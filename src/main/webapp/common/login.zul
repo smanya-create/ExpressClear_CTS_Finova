@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns:h="xhtml">
+<style src="/css/common/login.css"/>
+<div apply="com.iispl.cts.controller.common.LoginController" hflex="1" vflex="1" style="display:flex; flex-direction:column;">
+    
+    <!-- Header Ribbon -->
+    <div sclass="top-header">
+        <hlayout style="align-items: center;">
+            <div sclass="logo-box">CTS</div>
+            <div>
+                <label value="Express Clear" style="font-size: 18px; font-weight: bold; color: white; display: block;"/>
+                <label value="CHEQUE TRUNCATION SYSTEM" style="font-size: 8px; color: #a0aec0; letter-spacing: 1px;"/>
+            </div>
+        </hlayout>
+        <label value="SECURE BANKING OPERATIONS" style="font-size: 11px; color: #a0aec0; letter-spacing: 1px;"/>
+    </div>
+
+    <!-- Login Card Container -->
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+        <div sclass="login-card">
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <label value="Welcome back" style="font-size: 26px; font-weight: bold; color: #1a202c; display: block; margin-bottom: 6px;"/>
+                <label value="Sign in to access Express Clear CTS." style="color: #718096; font-size: 13px;"/>
+            </div>
+
+            <vlayout spacing="18px">
+                <!-- Username Field -->
+                <vlayout spacing="4px">
+                    <label value="USERNAME" sclass="field-label"/>
+                    <textbox id="txtUsername" placeholder="Enter your username" constraint="no empty: Username is required" sclass="input-field" hflex="1" height="42px"/>
+                </vlayout>
+
+                <!-- Password Field -->
+                <vlayout spacing="4px">
+                    <label value="PASSWORD" sclass="field-label"/>
+                    <textbox id="txtPassword" type="password" placeholder="Enter your password" constraint="no empty: Password is required" sclass="input-field" hflex="1" height="42px"/>
+                </vlayout>
+
+                <!-- Role Selection Dropdown -->
+                <vlayout spacing="4px">
+                    <label value="ROLE" sclass="field-label"/>
+                    <combobox id="cmbRole" placeholder="Select your role" readonly="true" hflex="1" height="42px">
+                        <comboitem label="Outward Maker" value="OUTWARD_MAKER"/>
+                        <comboitem label="Outward Checker" value="OUTWARD_CHECKER"/>
+                        <comboitem label="Inward Maker" value="INWARD_MAKER"/>
+                        <comboitem label="Inward Checker" value="INWARD_CHECKER"/>
+                        <comboitem label="Admin" value="ADMIN"/>
+                    </combobox>
+                </vlayout>
+
+                <separator height="10px"/>
+
+                <!-- Sign In Button -->
+                <button id="btnSignIn" label="SIGN IN" sclass="btn-signin" height="44px" width="100%" onClick="$composer.onClickSignIn()"/>
+
+                <separator height="10px"/>
+
+                <!-- Authorization Text -->
+                <div style="text-align: center;">
+                    <label value="Authorized users only" style="font-size: 11px; color: #a0aec0; display: block;"/>
+                    <label value="Your access is controlled by your assigned role." style="font-size: 11px; color: #a0aec0; display: block;"/>
+                </div>
+            </vlayout>
+
+        </div>
+    </div>
+
+    <!-- Footer Ribbon -->
+    <div sclass="footer-text">
+        <label value="© Express Clear CTS · Secure Banking Application"/>
+    </div>
+
+</div>
+</zk>
