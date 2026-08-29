@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk xmlns:h="xhtml">
+<style src="/css/common/header.css"/>
 <div apply="com.iispl.cts.controller.common.HeaderController" style="width: 100%; display: block;">
     
     <!-- Timer Ticks Every Second -->

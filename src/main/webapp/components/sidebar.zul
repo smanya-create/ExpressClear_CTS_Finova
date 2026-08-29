@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk xmlns:h="xhtml">
+<style src="/css/common/sidebar.css"/>
 <div width="220px" sclass="sidebar" apply="com.iispl.cts.controller.common.SidebarController">
     <!-- Brand Title Header -->
     <div style="padding: 20px;">
