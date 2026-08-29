@@ -9,26 +9,27 @@ public class InwardCheque implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String inwardChequeId;       // character varying(10) - 'CH...'
-    private String inwardBatchId;        // character varying(30) -> fk to inward_batch
-    private String chequeNumber;         // character varying(20)
-    private String micrCode;             // character varying(40)
-    private String draweeName;           // character varying(150)
-    private String draweeAccountNumber;  // character varying(30)
-    private String payeeName;            // character varying(150)
-    private String payeeAccountNumber;   // character varying(30)
-    private BigDecimal chequeAmount;     // numeric(18, 2)
-    private Date chequeDate;             // date
-    private String chequeStatus;         // character varying(30)
-    private String accountId;            // character varying(10) -> fk to master_account
-    private Timestamp createdAt;         // timestamp without time zone
+    private String inwardChequeId;
+    private String inwardBatchId;
+    private String chequeNumber;
+    private String micrCode;
+    private String draweeName;
+    private String draweeAccountNumber;
+    private String payeeName;
+    private String payeeAccountNumber;
+    private BigDecimal chequeAmount;
+    private Date chequeDate;
+    private String chequeStatus;
+    private String accountId;
+    private Timestamp createdAt;
 
     public InwardCheque() {
     }
 
-    public InwardCheque(String inwardChequeId, String inwardBatchId, String chequeNumber, String micrCode,
-                        String draweeName, String draweeAccountNumber, String payeeName, 
-                        String payeeAccountNumber, BigDecimal chequeAmount, Date chequeDate, String chequeStatus) {
+    public InwardCheque(String inwardChequeId, String inwardBatchId, String chequeNumber, 
+                        String micrCode, String draweeName, String draweeAccountNumber, 
+                        String payeeName, String payeeAccountNumber, BigDecimal chequeAmount, 
+                        Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt) {
         this.inwardChequeId = inwardChequeId;
         this.inwardBatchId = inwardBatchId;
         this.chequeNumber = chequeNumber;
@@ -40,110 +41,46 @@ public class InwardCheque implements Serializable {
         this.chequeAmount = chequeAmount;
         this.chequeDate = chequeDate;
         this.chequeStatus = chequeStatus;
-    }
-
-    // Getters and Setters
-    public String getInwardChequeId() {
-        return inwardChequeId;
-    }
-
-    public void setInwardChequeId(String inwardChequeId) {
-        this.inwardChequeId = inwardChequeId;
-    }
-
-    public String getInwardBatchId() {
-        return inwardBatchId;
-    }
-
-    public void setInwardBatchId(String inwardBatchId) {
-        this.inwardBatchId = inwardBatchId;
-    }
-
-    public String getChequeNumber() {
-        return chequeNumber;
-    }
-
-    public void setChequeNumber(String chequeNumber) {
-        this.chequeNumber = chequeNumber;
-    }
-
-    public String getMicrCode() {
-        return micrCode;
-    }
-
-    public void setMicrCode(String micrCode) {
-        this.micrCode = micrCode;
-    }
-
-    public String getDraweeName() {
-        return draweeName;
-    }
-
-    public void setDraweeName(String draweeName) {
-        this.draweeName = draweeName;
-    }
-
-    public String getDraweeAccountNumber() {
-        return draweeAccountNumber;
-    }
-
-    public void setDraweeAccountNumber(String draweeAccountNumber) {
-        this.draweeAccountNumber = draweeAccountNumber;
-    }
-
-    public String getPayeeName() {
-        return payeeName;
-    }
-
-    public void setPayeeName(String payeeName) {
-        this.payeeName = payeeName;
-    }
-
-    public String getPayeeAccountNumber() {
-        return payeeAccountNumber;
-    }
-
-    public void setPayeeAccountNumber(String payeeAccountNumber) {
-        this.payeeAccountNumber = payeeAccountNumber;
-    }
-
-    public BigDecimal getChequeAmount() {
-        return chequeAmount;
-    }
-
-    public void setChequeAmount(BigDecimal chequeAmount) {
-        this.chequeAmount = chequeAmount;
-    }
-
-    public Date getChequeDate() {
-        return chequeDate;
-    }
-
-    public void setChequeDate(Date chequeDate) {
-        this.chequeDate = chequeDate;
-    }
-
-    public String getChequeStatus() {
-        return chequeStatus;
-    }
-
-    public void setChequeStatus(String chequeStatus) {
-        this.chequeStatus = chequeStatus;
-    }
-
-    public String getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(String accountId) {
         this.accountId = accountId;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getInwardChequeId() { return inwardChequeId; }
+    public void setInwardChequeId(String inwardChequeId) { this.inwardChequeId = inwardChequeId; }
+
+    public String getInwardBatchId() { return inwardBatchId; }
+    public void setInwardBatchId(String inwardBatchId) { this.inwardBatchId = inwardBatchId; }
+
+    public String getChequeNumber() { return chequeNumber; }
+    public void setChequeNumber(String chequeNumber) { this.chequeNumber = chequeNumber; }
+
+    public String getMicrCode() { return micrCode; }
+    public void setMicrCode(String micrCode) { this.micrCode = micrCode; }
+
+    public String getDraweeName() { return draweeName; }
+    public void setDraweeName(String draweeName) { this.draweeName = draweeName; }
+
+    public String getDraweeAccountNumber() { return draweeAccountNumber; }
+    public void setDraweeAccountNumber(String draweeAccountNumber) { this.draweeAccountNumber = draweeAccountNumber; }
+
+    public String getPayeeName() { return payeeName; }
+    public void setPayeeName(String payeeName) { this.payeeName = payeeName; }
+
+    public String getPayeeAccountNumber() { return payeeAccountNumber; }
+    public void setPayeeAccountNumber(String payeeAccountNumber) { this.payeeAccountNumber = payeeAccountNumber; }
+
+    public BigDecimal getChequeAmount() { return chequeAmount; }
+    public void setChequeAmount(BigDecimal chequeAmount) { this.chequeAmount = chequeAmount; }
+
+    public Date getChequeDate() { return chequeDate; }
+    public void setChequeDate(Date chequeDate) { this.chequeDate = chequeDate; }
+
+    public String getChequeStatus() { return chequeStatus; }
+    public void setChequeStatus(String chequeStatus) { this.chequeStatus = chequeStatus; }
+
+    public String getAccountId() { return accountId; }
+    public void setAccountId(String accountId) { this.accountId = accountId; }
+
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 }
