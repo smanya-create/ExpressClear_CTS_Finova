@@ -1,66 +1,89 @@
 package com.iispl.cts.controller.common;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
-import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zk.ui.select.SelectorComposer;
+import org.zkoss.zk.ui.select.annotation.Listen;
+import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
-public class LoginController extends GenericForwardComposer<Component> {
+import com.iispl.cts.entity.User;
+import com.iispl.cts.service.UserService;
+import com.iispl.cts.serviceimpl.UserServiceImpl;
 
+public class LoginController extends SelectorComposer<Component> {
+
+    private static final long serialVersionUID = 1L;
+
+    @Wire
     private Textbox txtUsername;
+
+    @Wire
     private Textbox txtPassword;
+
+    @Wire
     private Combobox cmbRole;
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
-        super.doAfterCompose(comp);
-    }
+    private final UserService userService = new UserServiceImpl();
 
+    @Listen("onClick = #btnSignIn; onOK = #txtPassword")
     public void onClickSignIn() {
         String username = txtUsername.getValue() != null ? txtUsername.getValue().trim() : "";
         String password = txtPassword.getValue() != null ? txtPassword.getValue().trim() : "";
         Comboitem selectedItem = cmbRole.getSelectedItem();
 
-        // 1. Validate Username
-        if (username.isEmpty()) {
-            Messagebox.show("Username is required.", "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
-            txtUsername.focus();
+        if (username.isEmpty() || password.isEmpty() || selectedItem == null) {
+            Messagebox.show("Please enter username, password, and select a role.", 
+                            "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
             return;
         }
 
-        // 2. Validate Password
-        if (password.isEmpty()) {
-            Messagebox.show("Password is required.", "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
-            txtPassword.focus();
+        String selectedRoleValue = selectedItem.getValue() != null ? selectedItem.getValue().toString().trim() : "";
+        String selectedRoleLabel = selectedItem.getLabel() != null ? selectedItem.getLabel().trim() : "";
+
+        // Authenticate credentials via UserService
+        User user = userService.authenticate(username, password);
+
+        if (user == null) {
+            Messagebox.show("Invalid username or password.", "Authentication Failed", Messagebox.OK, Messagebox.ERROR);
             return;
         }
 
-        // 3. Validate Role Selection
-        if (selectedItem == null) {
-            Messagebox.show("Please select a role to proceed.", "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
-            cmbRole.focus();
+        String dbRole = user.getRoleId() != null ? user.getRoleId().trim() : "";
+
+        System.out.println("[LOGIN DEBUG] DB Role: '" + dbRole + 
+                           "' | Selected UI Value: '" + selectedRoleValue + 
+                           "' | Selected UI Label: '" + selectedRoleLabel + "'");
+
+        // Case-insensitive role comparison against value or label
+        boolean isRoleMatch = dbRole.equalsIgnoreCase(selectedRoleValue) || 
+                              dbRole.equalsIgnoreCase(selectedRoleLabel);
+
+        if (!isRoleMatch) {
+            Messagebox.show("Access Denied: Assigned role (" + dbRole + 
+                            ") does not match selected role (" + selectedRoleLabel + ").", 
+                            "Role Mismatch", Messagebox.OK, Messagebox.EXCLAMATION);
             return;
         }
 
-        String roleValue = selectedItem.getValue().toString();
-
-        // Save User Session Context to HTTP SESSION (Persists across page redirects)
+        // Session Attributes Setup
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-        String currentDateStr = sdf.format(new Date());
+        Sessions.getCurrent().setAttribute("LOGGED_USER", user.getFullName());
+        Sessions.getCurrent().setAttribute("USER_ID", user.getUserId());
+        Sessions.getCurrent().setAttribute("USERNAME", user.getUsername());
+        Sessions.getCurrent().setAttribute("USER_ROLE", dbRole);
+        Sessions.getCurrent().setAttribute("USER_OBJ", user);
+        Sessions.getCurrent().setAttribute("CLEARING_DATE", sdf.format(new Date()));
 
-        // Save dynamic session attributes
-        Sessions.getCurrent().setAttribute("LOGGED_USER", username);
-        Sessions.getCurrent().setAttribute("USER_ROLE", roleValue);
-        Sessions.getCurrent().setAttribute("CLEARING_DATE", currentDateStr);
-        
-        // Role-Based Redirects
-        switch (roleValue) {
+        // Dashboard Redirect Logic
+        switch (dbRole.toUpperCase()) {
             case "ADMIN":
                 Executions.sendRedirect("/admin/dashboard.zul");
                 break;
@@ -77,7 +100,7 @@ public class LoginController extends GenericForwardComposer<Component> {
                 Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
                 break;
             default:
-                Messagebox.show("Invalid role selected.", "Access Error", Messagebox.OK, Messagebox.ERROR);
+                Messagebox.show("No dashboard mapped for role: " + dbRole, "Navigation Error", Messagebox.OK, Messagebox.ERROR);
                 break;
         }
     }

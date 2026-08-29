@@ -1,5 +1,5 @@
 body { 
-    background-color: #eef4f9; 
+    background-color: #eef4f9;
     font-family: 'Inter', sans-serif; 
     margin: 0; 
     padding: 0;
@@ -9,12 +9,12 @@ body {
 }
 
 .top-header { 
-    background-color: #0d2342; 
-    color: #ffffff; 
+    background-color: #0d2342;
+    color: #ffffff;
     padding: 16px 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .logo-box {
@@ -28,21 +28,21 @@ body {
 }
 
 .login-card { 
-    background: #ffffff; 
-    border-radius: 12px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
-    padding: 40px; 
-    width: 420px; 
-    margin: auto; 
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+    padding: 40px;
+    width: 420px;
+    margin: auto;
 }
 
 .field-label { 
-    font-size: 11px; 
-    font-weight: bold; 
-    color: #4a5568; 
-    letter-spacing: 0.5px; 
-    margin-bottom: 6px; 
-    display: block; 
+    font-size: 11px;
+    font-weight: bold;
+    color: #4a5568;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
 }
 
 .input-field {
@@ -53,13 +53,13 @@ body {
 }
 
 .btn-signin { 
-    background-color: #1a365d; 
-    color: white; 
-    font-weight: bold; 
+    background-color: #1a365d;
+    color: white;
+    font-weight: bold;
     font-size: 14px;
-    border-radius: 6px; 
-    border: none; 
-    cursor: pointer; 
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-signin:hover {

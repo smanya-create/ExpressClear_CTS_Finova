@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?link rel="stylesheet" type="text/css" href="/css/login.css"?>
 <zk xmlns:h="xhtml">
-<style src="/css/common/login.css"/>
-<div apply="com.iispl.cts.controller.common.LoginController" hflex="1" vflex="1" style="display:flex; flex-direction:column;">
+<div apply="com.iispl.cts.controller.common.LoginController"
+     hflex="1" vflex="1" style="display:flex; flex-direction:column;">
     
-    <!-- Header Ribbon -->
+    <!-- Top Header Ribbon -->
     <div sclass="top-header">
         <hlayout style="align-items: center;">
             <div sclass="logo-box">CTS</div>
@@ -26,22 +26,30 @@
             </div>
 
             <vlayout spacing="18px">
-                <!-- Username Field -->
+                <!-- Username Field with ZK Constraint -->
                 <vlayout spacing="4px">
                     <label value="USERNAME" sclass="field-label"/>
-                    <textbox id="txtUsername" placeholder="Enter your username" constraint="no empty: Username is required" sclass="input-field" hflex="1" height="42px"/>
+                    <textbox id="txtUsername" placeholder="Enter your username" 
+                             constraint="no empty: Username is required."
+                             sclass="input-field" hflex="1" height="42px"
+                             onOK="$composer.onClickSignIn()"/>
                 </vlayout>
 
-                <!-- Password Field -->
+                <!-- Password Field with ZK Constraint -->
                 <vlayout spacing="4px">
                     <label value="PASSWORD" sclass="field-label"/>
-                    <textbox id="txtPassword" type="password" placeholder="Enter your password" constraint="no empty: Password is required" sclass="input-field" hflex="1" height="42px"/>
+                    <textbox id="txtPassword" type="password" placeholder="Enter your password" 
+                             constraint="no empty: Password is required."
+                             sclass="input-field" hflex="1" height="42px"
+                             onOK="$composer.onClickSignIn()"/>
                 </vlayout>
 
-                <!-- Role Selection Dropdown -->
+                <!-- Role Selection Dropdown with ZK Constraint -->
                 <vlayout spacing="4px">
                     <label value="ROLE" sclass="field-label"/>
-                    <combobox id="cmbRole" placeholder="Select your role" readonly="true" hflex="1" height="42px">
+                    <combobox id="cmbRole" placeholder="Select your role" readonly="true"
+                              constraint="no empty: Please select a role to proceed." 
+                              hflex="1" height="42px">
                         <comboitem label="Outward Maker" value="OUTWARD_MAKER"/>
                         <comboitem label="Outward Checker" value="OUTWARD_CHECKER"/>
                         <comboitem label="Inward Maker" value="INWARD_MAKER"/>
@@ -53,11 +61,12 @@
                 <separator height="10px"/>
 
                 <!-- Sign In Button -->
-                <button id="btnSignIn" label="SIGN IN" sclass="btn-signin" height="44px" width="100%" onClick="$composer.onClickSignIn()"/>
+                <button id="btnSignIn" label="SIGN IN" sclass="btn-signin" height="44px" width="100%"
+                        onClick="$composer.onClickSignIn()"/>
 
                 <separator height="10px"/>
 
-                <!-- Authorization Text -->
+                <!-- Authorization Notice -->
                 <div style="text-align: center;">
                     <label value="Authorized users only" style="font-size: 11px; color: #a0aec0; display: block;"/>
                     <label value="Your access is controlled by your assigned role." style="font-size: 11px; color: #a0aec0; display: block;"/>
