@@ -1,0 +1,37 @@
+# ==========================================
+# 1. Eclipse IDE Metadata
+# ==========================================
+.classpath
+.project
+.settings/
+
+# ==========================================
+# 2. Build Output & Compiled Files
+# ==========================================
+bin/
+build/
+*.class
+
+# ==========================================
+# 3. Packaged Libraries / Binaries
+# ==========================================
+# Ignore JAR files generated in the build output directory
+build/classes/*.jar
+
+# If your web application libraries inside WEB-INF/lib should NOT be committed:
+#WebContent/WEB-INF/lib/*.jar
+
+# ==========================================
+# 4. OS & System Metadata
+# ==========================================
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+
+# ==========================================
+# 5. Logs & Temporary Files
+# ==========================================
+*.log
+*.sqlite
