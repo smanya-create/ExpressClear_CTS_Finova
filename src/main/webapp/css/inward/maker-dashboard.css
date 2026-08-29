@@ -1,0 +1,50 @@
+/* Custom Clean Listbox */
+.cts-dashboard-listbox {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+}
+
+.cts-dashboard-listbox .z-listhead th {
+    background-color: #f8fafc !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 0 !important;
+}
+
+.cts-dashboard-listbox .z-listheader-content {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    letter-spacing: 0.5px !important;
+    padding: 12px 14px !important;
+}
+
+.cts-dashboard-listbox .z-listitem {
+    background: #ffffff !important;
+}
+
+.cts-dashboard-listbox .z-listitem:hover {
+    background-color: #f8fafc !important;
+}
+
+/* Disable blue selection bar on click */
+.cts-dashboard-listbox .z-listitem-selected,
+.cts-dashboard-listbox .z-listitem-selected:hover {
+    background: #ffffff !important;
+}
+
+.cts-dashboard-listbox .z-listitem-selected > .z-listcell {
+    background: transparent !important;
+}
+
+.cts-dashboard-listbox .z-listcell {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 0 !important;
+}
+
+.cts-dashboard-listbox .z-listcell-content {
+    padding: 0 !important;
+    line-height: inherit !important;
+}

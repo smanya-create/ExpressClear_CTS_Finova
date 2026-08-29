@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk xmlns:h="xhtml">
+    <div id="inwardMakerDashboardDiv" width="100%"
+         apply="com.iispl.cts.controller.inward.maker.InwardMakerDashboardController">
+
+        <vlayout spacing="20px" width="100%" style="padding: 10px 0 30px 0;">
+
+            <!-- Header Row: Title & Refresh Button -->
+            <hlayout width="100%" valign="middle">
+                <label value="Inward Dashboard" style="font-size: 20px; font-weight: bold; color: #2d3748;" />
+                <separator hflex="1" />
+                <button id="btnRefresh" label="Refresh" iconSclass="z-icon-refresh" 
+                        style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 6px 14px; cursor: pointer;" />
+            </hlayout>
+
+            <!-- 3 KPI Metric Cards -->
+            <hlayout spacing="16px" width="100%">
+                <div hflex="1" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <label value="Partially Processed" style="display: block; font-size: 12px; font-weight: 600; color: #4a5568;" />
+                    <label id="lblPartiallyProcessed" value="2" style="display: block; font-size: 28px; font-weight: 700; color: #1a365d; margin: 4px 0;" />
+                    <label value="Batches" style="display: block; font-size: 11px; color: #a0aec0;" />
+                </div>
+
+                <div hflex="1" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <label value="Sent Back to Maker" style="display: block; font-size: 12px; font-weight: 600; color: #4a5568;" />
+                    <label id="lblSentBackToMaker" value="1" style="display: block; font-size: 28px; font-weight: 700; color: #1a365d; margin: 4px 0;" />
+                    <label value="Batches" style="display: block; font-size: 11px; color: #a0aec0;" />
+                </div>
+
+                <div hflex="1" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <label value="Sent to RRF" style="display: block; font-size: 12px; font-weight: 600; color: #4a5568;" />
+                    <label id="lblSentToRrf" value="3" style="display: block; font-size: 28px; font-weight: 700; color: #1a365d; margin: 4px 0;" />
+                    <label value="Cheques" style="display: block; font-size: 11px; color: #a0aec0;" />
+                </div>
+            </hlayout>
+
+            <!-- Search Batch Box -->
+            <div width="100%" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <vlayout spacing="10px" width="100%">
+                    <label value="Search Batch" style="font-size: 15px; font-weight: bold; color: #2d3748;" />
+                    <label value="Batch ID" style="font-size: 11px; font-weight: 600; color: #718096;" />
+                    <hlayout spacing="12px" width="100%" valign="middle">
+                        <textbox id="txtSearchBatchId" placeholder="Enter Batch ID" hflex="1" 
+                                 style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; height: 36px; font-size: 13px;" />
+                        <button id="btnClearSearch" label="Clear" 
+                                style="background: #ffffff; border: 1px solid #cbd5e1; color: #4a5568; border-radius: 6px; height: 36px; width: 90px; font-weight: 600; cursor: pointer;" />
+                        <button id="btnSearch" label="Search" 
+                                style="background: #2b6cb0; border: 1px solid #2b6cb0; color: #ffffff; border-radius: 6px; height: 36px; width: 100px; font-weight: 600; cursor: pointer;" />
+                    </hlayout>
+                </vlayout>
+            </div>
+
+            <!-- Current Batch Status Table Section -->
+            <div width="100%" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <vlayout spacing="16px" width="100%">
+                    <label value="Current Batch Status" style="font-size: 15px; font-weight: bold; color: #2d3748;" />
+
+                    <listbox id="batchStatusListbox" emptyMessage="No batch data available." sclass="cts-dashboard-listbox" width="100%">
+                        <listhead sizable="false">
+                            <listheader label="BATCH ID" width="15%" align="left" />
+                            <listheader label="DATE" width="13%" align="left" />
+                            <listheader label="SOURCE" width="10%" align="center" />
+                            <listheader label="CHEQUES" width="10%" align="center" />
+                            <listheader label="ACCEPTED" width="12%" align="center" />
+                            <listheader label="BACK TO MAKER" width="15%" align="center" />
+                            <listheader label="RRF" width="10%" align="center" />
+                            <listheader label="STATUS" width="15%" align="center" />
+                        </listhead>
+                    </listbox>
+
+                    <!-- Table Action Buttons (Aligned Right) -->
+                    <hlayout width="100%" spacing="12px" style="padding-top: 8px;">
+                        <separator hflex="1" />
+                        <button id="btnViewBatch" label="View Batch" 
+                                style="background: #2b6cb0; border: 1px solid #2b6cb0; color: #ffffff; border-radius: 6px; font-weight: 600; font-size: 12px; width: 110px; height: 34px; cursor: pointer;" />
+                        <button id="btnViewHistory" label="View History" 
+                                style="background: #ffffff; border: 1px solid #cbd5e1; color: #4a5568; border-radius: 6px; font-weight: 600; font-size: 12px; width: 110px; height: 34px; cursor: pointer;" />
+                    </hlayout>
+                </vlayout>
+            </div>
+
+            <!-- Footer -->
+            <hlayout width="100%" style="padding-top: 12px; border-top: 1px solid #edf2f7;">
+                <label value="CTS Inward Processing • Enterprise Clearing Application" style="font-size: 11px; color: #a0aec0;" />
+                <separator hflex="1" />
+                <label value="v1.0" style="font-size: 11px; font-weight: 600; color: #a0aec0;" />
+            </hlayout>
+
+        </vlayout>
+    </div>
+</zk>
