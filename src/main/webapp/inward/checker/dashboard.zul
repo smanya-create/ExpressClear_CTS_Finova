@@ -1,0 +1,120 @@
+<?page title="Checker Dashboard" contentType="text/html;charset=UTF-8"?>
+<zk>
+<style><![CDATA[
+body{margin:0;font:12px Arial;color:#24344d}.side{background:#123d73;color:#fff;padding:10px}
+.side label{display:block;padding:9px 7px;font-size:11px}.brand{font-size:18px!important;font-weight:bold;padding:2px 7px!important}
+.sub{font-size:9px!important;color:#b9cbe3}.sel{background:#176fe0;border-radius:4px}.muted{font-size:9px;color:#8793a6}
+.head{font-size:22px;font-weight:bold;color:#1d2d46}.box{border:1px solid #e0e6ed;border-radius:6px;padding:10px;margin:12px 15px 0}
+.num{font-size:22px;font-weight:bold;margin:4px 0}.btn{background:#176fe0;color:#fff;border:0;border-radius:4px}
+.batch{background:#f7f9fc;padding:12px}.status{color:#159357;background:#eaf8f0;border:1px solid #bfe6d1;border-radius:12px;padding:4px;font-size:8px}
+]]></style>
+
+<borderlayout width="100%" height="100vh">
+
+    <west width="250px" border="0">
+        <include src="/components/checkersidebar.zul"/>
+    </west>
+
+
+    <!-- Everything on the right of sidebar -->
+    <center border="0">
+        <borderlayout width="100%" height="100%">
+
+            <!-- Header starts after sidebar -->
+            <north height="52px" border="0">
+                <hlayout valign="center"
+                         style="height:52px;border-bottom:1px solid #e5eaf0;padding:0 18px">
+                    <label hflex="1" value="Welcome Back, Alex 👋" style="font-weight:bold"/>
+                    <label value="🔔  A  Alex ▼"/>
+                </hlayout>
+            </north>
+
+            <!-- Footer starts after sidebar -->
+            <south height="35px" border="0">
+                <label value="CTS Inward Processing • Enterprise Clearing Application"
+                       style="border-top:1px solid #edf0f4;padding:10px 15px;color:#94a0b1;font-size:8px"/>
+            </south>
+
+            <!-- Dashboard -->
+            <center border="0">
+                <vlayout style="padding-top:16px">
+
+                    <label sclass="muted" value="Checker" style="margin-left:15px"/>
+                    <label sclass="head" value="Checker Dashboard" style="margin-left:15px"/>
+                    <label sclass="muted"
+                           value="Monitor batches submitted by Maker and track cheque verification progress."
+                           style="margin-left:15px"/>
+
+                    <vlayout sclass="box">
+                        <label value="Batch Search" style="font-weight:bold"/>
+                        <hlayout spacing="8px">
+                            <textbox hflex="1" placeholder="Enter Batch ID"/>
+                            <button label="Clear"/>
+                            <button label="Search" sclass="btn"/>
+                        </hlayout>
+                    </vlayout>
+
+                    <hlayout spacing="12px" style="margin:0 15px">
+                        <vlayout sclass="box" hflex="1">
+                            <label sclass="muted" value="BATCHES AWAITING VERIFICATION"/>
+                            <label sclass="num" value="1 batch"/>
+                            <label sclass="muted" value="Ready for Checker processing"/>
+                        </vlayout>
+                        <vlayout sclass="box" hflex="1">
+                            <label sclass="muted" value="CHEQUES AWAITING VERIFICATION"/>
+                            <label sclass="num" value="99 cheques"/>
+                            <label sclass="muted" value="Across the current checker queue"/>
+                        </vlayout>
+                        <vlayout sclass="box" hflex="1">
+                            <label sclass="muted" value="REJECTION REQUESTS"/>
+                            <label sclass="num" value="5 cheques"/>
+                            <label sclass="muted" value="Require Checker decision"/>
+                        </vlayout>
+                    </hlayout>
+
+                    <vlayout sclass="box">
+                        <label value="Current Batch" style="font-weight:bold"/>
+                        <label sclass="muted" value="The single batch currently available for Checker verification."/>
+
+                        <hlayout sclass="batch" spacing="15px" valign="center">
+                            <vlayout hflex="1">
+                                <label sclass="muted" value="BATCH ID"/>
+                                <label value="IN-B004" style="font-weight:bold"/>
+                            </vlayout>
+                            <vlayout hflex="1">
+                                <label sclass="muted" value="SOURCE"/>
+                                <label value="CHI" style="font-weight:bold"/>
+                            </vlayout>
+                            <vlayout hflex="1">
+                                <label sclass="muted" value="TOTAL CHEQUES"/>
+                                <label value="99" style="font-weight:bold"/>
+                            </vlayout>
+                            <vlayout hflex="1">
+                                <label sclass="muted" value="REJECTION REQUESTS"/>
+                                <label value="5" style="font-weight:bold;color:#d78616"/>
+                            </vlayout>
+                            <vlayout hflex="1">
+                                <label sclass="muted" value="MAKER STATUS"/>
+                                <label value="Completed" style="font-weight:bold"/>
+                            </vlayout>
+                            <vlayout hflex="1">
+                                <label sclass="muted" value="BATCH STATUS"/>
+                                <label sclass="status" value="READY FOR CHECKER"/>
+                            </vlayout>
+                            <button label="Open Checker Queue" sclass="btn"/>
+                        </hlayout>
+
+                        <label value="Verification Progress" style="font-weight:bold;margin-top:10px"/>
+                        <progressmeter value="0" width="100%"/>
+                        <hlayout width="100%">
+                            <label hflex="1" sclass="muted" value="0 of 99 cheques verified"/>
+                            <label sclass="muted" value="Not started"/>
+                        </hlayout>
+                    </vlayout>
+
+                </vlayout>
+            </center>
+        </borderlayout>
+    </center>
+</borderlayout>
+</zk>
