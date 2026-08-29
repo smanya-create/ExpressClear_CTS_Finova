@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk xmlns:h="xhtml">
+<div width="220px" sclass="sidebar" apply="com.iispl.cts.controller.common.SidebarController">
+    <!-- Brand Title Header -->
+    <div style="padding: 20px;">
+        <label value="CTS" style="font-size: 20px; font-weight: bold; color: white;"/>
+        <label value="Express Clear" style="font-size: 16px; color: #63b3ed; display: block;"/>
+        <label id="lblPortalTitle" value="BANKING PORTAL" style="font-size: 9px; color: #a0aec0; letter-spacing: 1px;"/>
+    </div>
+    
+    <separator bar="true" style="background:#1a365d;"/>
+    
+    <!-- Dynamic Role-Based Navigation Menu -->
+    <vlayout style="padding-top: 10px;" hflex="1">
+        <label value="NAVIGATION" style="font-size: 10px; color: #718096; padding: 10px 20px; display: block;"/>
+        
+        <!-- Common Dashboard Link -->
+        <a id="navDashboard" label="Dashboard" sclass="${arg.activeTab eq 'dashboard' || arg.activeTab eq 'inward-dashboard' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToDashboard()"/>
+        
+        <!-- ==================== ADMIN MODULES ==================== -->
+        <div id="divAdminMenu" visible="${arg.role eq 'ADMIN'}">
+            <vlayout spacing="0">
+                <a label="User Management" sclass="${arg.activeTab eq 'users' ? 'nav-item active' : 'nav-item'}"/>
+                <a label="Role Management" sclass="${arg.activeTab eq 'roles' ? 'nav-item active' : 'nav-item'}"/>
+                <a id="navAudit" label="Audit Logs" sclass="${arg.activeTab eq 'audit' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToAuditLogs()"/>
+                <a label="Reports" sclass="${arg.activeTab eq 'reports' ? 'nav-item active' : 'nav-item'}"/>
+            </vlayout>
+        </div>
+
+        <!-- ==================== OUTWARD MAKER MODULES ==================== -->
+        <div id="divMakerMenu" visible="${arg.role eq 'OUTWARD_MAKER'}">
+            <vlayout spacing="0">
+                <a id="navUpload" label="Upload Batch" sclass="${arg.activeTab eq 'upload' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToUploadBatch()"/>
+                <a label="MICR Repair" sclass="${arg.activeTab eq 'micr' ? 'nav-item active' : 'nav-item'}"/>
+                <a label="Data Entry" sclass="${arg.activeTab eq 'data-entry' ? 'nav-item active' : 'nav-item'}"/>
+                <a id="navQueue" label="Unprocessed Cheques" sclass="${arg.activeTab eq 'unprocessed' || arg.activeTab eq 'queue' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToQueue()"/>
+                <a label="Reports" sclass="${arg.activeTab eq 'reports' ? 'nav-item active' : 'nav-item'}"/>
+            </vlayout>
+        </div>
+
+        <!-- ==================== OUTWARD CHECKER MODULES ==================== -->
+        <div id="divCheckerMenu" visible="${arg.role eq 'OUTWARD_CHECKER'}">
+            <vlayout spacing="0">
+                <a label="Checker Queue" sclass="${arg.activeTab eq 'checker-queue' ? 'nav-item active' : 'nav-item'}"/>
+                <a label="XML Generation" sclass="${arg.activeTab eq 'xml-gen' ? 'nav-item active' : 'nav-item'}"/>
+                <a label="Outward Rejected Cheques" sclass="${arg.activeTab eq 'outward-rejected-cheques' ? 'nav-item active' : 'nav-item'}"/>
+                <a label="Reports" sclass="${arg.activeTab eq 'reports' ? 'nav-item active' : 'nav-item'}"/>
+            </vlayout>
+        </div>
+        
+        <!-- ==================== INWARD MAKER MODULES ==================== -->
+        <div id="divInwardMakerMenu" visible="${arg.role eq 'INWARD_MAKER'}">
+            <vlayout spacing="0">
+                <a label="Dashboard" sclass="${arg.activeTab eq 'inward-dashboard' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardDashboard()"/>
+                <a label="Batch Intake" sclass="${arg.activeTab eq 'batch-intake' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToBatchIntake()"/>
+                <a label="MICR Repair" sclass="${arg.activeTab eq 'inward-micr' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardMicrRepair()"/>
+                <a label="Data Entry" sclass="${arg.activeTab eq 'inward-data-entry' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardDataEntry()"/>
+                <a label="Maker Completion" sclass="${arg.activeTab eq 'maker-completion' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToMakerCompletion()"/>
+                <a label="Unprocessed Cheques" sclass="${arg.activeTab eq 'inward-unprocessed' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardUnprocessedQueue()"/>
+                <a label="Reports" sclass="${arg.activeTab eq 'reports' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardMakerReports()"/>
+            </vlayout>
+        </div>
+
+        <!-- ==================== INWARD CHECKER MODULES ==================== -->
+        <div id="divInwardCheckerMenu" visible="${arg.role eq 'INWARD_CHECKER'}">
+            <vlayout spacing="0">
+                <a label="Verification" sclass="${arg.activeTab eq 'verification' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToVerification()"/>
+                <a label="RRF" sclass="${arg.activeTab eq 'rrf' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToRRF()"/>
+                <a label="Reports" sclass="${arg.activeTab eq 'reports' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardCheckerReports()"/>
+            </vlayout>
+        </div>
+         
+    </vlayout>
+
+    <!-- Logout Action -->
+    <div style="padding-bottom: 20px;">
+        <a label="Log Out" sclass="nav-item-logout" onClick="$composer.onClickLogout()"/>
+    </div>
+</div>
+</zk>
