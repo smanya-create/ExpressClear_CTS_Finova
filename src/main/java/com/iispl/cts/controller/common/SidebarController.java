@@ -89,33 +89,51 @@ public class SidebarController extends GenericForwardComposer<Component> {
     }
 
     /**
-     * Core AJAX View-Swapper: Loads the destination ZUL into the center area
-     * without reloading the browser page or sidebar/header.
+     * Core AJAX View-Swapper: Finds mainContentArea safely across ZK IdSpaces
      */
     private void navigateTo(String zulPath, A targetTab, String pageSubtitle) {
-        // 1. Swap Center Content Area via AJAX
-        Include contentArea = (Include) Path.getComponent("//inwardMakerRootWin/mainContentArea");
-        if (contentArea == null) {
-            contentArea = (Include) Path.getComponent("/mainContentArea");
+        Include contentArea = null;
+
+        // 1. Search via Page Fellow Lookup (Cross-IdSpace safe)
+        if (self != null && self.getPage() != null) {
+            Component rootWin = self.getPage().getFellowIfAny("inwardMakerRootWin");
+            if (rootWin != null) {
+                contentArea = (Include) rootWin.getFellowIfAny("mainContentArea");
+            }
+            if (contentArea == null) {
+                contentArea = (Include) self.getPage().getFellowIfAny("mainContentArea");
+            }
         }
 
+        // 2. Fallback lookup via Path
+        if (contentArea == null) {
+            contentArea = (Include) Path.getComponent("//inwardMakerRootWin/mainContentArea");
+        }
+
+        // 3. Swap view via AJAX if found
         if (contentArea != null) {
-            contentArea.setSrc(null); // Clear previous state
+            contentArea.setSrc(null); // Clear previous component lifecycle
             contentArea.setSrc(zulPath);
         } else {
-            // Fallback only if root layout is missing
+            // ONLY redirects if not running inside the index.zul master shell
             Executions.sendRedirect(zulPath);
             return;
         }
 
-        // 2. Update Header Subtitle if header is present
-        Include headerInclude = (Include) Path.getComponent("//inwardMakerRootWin/headerInclude");
-        if (headerInclude != null && pageSubtitle != null) {
-            headerInclude.setDynamicProperty("pageSubtitle", pageSubtitle);
-            headerInclude.invalidate();
+        // 4. Update Header Subtitle if present
+        if (self != null && self.getPage() != null) {
+            Component rootWin = self.getPage().getFellowIfAny("inwardMakerRootWin");
+            Include headerInclude = null;
+            if (rootWin != null) {
+                headerInclude = (Include) rootWin.getFellowIfAny("headerInclude");
+            }
+            if (headerInclude != null && pageSubtitle != null) {
+                headerInclude.setDynamicProperty("pageSubtitle", pageSubtitle);
+                headerInclude.invalidate();
+            }
         }
 
-        // 3. Highlight the clicked tab
+        // 5. Highlight the clicked tab
         setActiveTab(targetTab);
     }
 
@@ -272,7 +290,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     }
 
     public void navToBatchIntake() {
-        navigateTo("/inward/maker/intake/intake.zul", navBatchIntake, "Batch Intake");
+        navigateTo("/inward/maker/intake/batch-intake.zul", navBatchIntake, "Batch Intake");
     }
 
     public void navToInwardMicrRepair() {
