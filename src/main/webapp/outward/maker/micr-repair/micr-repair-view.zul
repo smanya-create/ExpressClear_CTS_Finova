@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk>
+	
+	<style src="/css/outward/micr-repair-view.css" />
+    <window id="mainWindow" 
+            width="100%" height="100%" sclass="micr-repair-page">
+        
+        <!-- Page Title and Description -->
+        <div class="page-header">
+            <label value="MICR Repair" sclass="page-title" />
+            <label value="Outward processing — Fix OCR errors for flagged cheques." sclass="page-description" />
+        </div>
+
+        <!-- Batch Selection Section -->
+        <div class="batch-section">
+            <label value="Select Batch for MICR Repair" sclass="section-title" />
+            
+            <!-- Batch List Table -->
+            <grid id="batchGrid" model="@bind(vm.batches)" 
+                  sclass="batch-table">
+                <columns>
+                    <column label="BATCH ID" width="15%" />
+                    <column label="SCAN DATE" width="20%" />
+                    <column label="TOTAL CHEQUES" width="15%" />
+                    <column label="MICR ERRORS" width="15%" />
+                    <column label="STATUS" width="20%" />
+                    <column label="ACTION" width="15%" />
+                </columns>
+                <rows>
+                    <row>
+                        <label value="B004" />
+                        <label value="23-08-2026" />
+                        <label value="5" />
+                        <label value="2" />
+                        <div class="status-badge needs-repair">NEEDS REPAIR</div>
+                        <button label="Open" sclass="btn-primary" 
+                                onClick="@command('expandBatch', batchId='B004')" />
+                    </row>
+                </rows>
+            </grid>
+            
+            <div class="no-other-batches">
+                <label value="No other batches require MICR repair" />
+            </div>
+        </div>
+
+        <!-- Cheques List Section (Initially Hidden, Shows on Batch Expand) -->
+        <div id="chequesSection" class="cheques-section" style="display:block;">
+            <label value="Batch B004 — Cheques Requiring MICR Repair" sclass="section-title" />
+            <label value="Only cheques with MICR errors are displayed." sclass="section-description" />
+            
+            <grid id="chequesGrid" model="@bind(vm.cheques)" 
+                  sclass="cheques-table">
+                <columns>
+                    <column label="CHEQUE NO." width="15%" />
+                    <column label="BANK NAME" width="25%" />
+                    <column label="MICR CODE" width="20%" />
+                    <column label="ERROR" width="15%" />
+                    <column label="STATUS" width="15%" />
+                    <column label="ACTION" width="10%" />
+                </columns>
+                <rows>
+                    <row>
+                        <label value="100041" />
+                        <label value="HDFC Bank Ltd" />
+                        <label value="6000287001" sclass="micr-code-error" />
+                        <label value="MICR mismatch" sclass="error-text" />
+                        <div class="status-badge needs-repair">NEEDS REPAIR</div>
+                        <button label="Repair" sclass="btn-secondary" 
+                                onClick="@command('openChequeForm', chequeNo='100041')" />
+                    </row>
+                    <row>
+                        <label value="100043" />
+                        <label value="Axis Bank" />
+                        <label value="6000387001" sclass="micr-code-error" />
+                        <label value="MICR mismatch" sclass="error-text" />
+                        <div class="status-badge needs-repair">NEEDS REPAIR</div>
+                        <button label="Repair" sclass="btn-secondary" 
+                                onClick="@command('openChequeForm', chequeNo='100043')" />
+                    </row>
+                </rows>
+            </grid>
+        </div>
+    </window>
+</zk>

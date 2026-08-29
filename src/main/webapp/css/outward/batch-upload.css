@@ -1,0 +1,532 @@
+/* ============================================
+   Upload Batch Page
+   ============================================ */
+
+/* Main Container */
+.upload-batch-page {
+    background-color: #f5f7fa;
+    padding: 30px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.page-header .page-description {
+    font-size: 14px;
+    color: #999;
+    display: block;
+}
+
+/* Upload Batch Container */
+.upload-batch-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Batch Control GroupBox */
+.batch-control-groupbox {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0;
+    margin-bottom: 24px;
+    box-shadow: none;
+}
+
+.batch-control-groupbox .z-groupbox-hd {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 16px;
+    margin: 0;
+}
+
+.batch-control-groupbox .z-groupbox-ct {
+    padding: 16px;
+    background-color: #ffffff;
+}
+
+.groupbox-caption {
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* VLayout and HLayout */
+.batch-control-vlayout {
+    padding: 0;
+}
+
+.batch-control-vlayout .z-vlayout-inner {
+    padding: 0;
+}
+
+.batch-control-hlayout {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Form Group Wrapper */
+.form-group-wrapper {
+    flex: 1;
+    width: 100%;
+}
+
+.form-group-full {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* Form Input */
+.form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #999;
+    background-color: #ffffff;
+}
+
+.form-input:read-only {
+    background-color: #f0f0f0;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.form-input::placeholder {
+    color: #bbb;
+}
+
+/* Form Hint */
+.form-hint {
+    font-size: 12px;
+    color: #999;
+    display: block;
+    margin-top: 4px;
+}
+
+/* Folder Row */
+.folder-row {
+    width: 100% !important;
+}
+
+.folder-group {
+    width: 100%;
+}
+
+/* Folder Select Container */
+.folder-select-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.folder-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.btn-browse {
+    background-color: #ffffff;
+    color: #0052cc;
+    border: 1px solid #0052cc;
+    padding: 7px 16px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-browse:hover {
+    background-color: #f0f3f7;
+    border-color: #0052cc;
+}
+
+/* Form Actions Inline */
+.form-actions-inline {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    padding-top: 8px;
+}
+
+.btn-validate {
+    background-color: #0052cc;
+    color: white;
+    border: 1px solid #0052cc;
+    padding: 8px 24px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-validate:hover {
+    background-color: #003d99;
+    border-color: #003d99;
+}
+
+.btn-validate:active {
+    transform: translateY(1px);
+}
+
+/* Success Message */
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success-icon {
+    font-size: 20px;
+    color: #28a745;
+    font-weight: bold;
+    min-width: 24px;
+    text-align: center;
+}
+
+.success-text {
+    font-size: 13px;
+    color: #155724;
+    display: block;
+}
+
+/* Scanned Cheques Section */
+.scanned-cheques-section {
+    background-color: white;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: none;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    display: block;
+}
+
+.cheque-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.stat-badge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+}
+
+.stat-badge.normal {
+    background-color: #e8f4f8;
+    color: #0c5460;
+    border: 1px solid #b8dce6;
+}
+
+.stat-badge.micr-repair {
+    background-color: #fff8e1;
+    color: #856404;
+    border: 1px solid #ffe69c;
+}
+
+/* Scanned Cheques Table */
+.scanned-cheques-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.scanned-cheques-table .z-grid-head {
+    background-color: #f5f5f5;
+}
+
+.scanned-cheques-table .z-grid-hd {
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f5f5f5;
+}
+
+.scanned-cheques-table .z-row {
+    border-bottom: 1px solid #f0f0f0;
+    height: 48px;
+}
+
+.scanned-cheques-table .z-row:hover {
+    background-color: #fafafa;
+}
+
+.scanned-cheques-table .z-cell {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #333;
+    vertical-align: middle;
+}
+
+.scanned-cheques-table .z-cell label {
+    display: block;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.status-badge.normal {
+    background-color: #e8f4f8;
+    color: #0c5460;
+    border: 1px solid #b8dce6;
+}
+
+.status-badge.micr-repair {
+    background-color: #fff8e1;
+    color: #856404;
+    border: 1px solid #ffe69c;
+}
+
+/* MICR Error Color */
+.micr-error {
+    color: #d32f2f;
+    font-weight: 600;
+}
+
+/* Action Buttons in Table */
+.btn-action {
+    background-color: #0052cc;
+    color: white;
+    border: 1px solid #0052cc;
+    padding: 6px 16px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-action:hover {
+    background-color: #003d99;
+    border-color: #003d99;
+}
+
+.btn-action-repair {
+    background-color: #0052cc;
+    color: white;
+    border: 1px solid #0052cc;
+    padding: 6px 16px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-action-repair:hover {
+    background-color: #003d99;
+    border-color: #003d99;
+}
+
+/* Responsive Design - Tablet */
+@media (max-width: 1024px) {
+    .upload-batch-page {
+        padding: 20px;
+    }
+    
+    .batch-control-hlayout {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group-wrapper {
+        width: 100%;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cheque-stats {
+        width: 100%;
+    }
+}
+
+/* Responsive Design - Mobile */
+@media (max-width: 768px) {
+    .upload-batch-page {
+        padding: 16px;
+    }
+    
+    .batch-control-groupbox {
+        border-radius: 3px;
+    }
+    
+    .page-header .page-title {
+        font-size: 24px;
+    }
+    
+    .batch-control-hlayout {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group-wrapper {
+        width: 100%;
+        margin-bottom: 12px;
+    }
+    
+    .folder-select-container {
+        flex-direction: column;
+    }
+    
+    .btn-browse {
+        width: 100%;
+        height: auto;
+        padding: 10px 16px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .cheque-stats {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .stat-badge {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .scanned-cheques-section {
+        border-radius: 3px;
+    }
+    
+    .scanned-cheques-table .z-cell {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .success-message {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Responsive Design - Small Mobile */
+@media (max-width: 480px) {
+    .upload-batch-page {
+        padding: 12px;
+    }
+    
+    .page-header .page-title {
+        font-size: 20px;
+    }
+    
+    .groupbox-caption {
+        font-size: 11px;
+    }
+    
+    .form-label {
+        font-size: 12px;
+    }
+    
+    .form-input {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    
+    .btn-validate {
+        font-size: 12px;
+        padding: 6px 16px;
+    }
+    
+    .scanned-cheques-table .z-cell {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+}

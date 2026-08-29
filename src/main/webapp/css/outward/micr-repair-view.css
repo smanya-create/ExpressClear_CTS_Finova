@@ -1,0 +1,282 @@
+/* ============================================
+   MICR Repair - Page 1: Batch List & Cheques
+   ============================================ */
+
+/* Main Container */
+.micr-repair-page {
+    background-color: #f5f7fa;
+    padding: 30px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 40px;
+}
+
+.page-header .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.page-header .page-description {
+    font-size: 14px;
+    color: #666;
+    display: block;
+}
+
+/* Batch Section */
+.batch-section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.batch-section .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: block;
+    margin-bottom: 16px;
+}
+
+/* Batch Table */
+.batch-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.batch-table .z-grid-head {
+    background-color: #f0f3f7;
+}
+
+.batch-table .z-grid-hd {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0052cc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.batch-table .z-row {
+    border-bottom: 1px solid #e8ecf1;
+    height: 56px;
+}
+
+.batch-table .z-row:hover {
+    background-color: #fafbfc;
+}
+
+.batch-table .z-cell {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    vertical-align: middle;
+}
+
+.batch-table .z-cell label {
+    display: block;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.status-badge.needs-repair {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-badge.completed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.ready {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #1e5ba8;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #1a4a8a;
+}
+
+.btn-secondary {
+    background-color: #f8f9fa;
+    color: #1e5ba8;
+    border: 1px solid #dee2e6;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #1e5ba8;
+    color: #1e5ba8;
+}
+
+/* No Other Batches Message */
+.no-other-batches {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+    font-size: 13px;
+    margin-top: 16px;
+}
+
+/* Cheques Section */
+.cheques-section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.cheques-section .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.cheques-section .section-description {
+    font-size: 13px;
+    color: #666;
+    display: block;
+    margin-bottom: 16px;
+}
+
+/* Cheques Table */
+.cheques-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cheques-table .z-grid-head {
+    background-color: #f0f3f7;
+}
+
+.cheques-table .z-grid-hd {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0052cc;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cheques-table .z-row {
+    border-bottom: 1px solid #e8ecf1;
+    height: 56px;
+}
+
+.cheques-table .z-row:hover {
+    background-color: #fafbfc;
+}
+
+.cheques-table .z-cell {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+    vertical-align: middle;
+}
+
+.cheques-table .z-cell label {
+    display: block;
+}
+
+/* MICR Code Error (Red Color) */
+.micr-code-error {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Error Text */
+.error-text {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .micr-repair-page {
+        padding: 20px;
+    }
+    
+    .batch-section,
+    .cheques-section {
+        padding: 16px;
+    }
+    
+    .page-header .page-title {
+        font-size: 24px;
+    }
+    
+    .batch-table .z-cell,
+    .cheques-table .z-cell {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .micr-repair-page {
+        padding: 16px;
+    }
+    
+    .batch-section,
+    .cheques-section {
+        padding: 12px;
+    }
+    
+    .page-header .page-title {
+        font-size: 20px;
+    }
+    
+    .batch-table .z-cell,
+    .cheques-table .z-cell {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}

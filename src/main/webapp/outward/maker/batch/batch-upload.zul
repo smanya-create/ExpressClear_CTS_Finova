@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk>
+
+	<style src="/css/outward/batch-upload.css" />
+    <window id="uploadBatchWindow"  
+            width="100%" height="100%" sclass="upload-batch-page" style="overflow: auto;">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <label value="Upload Batch" sclass="page-title" />
+            <label value="Enter batch control information and scan the cheque folder." sclass="page-description" />
+        </div>
+
+        <!-- Main Content Container -->
+        <div class="upload-batch-container">
+            
+            <!-- WINDOW 1: Batch Control Information -->
+            <window id="batchControlWindow" width="100%" border="none" 
+                    sclass="batch-control-window" style="margin-bottom: 24px; background-color: white; border-radius: 4px; border: 1px solid #ddd;">
+                
+                <groupbox id="batchControlGroup" mold="default" sclass="batch-control-groupbox">
+                    <caption label="BATCH CONTROL INFORMATION" sclass="groupbox-caption" />
+                    
+                    <vlayout spacing="16px" sclass="batch-control-vlayout">
+                        
+                        <!-- Row 1: Expected Cheque Count and Total Amount -->
+                        <hlayout spacing="16px" sclass="batch-control-hlayout">
+                            <div class="form-group-wrapper">
+                                <label value="Expected Cheque Count *" sclass="form-label" />
+                                <textbox id="expectedChequeCount" 
+                                         placeholder="Enter expected number of cheques"
+                                         sclass="form-input" 
+                                         width="100%" />
+                            </div>
+                            <div class="form-group-wrapper">
+                                <label value="Expected Total Amount *" sclass="form-label" />
+                                <textbox id="expectedTotalAmount" 
+                                         placeholder="Enter expected total amount"
+                                         sclass="form-input" 
+                                         width="100%" />
+                            </div>
+                        </hlayout>
+
+                       <!-- Row 2: Cheque Folder -->
+                        <hlayout spacing="8px" sclass="folder-row" width="100%">
+                            <div class="form-group-full folder-group">
+                                <label value="Cheque Folder *" sclass="form-label" />
+                                <div class="folder-select-container">
+                                    <textbox id="chequeFolder" 
+                                             value="Cheque folder selected"
+                                             readonly="true"
+                                             sclass="form-input folder-input" 
+                                             width="100%" />
+                                    <button label="Browse" sclass="btn-browse" 
+                                            onClick="@command('browseChequeFolder')" />
+                                </div>
+                                <label value="Note: Please select a folder containing ZIP files with cheque images" 
+                                       sclass="form-hint" />
+                            </div>
+                        </hlayout>
+
+                        <!-- Row 3: Batch Number -->
+                        <div class="form-group-full">
+                            <label value="Batch Number" sclass="form-label" />
+                            <textbox id="batchNumber" 
+                                     value="B001"
+                                     readonly="true"
+                                     sclass="form-input" 
+                                     width="100%" />
+                            <label value="Automatically generated after folder selection" sclass="form-hint" />
+                        </div>
+
+                        <!-- Row 4: Validate Button -->
+                        <div class="form-actions-inline">
+                            <button id="validateBtn" label="Validate" sclass="btn-validate" 
+                                    onClick="@command('validateBatch')" />
+                        </div>
+                    </vlayout>
+                </groupbox>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message" style="display:block; margin: 16px 16px 0 16px;">
+                    <div class="success-icon">✓</div>
+                    <label id="successText" 
+                           value="Batch B001 generated — 5 cheques scanned. Normal: 3 | MICR Repair Required: 2"
+                           sclass="success-text" />
+                </div>
+            </window>
+
+            <!-- WINDOW 2: Scanned Cheques Display -->
+            <window id="scannedChequesWindow" width="100%" border="none" 
+                    sclass="scanned-cheques-window" style="background-color: white; border-radius: 4px; border: 1px solid #ddd; height: 700px; overflow: auto;">
+                
+                <div class="section-header" style="padding: 16px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: white; z-index: 10;">
+                    <label value="Batch B001 — Scanned Cheques" sclass="section-title" />
+                    <div class="cheque-stats">
+                        <div class="stat-badge normal">
+                            <label id="normalCount" value="3 NORMAL" />
+                        </div>
+                        <div class="stat-badge micr-repair">
+                            <label id="micrRepairCount" value="2 MICR REPAIR" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid with Scroll -->
+                <div style="padding: 16px; overflow: auto; height: calc(100% - 60px);">
+                    <grid id="scannedChequesGrid" model="@bind(vm.scannedCheques)" 
+                          sclass="scanned-cheques-table">
+                        <columns>
+                            <column label="CHEQUE NO." width="15%" />
+                            <column label="BANK NAME" width="25%" />
+                            <column label="MICR CODE" width="20%" />
+                            <column label="STATUS" width="20%" />
+                            <column label="ACTION" width="20%" />
+                        </columns>
+                        <rows>
+                            <row>
+                                <label value="100040" />
+                                <label value="State Bank of India" />
+                                <label value="600039000" />
+                                <div class="status-badge normal">NORMAL</div>
+                                <button label="View" sclass="btn-action" 
+                                        onClick="@command('viewCheque', chequeNo='100040')" />
+                            </row>
+                            <row>
+                                <label value="100041" />
+                                <label value="HDFC Bank Ltd" />
+                                <label value="600387001" sclass="micr-error" />
+                                <div class="status-badge micr-repair">MICR REPAIR</div>
+                                <button label="Repair" sclass="btn-action-repair" 
+                                        onClick="@command('repairCheque', chequeNo='100041')" />
+                            </row>
+                            <row>
+                                <label value="100042" />
+                                <label value="ICICI Bank" />
+                                <label value="600014002" />
+                                <div class="status-badge normal">NORMAL</div>
+                                <button label="View" sclass="btn-action" 
+                                        onClick="@command('viewCheque', chequeNo='100042')" />
+                            </row>
+                            <row>
+                                <label value="100043" />
+                                <label value="Axis Bank" />
+                                <label value="600387001" sclass="micr-error" />
+                                <div class="status-badge micr-repair">MICR REPAIR</div>
+                                <button label="Repair" sclass="btn-action-repair" 
+                                        onClick="@command('repairCheque', chequeNo='100043')" />
+                            </row>
+                            <row>
+                                <label value="100044" />
+                                <label value="Canara Bank" />
+                                <label value="600023008" />
+                                <div class="status-badge normal">NORMAL</div>
+                                <button label="View" sclass="btn-action" 
+                                        onClick="@command('viewCheque', chequeNo='100044')" />
+                            </row>
+                        </rows>
+                    </grid>
+                </div>
+            </window>
+        </div>
+    </window>
+</zk>
