@@ -1,0 +1,28 @@
+# Build output
+build/
+bin/
+target/
+classes/
+
+# IDE
+.metadata/
+.settings/
+.project
+.classpath
+*.launch
+
+# Java/runtime
+*.class
+*.log
+
+# Libraries - team members add required JARs locally
+*.jar
+
+# Local configuration / secrets
+src/main/resources/db.properties
+*.properties.local
+.env
+
+# OS
+.DS_Store
+Thumbs.db

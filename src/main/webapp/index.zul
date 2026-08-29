@@ -1,0 +1,39 @@
+<zk>
+     
+<window title="Hello I am" width="100%">
+
+   <vlayout width="100%">
+   
+     
+        <hlayout width="100%">
+
+            <label value="Shair Yaar Khan"/>
+
+            <space hflex="1"/>
+
+            <label value="Filter"/>
+
+            <textbox placeholder="Enter Your Name"
+                     width="200px"/>
+
+        </hlayout>
+    
+      
+      <listbox>
+          <listhead>
+              <listheader label="SL"/>
+                 <listheader label="Name"/>
+                 <listheader label="age"/>  
+                 <listheader label="class"/>
+          </listhead>
+          
+          <listitem>
+                 <listcell label="1"/>
+                <listcell label="Shair"/>
+                <listcell label="24"/>
+                <listcell label="iispl"/>
+          </listitem>
+      </listbox>
+   </vlayout>
+</window>
+</zk>
