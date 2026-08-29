@@ -2,10 +2,12 @@ package com.iispl.cts.controller.common;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.A;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 
@@ -13,6 +15,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
+    // UI Header & Menu Containers
     private Label lblPortalTitle;
     private Div divAdminMenu;
     private Div divMakerMenu;
@@ -20,33 +23,55 @@ public class SidebarController extends GenericForwardComposer<Component> {
     private Div divInwardMakerMenu;
     private Div divInwardCheckerMenu;
 
+    // Navigation Links (for active tab styling)
     private A navDashboard;
-    private A navUpload;
-    private A navQueue;
+    private A navAdminUsers;
+    private A navAdminRoles;
     private A navAudit;
+    private A navAdminReports;
+
+    private A navUpload;
+    private A navOutwardMicr;
+    private A navOutwardDataEntry;
+    private A navQueue;
+    private A navOutwardMakerReports;
+
+    private A navCheckerQueue;
+    private A navXmlGen;
+    private A navOutwardRejected;
+    private A navOutwardCheckerReports;
+
+    private A navInwardDashboard;
+    private A navBatchIntake;
+    private A navInwardMicr;
+    private A navInwardDataEntry;
+    private A navMakerCompletion;
+    private A navInwardUnprocessed;
+    private A navInwardMakerReports;
+
+    private A navInwardCheckerDashboard;
+    private A navVerification;
+    private A navRrf;
+    private A navInwardCheckerReports;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        // 1. Retrieve role from Session directly (persists through refresh)
+        // 1. Retrieve role from Session
         String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
-        
-        // 2. Fallback check from component arguments if session attribute is empty
         if (role == null || role.trim().isEmpty()) {
             role = (String) comp.getAttribute("role");
         }
-
-        // 3. Fallback default role for testing if unassigned
         if (role == null || role.trim().isEmpty()) {
             role = "OUTWARD_MAKER";
             Sessions.getCurrent().setAttribute("USER_ROLE", role);
         }
 
-        // Render menu based on verified role
+        // 2. Render sidebar visibility by role
         renderSidebarMenu(role);
-        
-        // Highlight active tab passed via attribute
+
+        // 3. Set initial active tab
         String activeTab = (String) comp.getAttribute("activeTab");
         highlightActiveTab(activeTab);
     }
@@ -56,7 +81,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
             lblPortalTitle.setValue(role.replace("_", " ") + " PORTAL");
         }
 
-        // Toggle role section visibility safely
         if (divAdminMenu != null) divAdminMenu.setVisible("ADMIN".equalsIgnoreCase(role));
         if (divMakerMenu != null) divMakerMenu.setVisible("OUTWARD_MAKER".equalsIgnoreCase(role));
         if (divCheckerMenu != null) divCheckerMenu.setVisible("OUTWARD_CHECKER".equalsIgnoreCase(role));
@@ -64,109 +88,231 @@ public class SidebarController extends GenericForwardComposer<Component> {
         if (divInwardCheckerMenu != null) divInwardCheckerMenu.setVisible("INWARD_CHECKER".equalsIgnoreCase(role));
     }
 
-    private void highlightActiveTab(String activeTab) {
-        if (activeTab == null) return;
+    /**
+     * Core AJAX View-Swapper: Loads the destination ZUL into the center area
+     * without reloading the browser page or sidebar/header.
+     */
+    private void navigateTo(String zulPath, A targetTab, String pageSubtitle) {
+        // 1. Swap Center Content Area via AJAX
+        Include contentArea = (Include) Path.getComponent("//inwardMakerRootWin/mainContentArea");
+        if (contentArea == null) {
+            contentArea = (Include) Path.getComponent("/mainContentArea");
+        }
 
+        if (contentArea != null) {
+            contentArea.setSrc(null); // Clear previous state
+            contentArea.setSrc(zulPath);
+        } else {
+            // Fallback only if root layout is missing
+            Executions.sendRedirect(zulPath);
+            return;
+        }
+
+        // 2. Update Header Subtitle if header is present
+        Include headerInclude = (Include) Path.getComponent("//inwardMakerRootWin/headerInclude");
+        if (headerInclude != null && pageSubtitle != null) {
+            headerInclude.setDynamicProperty("pageSubtitle", pageSubtitle);
+            headerInclude.invalidate();
+        }
+
+        // 3. Highlight the clicked tab
+        setActiveTab(targetTab);
+    }
+
+    private void setActiveTab(A targetTab) {
         resetTabStyles();
-
-        switch (activeTab.toLowerCase()) {
-            case "dashboard":
-            case "inward-dashboard":
-                if (navDashboard != null) navDashboard.setSclass("nav-item active");
-                break;
-            case "upload":
-            case "batch-intake":
-                if (navUpload != null) navUpload.setSclass("nav-item active");
-                break;
-            case "queue":
-            case "unprocessed":
-            case "inward-unprocessed":
-                if (navQueue != null) navQueue.setSclass("nav-item active");
-                break;
-            case "audit":
-                if (navAudit != null) navAudit.setSclass("nav-item active");
-                break;
+        if (targetTab != null) {
+            targetTab.setSclass("nav-item active");
         }
     }
 
     private void resetTabStyles() {
-        if (navDashboard != null) navDashboard.setSclass("nav-item");
-        if (navUpload != null) navUpload.setSclass("nav-item");
-        if (navQueue != null) navQueue.setSclass("nav-item");
-        if (navAudit != null) navAudit.setSclass("nav-item");
-    }
+        A[] allTabs = new A[] {
+            navDashboard, navAdminUsers, navAdminRoles, navAudit, navAdminReports,
+            navUpload, navOutwardMicr, navOutwardDataEntry, navQueue, navOutwardMakerReports,
+            navCheckerQueue, navXmlGen, navOutwardRejected, navOutwardCheckerReports,
+            navInwardDashboard, navBatchIntake, navInwardMicr, navInwardDataEntry, navMakerCompletion, navInwardUnprocessed, navInwardMakerReports,
+            navInwardCheckerDashboard, navVerification, navRrf, navInwardCheckerReports
+        };
 
-    // ==================== COMMON & EXISTING HANDLERS ====================
-    public void navToDashboard() {
-        String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
-        if ("ADMIN".equalsIgnoreCase(role)) {
-            Executions.sendRedirect("/admin/dashboard.zul");
-        } else if ("OUTWARD_CHECKER".equalsIgnoreCase(role)) {
-            Executions.sendRedirect("/outward/checker/checker-dashboard.zul");
-        } else if ("INWARD_MAKER".equalsIgnoreCase(role)) {
-            navToInwardDashboard();
-        } else if ("INWARD_CHECKER".equalsIgnoreCase(role)) {
-            navToVerification();
-        } else {
-            Executions.sendRedirect("/outward/maker/maker-dashboard.zul");
+        for (A tab : allTabs) {
+            if (tab != null) {
+                tab.setSclass("nav-item");
+            }
         }
     }
 
+    private void highlightActiveTab(String activeTab) {
+        if (activeTab == null || activeTab.trim().isEmpty()) return;
+
+        switch (activeTab.toLowerCase()) {
+            case "dashboard":
+            case "inward-dashboard":
+                setActiveTab(navDashboard != null ? navDashboard : navInwardDashboard);
+                break;
+            case "users": setActiveTab(navAdminUsers); break;
+            case "roles": setActiveTab(navAdminRoles); break;
+            case "audit": setActiveTab(navAudit); break;
+            case "admin-reports": setActiveTab(navAdminReports); break;
+
+            case "upload": setActiveTab(navUpload); break;
+            case "outward-micr":
+            case "micr": setActiveTab(navOutwardMicr); break;
+            case "outward-data-entry":
+            case "data-entry": setActiveTab(navOutwardDataEntry); break;
+            case "queue":
+            case "unprocessed": setActiveTab(navQueue); break;
+            case "outward-maker-reports": setActiveTab(navOutwardMakerReports); break;
+
+            case "checker-queue": setActiveTab(navCheckerQueue); break;
+            case "xml-gen": setActiveTab(navXmlGen); break;
+            case "outward-rejected-cheques": setActiveTab(navOutwardRejected); break;
+            case "outward-checker-reports": setActiveTab(navOutwardCheckerReports); break;
+
+            case "batch-intake": setActiveTab(navBatchIntake); break;
+            case "inward-micr": setActiveTab(navInwardMicr); break;
+            case "inward-data-entry": setActiveTab(navInwardDataEntry); break;
+            case "maker-completion": setActiveTab(navMakerCompletion); break;
+            case "inward-unprocessed": setActiveTab(navInwardUnprocessed); break;
+            case "inward-maker-reports": setActiveTab(navInwardMakerReports); break;
+
+            case "inward-checker-dashboard": setActiveTab(navInwardCheckerDashboard); break;
+            case "verification": setActiveTab(navVerification); break;
+            case "rrf": setActiveTab(navRrf); break;
+            case "inward-checker-reports": setActiveTab(navInwardCheckerReports); break;
+        }
+    }
+
+    // ==================== 1. COMMON DASHBOARD ====================
+    public void navToDashboard() {
+        String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            navToAdminDashboard();
+        } else if ("OUTWARD_CHECKER".equalsIgnoreCase(role)) {
+            navToOutwardCheckerDashboard();
+        } else if ("INWARD_MAKER".equalsIgnoreCase(role)) {
+            navToInwardDashboard();
+        } else if ("INWARD_CHECKER".equalsIgnoreCase(role)) {
+            navToInwardCheckerDashboard();
+        } else {
+            navToOutwardMakerDashboard();
+        }
+    }
+
+    // ==================== 2. ADMIN ROUTING ====================
+    public void navToAdminDashboard() {
+        navigateTo("/admin/dashboard.zul", navDashboard, "Admin Dashboard");
+    }
+
+    public void navToUserManagement() {
+        navigateTo("/admin/user/user-list.zul", navAdminUsers, "User Management");
+    }
+
+    public void navToRoleManagement() {
+        navigateTo("/admin/role/role-list.zul", navAdminRoles, "Role Management");
+    }
+
     public void navToAuditLogs() {
-        Executions.sendRedirect("/admin/audit-log/audit-logs.zul");
+        navigateTo("/admin/audit-log/audit-logs.zul", navAudit, "Audit Logs");
+    }
+
+    public void navToAdminReports() {
+        navigateTo("/admin/reports.zul", navAdminReports, "Admin Reports");
+    }
+
+    // ==================== 3. OUTWARD MAKER ROUTING ====================
+    public void navToOutwardMakerDashboard() {
+        navigateTo("/outward/maker/maker-dashboard.zul", navDashboard, "Maker Dashboard");
     }
 
     public void navToUploadBatch() {
-        Executions.sendRedirect("/outward/maker/upload-batch.zul");
+        navigateTo("/outward/maker/upload-batch.zul", navUpload, "Upload Batch");
+    }
+
+    public void navToOutwardMicrRepair() {
+        navigateTo("/outward/maker/micr-repair.zul", navOutwardMicr, "MICR Repair");
+    }
+
+    public void navToOutwardDataEntry() {
+        navigateTo("/outward/maker/data-entry.zul", navOutwardDataEntry, "Data Entry");
     }
 
     public void navToQueue() {
-        Executions.sendRedirect("/outward/maker/unprocessed-queue.zul");
+        navigateTo("/outward/maker/unprocessed-queue.zul", navQueue, "Unprocessed Queue");
     }
 
-    // ==================== INWARD MAKER ROUTING ====================
+    public void navToOutwardMakerReports() {
+        navigateTo("/outward/maker/reports.zul", navOutwardMakerReports, "Outward Reports");
+    }
+
+    // ==================== 4. OUTWARD CHECKER ROUTING ====================
+    public void navToOutwardCheckerDashboard() {
+        navigateTo("/outward/checker/checker-dashboard.zul", navDashboard, "Checker Dashboard");
+    }
+
+    public void navToOutwardCheckerQueue() {
+        navigateTo("/outward/checker/checker-queue.zul", navCheckerQueue, "Checker Queue");
+    }
+
+    public void navToOutwardXmlGeneration() {
+        navigateTo("/outward/checker/xml-generation.zul", navXmlGen, "XML Generation");
+    }
+
+    public void navToOutwardRejectedCheques() {
+        navigateTo("/outward/checker/rejected-cheques.zul", navOutwardRejected, "Rejected Cheques");
+    }
+
+    public void navToOutwardCheckerReports() {
+        navigateTo("/outward/checker/reports.zul", navOutwardCheckerReports, "Checker Reports");
+    }
+
+    // ==================== 5. INWARD MAKER ROUTING ====================
     public void navToInwardDashboard() {
-        Executions.sendRedirect("/inward/maker/inward-dashboard.zul");
+        navigateTo("/inward/maker/dashboard.zul", navInwardDashboard != null ? navInwardDashboard : navDashboard, "Inward Dashboard");
     }
 
     public void navToBatchIntake() {
-        Executions.sendRedirect("/inward/maker/batch-intake.zul");
+        navigateTo("/inward/maker/intake/intake.zul", navBatchIntake, "Batch Intake");
     }
 
     public void navToInwardMicrRepair() {
-        Executions.sendRedirect("/inward/maker/micr-repair.zul");
+        navigateTo("/inward/maker/cheque/micr_repair.zul", navInwardMicr, "MICR Repair");
     }
 
     public void navToInwardDataEntry() {
-        Executions.sendRedirect("/inward/maker/data-entry.zul");
+        navigateTo("/inward/maker/cheque/data_entry.zul", navInwardDataEntry, "Data Entry");
     }
 
     public void navToMakerCompletion() {
-        Executions.sendRedirect("/inward/maker/maker-completion.zul");
+        navigateTo("/inward/maker/submission/maker_completion.zul", navMakerCompletion, "Maker Completion");
     }
 
     public void navToInwardUnprocessedQueue() {
-        Executions.sendRedirect("/inward/maker/unprocessed-cheques.zul");
+        navigateTo("/inward/maker/cheque/unprocessed.zul", navInwardUnprocessed, "Unprocessed Queue");
     }
 
     public void navToInwardMakerReports() {
-        Executions.sendRedirect("/inward/maker/reports.zul");
+        navigateTo("/inward/maker/reports.zul", navInwardMakerReports, "Inward Reports");
     }
 
-    // ==================== INWARD CHECKER ROUTING ====================
+    // ==================== 6. INWARD CHECKER ROUTING ====================
+    public void navToInwardCheckerDashboard() {
+        navigateTo("/inward/checker/dashboard.zul", navInwardCheckerDashboard != null ? navInwardCheckerDashboard : navDashboard, "Checker Dashboard");
+    }
+
     public void navToVerification() {
-        Executions.sendRedirect("/inward/checker/verification.zul");
+        navigateTo("/inward/checker/verification.zul", navVerification, "Verification");
     }
 
     public void navToRRF() {
-        Executions.sendRedirect("/inward/checker/rrf.zul");
+        navigateTo("/inward/checker/rrf.zul", navRrf, "RRF Returns");
     }
 
     public void navToInwardCheckerReports() {
-        Executions.sendRedirect("/inward/checker/reports.zul");
+        navigateTo("/inward/checker/reports.zul", navInwardCheckerReports, "Checker Reports");
     }
 
-    // ==================== LOGOUT HANDLER ====================
+    // ==================== 7. LOGOUT (Only Action Requiring Redirect) ====================
     public void onClickLogout() {
         String currentUser = (String) Sessions.getCurrent().getAttribute("LOGGED_USER");
         if (currentUser == null || currentUser.trim().isEmpty()) {
@@ -177,7 +323,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
             Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, evt -> {
                 if (Messagebox.ON_YES.equals(evt.getName())) {
                     Sessions.getCurrent().invalidate();
-                    Executions.sendRedirect("/auth/login.zul");
+                    Executions.sendRedirect("/common/login.zul");
                 }
             });
     }
