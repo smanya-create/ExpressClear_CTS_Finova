@@ -1,0 +1,225 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	font-family: Arial, sans-serif;
+	background: #eef4f9;
+
+}
+.logo-title {
+	display: block;
+	font-size: 16px;
+	font-weight: bold;
+	color: white;
+
+}
+.menu-button:hover {
+	background: #1e5688;
+	color: white;
+
+}
+
+.small-label {
+	display: block;
+	font-size: 8px;
+	color: #9aaabd;
+
+}
+
+.dashboard-content {
+	padding: 30px 35px;
+	box-sizing: border-box;
+
+}
+.page-title {
+	display: block;
+	font-size: 20px;
+	font-weight: bold;
+	color: #1c3854;
+
+}
+.page-description {
+	display: block;
+	font-size: 9px;
+	color: #9aafc2;
+	margin-top : 7px;
+}
+.summary-card {
+	display: flex;
+	background: white;
+	border: 1px solid #dbe5ee;
+	border-radius: 12px;
+	margin-top: 22px;
+	padding: 15px 20px;
+	min-height: 45px;
+
+}
+.summary-item {
+	flex: 1;
+	padding: 5px 20px;
+	border-right: 1px solid #e1e8ef;
+
+}
+.summary-item:last-child {
+	border-right: none;
+
+}
+.summary-label {
+	display: block;
+	font-size: 8px;
+	color: #8da3b8;
+	font-weight: bold;
+
+}
+.summary-value {
+	display: block;
+	font-size: 13px;
+	color: #294762;
+	font-weight: bold;
+	margin-top: 8px;
+
+}
+.section-header {
+	margin-top: 22px;
+	margin-bottom: 15px;
+
+}
+.section-title {
+	display: block;
+	font-size: 15px;
+	font-weight: bold;
+	color: #284560;
+
+}
+.section-description {
+	display: block;
+	font-size: 9px;
+	color: #9aafc2;
+	margin-top: 5px;
+
+}
+.batch-table {
+	width: 100%;
+	background: white;
+	border: 1px solid #dbe5ee;
+	border-radius: 12px;
+	overflow: hidden;
+	box-sizing: border-box;
+
+}
+.batch-table .z-listbox-header {
+	background: #edf4fa ;
+
+}
+.batch-table .z-listheader {
+	background: #edf4fa ;
+	color: #526f8b ;
+	font-size: 10px;
+	font-weight: bold;
+	text-align: left;
+	border-right: 1px solid #d7e2eb ;
+	border-bottom: 1px solid #d7e2eb ;
+	height: 42px;
+	padding: 0;
+
+}
+.batch-table .z-listheader-content {
+	color: #526f8b ;
+	font-size: 10px ;
+	font-weight: bold ;
+	padding: 14px 12px ;
+	white-space: nowrap;
+	overflow: visible;
+
+}
+.batch-table .z-listcell {
+	color: #526f8b ;
+	font-size: 10px ;
+	padding: 15px 12px ;
+	border-bottom: 1px solid #edf1f5 ;
+	background: white;
+	height: 45px;
+    min-height: 45px;
+    padding: 0;
+
+}
+.batch-table .z-listcell-content {
+	color: #526f8b ;
+	font-size: 10px ;
+	font-weight: normal ;
+	padding: 5px 10px;
+    line-height: 20px;
+    box-sizing: border-box;
+
+}
+.batch-table .z-listitem {
+	background: white;
+	height: 45px;
+    min-height: 45px;
+
+}
+.batch-table .z-listitem:hover {
+	background: #f7fafc;
+
+}
+.batch-table .z-listheader:last-child {
+	border-right: none ;
+
+}
+.status-pending {
+	display: inline-block;
+	background: #fff7e7;
+	border: 1px solid #efb84d;
+	color: #b77b13;
+	border-radius: 20px;
+	padding: 7px 25px;
+	font-size: 8px;
+	font-weight: bold;
+	text-align: center;
+
+}
+.queue-button {
+	background: #1d5689 ;
+	color: white ;
+	border: none ;
+	border-radius: 6px;
+	font-size: 9px;
+	font-weight: bold;
+	padding: 9px 15px;
+	cursor: pointer;
+
+}
+.queue-button:hover {
+	background: #174a78 ;
+
+}
+.queue-button .z-button-content {
+	color: white ;
+	font-size: 9px ;
+	font-weight: bold ;
+
+}
+.batch-table .z-paging {
+	background: white;
+	border-top: 1px solid #edf1f5;
+
+}
+
+.z-listbox {
+	border-radius: 12px;
+
+}
+
+.z-listbox-body {
+	background: white;
+
+}
+.queue-button {
+    background: #1d5689;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    padding: 9px 15px;
+
+}
