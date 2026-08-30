@@ -85,7 +85,7 @@ public class LoginController extends SelectorComposer<Component> {
         // Dashboard Redirect Logic
         switch (dbRole.toUpperCase()) {
             case "ADMIN":
-                Executions.sendRedirect("/admin/dashboard.zul");
+                Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
                 break;
             case "OUTWARD_MAKER":
                 Executions.sendRedirect("/outward/maker/maker-dashboard.zul");
