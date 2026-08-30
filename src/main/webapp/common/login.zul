@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?link rel="stylesheet" type="text/css" href="/css/login.css"?>
+<?link rel="stylesheet" type="text/css" href="/css/common/login.css"?>
 <zk xmlns:h="xhtml">
 <div apply="com.iispl.cts.controller.common.LoginController"
      hflex="1" vflex="1" style="display:flex; flex-direction:column;">
@@ -26,7 +26,7 @@
             </div>
 
             <vlayout spacing="18px">
-                <!-- Username Field with ZK Constraint -->
+                <!-- Username Field -->
                 <vlayout spacing="4px">
                     <label value="USERNAME" sclass="field-label"/>
                     <textbox id="txtUsername" placeholder="Enter your username" 
@@ -35,7 +35,7 @@
                              onOK="$composer.onClickSignIn()"/>
                 </vlayout>
 
-                <!-- Password Field with ZK Constraint -->
+                <!-- Password Field -->
                 <vlayout spacing="4px">
                     <label value="PASSWORD" sclass="field-label"/>
                     <textbox id="txtPassword" type="password" placeholder="Enter your password" 
@@ -44,19 +44,13 @@
                              onOK="$composer.onClickSignIn()"/>
                 </vlayout>
 
-                <!-- Role Selection Dropdown with ZK Constraint -->
-                <vlayout spacing="4px">
-                    <label value="ROLE" sclass="field-label"/>
-                    <combobox id="cmbRole" placeholder="Select your role" readonly="true"
-                              constraint="no empty: Please select a role to proceed." 
-                              hflex="1" height="42px">
-                        <comboitem label="Outward Maker" value="OUTWARD_MAKER"/>
-                        <comboitem label="Outward Checker" value="OUTWARD_CHECKER"/>
-                        <comboitem label="Inward Maker" value="INWARD_MAKER"/>
-                        <comboitem label="Inward Checker" value="INWARD_CHECKER"/>
-                        <comboitem label="Admin" value="ADMIN"/>
-                    </combobox>
-                </vlayout>
+                <!-- Role Selection Dropdown (Populated exclusively by LoginController) -->
+                <!-- Role Selection Dropdown -->
+<vlayout spacing="4px">
+    <label value="ROLE" sclass="field-label"/>
+    <combobox id="cmbRole" placeholder="Select your role" readonly="true"
+              hflex="1" height="42px" style="font-size: 13px;" />
+</vlayout>
 
                 <separator height="10px"/>
 
