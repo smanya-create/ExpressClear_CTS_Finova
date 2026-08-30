@@ -15,6 +15,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
+    private Component sidebarComponent;
     // UI Header & Menu Containers
     private Label lblPortalTitle;
     private Div divAdminMenu;
@@ -58,6 +59,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
+        this.sidebarComponent = comp;
         // 1. Retrieve role from Session
         String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
         if (role == null || role.trim().isEmpty()) {
@@ -92,30 +94,34 @@ public class SidebarController extends GenericForwardComposer<Component> {
      * Core AJAX View-Swapper: Loads the destination ZUL into the center area
      * without reloading the browser page or sidebar/header.
      */
+    
     private void navigateTo(String zulPath, A targetTab, String pageSubtitle) {
-        // 1. Swap Center Content Area via AJAX
-        Include contentArea = (Include) Path.getComponent("//inwardMakerRootWin/mainContentArea");
+
+        Component root = sidebarComponent.getPage().getFirstRoot();
+
+        Include contentArea =
+                findComponentById(root, "mainContentArea");
+
         if (contentArea == null) {
-            contentArea = (Include) Path.getComponent("/mainContentArea");
+            throw new RuntimeException(
+                    "mainContentArea could not be found from SidebarController");
         }
 
-        if (contentArea != null) {
-            contentArea.setSrc(null); // Clear previous state
-            contentArea.setSrc(zulPath);
-        } else {
-            // Fallback only if root layout is missing
-            Executions.sendRedirect(zulPath);
-            return;
-        }
+        contentArea.setSrc(null);
+        contentArea.setSrc(zulPath);
 
-        // 2. Update Header Subtitle if header is present
-        Include headerInclude = (Include) Path.getComponent("//inwardMakerRootWin/headerInclude");
+        Include headerInclude =
+                findComponentById(root, "headerInclude");
+
         if (headerInclude != null && pageSubtitle != null) {
-            headerInclude.setDynamicProperty("pageSubtitle", pageSubtitle);
+            headerInclude.setDynamicProperty(
+                    "pageSubtitle",
+                    pageSubtitle
+            );
+
             headerInclude.invalidate();
         }
 
-        // 3. Highlight the clicked tab
         setActiveTab(targetTab);
     }
 
@@ -276,7 +282,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     }
 
     public void navToInwardMicrRepair() {
-        navigateTo("/inward/maker/cheque/micr_repair.zul", navInwardMicr, "MICR Repair");
+        navigateTo("/inward/maker/micr-repair/micr-repair.zul", navInwardMicr, "MICR Repair");
     }
 
     public void navToInwardDataEntry() {
@@ -326,5 +332,27 @@ public class SidebarController extends GenericForwardComposer<Component> {
                     Executions.sendRedirect("/common/login.zul");
                 }
             });
+    }
+    
+    private <T extends Component> T findComponentById(
+            Component root, String id) {
+
+        if (root == null) {
+            return null;
+        }
+
+        if (id.equals(root.getId())) {
+            return (T) root;
+        }
+
+        for (Component child : root.getChildren()) {
+            T found = findComponentById(child, id);
+
+            if (found != null) {
+                return found;
+            }
+        }
+
+        return null;
     }
 }

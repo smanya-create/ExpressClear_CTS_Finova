@@ -1,4 +1,4 @@
-package com.iispl.cts.controller.common;
+package com.iispl.cts.controller.inward.maker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
