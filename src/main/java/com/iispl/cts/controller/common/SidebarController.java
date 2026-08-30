@@ -91,37 +91,60 @@ public class SidebarController extends GenericForwardComposer<Component> {
     }
 
     /**
-     * Core AJAX View-Swapper: Loads the destination ZUL into the center area
-     * without reloading the browser page or sidebar/header.
+     * Core AJAX View-Swapper: Finds mainContentArea safely across ZK IdSpaces
      */
-    
     private void navigateTo(String zulPath, A targetTab, String pageSubtitle) {
+        Include contentArea = null;
 
-        Component root = sidebarComponent.getPage().getFirstRoot();
+        // 1. Search via Page Fellow Lookup (Cross-IdSpace safe)
+        if (self != null && self.getPage() != null) {
+            Component rootWin = self.getPage().getFellowIfAny("inwardMakerRootWin");
+            if (rootWin != null) {
+                contentArea = (Include) rootWin.getFellowIfAny("mainContentArea");
+            }
+            if (contentArea == null) {
+                contentArea = (Include) self.getPage().getFellowIfAny("mainContentArea");
+            }
+        }
 
-        Include contentArea =
-                findComponentById(root, "mainContentArea");
-
+        // 2. Fallback lookup via Path
         if (contentArea == null) {
-            throw new RuntimeException(
-                    "mainContentArea could not be found from SidebarController");
+            contentArea = (Include) Path.getComponent("//inwardMakerRootWin/mainContentArea");
         }
 
-        contentArea.setSrc(null);
-        contentArea.setSrc(zulPath);
-
-        Include headerInclude =
-                findComponentById(root, "headerInclude");
-
-        if (headerInclude != null && pageSubtitle != null) {
-            headerInclude.setDynamicProperty(
-                    "pageSubtitle",
-                    pageSubtitle
-            );
-
-            headerInclude.invalidate();
+        // 3. Fallback lookup via recursive tree traversal
+        if (contentArea == null && sidebarComponent != null && sidebarComponent.getPage() != null) {
+            Component root = sidebarComponent.getPage().getFirstRoot();
+            contentArea = findComponentById(root, "mainContentArea");
         }
 
+        // 4. Swap view via AJAX if target container is found
+        if (contentArea != null) {
+            contentArea.setSrc(null); // Clear previous component lifecycle
+            contentArea.setSrc(zulPath);
+        } else {
+            // Redirect if not running inside the index.zul shell
+            Executions.sendRedirect(zulPath);
+            return;
+        }
+
+        // 5. Update Header Subtitle if present
+        if (self != null && self.getPage() != null) {
+            Component rootWin = self.getPage().getFellowIfAny("inwardMakerRootWin");
+            Include headerInclude = null;
+            if (rootWin != null) {
+                headerInclude = (Include) rootWin.getFellowIfAny("headerInclude");
+            }
+            if (headerInclude == null && sidebarComponent != null && sidebarComponent.getPage() != null) {
+                headerInclude = findComponentById(sidebarComponent.getPage().getFirstRoot(), "headerInclude");
+            }
+            if (headerInclude != null && pageSubtitle != null) {
+                headerInclude.setDynamicProperty("pageSubtitle", pageSubtitle);
+                headerInclude.invalidate();
+            }
+        }
+
+        // 6. Highlight active menu tab
         setActiveTab(targetTab);
     }
 
@@ -278,7 +301,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     }
 
     public void navToBatchIntake() {
-        navigateTo("/inward/maker/intake/intake.zul", navBatchIntake, "Batch Intake");
+        navigateTo("/inward/maker/intake/batch-intake.zul", navBatchIntake, "Batch Intake");
     }
 
     public void navToInwardMicrRepair() {
@@ -333,10 +356,9 @@ public class SidebarController extends GenericForwardComposer<Component> {
                 }
             });
     }
-    
-    private <T extends Component> T findComponentById(
-            Component root, String id) {
 
+    @SuppressWarnings("unchecked")
+    private <T extends Component> T findComponentById(Component root, String id) {
         if (root == null) {
             return null;
         }
@@ -347,7 +369,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
         for (Component child : root.getChildren()) {
             T found = findComponentById(child, id);
-
             if (found != null) {
                 return found;
             }
