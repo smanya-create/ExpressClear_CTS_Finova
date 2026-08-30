@@ -93,7 +93,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     // Admin Navigation Actions
     public void navToAdminDashboard() { Executions.sendRedirect("/admin/dashboard.zul"); }
-    public void navToUserManagement() { Executions.sendRedirect("/admin/user-management.zul"); }
+    public void navToUserManagement() { Executions.sendRedirect("/admin/user/user-management.zul"); }
     public void navToRoleManagement() { Executions.sendRedirect("/admin/role-management.zul"); }
     public void navToAuditLogs() { Executions.sendRedirect("/admin/audit-logs.zul"); }
     public void navToAdminReports() { Executions.sendRedirect("/admin/reports.zul"); }

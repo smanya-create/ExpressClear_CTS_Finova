@@ -1,0 +1,260 @@
+<?page title="Express Clear - User Management"?>
+<zk xmlns:h="xhtml">
+    <style src="/css/admin/user-management.css" />
+
+    <borderlayout class="main-layout" height="100vh" apply="com.iispl.cts.controller.admin.UserManagementController">
+        
+        <!-- Left Sidebar Navigation -->
+        <west width="220px" border="none" collapsible="false">
+            <include src="/components/sidebar.zul" role="ADMIN" activeTab="user-management" />
+        </west>
+
+        <!-- Main Body Area -->
+        <center border="none" style="overflow-y: auto;">
+            <vlayout spacing="0">
+                
+                <!-- Shared Header -->
+                <include id="incHeader" src="/components/header.zul" 
+                         pageTitle="Admin Dashboard" 
+                         pageSubtitle="User Management" />
+
+                <div class="cts-content-wrapper">
+                    
+                    <!-- ========================================================================= -->
+                    <!-- 1. SCREEN 1: USER LIST VIEW                                               -->
+                    <!-- ========================================================================= -->
+    <div id="viewUserList" visible="true" style="padding: 28px 36px; background-color: #f1f5f9; min-height: 100%;">
+    
+    <!-- Top Header: Title & Add User Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;">
+        <vlayout spacing="3px">
+            <label value="User Management" style="font-size: 22px; font-weight: 800; color: #1e293b; display: block;" />
+            <label value="Manage system users, roles and access." style="font-size: 13px; color: #64748b;" />
+        </vlayout>
+        <button id="btnAddUser" label="+ ADD USER" 
+                style="background: #173b61 !important; color: #ffffff !important; font-weight: 700 !important; font-size: 11.5px !important; letter-spacing: 0.6px !important; height: 38px !important; padding: 0 22px !important; border: none !important; border-radius: 6px !important; cursor: pointer;" />
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px 24px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <label value="Search &amp; Filter Users" style="font-size: 13.5px; font-weight: 700; color: #1e293b; display: block; margin-bottom: 16px;" />
+
+        <!-- 1-Row Filter Grid -->
+        <h:table style="width: 100%; border-collapse: separate; border-spacing: 14px 0; margin-left: -14px;">
+            <h:tr>
+                <!-- Search Employee Field -->
+                <h:td style="width: 40%; vertical-align: bottom;">
+                    <label value="SEARCH EMPLOYEE" style="font-size: 10.5px; font-weight: 700; color: #64748b; letter-spacing: 0.6px; display: block; margin-bottom: 6px;" />
+                    <textbox id="txtSearchQuery" placeholder="🔍  Employee ID, username or name" 
+                             style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 12px; font-size: 13px; color: #1e293b; box-sizing: border-box;" />
+                </h:td>
+
+                <!-- Role Dropdown -->
+                <h:td style="width: 24%; vertical-align: bottom;">
+                    <label value="ROLE" style="font-size: 10.5px; font-weight: 700; color: #64748b; letter-spacing: 0.6px; display: block; margin-bottom: 6px;" />
+                    <combobox id="cmbRoleFilter" readonly="true" width="100%" style="height: 38px;">
+                        <comboitem label="All Roles" value="ALL" />
+                        <comboitem label="Admin" value="ROL1001" />
+                        <comboitem label="Maker Outward" value="ROL1002" />
+                        <comboitem label="Checker Outward" value="ROL1003" />
+                        <comboitem label="Maker Inward" value="ROL1004" />
+                        <comboitem label="Checker Inward" value="ROL1005" />
+                    </combobox>
+                </h:td>
+
+                <!-- Status Dropdown -->
+                <h:td style="width: 20%; vertical-align: bottom;">
+                    <label value="STATUS" style="font-size: 10.5px; font-weight: 700; color: #64748b; letter-spacing: 0.6px; display: block; margin-bottom: 6px;" />
+                    <combobox id="cmbStatusFilter" readonly="true" width="100%" style="height: 38px;">
+                        <comboitem label="All Status" value="ALL" />
+                        <comboitem label="Active" value="ACTIVE" />
+                        <comboitem label="Inactive" value="INACTIVE" />
+                    </combobox>
+                </h:td>
+
+                <!-- Action Buttons -->
+                <h:td style="width: 16%; vertical-align: bottom; white-space: nowrap;">
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btnSearch" label="SEARCH" 
+                                style="background: #173b61 !important; color: #ffffff !important; font-weight: 700 !important; font-size: 11px !important; letter-spacing: 0.5px !important; height: 38px !important; padding: 0 18px !important; border: none !important; border-radius: 6px !important; cursor: pointer;" />
+                        <button id="btnClearFilter" label="CLEAR" 
+                                style="background: #e2e8f0 !important; color: #334155 !important; font-weight: 700 !important; font-size: 11px !important; letter-spacing: 0.5px !important; height: 38px !important; padding: 0 16px !important; border: none !important; border-radius: 6px !important; cursor: pointer;" />
+                    </div>
+                </h:td>
+            </h:tr>
+        </h:table>
+    </div>
+
+    <!-- Users Table Card -->
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <label value="Users" style="font-size: 15px; font-weight: 700; color: #1e293b;" />
+            <label id="lblUserCount" value="6 users found" style="font-size: 12px; color: #64748b;" />
+        </div>
+
+        <grid id="gridUsers" class="cts-custom-grid" emptyMessage="No users found." style="border: 1px solid #e2e8f0; border-radius: 8px;">
+            <columns sizable="false">
+                <column label="EMPLOYEE ID" width="130px" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+                <column label="USER NAME" width="140px" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+                <column label="EMAIL" width="220px" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+                <column label="PHONE" width="140px" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+                <column label="ROLE" width="160px" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+                <column label="STATUS" width="110px" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+                <column label="ACTION" width="110px" align="center" style="background: #f1f5f9; font-weight: 700; font-size: 11px; color: #475569;" />
+            </columns>
+            <rows id="rowsUsers" />
+        </grid>
+
+        <!-- Pagination Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px;">
+            <label id="lblPaginationText" value="Showing 1–6 of 6 users" style="font-size: 12px; color: #64748b;" />
+            <div style="width: 30px; height: 30px; background: #173b61; color: #ffffff; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">
+                1
+            </div>
+        </div>
+    </div>
+</div>
+
+                    <!-- ========================================================================= -->
+                    <!-- 2. SCREEN 2: ADD USER VIEW                                                -->
+                    <!-- ========================================================================= -->
+                    <div id="viewAddUser" visible="false">
+                        <div class="cts-section-header" style="margin-bottom: 24px;">
+                            <label value="Add User" class="cts-main-title" />
+                            <label value="Create a new system user and assign the appropriate role." class="cts-main-subtitle" />
+                        </div>
+
+                        <div class="cts-card-container">
+                            <label value="User Details" class="cts-card-title" />
+                            <label value="Enter the user's basic information and access role." class="cts-card-subtitle" />
+
+                            <div class="cts-form-two-col">
+                                <div class="cts-form-field">
+                                    <label value="EMPLOYEE ID" class="cts-input-label" />
+                                    <textbox id="txtAddEmployeeId" readonly="true" placeholder="Auto generated" class="cts-textbox cts-textbox-disabled" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="USER NAME" class="cts-input-label" />
+                                    <textbox id="txtAddUsername" placeholder="Enter user name" class="cts-textbox" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="EMAIL" class="cts-input-label" />
+                                    <textbox id="txtAddEmail" placeholder="Enter email address" class="cts-textbox" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="PHONE" class="cts-input-label" />
+                                    <textbox id="txtAddPhone" placeholder="Enter phone number" class="cts-textbox" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="PASSWORD" class="cts-input-label" />
+                                    <div class="cts-password-wrapper">
+                                        <textbox id="txtAddPassword" type="password" placeholder="Create temporary password" class="cts-textbox" />
+                                        <a id="btnTogglePassword" label="Show" class="cts-toggle-pw-btn" />
+                                    </div>
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="ROLE" class="cts-input-label" />
+                                    <combobox id="cmbAddRole" readonly="true" placeholder="Select role" class="cts-combobox" width="100%">
+                                        <comboitem label="Maker Inward" value="ROL1004" />
+                                        <comboitem label="Maker Outward" value="ROL1002" />
+                                        <comboitem label="Checker Inward" value="ROL1005" />
+                                        <comboitem label="Checker Outward" value="ROL1003" />
+                                        <comboitem label="Admin" value="ROL1001" />
+                                    </combobox>
+                                </div>
+                            </div>
+
+                            <div class="cts-form-actions-row">
+                                <button id="btnSubmitAddUser" label="CREATE USER" class="cts-btn-primary-action" />
+                                <button id="btnClearAddForm" label="CLEAR" class="cts-btn-secondary-action" />
+                                <button id="btnCancelAdd" label="CANCEL" class="cts-btn-secondary-action" />
+                            </div>
+
+                            <div class="cts-hint-box">
+                                <label value="The selected role determines which CTS modules and actions are available to the user." class="cts-hint-text" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================================= -->
+                    <!-- 3. SCREEN 3: MODIFY USER VIEW                                             -->
+                    <!-- ========================================================================= -->
+                    <div id="viewModifyUser" visible="false">
+                        <div class="cts-section-header" style="margin-bottom: 24px;">
+                            <label value="Modify User" class="cts-main-title" />
+                            <label value="Manage user status and role." class="cts-main-subtitle" />
+                        </div>
+
+                        <div class="cts-card-container">
+                            <label value="User Details" class="cts-card-title" />
+
+                            <div class="cts-form-two-col" style="margin-top: 20px;">
+                                <div class="cts-form-field">
+                                    <label value="EMPLOYEE ID" class="cts-input-label" />
+                                    <textbox id="txtModEmployeeId" readonly="true" class="cts-textbox cts-textbox-disabled" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="USER NAME" class="cts-input-label" />
+                                    <textbox id="txtModUsername" readonly="true" class="cts-textbox cts-textbox-disabled" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="EMAIL" class="cts-input-label" />
+                                    <textbox id="txtModEmail" readonly="true" class="cts-textbox cts-textbox-disabled" width="100%" />
+                                </div>
+
+                                <div class="cts-form-field">
+                                    <label value="CURRENT ROLE" class="cts-input-label" />
+                                    <textbox id="txtModCurrentRole" readonly="true" class="cts-textbox cts-textbox-disabled" width="100%" />
+                                </div>
+                            </div>
+
+                            <!-- Action Switcher -->
+                            <div class="cts-form-field" style="margin-top: 24px;">
+                                <label value="ACTION" class="cts-input-label" />
+                                <div class="cts-action-segment-row">
+                                    <button id="btnActionEnable" label="ENABLE" class="cts-segment-btn" />
+                                    <button id="btnActionDisable" label="DISABLE" class="cts-segment-btn" />
+                                    <button id="btnActionChangeRole" label="CHANGE ROLE" class="cts-segment-btn cts-segment-btn-active" />
+                                </div>
+                            </div>
+
+                            <!-- New Role -->
+                            <div id="divNewRoleContainer" class="cts-form-field" visible="false" style="margin-top: 22px;">
+    <label value="NEW ROLE" class="cts-input-label" />
+    <div class="cts-new-role-grid">
+        <div>
+            <combobox id="cmbNewRole" readonly="true" placeholder="Select new role" class="cts-combobox" width="100%" />
+        </div>
+        <div class="cts-role-note-box">
+            <label value="Select a different role from the list." class="cts-side-note" />
+            <label value="The current role is excluded from the choices." class="cts-side-note" />
+        </div>
+    </div>
+</div>
+
+                            <div class="cts-form-actions-row" style="margin-top: 32px;">
+                                <button id="btnSaveModifications" label="SAVE" class="cts-btn-primary-action" />
+                                <button id="btnCancelModifications" label="CANCEL" class="cts-btn-secondary-action" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page Footer -->
+                    <div class="cts-portal-footer">
+                        <label value="Express Clear CTS · Admin Portal" class="cts-footer-left" />
+                        <label value="User Management" class="cts-footer-right" />
+                    </div>
+
+                </div>
+
+            </vlayout>
+        </center>
+    </borderlayout>
+</zk>
