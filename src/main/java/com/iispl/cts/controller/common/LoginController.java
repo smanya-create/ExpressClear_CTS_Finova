@@ -94,7 +94,7 @@ public class LoginController extends SelectorComposer<Component> {
                 Executions.sendRedirect("/outward/checker/checker-dashboard.zul");
                 break;
             case "INWARD_MAKER":
-                Executions.sendRedirect("/inward/maker/inward-maker-dashboard.zul");
+                Executions.sendRedirect("/inward/maker/index.zul");
                 break;
             case "INWARD_CHECKER":
                 Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
