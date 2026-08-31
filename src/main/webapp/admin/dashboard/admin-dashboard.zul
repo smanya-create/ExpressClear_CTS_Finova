@@ -1,0 +1,130 @@
+<?page title="Express Clear - CTS Admin Portal"?>
+<zk xmlns:h="xhtml">
+    <style src="/css/admin/dashboard.css" />
+
+    <borderlayout class="main-layout" height="100vh" apply="com.iispl.cts.controller.admin.AdminDashboardController">
+        
+        <!-- Reusable Left Sidebar -->
+        <west width="220px" border="none" collapsible="false">
+            <include src="/components/sidebar.zul" role="ADMIN" activeTab="admin-dashboard" />
+        </west>
+
+        <!-- Main Body Area -->
+        <center border="none" style="overflow-y: auto; background: #eef3f8;">
+            <vlayout spacing="0">
+                
+                <!-- Reusable Header Component -->
+                <include src="/components/header.zul" 
+                         pageTitle="Admin Dashboard" 
+                         pageSubtitle="Session Management" />
+
+                <!-- Main Content Body -->
+                <div class="cts-content-wrapper">
+                    
+                    <!-- Top Heading -->
+                    <div class="cts-section-header">
+                        <label value="Session Management" class="cts-main-title" />
+                        <label value="Select EOD or BOD and start the required CTS session." class="cts-main-subtitle" />
+                    </div>
+
+                    <!-- 4-Column Stat KPI Card -->
+                    <div class="cts-stats-card">
+                        <div class="cts-stat-col">
+                            <label value="CURRENT CLEARING DATE" class="cts-stat-header" />
+                            <label id="lblClearingDate" class="cts-stat-num" />
+                        </div>
+                        <div class="cts-stat-col">
+                            <label value="SESSION STATUS" class="cts-stat-header" />
+                            <div class="cts-status-container">
+                                <div id="dotSessionStatus" class="cts-status-dot-open" />
+                                <label id="lblSessionStatus" value="OPEN" class="cts-status-text-open" />
+                            </div>
+                        </div>
+                        <div class="cts-stat-col">
+                            <label value="LOGGED-IN USERS" class="cts-stat-header" />
+                            <label id="lblLoggedInUsers" value="0" class="cts-stat-num" />
+                        </div>
+                        <div class="cts-stat-col cts-stat-col-last">
+                            <label value="PENDING CHEQUES" class="cts-stat-header" />
+                            <div class="cts-pending-flex">
+                                <label id="lblPendingCount" value="0" class="cts-stat-num cts-pending-num" />
+                                <label id="lblPendingTag" value="Requires attention before EOD" class="cts-pending-warning-tag" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Action Selection Card -->
+                    <div class="cts-action-card">
+                        <label value="Session Action" class="cts-card-title" />
+                        <label value="Choose the session operation you want to perform." class="cts-card-subtitle" />
+
+                        <div class="cts-options-grid">
+                            <!-- End of Day (EOD) Box -->
+                            <div id="cardEOD" class="cts-choice-box cts-choice-box-active">
+                                <div class="cts-choice-inner">
+                                    <div id="ringEOD" class="cts-custom-radio-ring cts-radio-checked">
+                                        <div class="cts-radio-dot" />
+                                    </div>
+                                    <div class="cts-choice-text">
+                                        <label value="End of Day (EOD)" class="cts-choice-title" />
+                                        <label value="Close the current clearing day." class="cts-choice-desc" />
+                                        <label value="Pending transactions will be checked before EOD." class="cts-choice-desc" />
+                                        <label id="lblEODWarnText" value="3 pending cheques detected" class="cts-eod-alert" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Begin of Day (BOD) Box -->
+                            <div id="cardBOD" class="cts-choice-box">
+                                <div class="cts-choice-inner">
+                                    <div id="ringBOD" class="cts-custom-radio-ring">
+                                        <div class="cts-radio-dot" />
+                                    </div>
+                                    <div class="cts-choice-text">
+                                        <label value="Begin of Day (BOD)" class="cts-choice-title" />
+                                        <label value="Start operations for the next working day." class="cts-choice-desc" />
+                                        <label value="Previous-day EOD must be completed." class="cts-choice-desc" />
+                                        <label value="Required previous-day checks will be validated." class="cts-choice-desc cts-text-muted" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dark Navy Action Button -->
+                        <button id="btnStartSession" label="START SESSION" class="cts-btn-primary" />
+                    </div>
+
+                    <!-- Informational Process Text -->
+                    <div class="cts-info-text-block">
+                        <label value="Select EOD to close the current clearing date or select BOD to begin the next clearing date." class="cts-info-line" />
+                        <label value="For EOD, pending transactions may trigger the forced-EOD confirmation flow." class="cts-info-line" style="margin-top: 14px;" />
+                        <label value="For BOD, the previous clearing day's EOD and required pending checks are validated." class="cts-info-line" />
+                    </div>
+
+                    <!-- Pending Cheques Warning Callout Banner (Matches Screenshot 2) -->
+                    <div id="boxWarningBanner" class="cts-warning-banner" visible="false">
+                        <div class="cts-warn-left">
+                            <div class="cts-warn-icon">!</div>
+                            <div class="cts-warn-text-group">
+                                <label value="Pending Cheques Require Attention" class="cts-warn-title" />
+                                <label id="lblWarningMsg" value="3 cheques are currently pending. Review their current processing stage before performing EOD." class="cts-warn-desc" />
+                            </div>
+                        </div>
+                        <div class="cts-warn-right">
+                            <button id="btnViewPending" label="VIEW PENDING CHEQUES" class="cts-btn-view-pending" />
+                            <label value="Shows batch, cheque and current processing stage" class="cts-warn-footnote" />
+                        </div>
+                    </div>
+
+                    <!-- Portal Footer -->
+                    <div class="cts-portal-footer">
+                        <label value="Express Clear CTS · Admin Portal" class="cts-footer-left" />
+                        <label value="Secure Session Management" class="cts-footer-right" />
+                    </div>
+
+                </div>
+
+            </vlayout>
+        </center>
+    </borderlayout>
+</zk>

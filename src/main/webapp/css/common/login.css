@@ -1,3 +1,28 @@
+/* Styling for ZK Combobox on Login Page */
+.z-combobox {
+    display: block;
+    width: 100%;
+}
+
+.z-combobox-input {
+    height: 42px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-right: none !important;
+    border-radius: 6px 0 0 6px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+}
+
+.z-combobox-button {
+    height: 42px !important;
+    width: 38px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-left: none !important;
+    border-radius: 0 6px 6px 0 !important;
+    background: #ffffff !important;
+}
 body { 
     background-color: #eef4f9;
     font-family: 'Inter', sans-serif; 

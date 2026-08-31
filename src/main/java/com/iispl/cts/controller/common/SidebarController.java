@@ -1,201 +1,99 @@
 package com.iispl.cts.controller.common;
 
+import java.util.Map;
+
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zul.Include;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
-import org.zkoss.zul.A;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
+
+import com.iispl.cts.serviceimpl.AuditServiceImpl;
 
 public class SidebarController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
+    
+    private Component sidebarComponent;
 
-    // UI Header & Menu Containers
+    // Header & Category Labels
     private Label lblPortalTitle;
+    private Label lblNavCategory;
+
+    // Role Section Containers
     private Div divAdminMenu;
     private Div divMakerMenu;
     private Div divCheckerMenu;
     private Div divInwardMakerMenu;
     private Div divInwardCheckerMenu;
 
-    // Navigation Links (for active tab styling)
-    private A navDashboard;
-    private A navAdminUsers;
-    private A navAdminRoles;
-    private A navAudit;
-    private A navAdminReports;
-
-    private A navUpload;
-    private A navOutwardMicr;
-    private A navOutwardDataEntry;
-    private A navQueue;
-    private A navOutwardMakerReports;
-
-    private A navCheckerQueue;
-    private A navXmlGen;
-    private A navOutwardRejected;
-    private A navOutwardCheckerReports;
-
-    private A navInwardDashboard;
-    private A navBatchIntake;
-    private A navInwardMicr;
-    private A navInwardDataEntry;
-    private A navMakerCompletion;
-    private A navInwardUnprocessed;
-    private A navInwardMakerReports;
-
-    private A navInwardCheckerDashboard;
-    private A navVerification;
-    private A navRrf;
-    private A navInwardCheckerReports;
-
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
+        this.sidebarComponent = comp;
+        applyRoleVisibility();
+    }
 
-        // 1. Retrieve role from Session
-        String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
+    private void applyRoleVisibility() {
+        // Priority 1: Check argument passed via <include role="ADMIN" .../>
+        String role = null;
+        Map<?, ?> argMap = Executions.getCurrent().getArg();
+        if (argMap != null && argMap.containsKey("role")) {
+            Object r = argMap.get("role");
+            if (r != null) role = r.toString();
+        }
+
+        // Priority 2: Fallback to HTTP Session
         if (role == null || role.trim().isEmpty()) {
-            role = (String) comp.getAttribute("role");
+            role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
         }
+
+        // Default to ADMIN if nothing is specified
         if (role == null || role.trim().isEmpty()) {
-            role = "OUTWARD_MAKER";
-            Sessions.getCurrent().setAttribute("USER_ROLE", role);
+            role = "ADMIN";
         }
 
-        // 2. Render sidebar visibility by role
-        renderSidebarMenu(role);
+        // Hide all containers first
+        if (divAdminMenu != null) divAdminMenu.setVisible(false);
+        if (divMakerMenu != null) divMakerMenu.setVisible(false);
+        if (divCheckerMenu != null) divCheckerMenu.setVisible(false);
+        if (divInwardMakerMenu != null) divInwardMakerMenu.setVisible(false);
+        if (divInwardCheckerMenu != null) divInwardCheckerMenu.setVisible(false);
 
-        // 3. Set initial active tab
-        String activeTab = (String) comp.getAttribute("activeTab");
-        highlightActiveTab(activeTab);
-    }
-
-    private void renderSidebarMenu(String role) {
-        if (lblPortalTitle != null) {
-            lblPortalTitle.setValue(role.replace("_", " ") + " PORTAL");
-        }
-
-        if (divAdminMenu != null) divAdminMenu.setVisible("ADMIN".equalsIgnoreCase(role));
-        if (divMakerMenu != null) divMakerMenu.setVisible("OUTWARD_MAKER".equalsIgnoreCase(role));
-        if (divCheckerMenu != null) divCheckerMenu.setVisible("OUTWARD_CHECKER".equalsIgnoreCase(role));
-        if (divInwardMakerMenu != null) divInwardMakerMenu.setVisible("INWARD_MAKER".equalsIgnoreCase(role));
-        if (divInwardCheckerMenu != null) divInwardCheckerMenu.setVisible("INWARD_CHECKER".equalsIgnoreCase(role));
-    }
-
-    /**
-     * Core AJAX View-Swapper: Loads the destination ZUL into the center area
-     * without reloading the browser page or sidebar/header.
-     */
-    private void navigateTo(String zulPath, A targetTab, String pageSubtitle) {
-        // 1. Swap Center Content Area via AJAX
-        Include contentArea = (Include) Path.getComponent("//inwardMakerRootWin/mainContentArea");
-        if (contentArea == null) {
-            contentArea = (Include) Path.getComponent("/mainContentArea");
-        }
-
-        if (contentArea != null) {
-            contentArea.setSrc(null); // Clear previous state
-            contentArea.setSrc(zulPath);
-        } else {
-            // Fallback only if root layout is missing
-            Executions.sendRedirect(zulPath);
-            return;
-        }
-
-        // 2. Update Header Subtitle if header is present
-        Include headerInclude = (Include) Path.getComponent("//inwardMakerRootWin/headerInclude");
-        if (headerInclude != null && pageSubtitle != null) {
-            headerInclude.setDynamicProperty("pageSubtitle", pageSubtitle);
-            headerInclude.invalidate();
-        }
-
-        // 3. Highlight the clicked tab
-        setActiveTab(targetTab);
-    }
-
-    private void setActiveTab(A targetTab) {
-        resetTabStyles();
-        if (targetTab != null) {
-            targetTab.setSclass("nav-item active");
-        }
-    }
-
-    private void resetTabStyles() {
-        A[] allTabs = new A[] {
-            navDashboard, navAdminUsers, navAdminRoles, navAudit, navAdminReports,
-            navUpload, navOutwardMicr, navOutwardDataEntry, navQueue, navOutwardMakerReports,
-            navCheckerQueue, navXmlGen, navOutwardRejected, navOutwardCheckerReports,
-            navInwardDashboard, navBatchIntake, navInwardMicr, navInwardDataEntry, navMakerCompletion, navInwardUnprocessed, navInwardMakerReports,
-            navInwardCheckerDashboard, navVerification, navRrf, navInwardCheckerReports
-        };
-
-        for (A tab : allTabs) {
-            if (tab != null) {
-                tab.setSclass("nav-item");
-            }
-        }
-    }
-
-    private void highlightActiveTab(String activeTab) {
-        if (activeTab == null || activeTab.trim().isEmpty()) return;
-
-        switch (activeTab.toLowerCase()) {
-            case "dashboard":
-            case "inward-dashboard":
-                setActiveTab(navDashboard != null ? navDashboard : navInwardDashboard);
+        // Switch headers and show active role container
+        switch (role.toUpperCase()) {
+            case "ADMIN":
+                if (lblPortalTitle != null) lblPortalTitle.setValue("ADMIN PORTAL");
+                if (lblNavCategory != null) lblNavCategory.setValue("ADMINISTRATION");
+                if (divAdminMenu != null) divAdminMenu.setVisible(true);
                 break;
-            case "users": setActiveTab(navAdminUsers); break;
-            case "roles": setActiveTab(navAdminRoles); break;
-            case "audit": setActiveTab(navAudit); break;
-            case "admin-reports": setActiveTab(navAdminReports); break;
 
-            case "upload": setActiveTab(navUpload); break;
-            case "outward-micr":
-            case "micr": setActiveTab(navOutwardMicr); break;
-            case "outward-data-entry":
-            case "data-entry": setActiveTab(navOutwardDataEntry); break;
-            case "queue":
-            case "unprocessed": setActiveTab(navQueue); break;
-            case "outward-maker-reports": setActiveTab(navOutwardMakerReports); break;
+            case "OUTWARD_CHECKER":
+                if (lblPortalTitle != null) lblPortalTitle.setValue("OUTWARD CHECKER PORTAL");
+                if (lblNavCategory != null) lblNavCategory.setValue("NAVIGATION");
+                if (divCheckerMenu != null) divCheckerMenu.setVisible(true);
+                break;
 
-            case "checker-queue": setActiveTab(navCheckerQueue); break;
-            case "xml-gen": setActiveTab(navXmlGen); break;
-            case "outward-rejected-cheques": setActiveTab(navOutwardRejected); break;
-            case "outward-checker-reports": setActiveTab(navOutwardCheckerReports); break;
+            case "INWARD_MAKER":
+                if (lblPortalTitle != null) lblPortalTitle.setValue("INWARD MAKER PORTAL");
+                if (lblNavCategory != null) lblNavCategory.setValue("NAVIGATION");
+                if (divInwardMakerMenu != null) divInwardMakerMenu.setVisible(true);
+                break;
 
-            case "batch-intake": setActiveTab(navBatchIntake); break;
-            case "inward-micr": setActiveTab(navInwardMicr); break;
-            case "inward-data-entry": setActiveTab(navInwardDataEntry); break;
-            case "maker-completion": setActiveTab(navMakerCompletion); break;
-            case "inward-unprocessed": setActiveTab(navInwardUnprocessed); break;
-            case "inward-maker-reports": setActiveTab(navInwardMakerReports); break;
+            case "INWARD_CHECKER":
+                if (lblPortalTitle != null) lblPortalTitle.setValue("INWARD CHECKER PORTAL");
+                if (lblNavCategory != null) lblNavCategory.setValue("NAVIGATION");
+                if (divInwardCheckerMenu != null) divInwardCheckerMenu.setVisible(true);
+                break;
 
-            case "inward-checker-dashboard": setActiveTab(navInwardCheckerDashboard); break;
-            case "verification": setActiveTab(navVerification); break;
-            case "rrf": setActiveTab(navRrf); break;
-            case "inward-checker-reports": setActiveTab(navInwardCheckerReports); break;
-        }
-    }
-
-    // ==================== 1. COMMON DASHBOARD ====================
-    public void navToDashboard() {
-        String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
-        if ("ADMIN".equalsIgnoreCase(role)) {
-            navToAdminDashboard();
-        } else if ("OUTWARD_CHECKER".equalsIgnoreCase(role)) {
-            navToOutwardCheckerDashboard();
-        } else if ("INWARD_MAKER".equalsIgnoreCase(role)) {
-            navToInwardDashboard();
-        } else if ("INWARD_CHECKER".equalsIgnoreCase(role)) {
-            navToInwardCheckerDashboard();
-        } else {
-            navToOutwardMakerDashboard();
+            case "OUTWARD_MAKER":
+            default:
+                if (lblPortalTitle != null) lblPortalTitle.setValue("OUTWARD MAKER PORTAL");
+                if (lblNavCategory != null) lblNavCategory.setValue("NAVIGATION");
+                if (divMakerMenu != null) divMakerMenu.setVisible(true);
+                break;
         }
     }
 
@@ -313,18 +211,68 @@ public class SidebarController extends GenericForwardComposer<Component> {
     }
 
     // ==================== 7. LOGOUT (Only Action Requiring Redirect) ====================
+    // Admin Navigation Actions
+    public void navToAdminDashboard() { Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul"); }
+    public void navToUserManagement() { Executions.sendRedirect("/admin/user/user-management.zul"); }
+    public void navToRoleManagement() { Executions.sendRedirect("/admin/role/role-management.zul"); }
+    public void navToAuditLogs() { Executions.sendRedirect("/admin/audit/audit-logs.zul"); }
+    public void navToAdminReports() { Executions.sendRedirect("/admin/reports/reports.zul"); }
+
+    // Outward Maker Navigation Actions
+    public void navToMakerDashboard() { Executions.sendRedirect("/maker/dashboard.zul"); }
+    public void navToUploadBatch() { Executions.sendRedirect("/maker/upload-batch.zul"); }
+    public void navToOutwardMicrRepair() { Executions.sendRedirect("/maker/micr-repair.zul"); }
+    public void navToOutwardDataEntry() { Executions.sendRedirect("/maker/data-entry.zul"); }
+    public void navToQueue() { Executions.sendRedirect("/maker/unprocessed-cheques.zul"); }
+    public void navToOutwardMakerReports() { Executions.sendRedirect("/maker/reports.zul"); }
+
+    // Outward Checker Navigation Actions
+    public void navToCheckerDashboard() { Executions.sendRedirect("/checker/dashboard.zul"); }
+    public void navToOutwardCheckerQueue() { Executions.sendRedirect("/checker/queue.zul"); }
+    public void navToOutwardXmlGeneration() { Executions.sendRedirect("/checker/xml-gen.zul"); }
+    public void navToOutwardRejectedCheques() { Executions.sendRedirect("/checker/rejected.zul"); }
+    public void navToOutwardCheckerReports() { Executions.sendRedirect("/checker/reports.zul"); }
+
+    // Inward Maker Navigation Actions
+    public void navToInwardDashboard() { Executions.sendRedirect("/inward/maker/dashboard.zul"); }
+    public void navToBatchIntake() { Executions.sendRedirect("/inward/maker/intake/batch-intake.zul"); }
+       
+    public void navToInwardMicrRepair() { 
+    	
+    	 Component root = sidebarComponent.getPage().getFirstRoot();
+    	 
+         Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+    	
+         if (mainContentArea instanceof Include) {
+
+             Include include = (Include) mainContentArea;
+
+             include.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+         }   	
+    
+    }
+    
+    public void navToInwardDataEntry() { Executions.sendRedirect("/inward/maker/data-entry/data-entry.zul"); }
+    public void navToMakerCompletion() { Executions.sendRedirect("/inward-maker/completion.zul"); }
+    public void navToInwardUnprocessedQueue() { Executions.sendRedirect("/inward-maker/unprocessed.zul"); }
+    public void navToInwardMakerReports() { Executions.sendRedirect("/inward-maker/reports.zul"); }
+
+    // Inward Checker Navigation Actions
+    public void navToInwardCheckerDashboard() { Executions.sendRedirect("/inward-checker/dashboard.zul"); }
+    public void navToVerification() { Executions.sendRedirect("/inward-checker/verification.zul"); }
+    public void navToRRF() { Executions.sendRedirect("/inward-checker/rrf.zul"); }
+    public void navToInwardCheckerReports() { Executions.sendRedirect("/inward-checker/reports.zul"); }
+
+    // Global Logout
     public void onClickLogout() {
-        String currentUser = (String) Sessions.getCurrent().getAttribute("LOGGED_USER");
-        if (currentUser == null || currentUser.trim().isEmpty()) {
-            currentUser = "User";
+    	AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
+
+        // Clear and invalidate current HTTP session
+        if (Sessions.getCurrent() != null) {
+            Sessions.getCurrent().invalidate();
         }
 
-        Messagebox.show("Are you sure you want to log out of Express Clear CTS?", "Confirm Logout",
-            Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, evt -> {
-                if (Messagebox.ON_YES.equals(evt.getName())) {
-                    Sessions.getCurrent().invalidate();
-                    Executions.sendRedirect("/common/login.zul");
-                }
-            });
+        // Redirect back to login page
+        Executions.sendRedirect("/common/login.zul");
     }
 }

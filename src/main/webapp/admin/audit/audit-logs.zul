@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
+<zk xmlns:h="xhtml">
+<borderlayout apply="com.iispl.cts.controller.admin.AuditLogsController" hflex="1" vflex="1">
+
+    <!-- Shared Left Sidebar Navigation -->
+    <west width="240px" border="none" collapsible="false">
+        <include src="/components/sidebar.zul" role="ADMIN" activeTab="audit-logs" />
+    </west>
+
+    <!-- Main Workspace -->
+    <center border="none" style="overflow-y: auto; background-color: #f8fafc;">
+        <vlayout spacing="0" hflex="1">
+
+            <!-- Shared Header -->
+            <include id="incHeader" src="/components/header.zul" 
+                     pageTitle="Admin Dashboard" 
+                     pageSubtitle="Audit Logs" />
+
+            <!-- Content Area -->
+            <div sclass="role-content">
+                <div style="margin-bottom: 24px;">
+                    <label value="System Audit Logs" sclass="page-title"/>
+                    <label value="Track all security events, user logins, batch submissions, and operational activities." sclass="page-subtitle"/>
+                </div>
+
+                <!-- Filter Controls Card -->
+                <div sclass="card-panel">
+                    <hlayout spacing="16px" style="align-items: flex-end; flex-wrap: wrap;">
+                        <vlayout spacing="6px" width="160px">
+                            <label value="FROM DATE" sclass="field-label"/>
+                            <datebox id="dtFrom" format="yyyy-MM-dd" height="40px" width="100%"/>
+                        </vlayout>
+                        <vlayout spacing="6px" width="160px">
+                            <label value="TO DATE" sclass="field-label"/>
+                            <datebox id="dtTo" format="yyyy-MM-dd" height="40px" width="100%"/>
+                        </vlayout>
+                        <vlayout spacing="6px" width="180px">
+                            <label value="MODULE" sclass="field-label"/>
+                            <combobox id="cmbModuleFilter" readonly="true" width="100%" height="40px">
+                                <comboitem label="All Modules" value="ALL"/>
+                                <comboitem label="AUTH" value="AUTH"/>
+                                <comboitem label="ROLE_MGMT" value="ROLE_MGMT"/>
+                                <comboitem label="USER_MGMT" value="USER_MGMT"/>
+                                <comboitem label="OUTWARD_BATCH" value="OUTWARD_BATCH"/>
+                                <comboitem label="INWARD_CLEARING" value="INWARD_CLEARING"/>
+                            </combobox>
+                        </vlayout>
+                        <vlayout spacing="6px" style="flex: 1; min-width: 220px;">
+                            <label value="SEARCH USER / DETAILS" sclass="field-label"/>
+                            <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="40px" sclass="input-box"/>
+                        </vlayout>
+                        <button id="btnSearch" label="SEARCH" height="40px" sclass="btn-primary"/>
+                        <button id="btnReset" label="RESET" height="40px" sclass="btn-secondary"/>
+                    </hlayout>
+                </div>
+
+                <!-- Audit Log Table Card -->
+                <div sclass="card-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <label value="Audit Trail" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
+                        <label id="lblAuditCount" value="Loading logs..." style="color: #64748b; font-size: 12px;"/>
+                    </div>
+
+                    <grid sclass="role-grid">
+                        <columns sizable="true">
+                            <column label="TIMESTAMP" width="160px"/>
+                            <column label="USER / ROLE" width="200px"/>
+                            <column label="MODULE" width="140px"/>
+                            <column label="ACTION" width="150px"/>
+                            <column label="DETAILS" hflex="1"/>
+                            <column label="IP ADDRESS" width="130px"/>
+                            <column label="STATUS" width="100px"/>
+                        </columns>
+                        <rows id="rowsAudit">
+                            <!-- Populated by AuditLogsController -->
+                        </rows>
+                    </grid>
+                </div>
+            </div>
+
+        </vlayout>
+    </center>
+</borderlayout>
+</zk>

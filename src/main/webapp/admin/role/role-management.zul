@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
+<zk xmlns:h="xhtml">
+<borderlayout apply="com.iispl.cts.controller.admin.RoleManagementController" hflex="1" vflex="1">
+
+    <!-- Shared Left Sidebar Navigation -->
+    <west width="240px" border="none" collapsible="false">
+        <include src="/components/sidebar.zul" role="ADMIN" activeTab="role-management" />
+    </west>
+
+    <!-- Main Workspace -->
+    <center border="none" style="overflow-y: auto; background-color: #f8fafc;">
+        <vlayout spacing="0" hflex="1">
+            
+            <!-- Shared Header -->
+            <include id="incHeader" src="/components/header.zul" 
+                     pageTitle="Admin Dashboard" 
+                     pageSubtitle="Role Management" />
+
+            <!-- Content Area -->
+            <div sclass="role-content">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                    <div>
+                        <label value="Role Management" sclass="page-title"/>
+                        <label value="Manage system roles and their permissions." sclass="page-subtitle"/>
+                    </div>
+                    <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="40px"/>
+                </div>
+
+                <!-- Search Card -->
+                <div sclass="card-panel">
+                    <hlayout spacing="16px" style="align-items: flex-end;">
+                        <vlayout spacing="6px" style="flex: 1;">
+                            <label value="SEARCH ROLES" sclass="field-label"/>
+                            <textbox id="txtSearchRoles" placeholder="Search by Role ID or Role Name..." hflex="1" height="40px" sclass="input-box"/>
+                        </vlayout>
+                       <vlayout spacing="6px" width="200px">
+    <label value="STATUS" sclass="field-label"/>
+    <combobox id="cmbStatusFilter" readonly="true" width="100%" height="40px">
+        <comboitem label="All Status" value="ALL"/>
+        <comboitem label="Active" value="Active"/>
+        <comboitem label="Inactive" value="Inactive"/>
+    </combobox>
+</vlayout>
+                        <button id="btnSearch" label="SEARCH" height="40px" sclass="btn-primary"/>
+                        <button id="btnReset" label="RESET" height="40px" sclass="btn-secondary"/>
+                    </hlayout>
+                </div>
+
+                <!-- Table Card -->
+                <div sclass="card-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <label value="Roles" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
+                        <label id="lblRoleCount" value="Loading roles..." style="color: #64748b; font-size: 12px;"/>
+                    </div>
+
+                    <grid sclass="role-grid">
+    <columns sizable="true">
+        <column label="ROLE ID" width="120px"/>
+        <column label="ROLE NAME" width="200px"/>
+        <column label="DESCRIPTION" hflex="1"/>
+        <column label="STATUS" width="120px"/>
+        <column label="ACTIONS" width="120px"/>
+    </columns>
+    <rows id="rowsRoles">
+        <!-- Populated by Controller -->
+    </rows>
+</grid>
+                </div>
+            </div>
+            
+
+        </vlayout>
+    </center>
+</borderlayout>
+</zk>

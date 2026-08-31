@@ -1,116 +1,122 @@
 package com.iispl.cts.entity;
 
-
 import java.io.Serializable;
 import java.sql.Timestamp;
 
 public class AuditLog implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-    private String auditId;
+    private Long auditId;
+    private Timestamp timestamp;
     private String userId;
-    private String roleId;
-    private String actionModule;
-    private String actionType;
-    private String actionDescription;
+    private String username;
+    private String roleName;
+    private String module;
+    private String action;
+    private String details;
     private String ipAddress;
-    private Timestamp createdAt;
+    private String status;
 
-    // Default Constructor
-    public AuditLog() {
-    }
+    public AuditLog() {}
 
-    // Parameterized Constructor
-    public AuditLog(String auditId, String userId, String roleId, String actionModule, 
-                    String actionType, String actionDescription, String ipAddress, 
-                    Timestamp createdAt) {
+    public AuditLog(Long auditId, Timestamp timestamp, String userId, String username, 
+                    String roleName, String module, String action, String details, 
+                    String ipAddress, String status) {
         this.auditId = auditId;
+        this.timestamp = timestamp;
         this.userId = userId;
-        this.roleId = roleId;
-        this.actionModule = actionModule;
-        this.actionType = actionType;
-        this.actionDescription = actionDescription;
+        this.username = username;
+        this.roleName = roleName;
+        this.module = module;
+        this.action = action;
+        this.details = details;
         this.ipAddress = ipAddress;
-        this.createdAt = createdAt;
+        this.status = status;
     }
 
-    // Getters and Setters
-    public String getAuditId() {
-        return auditId;
-    }
+	public Long getAuditId() {
+		return auditId;
+	}
 
-    public void setAuditId(String auditId) {
-        this.auditId = auditId;
-    }
+	public void setAuditId(Long auditId) {
+		this.auditId = auditId;
+	}
 
-    public String getUserId() {
-        return userId;
-    }
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
+	}
 
-    public String getRoleId() {
-        return roleId;
-    }
+	public String getUserId() {
+		return userId;
+	}
 
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
-    }
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
-    public String getActionModule() {
-        return actionModule;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public void setActionModule(String actionModule) {
-        this.actionModule = actionModule;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public String getActionType() {
-        return actionType;
-    }
+	public String getRoleName() {
+		return roleName;
+	}
 
-    public void setActionType(String actionType) {
-        this.actionType = actionType;
-    }
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
 
-    public String getActionDescription() {
-        return actionDescription;
-    }
+	public String getModule() {
+		return module;
+	}
 
-    public void setActionDescription(String actionDescription) {
-        this.actionDescription = actionDescription;
-    }
+	public void setModule(String module) {
+		this.module = module;
+	}
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
+	public String getAction() {
+		return action;
+	}
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
+	public void setAction(String action) {
+		this.action = action;
+	}
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
+	public String getDetails() {
+		return details;
+	}
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
+	public void setDetails(String details) {
+		this.details = details;
+	}
 
-    @Override
-    public String toString() {
-        return "AuditLog {" +
-                "auditId='" + auditId + '\'' +
-                ", userId='" + userId + '\'' +
-                ", roleId='" + roleId + '\'' +
-                ", actionModule='" + actionModule + '\'' +
-                ", actionType='" + actionType + '\'' +
-                ", actionDescription='" + actionDescription + '\'' +
-                ", ipAddress='" + ipAddress + '\'' +
-                ", createdAt=" + createdAt +
-                '}';
-    }
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+   
 }
