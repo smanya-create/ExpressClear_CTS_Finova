@@ -5,6 +5,7 @@
 <zk>
 
   <style src="/css/inward/micr-repair.css"/>
+  
     <vlayout id="inwardMicrRepairRoot" width="100%"
              apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairControllerr"
              spacing="14px" sclass="micr-repair-page">
