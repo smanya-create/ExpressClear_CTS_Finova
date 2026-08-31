@@ -17,11 +17,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	    public void doAfterCompose(Component comp) throws Exception {
 	        super.doAfterCompose(comp);
 	        String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
-
-	        Sessions.getCurrent().setAttribute(
-	                "USER_ROLE",
-	                "OUTWARD_CHECKER"
-	            );
 	        loadDashboard();
 	    }
 
