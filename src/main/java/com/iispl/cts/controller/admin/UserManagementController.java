@@ -1,20 +1,31 @@
 package com.iispl.cts.controller.admin;
 
-import com.iispl.cts.entity.User;
-import com.iispl.cts.service.UserService;
-import com.iispl.cts.serviceimpl.UserServiceImpl;
+import java.sql.Timestamp;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
-import org.zkoss.zul.*;
+import org.zkoss.zul.A;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Include;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Row;
+import org.zkoss.zul.Rows;
+import org.zkoss.zul.Textbox;
 
-import java.sql.Timestamp;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.iispl.cts.common.util.SecurityUtil;
+import com.iispl.cts.entity.User;
+import com.iispl.cts.service.UserService;
+import com.iispl.cts.serviceimpl.UserServiceImpl;
 
 public class UserManagementController extends GenericForwardComposer<Component> {
 
@@ -79,6 +90,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
+        SecurityUtil.checkAccess("USER_MANAGEMENT");
         if (cmbRoleFilter != null && cmbRoleFilter.getItemCount() > 0) cmbRoleFilter.setSelectedIndex(0);
         if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) cmbStatusFilter.setSelectedIndex(0);
         loadUserData();
