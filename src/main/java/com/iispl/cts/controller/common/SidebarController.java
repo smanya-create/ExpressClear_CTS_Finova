@@ -97,120 +97,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
         }
     }
 
-    // ==================== 2. ADMIN ROUTING ====================
-    public void navToAdminDashboard() {
-        navigateTo("/admin/dashboard.zul", navDashboard, "Admin Dashboard");
-    }
-
-    public void navToUserManagement() {
-        navigateTo("/admin/user/user-list.zul", navAdminUsers, "User Management");
-    }
-
-    public void navToRoleManagement() {
-        navigateTo("/admin/role/role-list.zul", navAdminRoles, "Role Management");
-    }
-
-    public void navToAuditLogs() {
-        navigateTo("/admin/audit-log/audit-logs.zul", navAudit, "Audit Logs");
-    }
-
-    public void navToAdminReports() {
-        navigateTo("/admin/reports.zul", navAdminReports, "Admin Reports");
-    }
-
-    // ==================== 3. OUTWARD MAKER ROUTING ====================
-    public void navToOutwardMakerDashboard() {
-        navigateTo("/outward/maker/maker-dashboard.zul", navDashboard, "Maker Dashboard");
-    }
-
-    public void navToUploadBatch() {
-        navigateTo("/outward/maker/upload-batch.zul", navUpload, "Upload Batch");
-    }
-
-    public void navToOutwardMicrRepair() {
-        navigateTo("/outward/maker/micr-repair.zul", navOutwardMicr, "MICR Repair");
-    }
-
-    public void navToOutwardDataEntry() {
-        navigateTo("/outward/maker/data-entry.zul", navOutwardDataEntry, "Data Entry");
-    }
-
-    public void navToQueue() {
-        navigateTo("/outward/maker/unprocessed-queue.zul", navQueue, "Unprocessed Queue");
-    }
-
-    public void navToOutwardMakerReports() {
-        navigateTo("/outward/maker/reports.zul", navOutwardMakerReports, "Outward Reports");
-    }
-
-    // ==================== 4. OUTWARD CHECKER ROUTING ====================
-    public void navToOutwardCheckerDashboard() {
-        navigateTo("/outward/checker/dashboard.zul", navDashboard, "Checker Dashboard");
-    }
-
-    public void navToOutwardCheckerQueue() {
-        navigateTo("/outward/checker/checker-queue.zul", navCheckerQueue, "Checker Queue");
-    }
-
-    public void navToOutwardXmlGeneration() {
-        navigateTo("/outward/checker/xml-generation.zul", navXmlGen, "XML Generation");
-    }
-
-    public void navToOutwardRejectedCheques() {
-        navigateTo("/outward/checker/rejected-cheques.zul", navOutwardRejected, "Rejected Cheques");
-    }
-
-    public void navToOutwardCheckerReports() {
-        navigateTo("/outward/checker/reports.zul", navOutwardCheckerReports, "Checker Reports");
-    }
-
-    // ==================== 5. INWARD MAKER ROUTING ====================
-    public void navToInwardDashboard() {
-        navigateTo("/inward/maker/dashboard.zul", navInwardDashboard != null ? navInwardDashboard : navDashboard, "Inward Dashboard");
-    }
-
-    public void navToBatchIntake() {
-        navigateTo("/inward/maker/intake/intake.zul", navBatchIntake, "Batch Intake");
-    }
-
-    public void navToInwardMicrRepair() {
-        navigateTo("/inward/maker/cheque/micr_repair.zul", navInwardMicr, "MICR Repair");
-    }
-
-    public void navToInwardDataEntry() {
-        navigateTo("/inward/maker/cheque/data_entry.zul", navInwardDataEntry, "Data Entry");
-    }
-
-    public void navToMakerCompletion() {
-        navigateTo("/inward/maker/submission/maker_completion.zul", navMakerCompletion, "Maker Completion");
-    }
-
-    public void navToInwardUnprocessedQueue() {
-        navigateTo("/inward/maker/cheque/unprocessed.zul", navInwardUnprocessed, "Unprocessed Queue");
-    }
-
-    public void navToInwardMakerReports() {
-        navigateTo("/inward/maker/reports.zul", navInwardMakerReports, "Inward Reports");
-    }
-
-    // ==================== 6. INWARD CHECKER ROUTING ====================
-    public void navToInwardCheckerDashboard() {
-        navigateTo("/inward/checker/dashboard.zul", navInwardCheckerDashboard != null ? navInwardCheckerDashboard : navDashboard, "Checker Dashboard");
-    }
-
-    public void navToVerification() {
-        navigateTo("/inward/checker/verification.zul", navVerification, "Verification");
-    }
-
-    public void navToRRF() {
-        navigateTo("/inward/checker/rrf.zul", navRrf, "RRF Returns");
-    }
-
-    public void navToInwardCheckerReports() {
-        navigateTo("/inward/checker/reports.zul", navInwardCheckerReports, "Checker Reports");
-    }
-
-    // ==================== 7. LOGOUT (Only Action Requiring Redirect) ====================
     // Admin Navigation Actions
     public void navToAdminDashboard() { Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul"); }
     public void navToUserManagement() { Executions.sendRedirect("/admin/user/user-management.zul"); }
@@ -227,7 +113,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void navToOutwardMakerReports() { Executions.sendRedirect("/maker/reports.zul"); }
 
     // Outward Checker Navigation Actions
-    public void navToCheckerDashboard() { Executions.sendRedirect("/checker/dashboard.zul"); }
+    public void navToCheckerDashboard() { Executions.sendRedirect("/outward/checker/dashboard.zul"); }
     public void navToOutwardCheckerQueue() { Executions.sendRedirect("/checker/queue.zul"); }
     public void navToOutwardXmlGeneration() { Executions.sendRedirect("/checker/xml-gen.zul"); }
     public void navToOutwardRejectedCheques() { Executions.sendRedirect("/checker/rejected.zul"); }
