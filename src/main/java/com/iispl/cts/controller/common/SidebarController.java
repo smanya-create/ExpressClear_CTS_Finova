@@ -106,8 +106,32 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     // Outward Maker Navigation Actions
     public void navToMakerDashboard() { Executions.sendRedirect("/maker/dashboard.zul"); }
-    public void navToUploadBatch() { Executions.sendRedirect("/outward/maker/batch/batch-upload.zul"); }
-    public void navToOutwardMicrRepair() { Executions.sendRedirect("outward/maker/micr-repair/micr-repair-view.zul"); }
+    public void navToUploadBatch() { 
+    	Component root = sidebarComponent.getPage().getFirstRoot();
+     	 
+        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+   	
+        if (mainContentArea instanceof Include) {
+
+            Include include = (Include) mainContentArea;
+
+            include.setSrc("/outward/maker/batch/batch-upload.zul");
+        }  
+
+    }
+    public void navToOutwardMicrRepair() { 
+    	Component root = sidebarComponent.getPage().getFirstRoot();
+    	 
+        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+   	
+        if (mainContentArea instanceof Include) {
+
+            Include include = (Include) mainContentArea;
+
+            include.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
+        }  
+
+    }
     public void navToOutwardDataEntry() { Executions.sendRedirect("/maker/data-entry.zul"); }
     public void navToQueue() { Executions.sendRedirect("/maker/unprocessed-cheques.zul"); }
     public void navToOutwardMakerReports() { Executions.sendRedirect("/maker/reports.zul"); }
