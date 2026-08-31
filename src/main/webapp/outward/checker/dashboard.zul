@@ -2,9 +2,12 @@
 
 <zk xmlns:h="xhtml">
 	<zscript>
-	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("USER_ROLE", "OUTWARD_CHECKER");
-	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
-</zscript>
+        org.zkoss.zk.ui.Sessions.getCurrent()
+            .setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
+
+        org.zkoss.zk.ui.Sessions.getCurrent()
+            .setAttribute("CTS_USERNAME", "Alex");
+    </zscript>
 	<style src="/css/outward/checker-dashboard.css" />
 
 	<borderlayout hflex="1" vflex="1">
@@ -13,7 +16,7 @@
 			<include src="/components/sidebar.zul">
 
 				<custom-attributes role="OUTWARD_CHECKER"
-					activeTab="dashboard" />
+					activeTab="checker-dashboard" />
 
 			</include>
 
@@ -63,7 +66,7 @@
 								<label value="BATCHES AWAITING CHECKER"
 									sclass="summary-label" />
 
-								<label id="lblTotalBatches" value="0"
+								<label id="lblTotalBatches" 
 									sclass="summary-value" />
 
 							</div>
@@ -72,7 +75,7 @@
 								<label value="CHEQUES"
 									sclass="summary-label" />
 
-								<label id="lblTotalCheques" value="0"
+								<label id="lblTotalCheques" 
 									sclass="summary-value" />
 
 							</div>
