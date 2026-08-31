@@ -35,16 +35,19 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
-    	super.doAfterCompose(comp);
-    	SecurityUtil.checkAccess("ROLE_MANAGEMENT");
+        super.doAfterCompose(comp);
+        SecurityUtil.checkAccess("ROLE_MANAGEMENT");
         loadRoles();
     }
 
     private void loadRoles() {
-    	String query = (txtSearchRoles != null && txtSearchRoles.getValue() != null) 
+        String query = (txtSearchRoles != null && txtSearchRoles.getValue() != null) 
                 ? txtSearchRoles.getValue().trim() : "";
 
-        List<Role> roles = roleService.searchRoles(query, "ALL");
+        String statusFilter = (cmbStatusFilter != null && cmbStatusFilter.getSelectedItem() != null)
+                ? (String) cmbStatusFilter.getSelectedItem().getValue() : "ALL";
+
+        List<Role> roles = roleService.searchRoles(query, statusFilter != null ? statusFilter : "ALL");
 
         if (lblRoleCount != null) {
             lblRoleCount.setValue(roles.size() + " roles found");
@@ -72,9 +75,17 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
             lblDesc.setStyle("color: #64748b; font-size: 13px;");
             row.appendChild(lblDesc);
 
-            // 4. Status Badge (Active)
-            Label lblStatus = new Label("Active");
-            lblStatus.setStyle("background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block;");
+            // 4. Status Badge (Dynamic Active / Inactive)
+            String status = (role.getStatus() != null && !role.getStatus().trim().isEmpty()) 
+                            ? role.getStatus().trim() 
+                            : "Active";
+
+            Label lblStatus = new Label(status);
+            if ("ACTIVE".equalsIgnoreCase(status)) {
+                lblStatus.setStyle("background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block;");
+            } else {
+                lblStatus.setStyle("background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block;");
+            }
             row.appendChild(lblStatus);
 
             // 5. Modify Action Link
