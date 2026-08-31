@@ -23,10 +23,13 @@ public class RoleDAOImpl implements RoleDAO {
     }
 
    
+  
     @Override
     public List<Role> searchRoles(String query, String status) {
         List<Role> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT role_id, role_name, role_created_at FROM role WHERE 1=1 ");
+        StringBuilder sql = new StringBuilder(
+            "SELECT role_id, role_name, description, status, permissions, role_created_at FROM role WHERE 1=1 "
+        );
         List<Object> params = new ArrayList<>();
 
         // 1. Search Query filter (Role ID or Role Name)
@@ -35,6 +38,12 @@ public class RoleDAOImpl implements RoleDAO {
             String q = "%" + query.trim().toLowerCase() + "%";
             params.add(q);
             params.add(q);
+        }
+
+        // 2. Status filter
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
+            sql.append("AND LOWER(status) = ? ");
+            params.add(status.trim().toLowerCase());
         }
 
         sql.append("ORDER BY role_id ASC");
@@ -50,14 +59,8 @@ public class RoleDAOImpl implements RoleDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String roleId = rs.getString("role_id");
-                    String roleName = rs.getString("role_name");
-                    Timestamp createdAt = rs.getTimestamp("role_created_at");
-
-                    // Provide sensible default descriptions based on known roles
-                    String desc = resolveDefaultDescription(roleName);
-
-                    list.add(new Role(roleId, roleName, desc, "Active", "", createdAt));
+                    // Use mapResultSet to correctly read status, permissions, and description from DB
+                    list.add(mapResultSet(rs));
                 }
             }
         } catch (SQLException e) {
