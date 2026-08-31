@@ -1,362 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk xmlns:h="xhtml">
-<style>
-    /* Reset and Layout Viewport */
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        color: #1e293b;
-        overflow: hidden;
-    }
-    
-    .app-viewport {
-        display: flex;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-    }
+    <style src="/css/inward/data-entry.css" />
 
-    /* Fixed Left Sidebar */
-    .sidebar-column {
-        width: 250px;
-        min-width: 250px;
-        height: 100vh;
-        background-color: #0b1d3a;
-        flex-shrink: 0;
-    }
+    <div id="dataEntryRootDiv" class="cts-data-entry-wrapper"
+         apply="com.iispl.cts.controller.inward.maker.InwardDataEntryController">
 
-    /* Right Main Scrollable Area */
-    .main-column {
-        flex: 1;
-        min-width: 0; /* Prevents flex children from overflowing horizontally */
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        overflow-x: hidden;
-        background-color: #f8fafc;
-    }
+        <!-- Top Breadcrumb, Title & Back Action -->
+        <div class="cts-title-group">
+            <div>
+                
+                <label value="Data Entry" class="cts-main-title" />
+                <label value="Enter or correct cheque-level transaction details captured from the selected cheque." class="cts-main-subtitle" />
+            </div>
+            <button id="btnBackToReview" label="Back to Review" iconSclass="z-icon-arrow-left" class="cts-btn-secondary" />
+        </div>
 
-    /* Page Body */
-    .page-content-wrapper {
-        padding: 24px 28px 40px 28px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        min-width: 0;
-    }
-
-    /* Top Metadata Summary Bar */
-    .summary-bar {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 14px 20px;
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 12px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        box-sizing: border-box;
-        width: 100%;
-    }
-
-    .meta-item-title {
-        font-size: 10px;
-        font-weight: 700;
-        color: #64748b;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        margin-bottom: 3px;
-        display: block;
-    }
-
-    .meta-item-val {
-        font-size: 13px;
-        font-weight: 700;
-        color: #0f172a;
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .status-badge-entry {
-        display: inline-block;
-        background: #fffbeb;
-        color: #b45309;
-        border: 1px solid #fde68a;
-        padding: 2px 8px;
-        border-radius: 9999px;
-        font-size: 10px;
-        font-weight: 700;
-    }
-
-    /* Split Workspace Cards */
-    .work-panel {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 18px 20px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        box-sizing: border-box;
-        min-width: 0; /* Ensures inner flex layouts do not overflow */
-    }
-
-    .panel-headline {
-        font-size: 12px;
-        font-weight: 700;
-        color: #2563eb;
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-    }
-
-    .panel-subline {
-        font-size: 11px;
-        color: #64748b;
-        margin-top: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Cheque View Box */
-    .cheque-box-placeholder {
-        background: #0f172a;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        height: 330px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: #94a3b8;
-    }
-
-    /* Form Fields */
-    .form-lbl {
-        font-size: 11px;
-        font-weight: 600;
-        color: #334155;
-        margin-bottom: 3px;
-        display: block;
-    }
-
-    .field-input {
-        width: 100%;
-        height: 35px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        padding: 6px 10px;
-        font-size: 12px;
-        color: #0f172a;
-        background: #ffffff;
-        box-sizing: border-box;
-    }
-
-    .field-input-active {
-        border: 1px solid #3b82f6 !important;
-        background: #eff6ff !important;
-        font-weight: 600 !important;
-    }
-
-    .remark-area {
-        width: 100%;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        padding: 8px 10px;
-        font-size: 12px;
-        color: #0f172a;
-        resize: vertical;
-        box-sizing: border-box;
-    }
-</style>
-
-<div sclass="app-viewport">
-    
-    <!-- 1. Reusable Sidebar Component -->
-    <div sclass="sidebar-column">
-        <include src="/components/sidebar.zul" role="INWARD_MAKER" />
-    </div>
-
-    <!-- 2. Main Scrollable Workspace -->
-    <div sclass="main-column">
-
-        <!-- Reusable Headbar Component -->
-        <include src="/components/header.zul" 
-                 pageTitle="Inward Processing" 
-                 pageSubtitle="Data Entry" />
-
-        <!-- Page Body Content -->
-        <div sclass="page-content-wrapper" apply="com.iispl.cts.controller.inward.maker.InwardDataEntryController">
-            
-            <!-- Breadcrumbs + Title + Back Button -->
-            <hlayout width="100%" valign="middle">
-                <vlayout spacing="3px">
-                    <hlayout spacing="6px" valign="middle">
-                        <label value="Instrument Review" style="font-size: 11px; color: #64748b; cursor: pointer;" />
-                        <label value="›" style="font-size: 11px; color: #94a3b8;" />
-                        <label value="Data Entry" style="font-size: 11px; color: #0f172a; font-weight: 600;" />
-                    </hlayout>
-                    <label value="Data Entry" style="font-size: 22px; font-weight: 700; color: #0f172a;" />
-                    <label value="Enter or correct cheque-level transaction details captured from the selected cheque." 
-                           style="font-size: 12px; color: #64748b;" />
-                </vlayout>
-                <separator hflex="1" />
-                <button id="btnBackToReview" label="Back to Review" iconSclass="z-icon-arrow-left" 
-                        style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 7px 14px; cursor: pointer;" />
-            </hlayout>
-
-            <!-- 7-Column Metadata Banner -->
-            <div sclass="summary-bar">
+        <!-- 7-Column Metadata KPI Card -->
+        <div class="cts-metadata-card">
+            <div class="cts-meta-col">
+                <label value="BATCH ID" class="cts-meta-header" />
+                <label id="lblBatchId" value="IN-B004" class="cts-meta-val" />
+            </div>
+            <div class="cts-meta-col">
+                <label value="SOURCE" class="cts-meta-header" />
+                <label id="lblSource" value="CHI" class="cts-meta-val" />
+            </div>
+            <div class="cts-meta-col">
+                <label value="TOTAL CHEQUES" class="cts-meta-header" />
+                <label id="lblTotalCheques" value="99" class="cts-meta-val" />
+            </div>
+            <div class="cts-meta-col">
+                <label value="CHEQUE NO." class="cts-meta-header" />
+                <label id="lblChequeNo" value="100044" class="cts-meta-val" />
+            </div>
+            <div class="cts-meta-col">
+                <label value="DATA STATUS" class="cts-meta-header" />
                 <div>
-                    <label value="BATCH ID" sclass="meta-item-title" />
-                    <label id="lblBatchId" value="IN-B004" sclass="meta-item-val" />
-                </div>
-                <div>
-                    <label value="SOURCE" sclass="meta-item-title" />
-                    <label id="lblSource" value="CHI" sclass="meta-item-val" />
-                </div>
-                <div>
-                    <label value="TOTAL CHEQUES" sclass="meta-item-title" />
-                    <label id="lblTotalCheques" value="99" sclass="meta-item-val" />
-                </div>
-                <div>
-                    <label value="CHEQUE NO." sclass="meta-item-title" />
-                    <label id="lblChequeNo" value="100044" sclass="meta-item-val" />
-                </div>
-                <div>
-                    <label value="DATA STATUS" sclass="meta-item-title" />
-                    <div>
-                        <label id="lblDataStatus" value="DATA ENTRY" sclass="status-badge-entry" />
-                    </div>
-                </div>
-                <div>
-                    <label value="RECEIVED DATE" sclass="meta-item-title" />
-                    <label id="lblReceivedDate" value="21-08-2026" sclass="meta-item-val" />
-                </div>
-                <div>
-                    <label value="RECEIVED SESSION" sclass="meta-item-title" />
-                    <label id="lblReceivedSession" value="Morning" sclass="meta-item-val" />
+                    <label id="lblDataStatus" value="DATA ENTRY" class="cts-badge-data-entry" />
                 </div>
             </div>
+            <div class="cts-meta-col">
+                <label value="RECEIVED DATE" class="cts-meta-header" />
+                <label id="lblReceivedDate" value="21-08-2026" class="cts-meta-val" />
+            </div>
+            <div class="cts-meta-col">
+                <label value="RECEIVED SESSION" class="cts-meta-header" />
+                <label id="lblReceivedSession" value="Morning" class="cts-meta-val" />
+            </div>
+        </div>
 
-            <!-- Two-Column Form Layout -->
-            <hlayout spacing="16px" width="100%" valign="top">
-                
-                <!-- Left Panel: Cheque Viewer -->
-                <div hflex="1" sclass="work-panel">
-                    <vlayout spacing="12px" width="100%">
-                        <div>
-                            <label value="CHEQUE IMAGE" sclass="panel-headline" />
-                            <div sclass="panel-subline">
-                                <label value="Use the cheque image to enter and confirm the cheque-level transaction data." />
-                            </div>
-                        </div>
+        <!-- Two-Column Workspace -->
+        <div class="cts-data-entry-grid">
+            
+            <!-- Left Card: Cheque Viewer -->
+            <div class="cts-work-card">
+                <label value="CHEQUE IMAGE" class="cts-card-title" />
+                <label value="Use the cheque image to enter and confirm the cheque-level transaction data." class="cts-card-tagline" />
 
-                        <!-- Viewer Box Placeholder -->
-                        <div id="imageContainer" sclass="cheque-box-placeholder">
-                            <span class="z-icon-file-image-o" style="font-size: 36px; color: #475569; margin-bottom: 6px;" />
-                            <label value="Cheque image preview container" style="font-size: 12px; color: #94a3b8;" />
-                        </div>
-
-                        <!-- View Controls Toolbar -->
-                        <hlayout spacing="6px" width="100%">
-                            <button id="btnZoomOut" iconSclass="z-icon-minus" 
-                                    style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; height: 32px; width: 34px; cursor: pointer;" />
-                            <button id="btnZoomIn" iconSclass="z-icon-plus" 
-                                    style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; height: 32px; width: 34px; cursor: pointer;" />
-                            <button id="btnZoomFit" label="Zoom Fit" iconSclass="z-icon-arrows-alt" 
-                                    style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; height: 32px; font-size: 11px; font-weight: 600; padding: 0 10px; cursor: pointer;" />
-                            <button id="btnRotate" label="Rotate" iconSclass="z-icon-repeat" 
-                                    style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; height: 32px; font-size: 11px; font-weight: 600; padding: 0 10px; cursor: pointer;" />
-                            <separator hflex="1" />
-                            <button id="btnExpand" iconSclass="z-icon-expand" 
-                                    style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; height: 32px; width: 34px; cursor: pointer;" />
-                        </hlayout>
-                    </vlayout>
+                <!-- Cheque Image Area -->
+                <div id="imageContainer" class="cts-cheque-box-placeholder">
+                    <span class="z-icon-file-image-o" style="font-size: 38px; color: #475569; margin-bottom: 8px;" />
+                    <label value="Cheque image preview container" style="font-size: 12px; color: #94a3b8;" />
                 </div>
 
-                <!-- Right Panel: Cheque Data Entry Form -->
-                <div hflex="1" sclass="work-panel">
-                    <vlayout spacing="12px" width="100%">
-                        <div>
-                            <label value="CHEQUE DATA ENTRY" sclass="panel-headline" />
-                            <div sclass="panel-subline">
-                                <label value="Enter only cheque-level transaction details. MICR correction is handled separately." />
-                            </div>
-                        </div>
+                <!-- Image Controls Toolbar -->
+                <hlayout spacing="8px" width="100%" valign="middle">
+                    <button id="btnZoomOut" iconSclass="z-icon-minus" class="cts-btn-secondary cts-btn-icon-sq" />
+                    <button id="btnZoomIn" iconSclass="z-icon-plus" class="cts-btn-secondary cts-btn-icon-sq" />
+                    <button id="btnZoomFit" label="Zoom Fit" iconSclass="z-icon-arrows-alt" class="cts-btn-secondary" />
+                    <button id="btnRotate" label="Rotate" iconSclass="z-icon-repeat" class="cts-btn-secondary" />
+                    <separator hflex="1" />
+                    <button id="btnExpand" iconSclass="z-icon-expand" class="cts-btn-secondary cts-btn-icon-sq" />
+                </hlayout>
+            </div>
 
-                        <!-- Row 1: Cheque Number & Cheque Date -->
-                        <hlayout spacing="12px" width="100%">
-                            <div hflex="1">
-                                <label value="Cheque Number" sclass="form-lbl" />
-                                <textbox id="txtChequeNumber" value="100044" sclass="field-input" />
-                            </div>
-                            <div hflex="1">
-                                <label value="Cheque Date" sclass="form-lbl" />
-                                <textbox id="txtChequeDate" value="18-08-2026" sclass="field-input" />
-                            </div>
-                        </hlayout>
+            <!-- Right Card: Form Fields -->
+            <div class="cts-work-card">
+                <label value="CHEQUE DATA ENTRY" class="cts-card-title" />
+                <label value="Enter only cheque-level transaction details. MICR correction is handled separately." class="cts-card-tagline" />
 
-                        <!-- Row 2: Amount & Drawee Account Number -->
-                        <hlayout spacing="12px" width="100%">
-                            <div hflex="1">
-                                <label value="Amount" sclass="form-lbl" />
-                                <textbox id="txtAmount" value="₹ 8,500.00" sclass="field-input field-input-active" />
-                            </div>
-                            <div hflex="1">
-                                <label value="Drawee Account Number" sclass="form-lbl" />
-                                <textbox id="txtDraweeAccount" value="9876543212" sclass="field-input" />
-                            </div>
-                        </hlayout>
-
-                        <!-- Row 3: Drawee Bank Name & Payee Name -->
-                        <hlayout spacing="12px" width="100%">
-                            <div hflex="1">
-                                <label value="Drawee Bank Name" sclass="form-lbl" />
-                                <textbox id="txtDraweeBankName" value="CSS Bank Limited" sclass="field-input" />
-                            </div>
-                            <div hflex="1">
-                                <label value="Payee Name" sclass="form-lbl" />
-                                <textbox id="txtPayeeName" value="XYZ" sclass="field-input" />
-                            </div>
-                        </hlayout>
-
-                        <!-- Row 4: Entry Remark -->
-                        <div>
-                            <label value="Entry Remark" sclass="form-lbl" />
-                            <label value="Mandatory when correcting captured data" style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 3px;" />
-                            <textbox id="txtEntryRemark" rows="3" placeholder="Enter reason for data correction..." sclass="remark-area" />
-                        </div>
-
-                        <!-- Row 5: Action Buttons -->
-                        <hlayout width="100%" spacing="8px" style="padding-top: 8px;" valign="middle">
-                            <button id="btnCancel" label="Cancel" 
-                                    style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; height: 35px; width: 75px; font-weight: 600; font-size: 11px; cursor: pointer;" />
-                            <button id="btnValidateData" label="Validate Data" 
-                                    style="background: #ffffff; border: 1px solid #2563eb; color: #2563eb; border-radius: 6px; height: 35px; padding: 0 12px; font-weight: 600; font-size: 11px; cursor: pointer;" />
-                            <separator hflex="1" />
-                            <button id="btnRequestRejection" label="Request Rejection" 
-                                    style="background: #ffffff; border: 1px solid #ef4444; color: #dc2626; border-radius: 6px; height: 35px; padding: 0 12px; font-weight: 600; font-size: 11px; cursor: pointer;" />
-                            <button id="btnSaveDataEntry" label="Save Data Entry" 
-                                    style="background: #2563eb; border: 1px solid #2563eb; color: #ffffff; border-radius: 6px; height: 35px; padding: 0 14px; font-weight: 600; font-size: 11px; cursor: pointer;" />
-                        </hlayout>
-
-                    </vlayout>
+                <!-- Row 1: Cheque Number & Cheque Date -->
+                <div class="cts-form-row">
+                    <div class="cts-form-field">
+                        <label value="Cheque Number" class="cts-field-lbl" />
+                        <textbox id="txtChequeNumber" value="100044" class="cts-input-text" />
+                    </div>
+                    <div class="cts-form-field">
+                        <label value="Cheque Date" class="cts-field-lbl" />
+                        <textbox id="txtChequeDate" value="18-08-2026" class="cts-input-text" />
+                    </div>
                 </div>
 
-            </hlayout>
+                <!-- Row 2: Amount & Drawee Account Number -->
+                <div class="cts-form-row">
+                    <div class="cts-form-field">
+                        <label value="Amount" class="cts-field-lbl" />
+                        <textbox id="txtAmount" value="₹ 8,500.00" class="cts-input-text cts-input-highlight" />
+                    </div>
+                    <div class="cts-form-field">
+                        <label value="Drawee Account Number" class="cts-field-lbl" />
+                        <textbox id="txtDraweeAccount" value="9876543212" class="cts-input-text" />
+                    </div>
+                </div>
 
-            <!-- Bottom Application Footer -->
-            <hlayout width="100%" style="padding-top: 14px; border-top: 1px solid #e2e8f0;">
-                <label value="CTS Inward Processing • Enterprise Clearing Application" style="font-size: 11px; color: #94a3b8;" />
-                <separator hflex="1" />
-                <label value="v1.0" style="font-size: 11px; font-weight: 600; color: #94a3b8;" />
-            </hlayout>
+                <!-- Row 3: Drawee Bank Name & Payee Name -->
+                <div class="cts-form-row">
+                    <div class="cts-form-field">
+                        <label value="Drawee Bank Name" class="cts-field-lbl" />
+                        <textbox id="txtDraweeBankName" value="CSS Bank Limited" class="cts-input-text" />
+                    </div>
+                    <div class="cts-form-field">
+                        <label value="Payee Name" class="cts-field-lbl" />
+                        <textbox id="txtPayeeName" value="XYZ" class="cts-input-text" />
+                    </div>
+                </div>
+
+                <!-- Row 4: Entry Remark -->
+                <div style="margin-bottom: 16px;">
+                    <label value="Entry Remark" class="cts-field-lbl" />
+                    <label value="Mandatory when correcting captured data" style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;" />
+                    <textbox id="txtEntryRemark" rows="3" placeholder="Enter reason for data correction..." class="cts-textarea" />
+                </div>
+
+                <!-- Row 5: Action Buttons -->
+                <hlayout width="100%" spacing="5px" valign="middle">
+                    <button id="btnCancel" label="Cancel" class="cts-btn-secondary" />
+                    <button id="btnValidateData" label="Validate Data" class="cts-btn-outline-primary" />
+                    <button id="btnRequestRejection" label="Request Rejection" class="cts-btn-outline-danger" />
+                    <button id="btnSaveDataEntry" label="Save" class="cts-btn-solid-primary" />
+                </hlayout>
+            </div>
 
         </div>
+
+        <!-- Footer -->
+        <div class="cts-portal-footer">
+            <label value="Express Clear CTS · Inward Processing" class="cts-footer-left" />
+            <label value="v1.0" class="cts-footer-right" />
+        </div>
+
     </div>
-</div>
 </zk>

@@ -3,9 +3,11 @@
 <style src="/css/common/sidebar.css"/>
 
 <div width="220px" height="100%" sclass="sidebar" apply="com.iispl.cts.controller.common.SidebarController"
-     style="background-color: #0b1d3a; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; margin: 0; padding: 0;">
+     style="background-color: #0b1d3a; 
+     height: 100%; box-sizing: border-box; overflow: hidden;
+     display: flex; flex-direction: column; justify-content: space-between; margin: 0; padding: 0;">
     
-    <div>
+    <div style="overflow-y: auto; flex: 1;">
         <!-- Brand Title Header -->
         <div style="padding: 24px 20px 18px 20px;">
             <label value="CTS" style="font-size: 22px; font-weight: 800; color: #ffffff; display: block; line-height: 1.1;"/>

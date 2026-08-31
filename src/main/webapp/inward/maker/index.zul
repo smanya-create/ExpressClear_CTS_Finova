@@ -19,7 +19,7 @@
 
 			<!-- Left Fixed Sidebar (Locked to 0px offset) -->
 			<west size="220px" border="none"
-				style="margin: 0 !important; padding: 0 !important; background-color: #0b1d3a !important;">
+				style="margin: 0 !important; padding: 0 !important; background-color: #0b1d3a !important; height: 100%;">
 				<include src="/components/sidebar.zul"
 					role="INWARD_MAKER" activeTab="inward-dashboard" vflex="1"
 					hflex="1" />
