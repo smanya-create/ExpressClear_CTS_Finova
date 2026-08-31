@@ -120,8 +120,30 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void navToOutwardCheckerReports() { Executions.sendRedirect("/checker/reports.zul"); }
 
     // Inward Maker Navigation Actions
-    public void navToInwardDashboard() { Executions.sendRedirect("/inward/maker/dashboard.zul"); }
-    public void navToBatchIntake() { Executions.sendRedirect("/inward/maker/intake/batch-intake.zul"); }
+    public void navToInwardDashboard() { 
+    	Component root = sidebarComponent.getPage().getFirstRoot();
+      	 
+        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+   	
+        if (mainContentArea instanceof Include) {
+
+            Include include = (Include) mainContentArea;
+
+            include.setSrc("/inward/maker/dashboard.zul");
+        }  
+    }
+    public void navToBatchIntake() { 
+    	Component root = sidebarComponent.getPage().getFirstRoot();
+   	 
+        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+   	
+        if (mainContentArea instanceof Include) {
+
+            Include include = (Include) mainContentArea;
+
+            include.setSrc("/inward/maker/intake/batch-intake.zul");
+        }   
+    }
        
     public void navToInwardMicrRepair() { 
     	
@@ -138,7 +160,18 @@ public class SidebarController extends GenericForwardComposer<Component> {
     
     }
     
-    public void navToInwardDataEntry() { Executions.sendRedirect("/inward/maker/data-entry/data-entry.zul"); }
+    public void navToInwardDataEntry() { 
+    	Component root = sidebarComponent.getPage().getFirstRoot();
+   	 
+        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+   	
+        if (mainContentArea instanceof Include) {
+
+            Include include = (Include) mainContentArea;
+
+            include.setSrc("/inward/maker/data-entry/data-entry.zul");
+        } 
+    }
     public void navToMakerCompletion() { Executions.sendRedirect("/inward-maker/completion.zul"); }
     public void navToInwardUnprocessedQueue() { Executions.sendRedirect("/inward-maker/unprocessed.zul"); }
     public void navToInwardMakerReports() { Executions.sendRedirect("/inward-maker/reports.zul"); }
