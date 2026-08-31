@@ -25,6 +25,7 @@ import org.zkoss.zul.Textbox;
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.UserService;
+import com.iispl.cts.serviceimpl.AuditServiceImpl;
 import com.iispl.cts.serviceimpl.UserServiceImpl;
 
 public class UserManagementController extends GenericForwardComposer<Component> {
@@ -236,9 +237,12 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             return;
         }
 
+        String assignedRoleId = (String) selectedRole.getValue();
+        String roleDisplayName = getRoleDisplayName(assignedRoleId);
+
         User newUser = new User();
         newUser.setUserId(userService.generateNextUserId());
-        newUser.setRoleId((String) selectedRole.getValue());
+        newUser.setRoleId(assignedRoleId);
         newUser.setEmployeeId(empId);
         newUser.setUsername(username.trim());
         newUser.setFullName(username.trim());
@@ -249,14 +253,22 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
         boolean success = userService.registerOrUpdateUser(newUser, password.trim());
         if (success) {
+            // --- AUDIT LOG: CREATE USER SUCCESS ---
+            AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER", 
+                "Created user: " + username.trim() + " (Emp ID: " + empId + ", Role: " + roleDisplayName + ")", "SUCCESS");
+
             Clients.showNotification("User " + username + " (" + empId + ") added to database!", "info", null, "top_center", 2500);
             loadUserData();
             switchView("LIST");
         } else {
+            // --- AUDIT LOG: CREATE USER FAILED ---
+            AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER_FAILED", 
+                "Failed to register user: " + username.trim() + " (Emp ID: " + empId + ")", "FAILED");
+
             Clients.showNotification("Failed to save user in database.", "error", null, "top_center", 2500);
         }
     }
-
+    
     public void onClick$btnClearAddForm(Event event) {
         txtAddUsername.setValue("");
         txtAddEmail.setValue("");
@@ -326,6 +338,8 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             Clients.showNotification("Please choose an action: ENABLE, DISABLE, or CHANGE ROLE.", "warning", null, "top_center", 2500);
             return;
         }
+        String auditAction = "";
+        String auditDetail = "";
 
         if ("ENABLE".equals(selectedModifyAction)) {
             currentModUser.setStatus("ACTIVE");
@@ -342,10 +356,17 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
         boolean saved = userService.registerOrUpdateUser(currentModUser, null);
         if (saved) {
+            // --- AUDIT LOG: MODIFY USER SUCCESS ---
+            AuditServiceImpl.getInstance().log("USER_MGMT", auditAction, auditDetail, "SUCCESS");
+
             Clients.showNotification("User " + currentModUser.getUsername() + " updated in database!", "info", null, "top_center", 2500);
             loadUserData();
             switchView("LIST");
         } else {
+            // --- AUDIT LOG: MODIFY USER FAILED ---
+            AuditServiceImpl.getInstance().log("USER_MGMT", auditAction + "_FAILED", 
+                "Failed to update user: " + currentModUser.getUsername() + " (" + currentModUser.getEmployeeId() + ")", "FAILED");
+
             Clients.showNotification("Failed to update user in database.", "error", null, "top_center", 2500);
         }
     }
