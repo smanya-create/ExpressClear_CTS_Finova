@@ -247,7 +247,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     // ==================== 4. OUTWARD CHECKER ROUTING ====================
     public void navToOutwardCheckerDashboard() {
-        navigateTo("/outward/checker/checker-dashboard.zul", navDashboard, "Checker Dashboard");
+        navigateTo("/outward/checker/dashboard.zul", navDashboard, "Checker Dashboard");
     }
 
     public void navToOutwardCheckerQueue() {

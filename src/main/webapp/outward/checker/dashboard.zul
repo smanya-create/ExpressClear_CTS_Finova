@@ -1,226 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<zk>
-
+<zk xmlns:h="xhtml">
 <zscript>
-    org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("USER_ROLE", "INWARD_MAKER");
+    org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("USER_ROLE", "OUTWARD_CHECKER");
     org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
 </zscript>
+    <style src="/css/outward/checker-dashboard.css"/>
 
-	<style src="/css/outward/checker-dashboard.css" />
+    <borderlayout hflex="1" vflex="1">
+        <west width="265px"
+              splittable="false"
+              collapsible="false">
 
+            <include src="/components/sidebar.zul">
 
+                <custom-attributes
+                    role="OUTWARD_CHECKER"
+                    activeTab="dashboard"/>
 
-	<borderlayout hflex="1" vflex="1"
-		apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
-		<west width="265px" splittable="false" collapsible="false">
-			<include src="/components/sidebar.zul">
-				<custom-attributes role="OUTWARD_CHECKER"
-					activeTab="dashboard" />
-			</include>
-		</west>
+            </include>
 
-		<center>
-			<borderlayout hflex="1" vflex="1">
+        </west>
+        <center>
 
-				<north height="75px" splittable="false"
-					collapsible="false">
-					  <include src="/components/header.zul">
-        <custom-attributes
-            pageTitle="Checker Dashboard"
-            pageSubtitle="Batches submitted by Maker - Ready for Checker processing" />
-    </include>
+            <borderlayout hflex="1" vflex="1">
+                <north height="75px"
+                       splittable="false"
+                       collapsible="false">
 
-				</north>
+                    <include src="/components/header.zul" 
+                            pageTitle="Checker Dashboard"/>
 
-				<center>
 
+                </north>
+                <center>
 
+                    <div sclass="dashboard-content">
 
-					<div sclass="dashboard-content">
+                        <label
+                            value="Dashboard"
+                            sclass="page-title"/>
 
+                        <label
+                            value="Batches received from Maker and awaiting Checker action."
+                            sclass="page-description"/>
 
+                        <div sclass="summary-card">
+                            <div sclass="summary-item">
 
-						<label value="Dashboard" sclass="page-title" />
+                                <label
+                                    value="CURRENT SESSION"
+                                    sclass="summary-label"/>
 
+                                <label
+                                    value="BOD"
+                                    sclass="summary-value"/>
 
+                            </div>
+                            <div sclass="summary-item">
 
-						<label
-							value="Batches received from Maker and awaiting Checker action."
-							sclass="page-description" />
+                                <label
+                                    value="CLEARING DATE"
+                                    sclass="summary-label"/>
 
+                                <label
+                                    value="21-Aug-2026"
+                                    sclass="summary-value"/>
 
+                            </div>
+                            <div sclass="summary-item">
 
-						<div sclass="summary-card">
+                                <label
+                                    value="BATCHES AWAITING CHECKER"
+                                    sclass="summary-label"/>
 
+                                <label
+                                    id="lblTotalBatches"
+                                    value="0"
+                                    sclass="summary-value"/>
 
+                            </div>
+                            <div sclass="summary-item">
 
-							<div sclass="summary-item">
+                                <label
+                                    value="CHEQUES"
+                                    sclass="summary-label"/>
 
+                                <label
+                                    id="lblTotalCheques"
+                                    value="0"
+                                    sclass="summary-value"/>
 
+                            </div>
 
-								<label value="CURRENT SESSION"
-									sclass="summary-label" />
+                        </div>
 
+                        <div sclass="section-header">
 
+                            <label
+                                value="Batches Received from Maker"
+                                sclass="section-title"/>
 
-								<label value="BOD"
-									sclass="summary-value" />
+                            <label
+                                value="Completed Maker processing and submitted for Checker verification."
+                                sclass="section-description"/>
 
+                        </div>
 
+                        <listbox
+                            id="lstBatches"
+                            sclass="batch-table"
+                            mold="paging"
+                            pageSize="10"
+                            height="350px">
 
-							</div>
+                            <listhead>
 
+                                <listheader
+                                    label="BATCH"
+                                    width="12%"/>
 
+                                <listheader
+                                    label="NO. OF CHEQUES"
+                                    width="14%"/>
 
+                                <listheader
+                                    label="TOTAL AMOUNT"
+                                    width="19%"/>
 
+                                <listheader
+                                    label="SUBMITTED BY"
+                                    width="14%"/>
 
-							<div sclass="summary-item">
+                                <listheader
+                                    label="SUBMITTED AT"
+                                    width="16%"/>
 
+                                <listheader
+                                    label="STATUS"
+                                    width="13%"/>
 
+                                <listheader
+                                    label=""
+                                    width="90px"/>
 
-								<label value="CLEARING DATE"
-									sclass="summary-label" />
+                            </listhead>
 
+                        </listbox>
 
+                    </div>
 
-								<label value="21-Aug-2026"
-									sclass="summary-value" />
+                </center>
 
+            </borderlayout>
 
+        </center>
 
-							</div>
-
-
-
-
-
-							<div sclass="summary-item">
-
-
-
-								<label value="BATCHES AWAITING CHECKER"
-									sclass="summary-label" />
-
-
-
-								<label id="lblTotalBatches"
-									sclass="summary-value" />
-
-
-
-							</div>
-
-
-
-
-
-							<div sclass="summary-item">
-
-
-
-								<label value="CHEQUES"
-									sclass="summary-label" />
-
-
-
-								<label id="lblTotalCheques"
-									sclass="summary-value" />
-
-
-
-							</div>
-
-
-
-						</div>
-
-
-
-						<div sclass="section-header">
-
-
-
-							<label value="Batches Received from Maker"
-								sclass="section-title" />
-
-
-
-							<label
-								value="Completed Maker processing and submitted for Checker verification."
-								sclass="section-description" />
-
-
-
-						</div>
-
-						<listbox id="lstBatches" sclass="batch-table"
-							mold="paging" pageSize="10" height="350px">
-
-
-
-							<listhead>
-
-
-
-								<listheader label="BATCH" width="12%" />
-
-
-
-								<listheader label="NO. OF CHEQUES"
-									width="14%" />
-
-
-
-								<listheader label="TOTAL AMOUNT"
-									width="19%" />
-
-
-
-								<listheader label="SUBMITTED BY"
-									width="14%" />
-
-
-
-								<listheader label="SUBMITTED AT"
-									width="16%" />
-
-
-
-								<listheader label="STATUS" width="13%" />
-
-
-
-								<listheader label="" width="90px" />
-
-
-
-							</listhead>
-
-
-
-						</listbox>
-
-
-
-					</div>
-
-
-
-				</center>
-
-
-
-			</borderlayout>
-
-
-
-		</center>
-
-
-
-	</borderlayout>
-
-
+    </borderlayout>
 
 </zk>
