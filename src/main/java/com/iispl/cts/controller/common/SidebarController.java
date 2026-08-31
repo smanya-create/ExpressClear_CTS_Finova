@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.common;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zul.Include;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -12,6 +13,8 @@ import java.util.Map;
 public class SidebarController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
+    
+    private Component sidebarComponent;
 
     // Header & Category Labels
     private Label lblPortalTitle;
@@ -27,6 +30,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
+        this.sidebarComponent = comp;
         applyRoleVisibility();
     }
 
@@ -114,10 +118,25 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void navToOutwardCheckerReports() { Executions.sendRedirect("/checker/reports.zul"); }
 
     // Inward Maker Navigation Actions
-    public void navToInwardDashboard() { Executions.sendRedirect("/inward-maker/dashboard.zul"); }
-    public void navToBatchIntake() { Executions.sendRedirect("/inward-maker/intake.zul"); }
-    public void navToInwardMicrRepair() { Executions.sendRedirect("/inward-maker/micr-repair.zul"); }
-    public void navToInwardDataEntry() { Executions.sendRedirect("/inward-maker/data-entry.zul"); }
+    public void navToInwardDashboard() { Executions.sendRedirect("/inward/maker/dashboard.zul"); }
+    public void navToBatchIntake() { Executions.sendRedirect("/inward/maker/intake/batch-intake.zul"); }
+       
+    public void navToInwardMicrRepair() { 
+    	
+    	 Component root = sidebarComponent.getPage().getFirstRoot();
+    	 
+         Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+    	
+         if (mainContentArea instanceof Include) {
+
+             Include include = (Include) mainContentArea;
+
+             include.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+         }   	
+    
+    }
+    
+    public void navToInwardDataEntry() { Executions.sendRedirect("/inward/maker/data-entry/data-entry.zul"); }
     public void navToMakerCompletion() { Executions.sendRedirect("/inward-maker/completion.zul"); }
     public void navToInwardUnprocessedQueue() { Executions.sendRedirect("/inward-maker/unprocessed.zul"); }
     public void navToInwardMakerReports() { Executions.sendRedirect("/inward-maker/reports.zul"); }
