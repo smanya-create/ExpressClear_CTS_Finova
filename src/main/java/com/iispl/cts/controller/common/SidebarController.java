@@ -121,8 +121,15 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     // Inward Maker Navigation Actions
     public void navToInwardDashboard() { Executions.sendRedirect("/inward/maker/dashboard.zul"); }
-    public void navToBatchIntake() { Executions.sendRedirect("/inward/maker/intake/batch-intake.zul"); }
-       
+    public void navToBatchIntake() { 
+    	    Component root = sidebarComponent.getPage().getFirstRoot();
+    	    Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+
+    	    if (mainContentArea instanceof Include) {
+    	        Include include = (Include) mainContentArea;
+    	        include.setSrc("/inward/maker/intake/batch-intake.zul");
+    	    }
+    	}
     public void navToInwardMicrRepair() { 
     	
     	 Component root = sidebarComponent.getPage().getFirstRoot();

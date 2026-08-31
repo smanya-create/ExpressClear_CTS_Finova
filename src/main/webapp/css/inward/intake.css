@@ -1,17 +1,17 @@
 .batch-page {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 30px 34px;
+	padding: 26px 34px;
 	background: #f5f8fc;
 }
 
 .search-container {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 22px 24px 24px 24px;
-	margin-bottom: 28px;
+	padding: 22px 24px 24px;
+	margin-bottom: 24px;
 	background: #ffffff;
-	border: 1px solid #d8e0ea;
+	border: 1px solid #d7e0ea;
 	border-radius: 8px;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .search-field {
-	margin-right: 24px;
+	min-width: 0;
 }
 
 .field-label {
@@ -41,6 +41,7 @@
 }
 
 .input-field {
+	width: 100%;
 	height: 40px;
 	box-sizing: border-box;
 	border: 1px solid #c8d4e3;
@@ -50,42 +51,37 @@
 }
 
 .search-field .z-combobox {
+	width: 100% !important;
 	height: 40px;
 }
 
 .search-field .z-combobox-input {
 	height: 40px;
 	box-sizing: border-box;
-	border: 1px solid #c8d4e3;
-	border-radius: 5px;
 	font-size: 14px;
 }
 
 .search-field .z-combobox-button {
 	height: 40px;
-	border-left: 1px solid #c8d4e3;
 }
 
 .search-field .z-datebox {
+	width: 100% !important;
 	height: 40px;
 }
 
 .search-field .z-datebox-input {
 	height: 40px;
 	box-sizing: border-box;
-	border: 1px solid #c8d4e3;
-	border-radius: 5px;
-	padding: 8px 10px;
 	font-size: 14px;
 }
 
 .search-field .z-datebox-button {
 	height: 40px;
-	border-left: 1px solid #c8d4e3;
 }
 
 .search-button-area {
-	margin-left: auto;
+	flex-shrink: 0;
 }
 
 .search-button {
@@ -105,10 +101,9 @@
 .batch-container {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 22px 24px 20px 24px;
-	margin-bottom: 28px;
+	padding: 22px 24px 20px;
 	background: #ffffff;
-	border: 1px solid #d8e0ea;
+	border: 1px solid #d7e0ea;
 	border-radius: 8px;
 }
 
@@ -141,78 +136,99 @@
 .batch-table .z-listheader {
 	height: 52px;
 	box-sizing: border-box;
-	padding: 0 18px;
+	padding: 0 14px;
 	background: #1769d1;
 	border-right: 1px solid #4d8bd8;
 	color: #ffffff;
 	font-size: 14px;
 	font-weight: 600;
-	text-align: left;
+	white-space: nowrap;
+	text-align: center;
 }
 
 .batch-table .z-listitem {
-	height: 72px;
+	height: 68px;
 	background: #ffffff;
 	border-bottom: 1px solid #e1e7ef;
 }
 
 .batch-table .z-listitem:hover {
-	background: #f4f8fd;
+	background: #f7faff;
 }
 
 .batch-table .z-listcell {
 	box-sizing: border-box;
-	padding: 0 18px;
+	padding: 0 12px;
 	color: #172b4d;
 	font-size: 14px;
 	vertical-align: middle;
+	white-space: nowrap;
 }
 
 .batch-table .z-listcell-content {
-	line-height: 72px;
+	white-space: nowrap;
+	overflow: visible;
+}
+
+.batch-table .z-listcell:nth-child(1) {
+	text-align: left;
+}
+
+.batch-table .z-listcell:nth-child(2) {
+	text-align: left;
+}
+
+.batch-table .z-listcell:nth-child(3) {
+	text-align: left;
+}
+
+.batch-table .z-listcell:nth-child(4) {
+	text-align: center;
+}
+
+.batch-table .z-listcell:nth-child(5) {
+	text-align: center;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+
+.status-pending, .status-failed, .status-validated {
+	display: inline-block;
+	padding: 6px 11px;
+	border-radius: 14px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
 }
 
 .status-pending {
-	display: inline-block;
-	padding: 5px 12px;
 	background: #fff1d2;
-	border-radius: 14px;
 	color: #b26a00;
-	font-size: 12px;
-	font-weight: 600;
-	line-height: normal;
 }
 
 .status-failed {
-	display: inline-block;
-	padding: 5px 12px;
 	background: #fde0e0;
-	border-radius: 14px;
 	color: #d13232;
-	font-size: 12px;
-	font-weight: 600;
-	line-height: normal;
 }
 
 .status-validated {
-	display: inline-block;
-	padding: 5px 12px;
 	background: #dff4e9;
-	border-radius: 14px;
 	color: #13865c;
-	font-size: 12px;
-	font-weight: 600;
-	line-height: normal;
 }
 
-.validate-button {
+.validate-button, .error-button, .repair-button {
 	height: 38px;
-	background: #1769d1;
-	color: #ffffff;
 	border: none;
 	border-radius: 5px;
 	font-size: 13px;
 	font-weight: 600;
+	white-space: nowrap;
+}
+
+.validate-button {
+	background: #1769d1;
+	color: #ffffff;
 }
 
 .validate-button:hover {
@@ -220,13 +236,8 @@
 }
 
 .error-button {
-	height: 38px;
 	background: #d13b3b;
 	color: #ffffff;
-	border: none;
-	border-radius: 5px;
-	font-size: 13px;
-	font-weight: 600;
 }
 
 .error-button:hover {
@@ -234,13 +245,8 @@
 }
 
 .repair-button {
-	height: 38px;
 	background: #13865c;
 	color: #ffffff;
-	border: none;
-	border-radius: 5px;
-	font-size: 13px;
-	font-weight: 600;
 }
 
 .repair-button:hover {
@@ -254,41 +260,8 @@
 	font-size: 12px;
 }
 
-.process-container {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 20px 24px;
-	background: #ffffff;
-	border: 1px solid #d8e0ea;
-	border-radius: 8px;
-}
-
-.process-title {
-	display: block;
-	margin-bottom: 7px;
-	color: #123c6b;
-	font-size: 15px;
-	font-weight: 700;
-}
-
-.process-text {
-	display: block;
-	color: #718096;
-	font-size: 13px;
-}
-
 .validation-popup {
 	border-radius: 8px;
-	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.20);
-}
-
-.validation-popup .z-window-header {
-	padding: 16px 22px;
-	background: #ffffff;
-	border-bottom: 1px solid #e2e8f0;
-	color: #263238;
-	font-size: 17px;
-	font-weight: 700;
 }
 
 .popup-content {
@@ -333,7 +306,7 @@
 	font-weight: 600;
 }
 
-.success-value {
+.success-status {
 	color: #13865c;
 	font-size: 13px;
 	font-weight: 700;
@@ -347,7 +320,7 @@
 .success-icon {
 	margin-right: 8px;
 	color: #13865c;
-	font-size: 18px;
+	font-size: 16px;
 	font-weight: 700;
 }
 

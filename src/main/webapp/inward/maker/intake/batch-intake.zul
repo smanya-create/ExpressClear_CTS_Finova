@@ -13,7 +13,8 @@
 
 				<label value="SEARCH BATCH" sclass="section-title" />
 
-				<hlayout width="100%" sclass="search-row">
+				<hlayout width="100%" sclass="search-row"
+					spacing="18px">
 
 					<vlayout hflex="1" sclass="search-field">
 
@@ -23,7 +24,6 @@
 							placeholder="Batch No." width="100%" sclass="input-field" />
 
 					</vlayout>
-
 
 					<vlayout hflex="1" sclass="search-field">
 
@@ -47,7 +47,6 @@
 
 					</vlayout>
 
-
 					<vlayout hflex="1" sclass="search-field">
 
 						<label value="Received Date"
@@ -58,8 +57,8 @@
 
 					</vlayout>
 
-
-					<vlayout sclass="search-button-area">
+					<vlayout width="105px"
+						sclass="search-button-area">
 
 						<label value=" " sclass="field-label" />
 
@@ -88,32 +87,36 @@
 
 					<listhead sizable="true">
 
-						<listheader label="Batch No." width="25%" />
+						<listheader label="Batch No." width="20%" />
 
-						<listheader label="Received On" width="22%" />
+						<listheader label="Received On" width="20%" />
 
-						<listheader label="Amount" width="20%" />
+						<listheader label="Amount" width="18%" />
 
 						<listheader label="Status" width="20%" />
 
-						<listheader label="Action" width="18%" />
+						<listheader label="Action" width="22%" />
 
 					</listhead>
 
 
 					<listitem id="batchRow1">
 
-						<listcell label="IW-20260827-001" />
-
-						<listcell label="27-Aug-2026 09:12" />
-
-						<listcell label="₹ 18,42,600" />
+						<listcell>
+							<label value="IW-20260827-001" />
+						</listcell>
 
 						<listcell>
+							<label value="27-Aug-2026 09:12" />
+						</listcell>
 
+						<listcell>
+							<label value="₹ 18,42,600" />
+						</listcell>
+
+						<listcell>
 							<label id="statusLabel1"
 								value="Pending Validation" sclass="status-pending" />
-
 						</listcell>
 
 						<listcell>
@@ -132,17 +135,21 @@
 
 					<listitem id="batchRow2">
 
-						<listcell label="IW-20260827-002" />
-
-						<listcell label="27-Aug-2026 09:26" />
-
-						<listcell label="₹ 11,26,450" />
+						<listcell>
+							<label value="IW-20260827-002" />
+						</listcell>
 
 						<listcell>
+							<label value="27-Aug-2026 09:26" />
+						</listcell>
 
+						<listcell>
+							<label value="₹ 11,26,450" />
+						</listcell>
+
+						<listcell>
 							<label id="statusLabel2"
 								value="Pending Validation" sclass="status-pending" />
-
 						</listcell>
 
 						<listcell>
@@ -161,17 +168,21 @@
 
 					<listitem id="batchRow3">
 
-						<listcell label="IW-20260827-003" />
-
-						<listcell label="27-Aug-2026 10:04" />
-
-						<listcell label="₹ 8,94,200" />
+						<listcell>
+							<label value="IW-20260827-003" />
+						</listcell>
 
 						<listcell>
+							<label value="27-Aug-2026 10:04" />
+						</listcell>
 
-							<label id="statusLabel3"
-								value="Validation Failed" sclass="status-failed" />
+						<listcell>
+							<label value="₹ 8,94,200" />
+						</listcell>
 
+						<listcell>
+							<label value="Validation Failed"
+								sclass="status-failed" />
 						</listcell>
 
 						<listcell>
@@ -186,17 +197,21 @@
 
 					<listitem id="batchRow4">
 
-						<listcell label="IW-20260827-004" />
-
-						<listcell label="27-Aug-2026 10:31" />
-
-						<listcell label="₹ 21,08,900" />
+						<listcell>
+							<label value="IW-20260827-004" />
+						</listcell>
 
 						<listcell>
+							<label value="27-Aug-2026 10:31" />
+						</listcell>
 
+						<listcell>
+							<label value="₹ 21,08,900" />
+						</listcell>
+
+						<listcell>
 							<label id="statusLabel4" value="Validated"
 								sclass="status-validated" />
-
 						</listcell>
 
 						<listcell>
@@ -217,21 +232,11 @@
 			</div>
 
 
-			<div sclass="process-container">
-
-				<label value="PROCESS" sclass="process-title" />
-
-				<label
-					value="Successful validation automatically moves the batch to MICR Repair."
-					sclass="process-text" />
-
-			</div>
-
 		</vlayout>
 
 
 		<window id="validationFailedWindow"
-			title="Batch Validation Failed" border="normal" width="650px"
+			title="Batch Validation Failed" border="normal" width="600px"
 			mode="modal" closable="true" visible="false"
 			sclass="validation-popup">
 
@@ -242,12 +247,10 @@
 
 				<separator />
 
-
 				<vlayout sclass="validation-section">
 
 					<label value="Cheque Count"
 						sclass="validation-heading" />
-
 
 					<hlayout sclass="validation-row">
 
@@ -258,7 +261,6 @@
 
 					</hlayout>
 
-
 					<hlayout sclass="validation-row">
 
 						<label value="Actual:"
@@ -267,7 +269,6 @@
 						<label value="9" sclass="validation-value" />
 
 					</hlayout>
-
 
 					<hlayout sclass="mismatch-row">
 
@@ -279,15 +280,12 @@
 
 				</vlayout>
 
-
 				<separator />
-
 
 				<vlayout sclass="validation-section">
 
 					<label value="Total Amount"
 						sclass="validation-heading" />
-
 
 					<hlayout sclass="validation-row">
 
@@ -299,7 +297,6 @@
 
 					</hlayout>
 
-
 					<hlayout sclass="validation-row">
 
 						<label value="Actual:"
@@ -309,7 +306,6 @@
 							sclass="validation-value" />
 
 					</hlayout>
-
 
 					<hlayout sclass="mismatch-row">
 
@@ -321,11 +317,9 @@
 
 				</vlayout>
 
-
 				<label
 					value="Please verify the batch file and control values."
 					sclass="validation-message" />
-
 
 				<hlayout width="100%" sclass="popup-action">
 
@@ -342,7 +336,7 @@
 
 
 		<window id="validationSuccessWindow"
-			title="Validation Successful" border="normal" width="600px"
+			title="Validation Successful" border="normal" width="550px"
 			mode="modal" closable="true" visible="false"
 			sclass="validation-popup">
 
@@ -353,12 +347,10 @@
 
 				<separator />
 
-
 				<vlayout sclass="validation-section">
 
 					<label value="Batch Validation"
 						sclass="validation-heading" />
-
 
 					<hlayout sclass="validation-row">
 
@@ -370,7 +362,6 @@
 
 					</hlayout>
 
-
 					<hlayout sclass="validation-row">
 
 						<label value="Status:"
@@ -380,7 +371,6 @@
 							sclass="success-status" />
 
 					</hlayout>
-
 
 					<hlayout sclass="success-message-row">
 
@@ -393,10 +383,8 @@
 
 				</vlayout>
 
-
 				<label value="The batch is ready for MICR Repair."
 					sclass="validation-message" />
-
 
 				<hlayout width="100%" sclass="popup-action">
 
@@ -422,7 +410,6 @@
 
 				<separator />
 
-
 				<vlayout sclass="validation-section">
 
 					<label value="Batch is ready for MICR Repair."
@@ -432,12 +419,7 @@
 						value="MICR Repair screen is not configured in this module."
 						sclass="validation-message" />
 
-					<label
-						value="The validated batch can proceed to the MICR Repair process."
-						sclass="validation-message" />
-
 				</vlayout>
-
 
 				<hlayout width="100%" sclass="popup-action">
 
@@ -445,13 +427,8 @@
 
 					<button id="micrOkButton" label="OK" width="75px"
 						sclass="ok-button" />
-
 				</hlayout>
-
 			</vlayout>
-
 		</window>
-
 	</window>
-
 </zk>
