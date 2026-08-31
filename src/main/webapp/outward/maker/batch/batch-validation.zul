@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+    <style src="/css/outward/batch-validation.css"/>
+
+    <window id="batchValidationWindow"
+            border="none"
+            width="520px"
+            mode="modal"
+            closable="true"
+            sizable="false"
+            position="center"
+            sclass="validation-window">
+
+        <div sclass="validation-overlay">
+            <vlayout width="100%" sclass="validation-card" spacing="0">
+
+                <!-- Header -->
+                <div sclass="validation-header validation-failed">
+                    <hbox align="center" spacing="10px">
+                        <div sclass="status-icon">✕</div>
+                        <label value="Batch Validation Failed" sclass="validation-title"/>
+                    </hbox>
+                </div>
+
+                <!-- Body -->
+                <vlayout sclass="validation-body" spacing="0">
+
+                    <!-- Cheque Count -->
+                    <div sclass="validation-section">
+                        <label value="Cheque Count" sclass="section-title"/>
+
+                        <grid width="100%" sclass="validation-grid">
+                            <columns>
+                                <column width="40%"/>
+                                <column width="30%"/>
+                                <column width="30%"/>
+                            </columns>
+                            <rows>
+                                <row>
+                                    <label value="Expected:" sclass="field-name"/>
+                                    <label id="expectedCheques" sclass="field-value"/>
+                                    <label value=""/>
+                                </row>
+                                <row>
+                                    <label value="Actual:" sclass="field-name"/>
+                                    <label id="xmlTotalCheques" sclass="field-value"/>
+                                    <label value=""/>
+                                </row>
+                                <row>
+                                    <label id="chequeCountStatus" value="Mismatch" sclass="status-text status-mismatch"/>
+                                    <label value=""/>
+                                    <label value=""/>
+                                </row>
+                            </rows>
+                        </grid>
+                    </div>
+
+                    <separator sclass="section-divider"/>
+
+                    <!-- Total Amount -->
+                    <div sclass="validation-section">
+                        <label value="Total Amount" sclass="section-title"/>
+
+                        <grid width="100%" sclass="validation-grid">
+                            <columns>
+                                <column width="40%"/>
+                                <column width="30%"/>
+                                <column width="30%"/>
+                            </columns>
+                            <rows>
+                                <row>
+                                    <label value="Expected:" sclass="field-name"/>
+                                    <label id="expectedAmount" sclass="field-value"/>
+                                    <label value=""/>
+                                </row>
+                                <row>
+                                    <label value="Actual:" sclass="field-name"/>
+                                    <label id="xmlTotalAmount" sclass="field-value"/>
+                                    <label value=""/>
+                                </row>
+                                <row>
+                                    <label id="amountStatus" value="Mismatch" sclass="status-text status-mismatch"/>
+                                    <label value=""/>
+                                    <label value=""/>
+                                </row>
+                            </rows>
+                        </grid>
+                    </div>
+
+                    <!-- Footer message -->
+                    <label value="Please verify the batch file and control values"
+                           sclass="validation-note"/>
+
+                    <!-- Actions -->
+                    <hbox width="100%" pack="start" spacing="12px" sclass="validation-actions">
+                        <button id="batchConfirmButton"
+                                label="Batch Confirm"
+                                disabled="true"
+                                sclass="confirm-btn"/>
+
+                        <button id="closeButton"
+                                label="Back to Upload"
+                                sclass="close-btn"/>
+                    </hbox>
+
+                </vlayout>
+            </vlayout>
+        </div>
+
+    </window>
+</zk>
