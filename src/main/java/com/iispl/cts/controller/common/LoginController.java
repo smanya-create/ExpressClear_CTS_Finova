@@ -110,6 +110,10 @@ public class LoginController extends GenericForwardComposer<Component> {
         // 2. Fetch User's Role details
         String userRoleId = user.getRoleId() != null ? user.getRoleId().trim() : "";
         Role userRole = roleService.getRoleById(userRoleId);
+        
+        String userPermissions = (userRole != null && userRole.getPermissions() != null) 
+                ? userRole.getPermissions().trim() 
+                : "";
 
         // Fallback role name if Role entity lookup is null
         String dbRoleName = "";
@@ -152,6 +156,7 @@ public class LoginController extends GenericForwardComposer<Component> {
         Sessions.getCurrent().setAttribute("ROLE_NAME", dbRoleName);
         Sessions.getCurrent().setAttribute("USER_OBJ", user);
         Sessions.getCurrent().setAttribute("CLEARING_DATE", sdf.format(new Date()));
+        Sessions.getCurrent().setAttribute("USER_PERMISSIONS", userPermissions);
 
         // 6. Direct Navigation by Role ID and Role Name
         if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {

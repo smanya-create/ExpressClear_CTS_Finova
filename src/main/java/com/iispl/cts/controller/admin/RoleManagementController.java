@@ -14,6 +14,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.service.RoleService;
 import com.iispl.cts.serviceimpl.RoleServiceImpl;
@@ -35,6 +36,7 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
     	super.doAfterCompose(comp);
+    	SecurityUtil.checkAccess("ROLE_MANAGEMENT");
         loadRoles();
     }
 
