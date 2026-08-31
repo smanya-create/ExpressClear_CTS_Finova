@@ -10,36 +10,46 @@ import java.util.List;
 
 public class RoleServiceImpl implements RoleService {
 
-    private static RoleServiceImpl instance;
+	private static RoleServiceImpl instance;
     private final RoleDAO roleDAO = RoleDAOImpl.getInstance();
 
-    public RoleServiceImpl() {}
-
     public static synchronized RoleServiceImpl getInstance() {
-        if (instance == null) {
-            instance = new RoleServiceImpl();
-        }
+        if (instance == null) instance = new RoleServiceImpl();
         return instance;
     }
 
     @Override
     public List<Role> getAllRoles() {
-        return roleDAO.getAllRoles();
+        return roleDAO.searchRoles(null, null);
+    }
+
+    @Override
+    public List<Role> searchRoles(String query, String status) {
+        return roleDAO.searchRoles(query, status);
     }
 
     @Override
     public Role getRoleById(String roleId) {
-        if (roleId == null || roleId.trim().isEmpty()) {
-            return null;
-        }
-        return roleDAO.findById(roleId.trim());
+        return (roleId != null && !roleId.trim().isEmpty()) ? roleDAO.findById(roleId.trim()) : null;
     }
 
     @Override
     public Role getRoleByName(String roleName) {
-        if (roleName == null || roleName.trim().isEmpty()) {
-            return null;
-        }
-        return roleDAO.findByName(roleName.trim());
+        return (roleName != null && !roleName.trim().isEmpty()) ? roleDAO.findByName(roleName.trim()) : null;
+    }
+
+    @Override
+    public boolean saveRole(Role role) {
+        return roleDAO.saveRole(role);
+    }
+
+    @Override
+    public boolean updateRole(Role role) {
+        return roleDAO.updateRole(role);
+    }
+
+    @Override
+    public String generateNextRoleId() {
+        return roleDAO.generateNextRoleId();
     }
 }
