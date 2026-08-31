@@ -11,9 +11,9 @@ import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
-import org.zkoss.zul.Listitem;
 
 public class InwardIntakeController extends GenericComposer {
 
@@ -27,6 +27,8 @@ public class InwardIntakeController extends GenericComposer {
 
 	private Label statusLabel1;
 	private Label statusLabel2;
+	private Label successBatchNo;
+	private Label batchCountLabel;
 
 	private Button validateButton1;
 	private Button validateButton2;
@@ -34,9 +36,6 @@ public class InwardIntakeController extends GenericComposer {
 	private Button micrRepairButton1;
 	private Button micrRepairButton2;
 	private Button micrRepairButton;
-
-	private Label successBatchNo;
-	private Label batchCountLabel;
 
 	private Listitem batchRow1;
 	private Listitem batchRow2;
@@ -96,6 +95,8 @@ public class InwardIntakeController extends GenericComposer {
 
 		Button searchButton = (Button) mainWindow.getFellow("searchButton");
 
+		Button viewErrorButton = (Button) mainWindow.getFellow("viewErrorButton");
+
 		searchButton.addEventListener("onClick", new EventListener<Event>() {
 
 			@Override
@@ -138,6 +139,15 @@ public class InwardIntakeController extends GenericComposer {
 			}
 		});
 
+		viewErrorButton.addEventListener("onClick", new EventListener<Event>() {
+
+			@Override
+			public void onEvent(Event event) {
+
+				validationFailedWindow.setVisible(true);
+			}
+		});
+
 		backToUploadButton.addEventListener("onClick", new EventListener<Event>() {
 
 			@Override
@@ -153,17 +163,6 @@ public class InwardIntakeController extends GenericComposer {
 			public void onEvent(Event event) {
 
 				validationSuccessWindow.setVisible(false);
-			}
-		});
-
-		Button viewErrorButton = (Button) mainWindow.getFellow("viewErrorButton");
-
-		viewErrorButton.addEventListener("onClick", new EventListener<Event>() {
-
-			@Override
-			public void onEvent(Event event) {
-
-				validationFailedWindow.setVisible(true);
 			}
 		});
 
@@ -206,15 +205,23 @@ public class InwardIntakeController extends GenericComposer {
 
 	private void searchBatches() {
 
-		String batchNo = batchNoTextbox.getValue() == null ? "" : batchNoTextbox.getValue().trim().toLowerCase();
+		String batchNo = "";
 
-		String status = statusCombobox.getSelectedItem() == null ? "ALL" : statusCombobox.getSelectedItem().getValue();
+		if (batchNoTextbox.getValue() != null) {
+			batchNo = batchNoTextbox.getValue().trim().toLowerCase();
+		}
+
+		String status = "ALL";
+
+		if (statusCombobox.getSelectedItem() != null) {
+			status = statusCombobox.getSelectedItem().getValue();
+		}
 
 		Date selectedDate = receivedDate.getValue();
 
-		boolean row1 = matches("IW-20260827-001", "VALIDATED", "27-Aug-2026", batchNo, status, selectedDate);
+		boolean row1 = matches("IW-20260827-001", "PENDING", "27-Aug-2026", batchNo, status, selectedDate);
 
-		boolean row2 = matches("IW-20260827-002", "VALIDATED", "27-Aug-2026", batchNo, status, selectedDate);
+		boolean row2 = matches("IW-20260827-002", "PENDING", "27-Aug-2026", batchNo, status, selectedDate);
 
 		boolean row3 = matches("IW-20260827-003", "FAILED", "27-Aug-2026", batchNo, status, selectedDate);
 
