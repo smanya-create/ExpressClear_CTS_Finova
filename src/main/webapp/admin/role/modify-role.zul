@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
+<zk xmlns:h="xhtml">
+<borderlayout apply="com.iispl.cts.controller.admin.RoleFormController" hflex="1" vflex="1">
+
+    <!-- Shared Left Sidebar Navigation -->
+    <west width="240px" border="none" collapsible="false">
+        <include src="/components/sidebar.zul" role="ADMIN" activeTab="role-management" />
+    </west>
+
+    <!-- Main Workspace -->
+    <center border="none" style="overflow-y: auto; background-color: #f8fafc;">
+        <vlayout spacing="0" hflex="1">
+            
+            <!-- Shared Header -->
+            <include id="incHeader" src="/components/header.zul" 
+                     pageTitle="Admin Dashboard" 
+                     pageSubtitle="Role Management / Modify Role" />
+
+            <!-- Form Content -->
+            <div sclass="role-content">
+                <div style="margin-bottom: 24px;">
+                    <label value="MODIFY ROLE" sclass="page-title"/>
+                    <label value="Update role details and screen permissions." sclass="page-subtitle"/>
+                </div>
+
+                <div sclass="card-panel" style="padding: 32px;">
+                    <hlayout spacing="24px" style="margin-bottom: 20px;">
+                        <vlayout spacing="6px" style="flex: 1;">
+                            <label value="ROLE ID" sclass="field-label"/>
+                            <textbox id="txtRoleId" readonly="true" hflex="1" height="42px" sclass="input-box input-box-readonly"/>
+                        </vlayout>
+                        <vlayout spacing="6px" style="flex: 1;">
+                            <label value="ROLE NAME" sclass="field-label"/>
+                            <textbox id="txtRoleName" placeholder="Enter role name" hflex="1" height="42px" sclass="input-box"/>
+                        </vlayout>
+                    </hlayout>
+
+                    <vlayout spacing="6px" style="margin-bottom: 20px;">
+                        <label value="DESCRIPTION" sclass="field-label"/>
+                        <textbox id="txtDescription" placeholder="Enter role description" hflex="1" height="42px" sclass="input-box"/>
+                    </vlayout>
+
+                   <vlayout spacing="6px" style="margin-bottom: 28px;" width="50%">
+    <label value="STATUS" sclass="field-label"/>
+    <combobox id="cmbStatus" readonly="true" width="100%" height="42px">
+        <comboitem label="Active" value="Active"/>
+        <comboitem label="Inactive" value="Inactive"/>
+    </combobox>
+</vlayout>
+
+                    <!-- Permissions Section -->
+                    <div style="border-top: 1px solid #f1f5f9; padding-top: 24px; margin-bottom: 28px;">
+                        <label value="Screen Permissions" style="font-size: 15px; font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;"/>
+                        <label value="Select the screens this role is allowed to view and access." style="color: #64748b; font-size: 13px; display: block; margin-bottom: 16px;"/>
+
+                        <checkbox id="chkSelectAll" label="Select All" style="font-weight: 700; color: #0f172a; font-size: 13px; margin-bottom: 16px; display: block;"/>
+
+                        <hlayout spacing="24px">
+                            <div sclass="permission-box">
+                                <label value="AVAILABLE SCREENS" sclass="permission-title"/>
+                                <vlayout spacing="10px">
+                                    <checkbox id="chkDashboard" label="Dashboard"/>
+                                    <checkbox id="chkBatchUpload" label="Batch Upload / Batch Intake"/>
+                                    <checkbox id="chkBatchList" label="Batch List"/>
+                                    <checkbox id="chkUnprocessedQueue" label="Unprocessed Queue"/>
+                                    <checkbox id="chkMicrRepair" label="MICR Repair"/>
+                                </vlayout>
+                            </div>
+
+                            <div sclass="permission-box">
+                                <label value="AVAILABLE SCREENS" sclass="permission-title"/>
+                                <vlayout spacing="10px">
+                                    <checkbox id="chkDataEntry" label="Data Entry"/>
+                                    <checkbox id="chkChequeDetails" label="Cheque Details"/>
+                                    <checkbox id="chkSubmitBatch" label="Submit Batch"/>
+                                    <checkbox id="chkCheckerVerification" label="Checker Verification"/>
+                                    <checkbox id="chkReports" label="Reports / EOD-BOD / Admin"/>
+                                </vlayout>
+                            </div>
+                        </hlayout>
+                    </div>
+
+                    <hlayout style="justify-content: flex-end;" spacing="12px">
+                        <button id="btnCancel" label="CANCEL" height="42px" sclass="btn-outline"/>
+                        <button id="btnSave" label="UPDATE ROLE" height="42px" sclass="btn-primary"/>
+                    </hlayout>
+                </div>
+            </div>
+
+        </vlayout>
+    </center>
+</borderlayout>
+</zk>
