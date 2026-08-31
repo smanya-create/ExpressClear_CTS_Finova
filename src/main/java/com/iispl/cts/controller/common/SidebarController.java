@@ -106,8 +106,8 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     // Outward Maker Navigation Actions
     public void navToMakerDashboard() { Executions.sendRedirect("/maker/dashboard.zul"); }
-    public void navToUploadBatch() { Executions.sendRedirect("/maker/upload-batch.zul"); }
-    public void navToOutwardMicrRepair() { Executions.sendRedirect("/maker/micr-repair.zul"); }
+    public void navToUploadBatch() { Executions.sendRedirect("/outward/maker/batch/batch-upload.zul"); }
+    public void navToOutwardMicrRepair() { Executions.sendRedirect("outward/maker/micr-repair/micr-repair-view.zul"); }
     public void navToOutwardDataEntry() { Executions.sendRedirect("/maker/data-entry.zul"); }
     public void navToQueue() { Executions.sendRedirect("/maker/unprocessed-cheques.zul"); }
     public void navToOutwardMakerReports() { Executions.sendRedirect("/maker/reports.zul"); }
