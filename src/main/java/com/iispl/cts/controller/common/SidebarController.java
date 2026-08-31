@@ -1,5 +1,7 @@
 package com.iispl.cts.controller.common;
 
+import java.util.Map;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
@@ -7,7 +9,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 
-import java.util.Map;
+import com.iispl.cts.serviceimpl.AuditServiceImpl;
 
 public class SidebarController extends GenericForwardComposer<Component> {
 
@@ -130,7 +132,14 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
     // Global Logout
     public void onClickLogout() {
-        Sessions.getCurrent().invalidate();
+    	AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
+
+        // Clear and invalidate current HTTP session
+        if (Sessions.getCurrent() != null) {
+            Sessions.getCurrent().invalidate();
+        }
+
+        // Redirect back to login page
         Executions.sendRedirect("/common/login.zul");
     }
 }

@@ -55,8 +55,7 @@
                 <separator height="10px"/>
 
                 <!-- Sign In Button -->
-                <button id="btnSignIn" label="SIGN IN" sclass="btn-signin" height="44px" width="100%"
-                        onClick="$composer.onClickSignIn()"/>
+                <button id="btnSignIn" label="Sign In" />
 
                 <separator height="10px"/>
 

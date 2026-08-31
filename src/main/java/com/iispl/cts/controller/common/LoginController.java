@@ -19,6 +19,7 @@ import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.RoleService;
 import com.iispl.cts.service.UserService;
+import com.iispl.cts.serviceimpl.AuditServiceImpl;
 import com.iispl.cts.serviceimpl.RoleServiceImpl;
 import com.iispl.cts.serviceimpl.UserServiceImpl;
 
@@ -67,11 +68,10 @@ public class LoginController extends GenericForwardComposer<Component> {
             e.printStackTrace();
         }
     }
-
-    public void onClickSignIn() {
+    public void onClick$btnSignIn() {
         processLogin();
     }
-
+   
     public void onClick$btnSignIn(Event event) {
         processLogin();
     }
@@ -90,6 +90,7 @@ public class LoginController extends GenericForwardComposer<Component> {
         String username = (txtUsername != null && txtUsername.getValue() != null) ? txtUsername.getValue().trim() : "";
         String password = (txtPassword != null && txtPassword.getValue() != null) ? txtPassword.getValue().trim() : "";
         Comboitem selectedItem = (cmbRole != null) ? cmbRole.getSelectedItem() : null;
+        
 
         if (username.isEmpty() || password.isEmpty() || selectedItem == null) {
             Messagebox.show("Please enter username, password, and select a role.", 
@@ -103,8 +104,11 @@ public class LoginController extends GenericForwardComposer<Component> {
         // 1. Authenticate user credentials
         User user = userService.authenticate(username, password);
         if (user == null) {
-            Messagebox.show("Invalid username or password.", "Authentication Failed", Messagebox.OK, Messagebox.ERROR);
-            return;
+        	AuditServiceImpl.getInstance().log("AUTH", "LOGIN_FAILED", 
+                    "Invalid username or password attempt for username: " + username, "FAILED");
+
+                Messagebox.show("Invalid username or password.", "Authentication Failed", Messagebox.OK, Messagebox.ERROR);
+                return;
         }
 
         // 2. Fetch User's Role details
@@ -135,10 +139,13 @@ public class LoginController extends GenericForwardComposer<Component> {
                               selectedRoleName.equalsIgnoreCase(dbRoleName);
 
         if (!isRoleMatch) {
-            Messagebox.show("Access Denied: Assigned role (" + dbRoleName + 
-                            ") does not match selected role (" + selectedRoleName + ").", 
-                            "Role Mismatch", Messagebox.OK, Messagebox.EXCLAMATION);
-            return;
+        	AuditServiceImpl.getInstance().log("AUTH", "LOGIN_ROLE_MISMATCH", 
+                    "Access denied for user " + username + ": Assigned role (" + dbRoleName + ") does not match selected role (" + selectedRoleName + ")", "FAILED");
+
+                Messagebox.show("Access Denied: Assigned role (" + dbRoleName + 
+                                ") does not match selected role (" + selectedRoleName + ").", 
+                                "Role Mismatch", Messagebox.OK, Messagebox.EXCLAMATION);
+                return;
         }
 
         // 4. Normalize role token for session tracking
@@ -157,6 +164,9 @@ public class LoginController extends GenericForwardComposer<Component> {
         Sessions.getCurrent().setAttribute("USER_OBJ", user);
         Sessions.getCurrent().setAttribute("CLEARING_DATE", sdf.format(new Date()));
         Sessions.getCurrent().setAttribute("USER_PERMISSIONS", userPermissions);
+        
+        AuditServiceImpl.getInstance().log("AUTH", "LOGIN", 
+                "User " + user.getUsername() + " logged in successfully with role " + dbRoleName, "SUCCESS");
 
         // 6. Direct Navigation by Role ID and Role Name
         if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {

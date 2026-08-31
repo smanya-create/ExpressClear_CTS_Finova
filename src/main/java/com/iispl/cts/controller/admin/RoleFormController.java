@@ -19,6 +19,7 @@ import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.service.RoleService;
+import com.iispl.cts.serviceimpl.AuditServiceImpl;
 import com.iispl.cts.serviceimpl.RoleServiceImpl;
 
 public class RoleFormController extends GenericForwardComposer<Component> {
@@ -161,7 +162,30 @@ public class RoleFormController extends GenericForwardComposer<Component> {
 
         Role role = new Role(roleId, roleName, desc, status, perms, new Timestamp(System.currentTimeMillis()));
 
-        boolean success = isModifyMode ? roleService.updateRole(role) : roleService.saveRole(role);
+        boolean success;
+        if (isModifyMode) {
+            success = roleService.updateRole(role);
+            
+            // --- AUDIT LOG FOR ROLE UPDATE ---
+            if (success) {
+                AuditServiceImpl.getInstance().log("ROLE_MGMT", "MODIFY_ROLE", 
+                    "Updated role details and permissions for: " + roleName + " (" + roleId + ")", "SUCCESS");
+            } else {
+                AuditServiceImpl.getInstance().log("ROLE_MGMT", "MODIFY_ROLE_FAILED", 
+                    "Failed to update role: " + roleName + " (" + roleId + ")", "FAILED");
+            }
+        } else {
+            success = roleService.saveRole(role);
+            
+            // --- AUDIT LOG FOR ROLE CREATION ---
+            if (success) {
+                AuditServiceImpl.getInstance().log("ROLE_MGMT", "CREATE_ROLE", 
+                    "Created new role: " + roleName + " (" + roleId + ")", "SUCCESS");
+            } else {
+                AuditServiceImpl.getInstance().log("ROLE_MGMT", "CREATE_ROLE_FAILED", 
+                    "Failed to create role: " + roleName + " (" + roleId + ")", "FAILED");
+            }
+        }
 
         if (success) {
             Messagebox.show("Role " + (isModifyMode ? "updated" : "created") + " successfully.", "Success", Messagebox.OK, Messagebox.INFORMATION, e -> {
@@ -169,8 +193,8 @@ public class RoleFormController extends GenericForwardComposer<Component> {
             });
         } else {
             Messagebox.show("Failed to save role. Please verify input.", "Error", Messagebox.OK, Messagebox.ERROR);
+        }    
         }
-    }
 
     public void onClick$btnCancel(Event event) {
         Executions.sendRedirect("/admin/role/role-management.zul");
