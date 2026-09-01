@@ -22,19 +22,19 @@
             <!-- Global Session Status Pill -->
             <h:div style="display: flex; align-items: center; gap: 6px;">
                 <label value="SESSION:" style="font-size: 10px; font-weight: bold; color: #a0aec0; letter-spacing: 0.5px;"/>
-                <label id="lblHeaderSessionStatus" value="● OPEN" style="font-size: 11px; font-weight: bold; color: #38a169; background: #c6f6d5; padding: 3px 10px; border-radius: 12px;"/>
+                <label id="lblHeaderSessionStatus" style="font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 12px;"/>
             </h:div>
 
             <!-- Real-Time Session Date & Clock -->
             <h:div style="display: flex; flex-direction: column; align-items: flex-end;">
                 <label value="Session Date &amp; Time" style="font-size: 10px; font-weight: bold; color: #a0aec0; letter-spacing: 0.5px;"/>
                 <h:div style="display: flex; gap: 6px; align-items: center;">
-                    <label id="lblHeaderSessionDate" value="28-Aug-2026" style="font-size: 12px; font-weight: bold; color: #2d3748;"/>
-                    <label id="lblHeaderClock" value="13:17:12" style="font-size: 12px; font-weight: bold; color: #3182ce;"/>
+                    <label id="lblHeaderSessionDate" value="--" style="font-size: 12px; font-weight: bold; color: #2d3748;"/>
+                    <label id="lblHeaderClock" style="font-size: 12px; font-weight: bold; color: #3182ce;"/>
                 </h:div>
             </h:div>
 
-            <!-- NOTIFICATION BELL ICON (Visible for Outward & Inward Operational Roles) -->
+            <!-- NOTIFICATION BELL ICON -->
             <div id="divNotificationBell" 
                  style="position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #edf2f7;"
                  onClick='popupNotifications.open(self, "after_end")'>
@@ -61,18 +61,14 @@
     <!-- NOTIFICATION POPUP WINDOW -->
     <popup id="popupNotifications" width="320px" style="padding: 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #e2e8f0;">
         <vlayout spacing="0">
-            <!-- Popup Header -->
             <div style="padding: 12px 16px; background: #1a365d; color: white; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                 <label value="Notifications" style="font-weight: bold; font-size: 13px;"/>
                 <a label="Mark all read" style="font-size: 10px; color: #63b3ed; text-decoration: none;" onClick="$composer.onClickMarkAllRead()"/>
             </div>
 
-            <!-- List of Notifications -->
             <vlayout id="containerNotificationList" spacing="0" style="max-height: 250px; overflow-y: auto; background: white;">
-                <!-- Populated dynamically by HeaderController based on role (OUTWARD_MAKER, OUTWARD_CHECKER, INWARD_MAKER, INWARD_CHECKER) -->
             </vlayout>
 
-            <!-- Popup Footer -->
             <div style="padding: 8px; text-align: center; background: #f7fafc; border-top: 1px solid #edf2f7; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
                 <label value="Express Clear CTS Notifications" style="font-size: 10px; color: #a0aec0;"/>
             </div>
