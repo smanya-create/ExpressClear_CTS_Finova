@@ -36,7 +36,7 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        SecurityUtil.checkAccess("ROLE_MANAGEMENT");
+        
         loadRoles();
     }
 

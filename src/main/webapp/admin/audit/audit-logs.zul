@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
-<zk xmlns:h="xhtml">
+<zk>
 <borderlayout apply="com.iispl.cts.controller.admin.AuditLogsController" hflex="1" vflex="1">
 
     <!-- Shared Left Sidebar Navigation -->
@@ -9,7 +9,7 @@
     </west>
 
     <!-- Main Workspace -->
-    <center border="none" style="overflow-y: auto; background-color: #f8fafc;">
+    <center border="none" autoscroll="true" style="background-color: #f8fafc;">
         <vlayout spacing="0" hflex="1">
 
             <!-- Shared Header -->
@@ -17,16 +17,18 @@
                      pageTitle="Admin Dashboard" 
                      pageSubtitle="Audit Logs" />
 
-            <!-- Content Area -->
-            <div sclass="role-content">
-                <div style="margin-bottom: 24px;">
+            <!-- Content Area Container -->
+            <vlayout sclass="role-content" spacing="20px" style="padding: 24px;">
+                
+                <!-- Page Title Header -->
+                <vlayout spacing="4px">
                     <label value="System Audit Logs" sclass="page-title"/>
                     <label value="Track all security events, user logins, batch submissions, and operational activities." sclass="page-subtitle"/>
-                </div>
+                </vlayout>
 
                 <!-- Filter Controls Card -->
-                <div sclass="card-panel">
-                    <hlayout spacing="16px" style="align-items: flex-end; flex-wrap: wrap;">
+                <vlayout sclass="card-panel" spacing="0">
+                    <hlayout spacing="16px" valign="bottom" hflex="1">
                         <vlayout spacing="6px" width="160px">
                             <label value="FROM DATE" sclass="field-label"/>
                             <datebox id="dtFrom" format="yyyy-MM-dd" height="40px" width="100%"/>
@@ -46,23 +48,23 @@
                                 <comboitem label="INWARD_CLEARING" value="INWARD_CLEARING"/>
                             </combobox>
                         </vlayout>
-                        <vlayout spacing="6px" style="flex: 1; min-width: 220px;">
+                        <vlayout spacing="6px" hflex="1">
                             <label value="SEARCH USER / DETAILS" sclass="field-label"/>
                             <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="40px" sclass="input-box"/>
                         </vlayout>
                         <button id="btnSearch" label="SEARCH" height="40px" sclass="btn-primary"/>
                         <button id="btnReset" label="RESET" height="40px" sclass="btn-secondary"/>
                     </hlayout>
-                </div>
+                </vlayout>
 
                 <!-- Audit Log Table Card -->
-                <div sclass="card-panel">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <vlayout sclass="card-panel" spacing="16px">
+                    <hlayout valign="middle" hflex="1" style="justify-content: space-between;">
                         <label value="Audit Trail" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
                         <label id="lblAuditCount" value="Loading logs..." style="color: #64748b; font-size: 12px;"/>
-                    </div>
+                    </hlayout>
 
-                    <grid sclass="role-grid">
+                    <grid sclass="role-grid" hflex="1">
                         <columns sizable="true">
                             <column label="TIMESTAMP" width="160px"/>
                             <column label="USER / ROLE" width="200px"/>
@@ -73,11 +75,12 @@
                             <column label="STATUS" width="100px"/>
                         </columns>
                         <rows id="rowsAudit">
-                            <!-- Populated by AuditLogsController -->
+                            <!-- Populated dynamically by AuditLogsController -->
                         </rows>
                     </grid>
-                </div>
-            </div>
+                </vlayout>
+
+            </vlayout>
 
         </vlayout>
     </center>

@@ -33,7 +33,7 @@ public class SecurityUtil {
     public static boolean checkAccess(String screenKey) {
         Session session = Sessions.getCurrent();
         if (session == null) {
-            Executions.sendRedirect("/login.zul");
+            Executions.sendRedirect("/common/login.zul");
             return false;
         }
 

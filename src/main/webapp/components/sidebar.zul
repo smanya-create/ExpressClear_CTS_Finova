@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<zk xmlns:h="xhtml">
-<style src="/css/common/sidebar.css"/>
-
-<div width="220px" height="100%" sclass="sidebar" apply="com.iispl.cts.controller.common.SidebarController"
-     style="background-color: #0b1d3a; 
-     height: 100%; box-sizing: border-box; overflow: hidden;
-     display: flex; flex-direction: column; justify-content: space-between; margin: 0; padding: 0;">
+<?link rel="stylesheet" type="text/css" href="/css/common/sidebar.css"?>
+<zk>
+<vlayout sclass="sidebar" width="220px" vflex="1" apply="com.iispl.cts.controller.common.SidebarController"
+         spacing="0" style="background-color: #0b1d3a; overflow: hidden;">
     
-    <div style="overflow-y: auto; flex: 1;">
+    <!-- Top Scrollable Navigation Area -->
+    <vlayout vflex="1" hflex="1" spacing="0" style="overflow-y: auto;">
+        
         <!-- Brand Title Header -->
-        <div style="padding: 24px 20px 18px 20px;">
+        <vlayout spacing="2px" style="padding: 24px 20px 18px 20px;">
             <label value="CTS" style="font-size: 22px; font-weight: 800; color: #ffffff; display: block; line-height: 1.1;"/>
             <label value="Express Clear" style="font-size: 15px; font-weight: 600; color: #63b3ed; display: block; margin-top: 2px;"/>
             <label id="lblPortalTitle" value="ADMIN PORTAL" 
                    style="font-size: 9.5px; color: #a0aec0; letter-spacing: 1px; display: block; margin-top: 6px; font-weight: 700; text-transform: uppercase;"/>
-        </div>
+        </vlayout>
         
-        <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 0 0 12px 0;" />
+        <separator height="1px" style="background: rgba(255, 255, 255, 0.08); margin: 0 0 12px 0;" />
         
         <!-- Dynamic Role-Based Navigation Menu -->
         <vlayout hflex="1" spacing="0" style="padding: 0 10px;">
@@ -91,11 +90,12 @@
                 </vlayout>
             </div>
         </vlayout>
-    </div>
+    </vlayout>
 
     <!-- Pinned Bottom Logout Action -->
-    <div style="padding: 18px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+    <vlayout spacing="0" hflex="1" style="padding: 18px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
         <a label="●  Log Out" sclass="nav-item-logout" onClick="$composer.onClickLogout()"/>
-    </div>
-</div>
+    </vlayout>
+
+</vlayout>
 </zk>
