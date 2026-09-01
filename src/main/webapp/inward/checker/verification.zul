@@ -2,8 +2,6 @@
 
 <zk>
 
-    <!-- ================= CUSTOM CSS ================= -->
-
     <style src="/css/inward/verification.css"/>
     
    <zscript>
@@ -15,24 +13,23 @@
 
     <borderlayout width="100%" height="100vh">
 
-        <!-- ================= SIDEBAR ================= -->
-
+        <!-- SIDEBAR -->
         <west width="220px" border="0">
-
             <include
                 src="/components/sidebar.zul? role=INWARD_CHECKER &amp; activeTab=verification"/>
-
         </west>
 
+        <!--  MAIN AREA -->
 
-        <!-- ================= MAIN AREA ================= -->
+        <center
+    border="0"
+    style="background:#EAF6FF;">
 
-        <center border="0">
+            <borderlayout width="100%" height="calc(100vh - 55px)"
+            >
 
-            <borderlayout width="100%" height="calc(100vh - 55px)">
 
-
-                <!-- ================= HEADER ================= -->
+                <!-- HEADER -->
 
                 <north height="55px" border="0">
 
@@ -42,7 +39,7 @@
                 </north>
 
 
-                <!-- ================= PAGE CONTENT ================= -->
+                <!--  PAGE CONTENT -->
 
                <center border="0" autoscroll="false" vflex="1">
 
@@ -53,7 +50,7 @@
 								    sclass="verification-page">
 
 
-                        <!-- ================= BREADCRUMB ================= -->
+                        <!--  BREADCRUMB -->
 
                         <hlayout
                             spacing="8px"
@@ -67,33 +64,33 @@
                         </hlayout>
 
 
-<!--PAGE TITLE -->
+						<!--PAGE TITLE -->
 
-<hlayout
-    width="100%"
-    valign="middle"
-    sclass="page-title-row">
+						<hlayout
+						    width="100%"
+						    valign="middle"
+						    sclass="page-title-row">
 
-    <vlayout spacing="3px">
+                        <vlayout spacing="3px">
 
-        <label
-            value="Cheque Verification"
-            sclass="page-title"/>
+				        <label
+				            value="Cheque Verification"
+				            sclass="page-title"/>
 
-        <label
-            value="Review the selected cheque and record the Checker decision."
-            sclass="page-description"/>
+				        <label
+				            value="Review the selected cheque and record the Checker decision."
+				            sclass="page-description"/>
 
-    </vlayout>
+   						 </vlayout>
 
-</hlayout>
+		          </hlayout>
 
-<div sclass="batch-info-card">
+				<div sclass="batch-info-card">
 
-    <hlayout
-        width="100%"
-        spacing="0"
-        valign="top">
+			    <hlayout
+			        width="100%"
+			        spacing="0"
+			        valign="top">
 
         <!-- BATCH ID -->
         <vlayout
@@ -238,29 +235,37 @@
 
         </vlayout>
 
-        <!-- PREVIOUS / RECORD / NEXT -->
-        <hlayout
-            valign="middle"
-            spacing="8px"
-            sclass="cheque-navigation">
+      
+<!-- PREVIOUS / RECORD / NEXT -->
 
-            <button
-                id="btnPrevious"
-                label="← Prev"
-                sclass="cheque-nav-btn"/>
+<hlayout
+    valign="middle"
+    spacing="8px"
+    sclass="cheque-navigation"
+    style="margin-left:15px;">
 
-            <label
-                id="lblChequePosition"
-                value=""
-                sclass="cheque-position"/>
+    <button
+        id="btnPrevious"
+        label="← Prev"
+        sclass="cheque-nav-btn"
+        width="70px"
+        height="32px"
+        style="background:#0B2344;color:white;border:0;border-radius:4px;font-size:12px;"/>
 
-            <button
-                id="btnNext"
-                label="Next →"
-                sclass="cheque-nav-btn"/>
+    <label
+        id="lblChequePosition"
+        value=""
+        sclass="cheque-position"/>
 
-        </hlayout>
+    <button
+        id="btnNext"
+        label="Next →"
+        sclass="cheque-nav-btn"
+        width="70px"
+        height="32px"
+        style="background:#0B2344;color:white;border:0;border-radius:4px;font-size:12px;"/>
 
+</hlayout>
     </hlayout>
 
     <!-- CHEQUE IMAGE -->
@@ -303,112 +308,132 @@
 
 </vlayout>                            
 
-    <!-- ================= EMPTY IMAGE AREA ================= -->
+    <!--  EMPTY IMAGE AREA  -->
 
 							  <div
 							    id="chequeImageContainer"
 							    vflex="1"
 							    sclass="cheque-preview-area">
 							</div>
+							
+<!-- RIGHT SIDE WRAPPER -->
 <vlayout
-    sclass="verification-card cheque-verification-card"
     hflex="1"
-    spacing="0"
-    style="height: 343px; overflow-y: auto; overflow-x: hidden;">
-
-    <!-- CARD HEADER -->
-    <hlayout
-        width="100%"
-        valign="middle"
-        spacing="0"
-        sclass="verification-header-row">
-
-        <label
-            value="Cheque Verification"
-            sclass="card-title"
-            hflex="1"/>
-
-        <label
-            value="PENDING"
-            sclass="verification-status-badge"/>
-
-    </hlayout>
-
-    <label
-        value="Verify the captured details against the cheque image and maker request."
-        sclass="card-description"/>
-        
-            <!-- CBS VALIDATION-->
+    vflex="1"
+    spacing="8px">
 
     <vlayout
-        spacing="6px"
-        sclass="verification-section">
+        sclass="verification-card cheque-verification-card"
+        hflex="1"
+        vflex="1"
+        spacing="0"
+        style="min-height:0; overflow-y:auto; overflow-x:hidden;">
+        
+    <!-- CARD HEADER -->
+   
+<hlayout
+    width="100%"
+    valign="middle"
+    spacing="0"
+    sclass="verification-header-row">
 
-        <label
-            value="CBS VALIDATION"
-            sclass="verification-section-title"/>
+    <label
+        value="Cheque Verification"
+        sclass="card-title"
+        hflex="1"/>
 
-        <vlayout
-            spacing="7px"
-            sclass="cbs-validation-box">
+    <label
+        value="PENDING"
+        sclass="verification-status-badge"/>
 
-            <hlayout width="100%">
-                <label
-                    value="MICR Code"
-                    sclass="verification-field-label"
-                    hflex="1"/>
+</hlayout>
 
-                <label
-                    value=""
-                    id="lblMicrCode"
-                    sclass="verification-field-value"/>
-            </hlayout>
+<label
+    value="Verify the captured details against the cheque image and maker request."
+    sclass="card-description"/>
 
-            <hlayout width="100%">
-                <label
-                    value="Bank Code"
-                    sclass="verification-field-label"
-                    hflex="1"/>
 
-                <label
-                    value=""
-                    id="lblBankCode"
-                    sclass="verification-field-value"/>
-            </hlayout>
+<!--  CBS VALIDATION  -->
+<vlayout
+    spacing="6px"
+    sclass="verification-section">
 
-            <hlayout width="100%">
-                <label
-                    value="Branch Code"
-                    sclass="verification-field-label"
-                    hflex="1"/>
+    <label
+        value="CBS VALIDATION"
+        sclass="verification-section-title"/>
 
-                <label
-                    value=""
-                    id="lblBranchCode"
-                    sclass="verification-field-value"/>
-            </hlayout>
+    <vlayout
+        spacing="7px"
+        sclass="cbs-validation-box">
 
-        </vlayout>
+        <!-- MICR CODE -->
+        <hlayout width="100%">
+            <label
+                value="MICR Code"
+                sclass="verification-field-label"
+                hflex="1"/>
 
-        <!-- CBS Validation Button -->
+            <label
+                value=""
+                id="lblMicrCode"
+                sclass="verification-field-value"/>
+        </hlayout>
 
-        <button
-            id="btnRunCbsValidation"
-            label="🔍 Run CBS Validation"
-            sclass="cbs-validation-btn"/>
+        <!-- BANK CODE -->
+        <hlayout width="100%">
+            <label
+                value="Bank Code"
+                sclass="verification-field-label"
+                hflex="1"/>
+
+            <label
+                value=""
+                id="lblBankCode"
+                sclass="verification-field-value"/>
+        </hlayout>
+
+        <!-- BRANCH CODE -->
+        <hlayout width="100%">
+            <label
+                value="Branch Code"
+                sclass="verification-field-label"
+                hflex="1"/>
+
+            <label
+                value=""
+                id="lblBranchCode"
+                sclass="verification-field-value"/>
+        </hlayout>
+
+        <!-- TRANSACTION CODE -->
+        <hlayout width="100%">
+            <label
+                value="Transaction Code"
+                sclass="verification-field-label"
+                hflex="1"/>
+
+            <label
+                value=""
+                id="lblTransactionCode"
+                sclass="verification-field-value"/>
+        </hlayout>
 
     </vlayout>
 
+    <!-- CBS VALIDATION BUTTON -->
+    <button
+        id="btnRunCbsValidation"
+        label="🔍 Run CBS Validation"
+        sclass="cbs-validation-btn"/>
 
-    <!-- ================= SEPARATOR ================= -->
-
-   <div sclass="verification-separator"></div>
+</vlayout>
 
 
-  
+<!-- SEPARATOR  -->
+<div sclass="verification-separator"></div>
 
-<!--  PRESENTING DETAILS-->
 
+<!-- PRESENTING DETAILS -->
 <vlayout
     spacing="7px"
     sclass="verification-section">
@@ -417,6 +442,7 @@
         value="PRESENTING DETAILS"
         sclass="verification-section-title"/>
 
+    <!-- PRESENTING BANK -->
     <hlayout width="100%">
         <label
             value="Presenting Bank"
@@ -429,9 +455,10 @@
             sclass="verification-field-value"/>
     </hlayout>
 
+    <!-- CHEQUE NUMBER -->
     <hlayout width="100%">
         <label
-            value="Cheque No."
+            value="Cheque Number "
             sclass="verification-field-label"
             hflex="1"/>
 
@@ -441,6 +468,20 @@
             sclass="verification-field-value"/>
     </hlayout>
 
+    <!-- CHEQUE DATE -->
+    <hlayout width="100%">
+        <label
+            value="Cheque Date"
+            sclass="verification-field-label"
+            hflex="1"/>
+
+        <label
+            value=""
+            id="lblChequeDate"
+            sclass="verification-field-value"/>
+    </hlayout>
+
+   
     <hlayout width="100%">
         <label
             value="Amount"
@@ -456,123 +497,128 @@
 </vlayout>
 
 
-    <!-- ================= SEPARATOR ================= -->
-
-   <div sclass="verification-separator"></div>
-
-
-    <!--
-         OUR ACCOUNT - CBS -->
-
-    <vlayout
-        spacing="7px"
-        sclass="verification-section">
-
-        <label
-            value="OUR ACCOUNT (CBS)"
-            sclass="verification-section-title"/>
-
-        <hlayout width="100%">
-            <label
-                value="Account No."
-                sclass="verification-field-label"
-                hflex="1"/>
-
-            <label
-                value=""
-                id="lblAccountNumber"
-                sclass="verification-field-value"/>
-        </hlayout>
-
-        <hlayout width="100%">
-            <label
-                value="Holder"
-                sclass="verification-field-label"
-                hflex="1"/>
-
-            <label
-                value=""
-                id="lblAccountHolder"
-                sclass="verification-field-value"/>
-        </hlayout>
-
-        <hlayout width="100%">
-            <label
-                value="Balance"
-                sclass="verification-field-label"
-                hflex="1"/>
-
-            <label
-                value=""
-                id="lblAccountBalance"
-                sclass="verification-field-value"/>
-        </hlayout>
-
-    </vlayout>
-
-
-    <!-- SEPARATOR  -->
-
 <div sclass="verification-separator"></div>
 
 
-    <!-- ACTION -->
+<!-- DRAWER DETAILS -->
+<vlayout
+    spacing="7px"
+    sclass="verification-section">
 
-    <vlayout
-        spacing="8px"
-        sclass="verification-action-section">
+    <label
+        value="DRAWER DETAILS"
+        sclass="verification-section-title"/>
+
+    <!-- DRAWER NAME -->
+    <hlayout width="100%">
+        <label
+            value="Drawer Name"
+            sclass="verification-field-label"
+            hflex="1"/>
 
         <label
-            value="ACTION"
-            sclass="verification-section-title"/>
+            value=""
+            id="lblDraweeName"
+            sclass="verification-field-value"/>
+    </hlayout>
 
-        <hlayout
-            width="100%"
-            spacing="8px"
-            sclass="verification-action-buttons">
+    <!-- DRAWER ACCOUNT NUMBER -->
+    <hlayout width="100%">
+        <label
+            value="Drawer Account No."
+            sclass="verification-field-label"
+            hflex="1"/>
 
-            <button
-                id="btnAccept"
-                label="✓ Accept"
-                sclass="verification-action-btn accept-action-btn"
-                hflex="1"/>
+        <label
+            value=""
+            id="lblDraweeAccountNumber"
+            sclass="verification-field-value"/>
+    </hlayout>
+    
+    <!-- DRAWER ACCOUNT balance -->
+     <hlayout width="100%">
+        <label
+            value="Available Balance"
+            sclass="verification-field-label"
+            hflex="1"/>
 
-            <button
-                id="btnReturn"
-                label="✕ Return"
-                sclass="verification-action-btn return-action-btn"
-                hflex="1"/>
-
-            <button
-                id="btnSendBack"
-                label="↩ Send Back"
-                sclass="verification-action-btn send-back-action-btn"
-                hflex="1"/>
-
-        </hlayout>
-
-    </vlayout>
+        <label
+            value=""
+            id="lblAccountBalance"
+            sclass="verification-field-value"/>
+    </hlayout>
 
 </vlayout>
-</hlayout> 
 
-                        <!-- FOOTER  -->
 
-                        <hlayout
-                            width="100%"
-                            valign="middle"
-                            sclass="verification-footer">
 
-                            <label
-                                value="CTS Inward Processing • Enterprise Clearing Application"
-                                sclass="footer-text"
-                                hflex="1"/>
+<!--  SEPARATOR  -->
+<div sclass="verification-separator"></div>
 
-                            <label
-                                value="v1.0"
-                                sclass="footer-version"/>
 
-                        </hlayout>
+</vlayout>
+
+
+<!-- ACTION  -->
+
+<vlayout
+    spacing="8px"
+    sclass="verification-action-section">
+
+    <label
+        value="ACTION"
+        sclass="verification-section-title"/>
+
+    <hlayout
+        width="100%"
+        spacing="8px"
+        sclass="verification-action-buttons">
+
+        <button
+            id="btnAccept"
+            label="✓ Accept"
+            sclass="verification-action-btn accept-action-btn"
+            hflex="1"/>
+
+        <button
+            id="btnReturn"
+            label="✕ Reject"
+            sclass="verification-action-btn return-action-btn"
+            hflex="1"/>
+
+        <button
+            id="btnSendBack"
+            label="↩ Send Back"
+            sclass="verification-action-btn send-back-action-btn"
+            hflex="1"/>
+
+    </hlayout>
+
+</vlayout>
+
+</vlayout>
+<!-- CLOSE MAIN VERIFICATION AREA -->
+</hlayout>
+
+
+
+<!-- FOOTER -->
+
+<hlayout
+    width="100%"
+    valign="middle"
+    sclass="verification-footer">
+
+    <label
+        value="CTS Inward Processing • Enterprise Clearing Application"
+        sclass="footer-text"
+        hflex="1"/>
+
+    <label
+        value="v1.0"
+        sclass="footer-version"/>
+
+</hlayout>
 
 
                     </vlayout>

@@ -202,7 +202,7 @@ public class LoginController extends GenericForwardComposer<Component> {
             Executions.sendRedirect("/inward/maker/index.zul");
         } 
         else if ("ROL1005".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
-            Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
+            Executions.sendRedirect("/inward/checker/dashboard.zul");
         } 
         else {
             Messagebox.show("No dashboard mapped for role: " + dbRoleName + " (ID: " + userRoleId + ")", 
