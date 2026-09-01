@@ -172,7 +172,7 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 		return cheque;
 	}
     // Static in-memory storage (replace with JDBC PreparedStatement later)
-    private final List<InwardCheque> chequeTable = new ArrayList<>();
+    
 
     private void initStaticCheques() {
         Timestamp now = new Timestamp(System.currentTimeMillis());
