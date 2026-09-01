@@ -433,9 +433,13 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
         String adminUserId = resolveLoggedInUserId();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        String updatePendingSql = "UPDATE outward_cheque SET cheque_status = 'UNPROCESSED' " +
-                                  "WHERE cheque_status IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_VERIFICATION', 'Pending', 'PENDING')";
-        String updateSessionSql = "UPDATE clearing_session SET session_status = 'CLOSED', closed_at = ?, closed_by = ?, remarks = ? " +
+        // Flag all active in-flight items as EOD rollovers while preserving their operational state
+        String updatePendingSql = "UPDATE outward_cheque " +
+                                  "SET is_eod_rollover = TRUE " +
+                                  "WHERE cheque_status IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_VERIFICATION', 'Pending', 'PENDING', 'RAW')";
+
+        String updateSessionSql = "UPDATE clearing_session " +
+                                  "SET session_status = 'CLOSED', closed_at = ?, closed_by = ?, remarks = ? " +
                                   "WHERE clearing_date = ? AND session_status = 'OPEN'";
 
         try (Connection conn = DBConnection.getConnection()) {
@@ -464,7 +468,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             conn.commit();
 
             String auditDetail = isForced
-                ? "Forced EOD completed with " + pendingChequesCount + " pending cheques moved to Unprocessed Queue. Reason: " + remarks
+                ? "Forced EOD completed with " + pendingChequesCount + " pending cheques flagged as Rollover. Reason: " + remarks
                 : "Normal EOD closed successfully for date " + currentClearingDate;
             AuditServiceImpl.getInstance().log("EOD_BOD", "EOD_COMPLETED", auditDetail, "SUCCESS");
 
@@ -479,7 +483,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), false));
             refreshUI();
 
-            String msg = isForced ? "Forced EOD Completed. Unfinished cheques moved to Unprocessed Queue." : "EOD completed successfully.";
+            String msg = isForced ? "Forced EOD Completed. Rollover cheques sent to Maker Unprocessed queue." : "EOD completed successfully.";
             Clients.showNotification(msg, "info", null, "top_center", 3000);
 
         } catch (SQLException ex) {
