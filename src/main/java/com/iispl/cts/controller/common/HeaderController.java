@@ -1,5 +1,10 @@
 package com.iispl.cts.controller.common;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -10,13 +15,14 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Popup;
 import org.zkoss.zul.Timer;
 import org.zkoss.zul.Vlayout;
+
+import com.iispl.cts.common.config.DBConnection;
 
 public class HeaderController extends GenericForwardComposer<Component> {
 
@@ -92,20 +98,50 @@ public class HeaderController extends GenericForwardComposer<Component> {
     }
 
     private void loadSessionState() {
-        Boolean isSessionOpen = (Boolean) Sessions.getCurrent().getAttribute("CTS_SESSION_OPEN");
-        LocalDate clearingDate = (LocalDate) Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
+    	boolean isSessionOpen = false;
+        LocalDate clearingDate = null;
 
-        if (isSessionOpen == null) isSessionOpen = true;
-        if (clearingDate == null) clearingDate = LocalDate.now();
+        // 1. Fetch from Database
+        String sql = "SELECT clearing_date, session_status FROM clearing_session ORDER BY session_id DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
+            if (rs.next()) {
+                Date dbDate = rs.getDate("clearing_date");
+                if (dbDate != null) {
+                    clearingDate = dbDate.toLocalDate();
+                }
+                isSessionOpen = "OPEN".equalsIgnoreCase(rs.getString("session_status"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 2. Fallback to today's date if table is empty or date is null
+        if (clearingDate == null) {
+            clearingDate = LocalDate.now();
+        }
+
+        // 3. Save into Session Attributes
+        Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", isSessionOpen);
+        Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", clearingDate);
+
+        // 4. Force update the Label
         if (lblHeaderSessionDate != null) {
             lblHeaderSessionDate.setValue(clearingDate.format(dateFormatter));
+            lblHeaderSessionDate.setVisible(true);
         }
+
+        // 5. Update Status Badge
         updateSessionBadge(isSessionOpen);
     }
 
     private void updateSessionBadge(boolean isOpen) {
-        if (lblHeaderSessionStatus == null) return;
+        if (lblHeaderSessionStatus == null) {
+            System.out.println("DEBUG: lblHeaderSessionStatus is NULL in HeaderController!");
+            return;
+        }
 
         if (isOpen) {
             lblHeaderSessionStatus.setValue("● OPEN");

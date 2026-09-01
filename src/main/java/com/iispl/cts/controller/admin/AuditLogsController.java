@@ -15,6 +15,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.AuditLog;
 import com.iispl.cts.service.AuditService;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -38,6 +39,9 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
+        if(!SecurityUtil.checkAccess("AUDIT_LOG")) {
+        	return;
+        }
         
         // Default to today
         if (dtFrom != null) dtFrom.setValue(new Date(System.currentTimeMillis() - (7L * 24 * 3600 * 1000))); // 7 days back
