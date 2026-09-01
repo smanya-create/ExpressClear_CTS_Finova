@@ -61,7 +61,7 @@
                                     <listheader label="REJECTION REQUESTS" align="center"/>
                                     <listheader label="ACTION" align="center" width="180px"/>
                                 </listhead>
-                               
+0                               
                                 
                             </listbox>
                         </vlayout>
