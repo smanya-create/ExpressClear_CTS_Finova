@@ -91,7 +91,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        SecurityUtil.checkAccess("USER_MANAGEMENT");
+        
         if (cmbRoleFilter != null && cmbRoleFilter.getItemCount() > 0) cmbRoleFilter.setSelectedIndex(0);
         if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) cmbStatusFilter.setSelectedIndex(0);
         loadUserData();

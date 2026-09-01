@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.admin;
 
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.List;
 
@@ -39,9 +40,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        if(!SecurityUtil.checkAccess("AUDIT_LOG")) {
-        	return;
-        }
+        
         
         // Default to today
         if (dtFrom != null) dtFrom.setValue(new Date(System.currentTimeMillis() - (7L * 24 * 3600 * 1000))); // 7 days back
