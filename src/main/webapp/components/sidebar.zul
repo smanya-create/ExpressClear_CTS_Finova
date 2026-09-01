@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?link rel="stylesheet" type="text/css" href="/css/common/sidebar.css"?>
 <zk>
+<style src="/css/common/sidebar.css"/>
 <vlayout sclass="sidebar" width="220px" vflex="1" apply="com.iispl.cts.controller.common.SidebarController"
          spacing="0" style="background-color: #0b1d3a; overflow: hidden;">
     
