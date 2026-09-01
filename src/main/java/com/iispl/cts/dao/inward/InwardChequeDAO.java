@@ -18,4 +18,7 @@ public interface InwardChequeDAO {
    
   boolean updateMicrRepair(String inwardChequeId,String correctedMicrCode,String chequeStatus);
   
+    List<InwardCheque> findByBatchAndStatus(String batchId, String status);
+  
+    boolean updateCheque(InwardCheque cheque);
 }

@@ -36,13 +36,22 @@
                 </vlayout>
 
                 <!-- Password Field -->
-                <vlayout spacing="4px">
-                    <label value="PASSWORD" sclass="field-label"/>
-                    <textbox id="txtPassword" type="password" placeholder="Enter your password" 
-                             constraint="no empty: Password is required."
-                             sclass="input-field" hflex="1" height="42px"
-                             onOK="$composer.onClickSignIn()"/>
-                </vlayout>
+               <!-- Password Field -->
+<!-- Password Field -->
+<vlayout spacing="4px">
+    <label value="PASSWORD" sclass="field-label"/>
+    <hlayout style="position: relative; width: 100%;" valign="middle">
+        <textbox id="txtPassword" type="password" placeholder="Enter your password" 
+                 constraint="no empty: Password is required."
+                 sclass="input-field" hflex="1" height="42px"
+                 style="padding-right: 42px; box-sizing: border-box;"
+                 onOK="$composer.onClickSignIn()"/>
+        <button id="btnTogglePassword" 
+                iconSclass="z-icon-eye"
+                onClick="$composer.onTogglePasswordVisibility()"
+                style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; color: #718096; font-size: 15px; box-shadow: none; padding: 0; min-height: unset;" />
+    </hlayout>
+</vlayout>
 
                 <!-- Role Selection Dropdown (Populated exclusively by LoginController) -->
                 <!-- Role Selection Dropdown -->

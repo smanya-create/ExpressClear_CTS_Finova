@@ -11,5 +11,8 @@ public interface InwardChequeService {
     InwardCheque findById(String inwardChequeId);
 
     boolean updateMicrRepair(String inwardChequeId,String correctedMicrCode,String chequeStatus);
-    
+
+    List<InwardCheque> getChequesByBatchAndStatus(String batchId, String status);
+  
+    boolean updateChequeDetails(InwardCheque cheque);
 }

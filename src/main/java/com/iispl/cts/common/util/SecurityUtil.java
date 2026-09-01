@@ -1,41 +1,56 @@
 package com.iispl.cts.common.util;
 
-
-
-import java.util.Arrays;
-import java.util.List;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.Sessions;
 
 public class SecurityUtil {
 
     public static boolean hasPermission(String screenKey) {
-        Object roleObj = Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
-        String role = roleObj != null ? roleObj.toString().toUpperCase() : "";
-
-        // Admin has full bypass access
-        if (role.contains("ADMIN")) {
-            return true;
+        Session session = Sessions.getCurrent();
+        if (session == null) {
+            return false;
         }
 
-        Object permsObj = Sessions.getCurrent().getAttribute("USER_PERMISSIONS");
+        // Fetch granular permissions assigned to this user/role during login
+        Object permsObj = session.getAttribute("USER_PERMISSIONS");
         if (permsObj == null || permsObj.toString().trim().isEmpty()) {
             return false;
         }
 
-        List<String> permissions = Arrays.asList(permsObj.toString().split(","));
-        return permissions.contains(screenKey.trim().toUpperCase());
+        String[] permissions = permsObj.toString().split(",");
+        String targetKey = screenKey.trim().toUpperCase();
+
+        for (String perm : permissions) {
+            if (perm.trim().equalsIgnoreCase(targetKey)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public static void checkAccess(String screenKey) {
-        Object user = Sessions.getCurrent().getAttribute("LOGGED_USER");
-        if (user == null) {
+    public static boolean checkAccess(String screenKey) {
+        Session session = Sessions.getCurrent();
+        if (session == null) {
             Executions.sendRedirect("/login.zul");
-            return;
+            return false;
+        }
+
+        Object user = session.getAttribute("LOGGED_USER");
+        if (user == null) user = session.getAttribute("CTS_USER_ID");
+        if (user == null) user = session.getAttribute("USER_ID");
+
+        if (user == null) {
+            Executions.sendRedirect("/common/login.zul");
+            return false;
         }
 
         if (!hasPermission(screenKey)) {
-            Executions.sendRedirect("/access-denied.zul");
+            Executions.sendRedirect("/common/access-denied.zul");
+            return false;
         }
+
+        return true;
     }
 }

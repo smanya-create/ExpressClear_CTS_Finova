@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Checker Queue" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet" type="text/css" href="/css/outward/checker-queue.css"?>
+
+<zk>
+
+	<zscript>
+	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
+
+	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Alex");
+</zscript>
+
+	<window id="checkerQueueWindow" border="none" width="100%"
+		height="100%" sclass="checker-queue-window" apply="com.iispl.cts.controller.outward.checker.OutwardCheckerQueueController" >
+
+		<borderlayout width="100%" height="100%">
+
+			<!-- =====================================================
+				LEFT SIDEBAR
+				DO NOT CHANGE sidebar.zul
+				===================================================== -->
+
+			<west size="220px" border="none" splittable="false"
+				collapsible="false">
+
+				<include src="/components/sidebar.zul">
+
+					<custom-attributes role="OUTWARD_CHECKER"
+						activeTab="checker-queue" />
+
+				</include>
+
+			</west>
+
+
+			<!-- =====================================================
+				RIGHT SIDE
+				===================================================== -->
+
+			<center border="none">
+
+				<borderlayout width="100%" height="100%">
+
+					<!-- =================================================
+						HEADER
+						================================================= -->
+					<north height="90px" border="none">
+    <div sclass="page-header">
+
+        <!-- LEFT SIDE -->
+        <div sclass="header-left-content">
+
+            <label value="Cheque Verification"
+                   sclass="header-page-title" />
+
+            <label value="Review the cheque and verify the read-only details submitted by Maker."
+                   sclass="header-page-description" />
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div sclass="header-right-content">
+
+            <include src="/components/header.zul" />
+
+        </div>
+
+    </div>
+</north>
+
+
+					<!-- =================================================
+						MAIN CONTENT
+						================================================= -->
+
+					<center border="none" autoscroll="true">
+
+						<div sclass="main-page">
+
+							<div sclass="main-content">
+
+
+								<!-- =================================================
+									HEADING
+									================================================= -->
+
+								<div sclass="section-heading">
+
+									<label value="Cheque Queue"
+										sclass="main-title" />
+
+
+
+								</div>
+
+
+								<!-- =================================================
+									SUMMARY CARD
+									================================================= -->
+
+								<div sclass="summary-card">
+
+									<div sclass="summary-item">
+
+										<label value="BATCH"
+											sclass="summary-label" />
+
+										<label id="lblBatchNo" value="-"
+											sclass="summary-value" />
+
+									</div>
+
+
+									<div sclass="summary-item">
+
+										<label value="CHEQUE"
+											sclass="summary-label" />
+
+										<label id="lblChequeNo"
+											value="-" sclass="summary-value" />
+
+									</div>
+
+
+									<div sclass="summary-item">
+
+										<label value="QUEUE STATUS"
+											sclass="summary-label" />
+
+										<label id="lblQueueStatus"
+											value="" sclass="status-pending" />
+
+									</div>
+
+
+									<div sclass="summary-item">
+
+										<label value="CURRENT CHEQUE"
+											sclass="summary-label" />
+
+										<label id="lblCurrentCheque"
+											value="-" sclass="summary-value" />
+
+									</div>
+
+
+									<div sclass="summary-item last">
+
+										<label value="REMAINING"
+											sclass="summary-label" />
+
+										<label id="lblRemaining"
+											value="-" sclass="remaining-value" />
+
+									</div>
+
+								</div>
+
+
+								<!-- =================================================
+									IMAGE + DETAILS
+									================================================= -->
+
+								<div sclass="verification-row">
+
+
+									<!-- =================================================
+										CHEQUE IMAGE CARD
+										================================================= -->
+
+									<div sclass="image-card">
+
+										<label value="Cheque Image"
+											sclass="card-title" />
+
+										<label
+											value="Read-only image for visual verification"
+											sclass="card-description" />
+
+
+										<!-- ZOOM CONTROLS -->
+
+										<div sclass="zoom-controls">
+
+											<button id="btnZoomOut"
+												label="−" sclass="zoom-button" tooltiptext="Zoom Out" />
+
+											<label id="lblZoom"
+												value="100%" sclass="zoom-level" />
+
+											<button id="btnZoomIn"
+												label="+" sclass="zoom-button" tooltiptext="Zoom In" />
+
+											<button id="btnZoomReset"
+												label="Reset" sclass="zoom-reset-button"
+												tooltiptext="Reset Zoom" />
+
+										</div>
+
+
+										<!-- FRONT / BACK -->
+
+										<div
+											sclass="image-side-controls">
+
+											<button id="btnImageSide"
+												label="BACK SIDE" sclass="image-side-button" />
+
+										</div>
+
+
+										<!-- IMAGE -->
+
+										<div
+											sclass="cheque-image-container">
+
+											<image id="imgCheque"
+												visible="false" sclass="cheque-image" />
+
+										</div>
+
+									</div>
+
+
+									<!-- =================================================
+										CHEQUE DETAILS CARD
+										================================================= -->
+
+									<div sclass="details-card">
+
+										<label value="Cheque Details"
+											sclass="card-title" />
+
+										<label
+											value="Read-only · Submitted by Maker"
+											sclass="card-description" />
+
+
+										<!-- CHEQUE NUMBER -->
+
+										<div sclass="field-group">
+
+											<label value="CHEQUE NUMBER"
+												sclass="field-label" />
+
+											<textbox id="txtChequeNo"
+												readonly="true" width="100%" sclass="readonly-field" />
+
+										</div>
+
+
+										<!-- MICR -->
+
+										<div sclass="field-group">
+
+											<label value="MICR"
+												sclass="field-label" />
+
+											<textbox id="txtMicr"
+												readonly="true" width="100%" sclass="readonly-field" />
+
+										</div>
+										
+										<!-- PAYEE NAME-->
+
+										<div sclass="field-group">
+
+											<label value="PAYEE NAME"
+												sclass="field-label" />
+
+											<textbox id="txtpayeeName"
+												readonly="true" width="100%" sclass="readonly-field" />
+
+										</div>
+
+
+										<!-- ACCOUNT NUMBER + VALIDATION -->
+
+										<div sclass="field-group">
+
+											<label
+												value="ACCOUNT NUMBER" sclass="field-label" />
+
+											<div
+												sclass="account-validation-container">
+
+												<textbox
+													id="txtAccountNo" readonly="true" width="100%"
+													sclass="readonly-field account-field" />
+
+												<label
+													id="lblAccountValidation" value="-" sclass="valid-badge" />
+
+											</div>
+
+										</div>
+
+
+										<!-- AMOUNT + DATE -->
+
+										<div
+											sclass="two-column-fields">
+
+
+											<div sclass="field-group">
+
+												<label value="AMOUNT"
+													sclass="field-label" />
+
+												<textbox id="txtAmount"
+													readonly="true" width="100%" sclass="readonly-field" />
+
+											</div>
+
+
+											<div sclass="field-group">
+
+												<label
+													value="CHEQUE DATE" sclass="field-label" />
+
+												<textbox
+													id="txtChequeDate" readonly="true" width="100%"
+													sclass="readonly-field" />
+
+											</div>
+
+										</div>
+
+									</div>
+
+								</div>
+
+
+								<!-- =================================================
+									NAVIGATION
+									================================================= -->
+
+								<div sclass="navigation-row">
+
+									<button id="btnPrevious"
+										label="‹  PREVIOUS" disabled="true"
+										sclass="navigation-button" />
+
+									<label
+										id="lblCurrentChequeNavigation"
+										value="Cheque 1 of 1 · 0 remaining" sclass="navigation-label" />
+
+									<button id="btnNext" label="NEXT  ›"
+										sclass="navigation-button" />
+
+								</div>
+
+
+								<!-- =================================================
+									ACTION CARD
+									================================================= -->
+
+								<div sclass="action-card">
+
+									<label value="CHECKER ACTION"
+										sclass="action-title" />
+
+									<div sclass="action-buttons">
+
+										<button id="btnVerified"
+											label="VERIFIED" sclass="verified-button" />
+
+										<button id="btnReturn"
+											label="RETURN TO MAKER" sclass="return-button" />
+
+										<button id="btnReject"
+											label="REJECT" sclass="reject-button" />
+
+									</div>
+
+								</div>
+
+
+								<!-- =================================================
+									FOOTER
+									================================================= -->
+
+								<div sclass="page-footer">
+
+									<label
+										value="Express Clear CTS · Checker Portal"
+										sclass="footer-left" />
+
+									<label value="Cheque Verification"
+										sclass="footer-right" />
+
+								</div>
+
+
+							</div>
+
+						</div>
+
+					</center>
+
+				</borderlayout>
+
+			</center>
+
+		</borderlayout>
+
+	</window>
+
+</zk>

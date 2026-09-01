@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?style src="/css/cts-unprocessed.css"?>
+<zk xmlns="http://www.zkoss.org/2005/zul">
+    <!-- Full Height Left Sidebar Layout -->
+    <borderlayout vflex="1" hflex="1">
+        
+        <west width="240px" border="none" collapsible="false">
+            <include src="/components/sidebar.zul" role="OUTWARD_MAKER" activeTab="unprocessed" />
+        </west>
+
+        <center border="none">
+            <borderlayout vflex="1" hflex="1">
+                
+                <north size="65px" border="none">
+                    <include id="incHeader" src="/components/header.zul" 
+                             pageTitle="Outward Maker" 
+                             pageSubtitle="Forced EOD Unprocessed Cheques" />
+                </north>
+
+                <center border="none" autoscroll="true">
+                    <window id="winUnprocessedCheques" border="none" vflex="1" hflex="1"
+                            apply="com.iispl.cts.controller.outward.maker.UnprocessedChequesController"
+                            style="padding: 20px 24px; background: #f8fafc;">
+
+                        <vlayout spacing="16px" vflex="1">
+                            <!-- Page Heading -->
+                            <vlayout spacing="4px">
+                                <hlayout valign="middle" style="display: flex; justify-content: space-between; width: 100%;">
+                                    <vlayout spacing="2px">
+                                        <label value="Forced EOD Unprocessed Cheques" sclass="page-heading"/>
+                                        <label value="Rollover instruments requiring Maker MICR Repair or Data Entry to re-enter outward clearing." sclass="page-subheading"/>
+                                    </vlayout>
+                                    <button id="btnRefresh" label="Refresh List" iconSclass="z-icon-refresh"
+                                            sclass="btn-refresh"
+                                            onClick="$composer.loadUnprocessedCheques()"/>
+                                </hlayout>
+                            </vlayout>
+
+                            <!-- Maker Summary Counter Cards -->
+                            <hlayout spacing="16px" width="100%">
+                                <hlayout sclass="stat-card" hflex="1" valign="middle" style="justify-content: space-between;">
+                                    <vlayout spacing="2px">
+                                        <label value="TOTAL MAKER PENDING" sclass="stat-card-title text-muted"/>
+                                        <label id="lblTotalCount" value="0" sclass="stat-card-value text-dark"/>
+                                    </vlayout>
+                                    <label sclass="z-icon-history icon-gray"/>
+                                </hlayout>
+
+                                <hlayout sclass="stat-card" hflex="1" valign="middle" style="justify-content: space-between;">
+                                    <vlayout spacing="2px">
+                                        <label value="MICR REPAIR PENDING" sclass="stat-card-title text-orange"/>
+                                        <label id="lblRepairCount" value="0" sclass="stat-card-value text-orange"/>
+                                    </vlayout>
+                                    <label sclass="z-icon-wrench icon-orange"/>
+                                </hlayout>
+
+                                <hlayout sclass="stat-card" hflex="1" valign="middle" style="justify-content: space-between;">
+                                    <vlayout spacing="2px">
+                                        <label value="DATA ENTRY PENDING" sclass="stat-card-title text-purple"/>
+                                        <label id="lblDataEntryCount" value="0" sclass="stat-card-value text-purple"/>
+                                    </vlayout>
+                                    <label sclass="z-icon-edit icon-purple"/>
+                                </hlayout>
+                            </hlayout>
+
+                            <!-- Filter Controls -->
+                            <hlayout spacing="12px" valign="middle" sclass="filter-bar">
+                                <label value="Filter By Action:" sclass="filter-label"/>
+                                <combobox id="cmbStatusFilter" readonly="true" width="190px" onSelect="$composer.onFilterChanged()">
+                                    <comboitem label="All Maker Actions" value="ALL"/>
+                                    <comboitem label="Needs MICR Repair" value="PENDING_REPAIR"/>
+                                    <comboitem label="Needs Data Entry" value="PENDING_DATA_ENTRY"/>
+                                </combobox>
+
+                                <textbox id="txtSearchBatch" placeholder="Search Batch / Cheque No..." width="240px"
+                                         onOK="$composer.onFilterChanged()" instant="true"/>
+                            </hlayout>
+
+                            <!-- Listbox -->
+                            <listbox id="lstUnprocessed" vflex="1" mold="paging" pageSize="12"
+                                     emptyMessage="No Forced EOD rollover cheques pending for Maker processing.">
+                                <listhead sizable="true">
+                                    <listheader label="Original Batch / Session" width="240px"/>
+                                    <listheader label="Cheque No" width="120px"/>
+                                    <listheader label="MICR Code" width="120px"/>
+                                    <listheader label="Amount" width="140px" align="right"/>
+                                    <listheader label="Required Task" width="180px"/>
+                                    <listheader label="Reason / Remarks" hflex="1"/>
+                                    <listheader label="Action" width="120px" align="center"/>
+                                </listhead>
+                            </listbox>
+                        </vlayout>
+                    </window>
+                </center>
+            </borderlayout>
+        </center>
+    </borderlayout>
+</zk>
