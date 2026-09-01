@@ -1,6 +1,3 @@
-/* =========================================================
-   CHECKER CHEQUE VERIFICATION
-   ========================================================= */
 
 
 /* ================= PAGE ================= */
@@ -171,6 +168,7 @@
     padding: 14px;
     min-height: 0;
 }
+
 
 
 /* ================= CARD HEADER ================= */
@@ -401,10 +399,6 @@
 }
 
 
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
 .verification-footer {
     border-top: 1px solid #E1E7EF;
 
@@ -425,13 +419,7 @@
 .footer-version {
     text-align: right;
 }
-/* =========================================================
-   CHEQUE VERIFICATION - RIGHT PANEL
-   ========================================================= */
 
-/* =========================================================
-   RIGHT SIDE - CHEQUE VERIFICATION SCROLL
-   ========================================================= */
 
 .cheque-verification-card {
     height: 343px;
@@ -439,9 +427,10 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-
-/* ================= HEADER ================= */
+.cheque-verification-card {
+    background: #EAF6FF;
+    border: 1px solid #D6E8F5;
+}
 
 .verification-header-row {
     margin-bottom: 4px;
@@ -464,10 +453,6 @@
 }
 
 
-/* =========================================================
-   VERIFICATION SECTIONS
-   ========================================================= */
-
 .verification-section {
     margin-top: 12px;
 }
@@ -482,10 +467,6 @@
     letter-spacing: 0.5px;
 }
 
-
-/* =========================================================
-   CBS VALIDATION BOX
-   ========================================================= */
 
 .cbs-validation-box {
     width: 100%;
@@ -504,10 +485,6 @@
 }
 
 
-/* =========================================================
-   FIELD LABEL / VALUE
-   ========================================================= */
-
 .verification-field-label {
     font-size: 11px;
 
@@ -525,9 +502,6 @@
 }
 
 
-/* =========================================================
-   CBS VALIDATION BUTTON
-   ========================================================= */
 
 .cbs-validation-btn {
     background: #1D477D;
@@ -552,9 +526,6 @@
 }
 
 
-/* =========================================================
-   SEPARATOR
-   ========================================================= */
 
 .verification-separator {
     width: 100%;
@@ -567,9 +538,6 @@
 }
 
 
-/* =========================================================
-   ACTION SECTION
-   ========================================================= */
 
 .verification-action-section {
     margin-top: 10px;
@@ -610,7 +578,7 @@
 }
 
 
-/* ================= RETURN ================= */
+/* RETURN  */
 
 .return-action-btn {
     background: #C83A32;
@@ -637,4 +605,167 @@
 
 .send-back-action-btn:hover {
     background: #F6F8FB;
+}
+
+
+
+/* =========================================================
+   CHEQUE VERIFICATION - RIGHT PANEL
+   ========================================================= */
+
+.verification-panel {
+    padding: 14px;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+
+/* Header */
+
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1D2D46;
+}
+
+.section-description {
+    font-size: 10px;
+    color: #8793A6;
+}
+
+
+/* Section headings */
+
+.sub-section-title {
+    font-size: 10px;
+    font-weight: bold;
+    color: #6B7C93;
+}
+
+
+/* Details box */
+
+.details-box {
+    padding: 10px;
+    background: #EEF3F8;
+    border: 1px solid #D5DEE8;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+
+/* Labels */
+
+.detail-label {
+    font-size: 10px;
+    color: #718096;
+}
+
+.detail-value {
+    font-size: 11px;
+    font-weight: bold;
+    color: #1D2D46;
+}
+
+
+/* Separator */
+
+.verification-panel .z-separator {
+    border-top: 1px solid #D9E1EA;
+}
+
+
+/* CBS button */
+
+.primary-small-btn {
+    background: #1B4A8F;
+    color: white;
+    border: 0;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 10px;
+}
+
+.primary-small-btn:hover {
+    background: #153B72;
+}
+
+
+/* Status badges */
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.status-badge.pending {
+    color: #C47A00;
+    background: #FFF5DF;
+    border: 1px solid #F5C56B;
+}
+
+.status-badge.mismatch {
+    color: #C47A00;
+    background: #FFF5DF;
+    border: 1px solid #F5C56B;
+}
+
+.status-badge.active {
+    color: #18864B;
+    background: #E7F7EE;
+    border: 1px solid #9BD8B5;
+}
+
+
+/* Maker request */
+
+.maker-request {
+    padding: 8px 10px;
+    background: #FFF8E8;
+    border: 1px solid #F3D79A;
+    border-radius: 4px;
+    color: #9A6800;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+
+/* Decision buttons */
+
+.decision-btn {
+    background: white;
+    color: #1D2D46;
+    border: 1px solid #D0D9E4;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 10px;
+}
+
+.decision-btn:hover {
+    background: #F3F6FA;
+}
+
+
+.reject-btn {
+    background: white;
+    color: #D64545;
+    border: 1px solid #E5A5A5;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 10px;
+}
+
+.reject-btn:hover {
+    background: #FFF1F1;
+}
+
+.center {
+    background: #EAF6FF;
+    padding: 0;
 }
