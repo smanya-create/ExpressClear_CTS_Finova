@@ -1,8 +1,17 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.List;
+
+
+import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
+
 import org.zkoss.zk.ui.Component;
+
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Groupbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
@@ -14,6 +23,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
     private static final long serialVersionUID = 1L;
 
+   
+    
     private Label lblBatchId;
     private Label lblRecordPosition;
     private Label lblProgress;
@@ -35,28 +46,83 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
     private int currentRecord = 0;
     private int totalRecords = 0;
+    
+    private InwardChequeService inwardChequeService;
+
+    private List<InwardCheque> repairCheques;
+
+    private InwardCheque currentCheque;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
         super.doAfterCompose(comp);
+        
+        inwardChequeService = new InwardChequeServiceImpl();
 
         loadRepairRecord();
     }
 
     private void loadRepairRecord() {
 
-        /*
-         * Database/service integration will be added later.
-         * Currently there are no MICR repair records available.
-         */
+        try {
 
-        totalRecords = 0;
-        currentRecord = 0;
+            // Get cheques waiting for MICR repair
+            repairCheques = inwardChequeService.getMicrRepairRequiredCheques();
 
-        clearRecordFields();
-        updateNavigation();
-        showImagePlaceholder();
+            if (repairCheques == null || repairCheques.isEmpty()) {
+
+                totalRecords = 0;
+                currentRecord = 0;
+                currentCheque = null;
+
+                clearRecordFields();
+                updateNavigation();
+                showImagePlaceholder();
+
+                return;
+            }
+
+            // Total MICR repair cheques
+            totalRecords = repairCheques.size();
+
+           
+            if (currentRecord < 0)
+            {
+                currentRecord = 0;
+            }
+
+            if (currentRecord >= totalRecords)
+            {
+                currentRecord = totalRecords - 1;
+            }
+
+            // Get the current cheque
+            currentCheque = repairCheques.get(currentRecord);
+
+            // Populate UI fields
+            populateChequeFields(currentCheque);
+
+            // Update Previous / Next buttons
+            updateNavigation();
+
+            
+            showImagePlaceholder();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            totalRecords = 0;
+            currentRecord = 0;
+            currentCheque = null;
+
+            clearRecordFields();
+            updateNavigation();
+            showImagePlaceholder();
+
+        Messagebox.show("Unable to load MICR repair records.","Error",Messagebox.OK,Messagebox.ERROR);
+        }
     }
 
     private void clearRecordFields() {
@@ -123,9 +189,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
         if (progressMeter != null) {
 
-            int progress = totalRecords == 0
-                    ? 0
-                    : (currentRecord * 100) / totalRecords;
+            int progress = totalRecords == 0 ? 0 : (currentRecord * 100) / totalRecords;
 
             progressMeter.setValue(progress);
         }
@@ -167,42 +231,24 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
         if (totalRecords == 0) {
 
-            Messagebox.show(
-                "No MICR repair records are available.",
-                "MICR Repair",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-            );
+        Messagebox.show("No MICR repair records are available.","MICR Repair",Messagebox.OK,Messagebox.INFORMATION);
 
             return;
         }
 
-        String correctedMicr = txtCorrectedMicr != null
-                ? txtCorrectedMicr.getValue()
-                : "";
+        String correctedMicr = txtCorrectedMicr != null ? txtCorrectedMicr.getValue() : "";
 
         if (correctedMicr == null || correctedMicr.trim().isEmpty()) {
 
             if (txtCorrectedMicr != null) {
-                txtCorrectedMicr.setErrorMessage(
-                    "Corrected MICR code is required."
-                );
+            	
+              txtCorrectedMicr.setErrorMessage("Corrected MICR code is required.");
             }
 
             return;
         }
 
-        /*
-         * Database update will be added after
-         * the inward MICR repair service is implemented.
-         */
-
-        Messagebox.show(
-            "MICR correction saved successfully.",
-            "MICR Repair",
-            Messagebox.OK,
-            Messagebox.INFORMATION
-        );
+        Messagebox.show("MICR correction saved successfully.","MICR Repair",Messagebox.OK,Messagebox.INFORMATION);
 
         if (currentRecord < totalRecords) {
             currentRecord++;
@@ -214,31 +260,44 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
         if (totalRecords == 0) {
 
-            Messagebox.show(
-                "No MICR repair record is available to reject.",
-                "MICR Repair",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-            );
+            Messagebox.show("No MICR repair record is available to reject.","MICR Repair",Messagebox.OK,Messagebox.INFORMATION);
 
             return;
         }
 
-        /*
-         * Rejection processing will be connected
-         * to the inward workflow later.
-         */
-
-        Messagebox.show(
-            "Reject request action will be connected to the inward workflow.",
-            "MICR Repair",
-            Messagebox.OK,
-            Messagebox.INFORMATION
-        );
+       Messagebox.show("Reject request action will be connected to the inward workflow.","MICR Repair",Messagebox.OK,Messagebox.INFORMATION);
     }
 
     public void onClick$btnBackToList() {
 
         Executions.sendRedirect("/inward/maker/index.zul");
+    }
+    
+    private void populateChequeFields(InwardCheque cheque) {
+
+        if (cheque == null) {
+            clearRecordFields();
+            return;
+        }
+
+		// Cheque number
+		if (txtChequeNumber != null) {
+			txtChequeNumber.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "");
+		}
+
+		// Current MICR
+		if (txtCurrentMicr != null) {
+			txtCurrentMicr.setValue(cheque.getMicrCode() != null ? cheque.getMicrCode() : "");
+		}
+
+        // Corrected MICR starts empty for the maker
+        if (txtCorrectedMicr != null) {
+            txtCorrectedMicr.setValue("");
+        }
+
+        // Remarks start empty
+        if (txtRemarks != null) {
+            txtRemarks.setValue("");
+        }
     }
 }

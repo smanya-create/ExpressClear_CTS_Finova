@@ -1,1 +1,33 @@
 package com.iispl.cts.serviceimpl.inward;
+
+import java.util.List;
+
+import com.iispl.cts.dao.inward.InwardChequeDAO;
+import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
+import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.service.inward.InwardChequeService;
+
+public class InwardChequeServiceImpl implements InwardChequeService {
+
+    private final InwardChequeDAO inwardChequeDAO;
+
+    public InwardChequeServiceImpl() {
+        this.inwardChequeDAO = InwardChequeDAOImpl.getInstance();
+    }
+
+    @Override
+    public List<InwardCheque> getMicrRepairRequiredCheques() {
+        return inwardChequeDAO.getMicrRepairRequiredCheques();
+    }
+
+    @Override
+    public InwardCheque findById(String inwardChequeId) {
+        return inwardChequeDAO.findById(inwardChequeId);
+    }
+
+    @Override
+    public boolean updateMicrRepair(String inwardChequeId,String correctedMicrCode,String chequeStatus) {
+
+        return inwardChequeDAO.updateMicrRepair(inwardChequeId,correctedMicrCode,chequeStatus);
+    }
+}

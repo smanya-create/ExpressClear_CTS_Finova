@@ -17,18 +17,18 @@ public class Branch {
     public Branch() {
     }
 
-    public Branch(String branchId, String bankId, String branchCode,
-                  String branchName, String ifscCode, String micrCode,
-                  String city, String status, LocalDateTime createdAt) {
-        this.branchId = branchId;
-        this.bankId = bankId;
-        this.branchCode = branchCode;
-        this.branchName = branchName;
-        this.ifscCode = ifscCode;
-        this.micrCode = micrCode;
-        this.city = city;
-        this.status = status;
-        this.createdAt = createdAt;
+    public Branch(String branchId, String bankId, String branchCode,String branchName, String ifscCode, String micrCode,
+                       String city, String status, LocalDateTime createdAt)
+    {
+				        this.branchId = branchId;
+				        this.bankId = bankId;
+				        this.branchCode = branchCode;
+				        this.branchName = branchName;
+				        this.ifscCode = ifscCode;
+				        this.micrCode = micrCode;
+				        this.city = city;
+				        this.status = status;
+				        this.createdAt = createdAt;
     }
 
     public String getBranchId() {
