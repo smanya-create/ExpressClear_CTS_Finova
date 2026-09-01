@@ -34,7 +34,7 @@ public class DBConnection {
             pgds.setSslMode("require");
             pgds.setConnectTimeout(10);
             pgds.setSocketTimeout(30);
-
+            pgds.setPrepareThreshold(0);
             dataSource = pgds;
 
             System.out.println("PostgreSQL DataSource initialized successfully.");

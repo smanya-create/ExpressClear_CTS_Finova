@@ -1,800 +1,694 @@
 package com.iispl.cts.parser;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
+import com.iispl.cts.entity.outward.ScanChequeImage;
+import com.iispl.cts.service.outward.ScanService;
 
-/**
- * Parses the batch XML file.
- *
- * This class:
- *
- * - Does not access ZUL
- * - Does not access the Controller
- * - Does not contain UI logic
- *
- * Controller -> BatchXmlParser -> ParsedBatchData
- */
 public class BatchXmlParser {
 
+    private final ScanService scanService;
 
-    // =========================================================
-    // PARSE XML
-    // =========================================================
+    public BatchXmlParser(ScanService scanService) {
+        this.scanService = scanService;
+    }
 
-    public ParsedBatchData parse(
-            byte[] xmlBytes) throws Exception {
+    /**
+     * Receives the ZIP file path.
+     *
+     * Controller
+     *      ↓
+     * BatchXmlParser
+     *      ↓
+     * ScanService
+     *      ↓
+     * DAO
+     *      ↓
+     * DB
+     *
+     * @param zipFilePath path of uploaded ZIP file
+     * @return scannedBatchId
+     * @throws Exception if parsing fails
+     */
+    public String parse(String zipFilePath) throws Exception {
 
+        if (zipFilePath == null
+                || zipFilePath.trim().isEmpty()) {
 
-        if (xmlBytes == null
-                || xmlBytes.length == 0) {
-
-            throw new Exception(
-                    "XML file is empty.");
+            throw new IllegalArgumentException(
+                    "ZIP file path cannot be null or empty");
         }
 
-
-        // =====================================================
-        // DOCUMENT BUILDER
-        // =====================================================
+        /*
+         * =========================================================
+         * 1. Create DOM parser
+         * =========================================================
+         */
 
         DocumentBuilderFactory factory =
                 DocumentBuilderFactory.newInstance();
 
+        /*
+         * XML contains namespace:
+         *
+         * urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing
+         */
+        factory.setNamespaceAware(true);
 
-        // =====================================================
-        // XML SECURITY
-        // =====================================================
-
-        factory.setFeature(
-                "http://apache.org/xml/features/disallow-doctype-decl",
-                true);
-
-        factory.setFeature(
-                "http://xml.org/sax/features/external-general-entities",
-                false);
-
-        factory.setFeature(
-                "http://xml.org/sax/features/external-parameter-entities",
-                false);
-
-        factory.setFeature(
-                "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-                false);
-
-        factory.setXIncludeAware(false);
-
-        factory.setExpandEntityReferences(false);
-
-
-        // =====================================================
-        // PARSE XML
-        // =====================================================
-
-        Document document =
-                factory
-                        .newDocumentBuilder()
-                        .parse(
-                                new ByteArrayInputStream(
-                                        xmlBytes));
-
-
-        document.getDocumentElement()
-                .normalize();
-
-
-        // =====================================================
-        // ROOT
-        // =====================================================
-
-        Element root =
-                document.getDocumentElement();
-
-
-        if (root == null) {
-
-            throw new Exception(
-                    "XML document has no root element.");
-        }
-
-
-        // =====================================================
-        // BATCH HEADER
-        // =====================================================
-
-        Element batchHeader =
-                findFirstElement(
-                        root,
-                        "BatchHeader");
-
-
-        if (batchHeader == null) {
-
-            throw new Exception(
-                    "BatchHeader is missing from XML.");
-        }
-
-
-        // =====================================================
-        // BATCH ID
-        // =====================================================
-
-        String batchId =
-                getXmlValue(
-                        batchHeader,
-                        "BatchID");
-
-
-        if (isEmpty(batchId)) {
-
-            throw new Exception(
-                    "BatchID is missing from XML.");
-        }
-
-
-        // =====================================================
-        // TOTAL COUNT
-        // =====================================================
-
-        String totalCountValue =
-                getXmlValue(
-                        batchHeader,
-                        "TotalCount");
-
-
-        if (isEmpty(totalCountValue)) {
-
-            throw new Exception(
-                    "TotalCount is missing from XML.");
-        }
-
-
-        int totalCount;
-
-
+        /*
+         * Secure XML parser configuration.
+         */
         try {
 
-            totalCount =
-                    Integer.parseInt(
-                            totalCountValue.trim());
+            factory.setFeature(
+                    "http://apache.org/xml/features/disallow-doctype-decl",
+                    true);
 
-        } catch (NumberFormatException exception) {
+            factory.setFeature(
+                    "http://xml.org/sax/features/external-general-entities",
+                    false);
 
-            throw new Exception(
-                    "Invalid TotalCount in XML: "
-                            + totalCountValue,
-                    exception);
+            factory.setFeature(
+                    "http://xml.org/sax/features/external-parameter-entities",
+                    false);
+
+            factory.setFeature(
+                    "http://apache.org/xml/features/nonvalidating/load-external-dtd",
+                    false);
+
+        } catch (Exception e) {
+
+            /*
+             * Parser implementation may not support
+             * all features.
+             */
         }
 
+        DocumentBuilder builder =
+                factory.newDocumentBuilder();
 
-        // =====================================================
-        // TOTAL AMOUNT
-        // =====================================================
+        /*
+         * =========================================================
+         * 2. Open ZIP file
+         * =========================================================
+         */
 
-        String totalAmountValue =
-                getXmlValue(
-                        batchHeader,
-                        "TotalAmount");
+        boolean xmlFound = false;
 
+        String batchId = null;
 
-        if (isEmpty(totalAmountValue)) {
+        try (
+                InputStream fileInputStream =
+                        new FileInputStream(zipFilePath);
 
-            throw new Exception(
-                    "TotalAmount is missing from XML.");
+                ZipInputStream zipInputStream =
+                        new ZipInputStream(
+                                fileInputStream)) {
+
+            ZipEntry entry;
+
+            while ((entry =
+                    zipInputStream.getNextEntry()) != null) {
+
+                /*
+                 * Ignore directories.
+                 */
+                if (entry.isDirectory()) {
+
+                    zipInputStream.closeEntry();
+
+                    continue;
+                }
+
+                String entryName =
+                        entry.getName();
+
+                /*
+                 * =================================================
+                 * 3. Find XML file
+                 * =================================================
+                 */
+
+                if (entryName != null
+                        && entryName
+                                .toLowerCase()
+                                .endsWith(".xml")) {
+
+                    if (xmlFound) {
+
+                        throw new IllegalArgumentException(
+                                "Batch ZIP must contain only one XML file");
+                    }
+
+                    xmlFound = true;
+
+                    /*
+                     * =================================================
+                     * 4. Parse XML directly from ZIP entry
+                     * =================================================
+                     */
+
+                    Document document =
+                            builder.parse(
+                                    zipInputStream);
+
+                    document.getDocumentElement()
+                            .normalize();
+
+                    Element root =
+                            document.getDocumentElement();
+
+                    /*
+                     * =================================================
+                     * 5. Validate root
+                     * =================================================
+                     */
+
+                    if (!"ChequeBatchTransmission"
+                            .equals(
+                                    root.getLocalName())) {
+
+                        throw new IllegalArgumentException(
+                                "Invalid root element: "
+                                        + root.getNodeName());
+                    }
+
+                    /*
+                     * =================================================
+                     * 6. Read BatchHeader
+                     * =================================================
+                     */
+
+                    Element batchHeader =
+                            getFirstElement(
+                                    root,
+                                    "BatchHeader");
+
+                    if (batchHeader == null) {
+
+                        throw new IllegalArgumentException(
+                                "BatchHeader is missing");
+                    }
+
+                    String scannedBatchId =
+                            getElementValue(
+                                    batchHeader,
+                                    "ScannedBatchId");
+
+                    String batchReferenceId =
+                            getElementValue(
+                                    batchHeader,
+                                    "BatchReferenceId");
+
+                    String actualChequeCountValue =
+                            getElementValue(
+                                    batchHeader,
+                                    "ActualChequeCount");
+
+                    String actualTotalAmountValue =
+                            getElementValue(
+                                    batchHeader,
+                                    "ActualTotalAmount");
+
+                    String stagingStatus =
+                            getElementValue(
+                                    batchHeader,
+                                    "StagingStatus");
+
+                    String batchStatus =
+                            getElementValue(
+                                    batchHeader,
+                                    "BatchStatus");
+
+                    String uploadedBy =
+                            getElementValue(
+                                    batchHeader,
+                                    "UploadedBy");
+
+                    String uploadedAtValue =
+                            getElementValue(
+                                    batchHeader,
+                                    "UploadedAt");
+
+                    /*
+                     * =================================================
+                     * 7. Convert BatchHeader values
+                     * =================================================
+                     */
+
+                    int actualChequeCount = 0;
+
+                    if (actualChequeCountValue != null) {
+
+                        actualChequeCount =
+                                Integer.parseInt(
+                                        actualChequeCountValue);
+                    }
+
+                    BigDecimal actualTotalAmount = null;
+
+                    if (actualTotalAmountValue != null) {
+
+                        actualTotalAmount =
+                                new BigDecimal(
+                                        actualTotalAmountValue);
+                    }
+
+                    Timestamp uploadedAt = null;
+
+                    if (uploadedAtValue != null) {
+
+                        uploadedAt =
+                                Timestamp.valueOf(
+                                        LocalDateTime.parse(
+                                                uploadedAtValue));
+                    }
+
+                    /*
+                     * =================================================
+                     * 8. Create ScanBatch
+                     * =================================================
+                     */
+
+                    ScanBatch scanBatch =
+                            new ScanBatch();
+
+                    scanBatch.setScannedBatchId(
+                            scannedBatchId);
+
+                    scanBatch.setBatchReferenceId(
+                            batchReferenceId);
+
+                    scanBatch.setActualChequeCount(
+                            actualChequeCount);
+
+                    scanBatch.setActualTotalAmount(
+                            actualTotalAmount);
+
+                    scanBatch.setStagingStatus(
+                            stagingStatus);
+
+                    scanBatch.setBatchStatus(
+                            batchStatus);
+
+                    scanBatch.setUploadedBy(
+                            uploadedBy);
+
+                    scanBatch.setUploadedAt(
+                            uploadedAt);
+
+                    /*
+                     * =================================================
+                     * 9. Find ChequeItem NodeList
+                     * =================================================
+                     */
+
+                    NodeList chequeNodes =
+                            root.getElementsByTagNameNS(
+                                    "*",
+                                    "ChequeItem");
+
+                    if (chequeNodes == null
+                            || chequeNodes.getLength() == 0) {
+
+                        throw new IllegalArgumentException(
+                                "No ChequeItem found in XML");
+                    }
+
+                    /*
+                     * =================================================
+                     * 10. Create lists
+                     * =================================================
+                     */
+
+                    List<ScanCheque> chequeList =
+                            new ArrayList<>();
+
+                    /*
+                     * Image list is kept because the current
+                     * ScanService method expects it.
+                     *
+                     * Image database processing is NOT being
+                     * implemented now.
+                     */
+                    List<ScanChequeImage> imageList =
+                            new ArrayList<>();
+
+                    Timestamp createdAt =
+                            new Timestamp(
+                                    System.currentTimeMillis());
+
+                    /*
+                     * =================================================
+                     * 11. Parse every ChequeItem
+                     * =================================================
+                     */
+
+                    for (int i = 0;
+                            i < chequeNodes.getLength();
+                            i++) {
+
+                        Node node =
+                                chequeNodes.item(i);
+
+                        if (node.getNodeType()
+                                != Node.ELEMENT_NODE) {
+
+                            continue;
+                        }
+
+                        Element chequeElement =
+                                (Element) node;
+
+                        ScanCheque scanCheque =
+                                new ScanCheque();
+
+                        /*
+                         * -------------------------------------------------
+                         * Basic cheque details
+                         * -------------------------------------------------
+                         */
+
+                        String chequeId =
+                                getElementValue(
+                                        chequeElement,
+                                        "ScannedChequeId");
+
+                        scanCheque.setScannedChequeId(
+                                chequeId);
+
+                        scanCheque.setScannedBatchId(
+                                scannedBatchId);
+
+                        scanCheque.setChequeNumber(
+                                getElementValue(
+                                        chequeElement,
+                                        "ChequeNumber"));
+
+                        /*
+                         * -------------------------------------------------
+                         * Cheque Date
+                         * -------------------------------------------------
+                         */
+
+                        String chequeDateValue =
+                                getElementValue(
+                                        chequeElement,
+                                        "ChequeDate");
+
+                        if (chequeDateValue != null) {
+
+                            scanCheque.setChequeDate(
+                                    Date.valueOf(
+                                            chequeDateValue));
+                        }
+
+                        /*
+                         * -------------------------------------------------
+                         * Amount
+                         * -------------------------------------------------
+                         */
+
+                        String amountValue =
+                                getElementValue(
+                                        chequeElement,
+                                        "Amount");
+
+                        if (amountValue != null) {
+
+                            scanCheque.setChequeAmount(
+                                    new BigDecimal(
+                                            amountValue));
+                        }
+
+                        /*
+                         * -------------------------------------------------
+                         * Cheque Status
+                         * -------------------------------------------------
+                         */
+
+                        scanCheque.setChequeStatus(
+                                getElementValue(
+                                        chequeElement,
+                                        "ChequeStatus"));
+
+                        /*
+                         * -------------------------------------------------
+                         * Created At
+                         * -------------------------------------------------
+                         */
+
+                        scanCheque.setCreatedAt(
+                                createdAt);
+
+                        /*
+                         * =================================================
+                         * MICR Details
+                         * =================================================
+                         */
+
+                        Element micrElement =
+                                getFirstElement(
+                                        chequeElement,
+                                        "MICRDetails");
+
+                        if (micrElement != null) {
+
+                            /*
+                             * FullMICR → micrCode
+                             */
+                            scanCheque.setMicrCode(
+                                    getElementValue(
+                                            micrElement,
+                                            "FullMICR"));
+
+                            /*
+                             * CityCode → cityCode
+                             */
+                            scanCheque.setCityCode(
+                                    getElementValue(
+                                            micrElement,
+                                            "CityCode"));
+
+                            /*
+                             * BankCode → bankCode
+                             */
+                            scanCheque.setBankCode(
+                                    getElementValue(
+                                            micrElement,
+                                            "BankCode"));
+
+                            /*
+                             * BranchCode → branchCode
+                             */
+                            scanCheque.setBranchCode(
+                                    getElementValue(
+                                            micrElement,
+                                            "BranchCode"));
+                        }
+
+                        /*
+                         * =================================================
+                         * Drawee
+                         * =================================================
+                         */
+
+                        Element draweeElement =
+                                getFirstElement(
+                                        chequeElement,
+                                        "Drawee");
+
+                        if (draweeElement != null) {
+
+                            scanCheque.setDraweeName(
+                                    getElementValue(
+                                            draweeElement,
+                                            "AccountHolderName"));
+
+                            scanCheque.setDraweeAccountNumber(
+                                    getElementValue(
+                                            draweeElement,
+                                            "AccountNumber"));
+                        }
+
+                        /*
+                         * =================================================
+                         * Payee
+                         * =================================================
+                         */
+
+                        Element payeeElement =
+                                getFirstElement(
+                                        chequeElement,
+                                        "Payee");
+
+                        if (payeeElement != null) {
+
+                            scanCheque.setPayeeName(
+                                    getElementValue(
+                                            payeeElement,
+                                            "AccountHolderName"));
+
+                            scanCheque.setPayeeAccountNumber(
+                                    getElementValue(
+                                            payeeElement,
+                                            "AccountNumber"));
+                        }
+
+                        /*
+                         * =================================================
+                         * Account ID
+                         * =================================================
+                         *
+                         * XML does not contain accountId.
+                         * Therefore it remains null.
+                         */
+
+                        /*
+                         * Add cheque to list.
+                         */
+                        chequeList.add(
+                                scanCheque);
+
+                        /*
+                         * =================================================
+                         * Images
+                         * =================================================
+                         *
+                         * We are intentionally NOT processing images
+                         * for database storage now.
+                         *
+                         * The empty imageList is passed to ScanService
+                         * because its current method signature requires it.
+                         */
+                    }
+
+                    /*
+                     * =================================================
+                     * 12. Send to ScanService
+                     * =================================================
+                     *
+                     * Parser
+                     *     ↓
+                     * ScanService
+                     *     ↓
+                     * ScanBatchDAO
+                     *     ↓
+                     * ScanChequeDAO
+                     *     ↓
+                     * Database
+                     */
+
+                    batchId =
+                            scanService.saveScanBatch(
+                                    scanBatch,
+                                    chequeList,
+                                    imageList);
+
+                    /*
+                     * We have received the batch ID.
+                     */
+                    break;
+                }
+
+                /*
+                 * Do NOT close the ZIP stream here manually
+                 * after parsing the XML. The try-with-resources
+                 * block owns the stream.
+                 */
+            }
         }
 
+        /*
+         * =========================================================
+         * 13. XML must exist
+         * =========================================================
+         */
 
-        BigDecimal totalAmount;
+        if (!xmlFound) {
 
-
-        try {
-
-            totalAmount =
-                    new BigDecimal(
-                            totalAmountValue.trim());
-
-        } catch (NumberFormatException exception) {
-
-            throw new Exception(
-                    "Invalid TotalAmount in XML: "
-                            + totalAmountValue,
-                    exception);
+            throw new IllegalArgumentException(
+                    "No XML file found inside the ZIP");
         }
 
+        /*
+         * =========================================================
+         * 14. Return Batch ID to Controller
+         * =========================================================
+         */
 
-        // =====================================================
-        // CHEQUES
-        // =====================================================
-
-        List<ChequeData> cheques =
-                new ArrayList<>();
-
-
-        NodeList chequeNodes =
-                root.getElementsByTagName(
-                        "Cheque");
-
-
-        for (int i = 0;
-             i < chequeNodes.getLength();
-             i++) {
-
-
-            Element chequeElement =
-                    (Element) chequeNodes.item(i);
-
-
-            ChequeData cheque =
-                    parseCheque(
-                            chequeElement,
-                            i + 1);
-
-
-            cheques.add(
-                    cheque);
-        }
-
-
-        // =====================================================
-        // VERIFY XML COUNT
-        // =====================================================
-
-        if (totalCount != cheques.size()) {
-
-            throw new Exception(
-                    "XML TotalCount does not match "
-                            + "the number of cheque records."
-                            + "\n\nTotalCount: "
-                            + totalCount
-                            + "\nCheque Records: "
-                            + cheques.size());
-        }
-
-
-        // =====================================================
-        // RETURN
-        // =====================================================
-
-        return new ParsedBatchData(
-                batchId,
-                totalCount,
-                totalAmount,
-                cheques);
+        return batchId;
     }
 
-
-    // =========================================================
-    // PARSE CHEQUE
-    // =========================================================
-
-    private ChequeData parseCheque(
-            Element chequeElement,
-            int chequeIndex)
-            throws Exception {
-
-
-        if (chequeElement == null) {
-
-            throw new Exception(
-                    "Invalid cheque record at position "
-                            + chequeIndex);
-        }
-
-
-        // =====================================================
-        // CHEQUE DETAILS
-        // =====================================================
-
-        Element details =
-                findFirstElement(
-                        chequeElement,
-                        "ChequeDetails");
-
-
-        if (details == null) {
-
-            throw new Exception(
-                    "ChequeDetails is missing for cheque "
-                            + chequeIndex);
-        }
-
-
-        ChequeData cheque =
-                new ChequeData();
-
-
-        // =====================================================
-        // ITEM NUMBER
-        // =====================================================
-
-        cheque.setItemNumber(
-                getXmlValue(
-                        chequeElement,
-                        "ItemNumber"));
-
-
-        // =====================================================
-        // FRONT IMAGE
-        // =====================================================
-
-        cheque.setFrontImage(
-                getXmlValue(
-                        details,
-                        "FrontImage"));
-
-
-        // =====================================================
-        // BACK IMAGE
-        // =====================================================
-
-        cheque.setBackImage(
-                getXmlValue(
-                        details,
-                        "BackImage"));
-
-
-        // =====================================================
-        // MICR CODE
-        // =====================================================
-
-        cheque.setMicrCode(
-                getXmlValue(
-                        details,
-                        "MICRCode"));
-
-
-        // =====================================================
-        // DRAWEE ACCOUNT
-        // =====================================================
-
-        cheque.setDraweeAccount(
-                getXmlValue(
-                        details,
-                        "DraweeAccountNumber"));
-
-
-        // =====================================================
-        // PAYEE ACCOUNT
-        // =====================================================
-
-        cheque.setPayeeAccount(
-                getXmlValue(
-                        details,
-                        "PayeeAccountNumber"));
-
-
-        // =====================================================
-        // PAYEE NAME
-        // =====================================================
-
-        cheque.setPayeeName(
-                getXmlValue(
-                        details,
-                        "PayeeName"));
-
-
-        // =====================================================
-        // AMOUNT
-        // =====================================================
-
-        String amountValue =
-                getXmlValue(
-                        details,
-                        "Amount");
-
-
-        if (isEmpty(amountValue)) {
-
-            throw new Exception(
-                    "Amount is missing for cheque "
-                            + chequeIndex);
-        }
-
-
-        try {
-
-            cheque.setAmount(
-                    new BigDecimal(
-                            amountValue.trim()));
-
-        } catch (NumberFormatException exception) {
-
-            throw new Exception(
-                    "Invalid amount for cheque "
-                            + chequeIndex
-                            + ": "
-                            + amountValue,
-                    exception);
-        }
-
-
-        // =====================================================
-        // CHEQUE DATE
-        // =====================================================
-
-        cheque.setChequeDate(
-                getXmlValue(
-                        details,
-                        "ChequeDate"));
-
-
-        // =====================================================
-        // STATUS
-        // =====================================================
-
-        String status =
-                getXmlValue(
-                        details,
-                        "Status");
-
-
-        cheque.setStatus(
-                status);
-
-
-        // =====================================================
-        // DISPLAY STATUS
-        // =====================================================
-
-        if ("PENDING_MICR_REPAIR"
-                .equalsIgnoreCase(status)) {
-
-            cheque.setUiStatus(
-                    "MICR REPAIR");
-
-        } else {
-
-            cheque.setUiStatus(
-                    "NORMAL");
-        }
-
-
-        return cheque;
-    }
-
-
-    // =========================================================
-    // FIND FIRST ELEMENT
-    // =========================================================
-
-    /*
-     * IMPORTANT:
-     *
-     * This method accepts Element.
-     *
-     * The Document is converted to its root Element before
-     * calling this method.
-     *
-     * Therefore there is no:
-     *
-     * getFirstElement(Document, String)
-     *
-     * mismatch anymore.
+    /**
+     * Returns the first matching element.
      */
-    private Element findFirstElement(
+    private Element getFirstElement(
             Element parent,
-            String tagName) {
-
-
-        if (parent == null) {
-            return null;
-        }
-
+            String localName) {
 
         NodeList nodes =
-                parent.getElementsByTagName(
-                        tagName);
+                parent.getElementsByTagNameNS(
+                        "*",
+                        localName);
 
+        if (nodes != null
+                && nodes.getLength() > 0) {
 
-        if (nodes.getLength() == 0) {
-            return null;
+            return (Element) nodes.item(0);
         }
 
-
-        return (Element) nodes.item(0);
+        return null;
     }
 
-
-    // =========================================================
-    // GET XML VALUE
-    // =========================================================
-
-    private String getXmlValue(
+    /**
+     * Returns text value of the first matching element.
+     */
+    private String getElementValue(
             Element parent,
-            String tagName) {
+            String localName) {
 
+        Element element =
+                getFirstElement(
+                        parent,
+                        localName);
 
-        if (parent == null) {
-            return "";
+        if (element == null) {
+            return null;
         }
-
-
-        NodeList nodes =
-                parent.getElementsByTagName(
-                        tagName);
-
-
-        if (nodes.getLength() == 0) {
-            return "";
-        }
-
 
         String value =
-                nodes.item(0)
-                        .getTextContent();
-
+                element.getTextContent();
 
         if (value == null) {
-            return "";
+            return null;
         }
 
+        value = value.trim();
 
-        return value.trim();
-    }
-
-
-    // =========================================================
-    // EMPTY CHECK
-    // =========================================================
-
-    private boolean isEmpty(
-            String value) {
-
-
-        return value == null
-                || value.trim().isEmpty();
-    }
-
-
-    // =========================================================
-    // PARSED BATCH DATA
-    // =========================================================
-
-    public static class ParsedBatchData {
-
-        private final String batchId;
-
-        private final int totalCount;
-
-        private final BigDecimal totalAmount;
-
-        private final List<ChequeData> cheques;
-
-
-        public ParsedBatchData(
-                String batchId,
-                int totalCount,
-                BigDecimal totalAmount,
-                List<ChequeData> cheques) {
-
-
-            this.batchId =
-                    batchId;
-
-            this.totalCount =
-                    totalCount;
-
-            this.totalAmount =
-                    totalAmount;
-
-            this.cheques =
-                    cheques;
+        if (value.isEmpty()) {
+            return null;
         }
 
-
-        public String getBatchId() {
-
-            return batchId;
-        }
-
-
-        public int getTotalCount() {
-
-            return totalCount;
-        }
-
-
-        public BigDecimal getTotalAmount() {
-
-            return totalAmount;
-        }
-
-
-        public List<ChequeData> getCheques() {
-
-            return cheques;
-        }
-    }
-
-
-    // =========================================================
-    // CHEQUE DATA
-    // =========================================================
-
-    public static class ChequeData {
-
-        private String itemNumber;
-
-        private String frontImage;
-
-        private String backImage;
-
-        private String micrCode;
-
-        private String draweeAccount;
-
-        private String payeeAccount;
-
-        private String payeeName;
-
-        private BigDecimal amount;
-
-        private String chequeDate;
-
-        private String status;
-
-        private String uiStatus;
-
-
-        public String getItemNumber() {
-
-            return itemNumber;
-        }
-
-
-        public void setItemNumber(
-                String itemNumber) {
-
-            this.itemNumber =
-                    itemNumber;
-        }
-
-
-        public String getFrontImage() {
-
-            return frontImage;
-        }
-
-
-        public void setFrontImage(
-                String frontImage) {
-
-            this.frontImage =
-                    frontImage;
-        }
-
-
-        public String getBackImage() {
-
-            return backImage;
-        }
-
-
-        public void setBackImage(
-                String backImage) {
-
-            this.backImage =
-                    backImage;
-        }
-
-
-        public String getMicrCode() {
-
-            return micrCode;
-        }
-
-
-        public void setMicrCode(
-                String micrCode) {
-
-            this.micrCode =
-                    micrCode;
-        }
-
-
-        public String getDraweeAccount() {
-
-            return draweeAccount;
-        }
-
-
-        public void setDraweeAccount(
-                String draweeAccount) {
-
-            this.draweeAccount =
-                    draweeAccount;
-        }
-
-
-        public String getPayeeAccount() {
-
-            return payeeAccount;
-        }
-
-
-        public void setPayeeAccount(
-                String payeeAccount) {
-
-            this.payeeAccount =
-                    payeeAccount;
-        }
-
-
-        public String getPayeeName() {
-
-            return payeeName;
-        }
-
-
-        public void setPayeeName(
-                String payeeName) {
-
-            this.payeeName =
-                    payeeName;
-        }
-
-
-        public BigDecimal getAmount() {
-
-            return amount;
-        }
-
-
-        public void setAmount(
-                BigDecimal amount) {
-
-            this.amount =
-                    amount;
-        }
-
-
-        public String getChequeDate() {
-
-            return chequeDate;
-        }
-
-
-        public void setChequeDate(
-                String chequeDate) {
-
-            this.chequeDate =
-                    chequeDate;
-        }
-
-
-        public String getStatus() {
-
-            return status;
-        }
-
-
-        public void setStatus(
-                String status) {
-
-            this.status =
-                    status;
-        }
-
-
-        public String getUiStatus() {
-
-            return uiStatus;
-        }
-
-
-        public void setUiStatus(
-                String uiStatus) {
-
-            this.uiStatus =
-                    uiStatus;
-        }
+        return value;
     }
 }

@@ -1,16 +1,10 @@
 package com.iispl.cts.controller.outward.maker;
-import com.iispl.cts.parser.BatchXmlParser;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.ui.Component;
@@ -19,7 +13,6 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.UploadEvent;
 import org.zkoss.zk.ui.util.Composer;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Decimalbox;
 import org.zkoss.zul.Div;
@@ -29,95 +22,55 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Window;
 
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
+import com.iispl.cts.parser.BatchXmlParser;
+import com.iispl.cts.service.outward.ScanService;
+import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
-/**
- * Controller for Outward Maker Batch Upload.
- *
- * Flow:
- *
- * batch-upload.zul
- *        |
- *        v
- * Controller
- *        |
- *        v
- * BatchXmlParser
- *
- * Upload:
- *     Validate ZIP
- *     -> exactly one XML
- *     -> JPEG cheque images
- *     -> parse XML
- *
- * Validate:
- *     Expected Count vs XML Count
- *     Expected Amount vs XML Amount
- *
- * Match:
- *     Success
- *
- * Mismatch:
- *     Validation popup
- */
 public class OutwardMakerBatchUploadController
         implements Composer<Component> {
 
-
     private static final long serialVersionUID = 1L;
-
 
     // =========================================================
     // ZUL COMPONENTS
     // =========================================================
 
     private Intbox expectedTotalCheques;
-
     private Decimalbox expectedTotalChequeAmount;
 
     private Textbox chequeFolder;
-
     private Textbox batchNumber;
 
     private Button browseButton;
-
     private Button validateBatchButton;
 
     private Div successMessage;
-
     private Label successText;
 
     private Groupbox scannedChequesWindow;
-
-    private Label scannedChequeTitle;
-
-    private Label normalCount;
-
-    private Label micrRepairCount;
-
     private Listbox chequeList;
 
+    private Label scannedChequeTitle;
+    private Label normalCount;
+    private Label micrRepairCount;
 
     // =========================================================
-    // BATCH DATA
+    // SERVICE
     // =========================================================
 
-    private File uploadedBatchFile;
+    private ScanService scanService;
 
-    private String xmlBatchId;
+    // =========================================================
+    // UPLOADED ZIP
+    // =========================================================
 
-    private int xmlTotalCount;
+    private File uploadedZipFile;
 
-    private BigDecimal xmlTotalAmount =
-            BigDecimal.ZERO;
-
-
-    private final List<BatchXmlParser.ChequeData> cheques =
-            new ArrayList<>();
-
+    private String batchId;
 
     // =========================================================
     // COMPOSE
@@ -125,12 +78,10 @@ public class OutwardMakerBatchUploadController
 
     @Override
     public void doAfterCompose(
-            Component component)
-            throws Exception {
-
+            Component component) throws Exception {
 
         // =====================================================
-        // GET ZUL COMPONENTS
+        // Get ZUL components
         // =====================================================
 
         expectedTotalCheques =
@@ -169,6 +120,10 @@ public class OutwardMakerBatchUploadController
                 (Groupbox) component.getFellow(
                         "scannedChequesWindow");
 
+        chequeList =
+                (Listbox) component.getFellow(
+                        "chequeList");
+
         scannedChequeTitle =
                 (Label) component.getFellow(
                         "scannedChequeTitle");
@@ -181,14 +136,18 @@ public class OutwardMakerBatchUploadController
                 (Label) component.getFellow(
                         "micrRepairCount");
 
-        chequeList =
-                (Listbox) component.getFellow(
-                        "chequeList");
+        // =====================================================
+        // Create service
+        // =====================================================
 
+        scanService =
+                new ScanServiceImpl();
 
         // =====================================================
-        // INITIAL STATE
+        // Initial page state
         // =====================================================
+
+        batchNumber.setValue("");
 
         successMessage.setVisible(false);
 
@@ -196,51 +155,16 @@ public class OutwardMakerBatchUploadController
 
         validateBatchButton.setDisabled(true);
 
-        batchNumber.setValue("");
-
-        normalCount.setValue(
-                "0 NORMAL");
+        normalCount.setValue("0 NORMAL");
 
         micrRepairCount.setValue(
                 "0 MICR REPAIR");
 
+        scannedChequeTitle.setValue(
+                "Scanned Cheques");
 
         // =====================================================
-        // COUNT CHANGE
-        // =====================================================
-
-        expectedTotalCheques.addEventListener(
-                "onChange",
-                new EventListener<Event>() {
-
-                    @Override
-                    public void onEvent(
-                            Event event) {
-
-                        setValidateButtonState();
-                    }
-                });
-
-
-        // =====================================================
-        // AMOUNT CHANGE
-        // =====================================================
-
-        expectedTotalChequeAmount.addEventListener(
-                "onChange",
-                new EventListener<Event>() {
-
-                    @Override
-                    public void onEvent(
-                            Event event) {
-
-                        setValidateButtonState();
-                    }
-                });
-
-
-        // =====================================================
-        // ZIP UPLOAD
+        // Browse / ZIP upload
         // =====================================================
 
         browseButton.addEventListener(
@@ -251,14 +175,13 @@ public class OutwardMakerBatchUploadController
                     public void onEvent(
                             Event event) {
 
-                        handleBatchZipUpload(
+                        handleZipUpload(
                                 (UploadEvent) event);
                     }
                 });
 
-
         // =====================================================
-        // VALIDATE BUTTON
+        // Validate Batch button
         // =====================================================
 
         validateBatchButton.addEventListener(
@@ -274,30 +197,25 @@ public class OutwardMakerBatchUploadController
                 });
     }
 
-
     // =========================================================
-    // ZIP UPLOAD
+    // HANDLE ZIP UPLOAD
     // =========================================================
 
-    private void handleBatchZipUpload(
+    private void handleZipUpload(
             UploadEvent uploadEvent) {
-
 
         Media media =
                 uploadEvent.getMedia();
-
 
         if (media == null) {
             return;
         }
 
-
         String fileName =
                 media.getName();
 
-
         // =====================================================
-        // CHECK ZIP EXTENSION
+        // Check ZIP extension
         // =====================================================
 
         if (fileName == null
@@ -305,19 +223,11 @@ public class OutwardMakerBatchUploadController
                         .toLowerCase()
                         .endsWith(".zip")) {
 
-
-            Messagebox.show(
-                    "Only ZIP files are allowed.",
-                    "Invalid Batch File",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
             return;
         }
 
-
         // =====================================================
-        // TEMP DATA DIRECTORY
+        // Get webapp/TempData path
         // =====================================================
 
         String tempDataPath =
@@ -327,38 +237,27 @@ public class OutwardMakerBatchUploadController
                         .getRealPath(
                                 "/TempData");
 
-
         if (tempDataPath == null) {
-
-            Messagebox.show(
-                    "Unable to locate TempData folder.",
-                    "Upload Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
 
             return;
         }
-
 
         File tempDataDirectory =
                 new File(tempDataPath);
 
+        // =====================================================
+        // Create TempData folder if required
+        // =====================================================
 
-        if (!tempDataDirectory.exists()
-                && !tempDataDirectory.mkdirs()) {
+        if (!tempDataDirectory.exists()) {
 
-            Messagebox.show(
-                    "Unable to create TempData folder.",
-                    "Upload Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-
-            return;
+            if (!tempDataDirectory.mkdirs()) {
+                return;
+            }
         }
 
-
         // =====================================================
-        // SAVE ZIP
+        // Destination ZIP
         // =====================================================
 
         File destinationFile =
@@ -366,6 +265,9 @@ public class OutwardMakerBatchUploadController
                         tempDataDirectory,
                         fileName);
 
+        // =====================================================
+        // Save ZIP ONLY
+        // =====================================================
 
         try (
                 InputStream inputStream =
@@ -373,16 +275,12 @@ public class OutwardMakerBatchUploadController
 
                 FileOutputStream outputStream =
                         new FileOutputStream(
-                                destinationFile)
-        ) {
-
+                                destinationFile)) {
 
             byte[] buffer =
                     new byte[8192];
 
-
             int bytesRead;
-
 
             while ((bytesRead =
                     inputStream.read(buffer)) != -1) {
@@ -393,270 +291,73 @@ public class OutwardMakerBatchUploadController
                         bytesRead);
             }
 
+            outputStream.flush();
 
-        } catch (Exception exception) {
+        } catch (Exception e) {
 
-            exception.printStackTrace();
-
-
-            Messagebox.show(
-                    "Unable to save batch ZIP file.\n\n"
-                            + exception.getMessage(),
-                    "Upload Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+            e.printStackTrace();
 
             return;
         }
 
+        // =====================================================
+        // Store uploaded ZIP
+        // =====================================================
 
-        uploadedBatchFile =
+        uploadedZipFile =
                 destinationFile;
 
-
         // =====================================================
-        // CLEAR PREVIOUS DATA
-        // =====================================================
-
-        clearPreviousBatchData();
-
-
-        // =====================================================
-        // DISPLAY ZIP NAME
+        // Display selected file
         // =====================================================
 
         chequeFolder.setValue(
                 fileName);
 
-
         // =====================================================
-        // READ ZIP
-        // =====================================================
-
-        try {
-
-            readBatchZip(
-                    uploadedBatchFile);
-
-
-        } catch (Exception exception) {
-
-            exception.printStackTrace();
-
-
-            uploadedBatchFile = null;
-
-            chequeFolder.setValue("");
-
-            batchNumber.setValue("");
-
-            clearParsedData();
-
-
-            Messagebox.show(
-                    exception.getMessage(),
-                    "Batch Upload Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-
-
-            setValidateButtonState();
-
-            return;
-        }
-
-
-        // =====================================================
-        // DISPLAY BATCH NUMBER
+        // Reset previous validation result
         // =====================================================
 
-        batchNumber.setValue(
-                xmlBatchId);
+        batchId = null;
 
+        batchNumber.setValue("");
+
+        successMessage.setVisible(false);
+
+        scannedChequesWindow.setVisible(false);
+
+        chequeList.getItems().clear();
+
+        normalCount.setValue(
+                "0 NORMAL");
+
+        micrRepairCount.setValue(
+                "0 MICR REPAIR");
+
+        scannedChequeTitle.setValue(
+                "Scanned Cheques");
 
         // =====================================================
-        // ENABLE VALIDATE BUTTON
+        // Enable Validate Batch
         // =====================================================
 
-        setValidateButtonState();
-
+        validateBatchButton.setDisabled(false);
 
         /*
          * IMPORTANT:
          *
-         * DO NOT validate here.
+         * DO NOT call parser here.
          *
-         * DO NOT open batch-validation.zul here.
+         * DO NOT call ScanService here.
          *
-         * User must click Validate Batch.
+         * DO NOT perform database operation here.
+         *
+         * DO NOT perform validation here.
+         *
+         * Everything happens only after the user
+         * clicks Validate Batch.
          */
     }
-
-
-    // =========================================================
-    // READ ZIP
-    // =========================================================
-
-    private void readBatchZip(
-            File batchFile)
-            throws Exception {
-
-
-        boolean xmlFound = false;
-
-        int jpegCount = 0;
-
-
-        try (
-                InputStream inputStream =
-                        new FileInputStream(
-                                batchFile);
-
-                ZipInputStream zipInputStream =
-                        new ZipInputStream(
-                                inputStream)
-        ) {
-
-
-            ZipEntry zipEntry;
-
-
-            while ((zipEntry =
-                    zipInputStream.getNextEntry())
-                    != null) {
-
-
-                // =================================================
-                // IGNORE DIRECTORIES
-                // =================================================
-
-                if (zipEntry.isDirectory()) {
-
-                    zipInputStream.closeEntry();
-
-                    continue;
-                }
-
-
-                String fileName =
-                        zipEntry.getName()
-                                .toLowerCase();
-
-
-                // =================================================
-                // XML
-                // =================================================
-
-                if (fileName.endsWith(".xml")) {
-
-
-                    if (xmlFound) {
-
-                        throw new Exception(
-                                "Batch ZIP must contain exactly one XML file.");
-                    }
-
-
-                    xmlFound = true;
-
-
-                    /*
-                     * Read XML completely while the ZIP entry
-                     * is open.
-                     */
-
-                    byte[] xmlBytes =
-                            zipInputStream.readAllBytes();
-
-
-                    // ---------------------------------------------
-                    // CONTROLLER -> PARSER
-                    // ---------------------------------------------
-
-                    BatchXmlParser parser =
-                            new BatchXmlParser();
-
-
-                    BatchXmlParser.ParsedBatchData
-                            parsedData =
-                            parser.parse(
-                                    xmlBytes);
-
-
-                    // ---------------------------------------------
-                    // GET DATA FROM PARSER
-                    // ---------------------------------------------
-
-                    xmlBatchId =
-                            parsedData.getBatchId();
-
-
-                    xmlTotalCount =
-                            parsedData.getTotalCount();
-
-
-                    xmlTotalAmount =
-                            parsedData.getTotalAmount();
-
-
-                    cheques.clear();
-
-
-                    cheques.addAll(
-                            parsedData.getCheques());
-                }
-
-
-                // =================================================
-                // CHEQUE IMAGES
-                // =================================================
-
-                else if (fileName.endsWith(".jpg")
-                        || fileName.endsWith(".jpeg")) {
-
-
-                    jpegCount++;
-                }
-
-
-                zipInputStream.closeEntry();
-            }
-        }
-
-
-        // =====================================================
-        // XML REQUIRED
-        // =====================================================
-
-        if (!xmlFound) {
-
-            throw new Exception(
-                    "No XML file was found in the batch ZIP.");
-        }
-
-
-        // =====================================================
-        // CHEQUE IMAGES REQUIRED
-        // =====================================================
-
-        if (jpegCount == 0) {
-
-            throw new Exception(
-                    "No cheque JPEG images were found in the batch ZIP.");
-        }
-
-
-        // =====================================================
-        // FRONT/BACK IMAGE CHECK
-        // =====================================================
-
-        if (jpegCount % 2 != 0) {
-
-            throw new Exception(
-                    "Cheque front/back JPEG images are incomplete.");
-        }
-    }
-
 
     // =========================================================
     // VALIDATE BATCH
@@ -664,218 +365,276 @@ public class OutwardMakerBatchUploadController
 
     private void validateBatch() {
 
-
         // =====================================================
-        // EXPECTED COUNT
+        // Check ZIP
         // =====================================================
 
-        Integer expectedCount =
-                expectedTotalCheques.getValue();
-
-
-        if (expectedCount == null
-                || expectedCount <= 0) {
-
-
-            Messagebox.show(
-                    "Please enter a valid expected cheque count.",
-                    "Batch Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
-
-            Clients.focus(
-                    expectedTotalCheques);
+        if (uploadedZipFile == null
+                || !uploadedZipFile.exists()) {
 
             return;
         }
 
+        try {
 
-        // =====================================================
-        // EXPECTED AMOUNT
-        // =====================================================
+            // =================================================
+            // STEP 1
+            // Parse XML
+            // =================================================
 
-        BigDecimal expectedAmount =
-                expectedTotalChequeAmount.getValue();
+            BatchXmlParser parser =
+                    new BatchXmlParser(
+                            scanService);
 
+            /*
+             * Parser will:
+             *
+             * ZIP
+             *  ↓
+             * XML
+             *  ↓
+             * ScanBatch
+             *  ↓
+             * List<ScanCheque>
+             *  ↓
+             * ScanService
+             *  ↓
+             * Database
+             */
 
-        if (expectedAmount == null
-                || expectedAmount.signum() <= 0) {
+            batchId =
+                    parser.parse(
+                            uploadedZipFile
+                                    .getAbsolutePath());
 
+            // =================================================
+            // Check returned batch ID
+            // =================================================
 
-            Messagebox.show(
-                    "Please enter a valid expected total amount.",
-                    "Batch Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+            if (batchId == null
+                    || batchId.trim().isEmpty()) {
 
+                throw new RuntimeException(
+                        "Batch ID was not returned.");
+            }
 
-            Clients.focus(
-                    expectedTotalChequeAmount);
+            // =================================================
+            // STEP 2
+            // Get batch from DB
+            // =================================================
 
-            return;
+            ScanBatch scanBatch =
+                    scanService.getBatchById(
+                            batchId);
+
+            if (scanBatch == null) {
+
+                throw new RuntimeException(
+                        "Batch not found in database: "
+                                + batchId);
+            }
+
+            // =================================================
+            // STEP 3
+            // Get cheques from DB
+            // =================================================
+
+            List<ScanCheque> scannedCheques =
+                    scanService.getChequesByBatchId(
+                            batchId);
+
+            if (scannedCheques == null) {
+
+                throw new RuntimeException(
+                        "Unable to retrieve cheques.");
+            }
+
+            // =================================================
+            // STEP 4
+            // Validate cheque count
+            // =================================================
+
+            int expectedChequeCount =
+                    scanBatch.getActualChequeCount();
+
+            int actualChequeCount =
+                    scannedCheques.size();
+
+            boolean chequeCountValid =
+                    expectedChequeCount
+                            == actualChequeCount;
+
+            // =================================================
+            // STEP 5
+            // Validate total amount
+            // =================================================
+
+            BigDecimal expectedTotalAmount =
+                    scanBatch.getActualTotalAmount();
+
+            BigDecimal actualTotalAmount =
+                    BigDecimal.ZERO;
+
+            for (ScanCheque cheque :
+                    scannedCheques) {
+
+                if (cheque != null
+                        && cheque.getChequeAmount()
+                                != null) {
+
+                    actualTotalAmount =
+                            actualTotalAmount.add(
+                                    cheque.getChequeAmount());
+                }
+            }
+
+            boolean amountValid =
+                    expectedTotalAmount != null
+                            && expectedTotalAmount
+                                    .compareTo(
+                                            actualTotalAmount) == 0;
+
+            // =================================================
+            // STEP 6
+            // Update expected values on page
+            // =================================================
+
+            expectedTotalCheques.setValue(
+                    expectedChequeCount);
+
+            expectedTotalChequeAmount.setValue(
+                    expectedTotalAmount);
+
+            // =================================================
+            // STEP 7
+            // Validation PASSED
+            // =================================================
+
+            if (chequeCountValid
+                    && amountValid) {
+
+                /*
+                 * ---------------------------------------------
+                 * Show success message on SAME PAGE
+                 * ---------------------------------------------
+                 */
+
+                successMessage.setVisible(true);
+
+                successText.setValue(
+                        "Batch "
+                        + batchId
+                        + " has been validated successfully.");
+
+                /*
+                 * ---------------------------------------------
+                 * Show scanned cheque list
+                 * ---------------------------------------------
+                 */
+
+                scannedChequesWindow.setVisible(true);
+
+                /*
+                 * ---------------------------------------------
+                 * Populate cheque list
+                 * ---------------------------------------------
+                 */
+
+                displayScannedCheques(
+                        scannedCheques);
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * No Messagebox.show() here.
+                 */
+            }
+
+            // =================================================
+            // STEP 8
+            // Validation FAILED
+            // =================================================
+
+            else {
+
+                /*
+                 * Keep success message hidden.
+                 */
+
+                successMessage.setVisible(false);
+
+                /*
+                 * Keep cheque list hidden because
+                 * validation did not pass.
+                 */
+
+                scannedChequesWindow.setVisible(false);
+
+                /*
+                 * For now we are not showing a popup.
+                 *
+                 * A validation-error section can be added
+                 * to the ZUL later.
+                 */
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            /*
+             * Hide success/list when processing fails.
+             */
+
+            successMessage.setVisible(false);
+
+            scannedChequesWindow.setVisible(false);
+
+            batchId = null;
+
+            batchNumber.setValue("");
         }
-
-
-        // =====================================================
-        // ZIP CHECK
-        // =====================================================
-
-        if (uploadedBatchFile == null
-                || !uploadedBatchFile.exists()
-                || xmlBatchId == null) {
-
-
-            Messagebox.show(
-                    "Please upload a valid batch ZIP file first.",
-                    "Batch Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
-            return;
-        }
-
-
-        // =====================================================
-        // ACTUAL VALUES FROM XML
-        // =====================================================
-
-        int actualCount =
-                xmlTotalCount;
-
-
-        BigDecimal actualAmount =
-                xmlTotalAmount;
-
-
-        // =====================================================
-        // COMPARE COUNT
-        // =====================================================
-
-        boolean countMatched =
-                expectedCount == actualCount;
-
-
-        // =====================================================
-        // COMPARE AMOUNT
-        // =====================================================
-
-        boolean amountMatched =
-                expectedAmount.compareTo(
-                        actualAmount) == 0;
-
-
-        // =====================================================
-        // FAILED
-        // =====================================================
-
-        if (!countMatched
-                || !amountMatched) {
-
-
-            showValidationPopup(
-                    expectedCount,
-                    actualCount,
-                    expectedAmount,
-                    actualAmount);
-
-
-            return;
-        }
-
-
-        // =====================================================
-        // SUCCESS
-        // =====================================================
-
-        showSuccessfulBatch();
     }
 
-
     // =========================================================
-    // VALIDATION POPUP
+    // DISPLAY SCANNED CHEQUES
     // =========================================================
 
-    private void showValidationPopup(
-            int expectedCount,
-            int actualCount,
-            BigDecimal expectedAmount,
-            BigDecimal actualAmount) {
-
-
-        Map<String, Object> validationData =
-                new HashMap<>();
-
-
-        validationData.put(
-                "expectedCheques",
-                expectedCount);
-
-
-        validationData.put(
-                "xmlTotalCheques",
-                actualCount);
-
-
-        validationData.put(
-                "expectedAmount",
-                expectedAmount);
-
-
-        validationData.put(
-                "xmlTotalAmount",
-                actualAmount);
-
-
-        validationData.put(
-                "chequeCountStatus",
-                expectedCount == actualCount
-                        ? "Matched"
-                        : "Mismatch");
-
-
-        validationData.put(
-                "amountStatus",
-                expectedAmount.compareTo(
-                        actualAmount) == 0
-                        ? "Matched"
-                        : "Mismatch");
-
+    private void displayScannedCheques(
+            List<ScanCheque> scannedCheques) {
 
         /*
-         * This is the ONLY place where the validation
-         * popup is opened.
+         * Clear previous UI rows.
          */
 
-        Window validationWindow =
-                (Window) Executions.createComponents(
-                        "/outward/maker/batch/batch-validation.zul",
-                        null,
-                        validationData);
-
-
-        validationWindow.doModal();
-    }
-
-
-    // =========================================================
-    // SUCCESS
-    // =========================================================
-
-    private void showSuccessfulBatch() {
-
+        chequeList.getItems().clear();
 
         int normal = 0;
 
         int micrRepair = 0;
 
+        int itemNumber = 1;
 
-        for (BatchXmlParser.ChequeData cheque
-                : cheques) {
+        // =====================================================
+        // Create list rows
+        // =====================================================
 
+        for (ScanCheque cheque :
+                scannedCheques) {
 
-            if ("MICR REPAIR".equalsIgnoreCase(
-                    cheque.getUiStatus())) {
+            if (cheque == null) {
+                continue;
+            }
+
+            String status =
+                    cheque.getChequeStatus();
+
+            // -------------------------------------------------
+            // Count status
+            // -------------------------------------------------
+
+            if ("MICR_REPAIR_REQUIRED"
+                    .equalsIgnoreCase(status)) {
 
                 micrRepair++;
 
@@ -883,397 +642,81 @@ public class OutwardMakerBatchUploadController
 
                 normal++;
             }
-        }
 
-
-        // =====================================================
-        // SUCCESS TEXT
-        // =====================================================
-
-        successText.setValue(
-                "Batch "
-                        + xmlBatchId
-                        + " uploaded successfully — "
-                        + xmlTotalCount
-                        + " cheques scanned. "
-                        + "Normal: "
-                        + normal
-                        + " | MICR Repair Required: "
-                        + micrRepair);
-
-
-        normalCount.setValue(
-                normal + " NORMAL");
-
-
-        micrRepairCount.setValue(
-                micrRepair + " MICR REPAIR");
-
-
-        scannedChequeTitle.setValue(
-                "Batch "
-                        + xmlBatchId
-                        + " — Scanned Cheques");
-
-
-        successMessage.setVisible(true);
-
-        scannedChequesWindow.setVisible(true);
-
-
-        populateChequeList();
-    }
-
-
-    // =========================================================
-    // POPULATE CHEQUE LIST
-    // =========================================================
-
-    private void populateChequeList() {
-
-
-        chequeList.getItems().clear();
-
-
-        for (BatchXmlParser.ChequeData cheque
-                : cheques) {
-
+            // -------------------------------------------------
+            // Create row
+            // -------------------------------------------------
 
             Listitem item =
                     new Listitem();
 
-
-            // =================================================
-            // ITEM NO
-            // =================================================
+            // -------------------------------------------------
+            // ITEM NO.
+            // -------------------------------------------------
 
             item.appendChild(
                     new Listcell(
-                            safe(
-                                    cheque.getItemNumber())));
+                            String.valueOf(
+                                    itemNumber++)));
 
-
-            // =================================================
+            // -------------------------------------------------
             // PAYEE NAME
-            // =================================================
+            // -------------------------------------------------
 
             item.appendChild(
                     new Listcell(
-                            safe(
-                                    cheque.getPayeeName())));
+                            cheque.getPayeeName()));
 
-
-            // =================================================
-            // MICR
-            // =================================================
-
-            Listcell micrCell =
-                    new Listcell(
-                            safe(
-                                    cheque.getMicrCode()));
-
-
-            if ("MICR REPAIR".equalsIgnoreCase(
-                    cheque.getUiStatus())) {
-
-                micrCell.setSclass(
-                        "micr-error");
-            }
-
+            // -------------------------------------------------
+            // MICR CODE
+            // -------------------------------------------------
 
             item.appendChild(
-                    micrCell);
+                    new Listcell(
+                            cheque.getMicrCode()));
 
-
-            // =================================================
+            // -------------------------------------------------
             // STATUS
-            // =================================================
-
-            Listcell statusCell =
-                    new Listcell();
-
-
-            Label statusLabel =
-                    new Label(
-                            safe(
-                                    cheque.getUiStatus()));
-
-
-            if ("MICR REPAIR".equalsIgnoreCase(
-                    cheque.getUiStatus())) {
-
-                statusLabel.setSclass(
-                        "status-badge micr-repair");
-
-            } else {
-
-                statusLabel.setSclass(
-                        "status-badge normal");
-            }
-
-
-            statusCell.appendChild(
-                    statusLabel);
-
+            // -------------------------------------------------
 
             item.appendChild(
-                    statusCell);
+                    new Listcell(
+                            status));
 
-
-            // =================================================
+            // -------------------------------------------------
             // ACTION
-            // =================================================
-
-            Listcell actionCell =
-                    new Listcell();
-
-
-            Button actionButton =
-                    new Button();
-
-
-            if ("MICR REPAIR".equalsIgnoreCase(
-                    cheque.getUiStatus())) {
-
-
-                actionButton.setLabel(
-                        "Repair");
-
-
-                actionButton.setSclass(
-                        "btn-action-repair");
-
-
-                final BatchXmlParser.ChequeData
-                        selectedCheque =
-                        cheque;
-
-
-                actionButton.addEventListener(
-                        "onClick",
-                        new EventListener<Event>() {
-
-                            @Override
-                            public void onEvent(
-                                    Event event) {
-
-                                repairCheque(
-                                        selectedCheque);
-                            }
-                        });
-
-
-            } else {
-
-
-                actionButton.setLabel(
-                        "View");
-
-
-                actionButton.setSclass(
-                        "btn-action");
-
-
-                final BatchXmlParser.ChequeData
-                        selectedCheque =
-                        cheque;
-
-
-                actionButton.addEventListener(
-                        "onClick",
-                        new EventListener<Event>() {
-
-                            @Override
-                            public void onEvent(
-                                    Event event) {
-
-                                viewCheque(
-                                        selectedCheque);
-                            }
-                        });
-            }
-
-
-            actionCell.appendChild(
-                    actionButton);
-
+            //
+            // Not implemented yet.
+            // -------------------------------------------------
 
             item.appendChild(
-                    actionCell);
+                    new Listcell(""));
 
+            // -------------------------------------------------
+            // Add row
+            // -------------------------------------------------
 
             chequeList.appendChild(
                     item);
         }
-    }
 
+        // =====================================================
+        // Update title
+        // =====================================================
 
-    // =========================================================
-    // VIEW CHEQUE
-    // =========================================================
+        scannedChequeTitle.setValue(
+                "Scanned Cheques ("
+                + scannedCheques.size()
+                + ")");
 
-    private void viewCheque(
-            BatchXmlParser.ChequeData cheque) {
-
-
-        Messagebox.show(
-                "Item Number : "
-                        + safe(
-                                cheque.getItemNumber())
-                        + "\nPayee Name : "
-                        + safe(
-                                cheque.getPayeeName())
-                        + "\nMICR Code : "
-                        + safe(
-                                cheque.getMicrCode())
-                        + "\nAmount : "
-                        + safe(
-                                cheque.getAmount())
-                        + "\nCheque Date : "
-                        + safe(
-                                cheque.getChequeDate())
-                        + "\nFront Image : "
-                        + safe(
-                                cheque.getFrontImage())
-                        + "\nBack Image : "
-                        + safe(
-                                cheque.getBackImage()),
-                "Cheque Details",
-                Messagebox.OK,
-                Messagebox.INFORMATION);
-    }
-
-
-    // =========================================================
-    // MICR REPAIR
-    // =========================================================
-
-    private void repairCheque(
-            BatchXmlParser.ChequeData cheque) {
-
-
-        Messagebox.show(
-                "MICR Repair\n\n"
-                        + "Item Number : "
-                        + safe(
-                                cheque.getItemNumber())
-                        + "\nMICR Code : "
-                        + safe(
-                                cheque.getMicrCode())
-                        + "\nPayee Name : "
-                        + safe(
-                                cheque.getPayeeName()),
-                "MICR Repair",
-                Messagebox.OK,
-                Messagebox.INFORMATION);
-    }
-
-
-    // =========================================================
-    // BUTTON STATE
-    // =========================================================
-
-    private void setValidateButtonState() {
-
-
-        boolean countValid =
-                expectedTotalCheques.getValue() != null
-                        && expectedTotalCheques.getValue() > 0;
-
-
-        boolean amountValid =
-                expectedTotalChequeAmount.getValue() != null
-                        && expectedTotalChequeAmount
-                                .getValue()
-                                .signum() > 0;
-
-
-        boolean zipValid =
-                uploadedBatchFile != null
-                        && uploadedBatchFile.exists()
-                        && xmlBatchId != null
-                        && !cheques.isEmpty();
-
-
-        validateBatchButton.setDisabled(
-                !(countValid
-                        && amountValid
-                        && zipValid));
-    }
-
-
-    // =========================================================
-    // CLEAR PREVIOUS BATCH DATA
-    // =========================================================
-
-    private void clearPreviousBatchData() {
-
-
-        xmlBatchId = null;
-
-        xmlTotalCount = 0;
-
-        xmlTotalAmount =
-                BigDecimal.ZERO;
-
-        cheques.clear();
-
-
-        successMessage.setVisible(false);
-
-        scannedChequesWindow.setVisible(false);
-
-
-        chequeList.getItems().clear();
-
-
-        batchNumber.setValue("");
-
+        // =====================================================
+        // Update status counters
+        // =====================================================
 
         normalCount.setValue(
-                "0 NORMAL");
-
+                normal + " NORMAL");
 
         micrRepairCount.setValue(
-                "0 MICR REPAIR");
-    }
-
-
-    // =========================================================
-    // CLEAR PARSED DATA
-    // =========================================================
-
-    private void clearParsedData() {
-
-
-        xmlBatchId = null;
-
-        xmlTotalCount = 0;
-
-        xmlTotalAmount =
-                BigDecimal.ZERO;
-
-        cheques.clear();
-
-
-        chequeList.getItems().clear();
-
-
-        successMessage.setVisible(false);
-
-        scannedChequesWindow.setVisible(false);
-    }
-
-
-    // =========================================================
-    // SAFE VALUE
-    // =========================================================
-
-    private String safe(
-            Object value) {
-
-        return value == null
-                ? ""
-                : value.toString();
+                micrRepair + " MICR REPAIR");
     }
 }
