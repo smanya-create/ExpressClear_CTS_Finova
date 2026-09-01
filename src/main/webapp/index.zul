@@ -2,7 +2,7 @@
 
 <zk>
 
-    <include src="/inward/maker/intake/batch-intake.zul"
+    <include src="/outward/checker/checker-queue.zul"
              width="100%"
              height="100%"/>
 
