@@ -24,27 +24,75 @@ public class ScanCheque implements Serializable {
     private String chequeStatus;
     private String accountId;
     private Timestamp createdAt;
+    private String cityCode;
+    private String bankCode;
+    private String branchCode;
 
     public ScanCheque() {
     }
 
-    public ScanCheque(String scannedChequeId, String scannedBatchId, String chequeNumber, String micrCode, 
-                      String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber, 
-                      BigDecimal chequeAmount, Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt) {
-        this.scannedChequeId = scannedChequeId;
-        this.scannedBatchId = scannedBatchId;
-        this.chequeNumber = chequeNumber;
-        this.micrCode = micrCode;
-        this.draweeName = draweeName;
-        this.draweeAccountNumber = draweeAccountNumber;
-        this.payeeName = payeeName;
-        this.payeeAccountNumber = payeeAccountNumber;
-        this.chequeAmount = chequeAmount;
-        this.chequeDate = chequeDate;
-        this.chequeStatus = chequeStatus;
-        this.accountId = accountId;
-        this.createdAt = createdAt;
-    }
+    
+
+	public ScanCheque(String scannedChequeId, String scannedBatchId, String chequeNumber, String micrCode,
+			String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber,
+			BigDecimal chequeAmount, Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt,
+			String cityCode, String bankCode, String branchCode) {
+		super();
+		this.scannedChequeId = scannedChequeId;
+		this.scannedBatchId = scannedBatchId;
+		this.chequeNumber = chequeNumber;
+		this.micrCode = micrCode;
+		this.draweeName = draweeName;
+		this.draweeAccountNumber = draweeAccountNumber;
+		this.payeeName = payeeName;
+		this.payeeAccountNumber = payeeAccountNumber;
+		this.chequeAmount = chequeAmount;
+		this.chequeDate = chequeDate;
+		this.chequeStatus = chequeStatus;
+		this.accountId = accountId;
+		this.createdAt = createdAt;
+		this.cityCode = cityCode;
+		this.bankCode = bankCode;
+		this.branchCode = branchCode;
+	}
+
+	
+
+	public String getCityCode() {
+		return cityCode;
+	}
+
+
+
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
+	}
+
+
+
+	public String getBankCode() {
+		return bankCode;
+	}
+
+
+
+	public void setBankCode(String bankCode) {
+		this.bankCode = bankCode;
+	}
+
+
+
+	public String getBranchCode() {
+		return branchCode;
+	}
+
+
+
+	public void setBranchCode(String branchCode) {
+		this.branchCode = branchCode;
+	}
+
+
 
 	public String getScannedChequeId() {
 		return scannedChequeId;
