@@ -176,7 +176,7 @@ public class LoginController extends GenericForwardComposer<Component> {
             Executions.sendRedirect("/outward/maker/maker-dashboard.zul");
         } 
         else if ("ROL1003".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
-            Executions.sendRedirect("/outward/checker/checker-dashboard.zul");
+            Executions.sendRedirect("/outward/checker/dashboard.zul");
         } 
         else if ("ROL1004".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {
             Executions.sendRedirect("/inward/maker/index.zul");
