@@ -32,7 +32,7 @@
         }
         .cts-modal-box {
             background: #ffffff;
-            width: 460px;
+            width: 480px;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
@@ -42,7 +42,7 @@
     <div id="dataEntryRootDiv" class="cts-data-entry-wrapper"
          apply="com.iispl.cts.controller.inward.maker.InwardDataEntryController">
 
-        <!-- Top Header: Title on Left | Progress, Navigation & Dynamic Completion Button on Right -->
+        <!-- Header Bar -->
         <div class="cts-title-group" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div>
                 <label value="Inward Data Entry" class="cts-main-title" />
@@ -60,14 +60,14 @@
                     <label id="lblChequePosition" value="1 of 1" style="font-size: 12px; font-weight: 800; color: #1e293b; min-width: 45px; text-align: center;" />
                     <button id="btnNextCheque" label="Next" iconSclass="z-icon-chevron-right" class="cts-btn-secondary" style="height: 30px; padding: 0 10px; font-size: 12px;" />
                     
-                    <!-- Dynamic button: Appears when all cheques in batch are resolved -->
+                    <!-- Dynamic Proceed Button: Appears when all cheques are resolved -->
                     <button id="btnProceedToCompletion" label="Proceed with Maker Completion" iconSclass="z-icon-arrow-circle-right"
                             visible="false" class="cts-btn-solid-primary" style="height: 30px; padding: 0 12px; font-size: 12px; background: #059669 !important; border-color: #059669 !important;" />
                 </hlayout>
             </hlayout>
         </div>
 
-        <!-- 6-Column Metadata KPI Card -->
+        <!-- 6-Column Metadata Card -->
         <div id="metadataCardDiv" class="cts-metadata-card" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
             <div class="cts-meta-col" style="flex: 1;">
                 <label value="BATCH ID" class="cts-meta-header" />
@@ -97,7 +97,7 @@
             </div>
         </div>
 
-        <!-- Two-Column Workspace -->
+        <!-- 2-Column Main Workspace -->
         <div id="workspaceGridDiv" class="cts-data-entry-grid">
             
             <!-- Left Card: Cheque Viewer -->
@@ -195,15 +195,7 @@
                     
                     <vlayout spacing="4px">
                         <label value="Rejection Reason / Return Code *" style="font-size: 12px; font-weight: 700; color: #1e293b;" />
-                        <combobox id="cmbModalRejectionReason" readonly="true" placeholder="Select return reason..." width="100%">
-                            <comboitem label="01 - Funds Insufficient" value="01_FUNDS_INSUFFICIENT" />
-                            <comboitem label="02 - Signature Mismatch / Incomplete" value="02_SIGNATURE_DIFFERS" />
-                            <comboitem label="03 - Stale Cheque (Expired Date)" value="03_STALE_CHEQUE" />
-                            <comboitem label="04 - Post Dated Cheque" value="04_POST_DATED" />
-                            <comboitem label="05 - Account Closed / Blocked" value="05_ACCOUNT_CLOSED" />
-                            <comboitem label="06 - Instrument Altered / Overwritten" value="06_ALTERATION_REQUIRED" />
-                            <comboitem label="07 - Stop Payment Instruction" value="07_STOP_PAYMENT" />
-                        </combobox>
+                        <combobox id="cmbModalRejectionReason" readonly="true" placeholder="Select return reason..." width="100%" />
                     </vlayout>
 
                     <vlayout spacing="4px">
