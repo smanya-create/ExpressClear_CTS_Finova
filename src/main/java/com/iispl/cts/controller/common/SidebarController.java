@@ -155,6 +155,15 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void navToOutwardXmlGeneration() { Executions.sendRedirect("/checker/xml-gen.zul"); }
     public void navToOutwardRejectedCheques() { Executions.sendRedirect("/checker/rejected.zul"); }
     public void navToOutwardCheckerReports() { Executions.sendRedirect("/checker/reports.zul"); }
+    
+    public void navToOutwardCheckerUnprocessedQueue() {
+    	Component root=sidebarComponent.getPage().getFirstRoot();
+    	Component mainContentArea=root.getFellowIfAny("mainContentArea",true);
+    	if(mainContentArea instanceof Include) {
+    		Include include=(Include) mainContentArea;
+    		include.setSrc("/outward/checker/checker-unprocessed-cheques.zul");
+    	}
+    }
 
     // Inward Maker Navigation Actions
     public void navToInwardDashboard() { 

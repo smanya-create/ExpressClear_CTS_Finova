@@ -19,11 +19,11 @@ import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
-import com.iispl.cts.dao.outward.UnprocessedChequeDAO;
-import com.iispl.cts.daoimpl.outward.UnprocessedChequeDAOImpl;
+import com.iispl.cts.dao.outward.MakerUnprocessedChequeDAO;
+import com.iispl.cts.daoimpl.outward.MakerUnprocessedChequeDAOImpl;
 import com.iispl.cts.dto.UnprocessedChequeDTO;
 
-public class UnprocessedChequesController extends GenericForwardComposer<Component> {
+public class MakerUnprocessedChequesController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ public class UnprocessedChequesController extends GenericForwardComposer<Compone
     private Textbox txtSearchBatch;
     private Listbox lstUnprocessed;
 
-    private final UnprocessedChequeDAO unprocessedDAO = new UnprocessedChequeDAOImpl();
+    private final MakerUnprocessedChequeDAO unprocessedDAO = new MakerUnprocessedChequeDAOImpl();
     private List<UnprocessedChequeDTO> masterList = new ArrayList<>();
     private final DecimalFormat df = new DecimalFormat("##,##,##0.00");
 
