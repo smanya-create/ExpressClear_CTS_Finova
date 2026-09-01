@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?page title="CTS - Outward Processing" contentType="text/html;charset=UTF-8"?>
-<?link rel="stylesheet" type="text/css" href="/css/inward/maker-dashboard.css"?>
+<?link rel="stylesheet" type="text/css" href="/css/outward/maker-dashboard.css"?>
 
 <zk xmlns:h="xhtml">
 	<!-- 1. Explicitly force INWARD_MAKER session attributes before components load -->
