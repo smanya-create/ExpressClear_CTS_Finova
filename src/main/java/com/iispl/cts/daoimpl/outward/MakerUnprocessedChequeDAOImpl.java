@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
-import com.iispl.cts.dao.outward.UnprocessedChequeDAO;
+import com.iispl.cts.dao.outward.MakerUnprocessedChequeDAO;
 import com.iispl.cts.dto.UnprocessedChequeDTO;
 
-public class UnprocessedChequeDAOImpl implements UnprocessedChequeDAO {
+public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO {
 
     @Override
     public List<UnprocessedChequeDTO> getUnprocessedCheques(String userRole) {

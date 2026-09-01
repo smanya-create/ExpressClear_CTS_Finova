@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.iispl.cts.dto.UnprocessedChequeDTO;
 
-public interface UnprocessedChequeDAO {
+public interface MakerUnprocessedChequeDAO {
 	/**
      * Retrieves all pending/unprocessed cheques filtered by operator role
      * and prioritized by Forced EOD rollover status.

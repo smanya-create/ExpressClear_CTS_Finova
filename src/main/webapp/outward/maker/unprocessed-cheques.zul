@@ -19,7 +19,7 @@
 
                 <center border="none" autoscroll="true">
                     <window id="winUnprocessedCheques" border="none" vflex="1" hflex="1"
-                            apply="com.iispl.cts.controller.outward.maker.UnprocessedChequesController"
+                            apply="com.iispl.cts.controller.outward.maker.MakerUnprocessedChequesController"
                             style="padding: 20px 24px; background: #f8fafc;">
 
                         <vlayout spacing="16px" vflex="1">

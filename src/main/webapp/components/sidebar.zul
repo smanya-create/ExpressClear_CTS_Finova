@@ -64,6 +64,7 @@
                     <a id="navXmlGen" label="XML Generation" sclass="${arg.activeTab eq 'xml-gen' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardXmlGeneration()"/>
                     <a id="navOutwardRejected" label="Outward Rejected Cheques" sclass="${arg.activeTab eq 'outward-rejected-cheques' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardRejectedCheques()"/>
                     <a id="navOutwardCheckerReports" label="Reports" sclass="${arg.activeTab eq 'outward-checker-reports' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardCheckerReports()"/>
+                    <a id="navToOutwardCheckerUnprocessedQueue" label="Unprocessed Cheques" sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardCheckerUnprocessedQueue()"/>
                 </vlayout>
             </div>
             
