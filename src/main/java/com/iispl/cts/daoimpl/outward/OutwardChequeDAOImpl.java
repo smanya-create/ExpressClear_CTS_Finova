@@ -1,5 +1,4 @@
 package com.iispl.cts.daoimpl.outward;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,79 +11,118 @@ import com.iispl.cts.entity.outward.OutwardCheque;
 
 public class OutwardChequeDAOImpl implements OutwardChequeDAO{
 
+
 	@Override
 	public List<OutwardCheque> getChequesByBatchId(String outwardBatchId) {
-		 List<OutwardCheque> cheques = new ArrayList<>();
 
-	        String sql =
-	                "SELECT outward_cheque_id, "
-	              + "outward_batch_id, "
-	              + "cheque_number, "
-	              + "micr_code, "
-	              + "drawee_name, "
-	              + "drawee_account_number, "
-	              + "payee_name, "
-	              + "payee_account_number, "
-	              + "cheque_amount, "
-	              + "created_at "
-	              + "FROM outward_cheque "
-	              + "WHERE outward_batch_id = ? "
-	              + "ORDER BY outward_cheque_id";
+		List<OutwardCheque> chequeList = new ArrayList<>();
 
-	        try (Connection connection =
-	                     DBConnection.getDataSource().getConnection();
-	             PreparedStatement ps =
-	                     connection.prepareStatement(sql)) {
+		String sql = "SELECT outward_cheque_id, " + "outward_batch_id, " + "cheque_number, " + "micr_code, "
+				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
+				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at "
+				+ "FROM outward_cheque " + "WHERE outward_batch_id = ? " + "ORDER BY created_at ASC";
 
-	            ps.setString(1, outwardBatchId);
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-	            try (ResultSet rs = ps.executeQuery()) {
+			preparedStatement.setString(1, outwardBatchId);
 
-	                while (rs.next()) {
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-	                    OutwardCheque cheque = new OutwardCheque();
+				while (resultSet.next()) {
 
-	                    cheque.setOutwardChequeId(
-	                            rs.getString("outward_cheque_id"));
+					OutwardCheque outwardCheque = mapOutwardCheque(resultSet);
 
-	                    cheque.setOutwardBatchId(
-	                            rs.getString("outward_batch_id"));
+					chequeList.add(outwardCheque);
+				}
+			}
 
-	                    cheque.setChequeNumber(
-	                            rs.getString("cheque_number"));
+		} catch (Exception exception) {
+			throw new RuntimeException("Unable to fetch outward cheques", exception);
+		}
 
-	                    cheque.setMicrCode(
-	                            rs.getString("micr_code"));
+		return chequeList;
+	}
 
-	                    cheque.setDraweeName(
-	                            rs.getString("drawee_name"));
+	@Override
+	public int getTotalChequeCountByBatchId(String outwardBatchId) {
 
-	                    cheque.setDraweeAccountNumber(
-	                            rs.getString("drawee_account_number"));
+		String sql = "SELECT COUNT(outward_cheque_id) " + "FROM outward_cheque " + "WHERE outward_batch_id = ?";
 
-	                    cheque.setPayeeName(
-	                            rs.getString("payee_name"));
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-	                    cheque.setPayeeAccountNumber(
-	                            rs.getString("payee_account_number"));
+			preparedStatement.setString(1, outwardBatchId);
 
-	                    cheque.setChequeAmount(
-	                            rs.getBigDecimal("cheque_amount"));
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-	                    cheque.setCreatedAt(
-	                            rs.getTimestamp("created_at"));
+				if (resultSet.next()) {
+					return resultSet.getInt(1);
+				}
+			}
 
-	                    cheques.add(cheque);
-	                }
-	            }
+		} catch (Exception exception) {
+			throw new RuntimeException("Unable to fetch total cheque count", exception);
+		}
 
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
+		return 0;
+	}
 
-	        return cheques;
-	    }
-	
-	
-	
+	@Override
+	public BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId) {
+
+		String sql = "SELECT COALESCE(SUM(cheque_amount), 0) " + "FROM outward_cheque " + "WHERE outward_batch_id = ?";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, outwardBatchId);
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
+				if (resultSet.next()) {
+					return resultSet.getBigDecimal(1);
+				}
+			}
+
+		} catch (Exception exception) {
+			throw new RuntimeException("Unable to fetch total cheque amount", exception);
+		}
+
+		return BigDecimal.ZERO;
+	}
+
+	private OutwardCheque mapOutwardCheque(ResultSet resultSet) throws Exception {
+
+		OutwardCheque outwardCheque = new OutwardCheque();
+
+		outwardCheque.setOutwardChequeId(resultSet.getString("outward_cheque_id"));
+
+		outwardCheque.setOutwardBatchId(resultSet.getString("outward_batch_id"));
+
+		outwardCheque.setChequeNumber(resultSet.getString("cheque_number"));
+
+		outwardCheque.setMicrCode(resultSet.getString("micr_code"));
+
+		outwardCheque.setDraweeName(resultSet.getString("drawee_name"));
+
+		outwardCheque.setDraweeAccountNumber(resultSet.getString("drawee_account_number"));
+
+		outwardCheque.setPayeeName(resultSet.getString("payee_name"));
+
+		outwardCheque.setPayeeAccountNumber(resultSet.getString("payee_account_number"));
+
+		outwardCheque.setChequeAmount(resultSet.getBigDecimal("cheque_amount"));
+
+		outwardCheque.setChequeDate(resultSet.getDate("cheque_date"));
+
+		outwardCheque.setChequeStatus(resultSet.getString("cheque_status"));
+
+		outwardCheque.setAccountId(resultSet.getString("account_id"));
+
+		outwardCheque.setCreatedAt(resultSet.getTimestamp("created_at"));
+
+		return outwardCheque;
+	}
 }
+

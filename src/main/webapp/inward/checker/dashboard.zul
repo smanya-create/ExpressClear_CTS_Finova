@@ -14,10 +14,10 @@
     </style>
 
     <!-- Explicitly set Session Attributes before sidebar component renders -->
-    <zscript>
+  <!--   <zscript>
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("USER_ROLE", "INWARD_CHECKER");
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
-    </zscript> 
+    </zscript> --> 
 
     <borderlayout width="100%" height="100vh">
 
@@ -61,7 +61,7 @@
                                     <listheader label="REJECTION REQUESTS" align="center"/>
                                     <listheader label="ACTION" align="center" width="180px"/>
                                 </listhead>
-                               
+                             
                                 
                             </listbox>
                         </vlayout>

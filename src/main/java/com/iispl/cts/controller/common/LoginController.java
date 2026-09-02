@@ -32,6 +32,11 @@ public class LoginController extends GenericForwardComposer<Component> {
     private Textbox txtPassword;
     private Combobox cmbRole;
     private Button btnSignIn;
+    
+   
+    private Button btnTogglePassword;
+
+    private boolean isPasswordVisible = false;
 
     private final UserService userService = UserServiceImpl.getInstance();
     private final RoleService roleService = RoleServiceImpl.getInstance();
@@ -74,6 +79,21 @@ public class LoginController extends GenericForwardComposer<Component> {
    
     public void onClick$btnSignIn(Event event) {
         processLogin();
+    }
+    public void onTogglePasswordVisibility() {
+        isPasswordVisible = !isPasswordVisible;
+
+        if (isPasswordVisible) {
+            txtPassword.setType("text");
+            if (btnTogglePassword != null) {
+                btnTogglePassword.setIconSclass("z-icon-eye-slash");
+            }
+        } else {
+            txtPassword.setType("password");
+            if (btnTogglePassword != null) {
+                btnTogglePassword.setIconSclass("z-icon-eye");
+            }
+        }
     }
 
     public void onOK$txtUsername(Event event) {
@@ -182,7 +202,7 @@ public class LoginController extends GenericForwardComposer<Component> {
             Executions.sendRedirect("/inward/maker/index.zul");
         } 
         else if ("ROL1005".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
-            Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
+            Executions.sendRedirect("/inward/checker/dashboard.zul");
         } 
         else {
             Messagebox.show("No dashboard mapped for role: " + dbRoleName + " (ID: " + userRoleId + ")", 
