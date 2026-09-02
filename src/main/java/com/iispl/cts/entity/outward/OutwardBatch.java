@@ -1,4 +1,6 @@
 package com.iispl.cts.entity.outward;
+
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;

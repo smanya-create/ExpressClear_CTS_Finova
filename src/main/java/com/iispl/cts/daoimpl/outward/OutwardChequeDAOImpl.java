@@ -1,4 +1,6 @@
 package com.iispl.cts.daoimpl.outward;
+
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,8 +11,7 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardChequeDAO;
 import com.iispl.cts.entity.outward.OutwardCheque;
 
-public class OutwardChequeDAOImpl implements OutwardChequeDAO{
-
+public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 
 	@Override
 	public List<OutwardCheque> getChequesByBatchId(String outwardBatchId) {
@@ -125,4 +126,3 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO{
 		return outwardCheque;
 	}
 }
-

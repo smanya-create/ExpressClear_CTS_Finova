@@ -223,35 +223,3 @@ html, body {
     padding: 9px 15px;
 
 }
-
-.z-borderlayout {
-    border: none;
-}
-
-.z-west {
-    border: none;
-}
-
-.z-center {
-    border: none;
-}
-
-.z-north {
-    border: none;
-}
-
-.z-south {
-    border: none;
-}
-
-.z-east {
-    border: none;
-}
-
-.sidebar {
-    border: none;
-}
-
-.header {
-    border: none;
-}
