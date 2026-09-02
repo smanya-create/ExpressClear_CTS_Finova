@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +24,9 @@ import org.zkoss.zul.Timer;
 import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.entity.Notification;
+import com.iispl.cts.service.NotificationService;
+import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 
 public class HeaderController extends GenericForwardComposer<Component> {
 
@@ -45,13 +49,17 @@ public class HeaderController extends GenericForwardComposer<Component> {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
 
     private final List<NotificationItem> notificationQueue = new ArrayList<>();
+    private final NotificationService notificationService = NotificationServiceImpl.getInstance();
+
+    // Timer tick accumulator to poll the DB every 30 seconds instead of every second
+    private int pollTicks = 0;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
-    	super.doAfterCompose(comp);
+        super.doAfterCompose(comp);
         initUserProfile();
         loadSessionState();
-        loadRoleSpecificNotifications();
+        loadDatabaseNotifications();
 
         // Attach listener to first root element of the page
         if (getPage() != null && getPage().getFirstRoot() != null) {
@@ -86,11 +94,12 @@ public class HeaderController extends GenericForwardComposer<Component> {
         if (lblHeaderRole != null) lblHeaderRole.setValue(role);
         if (lblUserInitial != null) lblUserInitial.setValue(username.substring(0, 1).toUpperCase());
 
-        // Notifications are only visible for operational queue roles (Maker/Checker)
+        // Notifications are visible for operational roles and administrators
         boolean isOperationalRole = "OUTWARD_MAKER".equalsIgnoreCase(role)
                 || "OUTWARD_CHECKER".equalsIgnoreCase(role)
                 || "INWARD_MAKER".equalsIgnoreCase(role)
-                || "INWARD_CHECKER".equalsIgnoreCase(role);
+                || "INWARD_CHECKER".equalsIgnoreCase(role)
+                || "ADMIN".equalsIgnoreCase(role);
 
         if (divNotificationBell != null) {
             divNotificationBell.setVisible(isOperationalRole);
@@ -98,7 +107,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
     }
 
     private void loadSessionState() {
-    	boolean isSessionOpen = false;
+        boolean isSessionOpen = false;
         LocalDate clearingDate = null;
 
         // 1. Fetch from Database
@@ -154,36 +163,64 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
     // Handles onTimer event from <timer id="headerTimer" .../>
     public void onTimer$headerTimer(Event event) {
-        updateClock();
+        updateClockAndPoll();
     }
 
     public void onTickClock() {
-        updateClock();
+        updateClockAndPoll();
     }
 
-    private void updateClock() {
+    private void updateClockAndPoll() {
         if (lblHeaderClock != null) {
             lblHeaderClock.setValue(LocalTime.now().format(timeFormatter));
         }
+
+        // Background polling: check database for notifications every 30 seconds
+        pollTicks++;
+        if (pollTicks >= 30) {
+            pollTicks = 0;
+            loadDatabaseNotifications();
+        }
     }
 
-    private void loadRoleSpecificNotifications() {
+    /**
+     * Reads unread notifications from DB for the active session user/role
+     */
+    private void loadDatabaseNotifications() {
         String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
-        notificationQueue.clear();
+        String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
+        if (userId == null) {
+            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
+        }
 
-        // Feed mock routed transactions into the respective role queues
-        if ("OUTWARD_MAKER".equalsIgnoreCase(role)) {
-            notificationQueue.add(new NotificationItem("UNPROCESSED Batch #104 routed to your queue after BOD.", "10 mins ago"));
-        } else if ("OUTWARD_CHECKER".equalsIgnoreCase(role)) {
-            notificationQueue.add(new NotificationItem("New batch ready for verification (Batch #102).", "2 mins ago"));
-            notificationQueue.add(new NotificationItem("UNPROCESSED cheques pending checker approval.", "15 mins ago"));
-        } else if ("INWARD_MAKER".equalsIgnoreCase(role)) {
-            notificationQueue.add(new NotificationItem("Inward clearing files parsed from NPCI.", "5 mins ago"));
-        } else if ("INWARD_CHECKER".equalsIgnoreCase(role)) {
-            notificationQueue.add(new NotificationItem("3 cheques awaiting inward reject/approve verification.", "Just now"));
+        List<Notification> dbList = notificationService.getUnreadNotifications(role, userId);
+
+        notificationQueue.clear();
+        for (Notification item : dbList) {
+            notificationQueue.add(new NotificationItem(
+                item.getNotificationId(),
+                item.getMessage(),
+                calculateRelativeTime(item.getCreatedAt())
+            ));
         }
 
         renderNotifications();
+    }
+
+    private String calculateRelativeTime(java.sql.Timestamp ts) {
+    	if (ts == null) return "Just now";
+
+        // Compare raw millisecond differences directly
+        long diffMillis = System.currentTimeMillis() - ts.getTime();
+        long seconds = diffMillis / 1000;
+
+        if (seconds < 60) return "Just now";
+        long minutes = seconds / 60;
+        if (minutes < 60) return minutes + " mins ago";
+        long hours = minutes / 60;
+        if (hours < 24) return hours + " hrs ago";
+        long days = hours / 24;
+        return days + " days ago";
     }
 
     private void renderNotifications() {
@@ -199,12 +236,16 @@ public class HeaderController extends GenericForwardComposer<Component> {
             emptyDiv.appendChild(emptyLbl);
             containerNotificationList.appendChild(emptyDiv);
 
-            if (lblUnreadBadge != null) lblUnreadBadge.setVisible(false);
+            if (lblUnreadBadge != null) {
+                lblUnreadBadge.setVisible(false);
+                lblUnreadBadge.setValue("0");
+            }
             return;
         }
 
         if (lblUnreadBadge != null) {
-            lblUnreadBadge.setValue(String.valueOf(notificationQueue.size()));
+            int count = notificationQueue.size();
+            lblUnreadBadge.setValue(count > 99 ? "99+" : String.valueOf(count));
             lblUnreadBadge.setVisible(true);
         }
 
@@ -232,16 +273,25 @@ public class HeaderController extends GenericForwardComposer<Component> {
     }
 
     public void onClickMarkAllRead() {
+        String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
+        String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
+        if (userId == null) {
+            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
+        }
+
+        notificationService.markAllNotificationsAsRead(role, userId);
         notificationQueue.clear();
         renderNotifications();
     }
 
     // Helper Model
     private static class NotificationItem {
+        final Long id;
         final String message;
         final String timeAgo;
 
-        NotificationItem(String message, String timeAgo) {
+        NotificationItem(Long id, String message, String timeAgo) {
+            this.id = id;
             this.message = message;
             this.timeAgo = timeAgo;
         }
