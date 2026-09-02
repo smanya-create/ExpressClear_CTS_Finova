@@ -1,12 +1,9 @@
 package com.iispl.cts.daoimpl.outward;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +11,7 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardCheckerQueueDAO;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.SendBackReason;
 
 public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
@@ -213,5 +211,41 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
         System.out.println("=================================");
 
         return images;
+    }
+    
+    @Override
+    public List<SendBackReason> getSendBackReasons() throws SQLException {
+
+        List<SendBackReason> reasons = new ArrayList<>();
+
+        String sql =
+                "SELECT reason_id, reason_code, reason_name, reason_description "
+              + "FROM send_back_reason "
+              + "ORDER BY reason_id";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                SendBackReason reason = new SendBackReason();
+
+                reason.setReasonId(rs.getString("reason_id"));
+                reason.setReasonCode(rs.getString("reason_code"));
+                reason.setReasonName(rs.getString("reason_name"));
+                reason.setReasonDescription(
+                        rs.getString("reason_description")
+                );
+
+                reasons.add(reason);
+            }
+        }
+
+        System.out.println("Send Back Reasons Loaded = " + reasons.size());
+
+        return reasons;
     }
 }
