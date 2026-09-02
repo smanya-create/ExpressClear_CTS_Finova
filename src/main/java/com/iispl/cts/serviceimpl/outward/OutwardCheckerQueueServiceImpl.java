@@ -7,6 +7,7 @@ import com.iispl.cts.dao.outward.OutwardCheckerQueueDAO;
 import com.iispl.cts.daoimpl.outward.OutwardCheckerQueueDAOImpl;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.SendBackReason;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 
 public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueService {
@@ -51,6 +52,12 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		// TODO Auto-generated method stub
 
         return outwardCheckerQueueDAO.getImagesByChequeId(outwardChequeId);
+	}
+	
+	@Override
+	public List<SendBackReason> getSendBackReasons() throws SQLException {
+
+	    return outwardCheckerQueueDAO.getSendBackReasons();
 	}
 
 }

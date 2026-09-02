@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.SendBackReason;
 
 
 
@@ -18,5 +19,7 @@ public interface OutwardCheckerQueueDAO {
 	    
 	    List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId)
 	            throws SQLException;
+	    
+	    List<SendBackReason> getSendBackReasons() throws SQLException;
 
 }

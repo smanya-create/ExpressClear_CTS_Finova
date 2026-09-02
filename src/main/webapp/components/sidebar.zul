@@ -59,7 +59,7 @@
             <!-- OUTWARD CHECKER MODULES -->
             <div id="divCheckerMenu" visible="false">
                 <vlayout spacing="2px">
-                    <a id="navCheckerDashboard" label="Dashboard" sclass="${arg.activeTab eq 'checker-dashboard' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToCheckerDashboard()"/>
+                    <a id="navToCheckerDashboard" label="Dashboard" sclass="${arg.activeTab eq 'checker-dashboard' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToCheckerDashboard()"/>
                     <a id="navCheckerQueue" label="Checker Queue" sclass="${arg.activeTab eq 'checker-queue' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardCheckerQueue()"/>
                     <a id="navXmlGen" label="XML Generation" sclass="${arg.activeTab eq 'xml-gen' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardXmlGeneration()"/>
                     <a id="navOutwardRejected" label="Outward Rejected Cheques" sclass="${arg.activeTab eq 'outward-rejected-cheques' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToOutwardRejectedCheques()"/>

@@ -1,0 +1,119 @@
+<?page title="Return to Maker" contentType="text/html;charset=UTF-8"?>
+<?link rel="stylesheet" type="text/css" href="/css/return-to-maker.css"?>
+
+<zk>
+
+    <window
+        id="returnMakerWindow"
+        title="Return to Maker"
+        border="normal"
+        width="680px"
+        closable="true"
+        sizable="false"
+        sclass="return-maker-window">
+
+        <!-- HEADER -->
+        <div sclass="return-header">
+
+            <label
+                value="Return to Maker"
+                sclass="return-title"/>
+
+            <label
+                value="Send this cheque back to the Maker for correction."
+                sclass="return-description"/>
+
+        </div>
+
+
+        <!-- CONTENT -->
+        <div sclass="return-content">
+
+            <!-- BATCH AND CHEQUE NUMBER -->
+            <div sclass="two-column">
+
+                <div sclass="field-group">
+
+                    <label
+                        value="BATCH"
+                        sclass="field-label"/>
+
+                    <label
+                        id="lblReturnBatch"
+                        value="-"
+                        sclass="readonly-field"/>
+
+                </div>
+
+
+                <div sclass="field-group">
+
+                    <label
+                        value="CHEQUE NUMBER"
+                        sclass="field-label"/>
+
+                    <label
+                        id="lblReturnCheque"
+                        value="-"
+                        sclass="readonly-field"/>
+
+                </div>
+
+            </div>
+
+
+            <!-- REASON -->
+            <div sclass="field-group">
+
+                <label
+                    value="REASON FOR SENDING BACK"
+                    sclass="field-label"/>
+
+                <combobox
+                    id="cmbSendBackReason"
+                    width="100%"
+                    placeholder="Select reason"
+                    readonly="true"
+                    sclass="reason-combobox"/>
+
+            </div>
+
+
+            <!-- REMARKS -->
+            <div sclass="field-group">
+
+                <label
+                    value="REMARKS"
+                    sclass="field-label"/>
+
+                <textbox
+                    id="txtReturnRemarks"
+                    multiline="true"
+                    rows="4"
+                    width="100%"
+                    placeholder="Enter remarks for Maker..."
+                    sclass="remarks-field"/>
+
+            </div>
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <div sclass="return-footer">
+
+            <button
+                id="btnReturnCancel"
+                label="CANCEL"
+                sclass="cancel-button"/>
+
+            <button
+                id="btnReturnConfirm"
+                label="RETURN"
+                sclass="return-confirm-button"/>
+
+        </div>
+
+    </window>
+
+</zk>

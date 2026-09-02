@@ -327,4 +327,5 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		// Redirect back to login page
 		Executions.sendRedirect("/common/login.zul");
 	}
+
 }

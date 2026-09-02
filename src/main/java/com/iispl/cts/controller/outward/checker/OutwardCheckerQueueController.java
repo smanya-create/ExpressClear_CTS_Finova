@@ -8,15 +8,19 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
+import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.SendBackReason;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 import com.iispl.cts.serviceimpl.outward.OutwardCheckerQueueServiceImpl;
-import com.iispl.cts.entity.outward.OutwardChequeImage;
 
 
 
@@ -58,6 +62,94 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
     private Button btnZoomIn;
     private Button btnZoomOut;
     private Button btnZoomReset;
+    
+    private Window returnMakerWindow;
+
+    private Label lblReturnBatch;
+    private Label lblReturnCheque;
+
+    private Combobox cmbSendBackReason;    
+    private Textbox txtReturnRemarks;
+    
+    private void createReturnMakerWindow() {
+
+        try {
+
+            // Create Return to Maker window and ATTACH it
+            // to the current checker queue page
+            returnMakerWindow =
+                    (Window) Executions.createComponents(
+                            "/outward/checker/return-to-maker.zul",
+                            self,
+                            null
+                    );
+
+            // Get popup components
+            lblReturnBatch =
+                    (Label) returnMakerWindow.getFellow(
+                            "lblReturnBatch"
+                    );
+
+            lblReturnCheque =
+                    (Label) returnMakerWindow.getFellow(
+                            "lblReturnCheque"
+                    );
+
+            cmbSendBackReason =
+                    (Combobox) returnMakerWindow.getFellow(
+                            "cmbSendBackReason"
+                    );
+
+            txtReturnRemarks =
+                    (Textbox) returnMakerWindow.getFellow(
+                            "txtReturnRemarks"
+                    );
+
+            btnReturnConfirm =
+                    (Button) returnMakerWindow.getFellow(
+                            "btnReturnConfirm"
+                    );
+
+            btnReturnCancel =
+                    (Button) returnMakerWindow.getFellow(
+                            "btnReturnCancel"
+                    );
+
+            // Important:
+            // Dynamically created buttons need explicit listeners
+            btnReturnConfirm.addEventListener(
+                    "onClick",
+                    event -> onClick$btnReturnConfirm(event)
+            );
+
+            btnReturnCancel.addEventListener(
+                    "onClick",
+                    event -> onClick$btnReturnCancel(event)
+            );
+
+            // Keep popup hidden until Return to Maker is clicked
+            returnMakerWindow.setVisible(false);
+
+            System.out.println(
+                    "Return Maker window created and attached successfully."
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to create Return to Maker window.\n\n"
+                            + e.getMessage(),
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+        }
+    }
+
+    private Button btnReturnConfirm;
+    private Button btnReturnCancel;
 
 
     private List<OutwardCheque> cheques;
@@ -81,6 +173,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
         super.doAfterCompose(comp);
 
         outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
+        
+        createReturnMakerWindow();
 
 
         batchId = "BAT1003";
@@ -169,10 +263,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
                 cheques.get(currentIndex);
 
         showingBackImage = false;
-     // =================================================
-     // LOAD FRONT / BACK IMAGE PATHS
-     // =================================================
-
+          // LOAD FRONT / BACK IMAGE PATHS
+     
      frontImagePath = null;
      backImagePath = null;
 
@@ -226,9 +318,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
              "Back Image Path = " + backImagePath
      );
      System.out.println("=================================");
-        // =================================================
         // CHEQUE NUMBER
-        // =================================================
 
 
 
@@ -246,9 +336,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
       );
   }
   
-//=================================================
 //CHEQUE / QUEUE STATUS
-//=================================================
 
 String chequeStatus = nullSafe(cheque.getChequeStatus());
 
@@ -260,10 +348,8 @@ if (lblQueueStatus != null) {
        lblQueueStatus.setValue(chequeStatus);
    }
 }
-        // =================================================
         // MICR
-        // =================================================
-
+        
         if (txtMicr != null) {
 
             txtMicr.setValue(
@@ -275,9 +361,7 @@ if (lblQueueStatus != null) {
         	txtpayeeName.setValue(nullSafe(cheque.getPayeeName()));
         }
 
-        // =================================================
         // ACCOUNT NUMBER
-        // =================================================
 
         if (txtAccountNo != null) {
 
@@ -286,9 +370,7 @@ if (lblQueueStatus != null) {
             );
         }
         
-     // =================================================
      // ACCOUNT VALIDATION
-     // =================================================
      if (lblAccountValidation != null) {
 
          if ("VALID".equalsIgnoreCase(cheque.getChequeStatus())) {
@@ -300,9 +382,7 @@ if (lblQueueStatus != null) {
          }
      }
 
-        // =================================================
         // AMOUNT
-        // =================================================
 
         if (txtAmount != null) {
 
@@ -319,10 +399,8 @@ if (lblQueueStatus != null) {
             }
         }
 
-        // =================================================
-        // DATE
-        // =================================================
-
+                // DATE
+        
         if (txtChequeDate != null) {
 
             if (cheque.getChequeDate() != null) {
@@ -338,19 +416,9 @@ if (lblQueueStatus != null) {
             }
         }
         
-        
-        
-     
-
-        // =================================================
-        // FRONT IMAGE
-        // =================================================
-
    
 
-     // =================================================
      // SHOW FRONT IMAGE
-     // =================================================
 
      if (imgCheque != null) {
 
@@ -631,46 +699,246 @@ if (lblQueueStatus != null) {
         }
     }
 
-    // =====================================================
-    // RETURN TO MAKER
-    // =====================================================
+ // =====================================================
+ // RETURN TO MAKER POPUP
+ // =====================================================
 
     public void onClick$btnReturn(Event event) {
 
-        int result =
-                Messagebox.show(
-                        "Are you sure you want to return this cheque to Maker?",
-                        "Return to Maker",
-                        Messagebox.YES | Messagebox.NO,
-                        Messagebox.QUESTION
+        if (cheques == null || cheques.isEmpty()) {
+            return;
+        }
+
+        if (currentIndex < 0 || currentIndex >= cheques.size()) {
+            return;
+        }
+
+        OutwardCheque cheque = cheques.get(currentIndex);
+
+        // Set batch number
+        if (lblReturnBatch != null) {
+
+            lblReturnBatch.setValue(
+                    batchNo != null ? batchNo : "-"
+            );
+        }
+
+        // Set cheque number
+        if (lblReturnCheque != null) {
+
+            lblReturnCheque.setValue(
+                    cheque.getChequeNumber() != null
+                            ? cheque.getChequeNumber()
+                            : "-"
+            );
+        }
+
+        // Clear previous selected reason
+        if (cmbSendBackReason != null) {
+
+            cmbSendBackReason.getItems().clear();
+            cmbSendBackReason.setSelectedItem(null);
+            cmbSendBackReason.setValue("");
+        }
+
+        // Clear old remarks
+        if (txtReturnRemarks != null) {
+
+            txtReturnRemarks.setValue("");
+        }
+
+        // Load reasons from database
+        loadSendBackReasons();
+
+        // Open popup
+        if (returnMakerWindow != null) {
+
+            returnMakerWindow.setVisible(true);
+
+            returnMakerWindow.doModal();
+        }
+    }
+    private void loadSendBackReasons() {
+
+        try {
+
+            // Safety check
+            if (cmbSendBackReason == null) {
+
+                System.out.println(
+                        "ERROR: cmbSendBackReason is NULL"
                 );
 
-        if (result != Messagebox.YES) {
+                return;
+            }
+
+
+            // Clear old items
+
+            cmbSendBackReason.getItems().clear();
+
+
+            // Get reasons from database
+
+            List<SendBackReason> reasons = outwardCheckerQueueService.getSendBackReasons();
+
+
+            System.out.println("Reasons loaded = "+ (reasons == null ? 0 : reasons.size()));
+
+
+            if (reasons == null || reasons.isEmpty()) {
+
+                System.out.println("No send back reasons found.");
+
+                return;
+            }
+
+
+            // Add reasons to combobox
+
+            for (SendBackReason reason : reasons) {
+
+                Comboitem item = new Comboitem();
+
+                item.setLabel(
+                        reason.getReasonName()
+                );
+
+                // Store complete object
+
+                item.setValue(reason);
+
+                cmbSendBackReason
+                        .appendChild(item);
+            }
+
+
+            System.out.println(
+                    "Send back reasons added to combobox."
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+
+                    "Unable to load send back reasons.\n\n"
+                    + e.getClass().getName()
+                    + "\n"
+                    + e.getMessage(),
+
+                    "Error",
+
+                    Messagebox.OK,
+
+                    Messagebox.ERROR
+            );
+        }
+    }
+    public void onClick$btnReturnConfirm(Event event) {
+
+        // Validate reason
+        if (cmbSendBackReason == null
+                || cmbSendBackReason.getSelectedItem() == null) {
+
+            Messagebox.show(
+                    "Please select a reason for sending back.",
+                    "Validation",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION
+            );
+
             return;
         }
 
         try {
 
-        	OutwardCheque cheque =
-                    cheques.get(currentIndex);
+            if (cheques == null
+                    || cheques.isEmpty()
+                    || currentIndex < 0
+                    || currentIndex >= cheques.size()) {
 
-            outwardCheckerQueueService.returnChequeToMaker(
-                    cheque.getChequeNumber()
+                return;
+            }
+
+            OutwardCheque cheque = cheques.get(currentIndex);
+
+            Comboitem selectedItem =
+                    cmbSendBackReason.getSelectedItem();
+
+            SendBackReason selectedReason =
+                    (SendBackReason) selectedItem.getValue();
+
+            String remarks =
+                    txtReturnRemarks != null
+                            ? txtReturnRemarks.getValue()
+                            : "";
+
+            if (remarks == null) {
+                remarks = "";
+            }
+
+            System.out.println("================================");
+            System.out.println("RETURN TO MAKER");
+            System.out.println("Batch No       : " + batchNo);
+            System.out.println(
+                    "Cheque Number  : "
+                            + cheque.getChequeNumber()
             );
+            System.out.println(
+                    "Reason ID      : "
+                            + selectedReason.getReasonId()
+            );
+            System.out.println(
+                    "Reason Code    : "
+                            + selectedReason.getReasonCode()
+            );
+            System.out.println(
+                    "Reason Name    : "
+                            + selectedReason.getReasonName()
+            );
+            System.out.println(
+                    "Remarks        : "
+                            + remarks
+            );
+            System.out.println("================================");
 
-            cheque.setChequeStatus("RETURN_TO_MAKER");
+            // TODO:
+            // Call service method here to update database
+            //
+            // outwardCheckerQueueService.returnToMaker(
+            //         cheque.getChequeNumber(),
+            //         selectedReason.getReasonId(),
+            //         remarks
+            // );
 
-            moveToNextCheque();
+            // Close popup
+            returnMakerWindow.setVisible(false);
+
+            Messagebox.show(
+                    "Cheque has been returned to Maker successfully.",
+                    "Success",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION
+            );
 
         } catch (Exception e) {
 
             showError(
-                    "Unable to return cheque to Maker.", e );
+                    "Unable to return cheque to Maker.",
+                    e
+            );
         }
     }
+    public void onClick$btnReturnCancel(Event event) {
 
- 
+        if (returnMakerWindow != null) {
 
+            returnMakerWindow.setVisible(false);
+        }
+    }
+    
     public void onClick$btnReject(Event event) {
 
         int result =
