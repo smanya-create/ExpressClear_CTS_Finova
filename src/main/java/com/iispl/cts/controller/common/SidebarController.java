@@ -201,10 +201,10 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void navToInwardMakerReports() { Executions.sendRedirect("/inward-maker/reports.zul"); }
 
     // Inward Checker Navigation Actions
-    public void navToInwardCheckerDashboard() { Executions.sendRedirect("/inward-checker/dashboard.zul"); }
-    public void navToVerification() { Executions.sendRedirect("/inward-checker/verification.zul"); }
-    public void navToRRF() { Executions.sendRedirect("/inward-checker/rrf.zul"); }
-    public void navToInwardCheckerReports() { Executions.sendRedirect("/inward-checker/reports.zul"); }
+    public void navToInwardCheckerDashboard() { Executions.sendRedirect("/inward/checker/dashboard.zul"); }
+    public void navToVerification() { Executions.sendRedirect("/inward/checker/verification.zul"); }
+    public void navToRRF() { Executions.sendRedirect("/inward/checker/return.zul"); }
+    public void navToInwardCheckerReports() { Executions.sendRedirect("/inward/checker/reports.zul"); }
 
     // Global Logout
     public void onClickLogout() {
