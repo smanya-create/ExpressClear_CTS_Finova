@@ -3,13 +3,14 @@ package com.iispl.cts.controller.common;
 import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zul.Include;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 
+import com.iispl.cts.common.util.ActiveUserManager;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
 
 public class SidebarController extends GenericForwardComposer<Component> {
@@ -319,13 +320,21 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	public void onClickLogout() {
 		AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
 
-		// Clear and invalidate current HTTP session
-		if (Sessions.getCurrent() != null) {
-			Sessions.getCurrent().invalidate();
-		}
+	    // Clear and invalidate current HTTP session
+	    if (Sessions.getCurrent() != null) {
+	        String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
+	        if (userId == null) {
+	            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
+	        }
+	        
+	        // Deregister user from real-time tracker
+	        ActiveUserManager.userLoggedOut(userId);
 
-		// Redirect back to login page
-		Executions.sendRedirect("/common/login.zul");
+	        Sessions.getCurrent().invalidate();
+	    }
+
+	    // Redirect back to login page
+	    Executions.sendRedirect("/common/login.zul");
 	}
 
 }

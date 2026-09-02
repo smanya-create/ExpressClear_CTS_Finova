@@ -34,6 +34,7 @@ import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.ActiveUserManager;
 import com.iispl.cts.dto.PendingChequeDTO;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
 
@@ -111,18 +112,12 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
         }
     }
 
+   
     private void fetchActiveUsersCount() {
-        String sql = "SELECT COUNT(*) FROM users WHERE status = 'ACTIVE'";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                this.loggedInUsersCount = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            this.loggedInUsersCount = 1;
-        }
+    	this.loggedInUsersCount = ActiveUserManager.getActiveUserCount();
     }
+    	
+    
 
     private void loadPendingCheques() {
         pendingTransactionsList.clear();

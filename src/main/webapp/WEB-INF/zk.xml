@@ -8,6 +8,9 @@
 	<device-config>
 		<device-type>ajax</device-type>
 		<timeout-uri>/timeout.zul</timeout-uri><!-- An empty URL can cause the browser to reload the same URL -->
-        <server-push-class>org.zkoss.zk.ui.impl.PollingServerPush</server-push-class>	
+        <server-push-class>org.zkoss.zk.ui.impl.PollingServerPush</server-push-class>
+        <listener>
+           <listener-class>com.iispl.cts.listener.UserSession</listener-class>
+       </listener>
 	</device-config>
 </zk>
