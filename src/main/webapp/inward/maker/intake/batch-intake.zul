@@ -2,68 +2,116 @@
 
 <zk>
 
-	<style src="/css/inward/intake.css" />
+	<window id="inwardBatchQueueWindow" title="Inward Batch Queue"
+		border="normal" width="95%"
+		apply="com.iispl.cts.controller.inward.maker.InwardBatchController">
 
-	<window id="batchIntakeWindow" border="none" width="100%"
-		apply="com.iispl.cts.controller.inward.maker.InwardIntakeController">
+		<style>
 
-		<vlayout width="100%" sclass="batch-page">
+			.search-section { background: #ffffff; border: 1px solid
+			#d9e2ec; border-radius: 8px; padding: 22px; margin-bottom:
+			28px; }
 
-			<div sclass="search-container">
+			.section-title { font-size: 20px; font-weight: bold; color:
+			#164e87; margin-bottom: 18px; }
+
+			.field-label { font-size: 14px; font-weight: bold; color:
+			#164e87; margin-bottom: 7px; }
+
+			.input-field { height: 38px; border: 1px solid #cbd5e1;
+			border-radius: 5px; padding-left: 10px; }
+
+			.search-button { background: #1769d1; color: white; border:
+			none; border-radius: 5px; height: 38px; padding-left: 25px;
+			padding-right: 25px; font-weight: bold; }
+
+			.batch-section { background: #ffffff; border: 1px solid
+			#d9e2ec; border-radius: 8px; padding: 22px; }
+
+			.batch-title { font-size: 20px; font-weight: bold; color:
+			#164e87; }
+
+			.batch-subtitle { font-size: 14px; color: #718096;
+			margin-top: 5px; margin-bottom: 18px; }
+
+			.batch-listbox { width: 100%; border: 1px solid #d9e2ec; }
+
+			.batch-listbox .z-listheader { background: #1769d1; color:
+			white; font-size: 15px; font-weight: bold; text-align:
+			center; }
+
+			.batch-listbox .z-listcell { text-align: center;
+			vertical-align: middle; padding: 14px 8px; font-size: 14px;
+			}
+
+			.validate-button { background: #1597e5; color: white;
+			border: none; border-radius: 5px; padding: 9px 22px;
+			font-weight: bold; }
+
+			.micr-repair-button { background: #059669; color: white;
+			border: none; border-radius: 5px; padding: 9px 18px;
+			font-weight: bold; }
+
+			.status-pending { background: #fff1cc; color: #c47b00;
+			border-radius: 15px; padding: 6px 14px; font-weight: bold; }
+
+			.status-validated { background: #d1fae5; color: #047857;
+			border-radius: 15px; padding: 6px 14px; font-weight: bold; }
+
+			.status-failed { background: #fee2e2; color: #dc2626;
+			border-radius: 15px; padding: 6px 14px; font-weight: bold; }
+
+		</style>
+
+		<vlayout width="100%" style="padding:25px;">
+
+			<div sclass="search-section">
 
 				<label value="SEARCH BATCH" sclass="section-title" />
 
-				<hlayout width="100%" sclass="search-row"
-					spacing="18px">
+				<hlayout width="100%" spacing="20px">
 
-					<vlayout hflex="1" sclass="search-field">
+					<vlayout hflex="1">
 
 						<label value="Batch No." sclass="field-label" />
 
-						<textbox id="batchNoTextbox"
+						<textbox id="batchSearchTextbox"
 							placeholder="Batch No." width="100%" sclass="input-field" />
 
 					</vlayout>
 
-					<vlayout hflex="1" sclass="search-field">
+					<vlayout width="220px">
 
 						<label value="Status" sclass="field-label" />
 
 						<combobox id="statusCombobox" width="100%"
-							readonly="true" value="All">
+							value="All">
 
-							<comboitem label="All" value="ALL" />
-
-							<comboitem label="Pending Validation"
-								value="PENDING" />
-
-							<comboitem label="Validation Failed"
-								value="FAILED" />
-
-							<comboitem label="Validated"
-								value="VALIDATED" />
+							<comboitem label="All" />
+							<comboitem label="Pending Validation" />
+							<comboitem label="Validated" />
+							<comboitem label="Validation Failed" />
 
 						</combobox>
 
 					</vlayout>
 
-					<vlayout hflex="1" sclass="search-field">
+					<vlayout width="250px">
 
 						<label value="Received Date"
 							sclass="field-label" />
 
-						<datebox id="receivedDate" width="100%"
-							placeholder="Select Date" format="dd-MMM-yyyy" />
+						<datebox id="receivedDatebox" width="100%"
+							placeholder="Select Date" />
 
 					</vlayout>
 
-					<vlayout width="105px"
-						sclass="search-button-area">
+					<vlayout width="120px">
 
-						<label value=" " sclass="field-label" />
+						<space height="27px" />
 
 						<button id="searchButton" label="Search"
-							width="105px" sclass="search-button" />
+							width="100%" sclass="search-button" />
 
 					</vlayout>
 
@@ -71,364 +119,42 @@
 
 			</div>
 
+			<div sclass="batch-section">
 
-			<div sclass="batch-container">
+				<vlayout width="100%">
 
-				<label value="Received Inward Batches"
-					sclass="batch-title" />
+					<label value="Received Inward Batches"
+						sclass="batch-title" />
 
-				<label
-					value="Validate each batch before it enters MICR Repair."
-					sclass="section-description" />
+					<label
+						value="Validate each batch before it enters MICR Repair."
+						sclass="batch-subtitle" />
 
+				</vlayout>
 
 				<listbox id="batchListbox" width="100%"
-					sclass="batch-table">
+					sclass="batch-listbox">
 
-					<listhead sizable="true">
+					<listhead>
 
 						<listheader label="Batch No." width="20%" />
 
 						<listheader label="Received On" width="20%" />
 
-						<listheader label="Amount" width="18%" />
+						<listheader label="Amount" width="20%" />
 
 						<listheader label="Status" width="20%" />
 
-						<listheader label="Action" width="22%" />
+						<listheader label="Action" width="20%" />
 
 					</listhead>
 
-
-					<listitem id="batchRow1">
-
-						<listcell>
-							<label value="IW-20260827-001" />
-						</listcell>
-
-						<listcell>
-							<label value="27-Aug-2026 09:12" />
-						</listcell>
-
-						<listcell>
-							<label value="₹ 18,42,600" />
-						</listcell>
-
-						<listcell>
-							<label id="statusLabel1"
-								value="Pending Validation" sclass="status-pending" />
-						</listcell>
-
-						<listcell>
-
-							<button id="validateButton1"
-								label="Validate" width="105px" sclass="validate-button" />
-
-							<button id="micrRepairButton1"
-								label="Open MICR Repair" width="135px" visible="false"
-								sclass="repair-button" />
-
-						</listcell>
-
-					</listitem>
-
-
-					<listitem id="batchRow2">
-
-						<listcell>
-							<label value="IW-20260827-002" />
-						</listcell>
-
-						<listcell>
-							<label value="27-Aug-2026 09:26" />
-						</listcell>
-
-						<listcell>
-							<label value="₹ 11,26,450" />
-						</listcell>
-
-						<listcell>
-							<label id="statusLabel2"
-								value="Pending Validation" sclass="status-pending" />
-						</listcell>
-
-						<listcell>
-
-							<button id="validateButton2"
-								label="Validate" width="105px" sclass="validate-button" />
-
-							<button id="micrRepairButton2"
-								label="Open MICR Repair" width="135px" visible="false"
-								sclass="repair-button" />
-
-						</listcell>
-
-					</listitem>
-
-
-					<listitem id="batchRow3">
-
-						<listcell>
-							<label value="IW-20260827-003" />
-						</listcell>
-
-						<listcell>
-							<label value="27-Aug-2026 10:04" />
-						</listcell>
-
-						<listcell>
-							<label value="₹ 8,94,200" />
-						</listcell>
-
-						<listcell>
-							<label value="Validation Failed"
-								sclass="status-failed" />
-						</listcell>
-
-						<listcell>
-
-							<button id="viewErrorButton"
-								label="View Error" width="105px" sclass="error-button" />
-
-						</listcell>
-
-					</listitem>
-
-
-					<listitem id="batchRow4">
-
-						<listcell>
-							<label value="IW-20260827-004" />
-						</listcell>
-
-						<listcell>
-							<label value="27-Aug-2026 10:31" />
-						</listcell>
-
-						<listcell>
-							<label value="₹ 21,08,900" />
-						</listcell>
-
-						<listcell>
-							<label id="statusLabel4" value="Validated"
-								sclass="status-validated" />
-						</listcell>
-
-						<listcell>
-
-							<button id="micrRepairButton"
-								label="Open MICR Repair" width="135px" sclass="repair-button" />
-
-						</listcell>
-
-					</listitem>
-
 				</listbox>
-
-
-				<label id="batchCountLabel"
-					value="Showing 4 of 12 received batches" sclass="batch-count" />
 
 			</div>
 
-
 		</vlayout>
 
-
-		<window id="validationFailedWindow"
-			title="Batch Validation Failed" border="normal" width="600px"
-			mode="modal" closable="true" visible="false"
-			sclass="validation-popup">
-
-			<vlayout width="100%" sclass="popup-content">
-
-				<label value="Batch Validation Failed"
-					sclass="popup-title" />
-
-				<separator />
-
-				<vlayout sclass="validation-section">
-
-					<label value="Cheque Count"
-						sclass="validation-heading" />
-
-					<hlayout sclass="validation-row">
-
-						<label value="Expected:"
-							sclass="validation-label" />
-
-						<label value="10" sclass="validation-value" />
-
-					</hlayout>
-
-					<hlayout sclass="validation-row">
-
-						<label value="Actual:"
-							sclass="validation-label" />
-
-						<label value="9" sclass="validation-value" />
-
-					</hlayout>
-
-					<hlayout sclass="mismatch-row">
-
-						<label value="✕" sclass="error-icon" />
-
-						<label value="Mismatch" sclass="mismatch-text" />
-
-					</hlayout>
-
-				</vlayout>
-
-				<separator />
-
-				<vlayout sclass="validation-section">
-
-					<label value="Total Amount"
-						sclass="validation-heading" />
-
-					<hlayout sclass="validation-row">
-
-						<label value="Expected:"
-							sclass="validation-label" />
-
-						<label value="₹1,20,000"
-							sclass="validation-value" />
-
-					</hlayout>
-
-					<hlayout sclass="validation-row">
-
-						<label value="Actual:"
-							sclass="validation-label" />
-
-						<label value="₹1,15,000"
-							sclass="validation-value" />
-
-					</hlayout>
-
-					<hlayout sclass="mismatch-row">
-
-						<label value="✕" sclass="error-icon" />
-
-						<label value="Mismatch" sclass="mismatch-text" />
-
-					</hlayout>
-
-				</vlayout>
-
-				<label
-					value="Please verify the batch file and control values."
-					sclass="validation-message" />
-
-				<hlayout width="100%" sclass="popup-action">
-
-					<space hflex="1" />
-
-					<button id="backToUploadButton"
-						label="Back to Upload" width="150px" sclass="back-upload-button" />
-
-				</hlayout>
-
-			</vlayout>
-
-		</window>
-
-
-		<window id="validationSuccessWindow"
-			title="Validation Successful" border="normal" width="550px"
-			mode="modal" closable="true" visible="false"
-			sclass="validation-popup">
-
-			<vlayout width="100%" sclass="popup-content">
-
-				<label value="Batch Validation Successful"
-					sclass="popup-title" />
-
-				<separator />
-
-				<vlayout sclass="validation-section">
-
-					<label value="Batch Validation"
-						sclass="validation-heading" />
-
-					<hlayout sclass="validation-row">
-
-						<label value="Batch No.:"
-							sclass="validation-label" />
-
-						<label id="successBatchNo" value=""
-							sclass="validation-value" />
-
-					</hlayout>
-
-					<hlayout sclass="validation-row">
-
-						<label value="Status:"
-							sclass="validation-label" />
-
-						<label value="Validated"
-							sclass="success-status" />
-
-					</hlayout>
-
-					<hlayout sclass="success-message-row">
-
-						<label value="✓" sclass="success-icon" />
-
-						<label value="Batch validated successfully"
-							sclass="success-text" />
-
-					</hlayout>
-
-				</vlayout>
-
-				<label value="The batch is ready for MICR Repair."
-					sclass="validation-message" />
-
-				<hlayout width="100%" sclass="popup-action">
-
-					<space hflex="1" />
-
-					<button id="successOkButton" label="OK" width="75px"
-						sclass="ok-button" />
-
-				</hlayout>
-
-			</vlayout>
-
-		</window>
-
-
-		<window id="micrRepairWindow" title="MICR Repair"
-			border="normal" width="500px" mode="modal" closable="true"
-			visible="false" sclass="validation-popup">
-
-			<vlayout width="100%" sclass="popup-content">
-
-				<label value="MICR Repair" sclass="popup-title" />
-
-				<separator />
-
-				<vlayout sclass="validation-section">
-
-					<label value="Batch is ready for MICR Repair."
-						sclass="validation-heading" />
-
-					<label
-						value="MICR Repair screen is not configured in this module."
-						sclass="validation-message" />
-
-				</vlayout>
-
-				<hlayout width="100%" sclass="popup-action">
-
-					<space hflex="1" />
-
-					<button id="micrOkButton" label="OK" width="75px"
-						sclass="ok-button" />
-				</hlayout>
-			</vlayout>
-		</window>
 	</window>
+
 </zk>
