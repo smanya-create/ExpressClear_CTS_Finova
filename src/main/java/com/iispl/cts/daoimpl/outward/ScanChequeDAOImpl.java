@@ -592,4 +592,51 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                     e);
         }
     }
+    @Override
+    public void updateChequeStatus(
+            Connection connection,
+            String batchId,
+            String status) {
+
+        if (connection == null) {
+            throw new IllegalArgumentException(
+                    "Connection cannot be null");
+        }
+
+        if (batchId == null || batchId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Batch ID cannot be null or empty");
+        }
+
+        if (status == null || status.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Cheque status cannot be null or empty");
+        }
+
+        String sql =
+                "UPDATE scan_cheque " +
+                "SET cheque_status = ? " +
+                "WHERE scanned_batch_id = ?";
+
+        try (PreparedStatement ps =
+                     connection.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setString(2, batchId);
+
+            int rowsUpdated = ps.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new IllegalStateException(
+                        "No cheques found for batch ID: "
+                        + batchId);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Failed to update cheque status for batch ID: "
+                    + batchId,
+                    e);
+        }
+    }
 }

@@ -24,10 +24,14 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.ScanBatch;
-import com.iispl.cts.entity.outward.ScanCheque;
 import com.iispl.cts.parser.BatchXmlParser;
+import com.iispl.cts.service.outward.OutwardChequeService;
+import com.iispl.cts.service.outward.OutwardMakerService;
 import com.iispl.cts.service.outward.ScanService;
+import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
+import com.iispl.cts.serviceimpl.outward.OutwardMakerServiceImpl;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
 public class OutwardMakerBatchUploadController
@@ -59,10 +63,12 @@ public class OutwardMakerBatchUploadController
     private Label micrRepairCount;
 
     // =========================================================
-    // SERVICE
+    // SERVICES
     // =========================================================
 
     private ScanService scanService;
+    private OutwardMakerService outwardMakerService;
+    private OutwardChequeService outwardChequeService;
 
     // =========================================================
     // UPLOADED ZIP
@@ -70,7 +76,13 @@ public class OutwardMakerBatchUploadController
 
     private File uploadedZipFile;
 
+    // =========================================================
+    // BATCH IDs
+    // =========================================================
+
     private String batchId;
+
+    private String outwardBatchId;
 
     // =========================================================
     // COMPOSE
@@ -137,11 +149,17 @@ public class OutwardMakerBatchUploadController
                         "micrRepairCount");
 
         // =====================================================
-        // Create service
+        // Create services
         // =====================================================
 
         scanService =
                 new ScanServiceImpl();
+
+        outwardMakerService =
+                new OutwardMakerServiceImpl();
+
+        outwardChequeService =
+                new OutwardChequeServiceImpl();
 
         // =====================================================
         // Initial page state
@@ -155,7 +173,8 @@ public class OutwardMakerBatchUploadController
 
         validateBatchButton.setDisabled(true);
 
-        normalCount.setValue("0 NORMAL");
+        normalCount.setValue(
+                "0 NORMAL");
 
         micrRepairCount.setValue(
                 "0 MICR REPAIR");
@@ -238,7 +257,6 @@ public class OutwardMakerBatchUploadController
                                 "/TempData");
 
         if (tempDataPath == null) {
-
             return;
         }
 
@@ -296,7 +314,6 @@ public class OutwardMakerBatchUploadController
         } catch (Exception e) {
 
             e.printStackTrace();
-
             return;
         }
 
@@ -319,6 +336,8 @@ public class OutwardMakerBatchUploadController
         // =====================================================
 
         batchId = null;
+
+        outwardBatchId = null;
 
         batchNumber.setValue("");
 
@@ -346,16 +365,15 @@ public class OutwardMakerBatchUploadController
         /*
          * IMPORTANT:
          *
-         * DO NOT call parser here.
+         * Uploading the ZIP does NOT:
          *
-         * DO NOT call ScanService here.
+         * - parse XML
+         * - save to database
+         * - validate batch
+         * - transfer to outward
          *
-         * DO NOT perform database operation here.
-         *
-         * DO NOT perform validation here.
-         *
-         * Everything happens only after the user
-         * clicks Validate Batch.
+         * Everything happens only after
+         * Validate Batch is clicked.
          */
     }
 
@@ -387,7 +405,7 @@ public class OutwardMakerBatchUploadController
                             scanService);
 
             /*
-             * Parser will:
+             * Parser:
              *
              * ZIP
              *  ↓
@@ -395,11 +413,13 @@ public class OutwardMakerBatchUploadController
              *  ↓
              * ScanBatch
              *  ↓
-             * List<ScanCheque>
+             * ScanCheque
              *  ↓
              * ScanService
              *  ↓
              * Database
+             *
+             * Parser returns ONLY batchId.
              */
 
             batchId =
@@ -420,7 +440,7 @@ public class OutwardMakerBatchUploadController
 
             // =================================================
             // STEP 2
-            // Get batch from DB
+            // Retrieve ScanBatch from database
             // =================================================
 
             ScanBatch scanBatch =
@@ -436,155 +456,159 @@ public class OutwardMakerBatchUploadController
 
             // =================================================
             // STEP 3
-            // Get cheques from DB
+            // Get ACTUAL values from scan_batch
             // =================================================
 
-            List<ScanCheque> scannedCheques =
-                    scanService.getChequesByBatchId(
-                            batchId);
+            int actualChequeCount =
+                    scanBatch.getActualChequeCount();
 
-            if (scannedCheques == null) {
-
-                throw new RuntimeException(
-                        "Unable to retrieve cheques.");
-            }
+            BigDecimal actualTotalAmount =
+                    scanBatch.getActualTotalAmount();
 
             // =================================================
             // STEP 4
-            // Validate cheque count
+            // Get EXPECTED values entered by user
             // =================================================
 
-            int expectedChequeCount =
-                    scanBatch.getActualChequeCount();
+            Integer expectedChequeCount =
+                    expectedTotalCheques.getValue();
 
-            int actualChequeCount =
-                    scannedCheques.size();
+            BigDecimal expectedTotalAmount =
+                    expectedTotalChequeAmount.getValue();
 
-            boolean chequeCountValid =
-                    expectedChequeCount
-                            == actualChequeCount;
+            if (expectedChequeCount == null) {
+
+                throw new RuntimeException(
+                        "Expected cheque count is required.");
+            }
+
+            if (expectedTotalAmount == null) {
+
+                throw new RuntimeException(
+                        "Expected total amount is required.");
+            }
 
             // =================================================
             // STEP 5
-            // Validate total amount
+            // Compare expected vs actual
             // =================================================
 
-            BigDecimal expectedTotalAmount =
-                    scanBatch.getActualTotalAmount();
-
-            BigDecimal actualTotalAmount =
-                    BigDecimal.ZERO;
-
-            for (ScanCheque cheque :
-                    scannedCheques) {
-
-                if (cheque != null
-                        && cheque.getChequeAmount()
-                                != null) {
-
-                    actualTotalAmount =
-                            actualTotalAmount.add(
-                                    cheque.getChequeAmount());
-                }
-            }
+            boolean chequeCountValid =
+                    expectedChequeCount
+                            .intValue()
+                    == actualChequeCount;
 
             boolean amountValid =
-                    expectedTotalAmount != null
-                            && expectedTotalAmount
-                                    .compareTo(
-                                            actualTotalAmount) == 0;
+                    actualTotalAmount != null
+                    && expectedTotalAmount.compareTo(
+                            actualTotalAmount) == 0;
 
             // =================================================
             // STEP 6
-            // Update expected values on page
+            // Validation FAILED
             // =================================================
 
-            expectedTotalCheques.setValue(
-                    expectedChequeCount);
+            if (!chequeCountValid
+                    || !amountValid) {
 
-            expectedTotalChequeAmount.setValue(
-                    expectedTotalAmount);
+                successMessage.setVisible(false);
+
+                scannedChequesWindow.setVisible(false);
+
+                /*
+                 * Redirect to validation page.
+                 *
+                 * Pass the scanned batch ID so that
+                 * batch-validation.zul can retrieve
+                 * the required batch information.
+                 */
+
+                Executions.sendRedirect(
+                        "batch-validation.zul?batchId="
+                                + batchId);
+
+                return;
+            }
 
             // =================================================
             // STEP 7
             // Validation PASSED
             // =================================================
 
-            if (chequeCountValid
-                    && amountValid) {
+            /*
+             * At this point:
+             *
+             * expected count  == scan_batch actual count
+             *
+             * expected amount == scan_batch actual amount
+             *
+             * Now transfer the batch to outward.
+             */
 
-                /*
-                 * ---------------------------------------------
-                 * Show success message on SAME PAGE
-                 * ---------------------------------------------
-                 */
+            outwardBatchId =
+                    outwardMakerService.getBatchFromScan(
+                            batchId);
+            System.out.println(
+                    "SCANNED BATCH ID = " + batchId);
 
-                successMessage.setVisible(true);
+            System.out.println(
+                    "GENERATED OUTWARD BATCH ID = " + outwardBatchId);
 
-                successText.setValue(
-                        "Batch "
-                        + batchId
-                        + " has been validated successfully.");
+            // =================================================
+            // Check returned outward batch ID
+            // =================================================
 
-                /*
-                 * ---------------------------------------------
-                 * Show scanned cheque list
-                 * ---------------------------------------------
-                 */
+            if (outwardBatchId == null
+                    || outwardBatchId
+                            .trim()
+                            .isEmpty()) {
 
-                scannedChequesWindow.setVisible(true);
-
-                /*
-                 * ---------------------------------------------
-                 * Populate cheque list
-                 * ---------------------------------------------
-                 */
-
-                displayScannedCheques(
-                        scannedCheques);
-
-                /*
-                 * IMPORTANT:
-                 *
-                 * No Messagebox.show() here.
-                 */
+                throw new RuntimeException(
+                        "Outward batch ID was not returned.");
             }
 
             // =================================================
             // STEP 8
-            // Validation FAILED
+            // Retrieve cheques from outward_cheque
             // =================================================
 
-            else {
+            List<OutwardCheque> outwardCheques =
+            		outwardChequeService
+                    .getChequesByBatchId(
+                    		outwardBatchId);
+            		
 
-                /*
-                 * Keep success message hidden.
-                 */
+            if (outwardCheques == null) {
 
-                successMessage.setVisible(false);
-
-                /*
-                 * Keep cheque list hidden because
-                 * validation did not pass.
-                 */
-
-                scannedChequesWindow.setVisible(false);
-
-                /*
-                 * For now we are not showing a popup.
-                 *
-                 * A validation-error section can be added
-                 * to the ZUL later.
-                 */
+                throw new RuntimeException(
+                        "Unable to retrieve outward cheques.");
             }
+
+            // =================================================
+            // STEP 9
+            // Display outward cheques
+            // =================================================
+
+            scannedChequesWindow.setVisible(true);
+
+            displayOutwardCheques(
+                    outwardCheques);
+
+            // =================================================
+            // STEP 10
+            // SUCCESS
+            // =================================================
+
+            successMessage.setVisible(true);
+
+            successText.setValue(
+                    "Batch "
+                    + batchId
+                    + " has been validated and transferred successfully.");
 
         } catch (Exception e) {
 
             e.printStackTrace();
-
-            /*
-             * Hide success/list when processing fails.
-             */
 
             successMessage.setVisible(false);
 
@@ -592,35 +616,37 @@ public class OutwardMakerBatchUploadController
 
             batchId = null;
 
+            outwardBatchId = null;
+
             batchNumber.setValue("");
         }
     }
 
     // =========================================================
-    // DISPLAY SCANNED CHEQUES
+    // DISPLAY OUTWARD CHEQUES
     // =========================================================
 
-    private void displayScannedCheques(
-            List<ScanCheque> scannedCheques) {
-
-        /*
-         * Clear previous UI rows.
-         */
+    private void displayOutwardCheques(
+            List<OutwardCheque> outwardCheques) {
+    	System.out.println(
+				"Displaying outward cheques for batch: "
+				+ outwardBatchId);
+        // =====================================================
+        // Clear previous rows
+        // =====================================================
 
         chequeList.getItems().clear();
 
         int normal = 0;
-
         int micrRepair = 0;
-
         int itemNumber = 1;
 
         // =====================================================
-        // Create list rows
+        // Create rows
         // =====================================================
 
-        for (ScanCheque cheque :
-                scannedCheques) {
+        for (OutwardCheque cheque :
+                outwardCheques) {
 
             if (cheque == null) {
                 continue;
@@ -629,11 +655,11 @@ public class OutwardMakerBatchUploadController
             String status =
                     cheque.getChequeStatus();
 
-            // -------------------------------------------------
-            // Count status
-            // -------------------------------------------------
+            // =================================================
+            // Count statuses
+            // =================================================
 
-            if ("MICR_REPAIR_REQUIRED"
+            if ("PENDING_MICR_REPAIR"
                     .equalsIgnoreCase(status)) {
 
                 micrRepair++;
@@ -643,58 +669,146 @@ public class OutwardMakerBatchUploadController
                 normal++;
             }
 
-            // -------------------------------------------------
+            // =================================================
             // Create row
-            // -------------------------------------------------
+            // =================================================
 
             Listitem item =
                     new Listitem();
 
-            // -------------------------------------------------
+            // =================================================
             // ITEM NO.
-            // -------------------------------------------------
+            // =================================================
 
             item.appendChild(
                     new Listcell(
                             String.valueOf(
                                     itemNumber++)));
 
-            // -------------------------------------------------
+            // =================================================
             // PAYEE NAME
-            // -------------------------------------------------
+            // =================================================
 
             item.appendChild(
                     new Listcell(
                             cheque.getPayeeName()));
 
-            // -------------------------------------------------
+            // =================================================
             // MICR CODE
-            // -------------------------------------------------
+            // =================================================
 
             item.appendChild(
                     new Listcell(
                             cheque.getMicrCode()));
 
-            // -------------------------------------------------
+            // =================================================
             // STATUS
-            // -------------------------------------------------
+            // =================================================
 
             item.appendChild(
                     new Listcell(
                             status));
 
-            // -------------------------------------------------
+            // =================================================
             // ACTION
-            //
-            // Not implemented yet.
-            // -------------------------------------------------
+            // =================================================
+
+            Listcell actionCell =
+                    new Listcell();
+
+            // =================================================
+            // MICR REPAIR
+            // =================================================
+
+            if ("PENDING_MICR_REPAIR"
+                    .equalsIgnoreCase(status)) {
+
+                Button micrRepairButton =
+                        new Button(
+                                "MICR Repair");
+
+                micrRepairButton.setSclass(
+                        "btn-action-repair");
+
+                micrRepairButton.setAttribute(
+                        "outwardCheque",
+                        cheque);
+
+                micrRepairButton.addEventListener(
+                        "onClick",
+                        new EventListener<Event>() {
+
+                            @Override
+                            public void onEvent(
+                                    Event event) {
+
+                                /*
+                                 * MICR repair functionality
+                                 * will be implemented later.
+                                 */
+
+                                System.out.println(
+                                        "MICR Repair clicked for cheque: "
+                                        + cheque
+                                                .getOutwardChequeId());
+                            }
+                        });
+
+                actionCell.appendChild(
+                        micrRepairButton);
+
+            }
+
+            // =================================================
+            // NORMAL CHEQUE
+            // =================================================
+
+            else {
+
+                Button viewButton =
+                        new Button("View");
+
+                viewButton.setSclass(
+                        "btn-action");
+
+                viewButton.setAttribute(
+                        "outwardCheque",
+                        cheque);
+
+                viewButton.addEventListener(
+                        "onClick",
+                        new EventListener<Event>() {
+
+                            @Override
+                            public void onEvent(
+                                    Event event) {
+
+                                /*
+                                 * View functionality
+                                 * will be implemented later.
+                                 */
+
+                                System.out.println(
+                                        "View clicked for cheque: "
+                                        + cheque
+                                                .getOutwardChequeId());
+                            }
+                        });
+
+                actionCell.appendChild(
+                        viewButton);
+            }
+
+            // =================================================
+            // Add ACTION cell
+            // =================================================
 
             item.appendChild(
-                    new Listcell(""));
+                    actionCell);
 
-            // -------------------------------------------------
+            // =================================================
             // Add row
-            // -------------------------------------------------
+            // =================================================
 
             chequeList.appendChild(
                     item);
@@ -705,18 +819,19 @@ public class OutwardMakerBatchUploadController
         // =====================================================
 
         scannedChequeTitle.setValue(
-                "Scanned Cheques ("
-                + scannedCheques.size()
+                "Outward Cheques ("
+                + outwardCheques.size()
                 + ")");
 
         // =====================================================
-        // Update status counters
+        // Update counters
         // =====================================================
 
         normalCount.setValue(
                 normal + " NORMAL");
 
         micrRepairCount.setValue(
-                micrRepair + " MICR REPAIR");
+                micrRepair
+                + " MICR REPAIR");
     }
 }

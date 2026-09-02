@@ -170,4 +170,67 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO{
 		return outwardBatch;
 	}
 
+    @Override
+    public String transferBatchFromScanToOutward(
+            Connection connection,
+            String scannedBatchId) {
+
+        if (connection == null) {
+            throw new IllegalArgumentException(
+                    "Connection cannot be null");
+        }
+
+        if (scannedBatchId == null
+                || scannedBatchId.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Scanned batch ID cannot be null or empty");
+        }
+
+        String sql =
+                "INSERT INTO outward_batch ("
+                + "batch_reference_id, "
+                + "actual_cheque_count, "
+                + "actual_total_amount, "
+                + "batch_status, "
+                + "uploaded_by"
+                + ") "
+                + "SELECT "
+                + "batch_reference_id, "
+                + "actual_cheque_count, "
+                + "actual_total_amount, "
+                + "'Pending', "
+                + "uploaded_by "
+                + "FROM scan_batch "
+                + "WHERE scanned_batch_id = ? "
+                + "RETURNING outward_batch_id";
+
+        try (PreparedStatement ps =
+                     connection.prepareStatement(sql)) {
+
+            ps.setString(1, scannedBatchId);
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
+
+                if (!rs.next()) {
+
+                    throw new IllegalStateException(
+                            "Scan batch not found for batch ID: "
+                            + scannedBatchId);
+                }
+
+                return rs.getString(
+                        "outward_batch_id");
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to transfer scan batch "
+                    + scannedBatchId
+                    + " to outward batch",
+                    e);
+        }
+    }
 }

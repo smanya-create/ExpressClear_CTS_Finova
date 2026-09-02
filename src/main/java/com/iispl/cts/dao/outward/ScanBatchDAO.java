@@ -15,5 +15,10 @@ public interface ScanBatchDAO {
     String saveBatch(Connection connection,ScanBatch scanBatch);
     ScanBatch getBatchById(
             String scannedBatchId);
+    
+    void updateBatchStatus(
+            Connection connection,
+            String batchId,
+            String status);
 
 }

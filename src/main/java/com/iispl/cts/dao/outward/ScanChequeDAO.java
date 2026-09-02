@@ -17,5 +17,10 @@ public interface ScanChequeDAO {
     String saveBatch(Connection connection,List<ScanCheque> chequeList );
     List<ScanCheque> getChequesByBatchId(
             String scannedBatchId);
+    
+    void updateChequeStatus(
+            Connection connection,
+            String batchId,
+            String status);
 
 }
