@@ -20,4 +20,10 @@ public interface InwardBatchService {
     ParsedBatchData parseBatchXml(String xmlFilePath) throws Exception;
     
     boolean saveParsedBatch(ParsedBatchData parsedBatchData);
+import com.iispl.cts.entity.inward.InwardBatch;
+
+public interface InwardBatchService {
+    List<InwardBatch> getAllActiveBatches();
+    InwardBatch getBatchById(String batchId);
+    boolean updateBatchStatus(String batchId, String status);
 }

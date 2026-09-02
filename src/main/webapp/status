@@ -1,0 +1,32 @@
+1. Clearing Session Lifecycle (clearing_session.session_status)
+OPEN: Active clearing business day initiated via BOD. All transactions, uploads, repairs, and verifications are permitted.
+
+CLOSED: Day closed via EOD. Modifications and new batch uploads are locked until the next session is initialized.
+
+2. Staging Pipeline (scan_batch.batch_status & scan_cheque.status)
+
+This stage handles physical image capture and raw scanner ingestion:
+RAW: Raw TIFF/JPEG images and raw codeline text received from the scanner.
+REJECTED: Batch not validated
+STAGED: Batch successfully validated and ready to be transferred to the active clearing tables (outward_batch / outward_cheque).
+
+3. Outward Clearing Cycle (outward_cheque.cheque_status)
+Cheques presented by your bank’s customers to be collected from other banks:
+
+PENDING_REPAIR: Codeline is missing or partially unreadable (MICR reject, sort code mismatch, trans code error). Awaiting Maker fix in the MICR Repair Queue.
+
+PENDING_DATA_ENTRY: MICR is valid, but the physical amount, account number, or payee details must be keyed in or balanced against the batch slip.
+
+PENDING_VERIFICATION: Maker has completed entry and balancing; item is waiting for Checker approval.
+
+REJECTED_BY_CHECKER: Checker rejected the cheque .
+
+SENT_BACK_MAKER: returned it to the Maker queue for corrections.
+
+PROCESSED: Verified and approved by the Checker. Ready for clearing file generation.
+
+FILE_GENERATED: Included in the outward clearing presentation file (e.g., CPH / XML) sent to the Clearing House / Central Bank.
+
+CLEARED : The drawee bank accepted the cheque and funds were successfully settled.
+
+UNPROCESSED: The cheque was left in an unfinished pending stage when the Admin executed a Forced EOD.

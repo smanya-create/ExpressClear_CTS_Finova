@@ -13,12 +13,10 @@
 	<borderlayout hflex="1" vflex="1">
 		<west width="265px" splittable="false" collapsible="false">
 
-			<include src="/components/sidebar.zul">
+			<include src="/components/sidebar.zul" role="OUTWARD_CHECKER"  activeTab="checker-dashboard" />
 
-				<custom-attributes role="OUTWARD_CHECKER"
-					activeTab="checker-dashboard" />
-
-			</include>
+				
+			
 
 		</west>
 		<center>

@@ -1,0 +1,518 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Window reset */
+.validation-window {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.validation-window .z-window-content {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.validation-window .z-window-header,
+.validation-window .z-window-close {
+    display: none !important;
+}
+
+/* Card */
+.validation-overlay {
+    width: 100%;
+    background: transparent;
+}
+
+.validation-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #f0d4d0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(79, 33, 24, 0.08);
+    overflow: hidden;
+}
+
+/* Header */
+.validation-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f2dfdc;
+}
+
+.validation-failed {
+    background: #fdeceb;
+}
+
+.status-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f5b5ae;
+    color: #b94135;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 28px;
+    text-align: center;
+}
+
+.validation-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #7a2f28;
+}
+
+/* Body */
+.validation-body {
+    padding: 18px 18px 20px 18px;
+    background: #fffdfd;
+}
+
+.validation-section {
+    padding: 4px 0 10px 0;
+}
+
+.section-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #3f3f3f;
+    margin-bottom: 10px;
+}
+
+.section-divider {
+    margin: 6px 0 10px 0;
+    border-top: 1px solid #efe7e5 !important;
+    background: transparent !important;
+}
+
+/* Grid */
+.validation-grid {
+    border: none !important;
+    background: transparent !important;
+}
+
+.validation-grid .z-grid-header,
+.validation-grid .z-columns,
+.validation-grid .z-column {
+    display: none !important;
+}
+
+.validation-grid .z-row {
+    background: transparent !important;
+}
+
+.validation-grid .z-row-inner,
+.validation-grid .z-cell {
+    border: none !important;
+    padding: 5px 0 !important;
+    background: transparent !important;
+}
+
+.field-name {
+    font-size: 12px;
+    color: #8a8a8a;
+}
+
+.field-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #303030;
+}
+
+.status-text {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.status-mismatch {
+    color: #d14b42;
+}
+
+.status-mismatch::before {
+    content: "✕ ";
+    font-weight: 700;
+}
+
+/* Note */
+.validation-note {
+    display: block;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #b0a5a1;
+}
+
+/* Actions */
+.validation-actions {
+    margin-top: 16px;
+}
+
+.z-button.confirm-btn,
+.z-button.close-btn {
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    height: 34px;
+    padding: 0 16px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.z-button.confirm-btn {
+    background: #d8e6d5 !important;
+    border: 1px solid #c4d6c0 !important;
+    color: #7c9a79 !important;
+}
+
+.z-button.confirm-btn:disabled,
+.z-button.confirm-btn.z-button-disabled {
+    background: #e6efe4 !important;
+    border-color: #d8e4d5 !important;
+    color: #9cae99 !important;
+    opacity: 1 !important;
+}
+
+.z-button.close-btn {
+    background: #1fa85b !important;
+    border: 1px solid #17914d !important;
+    color: #ffffff !important;
+}
+
+.z-button.close-btn:hover {
+    background: #18894a !important;
+    border-color: #18894a !important;
+}
+
+
+/* ========================================================== */
+/* UPLOAD FORM STYLES                                         */
+/* ========================================================== */
+
+.upload-container {
+    padding: 0;
+    background: transparent;
+}
+
+.upload-header {
+    padding: 20px 20px 15px 20px;
+    border-bottom: 2px solid #f0d4d0;
+    background: #faf8f7;
+}
+
+.upload-title {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: #7a2f28;
+    margin-bottom: 4px;
+}
+
+.upload-subtitle {
+    display: block;
+    font-size: 12px;
+    color: #a89d99;
+}
+
+/* Form Section */
+.form-section {
+    padding: 20px;
+    background: #fffdfd;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #3f3f3f;
+    margin-bottom: 8px;
+}
+
+.form-hint {
+    font-size: 11px;
+    color: #a89d99;
+}
+
+.z-intbox,
+.z-decimalbox,
+.z-textbox {
+    border: 1px solid #d4ccc8 !important;
+    border-radius: 4px !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+}
+
+.z-intbox:focus,
+.z-decimalbox:focus,
+.z-textbox:focus {
+    border-color: #9a7d76 !important;
+    box-shadow: 0 0 0 2px rgba(154, 125, 118, 0.1) !important;
+}
+
+.z-textbox[readonly],
+.z-textbox[readonly]:focus {
+    background: #f5f1f0 !important;
+    color: #8a8a8a !important;
+    border-color: #e8e0dd !important;
+}
+
+/* Upload Section */
+.upload-section {
+    padding: 20px;
+    background: #fffdfd;
+    border-top: 1px solid #f2dfdc;
+}
+
+.upload-area {
+    background: #faf8f7;
+    border: 2px dashed #d4ccc8;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.file-input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.file-name-display {
+    flex: 1;
+}
+
+.upload-note {
+    display: block;
+    font-size: 11px;
+    color: #a89d99;
+    margin-top: 8px;
+}
+
+/* Buttons */
+.z-button.btn-upload,
+.z-button.btn-primary {
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    height: 36px;
+    padding: 0 16px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    white-space: nowrap;
+}
+
+.z-button.btn-upload {
+    background: #9a7d76 !important;
+    border: 1px solid #8a6d66 !important;
+    color: #ffffff !important;
+}
+
+.z-button.btn-upload:hover {
+    background: #8a6d66 !important;
+    border-color: #7a5d56 !important;
+}
+
+.z-button.btn-upload:disabled,
+.z-button.btn-upload.z-button-disabled {
+    background: #c4b5af !important;
+    border-color: #b8aca7 !important;
+    opacity: 1 !important;
+}
+
+.z-button.btn-primary {
+    background: #1fa85b !important;
+    border: 1px solid #17914d !important;
+    color: #ffffff !important;
+}
+
+.z-button.btn-primary:hover:not(:disabled) {
+    background: #18894a !important;
+    border-color: #157a3f !important;
+}
+
+.z-button.btn-primary:disabled,
+.z-button.btn-primary.z-button-disabled {
+    background: #a8d4a8 !important;
+    border-color: #8fc28f !important;
+    opacity: 1 !important;
+}
+
+/* Action Buttons */
+.action-buttons {
+    padding: 15px 20px;
+    border-top: 1px solid #f2dfdc;
+    background: #f5f1f0;
+    text-align: right;
+}
+
+/* Success Message */
+.success-message {
+    margin: 15px 20px;
+    padding: 12px 14px;
+    background: #e6f4e1;
+    border: 1px solid #b8d9b5;
+    border-radius: 6px;
+}
+
+.success-text {
+    display: block;
+    font-size: 12px;
+    color: #4a7a47;
+    line-height: 1.5;
+}
+
+/* Cheques Section */
+.cheques-section {
+    margin: 15px 20px;
+    border: 1px solid #d4ccc8 !important;
+    border-radius: 8px !important;
+    background: #fffdfd !important;
+}
+
+.cheques-caption {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #3f3f3f !important;
+}
+
+.cheques-summary {
+    padding: 12px 14px;
+    background: #faf8f7;
+    border-bottom: 1px solid #f2dfdc;
+}
+
+.cheques-title {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #7a2f28;
+    margin-bottom: 8px;
+}
+
+.count-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.normal-count {
+    background: #e1f0e1;
+    color: #4a7a47;
+}
+
+.micr-count {
+    background: #f9e6e3;
+    color: #b94135;
+}
+
+/* Cheques List */
+.cheques-list {
+    background: transparent !important;
+    border: none !important;
+}
+
+.cheques-list .z-listhead-content {
+    background: #f5f1f0 !important;
+    border: none !important;
+}
+
+.cheques-list .z-listheader {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #d4ccc8 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #3f3f3f !important;
+    padding: 8px 6px !important;
+}
+
+.cheques-list .z-listcell {
+    background: transparent !important;
+    border-bottom: 1px solid #f2dfdc !important;
+    padding: 8px 6px !important;
+    font-size: 11px !important;
+    color: #303030 !important;
+}
+
+.cheques-list .z-listitem {
+    background: transparent !important;
+    border: none !important;
+}
+
+.cheques-list .z-listitem:hover {
+    background: #f9f4f2 !important;
+}
+
+/* MICR Error Cell */
+.micr-error {
+    background: #f9e6e3 !important;
+    font-weight: 700 !important;
+    color: #b94135 !important;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.status-badge.normal {
+    background: #e1f0e1;
+    color: #4a7a47;
+}
+
+.status-badge.micr-repair {
+    background: #f9e6e3;
+    color: #b94135;
+}
+
+/* Action Buttons in List */
+.z-button.btn-action,
+.z-button.btn-action-repair {
+    height: 24px;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.z-button.btn-action {
+    background: #d8e6d5 !important;
+    border: 1px solid #c4d6c0 !important;
+    color: #7c9a79 !important;
+}
+
+.z-button.btn-action:hover {
+    background: #c4d6c0 !important;
+    border-color: #b8ccb5 !important;
+}
+
+.z-button.btn-action-repair {
+    background: #f5b5ae !important;
+    border: 1px solid #e89a93 !important;
+    color: #b94135 !important;
+}
+
+.z-button.btn-action-repair:hover {
+    background: #e89a93 !important;
+    border-color: #de8f88 !important;
+}

@@ -61,6 +61,38 @@ public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
 			try (ResultSet resultSet = statement.executeQuery()) {
 
+import com.iispl.cts.dao.inward.InwardChequeImageDAO;
+import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.common.config.DBConnection;
+
+public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
+
+	private static InwardChequeImageDAOImpl instance;
+
+	private InwardChequeImageDAOImpl() {
+	}
+
+	public static synchronized InwardChequeImageDAOImpl getInstance() {
+		if (instance == null) {
+			instance = new InwardChequeImageDAOImpl();
+		}
+		return instance;
+	}
+
+	@Override
+	public InwardChequeImage findFrontImageByChequeId(String inwardChequeId) {
+
+		String sql = "SELECT inward_image_id, inward_cheque_id, image_type, " + "image_path, created_at "
+				+ "FROM inward_cheque_image " + "WHERE inward_cheque_id = ? " + "AND LOWER(image_type) = 'front' "
+				+ "LIMIT 1";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, inwardChequeId);
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
 				if (resultSet.next()) {
 
 					InwardChequeImage image = new InwardChequeImage();

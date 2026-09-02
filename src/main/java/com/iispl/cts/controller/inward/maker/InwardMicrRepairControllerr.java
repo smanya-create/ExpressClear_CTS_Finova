@@ -1,244 +1,436 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.List;
+
+import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
+import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.validator.MICRValidator;
+import com.iispl.cts.validatorimpl.MICRValidatorImpl;
+import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.service.RejectedReasonService;
+import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Groupbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Window;
+import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Combobox;
 
 public class InwardMicrRepairControllerr extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private Label lblBatchId;
-    private Label lblRecordPosition;
-    private Label lblProgress;
-    private Label lblRepairStatus;
+	private Label lblBatchId;
+	private Label lblRecordPosition;
+	private Label lblProgress;
+	private Label lblRepairStatus;
 
-    private Image chequeImage;
-    private Groupbox emptyImageState;
+	private Window rejectRequestWindow;
+	private Image chequeImage;
+	private Groupbox emptyImageState;
 
-    private Textbox txtChequeNumber;
-    private Textbox txtCityCode;
-    private Textbox txtBankCode;
-    private Textbox txtBranchCode;
-    private Textbox txtCurrentMicr;
-    private Textbox txtTransactionCode;
-    private Textbox txtCorrectedMicr;
-    private Textbox txtRemarks;
+	private Textbox txtChequeNumber;
+	private Textbox txtCityCode;
+	private Textbox txtBankCode;
+	private Textbox txtBranchCode;
+	private Textbox txtCurrentMicr;
+	private Textbox txtTransactionCode;
+	private Textbox txtCorrectedMicr;
+	private Textbox txtRemarks;
 
-    private Progressmeter progressMeter;
+	private Progressmeter progressMeter;
 
-    private int currentRecord = 0;
-    private int totalRecords = 0;
+	private int currentRecord = 0;
+	private int totalRecords = 0;
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
+	private InwardChequeService inwardChequeService;
 
-        super.doAfterCompose(comp);
+	private MICRValidator micrValidator;
 
-        loadRepairRecord();
-    }
+	private List<InwardCheque> repairCheques;
 
-    private void loadRepairRecord() {
+	private RejectedReasonService rejectedReasonService;
 
-        /*
-         * Database/service integration will be added later.
-         * Currently there are no MICR repair records available.
-         */
+	private List<RejectedResaon> rejectedReasons;
 
-        totalRecords = 0;
-        currentRecord = 0;
+	private Combobox cmbRejectReason;
 
-        clearRecordFields();
-        updateNavigation();
-        showImagePlaceholder();
-    }
+	private InwardCheque currentCheque;
 
-    private void clearRecordFields() {
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-        if (lblBatchId != null) {
-            lblBatchId.setValue("BATCH: —");
-        }
+		super.doAfterCompose(comp);
 
-        if (txtChequeNumber != null) {
-            txtChequeNumber.setValue("");
-        }
+		inwardChequeService = new InwardChequeServiceImpl();
 
-        if (txtCityCode != null) {
-            txtCityCode.setValue("");
-        }
+		rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 
-        if (txtBankCode != null) {
-            txtBankCode.setValue("");
-        }
+		micrValidator = new MICRValidatorImpl();
 
-        if (txtBranchCode != null) {
-            txtBranchCode.setValue("");
-        }
+		loadRejectedReasons();
+		loadRepairRecord();
+	}
 
-        if (txtCurrentMicr != null) {
-            txtCurrentMicr.setValue("");
-        }
+	private void loadRejectedReasons() {
+		rejectedReasons = rejectedReasonService.getAllRejectedReasons();
 
-        if (txtTransactionCode != null) {
-            txtTransactionCode.setValue("");
-        }
+		if (cmbRejectReason == null) {
+			return;
+		}
 
-        if (txtCorrectedMicr != null) {
-            txtCorrectedMicr.setValue("");
-        }
+		cmbRejectReason.getItems().clear();
 
-        if (txtRemarks != null) {
-            txtRemarks.setValue("");
-        }
+		if (rejectedReasons == null) {
+			return;
+		}
 
-        if (lblRepairStatus != null) {
-            lblRepairStatus.setValue("MICR ERROR");
-        }
-    }
+		for (RejectedResaon reason : rejectedReasons) {
+			Comboitem item = new Comboitem();
 
-    private void updateNavigation() {
+			item.setLabel(reason.getRejectedReasonCode() + " - " + reason.getRejectedReasonName());
 
-        if (lblRecordPosition != null) {
+			item.setValue(reason.getRejectedReasonId());
 
-            if (totalRecords == 0) {
-                lblRecordPosition.setValue("No records");
-            } else {
-                lblRecordPosition.setValue(
-                    "Record " + currentRecord + " of " + totalRecords
-                );
-            }
-        }
+			cmbRejectReason.appendChild(item);
+		}
+	}
 
-        if (lblProgress != null) {
-            lblProgress.setValue(
-                currentRecord + " / " + totalRecords
-            );
-        }
+	private void loadRepairRecord() {
 
-        if (progressMeter != null) {
+		try {
 
-            int progress = totalRecords == 0
-                    ? 0
-                    : (currentRecord * 100) / totalRecords;
+			// Get cheques waiting for MICR repair
+			repairCheques = inwardChequeService.getMicrRepairRequiredCheques();
 
-            progressMeter.setValue(progress);
-        }
-    }
+			if (repairCheques == null || repairCheques.isEmpty()) {
 
-    private void showImagePlaceholder() {
+				totalRecords = 0;
+				currentRecord = 0;
+				currentCheque = null;
 
-        if (chequeImage != null) {
-            chequeImage.setVisible(false);
-            chequeImage.setSrc(null);
-        }
+				clearRecordFields();
+				updateNavigation();
+				loadChequeImage(null);
 
-        if (emptyImageState != null) {
-            emptyImageState.setVisible(true);
-        }
-    }
+				return;
+			}
 
-    public void onClick$btnPrevious() {
+			// Total MICR repair cheques
+			totalRecords = repairCheques.size();
 
-        if (totalRecords == 0 || currentRecord <= 1) {
-            return;
-        }
+			if (currentRecord < 0) {
+				currentRecord = 0;
+			}
 
-        currentRecord--;
-        loadRepairRecord();
-    }
+			if (currentRecord >= totalRecords) {
+				currentRecord = totalRecords - 1;
+			}
 
-    public void onClick$btnNext() {
+			// Get the current cheque
+			currentCheque = repairCheques.get(currentRecord);
 
-        if (totalRecords == 0 || currentRecord >= totalRecords) {
-            return;
-        }
+			// Populate UI fields
+			populateChequeFields(currentCheque);
 
-        currentRecord++;
-        loadRepairRecord();
-    }
+			// Update Previous / Next buttons
+			updateNavigation();
 
-    public void onClick$btnSaveAndNext() {
+			loadChequeImage(currentCheque.getInwardChequeId());
 
-        if (totalRecords == 0) {
+		} catch (Exception e) {
 
-            Messagebox.show(
-                "No MICR repair records are available.",
-                "MICR Repair",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-            );
+			e.printStackTrace();
 
-            return;
-        }
+			totalRecords = 0;
+			currentRecord = 0;
+			currentCheque = null;
 
-        String correctedMicr = txtCorrectedMicr != null
-                ? txtCorrectedMicr.getValue()
-                : "";
+			clearRecordFields();
+			updateNavigation();
+			loadChequeImage(null);
 
-        if (correctedMicr == null || correctedMicr.trim().isEmpty()) {
+			Messagebox.show("Unable to load MICR repair records.", "Error", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
 
-            if (txtCorrectedMicr != null) {
-                txtCorrectedMicr.setErrorMessage(
-                    "Corrected MICR code is required."
-                );
-            }
+	private void clearRecordFields() {
 
-            return;
-        }
+		if (lblBatchId != null) {
+			lblBatchId.setValue("BATCH: —");
+		}
 
-        /*
-         * Database update will be added after
-         * the inward MICR repair service is implemented.
-         */
+		if (txtChequeNumber != null) {
+			txtChequeNumber.setValue("");
+		}
 
-        Messagebox.show(
-            "MICR correction saved successfully.",
-            "MICR Repair",
-            Messagebox.OK,
-            Messagebox.INFORMATION
-        );
+		if (txtCityCode != null) {
+			txtCityCode.setValue("");
+		}
 
-        if (currentRecord < totalRecords) {
-            currentRecord++;
-            loadRepairRecord();
-        }
-    }
+		if (txtBankCode != null) {
+			txtBankCode.setValue("");
+		}
 
-    public void onClick$btnRejectRequest() {
+		if (txtBranchCode != null) {
+			txtBranchCode.setValue("");
+		}
 
-        if (totalRecords == 0) {
+		if (txtCurrentMicr != null) {
+			txtCurrentMicr.setValue("");
+		}
 
-            Messagebox.show(
-                "No MICR repair record is available to reject.",
-                "MICR Repair",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-            );
+		if (txtTransactionCode != null) {
+			txtTransactionCode.setValue("");
+		}
 
-            return;
-        }
+		if (txtCorrectedMicr != null) {
+			txtCorrectedMicr.setValue("");
+		}
 
-        /*
-         * Rejection processing will be connected
-         * to the inward workflow later.
-         */
+		if (txtRemarks != null) {
+			txtRemarks.setValue("");
+		}
 
-        Messagebox.show(
-            "Reject request action will be connected to the inward workflow.",
-            "MICR Repair",
-            Messagebox.OK,
-            Messagebox.INFORMATION
-        );
-    }
+		if (lblRepairStatus != null) {
+			lblRepairStatus.setValue("MICR ERROR");
+		}
+	}
 
-    public void onClick$btnBackToList() {
+	private void updateNavigation() {
 
-        Executions.sendRedirect("/inward/maker/index.zul");
-    }
+		if (lblRecordPosition != null) {
+
+			if (totalRecords == 0) {
+				lblRecordPosition.setValue("No records");
+			} else {
+				lblRecordPosition.setValue("Record " + (currentRecord + 1) + " of " + totalRecords);
+			}
+		}
+
+		if (lblProgress != null) {
+			lblProgress.setValue((totalRecords == 0 ? 0 : currentRecord + 1) + " / " + totalRecords);
+		}
+
+		if (progressMeter != null) {
+
+			int progress = totalRecords == 0 ? 0 : ((currentRecord + 1) * 100) / totalRecords;
+
+			progressMeter.setValue(progress);
+		}
+	}
+
+	private void loadChequeImage(String inwardChequeId) {
+
+		if (chequeImage != null) {
+			chequeImage.setVisible(false);
+			chequeImage.setSrc(null);
+		}
+
+		if (emptyImageState != null) {
+			emptyImageState.setVisible(true);
+		}
+
+		if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
+			return;
+		}
+
+		try {
+
+			InwardChequeImage image = inwardChequeService.getFrontImage(inwardChequeId);
+
+			if (image != null && image.getImagePath() != null && !image.getImagePath().trim().isEmpty()) {
+
+				if (chequeImage != null) {
+					chequeImage.setSrc(image.getImagePath());
+					chequeImage.setVisible(true);
+				}
+
+				if (emptyImageState != null) {
+					emptyImageState.setVisible(false);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void onClick$btnPrevious() {
+
+		if (totalRecords == 0 || currentRecord <= 0) {
+			return;
+		}
+
+		currentRecord--;
+		loadRepairRecord();
+	}
+
+	public void onClick$btnNext() {
+
+		if (totalRecords == 0 || currentRecord >= totalRecords - 1) {
+			return;
+		}
+
+		currentRecord++;
+		loadRepairRecord();
+	}
+
+	public void onClick$btnSaveAndNext() {
+
+		if (totalRecords == 0 || currentCheque == null) {
+
+			Messagebox.show("No MICR repair record is available.", "MICR Repair", Messagebox.OK,
+					Messagebox.INFORMATION);
+
+			return;
+		}
+
+		String correctedMicr = txtCorrectedMicr != null ? txtCorrectedMicr.getValue() : "";
+
+		if (correctedMicr == null || correctedMicr.trim().isEmpty()) {
+
+			if (txtCorrectedMicr != null) {
+				txtCorrectedMicr.setErrorMessage("Corrected MICR code is required.");
+			}
+
+			return;
+		}
+
+		correctedMicr = correctedMicr.trim();
+
+		if (!micrValidator.isValid(correctedMicr)) {
+
+			if (txtCorrectedMicr != null) {
+				txtCorrectedMicr.setErrorMessage("MICR code must contain exactly 9 digits.");
+			}
+
+			return;
+		}
+
+		boolean updated = inwardChequeService.updateMicrRepair(currentCheque.getInwardChequeId(), correctedMicr,
+				"PENDING_DATA_ENTRY");
+
+		if (!updated) {
+
+			Messagebox.show("Unable to save MICR correction.", "MICR Repair", Messagebox.OK, Messagebox.ERROR);
+
+			return;
+		}
+
+		Messagebox.show("MICR correction saved successfully.", "MICR Repair", Messagebox.OK, Messagebox.INFORMATION);
+
+		repairCheques = inwardChequeService.getMicrRepairRequiredCheques();
+
+		totalRecords = repairCheques != null ? repairCheques.size() : 0;
+
+		if (totalRecords == 0) {
+
+			currentRecord = 0;
+			currentCheque = null;
+
+			clearRecordFields();
+			updateNavigation();
+			loadChequeImage(null);
+
+			return;
+		}
+
+		if (currentRecord >= totalRecords) {
+			currentRecord = totalRecords - 1;
+		}
+
+		loadRepairRecord();
+	}
+
+	public void onClick$btnRejectRequest() {
+		if (currentCheque == null) {
+			Messagebox.show("No cheque is selected.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
+			return;
+		}
+
+		if (rejectRequestWindow != null) {
+			rejectRequestWindow.doModal();
+		}
+	}
+
+	public void onClick$btnCancelReject() {
+		if (rejectRequestWindow != null) {
+			rejectRequestWindow.setVisible(false);
+		}
+	}
+
+	public void onClick$btnConfirmReject() {
+
+		if (currentCheque == null) {
+			return;
+		}
+
+		if (cmbRejectReason == null || cmbRejectReason.getSelectedItem() == null) {
+			Messagebox.show("Please select a rejection reason.", "Reject Request", Messagebox.OK,
+					Messagebox.EXCLAMATION);
+			return;
+		}
+
+		Comboitem selectedItem = cmbRejectReason.getSelectedItem();
+
+		String rejectedReasonId = String.valueOf(selectedItem.getValue());
+
+		if (rejectedReasonId == null || rejectedReasonId.trim().isEmpty()) {
+			Messagebox.show("Invalid rejection reason.", "Reject Request", Messagebox.OK, Messagebox.EXCLAMATION);
+			return;
+		}
+
+	
+
+		Messagebox.show("Reject request submitted successfully.", "Reject Request", Messagebox.OK,
+				Messagebox.INFORMATION);
+
+		if (rejectRequestWindow != null) {
+			rejectRequestWindow.setVisible(false);
+		}
+	}
+
+	public void onClick$btnBackToList() {
+
+		Executions.sendRedirect("/inward/maker/index.zul");
+	}
+
+	private void populateChequeFields(InwardCheque cheque) {
+
+		if (cheque == null) {
+			clearRecordFields();
+			return;
+		}
+
+		// Cheque number
+		if (txtChequeNumber != null) {
+			txtChequeNumber.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "");
+		}
+
+		// Current MICR
+		if (txtCurrentMicr != null) {
+			txtCurrentMicr.setValue(cheque.getMicrCode() != null ? cheque.getMicrCode() : "");
+		}
+
+		// Corrected MICR starts empty for the maker
+		if (txtCorrectedMicr != null) {
+			txtCorrectedMicr.setValue("");
+		}
+
+		// Remarks start empty
+		if (txtRemarks != null) {
+			txtRemarks.setValue("");
+		}
+	}
 }

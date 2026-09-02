@@ -1,0 +1,108 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+<style src ="/css/outward/checker-xmlGeneration.css"/>
+<vlayout  sclass="xml-generation-content"
+             hflex="1"
+             vflex="1"
+             spacing="20px"
+             apply="com.iispl.cts.controller.outward.checker.OutwardCheckerXmlGenerationController">
+             <vlayout spacing="5px">
+              <label value="Verified Batches"
+                   sclass="section-title"/>
+
+            <label value="All cheques completed by Checker verification are available for XML generation."
+                   sclass="section-sub-title"/>
+             </vlayout>
+             
+             <hlayout sclass="summary-card"
+                 hflex="1"
+                 spacing="0">
+                 <vlayout sclass="summary-item"
+                     hflex="1"
+                     spacing="5px">
+                     <label value="VERIFIED BATCHES"
+                       sclass="summary-label"/>
+
+                <label id="lblVerifiedBatches"
+                       value="2"
+                       sclass="summary-value"/>
+                 </vlayout>
+                 <vlayout sclass="summary-item"
+                     hflex="2"
+                     spacing="5px">
+                      <label value="NEXT STEP"
+                       sclass="summary-label"/>
+
+                <label value="Generate XML → Send to NPCI"
+                       sclass="summary-value"/>
+                 </vlayout>
+                 
+                  </hlayout>
+                 
+                 <listbox id="lstVerifiedBatches"
+                 sclass="xml-batch-table"
+                 hflex="1">
+                 <listhead>
+
+                <listheader label="BATCH"
+                            width="18%"/>
+
+                <listheader label="NO. OF CHEQUES"
+                            width="18%"/>
+
+                <listheader label="TOTAL AMOUNT"
+                            width="22%"/>
+
+                <listheader label="STATUS"
+                            width="18%"/>
+
+                <listheader label="ACTION"
+                            width="24%"/>
+
+            </listhead>
+                 
+                 </listbox>
+                 <vlayout sclass="generated-section"
+                 spacing="10px">
+                 
+                 <label value="AFTER XML GENERATION"
+                   sclass="generated-title"/>
+                   
+                   <hlayout sclass="xml-file-row"
+                     hflex="1"
+                     valign="middle"
+                     spacing="15px">
+                     <label value="XML"
+                       sclass="xml-icon"/>
+                       <vlayout sclass="xml-file-info"
+                         hflex="1"
+                         spacing="3px">
+                         
+                         <label id="lblXmlFileName"
+                           value="B004_20260821.xml"
+                           sclass="xml-file-name"/>
+
+                    <label value="XML generated successfully - Ready to send to NPCI."
+                           sclass="xml-file-description"/>
+                       </vlayout>
+                       
+                       <button id="btnSendToNPCI"
+                        label="SEND TO NPCI"
+                        visible="true"
+                        sclass="send-button"
+                        onClick="$composer.onClickSendToNPCI()"/>
+                     
+                   </hlayout>
+                    <hlayout sclass="xml-info-message"
+                     hflex="1"
+                     valign="middle">
+
+                <label value="Generate XML first. After successful generation, the batch becomes ready for 'Send to NPCI'."
+                       sclass="info-label"/>
+
+            </hlayout>
+                 </vlayout>
+            
+</vlayout>
+
+</zk>

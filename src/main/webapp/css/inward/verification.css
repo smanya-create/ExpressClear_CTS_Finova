@@ -1,0 +1,771 @@
+
+
+/* ================= PAGE ================= */
+
+.verification-page {
+    width: 100%;
+
+    padding: 14px 22px 8px 22px;
+
+    box-sizing: border-box;
+
+    font-family: Arial, sans-serif;
+}
+
+
+/* ================= BREADCRUMB ================= */
+
+.breadcrumb {
+    font-size: 12px;
+
+    color: #6F809C;
+}
+
+.breadcrumb label:last-child {
+    color: #8793A6;
+}
+
+
+
+.page-title-row {
+    margin-bottom: 8px;
+}
+
+.page-title {
+    font-size: 26px;
+
+    font-weight: bold;
+
+    color: #1D2D46;
+}
+
+.page-description {
+    font-size: 13px;
+
+    color: #6F809C;
+}
+
+.btn-back {
+    background: white;
+
+    color: #263A57;
+
+    border: 1px solid #D5DFEA;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    padding: 8px 14px;
+
+    cursor: pointer;
+}
+
+.btn-back:hover {
+    background: #F7F9FC;
+}
+
+
+/* =========================================================
+   BATCH INFORMATION CARD
+   ========================================================= */
+
+
+.batch-info-card {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #DDE5EF;
+    border-radius: 9px;
+    background: #FFFFFF;
+    padding: 14px 18px;
+}
+
+
+/* ================= BATCH ROW ================= */
+
+.batch-info-item {
+    box-sizing: border-box;
+    padding: 0 18px;
+    min-width: 0;
+}
+
+.batch-info-item:first-child {
+    padding-left: 0;
+}
+
+.batch-info-item:last-child {
+    padding-right: 0;
+}
+
+
+/* ================= LABEL ================= */
+
+.info-label {
+    font-size: 10px;
+    color: #667A98;
+    margin-bottom: 5px;
+    white-space: nowrap;
+}
+
+
+/* ================= VALUE ================= */
+
+.info-value {
+    font-size: 12px;
+    color: #263A57;
+    white-space: nowrap;
+}
+
+.info-value.bold {
+    font-weight: bold;
+}
+/* ================= STATUS BADGES ================= */
+
+.status-badge {
+    display: inline-block;
+
+    border-radius: 15px;
+
+    padding: 4px 9px;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    box-sizing: border-box;
+}
+
+.status-badge.mismatch {
+    background: #FFF3E3;
+
+    border: 1px solid #FFB45B;
+
+    color: #D97900;
+}
+
+.status-badge.active {
+    background: #E9F8EF;
+
+    border: 1px solid #B9E3C7;
+
+    color: #218A4A;
+}
+
+
+/* =========================================================
+   MAIN VERIFICATION CARDS
+   ========================================================= */
+
+.verification-content {
+    width: 100%;
+}
+
+.verification-card {
+    border: 1px solid #DDE5EF;
+    border-radius: 9px;
+    background: #FFFFFF;
+    box-sizing: border-box;
+    padding: 14px;
+    min-height: 0;
+}
+
+
+
+/* ================= CARD HEADER ================= */
+
+.card-header {
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 16px;
+
+    font-weight: bold;
+
+    color: #1D2D46;
+}
+
+.card-description {
+    font-size: 11px;
+
+    color: #7586A0;
+}
+
+
+/* =========================================================
+   CHEQUE IMAGE
+   ========================================================= */
+
+.cheque-preview-area {
+    width: 100%;
+
+    min-height: 220px;
+
+    background: #EDF2F6;
+
+    border: 1px solid #D5DEE8;
+
+    border-radius: 6px;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+/* =========================================================
+   IMAGE CONTROLS
+   ========================================================= */
+
+.image-controls {
+    margin-top: 24px;
+}
+
+.image-control-btn,
+.image-control-wide {
+    background: #FFFFFF;
+
+    border: 1px solid #D5DFEA;
+
+    border-radius: 5px;
+
+    color: #334963;
+
+    font-size: 11px;
+
+    height: 35px;
+}
+
+.image-control-btn {
+    width: 32px;
+}
+
+.image-control-wide {
+    padding: 0 13px;
+}
+
+.image-control-btn:hover,
+.image-control-wide:hover {
+    background: #F6F8FB;
+}
+
+
+/* =========================================================
+   CHEQUE DETAILS
+   ========================================================= */
+
+.details-row {
+    margin-top: 2px;
+
+    margin-bottom: 8px;
+}
+
+.detail-label {
+    font-size: 10px;
+
+    color: #667A98;
+}
+
+.detail-value {
+    font-size: 13px;
+
+    color: #263A57;
+}
+
+
+/* ================= SEPARATOR ================= */
+
+.detail-separator {
+    width: 100%;
+
+    border-top: 1px solid #E5EAF0;
+
+    margin: 5px 0 10px 0;
+}
+
+
+/* =========================================================
+   MAKER REQUEST
+   ========================================================= */
+
+.maker-request {
+    margin-top: 2px;
+}
+
+.maker-request-box {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    border: 1px solid #F5C96B;
+
+    background: #FFF8E9;
+
+    border-radius: 6px;
+
+    padding: 11px 14px;
+}
+
+.maker-request-text {
+    font-size: 11px;
+
+    color: #A56B00;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   DECISION BUTTONS
+   ========================================================= */
+
+.decision-buttons {
+    margin-top: 10px;
+}
+
+.decision-btn {
+    height: 40px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    box-sizing: border-box;
+}
+
+
+/* ================= ACCEPT ================= */
+
+.accept-btn {
+    background: #FFFFFF;
+
+    color: #344963;
+
+    border: 1px solid #D5DFEA;
+}
+
+
+/* ================= SEND TO MAKER ================= */
+
+.maker-btn {
+    background: #FFFFFF;
+
+    color: #344963;
+
+    border: 1px solid #D5DFEA;
+}
+
+
+/* ================= REJECT ================= */
+
+.reject-btn {
+    background: #FFFFFF;
+
+    color: #D64040;
+
+    border: 1px solid #F0A4A4;
+}
+
+
+/* ================= SUBMIT ================= */
+
+.submit-btn {
+    background: #1D68DB;
+
+    color: #FFFFFF;
+
+    border: 1px solid #1D68DB;
+}
+
+.submit-btn:hover {
+    background: #175BBF;
+}
+
+
+/* ================= HELPER ================= */
+
+.decision-helper {
+    font-size: 10px;
+
+    color: #8190A6;
+
+    margin-top: 6px;
+}
+
+
+.verification-footer {
+    border-top: 1px solid #E1E7EF;
+
+    padding-top: 8px;
+
+    box-sizing: border-box;
+
+    flex-shrink: 0;
+}
+
+.footer-text,
+.footer-version {
+    font-size: 10px;
+
+    color: #73839B;
+}
+
+.footer-version {
+    text-align: right;
+}
+
+
+.cheque-verification-card {
+    height: 343px;
+    max-height: 343px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.cheque-verification-card {
+    background: #EAF6FF;
+    border: 1px solid #D6E8F5;
+}
+
+.verification-header-row {
+    margin-bottom: 4px;
+}
+
+.verification-status-badge {
+    background: #FFF8E9;
+
+    border: 1px solid #F5C96B;
+
+    color: #C57A00;
+
+    border-radius: 14px;
+
+    padding: 4px 10px;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
+
+
+.verification-section {
+    margin-top: 12px;
+}
+
+.verification-section-title {
+    font-size: 10px;
+
+    font-weight: bold;
+
+    color: #667A98;
+
+    letter-spacing: 0.5px;
+}
+
+
+.cbs-validation-box {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    background: #EDF2F6;
+
+    border: 1px solid #D5DEE8;
+
+    border-radius: 5px;
+
+    padding: 10px 12px;
+
+    margin-top: 2px;
+}
+
+
+.verification-field-label {
+    font-size: 11px;
+
+    color: #71839D;
+}
+
+.verification-field-value {
+    font-size: 12px;
+
+    color: #263A57;
+
+    font-weight: bold;
+
+    text-align: left;
+}
+
+
+
+.cbs-validation-btn {
+    background: #1D477D;
+
+    color: #FFFFFF;
+
+    border: 1px solid #1D477D;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    padding: 6px 10px;
+
+    margin-top: 2px;
+}
+
+.cbs-validation-btn:hover {
+    background: #153A68;
+}
+
+
+
+.verification-separator {
+    width: 100%;
+
+    border-top: 1px solid #E1E7EF;
+
+    margin-top: 10px;
+
+    margin-bottom: 2px;
+}
+
+
+
+.verification-action-section {
+    margin-top: 10px;
+}
+
+.verification-action-buttons {
+    margin-top: 2px;
+}
+
+
+/* ================= ACTION BUTTON ================= */
+
+.verification-action-btn {
+    height: 34px;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    box-sizing: border-box;
+}
+
+
+/* ================= ACCEPT ================= */
+
+.accept-action-btn {
+    background: #16834B;
+
+    color: #FFFFFF;
+
+    border: 1px solid #16834B;
+}
+
+.accept-action-btn:hover {
+    background: #126E3F;
+}
+
+
+/* RETURN  */
+
+.return-action-btn {
+    background: #C83A32;
+
+    color: #FFFFFF;
+
+    border: 1px solid #C83A32;
+}
+
+.return-action-btn:hover {
+    background: #AA2F29;
+}
+
+
+/* ================= SEND BACK ================= */
+
+.send-back-action-btn {
+    background: #FFFFFF;
+
+    color: #344963;
+
+    border: 1px solid #D5DFEA;
+}
+
+.send-back-action-btn:hover {
+    background: #F6F8FB;
+}
+
+
+
+/* =========================================================
+   CHEQUE VERIFICATION - RIGHT PANEL
+   ========================================================= */
+
+.verification-panel {
+    padding: 14px;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+
+/* Header */
+
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1D2D46;
+}
+
+.section-description {
+    font-size: 10px;
+    color: #8793A6;
+}
+
+
+/* Section headings */
+
+.sub-section-title {
+    font-size: 10px;
+    font-weight: bold;
+    color: #6B7C93;
+}
+
+
+/* Details box */
+
+.details-box {
+    padding: 10px;
+    background: #EEF3F8;
+    border: 1px solid #D5DEE8;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+
+/* Labels */
+
+.detail-label {
+    font-size: 10px;
+    color: #718096;
+}
+
+.detail-value {
+    font-size: 11px;
+    font-weight: bold;
+    color: #1D2D46;
+}
+
+
+/* Separator */
+
+.verification-panel .z-separator {
+    border-top: 1px solid #D9E1EA;
+}
+
+
+/* CBS button */
+
+.primary-small-btn {
+    background: #1B4A8F;
+    color: white;
+    border: 0;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 10px;
+}
+
+.primary-small-btn:hover {
+    background: #153B72;
+}
+
+
+/* Status badges */
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.status-badge.pending {
+    color: #C47A00;
+    background: #FFF5DF;
+    border: 1px solid #F5C56B;
+}
+
+.status-badge.mismatch {
+    color: #C47A00;
+    background: #FFF5DF;
+    border: 1px solid #F5C56B;
+}
+
+.status-badge.active {
+    color: #18864B;
+    background: #E7F7EE;
+    border: 1px solid #9BD8B5;
+}
+
+
+/* Maker request */
+
+.maker-request {
+    padding: 8px 10px;
+    background: #FFF8E8;
+    border: 1px solid #F3D79A;
+    border-radius: 4px;
+    color: #9A6800;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+
+/* Decision buttons */
+
+.decision-btn {
+    background: white;
+    color: #1D2D46;
+    border: 1px solid #D0D9E4;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 10px;
+}
+
+.decision-btn:hover {
+    background: #F3F6FA;
+}
+
+
+.reject-btn {
+    background: white;
+    color: #D64545;
+    border: 1px solid #E5A5A5;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 10px;
+}
+
+.reject-btn:hover {
+    background: #FFF1F1;
+}
+
+.center {
+    background: #EAF6FF;
+    padding: 0;
+}

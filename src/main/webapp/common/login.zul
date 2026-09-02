@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?page title="Express Clear - Login"?>
 <?link rel="stylesheet" type="text/css" href="/css/common/login.css"?>
-<zk xmlns:h="xhtml">
-<div apply="com.iispl.cts.controller.common.LoginController"
-     hflex="1" vflex="1" style="display:flex; flex-direction:column;">
+<zk>
+<vlayout apply="com.iispl.cts.controller.common.LoginController"
+         hflex="1" vflex="1" spacing="0">
     
     <!-- Top Header Ribbon -->
-    <div sclass="top-header">
-        <hlayout style="align-items: center;">
+    <hlayout sclass="top-header" valign="middle" hflex="1" style="justify-content: space-between;">
+        <hlayout valign="middle" spacing="12px">
             <div sclass="logo-box">CTS</div>
-            <div>
+            <vlayout spacing="2px">
                 <label value="Express Clear" style="font-size: 18px; font-weight: bold; color: white; display: block;"/>
                 <label value="CHEQUE TRUNCATION SYSTEM" style="font-size: 8px; color: #a0aec0; letter-spacing: 1px;"/>
-            </div>
+            </vlayout>
         </hlayout>
         <label value="SECURE BANKING OPERATIONS" style="font-size: 11px; color: #a0aec0; letter-spacing: 1px;"/>
-    </div>
+    </hlayout>
 
     <!-- Login Card Container -->
-    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-        <div sclass="login-card">
+    <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center;">
+        <vlayout sclass="login-card" spacing="0">
             
-            <div style="text-align: center; margin-bottom: 30px;">
-                <label value="Welcome back" style="font-size: 26px; font-weight: bold; color: #1a202c; display: block; margin-bottom: 6px;"/>
+            <vlayout spacing="6px" style="text-align: center; margin-bottom: 30px;">
+                <label value="Welcome back" style="font-size: 26px; font-weight: bold; color: #1a202c; display: block;"/>
                 <label value="Sign in to access Express Clear CTS." style="color: #718096; font-size: 13px;"/>
-            </div>
+            </vlayout>
 
             <vlayout spacing="18px">
                 <!-- Username Field -->
@@ -38,41 +39,47 @@
                 <!-- Password Field -->
                 <vlayout spacing="4px">
                     <label value="PASSWORD" sclass="field-label"/>
-                    <textbox id="txtPassword" type="password" placeholder="Enter your password" 
-                             constraint="no empty: Password is required."
-                             sclass="input-field" hflex="1" height="42px"
-                             onOK="$composer.onClickSignIn()"/>
+                    <hlayout style="position: relative; width: 100%;" valign="middle">
+                        <textbox id="txtPassword" type="password" placeholder="Enter your password" 
+                                 constraint="no empty: Password is required."
+                                 sclass="input-field" hflex="1" height="42px"
+                                 style="padding-right: 42px; box-sizing: border-box;"
+                                 onOK="$composer.onClickSignIn()"/>
+                        <button id="btnTogglePassword" 
+                                iconSclass="z-icon-eye"
+                                onClick="$composer.onTogglePasswordVisibility()"
+                                style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; color: #718096; font-size: 15px; box-shadow: none; padding: 0; min-height: unset;" />
+                    </hlayout>
                 </vlayout>
 
-                <!-- Role Selection Dropdown (Populated exclusively by LoginController) -->
                 <!-- Role Selection Dropdown -->
-<vlayout spacing="4px">
-    <label value="ROLE" sclass="field-label"/>
-    <combobox id="cmbRole" placeholder="Select your role" readonly="true"
-              hflex="1" height="42px" style="font-size: 13px;" />
-</vlayout>
+                <vlayout spacing="4px">
+                    <label value="ROLE" sclass="field-label"/>
+                    <combobox id="cmbRole" placeholder="Select your role" readonly="true"
+                              hflex="1" height="42px" style="font-size: 13px;" />
+                </vlayout>
 
                 <separator height="10px"/>
 
                 <!-- Sign In Button -->
-                <button id="btnSignIn" label="Sign In" />
+                <button id="btnSignIn" label="Sign In" hflex="1" height="42px" sclass="btn-primary" />
 
                 <separator height="10px"/>
 
                 <!-- Authorization Notice -->
-                <div style="text-align: center;">
+                <vlayout spacing="2px" style="text-align: center;">
                     <label value="Authorized users only" style="font-size: 11px; color: #a0aec0; display: block;"/>
                     <label value="Your access is controlled by your assigned role." style="font-size: 11px; color: #a0aec0; display: block;"/>
-                </div>
+                </vlayout>
             </vlayout>
 
-        </div>
-    </div>
+        </vlayout>
+    </vlayout>
 
     <!-- Footer Ribbon -->
-    <div sclass="footer-text">
+    <div sclass="footer-text" hflex="1">
         <label value="© Express Clear CTS · Secure Banking Application"/>
     </div>
 
-</div>
+</vlayout>
 </zk>
