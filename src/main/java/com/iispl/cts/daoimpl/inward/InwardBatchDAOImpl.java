@@ -21,7 +21,7 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
         batchTable.add(new InwardBatch(
             "BAT1001", 
             "REF-BATCH-2026-001", 
-            3, 
+            2, 
             new BigDecimal("3775000.00"), 
             "Processing", 
             "USR1001", 

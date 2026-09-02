@@ -61,8 +61,8 @@
                     <button id="btnNextCheque" label="Next" iconSclass="z-icon-chevron-right" class="cts-btn-secondary" style="height: 30px; padding: 0 10px; font-size: 12px;" />
                     
                     <!-- Dynamic Proceed Button: Appears when all cheques are resolved -->
-                    <button id="btnProceedToCompletion" label="Proceed with Maker Completion" iconSclass="z-icon-arrow-circle-right"
-                            visible="false" class="cts-btn-solid-primary" style="height: 30px; padding: 0 12px; font-size: 12px; background: #059669 !important; border-color: #059669 !important;" />
+                    <button id="btnProceedToCompletion" label="Proceed to Completion" iconSclass="z-icon-arrow-circle-right"
+                            visible="false" class="cts-btn-solid-primary" style="height: 30px; padding: 0 12px; font-size: 12px; background: #059669 !important; border-color: #059669 !important; white-space: nowrap;" />
                 </hlayout>
             </hlayout>
         </div>
