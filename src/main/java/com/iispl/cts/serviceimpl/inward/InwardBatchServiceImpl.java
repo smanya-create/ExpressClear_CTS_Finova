@@ -1,34 +1,56 @@
+	
 package com.iispl.cts.serviceimpl.inward;
-
+	
 import java.util.List;
-
 import com.iispl.cts.dao.inward.InwardBatchDAO;
+import com.iispl.cts.daoimpl.inward.InwardBatchDAOImpl;
+import com.iispl.cts.entity.inward.InwardBatch;
+import com.iispl.cts.service.inward.InwardBatchService;
+
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.dao.inward.InwardChequeImageDAO;
-import com.iispl.cts.daoimpl.inward.InwardBatchDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
-import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
-import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchXmlParser.ParsedBatchData;
 
 public class InwardBatchServiceImpl implements InwardBatchService {
 
-	private final InwardBatchXmlParser xmlParser;
+    private final InwardBatchDAO batchDao = new InwardBatchDAOImpl();
+    
+    private final InwardBatchXmlParser xmlParser;
 	private final InwardBatchDAO inwardBatchDAO;
 	private final InwardChequeDAO inwardChequeDAO;
 	private final InwardChequeImageDAO inwardChequeImageDAO;
-
+	
 	public InwardBatchServiceImpl() {
 		this.xmlParser = new InwardBatchXmlParser();
 		this.inwardBatchDAO = new InwardBatchDAOImpl();
-		this.inwardChequeDAO = new InwardChequeDAOImpl();
-		this.inwardChequeImageDAO = new InwardChequeImageDAOImpl();
+		this.inwardChequeDAO = InwardChequeDAOImpl.getInstance();
+		this.inwardChequeImageDAO = InwardChequeImageDAOImpl.getInstance();
 	}
 
-	@Override
+    @Override
+    public List<InwardBatch> getAllActiveBatches() {
+        return batchDao.findAllActiveBatches();
+    }
+
+    @Override
+    public InwardBatch getBatchById(String batchId) {
+        return batchDao.findById(batchId);
+    }
+
+    @Override
+    public boolean updateBatchStatus(String batchId, String status) {
+        return batchDao.updateStatus(batchId, status);
+    }
+    
+    
+    
+    
+    
+    @Override
 	public ParsedBatchData parseBatchXml(String xmlFilePath) throws Exception {
 		return xmlParser.parse(xmlFilePath);
 	}
@@ -36,11 +58,6 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 	@Override
 	public List<InwardBatch> getAllBatches() {
 		return inwardBatchDAO.getAllBatches();
-	}
-
-	@Override
-	public InwardBatch getBatchById(String inwardBatchId) {
-		return inwardBatchDAO.getBatchById(inwardBatchId);
 	}
 
 	@Override
@@ -135,27 +152,10 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 
 	    return true;
 	}
-import com.iispl.cts.dao.inward.InwardBatchDAO;
-import com.iispl.cts.daoimpl.inward.InwardBatchDAOImpl;
-import com.iispl.cts.entity.inward.InwardBatch;
-import com.iispl.cts.service.inward.InwardBatchService;
-
-public class InwardBatchServiceImpl implements InwardBatchService {
-
-    private final InwardBatchDAO batchDao = new InwardBatchDAOImpl();
-
-    @Override
-    public List<InwardBatch> getAllActiveBatches() {
-        return batchDao.findAllActiveBatches();
-    }
-
-    @Override
-    public InwardBatch getBatchById(String batchId) {
-        return batchDao.findById(batchId);
-    }
-
-    @Override
-    public boolean updateBatchStatus(String batchId, String status) {
-        return batchDao.updateStatus(batchId, status);
-    }
 }
+
+	
+
+	
+
+	

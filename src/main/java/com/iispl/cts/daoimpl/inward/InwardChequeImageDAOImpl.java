@@ -10,60 +10,10 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.inward.InwardChequeImageDAO;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 
-public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
-	@Override
-	public List<InwardChequeImage> getAllImages() {
+	
+	
 
-		List<InwardChequeImage> images = new ArrayList<>();
-
-		String sql = "SELECT inward_image_id, inward_cheque_id, " + "image_type, image_path, created_at "
-				+ "FROM inward_cheque_image " + "ORDER BY created_at DESC";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql);
-				ResultSet resultSet = statement.executeQuery()) {
-
-			while (resultSet.next()) {
-
-				InwardChequeImage image = new InwardChequeImage();
-
-				image.setInwardImageId(resultSet.getString("inward_image_id"));
-
-				image.setInwardChequeId(resultSet.getString("inward_cheque_id"));
-
-				image.setImageType(resultSet.getString("image_type"));
-
-				image.setImagePath(resultSet.getString("image_path"));
-
-				image.setCreatedAt(resultSet.getTimestamp("created_at"));
-
-				images.add(image);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return images;
-	}
-
-	@Override
-	public InwardChequeImage getImageById(String inwardImageId) {
-
-		String sql = "SELECT inward_image_id, inward_cheque_id, " + "image_type, image_path, created_at "
-				+ "FROM inward_cheque_image " + "WHERE inward_image_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
-
-			statement.setString(1, inwardImageId);
-
-			try (ResultSet resultSet = statement.executeQuery()) {
-
-import com.iispl.cts.dao.inward.InwardChequeImageDAO;
-import com.iispl.cts.entity.inward.InwardChequeImage;
-import com.iispl.cts.common.config.DBConnection;
 
 public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
@@ -226,4 +176,86 @@ public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 			return false;
 		}
 	}
+	
+	@Override
+	public List<InwardChequeImage> getAllImages() {
+
+		List<InwardChequeImage> images = new ArrayList<>();
+
+		String sql = "SELECT inward_image_id, inward_cheque_id, " + "image_type, image_path, created_at "
+				+ "FROM inward_cheque_image " + "ORDER BY created_at DESC";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
+				ResultSet resultSet = statement.executeQuery()) {
+
+			while (resultSet.next()) {
+
+				InwardChequeImage image = new InwardChequeImage();
+
+				image.setInwardImageId(resultSet.getString("inward_image_id"));
+
+				image.setInwardChequeId(resultSet.getString("inward_cheque_id"));
+
+				image.setImageType(resultSet.getString("image_type"));
+
+				image.setImagePath(resultSet.getString("image_path"));
+
+				image.setCreatedAt(resultSet.getTimestamp("created_at"));
+
+				images.add(image);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return images;
+	}
+	
+	@Override
+	public InwardChequeImage getImageById(String inwardImageId) {
+
+		String sql = "SELECT inward_image_id, inward_cheque_id, "
+				+ "image_type, image_path, created_at "
+				+ "FROM inward_cheque_image "
+				+ "WHERE inward_image_id = ?";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setString(1, inwardImageId);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+
+				if (resultSet.next()) {
+
+					InwardChequeImage image = new InwardChequeImage();
+
+					image.setInwardImageId(
+							resultSet.getString("inward_image_id"));
+
+					image.setInwardChequeId(
+							resultSet.getString("inward_cheque_id"));
+
+					image.setImageType(
+							resultSet.getString("image_type"));
+
+					image.setImagePath(
+							resultSet.getString("image_path"));
+
+					image.setCreatedAt(
+							resultSet.getTimestamp("created_at"));
+
+					return image;
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
 }

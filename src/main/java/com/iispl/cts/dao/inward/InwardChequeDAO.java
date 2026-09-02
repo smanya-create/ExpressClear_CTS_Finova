@@ -14,10 +14,15 @@ public interface InwardChequeDAO {
 
     boolean saveCheque(InwardCheque inwardCheque);
 
-    boolean updateCheque(InwardCheque inwardCheque);
-
     boolean deleteCheque(String inwardChequeId);
  
+    boolean updatecheque(InwardCheque cheque);
+    
+    
+    
+    
+    
+    
      // Fetch all inward cheques require MICR repair.
      
     List<InwardCheque> getMicrRepairRequiredCheques();
@@ -33,4 +38,5 @@ public interface InwardChequeDAO {
     List<InwardCheque> findByBatchAndStatus(String batchId, String status);
   
     boolean updateCheque(InwardCheque cheque);
+    
 }
