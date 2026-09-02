@@ -7,9 +7,6 @@ import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
 public interface OutwardChequeDAO{
-	List<OutwardCheque> getChequesByBatchId(String outwardBatchId);	
-
-
 	List<OutwardCheque> getChequesByBatchId(String outwardBatchId);
 
 	int getTotalChequeCountByBatchId(String outwardBatchId);
