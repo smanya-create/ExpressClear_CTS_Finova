@@ -21,6 +21,7 @@ import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.ActiveUserManager;
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.RoleService;
@@ -239,6 +240,9 @@ public class LoginController extends GenericForwardComposer<Component> {
                     session.setAttribute("USER_OBJ", finalUser);
                     session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
                     session.setAttribute("USER_PERMISSIONS", finalPermissions);
+                    
+                 // Register user in the real-time active user registry
+                    ActiveUserManager.userLoggedIn(finalUser.getUserId());
 
                     // Audit success log
                     AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
