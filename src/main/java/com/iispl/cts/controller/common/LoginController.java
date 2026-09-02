@@ -253,7 +253,7 @@ public class LoginController extends GenericForwardComposer<Component> {
                     if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {
                         Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
                     } else if ("ROL1002".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {
-                        Executions.sendRedirect("/outward/maker/maker-dashboard.zul");
+                        Executions.sendRedirect("/outward/maker/maker-module.zul");
                     } else if ("ROL1003".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
                         Executions.sendRedirect("/outward/checker/dashboard.zul");
                     } else if ("ROL1004".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {

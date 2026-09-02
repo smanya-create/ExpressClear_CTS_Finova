@@ -23,13 +23,32 @@ public class OutwardCheque implements Serializable {
     private String accountId;
     private Timestamp createdAt;
 
+    // MICR-related fields
+    private String cityCode;
+    private String bankCode;
+    private String branchCode;
+
     public OutwardCheque() {
     }
 
-    public OutwardCheque(String outwardChequeId, String outwardBatchId, String chequeNumber, 
-                         String micrCode, String draweeName, String draweeAccountNumber, 
-                         String payeeName, String payeeAccountNumber, BigDecimal chequeAmount, 
-                         Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt) {
+    public OutwardCheque(
+            String outwardChequeId,
+            String outwardBatchId,
+            String chequeNumber,
+            String micrCode,
+            String draweeName,
+            String draweeAccountNumber,
+            String payeeName,
+            String payeeAccountNumber,
+            BigDecimal chequeAmount,
+            Date chequeDate,
+            String chequeStatus,
+            String accountId,
+            Timestamp createdAt,
+            String cityCode,
+            String bankCode,
+            String branchCode) {
+
         this.outwardChequeId = outwardChequeId;
         this.outwardBatchId = outwardBatchId;
         this.chequeNumber = chequeNumber;
@@ -43,44 +62,136 @@ public class OutwardCheque implements Serializable {
         this.chequeStatus = chequeStatus;
         this.accountId = accountId;
         this.createdAt = createdAt;
+        this.cityCode = cityCode;
+        this.bankCode = bankCode;
+        this.branchCode = branchCode;
     }
 
-    public String getOutwardChequeId() { return outwardChequeId; }
-    public void setOutwardChequeId(String outwardChequeId) { this.outwardChequeId = outwardChequeId; }
+    public String getOutwardChequeId() {
+        return outwardChequeId;
+    }
 
-    public String getOutwardBatchId() { return outwardBatchId; }
-    public void setOutwardBatchId(String outwardBatchId) { this.outwardBatchId = outwardBatchId; }
+    public void setOutwardChequeId(String outwardChequeId) {
+        this.outwardChequeId = outwardChequeId;
+    }
 
-    public String getChequeNumber() { return chequeNumber; }
-    public void setChequeNumber(String chequeNumber) { this.chequeNumber = chequeNumber; }
+    public String getOutwardBatchId() {
+        return outwardBatchId;
+    }
 
-    public String getMicrCode() { return micrCode; }
-    public void setMicrCode(String micrCode) { this.micrCode = micrCode; }
+    public void setOutwardBatchId(String outwardBatchId) {
+        this.outwardBatchId = outwardBatchId;
+    }
 
-    public String getDraweeName() { return draweeName; }
-    public void setDraweeName(String draweeName) { this.draweeName = draweeName; }
+    public String getChequeNumber() {
+        return chequeNumber;
+    }
 
-    public String getDraweeAccountNumber() { return draweeAccountNumber; }
-    public void setDraweeAccountNumber(String draweeAccountNumber) { this.draweeAccountNumber = draweeAccountNumber; }
+    public void setChequeNumber(String chequeNumber) {
+        this.chequeNumber = chequeNumber;
+    }
 
-    public String getPayeeName() { return payeeName; }
-    public void setPayeeName(String payeeName) { this.payeeName = payeeName; }
+    public String getMicrCode() {
+        return micrCode;
+    }
 
-    public String getPayeeAccountNumber() { return payeeAccountNumber; }
-    public void setPayeeAccountNumber(String payeeAccountNumber) { this.payeeAccountNumber = payeeAccountNumber; }
+    public void setMicrCode(String micrCode) {
+        this.micrCode = micrCode;
+    }
 
-    public BigDecimal getChequeAmount() { return chequeAmount; }
-    public void setChequeAmount(BigDecimal chequeAmount) { this.chequeAmount = chequeAmount; }
+    public String getDraweeName() {
+        return draweeName;
+    }
 
-    public Date getChequeDate() { return chequeDate; }
-    public void setChequeDate(Date chequeDate) { this.chequeDate = chequeDate; }
+    public void setDraweeName(String draweeName) {
+        this.draweeName = draweeName;
+    }
 
-    public String getChequeStatus() { return chequeStatus; }
-    public void setChequeStatus(String chequeStatus) { this.chequeStatus = chequeStatus; }
+    public String getDraweeAccountNumber() {
+        return draweeAccountNumber;
+    }
 
-    public String getAccountId() { return accountId; }
-    public void setAccountId(String accountId) { this.accountId = accountId; }
+    public void setDraweeAccountNumber(String draweeAccountNumber) {
+        this.draweeAccountNumber = draweeAccountNumber;
+    }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getPayeeName() {
+        return payeeName;
+    }
+
+    public void setPayeeName(String payeeName) {
+        this.payeeName = payeeName;
+    }
+
+    public String getPayeeAccountNumber() {
+        return payeeAccountNumber;
+    }
+
+    public void setPayeeAccountNumber(String payeeAccountNumber) {
+        this.payeeAccountNumber = payeeAccountNumber;
+    }
+
+    public BigDecimal getChequeAmount() {
+        return chequeAmount;
+    }
+
+    public void setChequeAmount(BigDecimal chequeAmount) {
+        this.chequeAmount = chequeAmount;
+    }
+
+    public Date getChequeDate() {
+        return chequeDate;
+    }
+
+    public void setChequeDate(Date chequeDate) {
+        this.chequeDate = chequeDate;
+    }
+
+    public String getChequeStatus() {
+        return chequeStatus;
+    }
+
+    public void setChequeStatus(String chequeStatus) {
+        this.chequeStatus = chequeStatus;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getCityCode() {
+        return cityCode;
+    }
+
+    public void setCityCode(String cityCode) {
+        this.cityCode = cityCode;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
+
+    public String getBranchCode() {
+        return branchCode;
+    }
+
+    public void setBranchCode(String branchCode) {
+        this.branchCode = branchCode;
+    }
 }

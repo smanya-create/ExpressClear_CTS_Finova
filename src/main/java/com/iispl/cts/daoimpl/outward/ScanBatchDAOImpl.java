@@ -317,4 +317,51 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
                     e);
         }
     }
+        @Override
+        public void updateBatchStatus(
+                Connection connection,
+                String batchId,
+                String status) {
+
+            if (connection == null) {
+                throw new IllegalArgumentException(
+                        "Connection cannot be null");
+            }
+
+            if (batchId == null || batchId.trim().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Batch ID cannot be null or empty");
+            }
+
+            if (status == null || status.trim().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Batch status cannot be null or empty");
+            }
+
+            String sql =
+                    "UPDATE scan_batch " +
+                    "SET staging_status = ? " +
+                    "WHERE scanned_batch_id = ?";
+
+            try (PreparedStatement ps =
+                         connection.prepareStatement(sql)) {
+
+                ps.setString(1, status);
+                ps.setString(2, batchId);
+
+                int rowsUpdated = ps.executeUpdate();
+
+                if (rowsUpdated == 0) {
+                    throw new IllegalStateException(
+                            "Scan batch not found for batch ID: "
+                            + batchId);
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(
+                        "Failed to update scan batch status for batch ID: "
+                        + batchId, e);
+            }
+        
+    }
 }

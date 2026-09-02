@@ -12,4 +12,5 @@ public interface OutwardChequeService {
 
 	BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
 
+
 }

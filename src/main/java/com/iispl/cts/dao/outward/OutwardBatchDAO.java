@@ -1,6 +1,8 @@
 package com.iispl.cts.dao.outward;
 
 import java.util.List;
+import java.sql.Connection;
+
 
 import com.iispl.cts.entity.outward.OutwardBatch;
 
@@ -14,5 +16,10 @@ public interface OutwardBatchDAO {
 	List<OutwardBatch> searchBatches(String batchId, String status);
 
 	OutwardBatch getBatchById(String outwardBatchId);
+	
+	String transferBatchFromScanToOutward(
+            Connection connection,
+            String scannedBatchId);
+
 
 }
