@@ -62,46 +62,55 @@
             </listhead>
                  
                  </listbox>
-                 <vlayout sclass="generated-section"
-                 spacing="10px">
-                 
-                 <label value="AFTER XML GENERATION"
-                   sclass="generated-title"/>
-                   
-                   <hlayout sclass="xml-file-row"
-                     hflex="1"
-                     valign="middle"
-                     spacing="15px">
-                     <label value="XML"
-                       sclass="xml-icon"/>
-                       <vlayout sclass="xml-file-info"
-                         hflex="1"
-                         spacing="3px">
-                         
-                         <label id="lblXmlFileName"
-                           value="B004_20260821.xml"
-                           sclass="xml-file-name"/>
+                <vlayout sclass="generated-section"
+         spacing="10px">
 
-                    <label value="XML generated successfully - Ready to send to NPCI."
-                           sclass="xml-file-description"/>
-                       </vlayout>
-                       
-                       <button id="btnSendToNPCI"
-                        label="SEND TO NPCI"
-                        visible="true"
-                        sclass="send-button"
-                        onClick="$composer.onClickSendToNPCI()"/>
-                     
-                   </hlayout>
-                    <hlayout sclass="xml-info-message"
-                     hflex="1"
-                     valign="middle">
+    <label value="AFTER XML GENERATION"
+           sclass="generated-title"/>
 
-                <label value="Generate XML first. After successful generation, the batch becomes ready for 'Send to NPCI'."
-                       sclass="info-label"/>
+    <hlayout id="generatedXmlRow"
+             sclass="xml-file-row"
+             hflex="1"
+             valign="middle"
+             spacing="15px"
+             visible="false">
 
-            </hlayout>
-                 </vlayout>
+        <label value="XML"
+               sclass="xml-icon"/>
+
+        <vlayout sclass="xml-file-info"
+                 hflex="1"
+                 spacing="3px">
+
+            <label id="lblXmlFileName"
+                   value=""
+                   sclass="xml-file-name"/>
+
+            <label id="lblXmlFileDescription"
+                   value=""
+                   sclass="xml-file-description"/>
+
+        </vlayout>
+
+        <button id="btnSendToNPCI"
+                label="SEND TO NPCI"
+                visible="false"
+                sclass="send-button"
+                onClick="$composer.onClickSendToNPCI()"/>
+
+    </hlayout>
+
+    <hlayout id="xmlInfoMessage"
+             sclass="xml-info-message"
+             hflex="1"
+             valign="middle">
+
+        <label value="Generate XML first. After successful generation, the batch becomes ready for 'Send to NPCI'."
+               sclass="info-label"/>
+
+    </hlayout>
+
+</vlayout>
             
 </vlayout>
 

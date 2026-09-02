@@ -211,7 +211,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardXmlGeneration() {
-		Executions.sendRedirect("/checker/xml-gen.zul");
+		Executions.sendRedirect("/outward/checker/xml-generation.zul");
 	}
 
 	public void navToOutwardRejectedCheques() {

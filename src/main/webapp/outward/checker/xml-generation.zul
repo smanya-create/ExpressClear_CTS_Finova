@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk xmlns:h="xhtml">
-	<zscript>
-        org.zkoss.zk.ui.Sessions.getCurrent()
-            .setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
-
-        org.zkoss.zk.ui.Sessions.getCurrent()
-            .setAttribute("CTS_USERNAME", "Alex");
-    </zscript>
 	<style src="/css/outward/checker-xmlGeneration.css" />
 
 	<borderlayout hflex="1" vflex="1">

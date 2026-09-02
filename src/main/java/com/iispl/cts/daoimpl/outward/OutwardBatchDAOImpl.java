@@ -29,7 +29,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO{
 	                + "WHERE batch_status = ?";
 		try(Connection connection = DBConnection.getDataSource().getConnection();
 				PreparedStatement prepStmt = connection.prepareStatement(selectSql)){
-			prepStmt.setString(1,"Pending");
+			prepStmt.setString(1,"Verified");
 			ResultSet rs = prepStmt.executeQuery();
 			while(rs.next()) {
 				batches.add(new OutwardBatch(rs.getString("outward_batch_id"),rs.getString("batch_reference_id"),rs.getInt("actual_cheque_count"),rs.getBigDecimal("actual_total_amount"),rs.getString("batch_status"),rs.getString("uploaded_by"),rs.getTimestamp("uploaded_at")));
