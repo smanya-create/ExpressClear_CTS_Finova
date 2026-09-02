@@ -1,16 +1,14 @@
 package com.iispl.cts.dao.outward;
 
-
 import java.math.BigDecimal;
-
 import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
-public interface OutwardChequeDAO{
-	List<OutwardCheque> getChequesByBatchId(String outwardBatchId);
+public interface OutwardChequeDAO {
 
-	int getTotalChequeCountByBatchId(String outwardBatchId);
+    List<OutwardCheque> getChequesByBatchId(String outwardBatchId);
 
-	BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
+    int getTotalChequeCountByBatchId(String outwardBatchId);
+
+    BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
 }
-
