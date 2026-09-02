@@ -16,11 +16,12 @@ public class ActiveUserManager {
     public static void userLoggedOut(String userId) {
         if (userId != null) {
             activeUsers.remove(userId.trim());
+            System.out.println(">>> [ActiveUserManager] Removed: " + userId + " | Current Active Set: " + activeUsers);
         }
     }
 
     public static int getActiveUserCount() {
-        return Math.max(activeUsers.size(), 1);
+         return activeUsers.size();
     }
 
 }
