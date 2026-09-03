@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk>
+    <style src="/css/inward/return.css"/>
+
+    <zscript>
+        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
+        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
+    </zscript> 
+
+    <!-- Bound to controller (update class path if needed) -->
+    <borderlayout width="100%" height="100vh">
+
+        <west width="220px" border="0">
+            <include src="/components/sidebar.zul?role=INWARD_CHECKER&amp;activeTab=rrf"/>
+        </west>
+
+        <center border="0">
+            <borderlayout width="100%" height="100%">
+
+                <north height="80px" border="0">
+                    <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=rrf"/>
+                </north>
+
+                <center border="0" autoscroll="true">
+                    <!-- Single wrapping container for all vertical content -->
+                    <vlayout spacing="10px" style="padding:20px">
+ 						
+ 						<vlayout spacing="0px">
+    						<label value="RRF" style="font-size:24px;font-weight:bold;color:#1D2D46"/>
+    						<label value="View rejected cheques, reject reasons and return processing status" style="font-size:11px;color:#8793A6"/>
+						</vlayout>
+                       
+                        <!-- Search Section -->
+						<vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:8px 12px;background:white">
+   						<label value="Search Rejected Cheques" style="font-weight:bold;font-size:14px"/>
+    					<hlayout spacing="6px" style="align-items:center">
+        					<textbox id="txtSearchBatchIDOrChequeNumber" 
+            				     hflex="1"
+                				 height="30px"
+             				    placeholder="Enter Batch ID/Cheque Number" 
+                				 style="font-size:12px; padding:2px 8px"/>
+       						 <button id="btnClear" 
+            				    label="Clear" 
+          					      height="30px"
+          					      style="background:#1B4A8F;color:white;border:0;font-size:12px;padding:0 12px;border-radius:4px"/>
+      						  <button id="btnSearch" 
+        					        label="Search" 
+         					       height="30px"
+           					     style="background:#1B4A8F;color:white;border:0;font-size:12px;padding:0 12px;border-radius:4px"/>
+   					 </hlayout>
+					</vlayout>
+						
+                        <!-- Rejected Cheques Table -->
+                        <vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:12px;background:white">
+                            <label value="Rejected Cheques" style="font-size:14px;font-weight:bold;"/>
+                            <listbox id="rrfListbox" 
+                                     sclass="listbox-header z-listbox-grid" 
+                                     nonselectableTags="*" 
+                                     emptyMessage="No rejected cheques found">
+                                <listhead>
+                                    <listheader label="BATCH ID"/>
+                                    <listheader label="CHEQUE NUMBER" align="center" width="150px"/>
+                                    <listheader label="AMOUNT" align="center"/>
+                                    <listheader label="REJECT REASON" align="center" width="150px"/>
+                                    <listheader label="REJECTED ON" align="center"/>
+                                    <listheader label="STATUS" align="center"/>
+                                    <listheader label="ACTION" align="center" width="180px"/>
+                                </listhead>
+                            </listbox>
+                        </vlayout>
+
+                    </vlayout>
+                </center>
+
+            </borderlayout>
+        </center>
+
+    </borderlayout> 
+</zk>

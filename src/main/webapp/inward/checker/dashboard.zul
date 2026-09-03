@@ -1,59 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk>
-    <!-- Custom styling to force Listheader background to White -->
-    <style>
-        .listbox-header .z-listheader {
-            background: #FFFFFF !important;
-            border-bottom: 1px solid #E0E6ED !important;
-        }
-        .listbox-header .z-listheader-content {
-            color: #1D2D46 !important;
-            font-weight: bold !important;
-            font-size: 10px !important;
-        }
-    </style>
+    <style src="/css/inward/checker-dashboard.css"/>
 
-    <!-- Explicitly set Session Attributes before sidebar component renders -->
-  <!--   <zscript>
-        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("USER_ROLE", "INWARD_CHECKER");
+    <zscript>
+        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
-    </zscript> --> 
+    </zscript> 
 
-    <borderlayout width="100%" height="100vh">
+    <borderlayout width="100%" height="100vh" >
 
         <west width="220px" border="0">
-            <include src="/components/sidebar.zul?role=INWARD_CHECKER&amp;activeTab=inward-dashboard"/>
+            <include src="/components/sidebar.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash"/>
         </west>
 
         <center border="0">
             <borderlayout width="100%" height="100%">
 
-                <north height="55px" border="0">
-                    <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=inward-dashboard"/>
+                <north height="80px" border="0">
+                    <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash"/>
                 </north>
 
                 <center border="0" autoscroll="true">
                     <vlayout spacing="12px" style="padding:20px">
  
-                        <label value="Checker Dashboard"
-                               style="font-size:24px;font-weight:bold;color:#1D2D46"/>
+                        <vlayout spacing="0px">
+                            <label value="Checker Dashboard" style="font-size:24px;font-weight:bold;color:#1D2D46"/>
+                            <label value="Monitor batches submitted by Maker and track cheque verification progress." style="font-size:11px;color:#8793A6"/>
+                        </vlayout>
 
-                        <label value="Monitor batches submitted by Maker and track cheque verification progress."
-                               style="font-size:11px;color:#8793A6"/>
-
-                        <vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:12px">
+                        <!-- Batch Search Card (Compact) -->
+                        <vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:8px 12px;background:white">
                             <label value="Batch Search" style="font-weight:bold;font-size:14px"/>
-                            <hlayout spacing="8px">
-                                <textbox hflex="1" placeholder="Enter Batch ID" style="font-size:14px"/>
-                                <button label="Clear" style="background:#1B4A8F;color:white;border:0"/>
-                                <button label="Search" style="background:#1B4A8F;color:white;border:0"/>
+                            <hlayout spacing="6px" style="align-items:center">
+                                <textbox id="txtSearchBatchId" 
+                                         hflex="1" 
+                                         height="30px" 
+                                         placeholder="Enter Batch ID" 
+                                         style="font-size:12px; padding:2px 8px"/>
+                                <button id="btnClear" 
+                                        label="Clear" 
+                                        height="30px" 
+                                        style="background:#1B4A8F;color:white;border:0;font-size:12px;padding:0 14px;border-radius:4px"/>
+                                <button id="btnSearch" 
+                                        label="Search" 
+                                        height="30px" 
+                                        style="background:#1B4A8F;color:white;border:0;font-size:12px;padding:0 14px;border-radius:4px"/>
                             </hlayout>
                         </vlayout>
 
                         <!-- Batch Details Table (Listbox) -->
                         <vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:12px;background:white">
-                            <listbox id="batchListbox" sclass="listbox-header" 
-                            			emptyMessage="No batch details found" >
+                           	<label value="All Batches" style="font-weight:bold;font-size:14px"/>
+                            <listbox id="batchListbox" 
+                                     sclass="listbox-header z-listbox-grid" 
+                                     nonselectableTags="*" 
+                                     emptyMessage="No batch details found">
                                 <listhead>
                                     <listheader label="BATCH ID"/>
                                     <listheader label="TOTAL CHEQUES" align="center"/>
@@ -61,13 +62,10 @@
                                     <listheader label="REJECTION REQUESTS" align="center"/>
                                     <listheader label="ACTION" align="center" width="180px"/>
                                 </listhead>
-                             
-                                
                             </listbox>
                         </vlayout>
 
                     </vlayout>
-                    
                 </center>
 
             </borderlayout>
