@@ -121,53 +121,23 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	// Admin Navigation Actions
 	public void navToAdminDashboard() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			include.setSrc("/admin/dashboard/admin-dashboard.zul");
-		}
-		
+		Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
 	}
 
 	public void navToUserManagement() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			include.setSrc("/admin/user/user-management.zul");
-		}
-		
+		Executions.sendRedirect("/admin/user/user-management.zul");
 	}
 
 	public void navToRoleManagement() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			include.setSrc("/admin/role/role-management.zul");
-		}
-		
+		Executions.sendRedirect("/admin/role/role-management.zul");
 	}
 
 	public void navToAuditLogs() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			include.setSrc("/admin/audit/audit-logs.zul");
-		}
-		
+		Executions.sendRedirect("/admin/audit/audit-logs.zul");
 	}
 
 	public void navToAdminReports() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			include.setSrc("/admin/reports/reports.zul");
-		}
-		
+		Executions.sendRedirect("/admin/reports/reports.zul");
 	}
 
 	// Outward Maker Navigation Actions
