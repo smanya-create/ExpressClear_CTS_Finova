@@ -75,7 +75,6 @@
 					<label
 						value="Validate each batch before it enters MICR Repair."
 						sclass="section-description" />
-
 				</vlayout>
 
 				<listbox id="batchListbox" width="100%"
