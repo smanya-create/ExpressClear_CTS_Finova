@@ -50,7 +50,7 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
     }
 
     @Override
-    public List<InwardCheque> findByBatchAndStatus(
+    public List<InwardCheque> findbyBatchAndStatus(
             String batchId,
             String status) {
 

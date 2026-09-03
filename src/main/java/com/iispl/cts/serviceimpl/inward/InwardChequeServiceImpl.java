@@ -12,7 +12,7 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 
     @Override
     public List<InwardCheque> getChequesByBatchAndStatus(String batchId, String status) {
-        return chequeDao.findByBatchAndStatus(batchId, status);
+        return chequeDao.findbyBatchAndStatus(batchId, status);
     }
 
     @Override
