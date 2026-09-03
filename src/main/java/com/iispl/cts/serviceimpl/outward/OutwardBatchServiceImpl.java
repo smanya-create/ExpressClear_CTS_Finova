@@ -36,5 +36,13 @@ public class OutwardBatchServiceImpl implements OutwardBatchService{
 
 		return outwardBatchDAO.getBatchById(outwardBatchId);
 	}
+
+	@Override
+	public List<OutwardBatch> getPendingBatches() {
+		
+		return outwardBatchDAO.getPendingBatches();
+	}
+	
+	
 }
 

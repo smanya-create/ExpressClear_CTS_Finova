@@ -21,5 +21,6 @@ public interface OutwardBatchDAO {
             Connection connection,
             String scannedBatchId);
 
+	List<OutwardBatch> getPendingBatches();
 
 }
