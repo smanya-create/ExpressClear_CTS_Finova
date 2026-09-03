@@ -27,27 +27,48 @@
 }
 
 /* 4-Column Stat KPI Card */
+/* 4-Column Stat KPI Card */
 .cts-stats-card {
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e2e8f0;
-    padding: 20px 24px;
+    padding: 20px 0 !important;
     display: flex;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     margin-bottom: 22px;
 }
 
-.cts-stat-col {
-    flex: 1;
-    border-right: 1px solid #e2e8f0;
-    padding: 0 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+/* Push border and spacing onto ZK's actual rendered wrapper cells */
+.cts-stats-card > .z-hlayout-inner {
+    flex: 1 1 0% !important;
+    width: 25% !important;
+    border-right: 1px solid #e2e8f0 !important;
+    padding: 0 28px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center;
 }
 
-.cts-stat-col:first-child {
-    padding-left: 0;
+/* First cell padding */
+.cts-stats-card > .z-hlayout-inner:first-child {
+    padding-left: 24px !important;
+}
+
+/* Remove right divider on last cell */
+.cts-stats-card > .z-hlayout-inner:last-child {
+    border-right: none !important;
+    padding-right: 24px !important;
+}
+
+/* Reset inner vlayout so it doesn't conflict */
+.cts-stat-col {
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+.cts-stat-col > .z-vlayout-inner {
+    padding: 0 !important;
 }
 
 .cts-stat-col-last {
