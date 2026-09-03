@@ -19,4 +19,9 @@ public class InwardChequeServiceImpl implements InwardChequeService {
     public boolean updateChequeDetails(InwardCheque cheque) {
         return chequeDao.updateCheque(cheque);
     }
+    @Override
+    public InwardCheque getChequeById(String inwardChequeId) {
+
+        return chequeDao.findById(inwardChequeId);
+    }
 }

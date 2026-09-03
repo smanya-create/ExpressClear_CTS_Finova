@@ -1,12 +1,16 @@
 package com.iispl.cts.daoimpl.inward;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.entity.inward.InwardCheque;
 
@@ -46,21 +50,165 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
     }
 
     @Override
-    public List<InwardCheque> findByBatchAndStatus(String batchId, String status) {
-        return chequeTable.stream()
-                .filter(c -> c.getInwardBatchId().equalsIgnoreCase(batchId) 
-                          && (status == null || c.getChequeStatus().equalsIgnoreCase(status)))
-                .collect(Collectors.toList());
-    }
+    public List<InwardCheque> findByBatchAndStatus(
+            String batchId,
+            String status) {
 
+        List<InwardCheque> chequeList = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT inward_cheque_id, " +
+                "       inward_batch_id, " +
+                "       cheque_number, " +
+                "       micr_code, " +
+                "       drawee_name, " +
+                "       drawee_account_number, " +
+                "       payee_name, " +
+                "       payee_account_number, " +
+                "       cheque_amount, " +
+                "       cheque_date, " +
+                "       cheque_status, " +
+                "       account_id, " +
+                "       created_at " +
+                "FROM inward_cheque " +
+                "WHERE inward_batch_id = ? "
+        );
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append("AND cheque_status = ? ");
+        }
+
+        sql.append("ORDER BY created_at, inward_cheque_id");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            ps.setString(1, batchId);
+
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(2, status);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    chequeList.add(mapResultSetToCheque(rs));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return chequeList;
+    }
     @Override
     public boolean updateCheque(InwardCheque cheque) {
-        for (int i = 0; i < chequeTable.size(); i++) {
-            if (chequeTable.get(i).getInwardChequeId().equals(cheque.getInwardChequeId())) {
-                chequeTable.set(i, cheque);
-                return true;
+
+        String sql =
+                "UPDATE inward_cheque " +
+                "SET cheque_number = ?, " +
+                "    micr_code = ?, " +
+                "    drawee_name = ?, " +
+                "    drawee_account_number = ?, " +
+                "    payee_name = ?, " +
+                "    payee_account_number = ?, " +
+                "    cheque_amount = ?, " +
+                "    cheque_date = ?, " +
+                "    cheque_status = ?, " +
+                "    account_id = ? " +
+                "WHERE inward_cheque_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, cheque.getChequeNumber());
+            ps.setString(2, cheque.getMicrCode());
+            ps.setString(3, cheque.getDraweeName());
+            ps.setString(4, cheque.getDraweeAccountNumber());
+            ps.setString(5, cheque.getPayeeName());
+            ps.setString(6, cheque.getPayeeAccountNumber());
+
+            ps.setBigDecimal(7, cheque.getChequeAmount());
+
+            if (cheque.getChequeDate() != null) {
+                ps.setDate(
+                        8,
+                        new Date(cheque.getChequeDate().getTime()));
+            } else {
+                ps.setDate(8, null);
             }
+
+            ps.setString(9, cheque.getChequeStatus());
+            ps.setString(10, cheque.getAccountId());
+            ps.setString(11, cheque.getInwardChequeId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return false;
     }
+    
+    @Override
+    public InwardCheque findById(String inwardChequeId) {
+
+        String sql =
+                "SELECT inward_cheque_id, " +
+                "       inward_batch_id, " +
+                "       cheque_number, " +
+                "       micr_code, " +
+                "       drawee_name, " +
+                "       drawee_account_number, " +
+                "       payee_name, " +
+                "       payee_account_number, " +
+                "       cheque_amount, " +
+                "       cheque_date, " +
+                "       cheque_status, " +
+                "       account_id, " +
+                "       created_at " +
+                "FROM inward_cheque " +
+                "WHERE inward_cheque_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, inwardChequeId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    return mapResultSetToCheque(rs);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    private InwardCheque mapResultSetToCheque(ResultSet rs)
+            throws Exception {
+
+        return new InwardCheque(
+                rs.getString("inward_cheque_id"),
+                rs.getString("inward_batch_id"),
+                rs.getString("cheque_number"),
+                rs.getString("micr_code"),
+                rs.getString("drawee_name"),
+                rs.getString("drawee_account_number"),
+                rs.getString("payee_name"),
+                rs.getString("payee_account_number"),
+                rs.getBigDecimal("cheque_amount"),
+                rs.getDate("cheque_date"),
+                rs.getString("cheque_status"),
+                rs.getString("account_id"),
+                rs.getTimestamp("created_at")
+        );
+    }
+
 }
