@@ -301,19 +301,19 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	// Inward Checker Navigation Actions
 	public void navToInwardCheckerDashboard() {
-		Executions.sendRedirect("/inward-checker/dashboard.zul");
+		Executions.sendRedirect("/inward/checker/dashboard.zul");
 	}
 
 	public void navToVerification() {
-		Executions.sendRedirect("/inward-checker/verification.zul");
+		Executions.sendRedirect("/inward/checker/verification.zul");
 	}
 
 	public void navToRRF() {
-		Executions.sendRedirect("/inward-checker/rrf.zul");
+		Executions.sendRedirect("/inward/checker/return.zul");
 	}
 
 	public void navToInwardCheckerReports() {
-		Executions.sendRedirect("/inward-checker/reports.zul");
+		Executions.sendRedirect("/inward/checker/reports.zul");
 	}
 
 	// Global Logout
