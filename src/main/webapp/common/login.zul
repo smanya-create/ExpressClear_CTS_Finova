@@ -18,8 +18,8 @@
     </hlayout>
 
     <!-- Login Card Container -->
-    <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center;">
-        <vlayout sclass="login-card" spacing="0">
+    <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center;padding: 40px 0;">
+        <vlayout sclass="login-card" spacing="0" style="margin-top: 20px;">
             
             <vlayout spacing="6px" style="text-align: center; margin-bottom: 30px;">
                 <label value="Welcome back" style="font-size: 26px; font-weight: bold; color: #1a202c; display: block;"/>
