@@ -2,11 +2,11 @@ package com.iispl.cts.controller.admin;
 
 import java.util.List;
 
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
-import org.zkoss.zul.A;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Label;
@@ -23,10 +23,7 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
 
     private static final long serialVersionUID = 1L;
 
-    private Textbox txtSearchRoles;
-    private Combobox cmbStatusFilter;
-    private Button btnSearch;
-    private Button btnReset;
+    
     private Button btnAddRole;
     private Label lblRoleCount;
     private Rows rowsRoles;
@@ -41,19 +38,15 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
     }
 
     private void loadRoles() {
-        String query = (txtSearchRoles != null && txtSearchRoles.getValue() != null) 
-                ? txtSearchRoles.getValue().trim() : "";
-
-        String statusFilter = (cmbStatusFilter != null && cmbStatusFilter.getSelectedItem() != null)
-                ? (String) cmbStatusFilter.getSelectedItem().getValue() : "ALL";
-
-        List<Role> roles = roleService.searchRoles(query, statusFilter != null ? statusFilter : "ALL");
+    	// Fetch all roles directly without search queries or status filters
+        List<Role> roles = roleService.searchRoles("", "ALL");
 
         if (lblRoleCount != null) {
-            lblRoleCount.setValue(roles.size() + " roles found");
+            lblRoleCount.setValue(roles.size() + " roles defined");
         }
 
         if (rowsRoles == null) return;
+        
         rowsRoles.getChildren().clear();
 
         for (Role role : roles) {
@@ -89,25 +82,17 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
             row.appendChild(lblStatus);
 
             // 5. Modify Action Link
-            A modifyLink = new A("Modify");
-            modifyLink.setStyle("color: #0f172a; font-weight: 700; font-size: 13px; text-decoration: none; cursor: pointer;");
-            modifyLink.addEventListener("onClick", e -> {
+            Button btnModify = new Button("Modify");
+            btnModify.setSclass("btn-action-modify");
+            btnModify.addEventListener("onClick", e -> {
                 Executions.sendRedirect("/admin/role/modify-role.zul?roleId=" + role.getRoleId());
             });
-            row.appendChild(modifyLink);
-
+            row.appendChild(btnModify);
             rowsRoles.appendChild(row);
         }
     }
 
-    public void onClick$btnSearch(Event event) { loadRoles(); }
-    public void onOK$txtSearchRoles(Event event) { loadRoles(); }
-
-    public void onClick$btnReset(Event event) {
-        if (txtSearchRoles != null) txtSearchRoles.setValue("");
-        if (cmbStatusFilter != null) cmbStatusFilter.setSelectedIndex(0);
-        loadRoles();
-    }
+   
 
     public void onClick$btnAddRole(Event event) {
         Executions.sendRedirect("/admin/role/add-role.zul");
