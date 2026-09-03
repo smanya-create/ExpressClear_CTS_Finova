@@ -27,7 +27,6 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public void log(String module, String action, String details, String status) {
-        // Extract session details
         String userId = "SYSTEM";
         String username = "Anonymous";
         String roleName = "N/A";
@@ -36,14 +35,8 @@ public class AuditServiceImpl implements AuditService {
         try {
             if (Sessions.getCurrent() != null) {
                 Object uId = Sessions.getCurrent().getAttribute("USER_ID");
-                if (uId == null) uId = Sessions.getCurrent().getAttribute("CTS_USER_ID");
-
                 Object uName = Sessions.getCurrent().getAttribute("USERNAME");
-                if (uName == null) uName = Sessions.getCurrent().getAttribute("CTS_USERNAME");
-                if (uName == null) uName = Sessions.getCurrent().getAttribute("LOGGED_USER");
-
                 Object uRole = Sessions.getCurrent().getAttribute("ROLE_NAME");
-                if (uRole == null) uRole = Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
 
                 if (uId != null) userId = uId.toString();
                 if (uName != null) username = uName.toString();
@@ -55,32 +48,37 @@ public class AuditServiceImpl implements AuditService {
             }
         } catch (Exception ignored) {}
 
-        // 1. Write to Log4j File Appender
         auditLogger.info("USER:[{}] | ROLE:[{}] | MODULE:[{}] | ACTION:[{}] | STATUS:[{}] | IP:[{}] | DETAILS:[{}]",
                 userId, roleName, module, action, status, ipAddress, details);
 
-        // 2. Persist to Database for UI display
-        String sql = "INSERT INTO audit_logs (timestamp, user_id, username, role_name, module, action, details, ip_address, status) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        final String fUserId = userId;
+        final String fUsername = username;
+        final String fRoleName = roleName;
+        final String fIpAddress = ipAddress;
+        final String fStatus = (status != null ? status : "SUCCESS");
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-            ps.setString(2, userId);
-            ps.setString(3, username);
-            ps.setString(4, roleName);
-            ps.setString(5, module);
-            ps.setString(6, action);
-            ps.setString(7, details);
-            ps.setString(8, ipAddress);
-            ps.setString(9, status != null ? status : "SUCCESS");
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            auditLogger.error("Failed to insert audit log into database", e);
-        }
+        // Execute in background thread so the user is not held back on login
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            String sql = "INSERT INTO audit_logs (timestamp, user_id, username, role_name, module, action, details, ip_address, status) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                ps.setString(2, fUserId);
+                ps.setString(3, fUsername);
+                ps.setString(4, fRoleName);
+                ps.setString(5, module);
+                ps.setString(6, action);
+                ps.setString(7, details);
+                ps.setString(8, fIpAddress);
+                ps.setString(9, fStatus);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                auditLogger.error("Failed to insert audit log into database", e);
+            }
+        });
     }
-
-   
 
 	@Override
 	public List<AuditLog> searchAuditLogs(Date fromDate, Date toDate, String module, String action, String query,
