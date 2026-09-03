@@ -1,77 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk>
+    <style src="/css/inward/batch.css"/>
 
 	<window id="inwardBatchQueueWindow" title="Inward Batch Queue"
 		border="normal" width="95%"
 		apply="com.iispl.cts.controller.inward.maker.InwardBatchController">
 
-		<style>
+		<vlayout width="100%" sclass="batch-page">
 
-			.search-section { background: #ffffff; border: 1px solid
-			#d9e2ec; border-radius: 8px; padding: 22px; margin-bottom:
-			28px; }
-
-			.section-title { font-size: 20px; font-weight: bold; color:
-			#164e87; margin-bottom: 18px; }
-
-			.field-label { font-size: 14px; font-weight: bold; color:
-			#164e87; margin-bottom: 7px; }
-
-			.input-field { height: 38px; border: 1px solid #cbd5e1;
-			border-radius: 5px; padding-left: 10px; }
-
-			.search-button { background: #1769d1; color: white; border:
-			none; border-radius: 5px; height: 38px; padding-left: 25px;
-			padding-right: 25px; font-weight: bold; }
-
-			.batch-section { background: #ffffff; border: 1px solid
-			#d9e2ec; border-radius: 8px; padding: 22px; }
-
-			.batch-title { font-size: 20px; font-weight: bold; color:
-			#164e87; }
-
-			.batch-subtitle { font-size: 14px; color: #718096;
-			margin-top: 5px; margin-bottom: 18px; }
-
-			.batch-listbox { width: 100%; border: 1px solid #d9e2ec; }
-
-			.batch-listbox .z-listheader { background: #1769d1; color:
-			white; font-size: 15px; font-weight: bold; text-align:
-			center; }
-
-			.batch-listbox .z-listcell { text-align: center;
-			vertical-align: middle; padding: 14px 8px; font-size: 14px;
-			}
-
-			.validate-button { background: #1597e5; color: white;
-			border: none; border-radius: 5px; padding: 9px 22px;
-			font-weight: bold; }
-
-			.micr-repair-button { background: #059669; color: white;
-			border: none; border-radius: 5px; padding: 9px 18px;
-			font-weight: bold; }
-
-			.status-pending { background: #fff1cc; color: #c47b00;
-			border-radius: 15px; padding: 6px 14px; font-weight: bold; }
-
-			.status-validated { background: #d1fae5; color: #047857;
-			border-radius: 15px; padding: 6px 14px; font-weight: bold; }
-
-			.status-failed { background: #fee2e2; color: #dc2626;
-			border-radius: 15px; padding: 6px 14px; font-weight: bold; }
-
-		</style>
-
-		<vlayout width="100%" style="padding:25px;">
-
-			<div sclass="search-section">
+			<div sclass="search-container">
 
 				<label value="SEARCH BATCH" sclass="section-title" />
 
-				<hlayout width="100%" spacing="20px">
+				<hlayout width="100%" spacing="20px"
+					sclass="search-row">
 
-					<vlayout hflex="1">
+					<vlayout hflex="1" sclass="search-field">
 
 						<label value="Batch No." sclass="field-label" />
 
@@ -80,7 +25,7 @@
 
 					</vlayout>
 
-					<vlayout width="220px">
+					<vlayout width="220px" sclass="search-field">
 
 						<label value="Status" sclass="field-label" />
 
@@ -96,7 +41,7 @@
 
 					</vlayout>
 
-					<vlayout width="250px">
+					<vlayout width="250px" sclass="search-field">
 
 						<label value="Received Date"
 							sclass="field-label" />
@@ -106,7 +51,8 @@
 
 					</vlayout>
 
-					<vlayout width="120px">
+					<vlayout width="120px"
+						sclass="search-button-area">
 
 						<space height="27px" />
 
@@ -119,7 +65,7 @@
 
 			</div>
 
-			<div sclass="batch-section">
+			<div sclass="batch-container">
 
 				<vlayout width="100%">
 
@@ -128,12 +74,12 @@
 
 					<label
 						value="Validate each batch before it enters MICR Repair."
-						sclass="batch-subtitle" />
+						sclass="section-description" />
 
 				</vlayout>
 
 				<listbox id="batchListbox" width="100%"
-					sclass="batch-listbox">
+					sclass="batch-table">
 
 					<listhead>
 
@@ -148,13 +94,9 @@
 						<listheader label="Action" width="20%" />
 
 					</listhead>
-
 				</listbox>
-
 			</div>
-
 		</vlayout>
-
 	</window>
-
 </zk>
+
