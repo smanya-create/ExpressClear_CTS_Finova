@@ -325,19 +325,13 @@ InwardBatch batch = (InwardBatch) item.getValue();
 Messagebox.show("Opening MICR Repair for batch " + batch.getInwardBatchId(), "MICR Repair", Messagebox.OK,
 Messagebox.INFORMATION);
 }
-
 private void setStatusStyle(Label label, String status) {
 
 if ("Validated".equalsIgnoreCase(status)) {
-
 label.setSclass("status-validated");
-
 } else if ("Validation Failed".equalsIgnoreCase(status)) {
-
 label.setSclass("status-failed");
-
 } else {
-
 label.setSclass("status-pending");
 }
 }
