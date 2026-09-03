@@ -1,17 +1,10 @@
 
 
 /* ================= PAGE ================= */
-
 .verification-page {
-    width: 100%;
-
-    padding: 14px 22px 8px 22px;
-
-    box-sizing: border-box;
-
-    font-family: Arial, sans-serif;
+    background: #EAF6FF !important;
+    padding: 10px 18px;
 }
-
 
 /* ================= BREADCRUMB ================= */
 
@@ -422,10 +415,11 @@
 
 
 .cheque-verification-card {
-    height: 343px;
-    max-height: 343px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    background: #FFFFFF !important;
+}
+
+.cbs-validation-box {
+    background: #EEF7FF !important;
 }
 .cheque-verification-card {
     background: #EAF6FF;
@@ -506,7 +500,7 @@
 .cbs-validation-btn {
     background: #1D477D;
 
-    color: #FFFFFF;
+    
 
     border: 1px solid #1D477D;
 
@@ -548,8 +542,6 @@
 }
 
 
-/* ================= ACTION BUTTON ================= */
-
 .verification-action-btn {
     height: 34px;
 
@@ -563,7 +555,6 @@
 }
 
 
-/* ================= ACCEPT ================= */
 
 .accept-action-btn {
     background: #16834B;
@@ -768,4 +759,91 @@
 .center {
     background: #EAF6FF;
     padding: 0;
+}
+
+/* =========================================
+   FRONT / BACK CHEQUE SIDE BUTTONS
+   ========================================= */
+
+.cheque-side-buttons {
+    margin-left: 10px;
+    spacing: 5px;
+}
+
+.cheque-side-buttons .z-button.cheque-side-btn {
+    width: 55px !important;
+    height: 28px !important;
+
+    min-width: 55px !important;
+    min-height: 28px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    background: #0B2344 !important;
+    background-image: none !important;
+
+    border: 1px solid #0B2344 !important;
+    border-radius: 4px !important;
+
+    color: #FFFFFF !important;
+
+    font-size: 11px !important;
+    font-weight: 500 !important;
+
+    line-height: 26px !important;
+    box-shadow: none !important;
+}
+
+/* Hover */
+.cheque-side-buttons .z-button.cheque-side-btn:hover {
+    background: #12345F !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+}
+
+/* Selected button */
+.cheque-side-buttons .z-button.cheque-side-active {
+    background: #12345F !important;
+    background-image: none !important;
+    border-color: #12345F !important;
+    color: #FFFFFF !important;
+}
+
+/* Pressed */
+.cheque-side-buttons .z-button.cheque-side-btn:active {
+    background: #08203D !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+}
+
+/* =========================================
+   CHECKER VERIFICATION PAGE BACKGROUND
+   ========================================= */
+
+.verification-page-container {
+    background: #EAF6FF !important;
+}
+
+.verification-page {
+    background: #EAF6FF !important;
+}
+
+
+/* =========================================
+   RIGHT SIDE CHEQUE VERIFICATION CARD
+   ========================================= */
+
+.cheque-verification-card {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+
+/* Keep the inside of the verification card white */
+.cheque-verification-card .verification-section {
+    background: #FFFFFF !important;
+}
+
+.cheque-verification-card .verification-header-row {
+    background: #FFFFFF !important;
 }
