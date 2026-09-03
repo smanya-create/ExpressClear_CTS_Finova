@@ -65,7 +65,6 @@ public class InwardMakerCompletionController extends GenericForwardComposer<Comp
     private Button btnTabRejected;
 
     // Action Buttons
-    private Button btnBackToReview;
     private Button btnSaveAndExit;
     private Button btnSubmitToChecker;
 
@@ -305,10 +304,6 @@ public class InwardMakerCompletionController extends GenericForwardComposer<Comp
         if (activeBtn != null) {
             activeBtn.setStyle("font-size: 11px; padding: 5px 14px; border-radius: 4px; border: 1px solid #2563eb; background: #eff6ff; color: #2563eb; font-weight: 700; cursor: pointer;");
         }
-    }
-
-    public void onClick$btnBackToReview() {
-        Executions.sendRedirect("/inward/maker/data-entry/data-entry.zul?batchId=" + currentBatchId);
     }
 
     public void onClick$btnSaveAndExit() {
