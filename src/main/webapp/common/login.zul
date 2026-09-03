@@ -32,8 +32,7 @@
                     <label value="USERNAME" sclass="field-label"/>
                     <textbox id="txtUsername" placeholder="Enter your username" 
                              constraint="no empty: Username is required."
-                             sclass="input-field" hflex="1" height="42px"
-                             onOK="$composer.onClickSignIn()"/>
+                             sclass="input-field" hflex="1" height="42px" />
                 </vlayout>
 
                 <!-- Password Field -->
@@ -43,8 +42,7 @@
                         <textbox id="txtPassword" type="password" placeholder="Enter your password" 
                                  constraint="no empty: Password is required."
                                  sclass="input-field" hflex="1" height="42px"
-                                 style="padding-right: 42px; box-sizing: border-box;"
-                                 onOK="$composer.onClickSignIn()"/>
+                                 style="padding-right: 42px; box-sizing: border-box;" />
                         <button id="btnTogglePassword" 
                                 iconSclass="z-icon-eye"
                                 onClick="$composer.onTogglePasswordVisibility()"
