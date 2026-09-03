@@ -80,45 +80,26 @@ public class AuditServiceImpl implements AuditService {
         }
     }
 
-    @Override
-    public List<AuditLog> searchAuditLogs(Date fromDate, Date toDate, String module, String action, String query) {
-        List<AuditLog> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM audit_logs WHERE 1=1 ");
+   
+
+	@Override
+	public List<AuditLog> searchAuditLogs(Date fromDate, Date toDate, String module, String action, String query,
+			int offset, int limit) {
+		// TODO Auto-generated method stub
+		List<AuditLog> list = new ArrayList<>();
         List<Object> params = new ArrayList<>();
+        String whereClause = buildWhereClause(fromDate, toDate, module, action, query, params);
 
-        if (fromDate != null) {
-            sql.append("AND timestamp >= ? ");
-            params.add(new Timestamp(fromDate.getTime()));
-        }
-        if (toDate != null) {
-            sql.append("AND timestamp <= ? ");
-            // Set end of day
-            params.add(new Timestamp(toDate.getTime() + 86399000L));
-        }
-        if (module != null && !"ALL".equalsIgnoreCase(module) && !module.trim().isEmpty()) {
-            sql.append("AND LOWER(module) = ? ");
-            params.add(module.trim().toLowerCase());
-        }
-        if (action != null && !"ALL".equalsIgnoreCase(action) && !action.trim().isEmpty()) {
-            sql.append("AND LOWER(action) = ? ");
-            params.add(action.trim().toLowerCase());
-        }
-        if (query != null && !query.trim().isEmpty()) {
-            sql.append("AND (LOWER(user_id) LIKE ? OR LOWER(username) LIKE ? OR LOWER(details) LIKE ?) ");
-            String q = "%" + query.trim().toLowerCase() + "%";
-            params.add(q);
-            params.add(q);
-            params.add(q);
-        }
-
-        sql.append("ORDER BY timestamp DESC LIMIT 200");
+        String sql = "SELECT * FROM audit_logs " + whereClause + " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
+            ps.setInt(params.size() + 1, limit);
+            ps.setInt(params.size() + 2, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -140,5 +121,61 @@ public class AuditServiceImpl implements AuditService {
             auditLogger.error("Failed to query audit logs", e);
         }
         return list;
-    }
+	}
+
+	private String buildWhereClause(Date fromDate, Date toDate, String module, String action, String query,
+			List<Object> params) {
+		// TODO Auto-generated method stub
+		StringBuilder where = new StringBuilder(" WHERE 1=1 ");
+
+        if (fromDate != null) {
+            where.append("AND timestamp >= ? ");
+            params.add(new Timestamp(fromDate.getTime()));
+        }
+        if (toDate != null) {
+            where.append("AND timestamp <= ? ");
+            params.add(new Timestamp(toDate.getTime() + 86399000L));
+        }
+        if (module != null && !"ALL".equalsIgnoreCase(module) && !module.trim().isEmpty()) {
+            where.append("AND LOWER(module) = ? ");
+            params.add(module.trim().toLowerCase());
+        }
+        if (action != null && !"ALL".equalsIgnoreCase(action) && !action.trim().isEmpty()) {
+            where.append("AND LOWER(action) = ? ");
+            params.add(action.trim().toLowerCase());
+        }
+        if (query != null && !query.trim().isEmpty()) {
+            where.append("AND (LOWER(user_id) LIKE ? OR LOWER(username) LIKE ? OR LOWER(details) LIKE ?) ");
+            String q = "%" + query.trim().toLowerCase() + "%";
+            params.add(q);
+            params.add(q);
+            params.add(q);
+        }
+        return where.toString();
+	}
+
+	@Override
+	public int countAuditLogs(Date fromDate, Date toDate, String module, String action, String query) {
+		// TODO Auto-generated method stub
+		List<Object> params = new ArrayList<>();
+        String whereClause = buildWhereClause(fromDate, toDate, module, action, query, params);
+        String sql = "SELECT COUNT(*) FROM audit_logs " + whereClause;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            auditLogger.error("Failed to count audit logs", e);
+        }
+		return 0;
+	}
 }

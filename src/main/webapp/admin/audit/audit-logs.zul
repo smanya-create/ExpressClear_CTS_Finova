@@ -78,6 +78,9 @@
                             <!-- Populated dynamically by AuditLogsController -->
                         </rows>
                     </grid>
+                    <hlayout hflex="1" style="justify-content: flex-end; padding-top: 8px;">
+                        <paging id="auditPaging" pageSize="15" detailed="true"/>
+                    </hlayout>
                 </vlayout>
 
             </vlayout>
