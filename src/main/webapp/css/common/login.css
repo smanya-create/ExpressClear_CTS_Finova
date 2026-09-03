@@ -23,6 +23,7 @@
     border-radius: 0 6px 6px 0 !important;
     background: #ffffff !important;
 }
+
 body { 
     background-color: #eef4f9;
     font-family: 'Inter', sans-serif; 
@@ -52,13 +53,14 @@ body {
     margin-right: 12px;
 }
 
+/* Card repositioned lower from the top header */
 .login-card { 
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
     padding: 40px;
     width: 420px;
-    margin: auto;
+    margin: 40px auto; /* 40px top and bottom creates breathing space */
 }
 
 .field-label { 
@@ -77,18 +79,38 @@ body {
     font-size: 14px;
 }
 
-.btn-signin { 
-    background-color: #1a365d;
-    color: white;
+/* Dark blue styling mapped to both btn-primary and btn-signin */
+.btn-primary,
+.btn-signin,
+.z-button.btn-primary,
+.z-button.btn-signin { 
+    background-color: #0d2342 !important;
+    background-image: none !important;
+    border: 1px solid #0d2342 !important;
+    color: #ffffff !important;
     font-weight: bold;
     font-size: 14px;
     border-radius: 6px;
-    border: none;
     cursor: pointer;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease;
 }
 
-.btn-signin:hover {
-    background-color: #0d2342;
+.btn-primary:hover,
+.btn-signin:hover,
+.z-button.btn-primary:hover,
+.z-button.btn-signin:hover {
+    background-color: #1a365d !important;
+    border-color: #1a365d !important;
+    color: #ffffff !important;
+}s
+
+.btn-primary:active,
+.btn-signin:active,
+.z-button.btn-primary:active,
+.z-button.btn-signin:active {
+    background-color: #08172c !important;
+    border-color: #08172c !important;
 }
 
 .footer-text {

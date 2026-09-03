@@ -19,7 +19,7 @@
 
     <!-- Login Card Container -->
     <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center;padding: 40px 0;">
-        <vlayout sclass="login-card" spacing="0" style="margin-top: 20px;">
+        <vlayout sclass="login-card" spacing="0" style="margin-top: 50px !important; margin-bottom: 40px !important;">
             
             <vlayout spacing="6px" style="text-align: center; margin-bottom: 30px;">
                 <label value="Welcome back" style="font-size: 26px; font-weight: bold; color: #1a202c; display: block;"/>
@@ -60,7 +60,7 @@
                 <separator height="10px"/>
 
                 <!-- Sign In Button -->
-                <button id="btnSignIn" label="Sign In" hflex="1" height="42px" sclass="btn-primary" />
+                <button id="btnSignIn" label="Sign In" hflex="1" height="42px" style="background: #0d2342 !important; background-color: #0d2342 !important; border: 1px solid #0d2342 !important; color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; border-radius: 6px !important; box-shadow: none !important;" />
 
                 <separator height="10px"/>
 
