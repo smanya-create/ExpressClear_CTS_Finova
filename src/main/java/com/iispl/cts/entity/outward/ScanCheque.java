@@ -27,16 +27,18 @@ public class ScanCheque implements Serializable {
     private String cityCode;
     private String bankCode;
     private String branchCode;
+    private String chequeImageFront;
+    private String chequeImageBack;
 
     public ScanCheque() {
     }
 
-    
+	
 
 	public ScanCheque(String scannedChequeId, String scannedBatchId, String chequeNumber, String micrCode,
 			String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber,
 			BigDecimal chequeAmount, Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt,
-			String cityCode, String bankCode, String branchCode) {
+			String cityCode, String bankCode, String branchCode, String chequeImageFront, String chequeImageBack) {
 		super();
 		this.scannedChequeId = scannedChequeId;
 		this.scannedBatchId = scannedBatchId;
@@ -54,9 +56,35 @@ public class ScanCheque implements Serializable {
 		this.cityCode = cityCode;
 		this.bankCode = bankCode;
 		this.branchCode = branchCode;
+		this.chequeImageFront = chequeImageFront;
+		this.chequeImageBack = chequeImageBack;
 	}
 
-	
+
+
+	public String getChequeImageFront() {
+		return chequeImageFront;
+	}
+
+
+
+	public void setChequeImageFront(String chequeImageFront) {
+		this.chequeImageFront = chequeImageFront;
+	}
+
+
+
+	public String getChequeImageBack() {
+		return chequeImageBack;
+	}
+
+
+
+	public void setChequeImageBack(String chequeImageBack) {
+		this.chequeImageBack = chequeImageBack;
+	}
+
+
 
 	public String getCityCode() {
 		return cityCode;
