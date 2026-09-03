@@ -21,15 +21,15 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.entity.RejectedResaon;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
-import com.iispl.cts.entity.SendBackReason;
+import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
-import com.iispl.cts.service.SendBackReasonService;
+import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
-import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
 
 public class InwardDataEntryController extends GenericForwardComposer<Component> {
 
@@ -38,7 +38,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     // Database Services
     private final InwardBatchService batchService = new InwardBatchServiceImpl();
     private final InwardChequeService chequeService = new InwardChequeServiceImpl();
-    private final SendBackReasonService sendBackReasonService = new SendBackReasonServiceImpl();
+    private final RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 
     // Top Metadata Card Labels
     private Label lblBatchId;
@@ -86,7 +86,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     private Button btnCancelModalReject;
     private Button btnConfirmModalReject;
 
-    // Completion Confirmation Modal Controls
+    // Move to Maker Completion Modal Controls
     private Div winCompletionConfirmModal;
     private Label lblModalTotal;
     private Label lblModalAccepted;
@@ -122,21 +122,21 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             currentBatchId = paramBatch.trim();
         }
 
-        // Fast initial load
+        // Fast initial load: loads batch and cheque without hitting dropdown reference tables
         loadBatch(currentBatchId);
     }
 
-    private void populateSendBackReasons() {
+    private void populateRejectedReasons() {
         if (cmbModalRejectionReason == null) return;
         cmbModalRejectionReason.getChildren().clear();
 
-        List<SendBackReason> reasons = sendBackReasonService.getAllSendBackReasons();
+        List<RejectedResaon> reasons = rejectedReasonService.getAllRejectedReasons();
         if (reasons != null) {
-            for (SendBackReason r : reasons) {
-                String label = "[" + r.getReasonCode() + "] " + r.getReasonName();
+            for (RejectedResaon r : reasons) {
+                String label = "[" + r.getRejectedReasonCode() + "] " + r.getRejectedReasonName();
                 Comboitem item = new Comboitem(label);
-                item.setValue(r.getReasonCode());
-                item.setTooltiptext(r.getReasonDescription());
+                item.setValue(r.getRejectedReasonCode());
+                item.setTooltiptext(r.getRejectedReasonDescription());
                 cmbModalRejectionReason.appendChild(item);
             }
         }
@@ -236,6 +236,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             lblProgressText.setValue(resolvedCount + "/" + total + " (" + percentage + "%)");
         }
 
+        // Reveal the "Proceed with Maker Completion" button once all items in the batch are decided
         boolean allResolved = (resolvedCount == total);
         if (btnProceedToCompletion != null) {
             btnProceedToCompletion.setVisible(allResolved);
@@ -396,9 +397,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     public void onClick$btnRequestRejection() {
         if (activeQueue == null || activeQueue.isEmpty()) return;
 
-        // Lazy-load database dropdown only on first click
+        // Lazy-load rejected reasons from database on first open
         if (cmbModalRejectionReason != null && cmbModalRejectionReason.getItemCount() == 0) {
-            populateSendBackReasons();
+            populateRejectedReasons();
         }
 
         if (cmbModalRejectionReason != null) {
@@ -469,10 +470,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             winCompletionConfirmModal.setVisible(false);
         }
 
-        // 1. Transition batch status to remove it from Data Entry
+        // 1. Transition batch status to remove it from Data Entry queue
         batchService.updateBatchStatus(currentBatchId, "READY_FOR_COMPLETION");
 
-        // 2. Redirect to Maker Completion
+        // 2. Redirect to Maker Completion module
         Executions.sendRedirect("/inward/maker/maker-completion.zul?batchId=" + currentBatchId);
     }
 

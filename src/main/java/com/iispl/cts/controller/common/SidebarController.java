@@ -288,7 +288,15 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToMakerCompletion() {
-		Executions.sendRedirect("/inward-maker/completion.zul");
+		Component root = sidebarComponent.getPage().getFirstRoot();
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+
+		if (mainContentArea instanceof Include) {
+			Include include = (Include) mainContentArea;
+			include.setSrc("/inward/maker/submission/batch-submission.zul");
+		} else {
+			Executions.sendRedirect("/inward/maker/submission/batch-submission.zul");
+		}
 	}
 
 	public void navToInwardUnprocessedQueue() {
