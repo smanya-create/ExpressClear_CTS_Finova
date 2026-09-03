@@ -39,4 +39,6 @@ public interface InwardChequeDAO {
   
     boolean updateCheque(InwardCheque cheque);
     
+    
+    
 }

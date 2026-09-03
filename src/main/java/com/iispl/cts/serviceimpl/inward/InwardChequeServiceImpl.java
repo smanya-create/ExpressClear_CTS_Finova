@@ -47,4 +47,6 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	public InwardChequeImage getFrontImage(String inwardChequeId) {
 		return InwardChequeImageDAOImpl.getInstance().findFrontImageByChequeId(inwardChequeId);
 	}
+
+	
 }
