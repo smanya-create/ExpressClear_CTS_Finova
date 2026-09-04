@@ -25,9 +25,10 @@ public class InwardCheque implements Serializable {
     private String cityCode;
     private String bankCode;
     private String branchCode;
-    
+    private String transactionCode;
     private String chequeImageFront;
     private String chequeImageBack;
+    private Integer itemSequenceNumber;
 
     public InwardCheque() {
     }
@@ -37,7 +38,7 @@ public class InwardCheque implements Serializable {
     public InwardCheque(String inwardChequeId, String inwardBatchId, String chequeNumber, String micrCode,
 			String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber,
 			BigDecimal chequeAmount, Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt,
-			String cityCode, String bankCode, String branchCode, String chequeImageFront, String chequeImageBack) {
+			String cityCode, String bankCode, String branchCode, String chequeImageFront, String chequeImageBack,String transactionCode) {
 		super();
 		this.inwardChequeId = inwardChequeId;
 		this.inwardBatchId = inwardBatchId;
@@ -57,9 +58,24 @@ public class InwardCheque implements Serializable {
 		this.branchCode = branchCode;
 		this.chequeImageFront = chequeImageFront;
 		this.chequeImageBack = chequeImageBack;
+		this.transactionCode = transactionCode;
 	}
 
+    public Integer getItemSequenceNumber() {
+        return itemSequenceNumber;
+    }
 
+    public void setItemSequenceNumber(Integer itemSequenceNumber) {
+        this.itemSequenceNumber = itemSequenceNumber;
+    }
+
+    public String getTransactionCode() {
+        return transactionCode;
+    }
+
+    public void setTransactionCode(String transactionCode) {
+        this.transactionCode = transactionCode;
+    }
 
 	public String getCityCode() {
 		return cityCode;
