@@ -3,17 +3,12 @@ package com.iispl.cts.controller.common;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
@@ -46,18 +41,9 @@ public class LoginController extends GenericForwardComposer<Component> {
     private final UserService userService = UserServiceImpl.getInstance();
     private final RoleService roleService = RoleServiceImpl.getInstance();
 
-    // Reusable thread pool for login execution
-    private static final ExecutorService loginExecutor = Executors.newFixedThreadPool(4);
-
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-
-        Desktop desktop = comp.getDesktop();
-        if (desktop != null && !desktop.isServerPushEnabled()) {
-            desktop.enableServerPush(true);
-        }
-
         populateRolesDropdown();
     }
 
@@ -131,141 +117,101 @@ public class LoginController extends GenericForwardComposer<Component> {
 
         final String selectedRoleId = selectedItem.getValue() != null ? selectedItem.getValue().toString().trim() : "";
         final String selectedRoleName = selectedItem.getLabel() != null ? selectedItem.getLabel().trim() : "";
+        System.out.println("========== LOGIN PERFORMANCE BENCHMARK ==========");
+        long tStart = System.currentTimeMillis();
+        // 1. Authenticate user
+        long t0 = System.currentTimeMillis();
+        User authenticatedUser = userService.authenticate(username, password);
+        long t1 = System.currentTimeMillis();
+        System.out.println("LOG: BCrypt + User Lookup took: " + (t1 - t0) + " ms");
 
-        // 1. Immediate UI Feedback: Disable button and show busy indicator
-        btnSignIn.setDisabled(true);
-        btnSignIn.setLabel("Authenticating...");
-        Clients.showBusy("Authenticating user credentials...");
+        if (authenticatedUser == null) {
+            AuditServiceImpl.getInstance().log("AUTH", "LOGIN_FAILED",
+                    "Invalid username or password attempt for username: " + username, "FAILED");
+            Messagebox.show("Invalid username or password.", "Authentication Failed", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
 
-        // 2. Capture ZK Desktop & Session on the UI Thread BEFORE dispatching
-        final Desktop desktop = self.getDesktop();
-        final Session session = Sessions.getCurrent();
+        // 2. Fetch assigned role & permissions
+        String userRoleId = authenticatedUser.getRoleId() != null ? authenticatedUser.getRoleId().trim() : "";
+        Role userRole = roleService.getRoleById(userRoleId);
+        long t2 = System.currentTimeMillis();
+        System.out.println("LOG: Role Lookup took: " + (t2 - t1) + " ms");
+        String userPermissions = (userRole != null && userRole.getPermissions() != null) ? userRole.getPermissions().trim() : "";
 
-        // 3. Heavy logic executed in background thread
-        loginExecutor.submit(() -> {
-            User authenticatedUser = null;
-            Role userRole = null;
-            String computedDbRoleName = "";
-            String userPermissions = "";
-            int errorType = 0; // 0 = Success, 1 = Invalid Creds, 2 = Role Mismatch, 3 = Exception
+        String computedDbRoleName;
+        if (userRole != null && userRole.getRoleName() != null) {
+            computedDbRoleName = userRole.getRoleName().trim();
+        } else {
+            if ("ROL1001".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Admin";
+            else if ("ROL1002".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Maker Outward";
+            else if ("ROL1003".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Checker Outward";
+            else if ("ROL1004".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Maker Inward";
+            else if ("ROL1005".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Checker Inward";
+            else computedDbRoleName = selectedRoleName;
+        }
 
-            try {
-                // Heavy DB check: BCrypt / Credential validation
-                authenticatedUser = userService.authenticate(username, password);
+        // 3. Verify selected role against database role
+        boolean isRoleMatch = userRoleId.equalsIgnoreCase(selectedRoleId) ||
+                              computedDbRoleName.equalsIgnoreCase(selectedRoleName) ||
+                              computedDbRoleName.replace(" ", "_").equalsIgnoreCase(selectedRoleId) ||
+                              selectedRoleName.equalsIgnoreCase(computedDbRoleName);
 
-                if (authenticatedUser == null) {
-                    AuditServiceImpl.getInstance().log("AUTH", "LOGIN_FAILED",
-                            "Invalid username or password attempt for username: " + username, "FAILED");
-                    errorType = 1;
-                } else {
-                    String userRoleId = authenticatedUser.getRoleId() != null ? authenticatedUser.getRoleId().trim() : "";
-                    
-                    // Heavy DB check: Role and permissions lookup
-                    userRole = roleService.getRoleById(userRoleId);
-                    userPermissions = (userRole != null && userRole.getPermissions() != null) 
-                            ? userRole.getPermissions().trim() : "";
+        if (!isRoleMatch) {
+            AuditServiceImpl.getInstance().log("AUTH", "LOGIN_ROLE_MISMATCH",
+                    "Access denied for user " + username + ": Assigned role (" + computedDbRoleName 
+                    + ") does not match selected role (" + selectedRoleName + ")", "FAILED");
+            Messagebox.show("Access Denied: Assigned role (" + computedDbRoleName +
+                            ") does not match selected role (" + selectedRoleName + ").",
+                            "Role Mismatch", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
 
-                    if (userRole != null && userRole.getRoleName() != null) {
-                        computedDbRoleName = userRole.getRoleName().trim();
-                    } else {
-                        if ("ROL1001".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Admin";
-                        else if ("ROL1002".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Maker Outward";
-                        else if ("ROL1003".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Checker Outward";
-                        else if ("ROL1004".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Maker Inward";
-                        else if ("ROL1005".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Checker Inward";
-                        else computedDbRoleName = selectedRoleName;
-                    }
+        // 4. Bind Session Attributes
+        Session session = Sessions.getCurrent();
+        String normalizedRole = computedDbRoleName.toUpperCase().replace(" ", "_");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 
-                    // Role verification
-                    boolean isRoleMatch = userRoleId.equalsIgnoreCase(selectedRoleId) ||
-                                          computedDbRoleName.equalsIgnoreCase(selectedRoleName) ||
-                                          computedDbRoleName.replace(" ", "_").equalsIgnoreCase(selectedRoleId) ||
-                                          selectedRoleName.equalsIgnoreCase(computedDbRoleName);
+        session.setAttribute("LOGGED_USER", authenticatedUser.getFullName());
+        session.setAttribute("USER_ID", authenticatedUser.getUserId());
+        session.setAttribute("USERNAME", authenticatedUser.getUsername());
+        session.setAttribute("CTS_USERNAME", authenticatedUser.getUsername());
+        session.setAttribute("USER_ROLE", normalizedRole);
+        session.setAttribute("CTS_USER_ROLE", normalizedRole);
+        session.setAttribute("ROLE_ID", authenticatedUser.getRoleId());
+        session.setAttribute("ROLE_NAME", computedDbRoleName);
+        session.setAttribute("USER_OBJ", authenticatedUser);
+        session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
+        session.setAttribute("USER_PERMISSIONS", userPermissions);
 
-                    if (!isRoleMatch) {
-                        AuditServiceImpl.getInstance().log("AUTH", "LOGIN_ROLE_MISMATCH",
-                                "Access denied for user " + username + ": Assigned role (" + computedDbRoleName 
-                                + ") does not match selected role (" + selectedRoleName + ")", "FAILED");
-                        errorType = 2;
-                    }
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                errorType = 3;
-            }
+        // Register user in active user registry
+       
 
-            final int finalStatus = errorType;
-            final User finalUser = authenticatedUser;
-            final String finalDbRoleName = computedDbRoleName;
-            final String finalPermissions = userPermissions;
+        // Audit success log
+        AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
+                "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName, "SUCCESS");
 
-            // 4. Safely return back to the ZK UI Thread
-            Executions.schedule(desktop, new EventListener<Event>() {
-                @Override
-                public void onEvent(Event event) {
-                    // Clear busy state and restore button
-                    Clients.clearBusy();
-                    btnSignIn.setDisabled(false);
-                    btnSignIn.setLabel("Sign In");
+        // Audit success log
+        AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
+                "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName, "SUCCESS");
+        long t3 = System.currentTimeMillis();
+        System.out.println("3. Session Bind + Audit Trigger: " + (t3 - t2) + " ms");
+        System.out.println("TOTAL LOGIN HANDSHAKE: " + (t3 - tStart) + " ms");
 
-                    if (finalStatus == 1) {
-                        Messagebox.show("Invalid username or password.", "Authentication Failed", Messagebox.OK, Messagebox.ERROR);
-                        return;
-                    }
-
-                    if (finalStatus == 2) {
-                        Messagebox.show("Access Denied: Assigned role (" + finalDbRoleName +
-                                        ") does not match selected role (" + selectedRoleName + ").",
-                                        "Role Mismatch", Messagebox.OK, Messagebox.EXCLAMATION);
-                        return;
-                    }
-
-                    if (finalStatus == 3 || finalUser == null) {
-                        Messagebox.show("A system error occurred during authentication. Please try again.", "Error", Messagebox.OK, Messagebox.ERROR);
-                        return;
-                    }
-
-                    // Success: Bind session attributes
-                    String normalizedRole = finalDbRoleName.toUpperCase().replace(" ", "_");
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-
-                    session.setAttribute("LOGGED_USER", finalUser.getFullName());
-                    session.setAttribute("USER_ID", finalUser.getUserId());
-                    session.setAttribute("USERNAME", finalUser.getUsername());
-                    session.setAttribute("CTS_USERNAME", finalUser.getUsername());
-                    session.setAttribute("USER_ROLE", normalizedRole);
-                    session.setAttribute("CTS_USER_ROLE", normalizedRole);
-                    session.setAttribute("ROLE_ID", finalUser.getRoleId());
-                    session.setAttribute("ROLE_NAME", finalDbRoleName);
-                    session.setAttribute("USER_OBJ", finalUser);
-                    session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
-                    session.setAttribute("USER_PERMISSIONS", finalPermissions);
-                    
-                 // Register user in the real-time active user registry
-                    ActiveUserManager.userLoggedIn(finalUser.getUserId());
-
-                    // Audit success log
-                    AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
-                            "User " + finalUser.getUsername() + " logged in successfully with role " + finalDbRoleName, "SUCCESS");
-
-                    // Navigate user by role
-                    String userRoleId = finalUser.getRoleId() != null ? finalUser.getRoleId().trim() : "";
-                    if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {
-                        Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
-                    } else if ("ROL1002".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {
-                        Executions.sendRedirect("/outward/maker/maker-module.zul");
-                    } else if ("ROL1003".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
-                        Executions.sendRedirect("/outward/checker/dashboard.zul");
-                    } else if ("ROL1004".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {
-                        Executions.sendRedirect("/inward/maker/index.zul");
-                    } else if ("ROL1005".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
-                        Executions.sendRedirect("/inward/checker/dashboard.zul");
-                    } else {
-                        Messagebox.show("No dashboard mapped for role: " + finalDbRoleName + " (ID: " + userRoleId + ")",
-                                        "Navigation Error", Messagebox.OK, Messagebox.ERROR);
-                    }
-                }
-            }, new Event("onLoginFinished"));
-        });
+        // 5. Navigate user directly to dashboard
+        if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {
+            Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
+        } else if ("ROL1002".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {
+            Executions.sendRedirect("/outward/maker/maker-module.zul");
+        } else if ("ROL1003".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
+            Executions.sendRedirect("/outward/checker/dashboard.zul");
+        } else if ("ROL1004".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {
+            Executions.sendRedirect("/inward/maker/index.zul");
+        } else if ("ROL1005".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
+            Executions.sendRedirect("/inward/checker/dashboard.zul");
+        } else {
+            Messagebox.show("No dashboard mapped for role: " + computedDbRoleName + " (ID: " + userRoleId + ")",
+                            "Navigation Error", Messagebox.OK, Messagebox.ERROR);
+        }
     }
 }

@@ -12,5 +12,6 @@ public interface OutwardBatchService{
 	List<OutwardBatch> searchBatches(String batchId, String status);
 
 	OutwardBatch getBatchById(String outwardBatchId);
+	List<OutwardBatch> getPendingBatches();
 }
 

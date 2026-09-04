@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.iispl.cts.dao.inward.InwardBatchDAO;
+import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 
 public class InwardBatchDAOImpl implements InwardBatchDAO {
@@ -28,7 +29,7 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
         batchTable.add(new InwardBatch(
             "BAT1001", 
             "REF-BATCH-2026-001", 
-            3, 
+            2, 
             new BigDecimal("3775000.00"), 
             "Processing", 
             "USR1001", 
@@ -268,8 +269,49 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
         }
     
 }
-	
-	
-	
+
+	@Override
+	public List<DashboardSummaryDTO> getDashboardBatches() {
+
+	    String dashboardSummaryQuery =
+	            "SELECT ib.inward_batch_id, ib.actual_cheque_count AS total_cheques, "
+	          + "COUNT(CASE WHEN ic.cheque_status = 'maker_approved' THEN 1 END) AS normal_cheques, "
+	          + "COUNT(CASE WHEN ic.cheque_status = 'rejection_request' THEN 1 END) AS rejected_cheques "
+	          + "FROM inward_batch ib "
+	          + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
+	          + "WHERE ib.batch_status = 'submit_to_ichecker' "
+	          + "GROUP BY ib.inward_batch_id "
+	          + "ORDER BY ib.inward_batch_id;";
+
+	    List<DashboardSummaryDTO> batchList = new ArrayList<>();
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(dashboardSummaryQuery);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        if (conn != null) {
+	            System.out.println("connection successful");
+	        }
+
+	        while (rs.next()) {
+
+	            DashboardSummaryDTO summary = new DashboardSummaryDTO();
+
+	            summary.setBatchId(rs.getString("inward_batch_id"));
+	            summary.setTotalCheques(rs.getInt("total_cheques"));
+	            summary.setRejectionRequestCheques(rs.getInt("rejected_cheques"));
+	            summary.setMakerApprovedCheques(rs.getInt("normal_cheques"));
+
+	            batchList.add(summary);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    System.out.println("Dashboard batches found: " + batchList.size());
+
+	    return batchList;
+	}
 }
 

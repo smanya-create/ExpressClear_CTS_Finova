@@ -27,45 +27,57 @@ public class OutwardCheque implements Serializable {
     private String cityCode;
     private String bankCode;
     private String branchCode;
+    
+    private String chequeImageFront;
+    private String chequeImageBack;
 
     public OutwardCheque() {
     }
+    
+    
 
-    public OutwardCheque(
-            String outwardChequeId,
-            String outwardBatchId,
-            String chequeNumber,
-            String micrCode,
-            String draweeName,
-            String draweeAccountNumber,
-            String payeeName,
-            String payeeAccountNumber,
-            BigDecimal chequeAmount,
-            Date chequeDate,
-            String chequeStatus,
-            String accountId,
-            Timestamp createdAt,
-            String cityCode,
-            String bankCode,
-            String branchCode) {
+    public OutwardCheque(String outwardChequeId, String outwardBatchId, String chequeNumber, String micrCode,
+			String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber,
+			BigDecimal chequeAmount, Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt,
+			String cityCode, String bankCode, String branchCode, String chequeImageFront, String chequeImageBack) {
+		super();
+		this.outwardChequeId = outwardChequeId;
+		this.outwardBatchId = outwardBatchId;
+		this.chequeNumber = chequeNumber;
+		this.micrCode = micrCode;
+		this.draweeName = draweeName;
+		this.draweeAccountNumber = draweeAccountNumber;
+		this.payeeName = payeeName;
+		this.payeeAccountNumber = payeeAccountNumber;
+		this.chequeAmount = chequeAmount;
+		this.chequeDate = chequeDate;
+		this.chequeStatus = chequeStatus;
+		this.accountId = accountId;
+		this.createdAt = createdAt;
+		this.cityCode = cityCode;
+		this.bankCode = bankCode;
+		this.branchCode = branchCode;
+		this.chequeImageFront = chequeImageFront;
+		this.chequeImageBack = chequeImageBack;
+	}
 
-        this.outwardChequeId = outwardChequeId;
-        this.outwardBatchId = outwardBatchId;
-        this.chequeNumber = chequeNumber;
-        this.micrCode = micrCode;
-        this.draweeName = draweeName;
-        this.draweeAccountNumber = draweeAccountNumber;
-        this.payeeName = payeeName;
-        this.payeeAccountNumber = payeeAccountNumber;
-        this.chequeAmount = chequeAmount;
-        this.chequeDate = chequeDate;
-        this.chequeStatus = chequeStatus;
-        this.accountId = accountId;
-        this.createdAt = createdAt;
-        this.cityCode = cityCode;
-        this.bankCode = bankCode;
-        this.branchCode = branchCode;
-    }
+
+
+	public String getChequeImageFront() {
+		return chequeImageFront;
+	}
+
+	public void setChequeImageFront(String chequeImageFront) {
+		this.chequeImageFront = chequeImageFront;
+	}
+
+	public String getChequeImageBack() {
+		return chequeImageBack;
+	}
+
+	public void setChequeImageBack(String chequeImageBack) {
+		this.chequeImageBack = chequeImageBack;
+	}
 
     public String getOutwardChequeId() {
         return outwardChequeId;

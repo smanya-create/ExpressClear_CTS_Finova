@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk xmlns:h="xhtml">
-	<zscript>
-        org.zkoss.zk.ui.Sessions.getCurrent()
-            .setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
-
-        org.zkoss.zk.ui.Sessions.getCurrent()
-            .setAttribute("CTS_USERNAME", "Alex");
-    </zscript>
 	<style src="/css/outward/checker-dashboard.css" />
 
-	<borderlayout hflex="1" vflex="1">
+	<borderlayout hflex="1" vflex="1" apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
 		<west width="265px" splittable="false" collapsible="false">
 
-			<include src="/components/sidebar.zul" role="OUTWARD_CHECKER"  activeTab="checker-dashboard" />
-
-				
-			
-
+			<include src="/components/sidebar.zul"
+				role="OUTWARD_CHECKER" activeTab="checker-dashboard" />
 		</west>
 		<center>
 
@@ -52,19 +42,10 @@
 							</div>
 							<div sclass="summary-item">
 
-								<label value="CLEARING DATE"
-									sclass="summary-label" />
-
-								<label value="21-Aug-2026"
-									sclass="summary-value" />
-
-							</div>
-							<div sclass="summary-item">
-
 								<label value="BATCHES AWAITING CHECKER"
 									sclass="summary-label" />
 
-								<label id="lblTotalBatches" 
+								<label id="lblTotalBatches"
 									sclass="summary-value" />
 
 							</div>
@@ -73,7 +54,7 @@
 								<label value="CHEQUES"
 									sclass="summary-label" />
 
-								<label id="lblTotalCheques" 
+								<label id="lblTotalCheques"
 									sclass="summary-value" />
 
 							</div>

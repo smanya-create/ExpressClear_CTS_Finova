@@ -12,37 +12,30 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
-public class OutwardBatchDAOImpl implements OutwardBatchDAO{
+public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 	@Override
 	public List<OutwardBatch> getVerifiedBatches() {
 		List<OutwardBatch> batches = new ArrayList<>();
-		 String selectSql =
-	                "SELECT outward_batch_id, "
-	                + "batch_reference_id, "
-	                + "actual_cheque_count, "
-	                + "actual_total_amount, "
-	                + "batch_status, "
-	                + "uploaded_by, "
-	                + "uploaded_at "
-	                + "FROM outward_batch "
-	                + "WHERE batch_status = ?";
-		try(Connection connection = DBConnection.getDataSource().getConnection();
-				PreparedStatement prepStmt = connection.prepareStatement(selectSql)){
-			prepStmt.setString(1,"Pending");
+		String selectSql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
+				+ "WHERE batch_status = ?";
+		try (Connection connection = DBConnection.getDataSource().getConnection();
+				PreparedStatement prepStmt = connection.prepareStatement(selectSql)) {
+			prepStmt.setString(1, "Verified");
 			ResultSet rs = prepStmt.executeQuery();
-			while(rs.next()) {
-				batches.add(new OutwardBatch(rs.getString("outward_batch_id"),rs.getString("batch_reference_id"),rs.getInt("actual_cheque_count"),rs.getBigDecimal("actual_total_amount"),rs.getString("batch_status"),rs.getString("uploaded_by"),rs.getTimestamp("uploaded_at")));
+			while (rs.next()) {
+				batches.add(new OutwardBatch(rs.getString("outward_batch_id"), rs.getString("batch_reference_id"),
+						rs.getInt("actual_cheque_count"), rs.getBigDecimal("actual_total_amount"),
+						rs.getString("batch_status"), rs.getString("uploaded_by"), rs.getTimestamp("uploaded_at")));
 			}
-			
-		}
-		catch(SQLException ex) {
+
+		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
 		}
-		
+
 		return batches;
 	}
-
 
 	@Override
 	public List<OutwardBatch> getRecentBatches() {
@@ -170,67 +163,68 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO{
 		return outwardBatch;
 	}
 
-    @Override
-    public String transferBatchFromScanToOutward(
-            Connection connection,
-            String scannedBatchId) {
+	@Override
+	public String transferBatchFromScanToOutward(Connection connection, String scannedBatchId) {
 
-        if (connection == null) {
-            throw new IllegalArgumentException(
-                    "Connection cannot be null");
-        }
+		if (connection == null) {
+			throw new IllegalArgumentException("Connection cannot be null");
+		}
 
-        if (scannedBatchId == null
-                || scannedBatchId.trim().isEmpty()) {
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 
-            throw new IllegalArgumentException(
-                    "Scanned batch ID cannot be null or empty");
-        }
+			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
+		}
 
-        String sql =
-                "INSERT INTO outward_batch ("
-                + "batch_reference_id, "
-                + "actual_cheque_count, "
-                + "actual_total_amount, "
-                + "batch_status, "
-                + "uploaded_by"
-                + ") "
-                + "SELECT "
-                + "batch_reference_id, "
-                + "actual_cheque_count, "
-                + "actual_total_amount, "
-                + "'Pending', "
-                + "uploaded_by "
-                + "FROM scan_batch "
-                + "WHERE scanned_batch_id = ? "
-                + "RETURNING outward_batch_id";
+		String sql = "INSERT INTO outward_batch (" + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by" + ") " + "SELECT " + "batch_reference_id, "
+				+ "actual_cheque_count, " + "actual_total_amount, " + "'Pending', " + "uploaded_by "
+				+ "FROM scan_batch " + "WHERE scanned_batch_id = ? " + "RETURNING outward_batch_id";
 
-        try (PreparedStatement ps =
-                     connection.prepareStatement(sql)) {
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setString(1, scannedBatchId);
+			ps.setString(1, scannedBatchId);
 
-            try (ResultSet rs =
-                         ps.executeQuery()) {
+			try (ResultSet rs = ps.executeQuery()) {
 
-                if (!rs.next()) {
+				if (!rs.next()) {
 
-                    throw new IllegalStateException(
-                            "Scan batch not found for batch ID: "
-                            + scannedBatchId);
-                }
+					throw new IllegalStateException("Scan batch not found for batch ID: " + scannedBatchId);
+				}
 
-                return rs.getString(
-                        "outward_batch_id");
-            }
+				return rs.getString("outward_batch_id");
+			}
 
-        } catch (SQLException e) {
+		} catch (SQLException e) {
 
-            throw new RuntimeException(
-                    "Failed to transfer scan batch "
-                    + scannedBatchId
-                    + " to outward batch",
-                    e);
-        }
-    }
+			throw new RuntimeException("Failed to transfer scan batch " + scannedBatchId + " to outward batch", e);
+		}
+	}
+
+	@Override
+	public List<OutwardBatch> getPendingBatches() {
+
+		List<OutwardBatch> batches = new ArrayList<>();
+
+		String sql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
+				+ "WHERE batch_status = ? " + "ORDER BY uploaded_at DESC";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement prepStmt = connection.prepareStatement(sql);
+				) {
+			prepStmt.setString(1, "Pending");
+			ResultSet resultSet = prepStmt.executeQuery();
+
+			while (resultSet.next()) {
+
+				batches.add(mapOutwardBatch(resultSet));
+			}
+
+		} catch (Exception exception) {
+
+			throw new RuntimeException("Unable to fetch pending batches  ", exception);
+		}
+
+		return batches;
+	}
 }

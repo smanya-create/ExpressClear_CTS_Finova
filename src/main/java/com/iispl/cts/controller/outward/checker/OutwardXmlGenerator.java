@@ -1,4 +1,5 @@
 package com.iispl.cts.controller.outward.checker;
+
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,213 +16,194 @@ import com.iispl.cts.entity.outward.OutwardCheque;
 
 public class OutwardXmlGenerator {
 
-    private static final String NAMESPACE =
-            "urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing";
+	private static final String NAMESPACE = "urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing";
 
-    private static final DateTimeFormatter FILE_DATE_FORMAT =
-            DateTimeFormatter.ofPattern("yyyyMMdd");
+	private static final String INDENT = "    ";
 
-    private static final DateTimeFormatter DATE_TIME_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+	public static Path generateXml(OutwardBatch batch, List<OutwardCheque> cheques, String outputDirectory)
+			throws Exception {
 
-    public static Path generateXml(
-            OutwardBatch batch,
-            List<OutwardCheque> cheques,
-            String outputDirectory) throws Exception {
+		String fileName = "bxf_" + batch.getOutwardBatchId() + "_"
+				+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xml";
 
-        String fileName =
-                batch.getOutwardBatchId()
-                + "_"
-                + LocalDateTime.now().format(FILE_DATE_FORMAT)
-                + ".xml";
+		Path directory = Paths.get(outputDirectory);
 
-        Path directory = Paths.get(outputDirectory);
+		if (!Files.exists(directory)) {
+			Files.createDirectories(directory);
+		}
 
-        Files.createDirectories(directory);
+		Path xmlFile = directory.resolve(fileName);
 
-        Path xmlFile = directory.resolve(fileName);
+		XMLOutputFactory factory = XMLOutputFactory.newInstance();
 
-        XMLOutputFactory factory =
-                XMLOutputFactory.newInstance();
+		XMLStreamWriter writer = factory.createXMLStreamWriter(Files.newOutputStream(xmlFile), "UTF-8");
 
-        try (java.io.OutputStream outputStream =
-                     Files.newOutputStream(xmlFile)) {
+		writer.writeStartDocument("UTF-8", "1.0");
 
-            XMLStreamWriter writer =
-                    factory.createXMLStreamWriter(outputStream, "UTF-8");
+		writer.writeStartElement("ChequeBatchTransmission");
+		writer.writeDefaultNamespace(NAMESPACE);
+		writer.writeCharacters("\n");
 
-            writer.writeStartDocument("UTF-8", "1.0");
+		writeBatchHeader(writer, batch, cheques);
 
-            writer.writeStartElement("ChequeBatchTransmission");
+		writer.writeCharacters("\n");
 
-            writer.writeDefaultNamespace(NAMESPACE);
+		writeIndent(writer, 0);
+		writer.writeStartElement("Cheques");
+		writer.writeCharacters("\n");
 
-            writeBatchHeader(writer, batch, cheques);
+		for (OutwardCheque cheque : cheques) {
+			writeCheque(writer, cheque);
+			writer.writeCharacters("\n");
+		}
 
-            writer.writeStartElement("Cheques");
+		writeIndent(writer, 0);
+		writer.writeEndElement();
 
-            for (OutwardCheque cheque : cheques) {
-                writeCheque(writer, cheque);
-            }
+		writer.writeCharacters("\n");
 
-            writer.writeEndElement();
+		writeIndent(writer, 0);
+		writer.writeEndElement();
 
-            writer.writeEndElement();
+		writer.writeCharacters("\n");
 
-            writer.writeEndDocument();
+		writer.writeEndDocument();
 
-            writer.flush();
-            writer.close();
-        }
+		writer.flush();
+		writer.close();
 
-        return xmlFile;
-    }
+		return xmlFile;
+	}
 
-    private static void writeBatchHeader(
-            XMLStreamWriter writer,
-            OutwardBatch batch,
-            List<OutwardCheque> cheques) throws Exception {
+	private static void writeBatchHeader(XMLStreamWriter writer, OutwardBatch batch, List<OutwardCheque> cheques)
+			throws Exception {
 
-        writer.writeStartElement("BatchHeader");
+		writeIndent(writer, 1);
+		writer.writeStartElement("BatchHeader");
+		writer.writeCharacters("\n");
 
-        writeElement(
-                writer,
-                "ScannedBatchId",
-                batch.getOutwardBatchId());
+		writeSimpleElement(writer, 2, "ScannedBatchId", batch.getOutwardBatchId());
 
-        writeElement(
-                writer,
-                "BatchReferenceId",
-                batch.getBatchReferenceId());
+		writeSimpleElement(writer, 2, "BatchReferenceId", batch.getBatchReferenceId());
 
-        writeElement(
-                writer,
-                "ActualChequeCount",
-                String.valueOf(cheques.size()));
+		writeSimpleElement(writer, 2, "ActualChequeCount", String.valueOf(cheques.size()));
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
+		BigDecimal totalAmount = BigDecimal.ZERO;
 
-        for (OutwardCheque cheque : cheques) {
+		for (OutwardCheque cheque : cheques) {
+			if (cheque.getChequeAmount() != null) {
+				totalAmount = totalAmount.add(cheque.getChequeAmount());
+			}
+		}
 
-            if (cheque.getChequeAmount() != null) {
+		writeIndent(writer, 2);
+		writer.writeStartElement("ActualTotalAmount");
+		writer.writeAttribute("currency", "INR");
+		writer.writeCharacters(totalAmount.toPlainString());
+		writer.writeEndElement();
+		writer.writeCharacters("\n");
 
-                totalAmount = totalAmount.add(
-                        cheque.getChequeAmount());
-            }
-        }
+		writeSimpleElement(writer, 2, "BatchStatus", batch.getBatchStatus());
 
-        writer.writeStartElement("ActualTotalAmount");
+		writeSimpleElement(writer, 2, "UploadedBy", batch.getUploadedBy());
 
-        writer.writeAttribute("currency", "INR");
+		if (batch.getUploadedAt() != null) {
+			writeSimpleElement(writer, 2, "UploadedAt", batch.getUploadedAt().toLocalDateTime()
+					.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+		}
 
-        writer.writeCharacters(
-                totalAmount.toPlainString());
+		writeIndent(writer, 1);
+		writer.writeEndElement();
+	}
 
-        writer.writeEndElement();
+	private static void writeCheque(XMLStreamWriter writer, OutwardCheque cheque) throws Exception {
 
-        writeElement(
-                writer,
-                "BatchStatus",
-                batch.getBatchStatus());
+		writeIndent(writer, 1);
+		writer.writeStartElement("ChequeItem");
+		writer.writeCharacters("\n");
 
-        writeElement(
-                writer,
-                "UploadedBy",
-                batch.getUploadedBy());
+		writeSimpleElement(writer, 2, "ScannedChequeId", cheque.getOutwardChequeId());
 
-        if (batch.getUploadedAt() != null) {
+		writeSimpleElement(writer, 2, "ChequeNumber", cheque.getChequeNumber());
 
-            writeElement(
-                    writer,
-                    "UploadedAt",
-                    batch.getUploadedAt()
-                            .toLocalDateTime()
-                            .format(DATE_TIME_FORMAT));
-        }
+		if (cheque.getChequeDate() != null) {
+			writeSimpleElement(writer, 2, "ChequeDate", cheque.getChequeDate().toString());
+		}
 
-        writer.writeEndElement();
-    }
+		if (cheque.getChequeAmount() != null) {
+			writeIndent(writer, 2);
+			writer.writeStartElement("Amount");
+			writer.writeAttribute("currency", "INR");
+			writer.writeCharacters(cheque.getChequeAmount().toPlainString());
+			writer.writeEndElement();
+			writer.writeCharacters("\n");
+		}
 
-    private static void writeCheque(
-            XMLStreamWriter writer,
-            OutwardCheque cheque) throws Exception {
+		writeSimpleElement(writer, 2, "ChequeStatus", cheque.getChequeStatus());
 
-        writer.writeStartElement("ChequeItem");
+		writeIndent(writer, 2);
+		writer.writeStartElement("MICRDetails");
+		writer.writeCharacters("\n");
 
-        writeElement(
-                writer,
-                "ScannedChequeId",
-                cheque.getOutwardChequeId());
+		writeSimpleElement(writer, 3, "FullMICR", cheque.getMicrCode());
 
-        writeElement(
-                writer,
-                "ChequeNumber",
-                cheque.getChequeNumber());
+//		writeSimpleElement(writer, 3, "CityCode", cheque.getCityCode());
+//
+//		writeSimpleElement(writer, 3, "BankCode", cheque.getBankCode());
+//
+//		writeSimpleElement(writer, 3, "BranchCode", cheque.getBranchCode());
 
-        if (cheque.getChequeAmount() != null) {
+		writeIndent(writer, 2);
+		writer.writeEndElement();
+		writer.writeCharacters("\n");
 
-            writer.writeStartElement("Amount");
+		writeIndent(writer, 2);
+		writer.writeStartElement("Drawee");
+		writer.writeCharacters("\n");
 
-            writer.writeAttribute("currency", "INR");
+		writeSimpleElement(writer, 3, "Name", cheque.getDraweeName());
 
-            writer.writeCharacters(
-                    cheque.getChequeAmount()
-                            .toPlainString());
+		writeSimpleElement(writer, 3, "AccountNumber", cheque.getDraweeAccountNumber());
 
-            writer.writeEndElement();
-        }
+		writeIndent(writer, 2);
+		writer.writeEndElement();
+		writer.writeCharacters("\n");
 
-        writer.writeStartElement("MICRDetails");
+		writeIndent(writer, 2);
+		writer.writeStartElement("Payee");
+		writer.writeCharacters("\n");
 
-        writeElement(
-                writer,
-                "FullMICR",
-                cheque.getMicrCode());
+		writeSimpleElement(writer, 3, "Name", cheque.getPayeeName());
 
-        writer.writeEndElement();
+		writeSimpleElement(writer, 3, "AccountNumber", cheque.getPayeeAccountNumber());
 
-        writer.writeStartElement("Drawee");
+		writeIndent(writer, 2);
+		writer.writeEndElement();
+		writer.writeCharacters("\n");
 
-        writeElement(
-                writer,
-                "AccountHolderName",
-                cheque.getDraweeName());
+		writeIndent(writer, 1);
+		writer.writeEndElement();
+	}
 
-        writeElement(
-                writer,
-                "AccountNumber",
-                cheque.getDraweeAccountNumber());
+	private static void writeSimpleElement(XMLStreamWriter writer, int level, String name, String value)
+			throws Exception {
 
-        writer.writeEndElement();
+		writeIndent(writer, level);
 
-        writer.writeStartElement("Payee");
+		writer.writeStartElement(name);
 
-        writeElement(
-                writer,
-                "AccountHolderName",
-                cheque.getPayeeName());
+		if (value != null) {
+			writer.writeCharacters(value);
+		}
 
-        writeElement(
-                writer,
-                "AccountNumber",
-                cheque.getPayeeAccountNumber());
+		writer.writeEndElement();
+		writer.writeCharacters("\n");
+	}
 
-        writer.writeEndElement();
+	private static void writeIndent(XMLStreamWriter writer, int level) throws Exception {
 
-        writer.writeEndElement();
-    }
-
-    private static void writeElement(
-            XMLStreamWriter writer,
-            String name,
-            String value) throws Exception {
-
-        writer.writeStartElement(name);
-
-        if (value != null) {
-            writer.writeCharacters(value);
-        }
-
-        writer.writeEndElement();
-    }
+		for (int i = 0; i < level; i++) {
+			writer.writeCharacters(INDENT);
+		}
+	}
 }

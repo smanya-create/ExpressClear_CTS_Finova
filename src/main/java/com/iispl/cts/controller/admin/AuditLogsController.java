@@ -1,22 +1,25 @@
 package com.iispl.cts.controller.admin;
 
 import java.text.SimpleDateFormat;
-
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zul.event.PagingEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Paging;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Cell;
 
-import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.AuditLog;
 import com.iispl.cts.service.AuditService;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -25,6 +28,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
+    // Auto-wired components by ZUL ID match
     private Datebox dtFrom;
     private Datebox dtTo;
     private Combobox cmbModuleFilter;
@@ -33,27 +37,50 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     private Button btnReset;
     private Label lblAuditCount;
     private Rows rowsAudit;
+    private Paging auditPaging;
 
     private final AuditService auditService = AuditServiceImpl.getInstance();
+    private static final int PAGE_SIZE = 15;
     private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        
-        
-        // Default to today
-        if (dtFrom != null) dtFrom.setValue(new Date(System.currentTimeMillis() - (7L * 24 * 3600 * 1000))); // 7 days back
-        if (dtTo != null) dtTo.setValue(new Date());
+
+        if (auditPaging != null) {
+            auditPaging.setPageSize(PAGE_SIZE);
+        }
+
+        // Default to today only (per trainer's requirement)
+        resetFiltersToToday();
+
+        // Load page 0 for today
+        loadAuditPage(0);
+    }
+
+    /**
+     * Sets date filters to the start and end of the current day.
+     */
+    private void resetFiltersToToday() {
+        LocalDate today = LocalDate.now();
+        Date todayDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        if (dtFrom != null) dtFrom.setValue(todayDate);
+        if (dtTo != null) dtTo.setValue(todayDate);
 
         if (cmbModuleFilter != null && cmbModuleFilter.getItemCount() > 0) {
             cmbModuleFilter.setSelectedIndex(0);
         }
 
-        loadAuditLogs();
+        if (txtSearchAudit != null) {
+            txtSearchAudit.setValue("");
+        }
     }
 
-    private void loadAuditLogs() {
+    /**
+     * Queries database by limit and offset, updates paging bar and renders grid.
+     */
+    private void loadAuditPage(int activePageIndex) {
         Date from = dtFrom != null ? dtFrom.getValue() : null;
         Date to = dtTo != null ? dtTo.getValue() : null;
         String mod = (cmbModuleFilter != null && cmbModuleFilter.getSelectedItem() != null)
@@ -61,14 +88,40 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         String q = (txtSearchAudit != null && txtSearchAudit.getValue() != null) 
                    ? txtSearchAudit.getValue().trim() : "";
 
-        List<AuditLog> logs = auditService.searchAuditLogs(from, to, mod, null, q);
+        // 1. Fetch total count for paging bar calculation
+        int totalRecords = auditService.countAuditLogs(from, to, mod, null, q);
+
+        if (auditPaging != null) {
+            auditPaging.setTotalSize(totalRecords);
+            auditPaging.setActivePage(activePageIndex);
+        }
 
         if (lblAuditCount != null) {
-            lblAuditCount.setValue(logs.size() + " records found");
+            lblAuditCount.setValue(totalRecords + " records found");
         }
+
+        // 2. Fetch only the active page records from database
+        int offset = activePageIndex * PAGE_SIZE;
+        List<AuditLog> logs = auditService.searchAuditLogs(from, to, mod, null, q, offset, PAGE_SIZE);
 
         if (rowsAudit == null) return;
         rowsAudit.getChildren().clear();
+
+        if (logs.isEmpty()) {
+            Row emptyRow = new Row();
+            
+            Cell cell = new Cell();
+            cell.setColspan(7); // Spans all 7 columns of the grid
+            cell.setStyle("text-align: center; padding: 24px;");
+
+            Label emptyLbl = new Label("No audit records found for the selected criteria.");
+            emptyLbl.setStyle("color: #94a3b8; font-style: italic; font-size: 13px;");
+            
+            cell.appendChild(emptyLbl);
+            emptyRow.appendChild(cell);
+            rowsAudit.appendChild(emptyRow);
+            return;
+        }
 
         for (AuditLog log : logs) {
             Row row = new Row();
@@ -117,14 +170,24 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         }
     }
 
-    public void onClick$btnSearch(Event event) { loadAuditLogs(); }
-    public void onOK$txtSearchAudit(Event event) { loadAuditLogs(); }
+    // Triggered on Search button click
+    public void onClick$btnSearch(Event event) { 
+        loadAuditPage(0); 
+    }
 
+    // Triggered when hitting Enter in search textbox
+    public void onOK$txtSearchAudit(Event event) { 
+        loadAuditPage(0); 
+    }
+
+    // Reset button resets to Today's date range and loads Page 0
     public void onClick$btnReset(Event event) {
-        if (dtFrom != null) dtFrom.setValue(new Date(System.currentTimeMillis() - (7L * 24 * 3600 * 1000)));
-        if (dtTo != null) dtTo.setValue(new Date());
-        if (cmbModuleFilter != null) cmbModuleFilter.setSelectedIndex(0);
-        if (txtSearchAudit != null) txtSearchAudit.setValue("");
-        loadAuditLogs();
+        resetFiltersToToday();
+        loadAuditPage(0);
+    }
+
+    // Navigation event from the ZK <paging id="auditPaging" ... /> component
+    public void onPaging$auditPaging(PagingEvent event) {
+        loadAuditPage(event.getActivePage());
     }
 }
