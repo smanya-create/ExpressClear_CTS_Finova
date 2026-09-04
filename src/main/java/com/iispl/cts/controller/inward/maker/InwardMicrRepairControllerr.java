@@ -1,6 +1,9 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.HashMap;
+
 import java.util.List;
+import java.util.Map;
 
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.inward.InwardChequeService;
@@ -11,6 +14,9 @@ import com.iispl.cts.validatorimpl.MICRValidatorImpl;
 import com.iispl.cts.entity.RejectedResaon;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
+import com.iispl.cts.entity.inward.InwardBatch;
+import com.iispl.cts.service.inward.InwardBatchService;
+import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -55,6 +61,14 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private InwardChequeService inwardChequeService;
 
+	private InwardBatchService inwardBatchService;
+
+	private Label lblBatchSource;
+	private Label lblTotalCheques;
+	private Label lblHeaderChequeNo;
+	private Label lblHeaderItemStatus;
+	private Label lblReceivedDate;
+
 	private MICRValidator micrValidator;
 
 	private List<InwardCheque> repairCheques;
@@ -73,6 +87,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		super.doAfterCompose(comp);
 
 		inwardChequeService = new InwardChequeServiceImpl();
+
+		inwardBatchService = new InwardBatchServiceImpl();
 
 		rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 
@@ -140,6 +156,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			// Get the current cheque
 			currentCheque = repairCheques.get(currentRecord);
 
+			loadBatchSummary(currentCheque);
 			// Populate UI fields
 			populateChequeFields(currentCheque);
 
@@ -162,6 +179,47 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			Messagebox.show("Unable to load MICR repair records.", "Error", Messagebox.OK, Messagebox.ERROR);
 		}
+	}
+
+	private void loadBatchSummary(InwardCheque cheque) {
+
+	    if (cheque == null) {
+	        return;
+	    }
+
+	    InwardBatch batch =
+	            inwardBatchService.getBatchById(cheque.getInwardBatchId());
+
+	    if (batch == null) {
+	        return;
+	    }
+
+	    if (lblBatchId != null) {
+	        lblBatchId.setValue(String.valueOf(batch.getInwardBatchId()));
+	    }
+
+	    if (lblBatchSource != null) {
+	        lblBatchSource.setValue("CHI");
+	    }
+
+	    if (lblTotalCheques != null) {
+	        lblTotalCheques.setValue(
+	                String.valueOf(batch.getActualChequeCount()));
+	    }
+
+	    if (lblHeaderChequeNo != null) {
+	        lblHeaderChequeNo.setValue(cheque.getChequeNumber());
+	    }
+
+	    if (lblHeaderItemStatus != null) {
+	        lblHeaderItemStatus.setValue(cheque.getChequeStatus());
+	    }
+
+	    if (lblReceivedDate != null && batch.getUploadedAt() != null) {
+	        lblReceivedDate.setValue(
+	                new java.text.SimpleDateFormat("dd-MM-yyyy")
+	                        .format(batch.getUploadedAt()));
+	    }
 	}
 
 	private void clearRecordFields() {
@@ -245,24 +303,18 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		try {
+		InwardChequeImage image = inwardChequeService.getFrontImage(inwardChequeId);
 
-			InwardChequeImage image = inwardChequeService.getFrontImage(inwardChequeId);
+		if (image != null && image.getImagePath() != null && !image.getImagePath().trim().isEmpty()) {
 
-			if (image != null && image.getImagePath() != null && !image.getImagePath().trim().isEmpty()) {
+			String imageSrc = "/" + image.getImagePath();
 
-				if (chequeImage != null) {
-					chequeImage.setSrc(image.getImagePath());
-					chequeImage.setVisible(true);
-				}
+			chequeImage.setSrc(imageSrc);
+			chequeImage.setVisible(true);
 
-				if (emptyImageState != null) {
-					emptyImageState.setVisible(false);
-				}
+			if (emptyImageState != null) {
+				emptyImageState.setVisible(false);
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -390,8 +442,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			Messagebox.show("Invalid rejection reason.", "Reject Request", Messagebox.OK, Messagebox.EXCLAMATION);
 			return;
 		}
-
-	
 
 		Messagebox.show("Reject request submitted successfully.", "Reject Request", Messagebox.OK,
 				Messagebox.INFORMATION);

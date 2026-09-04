@@ -3,13 +3,8 @@
 <?link rel="stylesheet" type="text/css" href="/css/inward/maker-dashboard.css"?>
 
 <zk xmlns:h="xhtml">
-	<!-- 1. Explicitly force INWARD_MAKER session attributes before components load -->
-	<!-- <zscript>
-	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("USER_ROLE", "INWARD_MAKER");
-	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
-</zscript> -->
 
-	<!-- 2. Root Window with strict 0 margin/padding -->
+	
 	<window id="inwardMakerRootWin" border="none" width="100%"
 		height="100%"
 		style="margin: 0 !important; padding: 0 !important; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
@@ -17,26 +12,25 @@
 		<borderlayout hflex="1" vflex="1"
 			style="margin: 0 !important; padding: 0 !important; background: transparent;">
 
-			<!-- Left Fixed Sidebar (Locked to 0px offset) -->
+			
 			<west size="220px" border="none"
 				style="margin: 0 !important; padding: 0 !important; background-color: #0b1d3a !important; height: 100%;">
 				<include src="/components/sidebar.zul"
 					role="INWARD_MAKER" activeTab="inward-dashboard" vflex="1"
 					hflex="1" />
 			</west>
-
-			<!-- Center Content Area -->
+		
 			<center border="none" autoscroll="true"
 				sclass="main-content">
-				<vlayout spacing="16px" sclass="dashboard-container"
+				<vlayout spacing="1px" sclass="dashboard-container"
 					hflex="1">
 
-					<!-- Top Reusable Header -->
+				
 					<include id="headerInclude"
 						src="/components/header.zul" pageTitle="Inward Processing"
 						pageSubtitle="Maker Dashboard" />
 
-					<!-- Dynamic Workspace Component -->
+					
 					<include id="mainContentArea" mode="instant"
 						src="/inward/maker/dashboard.zul" hflex="1" />
 

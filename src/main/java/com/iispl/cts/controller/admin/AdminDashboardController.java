@@ -83,7 +83,9 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
         super.doAfterCompose(comp);
         loadSessionData();
         refreshUI();
+        refreshActiveUsers();
     }
+    
 
     private void loadSessionData() {
         fetchActiveClearingSession();
@@ -115,6 +117,12 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
    
     private void fetchActiveUsersCount() {
     	this.loggedInUsersCount = ActiveUserManager.getActiveUserCount();
+    }
+    public void refreshActiveUsers() {
+        this.loggedInUsersCount = ActiveUserManager.getActiveUserCount();
+        if (lblLoggedInUsers != null) {
+            lblLoggedInUsers.setValue(String.valueOf(this.loggedInUsersCount));
+        }
     }
     	
     
@@ -544,4 +552,5 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
         }
         return adminUserId;
     }
+    
 }

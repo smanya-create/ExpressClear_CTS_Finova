@@ -163,7 +163,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 		return outwardBatch;
 	}
 
-	@Override
+	@Overrid
 	public List<OutwardBatch> getBatchesReadyForDataEntry() {
 
 		List<OutwardBatch> batches = new ArrayList<>();
@@ -210,6 +210,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 	}
 
 	@Override
+
 	public String transferBatchFromScanToOutward(Connection connection, String scannedBatchId) {
 
 		if (connection == null) {
@@ -244,5 +245,34 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 			throw new RuntimeException("Failed to transfer scan batch " + scannedBatchId + " to outward batch", e);
 		}
+	}
+
+
+	@Override
+	public List<OutwardBatch> getPendingBatches() {
+
+		List<OutwardBatch> batches = new ArrayList<>();
+
+		String sql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
+				+ "WHERE batch_status = ? " + "ORDER BY uploaded_at DESC";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement prepStmt = connection.prepareStatement(sql);
+				) {
+			prepStmt.setString(1, "Pending");
+			ResultSet resultSet = prepStmt.executeQuery();
+
+			while (resultSet.next()) {
+
+				batches.add(mapOutwardBatch(resultSet));
+			}
+
+		} catch (Exception exception) {
+
+			throw new RuntimeException("Unable to fetch pending batches  ", exception);
+		}
+
+		return batches;
 	}
 }

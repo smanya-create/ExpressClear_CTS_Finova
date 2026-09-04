@@ -288,11 +288,7 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	    try (Connection conn = DBConnection.getConnection();
 	         PreparedStatement ps = conn.prepareStatement(dashboardSummaryQuery);
 	         ResultSet rs = ps.executeQuery()) {
-
-	        if (conn != null) {
-	            System.out.println("connection successful");
-	        }
-
+	        
 	        while (rs.next()) {
 
 	            DashboardSummaryDTO summary = new DashboardSummaryDTO();
@@ -308,8 +304,6 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-
-	    System.out.println("Dashboard batches found: " + batchList.size());
 
 	    return batchList;
 	}

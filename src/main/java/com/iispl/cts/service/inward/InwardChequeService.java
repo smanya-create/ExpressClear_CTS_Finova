@@ -18,4 +18,8 @@ public interface InwardChequeService {
     boolean updateChequeDetails(InwardCheque cheque);
     
     InwardChequeImage getFrontImage(String inwardChequeId);
+    
+  
+  
+    
 }
