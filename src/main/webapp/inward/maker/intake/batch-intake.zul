@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk>
-    <style src="/css/inward/batch.css"/>
+
+	<style src="/css/inward/batch.css" />
 
 	<window id="inwardBatchQueueWindow" title="Inward Batch Queue"
-		border="normal" width="95%"
+		border="none" width="95%"
 		apply="com.iispl.cts.controller.inward.maker.InwardBatchController">
 
 		<vlayout width="100%" sclass="batch-page">
@@ -65,37 +66,42 @@
 
 			</div>
 
+
 			<div sclass="batch-container">
 
-				<vlayout width="100%">
+				<label value="Received Inward Batches"
+					sclass="batch-title" />
 
-					<label value="Received Inward Batches"
-						sclass="batch-title" />
-
-					<label
-						value="Validate each batch before it enters MICR Repair."
-						sclass="section-description" />
-				</vlayout>
+				<label
+					value="Validate each batch before it enters MICR Repair."
+					sclass="section-description" />
 
 				<listbox id="batchListbox" width="100%"
 					sclass="batch-table">
 
 					<listhead>
 
-						<listheader label="Batch No." width="20%" />
+						<listheader label="Batch No." width="19%" />
 
 						<listheader label="Received On" width="20%" />
 
-						<listheader label="Amount" width="20%" />
+						<listheader label="Amount" width="18%" />
 
-						<listheader label="Status" width="20%" />
+						<listheader label="Status" width="22%" />
 
-						<listheader label="Action" width="20%" />
+						<listheader label="Action" width="21%" />
 
 					</listhead>
-				</listbox>
-			</div>
-		</vlayout>
-	</window>
-</zk>
 
+				</listbox>
+
+				<label id="batchCountLabel" value=""
+					sclass="batch-count" />
+
+			</div>
+
+		</vlayout>
+
+	</window>
+
+</zk>
