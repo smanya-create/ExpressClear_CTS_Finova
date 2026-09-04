@@ -1,4 +1,5 @@
-package com.iispl.cts.serviceimpl.outward;
+ package com.iispl.cts.serviceimpl.outward;
+
 import java.util.List;
 
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
@@ -6,15 +7,14 @@ import com.iispl.cts.daoimpl.outward.OutwardBatchDAOImpl;
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardBatchService;
 
-
-public class OutwardBatchServiceImpl implements OutwardBatchService{
+public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 	private final OutwardBatchDAO outwardBatchDAO;
 
 	public OutwardBatchServiceImpl() {
 		outwardBatchDAO = new OutwardBatchDAOImpl();
 	}
-  
+
 	@Override
 	public List<OutwardBatch> getVerifiedBatches() {
 		return outwardBatchDAO.getVerifiedBatches();
@@ -37,12 +37,16 @@ public class OutwardBatchServiceImpl implements OutwardBatchService{
 		return outwardBatchDAO.getBatchById(outwardBatchId);
 	}
 
+
 	@Override
 	public List<OutwardBatch> getPendingBatches() {
 		
 		return outwardBatchDAO.getPendingBatches();
 	}
 	
-	
-}
+	@Override
+	public List<OutwardBatch> getBatchesReadyForDataEntry() {
 
+		return outwardBatchDAO.getBatchesReadyForDataEntry();
+	}
+}

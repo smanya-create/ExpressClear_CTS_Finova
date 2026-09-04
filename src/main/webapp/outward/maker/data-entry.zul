@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+	<div id="outwardDataEntryMain" width="100%"
+		apply="com.iispl.cts.controller.outward.maker.OutwardDataEntryController"
+		sclass="outward-data-entry-page">
+
+		<vlayout width="100%" spacing="20px">
+
+			<vlayout spacing="4px"
+				sclass="outward-data-entry-title-section">
+
+				<label value="DATA ENTRY"
+					sclass="outward-data-entry-title" />
+
+				<label
+					value="Select a batch ready for cheque data entry"
+					sclass="outward-data-entry-subtitle" />
+
+			</vlayout>
+
+			<div sclass="outward-data-entry-session-card"
+				width="100%">
+
+				<hlayout width="100%" valign="middle" spacing="0">
+
+					<vlayout hflex="1" spacing="5px">
+
+						<label value="CLEARING SESSION"
+							sclass="outward-data-entry-card-label" />
+
+						<label id="outwardDataEntryLblSessionDate"
+							value="--" sclass="outward-data-entry-session-date" />
+
+					</vlayout>
+
+					<vlayout width="180px" spacing="5px">
+
+						<label value="SESSION STATUS"
+							sclass="outward-data-entry-card-label" />
+
+						<label id="outwardDataEntryLblSessionStatus"
+							value="OPEN" sclass="outward-data-entry-session-status" />
+
+					</vlayout>
+
+					<vlayout width="220px" spacing="5px">
+
+						<label value="DATE &amp; TIME"
+							sclass="outward-data-entry-card-label" />
+
+						<label id="outwardDataEntryLblSessionDateTime"
+							value="--" sclass="outward-data-entry-session-time" />
+
+					</vlayout>
+
+				</hlayout>
+
+			</div>
+
+			<vlayout spacing="8px">
+
+				<label value="Batches Ready for Data Entry"
+					sclass="outward-data-entry-section-title" />
+
+				<label
+					value="Select a batch below to begin entering cheque details."
+					sclass="outward-data-entry-section-subtitle" />
+
+			</vlayout>
+
+			<div sclass="outward-data-entry-table-card" width="100%">
+
+				<grid width="100%" sclass="outward-data-entry-grid">
+
+					<columns sizable="false">
+
+						<column label="BATCH" width="20%" />
+
+						<column label="TOTAL NO. OF CHEQUES"
+							width="22%" />
+
+						<column label="DATA ENTERED" width="20%" />
+
+						<column label="STATUS" width="18%" />
+
+						<column label="ACTION" width="20%" />
+
+					</columns>
+
+					<rows id="outwardDataEntryRowsBatch"></rows>
+
+				</grid>
+
+				<label id="outwardDataEntryLblEmpty"
+					value="No other batches ready for data entry." visible="false"
+					sclass="outward-data-entry-empty" />
+
+			</div>
+
+			<div sclass="outward-data-entry-next-step" width="100%">
+
+				<hlayout valign="middle" spacing="12px">
+
+					<label value="→"
+						sclass="outward-data-entry-next-icon" />
+
+					<vlayout spacing="3px">
+
+						<label value="Next Step"
+							sclass="outward-data-entry-next-title" />
+
+						<label
+							value="Select a batch and click PROCEED to begin cheque data entry."
+							sclass="outward-data-entry-next-text" />
+
+					</vlayout>
+
+				</hlayout>
+
+			</div>
+
+		</vlayout>
+
+	</div>
+
+</zk>

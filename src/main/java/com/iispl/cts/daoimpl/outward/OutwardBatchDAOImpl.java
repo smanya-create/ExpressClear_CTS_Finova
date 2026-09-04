@@ -163,7 +163,54 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 		return outwardBatch;
 	}
 
+	@Overrid
+	public List<OutwardBatch> getBatchesReadyForDataEntry() {
+
+		List<OutwardBatch> batches = new ArrayList<>();
+
+		String sql = "SELECT ob.outward_batch_id, " + "ob.batch_reference_id, " + "ob.actual_cheque_count, "
+				+ "ob.actual_total_amount, " + "ob.batch_status, " + "ob.uploaded_by, " + "ob.uploaded_at "
+				+ "FROM outward_batch ob " + "WHERE UPPER(TRIM(ob.batch_status)) = 'PENDING' " + "AND EXISTS ( "
+				+ "SELECT 1 " + "FROM outward_cheque oc " + "WHERE oc.outward_batch_id = ob.outward_batch_id "
+				+ "AND UPPER(TRIM(oc.cheque_status)) = 'PENDING_DATA_ENTRY' " + ") " + "ORDER BY ob.uploaded_at ASC";
+
+		try (Connection connection = DBConnection.getConnection();
+
+				PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+				ResultSet resultSet = preparedStatement.executeQuery()) {
+
+			while (resultSet.next()) {
+
+				OutwardBatch batch = new OutwardBatch();
+
+				batch.setOutwardBatchId(resultSet.getString("outward_batch_id"));
+
+				batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
+
+				batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
+
+				batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
+
+				batch.setBatchStatus(resultSet.getString("batch_status"));
+
+				batch.setUploadedBy(resultSet.getString("uploaded_by"));
+
+				batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
+
+				batches.add(batch);
+			}
+
+		} catch (Exception exception) {
+
+			exception.printStackTrace();
+		}
+
+		return batches;
+	}
+
 	@Override
+
 	public String transferBatchFromScanToOutward(Connection connection, String scannedBatchId) {
 
 		if (connection == null) {
@@ -199,6 +246,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			throw new RuntimeException("Failed to transfer scan batch " + scannedBatchId + " to outward batch", e);
 		}
 	}
+
 
 	@Override
 	public List<OutwardBatch> getPendingBatches() {
