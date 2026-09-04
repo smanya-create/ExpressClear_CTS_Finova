@@ -8,37 +8,28 @@ import com.iispl.cts.entity.outward.ScanChequeImage;
 
 public interface ScanService {
 
-    /*
-     * =====================================================
-     * Save / update batch and cheques
-     *
-     * One transaction:
-     *   Batch + Cheques
-     *
-     * If anything fails:
-     *   ROLLBACK everything
-     * =====================================================
-     */
-    String saveScanBatch(
-            ScanBatch scanBatch,
-            List<ScanCheque> chequeList,
-            List<ScanChequeImage> imageList);
+	/*
+	 * ===================================================== Save / update batch and
+	 * cheques
+	 *
+	 * One transaction: Batch + Cheques
+	 *
+	 * If anything fails: ROLLBACK everything
+	 * =====================================================
+	 */
+	String saveScanBatch(ScanBatch scanBatch, List<ScanCheque> chequeList, List<ScanChequeImage> imageList);
 
+	/*
+	 * ===================================================== Retrieve batch by batch
+	 * ID =====================================================
+	 */
+	ScanBatch getBatchById(String scannedBatchId);
 
-    /*
-     * =====================================================
-     * Retrieve batch by batch ID
-     * =====================================================
-     */
-    ScanBatch getBatchById(
-            String scannedBatchId);
+	/*
+	 * ===================================================== Retrieve all cheques
+	 * belonging to batch =====================================================
+	 */
+	List<ScanCheque> getChequesByBatchId(String scannedBatchId);
 
-
-    /*
-     * =====================================================
-     * Retrieve all cheques belonging to batch
-     * =====================================================
-     */
-    List<ScanCheque> getChequesByBatchId(
-            String scannedBatchId);
+	List<ScanBatch> getMakerDashboardBatches();
 }

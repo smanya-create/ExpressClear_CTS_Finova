@@ -16,207 +16,169 @@ import com.iispl.cts.service.outward.ScanService;
 
 public class ScanServiceImpl implements ScanService {
 
-    private ScanBatchDAO scanBatchDAO;
-    private ScanChequeDAO scanChequeDAO;
+	private ScanBatchDAO scanBatchDAO;
+	private ScanChequeDAO scanChequeDAO;
 
-    public ScanServiceImpl() {
+	public ScanServiceImpl() {
 
-        scanBatchDAO =
-                new ScanBatchDAOImpl();
+		scanBatchDAO = new ScanBatchDAOImpl();
 
-        scanChequeDAO =
-                new ScanChequeDAOImpl();
-    }
+		scanChequeDAO = new ScanChequeDAOImpl();
+	}
 
-    /*
-     * =====================================================
-     * SAVE / UPDATE BATCH + CHEQUES
-     * =====================================================
-     */
+	/*
+	 * ===================================================== SAVE / UPDATE BATCH +
+	 * CHEQUES =====================================================
+	 */
 
-    @Override
-    public String saveScanBatch(
-            ScanBatch scanBatch,
-            List<ScanCheque> chequeList,
-            List<ScanChequeImage> imageList) {
+	@Override
+	public String saveScanBatch(ScanBatch scanBatch, List<ScanCheque> chequeList, List<ScanChequeImage> imageList) {
 
-        /*
-         * -------------------------------------------------
-         * Validate input
-         * -------------------------------------------------
-         */
+		/*
+		 * ------------------------------------------------- Validate input
+		 * -------------------------------------------------
+		 */
 
-        if (scanBatch == null) {
+		if (scanBatch == null) {
 
-            throw new IllegalArgumentException(
-                    "Scan batch cannot be null");
-        }
+			throw new IllegalArgumentException("Scan batch cannot be null");
+		}
 
-        if (chequeList == null
-                || chequeList.isEmpty()) {
+		if (chequeList == null || chequeList.isEmpty()) {
 
-            throw new IllegalArgumentException(
-                    "Cheque list cannot be null or empty");
-        }
+			throw new IllegalArgumentException("Cheque list cannot be null or empty");
+		}
 
-        Connection connection = null;
+		Connection connection = null;
 
-        try {
+		try {
 
-            /*
-             * =================================================
-             * Get ONE connection
-             * =================================================
-             */
+			/*
+			 * ================================================= Get ONE connection
+			 * =================================================
+			 */
 
-            connection =
-                    DBConnection.getConnection();
+			connection = DBConnection.getConnection();
 
-            /*
-             * =================================================
-             * Start transaction
-             * =================================================
-             */
+			/*
+			 * ================================================= Start transaction
+			 * =================================================
+			 */
 
-            connection.setAutoCommit(false);
+			connection.setAutoCommit(false);
 
-            /*
-             * =================================================
-             * Save / update batch
-             * =================================================
-             */
+			/*
+			 * ================================================= Save / update batch
+			 * =================================================
+			 */
 
-            String batchId =
-                    scanBatchDAO.saveBatch(
-                            connection,
-                            scanBatch);
+			String batchId = scanBatchDAO.saveBatch(connection, scanBatch);
 
-            /*
-             * =================================================
-             * Save / update cheques
-             * =================================================
-             */
+			/*
+			 * ================================================= Save / update cheques
+			 * =================================================
+			 */
 
-            scanChequeDAO.saveBatch(
-                    connection,
-                    chequeList);
+			scanChequeDAO.saveBatch(connection, chequeList);
 
-            /*
-             * =================================================
-             * Images
-             *
-             * Not implemented yet.
-             * =================================================
-             */
+			/*
+			 * ================================================= Images
+			 *
+			 * Not implemented yet. =================================================
+			 */
 
-            /*
-             * =================================================
-             * Everything succeeded
-             *
-             * COMMIT
-             * =================================================
-             */
+			/*
+			 * ================================================= Everything succeeded
+			 *
+			 * COMMIT =================================================
+			 */
 
-            connection.commit();
+			connection.commit();
 
-            System.out.println(
-                    "Batch and cheque transaction committed successfully.");
+			System.out.println("Batch and cheque transaction committed successfully.");
 
-            return batchId;
+			return batchId;
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            /*
-             * =================================================
-             * Something failed
-             *
-             * ROLLBACK EVERYTHING
-             * =================================================
-             */
+			/*
+			 * ================================================= Something failed
+			 *
+			 * ROLLBACK EVERYTHING =================================================
+			 */
 
-            if (connection != null) {
+			if (connection != null) {
 
-                try {
+				try {
 
-                    connection.rollback();
+					connection.rollback();
 
-                    System.out.println(
-                            "Transaction rolled back successfully.");
+					System.out.println("Transaction rolled back successfully.");
 
-                } catch (SQLException rollbackException) {
+				} catch (SQLException rollbackException) {
 
-                    rollbackException.printStackTrace();
-                }
-            }
+					rollbackException.printStackTrace();
+				}
+			}
 
-            throw new RuntimeException(
-                    "Error while saving scan batch and cheques. "
-                    + "Transaction rolled back.",
-                    e);
+			throw new RuntimeException("Error while saving scan batch and cheques. " + "Transaction rolled back.", e);
 
-        } finally {
+		} finally {
 
-            /*
-             * =================================================
-             * Close connection
-             * =================================================
-             */
+			/*
+			 * ================================================= Close connection
+			 * =================================================
+			 */
 
-            if (connection != null) {
+			if (connection != null) {
 
-                try {
+				try {
 
-                    connection.close();
+					connection.close();
 
-                } catch (SQLException e) {
+				} catch (SQLException e) {
 
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
+	/*
+	 * ===================================================== GET BATCH BY ID
+	 * =====================================================
+	 */
 
-    /*
-     * =====================================================
-     * GET BATCH BY ID
-     * =====================================================
-     */
+	@Override
+	public ScanBatch getBatchById(String scannedBatchId) {
 
-    @Override
-    public ScanBatch getBatchById(
-            String scannedBatchId) {
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 
-        if (scannedBatchId == null
-                || scannedBatchId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
+		}
 
-            throw new IllegalArgumentException(
-                    "Scanned batch ID cannot be null or empty");
-        }
+		return scanBatchDAO.getBatchById(scannedBatchId);
+	}
 
-        return scanBatchDAO.getBatchById(
-                scannedBatchId);
-    }
+	/*
+	 * ===================================================== GET CHEQUES BY BATCH ID
+	 * =====================================================
+	 */
 
+	@Override
+	public List<ScanCheque> getChequesByBatchId(String scannedBatchId) {
 
-    /*
-     * =====================================================
-     * GET CHEQUES BY BATCH ID
-     * =====================================================
-     */
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 
-    @Override
-    public List<ScanCheque> getChequesByBatchId(
-            String scannedBatchId) {
+			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
+		}
 
-        if (scannedBatchId == null
-                || scannedBatchId.trim().isEmpty()) {
+		return scanChequeDAO.getChequesByBatchId(scannedBatchId);
+	}
 
-            throw new IllegalArgumentException(
-                    "Scanned batch ID cannot be null or empty");
-        }
+	@Override
+	public List<ScanBatch> getMakerDashboardBatches() {
+		return scanBatchDAO.getMakerDashboardBatches();
+	}
 
-        return scanChequeDAO.getChequesByBatchId(
-                scannedBatchId);
-    }
 }

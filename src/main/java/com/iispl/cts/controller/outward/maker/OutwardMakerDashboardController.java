@@ -2,1052 +2,345 @@ package com.iispl.cts.controller.outward.maker;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Desktop;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Cell;
-import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Grid;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
-import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
-import org.zkoss.zul.Window;
 
-import com.iispl.cts.entity.outward.OutwardBatch;
-import com.iispl.cts.entity.outward.OutwardCheque;
-import com.iispl.cts.service.outward.OutwardBatchService;
-import com.iispl.cts.service.outward.OutwardChequeService;
-import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
-import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.service.outward.ScanService;
+import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
 public class OutwardMakerDashboardController extends SelectorComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
-    private static final long BATCH_DETAILS_TIMEOUT = 10000L;
-
-    private Textbox outwardMakerTxtBatchId;
-    private Combobox outwardMakerCmbStatus;
-    private Button outwardMakerBtnSearch;
-    private Button outwardMakerBtnClear;
-    private Button outwardMakerBtnCloseBatchDetails;
-
-    private Rows outwardMakerRowsBatchDetails;
-    private Vlayout outwardMakerVlayoutEmptyState;
-
-    private Window outwardMakerWinBatchDetails;
-
-    private Label outwardMakerLblBatchId;
-    private Label outwardMakerLblBatchReference;
-    private Label outwardMakerLblBatchStatus;
-    private Label outwardMakerLblUploadedBy;
-    private Label outwardMakerLblUploadedAt;
-    private Label outwardMakerLblModalTotalCheques;
-    private Label outwardMakerLblModalTotalAmount;
-    private Label outwardMakerLblBatchLoading;
-
-    private Grid outwardMakerGridChequeDetails;
-
-    private final OutwardBatchService outwardBatchService;
-    private final OutwardChequeService outwardChequeService;
-
-    private ListModelList<String> outwardMakerStatusModel;
-
-    public OutwardMakerDashboardController() {
-        outwardBatchService = new OutwardBatchServiceImpl();
-        outwardChequeService = new OutwardChequeServiceImpl();
-    }
-
-    @Override
-    public void doAfterCompose(Component component) throws Exception {
-
-        super.doAfterCompose(component);
-
-        outwardMakerTxtBatchId =
-                (Textbox) component.getFellow(
-                        "outwardMakerTxtBatchId"
-                );
-
-        outwardMakerCmbStatus =
-                (Combobox) component.getFellow(
-                        "outwardMakerCmbStatus"
-                );
-
-        outwardMakerBtnSearch =
-                (Button) component.getFellow(
-                        "outwardMakerBtnSearch"
-                );
-
-        outwardMakerBtnClear =
-                (Button) component.getFellow(
-                        "outwardMakerBtnClear"
-                );
-
-        outwardMakerRowsBatchDetails =
-                (Rows) component.getFellow(
-                        "outwardMakerRowsBatchDetails"
-                );
-
-        outwardMakerVlayoutEmptyState =
-                (Vlayout) component.getFellow(
-                        "outwardMakerVlayoutEmptyState"
-                );
-
-        outwardMakerWinBatchDetails =
-                (Window) component.getFellow(
-                        "outwardMakerWinBatchDetails"
-                );
-
-        outwardMakerLblBatchId =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblBatchId"
-                );
-
-        outwardMakerLblBatchReference =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblBatchReference"
-                );
-
-        outwardMakerLblBatchStatus =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblBatchStatus"
-                );
-
-        outwardMakerLblUploadedBy =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblUploadedBy"
-                );
-
-        outwardMakerLblUploadedAt =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblUploadedAt"
-                );
-
-        outwardMakerLblModalTotalCheques =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblModalTotalCheques"
-                );
+	private static final long serialVersionUID = 1L;
 
-        outwardMakerLblModalTotalAmount =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblModalTotalAmount"
-                );
-
-        outwardMakerLblBatchLoading =
-                (Label) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerLblBatchLoading"
-                );
+	private static final int PAGE_SIZE = 5;
 
-        outwardMakerBtnCloseBatchDetails =
-                (Button) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerBtnCloseBatchDetails"
-                );
+	private Rows outwardMakerRowsBatchDetails;
 
-        outwardMakerGridChequeDetails =
-                (Grid) outwardMakerWinBatchDetails.getFellow(
-                        "outwardMakerGridChequeDetails"
-                );
+	private Vlayout outwardMakerVlayoutEmptyState;
 
-        initializeStatusFilter();
+	private Label outwardMakerLblCurrentPage;
 
-        outwardMakerBtnSearch.addEventListener(
-                "onClick",
-                event -> searchBatches()
-        );
+	private Button outwardMakerBtnFirst;
 
-        outwardMakerBtnClear.addEventListener(
-                "onClick",
-                event -> clearSearch()
-        );
+	private Button outwardMakerBtnPrevious;
 
-        outwardMakerBtnCloseBatchDetails.addEventListener(
-                "onClick",
-                event -> closeBatchDetails()
-        );
+	private Button outwardMakerBtnNext;
 
-        loadRecentBatches();
-    }
+	private Button outwardMakerBtnLast;
 
-    private void initializeStatusFilter() {
+	private Grid outwardMakerGridBatchDetails;
 
-        outwardMakerStatusModel =
-                new ListModelList<>(
-                        Arrays.asList(
-                                "All Status",
-                                "Pending",
-                                "Processing",
-                                "Completed",
-                                "Rejected"
-                        )
-                );
+	private ScanService scanService;
 
-        outwardMakerStatusModel
-                .addToSelection("All Status");
+	private List<ScanBatch> batchList = new ArrayList<>();
 
-        outwardMakerCmbStatus
-                .setModel(
-                        outwardMakerStatusModel
-                );
+	private int currentPage = 1;
 
-        outwardMakerCmbStatus
-                .setPopupWidth("280px");
+	@Override
+	public void doAfterCompose(Component component) throws Exception {
 
-        outwardMakerCmbStatus
-                .setReadonly(true);
+		super.doAfterCompose(component);
 
-        outwardMakerCmbStatus
-                .setAutodrop(false);
-    }
+		scanService = new ScanServiceImpl();
 
-    private void searchBatches() {
+		outwardMakerGridBatchDetails = (Grid) component.getFellow("outwardMakerGridBatchDetails");
 
-        String batchId =
-                outwardMakerTxtBatchId.getValue();
+		outwardMakerRowsBatchDetails = (Rows) component.getFellow("outwardMakerRowsBatchDetails");
 
-        if (batchId != null) {
-            batchId = batchId.trim();
-        }
+		outwardMakerVlayoutEmptyState = (Vlayout) component.getFellow("outwardMakerVlayoutEmptyState");
 
-        String status =
-                getSelectedStatus();
+		outwardMakerLblCurrentPage = (Label) component.getFellow("outwardMakerLblCurrentPage");
 
-        try {
+		outwardMakerBtnFirst = (Button) component.getFellow("outwardMakerBtnFirst");
 
-            List<OutwardBatch> batches =
-                    outwardBatchService.searchBatches(
-                            batchId,
-                            status
-                    );
+		outwardMakerBtnPrevious = (Button) component.getFellow("outwardMakerBtnPrevious");
 
-            renderBatches(batches);
+		outwardMakerBtnNext = (Button) component.getFellow("outwardMakerBtnNext");
 
-        } catch (Exception e) {
+		outwardMakerBtnLast = (Button) component.getFellow("outwardMakerBtnLast");
 
-            renderBatches(null);
-        }
-    }
+		outwardMakerBtnFirst.addEventListener("onClick", event -> goToFirstPage());
 
-    private String getSelectedStatus() {
+		outwardMakerBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
 
-        if (outwardMakerStatusModel == null) {
-            return "";
-        }
+		outwardMakerBtnNext.addEventListener("onClick", event -> goToNextPage());
 
-        if (outwardMakerStatusModel
-                .getSelection()
-                .isEmpty()) {
+		outwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
 
-            return "";
-        }
+		loadBatches();
+	}
 
-        String selectedStatus =
-                outwardMakerStatusModel
-                        .getSelection()
-                        .iterator()
-                        .next();
+	private void loadBatches() {
 
-        if (selectedStatus == null ||
-                selectedStatus.equals("All Status")) {
+		try {
 
-            return "";
-        }
+			batchList = scanService.getMakerDashboardBatches();
 
-        return selectedStatus.toUpperCase();
-    }
+			if (batchList == null) {
 
-    private void clearSearch() {
+				batchList = new ArrayList<>();
+			}
 
-        outwardMakerTxtBatchId
-                .setValue("");
+			currentPage = 1;
 
-        outwardMakerStatusModel
-                .clearSelection();
+			renderCurrentPage();
 
-        outwardMakerStatusModel
-                .addToSelection(
-                        "All Status"
-                );
+		} catch (Exception e) {
 
-        loadRecentBatches();
-    }
+			e.printStackTrace();
 
-    private void loadRecentBatches() {
+			batchList = new ArrayList<>();
 
-        try {
+			currentPage = 1;
 
-            List<OutwardBatch> batches =
-                    outwardBatchService
-                            .getRecentBatches();
+			renderCurrentPage();
+		}
+	}
 
-            renderBatches(batches);
+	private void renderCurrentPage() {
 
-        } catch (Exception e) {
+		outwardMakerRowsBatchDetails.getChildren().clear();
 
-            renderBatches(null);
-        }
-    }
+		if (batchList == null || batchList.isEmpty()) {
 
-    private void renderBatches(
-            List<OutwardBatch> batches) {
+			outwardMakerVlayoutEmptyState.setVisible(true);
 
-        outwardMakerRowsBatchDetails
-                .getChildren()
-                .clear();
+			outwardMakerGridBatchDetails.setVisible(false);
 
-        if (batches == null ||
-                batches.isEmpty()) {
+			updatePagination();
 
-            outwardMakerVlayoutEmptyState
-                    .setVisible(true);
+			return;
+		}
 
-            return;
-        }
+		outwardMakerVlayoutEmptyState.setVisible(false);
 
-        outwardMakerVlayoutEmptyState
-                .setVisible(false);
+		outwardMakerGridBatchDetails.setVisible(true);
 
-        for (OutwardBatch batch : batches) {
+		int totalPages = getTotalPages();
 
-            createBatchRow(batch);
-        }
-    }
+		if (currentPage > totalPages) {
 
-    private void createBatchRow(
-            final OutwardBatch batch) {
+			currentPage = totalPages;
+		}
 
-        Row row =
-                new Row();
+		int startIndex = (currentPage - 1) * PAGE_SIZE;
 
-        Label batchIdLabel =
-                new Label(
-                        getValue(
-                                batch.getOutwardBatchId()
-                        )
-                );
+		int endIndex = Math.min(startIndex + PAGE_SIZE, batchList.size());
 
-        batchIdLabel.setSclass(
-                "outward-maker-batch-id"
-        );
+		for (int index = startIndex; index < endIndex; index++) {
 
-        Label chequeCountLabel =
-                new Label(
-                        String.valueOf(
-                                batch.getActualChequeCount()
-                        )
-                );
+			ScanBatch batch = batchList.get(index);
 
-        Label totalAmountLabel =
-                new Label(
-                        formatAmount(
-                                batch.getActualTotalAmount()
-                        )
-                );
+			if (batch != null) {
 
-        Label statusLabel =
-                new Label(
-                        getValue(
-                                batch.getBatchStatus()
-                        )
-                );
+				createBatchRow(batch);
+			}
+		}
 
-        statusLabel.setSclass(
-                "outward-maker-status "
-                + getStatusClass(
-                        batch.getBatchStatus()
-                )
-        );
+		updatePagination();
+	}
 
-        Button viewButton =
-                new Button(
-                        "View Batch"
-                );
+	private void createBatchRow(ScanBatch batch) {
 
-        viewButton.setSclass(
-                "outward-maker-view-button"
-        );
+		Row row = new Row();
 
-        viewButton.addEventListener(
-                "onClick",
-                event ->
-                        openBatchDetails(
-                                batch
-                        )
-        );
+		Label batchIdLabel = new Label(getValue(batch.getScannedBatchId()));
 
-        row.appendChild(
-                batchIdLabel
-        );
+		batchIdLabel.setSclass("outward-maker-batch-id");
 
-        row.appendChild(
-                chequeCountLabel
-        );
+		Label chequeCountLabel = new Label(String.valueOf(batch.getActualChequeCount()));
 
-        row.appendChild(
-                totalAmountLabel
-        );
+		chequeCountLabel.setSclass("outward-maker-cheque-count");
 
-        row.appendChild(
-                statusLabel
-        );
+		Label totalAmountLabel = new Label(formatAmount(batch.getActualTotalAmount()));
 
-        row.appendChild(
-                viewButton
-        );
+		totalAmountLabel.setSclass("outward-maker-total-amount");
 
-        outwardMakerRowsBatchDetails
-                .appendChild(row);
-    }
+		Label statusLabel = new Label(getValue(batch.getBatchStatus()));
 
-    private void openBatchDetails(
-            final OutwardBatch selectedBatch) {
+		statusLabel.setSclass("outward-maker-status " + getStatusClass(batch.getBatchStatus()));
 
-        if (selectedBatch == null ||
-                selectedBatch.getOutwardBatchId() == null) {
+		Button viewButton = new Button("VIEW DETAILS");
 
-            return;
-        }
+		viewButton.setSclass("outward-maker-view-button");
 
-        final String batchId =
-                selectedBatch
-                        .getOutwardBatchId();
+		viewButton.addEventListener("onClick", event -> openBatchDetails(batch.getScannedBatchId()));
 
-        prepareLoadingState(
-                batchId
-        );
+		row.appendChild(batchIdLabel);
 
-        outwardMakerWinBatchDetails
-                .setVisible(true);
+		row.appendChild(chequeCountLabel);
 
-        outwardMakerWinBatchDetails
-                .doModal();
+		row.appendChild(totalAmountLabel);
 
-        final Desktop desktop =
-                outwardMakerWinBatchDetails
-                        .getDesktop();
+		row.appendChild(statusLabel);
 
-        final AtomicBoolean completed =
-                new AtomicBoolean(false);
+		row.appendChild(viewButton);
 
-        Thread batchDetailsThread =
-                new Thread(() -> {
+		outwardMakerRowsBatchDetails.appendChild(row);
+	}
 
-                    BatchDetailsResult result =
-                            new BatchDetailsResult();
+	private void openBatchDetails(String scannedBatchId) {
 
-                    try {
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 
-                        OutwardBatch batch =
-                                outwardBatchService
-                                        .getBatchById(
-                                                batchId
-                                        );
+			return;
+		}
 
-                        List<OutwardCheque> cheques =
-                                outwardChequeService
-                                        .getChequesByBatchId(
-                                                batchId
-                                        );
+		String batchId = scannedBatchId.trim();
 
-                        int totalChequeCount =
-                                outwardChequeService
-                                        .getTotalChequeCountByBatchId(
-                                                batchId
-                                        );
+		Component root = outwardMakerRowsBatchDetails.getPage().getFirstRoot();
 
-                        BigDecimal totalChequeAmount =
-                                outwardChequeService
-                                        .getTotalChequeAmountByBatchId(
-                                                batchId
-                                        );
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
-                        result.batch =
-                                batch;
+		if (!(mainContentArea instanceof Include)) {
 
-                        result.cheques =
-                                cheques;
+			return;
+		}
 
-                        result.totalChequeCount =
-                                totalChequeCount;
+		Include include = (Include) mainContentArea;
 
-                        result.totalChequeAmount =
-                                totalChequeAmount;
+		include.setAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID", batchId);
 
-                    } catch (Exception e) {
+		Executions.getCurrent().getSession().setAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID", batchId);
 
-                        result.error =
-                                e.getMessage();
+		include.clearDynamicProperties();
 
-                        if (result.error == null ||
-                                result.error.trim().isEmpty()) {
+		include.setDynamicProperty("batchId", batchId);
 
-                            result.error =
-                                    "Unable to load batch details.";
-                        }
-                    }
+		include.setSrc("/outward/maker/batch-details.zul");
+	}
 
-                    if (completed.compareAndSet(
-                            false,
-                            true)) {
+	private void goToFirstPage() {
 
-                        if (desktop != null &&
-                                desktop.isAlive()) {
+		if (currentPage > 1) {
 
-                            Executions.schedule(
-                                    desktop,
-                                    event ->
-                                            populateBatchDetails(
-                                                    result
-                                            ),
-                                    new Event(
-                                            "onBatchDetailsLoaded"
-                                    )
-                            );
-                        }
-                    }
+			currentPage = 1;
 
-                });
+			renderCurrentPage();
+		}
+	}
 
-        batchDetailsThread.setName(
-                "OutwardMakerBatchDetails-"
-                + batchId
-        );
+	private void goToPreviousPage() {
 
-        batchDetailsThread.setDaemon(true);
+		if (currentPage > 1) {
 
-        batchDetailsThread.start();
+			currentPage--;
 
-        Thread timeoutThread =
-                new Thread(() -> {
+			renderCurrentPage();
+		}
+	}
 
-                    try {
+	private void goToNextPage() {
 
-                        Thread.sleep(
-                                BATCH_DETAILS_TIMEOUT
-                        );
+		if (currentPage < getTotalPages()) {
 
-                        if (completed.compareAndSet(
-                                false,
-                                true)) {
+			currentPage++;
 
-                            if (desktop != null &&
-                                    desktop.isAlive()) {
+			renderCurrentPage();
+		}
+	}
 
-                                Executions.schedule(
-                                        desktop,
-                                        event ->
-                                                showBatchTimeout(),
-                                        new Event(
-                                                "onBatchDetailsTimeout"
-                                        )
-                                );
-                            }
-                        }
+	private void goToLastPage() {
 
-                    } catch (InterruptedException e) {
+		int totalPages = getTotalPages();
 
-                        Thread.currentThread()
-                                .interrupt();
-                    }
+		if (currentPage < totalPages) {
 
-                });
+			currentPage = totalPages;
 
-        timeoutThread.setName(
-                "OutwardMakerBatchTimeout-"
-                + batchId
-        );
+			renderCurrentPage();
+		}
+	}
 
-        timeoutThread.setDaemon(true);
+	private int getTotalPages() {
 
-        timeoutThread.start();
-    }
+		if (batchList == null || batchList.isEmpty()) {
 
-    private void prepareLoadingState(
-            String batchId) {
+			return 1;
+		}
 
-        outwardMakerLblBatchLoading
-                .setValue(
-                        "Loading batch details..."
-                );
+		return (int) Math.ceil((double) batchList.size() / PAGE_SIZE);
+	}
 
-        outwardMakerLblBatchLoading
-                .setVisible(true);
+	private void updatePagination() {
 
-        outwardMakerLblBatchId
-                .setValue(batchId);
+		int totalPages = getTotalPages();
 
-        outwardMakerLblBatchReference
-                .setValue("Loading...");
+		outwardMakerLblCurrentPage.setValue(currentPage + " / " + totalPages);
 
-        outwardMakerLblBatchStatus
-                .setValue("Loading...");
+		outwardMakerBtnFirst.setDisabled(currentPage <= 1);
 
-        outwardMakerLblBatchStatus
-                .setSclass(
-                        "outward-maker-summary-value"
-                );
+		outwardMakerBtnPrevious.setDisabled(currentPage <= 1);
 
-        outwardMakerLblUploadedBy
-                .setValue("Loading...");
+		outwardMakerBtnNext.setDisabled(currentPage >= totalPages);
 
-        outwardMakerLblUploadedAt
-                .setValue("Loading...");
+		outwardMakerBtnLast.setDisabled(currentPage >= totalPages);
+	}
 
-        outwardMakerLblModalTotalCheques
-                .setValue("0");
+	private String formatAmount(BigDecimal amount) {
 
-        outwardMakerLblModalTotalAmount
-                .setValue("0.00");
+		if (amount == null) {
 
-        Rows rows =
-                outwardMakerGridChequeDetails
-                        .getRows();
+			return "₹0.00";
+		}
 
-        rows.getChildren()
-                .clear();
+		return "₹" + new DecimalFormat("#,##0.00").format(amount);
+	}
 
-        Row loadingRow =
-                new Row();
+	private String getValue(Object value) {
 
-        Cell loadingCell =
-                new Cell();
+		if (value == null) {
 
-        loadingCell.setColspan(7);
+			return "-";
+		}
 
-        Label loadingLabel =
-                new Label(
-                        "Loading cheque details..."
-                );
+		String text = String.valueOf(value);
 
-        loadingLabel.setSclass(
-                "outward-maker-empty-cheque-message"
-        );
+		if (text.trim().isEmpty()) {
 
-        loadingCell.appendChild(
-                loadingLabel
-        );
+			return "-";
+		}
 
-        loadingRow.appendChild(
-                loadingCell
-        );
+		return text;
+	}
 
-        rows.appendChild(
-                loadingRow
-        );
-    }
+	private String getStatusClass(String status) {
 
-    private void populateBatchDetails(
-            BatchDetailsResult result) {
+		if (status == null) {
 
-        outwardMakerLblBatchLoading
-                .setVisible(false);
+			return "processing";
+		}
 
-        if (result == null) {
+		String normalizedStatus = status.trim().toLowerCase();
 
-            showBatchError(
-                    "Unable to load batch details."
-            );
+		if (normalizedStatus.contains("completed") || normalizedStatus.contains("success")
+				|| normalizedStatus.contains("validated")) {
 
-            return;
-        }
+			return "completed";
+		}
 
-        if (result.error != null) {
+		if (normalizedStatus.contains("rejected") || normalizedStatus.contains("failed")) {
 
-            showBatchError(
-                    result.error
-            );
+			return "rejected";
+		}
 
-            return;
-        }
+		if (normalizedStatus.contains("processing") || normalizedStatus.contains("validating")) {
 
-        if (result.batch == null) {
+			return "processing";
+		}
 
-            showBatchError(
-                    "Batch details were not found."
-            );
-
-            return;
-        }
-
-        OutwardBatch batch =
-                result.batch;
-
-        outwardMakerLblBatchId
-                .setValue(
-                        getValue(
-                                batch.getOutwardBatchId()
-                        )
-                );
-
-        outwardMakerLblBatchReference
-                .setValue(
-                        getValue(
-                                batch.getBatchReferenceId()
-                        )
-                );
-
-        outwardMakerLblBatchStatus
-                .setValue(
-                        getValue(
-                                batch.getBatchStatus()
-                        )
-                );
-
-        outwardMakerLblBatchStatus
-                .setSclass(
-                        "outward-maker-modal-status "
-                        + getStatusClass(
-                                batch.getBatchStatus()
-                        )
-                );
-
-        outwardMakerLblUploadedBy
-                .setValue(
-                        getValue(
-                                batch.getUploadedBy()
-                        )
-                );
-
-        outwardMakerLblUploadedAt
-                .setValue(
-                        formatDate(
-                                batch.getUploadedAt()
-                        )
-                );
-
-        outwardMakerLblModalTotalCheques
-                .setValue(
-                        String.valueOf(
-                                result.totalChequeCount
-                        )
-                );
-
-        outwardMakerLblModalTotalAmount
-                .setValue(
-                        formatAmount(
-                                result.totalChequeAmount
-                        )
-                );
-
-        renderChequeDetails(
-                result.cheques
-        );
-    }
-
-    private void showBatchError(
-            String message) {
-
-        outwardMakerLblBatchLoading
-                .setValue(message);
-
-        outwardMakerLblBatchLoading
-                .setVisible(true);
-
-        Rows rows =
-                outwardMakerGridChequeDetails
-                        .getRows();
-
-        rows.getChildren()
-                .clear();
-
-        Row errorRow =
-                new Row();
-
-        Cell errorCell =
-                new Cell();
-
-        errorCell.setColspan(7);
-
-        Label errorLabel =
-                new Label(message);
-
-        errorLabel.setSclass(
-                "outward-maker-empty-cheque-message"
-        );
-
-        errorCell.appendChild(
-                errorLabel
-        );
-
-        errorRow.appendChild(
-                errorCell
-        );
-
-        rows.appendChild(
-                errorRow
-        );
-    }
-
-    private void showBatchTimeout() {
-
-        showBatchError(
-                "Loading timed out. Please close and try again."
-        );
-    }
-
-    private void renderChequeDetails(
-            List<OutwardCheque> cheques) {
-
-        Rows chequeRows =
-                outwardMakerGridChequeDetails
-                        .getRows();
-
-        chequeRows.getChildren()
-                .clear();
-
-        if (cheques == null ||
-                cheques.isEmpty()) {
-
-            Row emptyRow =
-                    new Row();
-
-            Cell emptyCell =
-                    new Cell();
-
-            emptyCell.setColspan(7);
-
-            Label emptyLabel =
-                    new Label(
-                            "No cheque details available."
-                    );
-
-            emptyLabel.setSclass(
-                    "outward-maker-empty-cheque-message"
-            );
-
-            emptyCell.appendChild(
-                    emptyLabel
-            );
-
-            emptyRow.appendChild(
-                    emptyCell
-            );
-
-            chequeRows.appendChild(
-                    emptyRow
-            );
-
-            return;
-        }
-
-        DecimalFormat decimalFormat =
-                new DecimalFormat(
-                        "#,##0.00"
-                );
-
-        SimpleDateFormat dateFormat =
-                new SimpleDateFormat(
-                        "dd-MM-yyyy"
-                );
-
-        for (OutwardCheque cheque :
-                cheques) {
-
-            Row row =
-                    new Row();
-
-            row.appendChild(
-                    new Label(
-                            getValue(
-                                    cheque.getChequeNumber()
-                            )
-                    )
-            );
-
-            row.appendChild(
-                    new Label(
-                            getValue(
-                                    cheque.getMicrCode()
-                            )
-                    )
-            );
-
-            row.appendChild(
-                    new Label(
-                            getValue(
-                                    cheque.getDraweeName()
-                            )
-                    )
-            );
-
-            row.appendChild(
-                    new Label(
-                            getValue(
-                                    cheque.getPayeeName()
-                            )
-                    )
-            );
-
-            BigDecimal amount =
-                    cheque.getChequeAmount();
-
-            String amountValue =
-                    amount == null
-                            ? "0.00"
-                            : decimalFormat.format(
-                                    amount
-                            );
-
-            row.appendChild(
-                    new Label(
-                            amountValue
-                    )
-            );
-
-            String chequeDate =
-                    "-";
-
-            if (cheque.getChequeDate() != null) {
-
-                chequeDate =
-                        dateFormat.format(
-                                cheque.getChequeDate()
-                        );
-            }
-
-            row.appendChild(
-                    new Label(
-                            chequeDate
-                    )
-            );
-
-            Label statusLabel =
-                    new Label(
-                            getValue(
-                                    cheque.getChequeStatus()
-                            )
-                    );
-
-            statusLabel.setSclass(
-                    "outward-maker-status "
-                    + getStatusClass(
-                            cheque.getChequeStatus()
-                    )
-            );
-
-            row.appendChild(
-                    statusLabel
-            );
-
-            chequeRows.appendChild(
-                    row
-            );
-        }
-    }
-
-    private void closeBatchDetails() {
-
-        if (outwardMakerWinBatchDetails != null) {
-
-            outwardMakerWinBatchDetails
-                    .setVisible(false);
-        }
-    }
-
-    private String formatAmount(
-            BigDecimal amount) {
-
-        if (amount == null) {
-            return "0.00";
-        }
-
-        DecimalFormat decimalFormat =
-                new DecimalFormat(
-                        "#,##0.00"
-                );
-
-        return decimalFormat.format(
-                amount
-        );
-    }
-
-    private String formatDate(
-            java.util.Date date) {
-
-        if (date == null) {
-            return "-";
-        }
-
-        SimpleDateFormat dateFormat =
-                new SimpleDateFormat(
-                        "dd-MM-yyyy"
-                );
-
-        return dateFormat.format(date);
-    }
-
-    private String getValue(
-            Object value) {
-
-        if (value == null) {
-            return "-";
-        }
-
-        String text =
-                String.valueOf(value);
-
-        if (text.trim().isEmpty()) {
-            return "-";
-        }
-
-        return text;
-    }
-
-    private String getStatusClass(
-            String status) {
-
-        if (status == null) {
-            return "pending";
-        }
-
-        String normalizedStatus =
-                status.toLowerCase();
-
-        if (normalizedStatus.contains(
-                "completed")
-                || normalizedStatus.contains(
-                        "success")
-                || normalizedStatus.contains(
-                        "validated")) {
-
-            return "completed";
-        }
-
-        if (normalizedStatus.contains(
-                "rejected")
-                || normalizedStatus.contains(
-                        "failed")) {
-
-            return "rejected";
-        }
-
-        if (normalizedStatus.contains(
-                "processing")
-                || normalizedStatus.contains(
-                        "validating")) {
-
-            return "processing";
-        }
-
-        return "pending";
-    }
-
-    private static class BatchDetailsResult {
-
-        private OutwardBatch batch;
-        private List<OutwardCheque> cheques;
-        private int totalChequeCount;
-        private BigDecimal totalChequeAmount;
-        private String error;
-    }
+		return "pending";
+	}
 }

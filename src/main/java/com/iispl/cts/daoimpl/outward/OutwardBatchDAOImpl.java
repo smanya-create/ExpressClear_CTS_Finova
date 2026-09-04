@@ -12,37 +12,30 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
-public class OutwardBatchDAOImpl implements OutwardBatchDAO{
+public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 	@Override
 	public List<OutwardBatch> getVerifiedBatches() {
 		List<OutwardBatch> batches = new ArrayList<>();
-		 String selectSql =
-	                "SELECT outward_batch_id, "
-	                + "batch_reference_id, "
-	                + "actual_cheque_count, "
-	                + "actual_total_amount, "
-	                + "batch_status, "
-	                + "uploaded_by, "
-	                + "uploaded_at "
-	                + "FROM outward_batch "
-	                + "WHERE batch_status = ?";
-		try(Connection connection = DBConnection.getDataSource().getConnection();
-				PreparedStatement prepStmt = connection.prepareStatement(selectSql)){
-			prepStmt.setString(1,"Verified");
+		String selectSql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
+				+ "WHERE batch_status = ?";
+		try (Connection connection = DBConnection.getDataSource().getConnection();
+				PreparedStatement prepStmt = connection.prepareStatement(selectSql)) {
+			prepStmt.setString(1, "Verified");
 			ResultSet rs = prepStmt.executeQuery();
-			while(rs.next()) {
-				batches.add(new OutwardBatch(rs.getString("outward_batch_id"),rs.getString("batch_reference_id"),rs.getInt("actual_cheque_count"),rs.getBigDecimal("actual_total_amount"),rs.getString("batch_status"),rs.getString("uploaded_by"),rs.getTimestamp("uploaded_at")));
+			while (rs.next()) {
+				batches.add(new OutwardBatch(rs.getString("outward_batch_id"), rs.getString("batch_reference_id"),
+						rs.getInt("actual_cheque_count"), rs.getBigDecimal("actual_total_amount"),
+						rs.getString("batch_status"), rs.getString("uploaded_by"), rs.getTimestamp("uploaded_at")));
 			}
-			
-		}
-		catch(SQLException ex) {
+
+		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
 		}
-		
+
 		return batches;
 	}
-
 
 	@Override
 	public List<OutwardBatch> getRecentBatches() {
@@ -170,67 +163,86 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO{
 		return outwardBatch;
 	}
 
-    @Override
-    public String transferBatchFromScanToOutward(
-            Connection connection,
-            String scannedBatchId) {
+	@Override
+	public List<OutwardBatch> getBatchesReadyForDataEntry() {
 
-        if (connection == null) {
-            throw new IllegalArgumentException(
-                    "Connection cannot be null");
-        }
+		List<OutwardBatch> batches = new ArrayList<>();
 
-        if (scannedBatchId == null
-                || scannedBatchId.trim().isEmpty()) {
+		String sql = "SELECT ob.outward_batch_id, " + "ob.batch_reference_id, " + "ob.actual_cheque_count, "
+				+ "ob.actual_total_amount, " + "ob.batch_status, " + "ob.uploaded_by, " + "ob.uploaded_at "
+				+ "FROM outward_batch ob " + "WHERE UPPER(TRIM(ob.batch_status)) = 'PENDING' " + "AND EXISTS ( "
+				+ "SELECT 1 " + "FROM outward_cheque oc " + "WHERE oc.outward_batch_id = ob.outward_batch_id "
+				+ "AND UPPER(TRIM(oc.cheque_status)) = 'PENDING_DATA_ENTRY' " + ") " + "ORDER BY ob.uploaded_at ASC";
 
-            throw new IllegalArgumentException(
-                    "Scanned batch ID cannot be null or empty");
-        }
+		try (Connection connection = DBConnection.getConnection();
 
-        String sql =
-                "INSERT INTO outward_batch ("
-                + "batch_reference_id, "
-                + "actual_cheque_count, "
-                + "actual_total_amount, "
-                + "batch_status, "
-                + "uploaded_by"
-                + ") "
-                + "SELECT "
-                + "batch_reference_id, "
-                + "actual_cheque_count, "
-                + "actual_total_amount, "
-                + "'Pending', "
-                + "uploaded_by "
-                + "FROM scan_batch "
-                + "WHERE scanned_batch_id = ? "
-                + "RETURNING outward_batch_id";
+				PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-        try (PreparedStatement ps =
-                     connection.prepareStatement(sql)) {
+				ResultSet resultSet = preparedStatement.executeQuery()) {
 
-            ps.setString(1, scannedBatchId);
+			while (resultSet.next()) {
 
-            try (ResultSet rs =
-                         ps.executeQuery()) {
+				OutwardBatch batch = new OutwardBatch();
 
-                if (!rs.next()) {
+				batch.setOutwardBatchId(resultSet.getString("outward_batch_id"));
 
-                    throw new IllegalStateException(
-                            "Scan batch not found for batch ID: "
-                            + scannedBatchId);
-                }
+				batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
 
-                return rs.getString(
-                        "outward_batch_id");
-            }
+				batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
 
-        } catch (SQLException e) {
+				batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
 
-            throw new RuntimeException(
-                    "Failed to transfer scan batch "
-                    + scannedBatchId
-                    + " to outward batch",
-                    e);
-        }
-    }
+				batch.setBatchStatus(resultSet.getString("batch_status"));
+
+				batch.setUploadedBy(resultSet.getString("uploaded_by"));
+
+				batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
+
+				batches.add(batch);
+			}
+
+		} catch (Exception exception) {
+
+			exception.printStackTrace();
+		}
+
+		return batches;
+	}
+
+	@Override
+	public String transferBatchFromScanToOutward(Connection connection, String scannedBatchId) {
+
+		if (connection == null) {
+			throw new IllegalArgumentException("Connection cannot be null");
+		}
+
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+
+			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
+		}
+
+		String sql = "INSERT INTO outward_batch (" + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by" + ") " + "SELECT " + "batch_reference_id, "
+				+ "actual_cheque_count, " + "actual_total_amount, " + "'Pending', " + "uploaded_by "
+				+ "FROM scan_batch " + "WHERE scanned_batch_id = ? " + "RETURNING outward_batch_id";
+
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setString(1, scannedBatchId);
+
+			try (ResultSet rs = ps.executeQuery()) {
+
+				if (!rs.next()) {
+
+					throw new IllegalStateException("Scan batch not found for batch ID: " + scannedBatchId);
+				}
+
+				return rs.getString("outward_batch_id");
+			}
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException("Failed to transfer scan batch " + scannedBatchId + " to outward batch", e);
+		}
+	}
 }

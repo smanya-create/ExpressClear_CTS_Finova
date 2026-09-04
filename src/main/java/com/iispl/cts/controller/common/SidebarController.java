@@ -328,21 +328,21 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	public void onClickLogout() {
 		AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
 
-	    // Clear and invalidate current HTTP session
-	    if (Sessions.getCurrent() != null) {
-	        String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
-	        if (userId == null) {
-	            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
-	        }
-	        
-	        // Deregister user from real-time tracker
-	        ActiveUserManager.userLoggedOut(userId);
+		// Clear and invalidate current HTTP session
+		if (Sessions.getCurrent() != null) {
+			String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
+			if (userId == null) {
+				userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
+			}
 
-	        Sessions.getCurrent().invalidate();
-	    }
+			// Deregister user from real-time tracker
+			ActiveUserManager.userLoggedOut(userId);
 
-	    // Redirect back to login page
-	    Executions.sendRedirect("/common/login.zul");
+			Sessions.getCurrent().invalidate();
+		}
+
+		// Redirect back to login page
+		Executions.sendRedirect("/common/login.zul");
 	}
 
 }

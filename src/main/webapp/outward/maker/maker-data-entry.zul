@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?page title="CTS - Outward Processing" contentType="text/html;charset=UTF-8"?>
+<?page title="CTS - Outward Data Entry" contentType="text/html;charset=UTF-8"?>
 
-<zk>
+<?link rel="stylesheet" type="text/css" href="/css/outward/data-entry.css"?>
+
+<zk xmlns:h="xhtml">
 
 	<zscript>
 	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "OUTWARD_MAKER");
 	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Alex");
 </zscript>
 
-	<window id="outwardMakerRootWin" border="none" width="100%"
+	<window id="outwardDataEntryRootWin" border="none" width="100%"
 		height="100%"
 		style="margin: 0 !important; padding: 0 !important; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
 
@@ -19,9 +21,9 @@
 			<west size="220px" border="none"
 				style="margin: 0 !important; padding: 0 !important; background-color: #0b1d3a !important;">
 
-				<include id="sidebarInclude"
-					src="/components/sidebar.zul" role="OUTWARD_MAKER"
-					activeTab="outward-dashboard" vflex="1" hflex="1" />
+				<include src="/components/sidebar.zul"
+					role="OUTWARD_MAKER" activeTab="outward-data-entry" vflex="1"
+					hflex="1" />
 
 			</west>
 
@@ -33,10 +35,10 @@
 
 					<include id="headerInclude"
 						src="/components/header.zul" pageTitle="Maker Dashboard"
-						pageSubtitle="" hflex="1" />
+						pageSubtitle="Data Entry" />
 
 					<include id="mainContentArea" mode="instant"
-						src="/outward/maker/dashboard.zul" hflex="1" />
+						src="/outward/maker/data-entry.zul" hflex="1" />
 
 				</vlayout>
 

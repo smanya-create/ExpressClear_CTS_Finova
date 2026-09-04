@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?link rel="stylesheet" type="text/css" href="/css/outward/maker-dashboard.css"?>
-
 <zk>
+
+	<style src="/css/outward/maker-dashboard.css" />
 
 	<div id="outwardMakerDivDashboard" width="100%" height="100%"
 		apply="com.iispl.cts.controller.outward.maker.OutwardMakerDashboardController"
@@ -13,57 +13,25 @@
 			<label value="Welcome, Maker"
 				sclass="outward-maker-welcome-title" />
 
-			<label value="Here's your outward processing summary."
+			<label value="Manage and process outward cheque batches."
 				sclass="outward-maker-welcome-subtitle" />
 
 		</div>
 
-
-		<div sclass="outward-maker-search-card">
-
-			<div sclass="outward-maker-search-field">
-
-				<label value="Batch ID"
-					sclass="outward-maker-field-label" />
-
-				<textbox id="outwardMakerTxtBatchId"
-					placeholder="Search by Batch ID" width="100%"
-					sclass="outward-maker-search-input" />
-
-			</div>
-
-
-			<div sclass="outward-maker-search-field">
-
-				<label value="Status"
-					sclass="outward-maker-field-label" />
-
-				<combobox id="outwardMakerCmbStatus" width="100%"
-					readonly="true" sclass="outward-maker-status-combobox" />
-
-			</div>
-
-
-			<div sclass="outward-maker-search-actions">
-
-				<button id="outwardMakerBtnSearch" label="Search"
-					sclass="outward-maker-search-button" />
-
-				<button id="outwardMakerBtnClear" label="Clear"
-					sclass="outward-maker-clear-button" />
-
-			</div>
-
-		</div>
-
-
 		<div sclass="outward-maker-section-header">
 
-			<label value="Recent Batches"
-				sclass="outward-maker-section-title" />
+			<div>
+
+				<label value="Processing Batches"
+					sclass="outward-maker-section-title" />
+
+				<label
+					value="Batches currently available for outward processing."
+					sclass="outward-maker-section-subtitle" />
+
+			</div>
 
 		</div>
-
 
 		<div sclass="outward-maker-table-card">
 
@@ -72,20 +40,15 @@
 
 				<columns sizable="true">
 
-					<column id="outwardMakerColBatch" label="Batch"
-						width="25%" />
+					<column label="Batch ID" width="24%" />
 
-					<column id="outwardMakerColChequeCount"
-						label="No. of Cheques" width="18%" />
+					<column label="No. of Cheques" width="18%" />
 
-					<column id="outwardMakerColTotalAmount"
-						label="Total Amount" width="20%" />
+					<column label="Total Amount" width="22%" />
 
-					<column id="outwardMakerColStatus" label="Status"
-						width="18%" />
+					<column label="Status" width="17%" />
 
-					<column id="outwardMakerColAction" label="Action"
-						width="19%" />
+					<column label="Action" width="19%" />
 
 				</columns>
 
@@ -93,214 +56,38 @@
 
 			</grid>
 
-
 			<vlayout id="outwardMakerVlayoutEmptyState" visible="false"
 				sclass="outward-maker-empty-state">
 
-				<div id="outwardMakerDivEmptyContent"
-					sclass="outward-maker-empty-content">
+				<label value="No processing batches found"
+					sclass="outward-maker-empty-title" />
 
-					<label value="No batches found"
-						sclass="outward-maker-empty-title" />
-
-					<label value="No outward batches match your search."
-						sclass="outward-maker-empty-subtitle" />
-
-				</div>
+				<label
+					value="There are currently no batches available for outward processing."
+					sclass="outward-maker-empty-subtitle" />
 
 			</vlayout>
 
 		</div>
 
+		<div sclass="outward-maker-pagination">
 
-		<window id="outwardMakerWinBatchDetails" visible="false"
-			border="none" width="900px" height="82vh"
-			sclass="outward-maker-batch-details-window">
+			<button id="outwardMakerBtnFirst" label="&lt;&lt;"
+				sclass="outward-maker-pagination-button" />
 
-			<div sclass="outward-maker-modal-wrapper">
+			<button id="outwardMakerBtnPrevious" label="&lt;"
+				sclass="outward-maker-pagination-button" />
 
+			<label id="outwardMakerLblCurrentPage" value="1 / 1"
+				sclass="outward-maker-pagination-label" />
 
-				<div sclass="outward-maker-modal-header">
+			<button id="outwardMakerBtnNext" label="&gt;"
+				sclass="outward-maker-pagination-button" />
 
-					<div sclass="outward-maker-modal-header-text">
+			<button id="outwardMakerBtnLast" label="&gt;&gt;"
+				sclass="outward-maker-pagination-button" />
 
-						<label value="Batch Details"
-							sclass="outward-maker-modal-title" />
-
-						<label
-							value="Outward batch and cheque information"
-							sclass="outward-maker-modal-subtitle" />
-
-					</div>
-
-				</div>
-
-
-				<label id="outwardMakerLblBatchLoading" value=""
-					visible="false" sclass="outward-maker-batch-loading" />
-
-
-				<div sclass="outward-maker-modal-body">
-
-
-					<grid id="outwardMakerGridBatchSummary" width="100%"
-						sclass="outward-maker-summary-grid">
-
-						<columns>
-
-							<column width="17%" />
-							<column width="33%" />
-							<column width="17%" />
-							<column width="33%" />
-
-						</columns>
-
-
-						<rows id="outwardMakerRowsBatchSummary">
-
-
-							<row>
-
-								<label id="outwardMakerLblBatchIdTitle"
-									value="Batch ID" sclass="outward-maker-summary-label" />
-
-								<label id="outwardMakerLblBatchId"
-									value="-" sclass="outward-maker-summary-value" />
-
-								<label
-									id="outwardMakerLblBatchReferenceTitle" value="Batch Reference"
-									sclass="outward-maker-summary-label" />
-
-								<label
-									id="outwardMakerLblBatchReference" value="-"
-									sclass="outward-maker-summary-value" />
-
-							</row>
-
-
-							<row>
-
-								<label
-									id="outwardMakerLblBatchStatusTitle" value="Status"
-									sclass="outward-maker-summary-label" />
-
-								<label id="outwardMakerLblBatchStatus"
-									value="-" sclass="outward-maker-summary-value" />
-
-								<label
-									id="outwardMakerLblUploadedByTitle" value="Uploaded By"
-									sclass="outward-maker-summary-label" />
-
-								<label id="outwardMakerLblUploadedBy"
-									value="-" sclass="outward-maker-summary-value" />
-
-							</row>
-
-
-							<row>
-
-								<label
-									id="outwardMakerLblUploadedAtTitle" value="Uploaded At"
-									sclass="outward-maker-summary-label" />
-
-								<label id="outwardMakerLblUploadedAt"
-									value="-" sclass="outward-maker-summary-value" />
-
-								<label
-									id="outwardMakerLblTotalChequesTitle" value="Total Cheques"
-									sclass="outward-maker-summary-label" />
-
-								<label
-									id="outwardMakerLblModalTotalCheques" value="0"
-									sclass="outward-maker-summary-value" />
-
-							</row>
-
-
-							<row>
-
-								<label
-									id="outwardMakerLblTotalAmountTitle" value="Total Amount"
-									sclass="outward-maker-summary-label" />
-
-								<label
-									id="outwardMakerLblModalTotalAmount" value="0.00"
-									sclass="outward-maker-summary-amount" />
-
-								<label value=""
-									sclass="outward-maker-summary-label" />
-
-								<label value=""
-									sclass="outward-maker-summary-value" />
-
-							</row>
-
-						</rows>
-
-					</grid>
-
-
-					<div sclass="outward-maker-cheque-section-header">
-
-						<div sclass="outward-maker-cheque-section-line" />
-
-						<label id="outwardMakerLblChequeDetails"
-							value="Cheque Details"
-							sclass="outward-maker-cheque-section-title" />
-
-					</div>
-
-
-					<div sclass="outward-maker-cheque-table-card">
-
-						<grid id="outwardMakerGridChequeDetails"
-							width="100%" sclass="outward-maker-cheque-grid">
-
-							<columns sizable="true">
-
-								<column id="outwardMakerColChequeNumber"
-									label="Cheque No." width="14%" />
-
-								<column id="outwardMakerColMicrCode"
-									label="MICR" width="15%" />
-
-								<column id="outwardMakerColDrawee"
-									label="Drawee" width="18%" />
-
-								<column id="outwardMakerColPayee"
-									label="Payee" width="17%" />
-
-								<column id="outwardMakerColAmount"
-									label="Amount" width="12%" />
-
-								<column id="outwardMakerColDate"
-									label="Date" width="12%" />
-
-								<column id="outwardMakerColStatus"
-									label="Status" width="12%" />
-
-							</columns>
-
-							<rows id="outwardMakerRowsChequeDetails" />
-
-						</grid>
-
-					</div>
-
-				</div>
-
-
-				<div sclass="outward-maker-modal-footer">
-
-					<button id="outwardMakerBtnCloseBatchDetails"
-						label="Close" sclass="outward-maker-close-button" />
-
-				</div>
-
-
-			</div>
-
-		</window>
+		</div>
 
 	</div>
 
