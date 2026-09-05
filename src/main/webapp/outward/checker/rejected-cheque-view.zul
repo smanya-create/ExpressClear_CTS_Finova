@@ -1,0 +1,291 @@
+<?page title="Cheque Information" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet"
+        type="text/css"
+        href="/css/rejected-cheque-view.css"?>
+
+<zk>
+
+ <window id="viewWindow"
+        width="900px"
+        height="auto"
+        border="none"
+        closable="true"
+        mode="modal"
+        position="center"
+        sclass="rejected-details-window">
+
+        <!-- =====================================================
+             POPUP HEADER
+             ===================================================== -->
+
+        <div sclass="popup-header">
+
+            <vlayout spacing="4px">
+
+                <label value="Cheque Information"
+                       sclass="popup-title"
+                       style="font-size:22px;
+                              font-weight:bold;
+                              color:#173f68;
+                              display:block;"/>
+
+                <label value="Rejected cheque details"
+                       sclass="popup-subtitle"
+                       style="font-size:12px;
+                              font-weight:400;
+                              color:#7890a8;
+                              display:block;"/>
+
+            </vlayout>
+
+        </div>
+
+
+        <!-- =====================================================
+             CONTENT
+             ===================================================== -->
+
+        <div sclass="popup-content">
+
+
+            <!-- =================================================
+                 INFORMATION GRID
+                 ================================================= -->
+
+            <grid sclass="information-grid">
+
+                <columns>
+
+                    <column width="50%"/>
+                    <column width="50%"/>
+
+                </columns>
+
+
+                <rows>
+
+
+                    <!-- =================================================
+                         ROW 1
+                         ================================================= -->
+
+                    <row sclass="information-row">
+
+                        <!-- BATCH ID -->
+
+                        <vlayout sclass="info-item">
+
+                            <label value="BATCH ID"
+                                   sclass="info-label"
+                                   style="font-size:11px;
+                                          font-weight:bold;
+                                          color:#1d4e7a;
+                                          display:block;
+                                          letter-spacing:0.7px;"/>
+
+                            <label id="lblBatchId"
+                                   value="-"
+                                   sclass="info-value"
+                                   style="font-size:13px;
+                                          font-weight:400;
+                                          color:#526b84;
+                                          display:block;"/>
+
+                        </vlayout>
+
+
+                        <!-- CHEQUE NUMBER -->
+
+                        <vlayout sclass="info-item">
+
+                            <label value="CHEQUE NUMBER"
+                                   sclass="info-label"
+                                   style="font-size:11px;
+                                          font-weight:bold;
+                                          color:#1d4e7a;
+                                          display:block;
+                                          letter-spacing:0.7px;"/>
+
+                            <label id="lblChequeNumber"
+                                   value="-"
+                                   sclass="info-value"
+                                   style="font-size:13px;
+                                          font-weight:400;
+                                          color:#526b84;
+                                          display:block;"/>
+
+                        </vlayout>
+
+                    </row>
+
+
+                    <!-- =================================================
+                         ROW 2
+                         ================================================= -->
+
+                    <row sclass="information-row">
+
+                        <!-- AMOUNT -->
+
+                        <vlayout sclass="info-item">
+
+                            <label value="CHEQUE AMOUNT"
+                                   sclass="info-label"
+                                   style="font-size:11px;
+                                          font-weight:bold;
+                                          color:#1d4e7a;
+                                          display:block;
+                                          letter-spacing:0.7px;"/>
+
+                            <label id="lblAmount"
+                                   value="-"
+                                   sclass="amount-value"
+                                   style="font-size:13px;
+                                          font-weight:400;
+                                          color:#526b84;
+                                          display:block;"/>
+
+                        </vlayout>
+
+
+                        <!-- REJECTED BY -->
+
+                        <vlayout sclass="info-item">
+
+                            <label value="REJECTED BY"
+                                   sclass="info-label"
+                                   style="font-size:11px;
+                                          font-weight:bold;
+                                          color:#1d4e7a;
+                                          display:block;
+                                          letter-spacing:0.7px;"/>
+
+                            <label id="lblRejectedBy"
+                                   value="-"
+                                   sclass="info-value"
+                                   style="font-size:13px;
+                                          font-weight:400;
+                                          color:#526b84;
+                                          display:block;"/>
+
+                        </vlayout>
+
+                    </row>
+
+
+                    <!-- =================================================
+                         ROW 3
+                         ================================================= -->
+
+                    <row sclass="information-row">
+
+                        <!-- REJECTED ON -->
+
+                        <vlayout sclass="info-item">
+
+                            <label value="REJECTED ON"
+                                   sclass="info-label"
+                                   style="font-size:11px;
+                                          font-weight:bold;
+                                          color:#1d4e7a;
+                                          display:block;
+                                          letter-spacing:0.7px;"/>
+
+                            <label id="lblRejectedDate"
+                                   value="-"
+                                   sclass="info-value"
+                                   style="font-size:13px;
+                                          font-weight:400;
+                                          color:#526b84;
+                                          display:block;"/>
+
+                        </vlayout>
+
+
+                        <!-- STATUS -->
+
+                        <vlayout sclass="info-item">
+
+                            <label value="STATUS"
+                                   sclass="info-label"
+                                   style="font-size:11px;
+                                          font-weight:bold;
+                                          color:#1d4e7a;
+                                          display:block;
+                                          letter-spacing:0.7px;"/>
+
+                            <label value="REJECTED"
+                                   sclass="status-badge"/>
+
+                        </vlayout>
+
+                    </row>
+
+
+                    <!-- =================================================
+                         ROW 4 - REJECTION REASON
+                         ================================================= -->
+
+                    <row sclass="reason-row">
+
+                        <cell colspan="2"
+                              sclass="reason-cell">
+
+                            <vlayout sclass="reason-container">
+
+                                <!-- REJECTION REASON HEADING -->
+
+                                <label value="Rejection Reason"
+                                       sclass="reason-title"
+                                       style="font-size:15px;
+                                              font-weight:bold;
+                                              color:#173f68;
+                                              display:block;"/>
+
+
+                                <!-- REASON -->
+
+                                <div sclass="reason-box">
+
+                                    <label id="lblReason"
+                                           value="-"
+                                           sclass="reason-value"
+                                           style="font-size:13px;
+                                                  font-weight:400;
+                                                  color:#704545;
+                                                  display:block;"/>
+
+                                </div>
+
+                            </vlayout>
+
+                        </cell>
+
+                    </row>
+
+
+                </rows>
+
+            </grid>
+
+
+            <!-- =====================================================
+                 FOOTER
+                 ===================================================== -->
+
+            <div sclass="popup-footer">
+
+                <button id="btnClose"
+                        label="Close"
+                        onClick="viewWindow.detach();"
+                        sclass="close-button"/>
+
+            </div>
+
+
+        </div>
+
+    </window>
+
+</zk>
