@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
@@ -94,7 +95,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     private Button btnCancelCompletionModal;
     private Button btnConfirmCompletionModal;
 
-    // Image Mapping
+    // Fallback Image Mapping (Used only when DB has no image paths)
     private static final Map<String, String[]> IMAGE_MAP = new HashMap<>();
     static {
         IMAGE_MAP.put("CH1005", new String[]{"/Batch1001-images/cheque001_front.png", "/Batch1001-images/cheque001_back.png"});
@@ -106,7 +107,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
     private List<InwardCheque> activeQueue;
     private int currentIndex = 0;
-    private String currentBatchId = "BAT1001";
+    private String currentBatchId;
 
     // Viewer transformation state
     private boolean isViewingFront = true;
@@ -117,13 +118,25 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        String paramBatch = execution.getParameter("batchId");
-        if (paramBatch != null && !paramBatch.trim().isEmpty()) {
-            currentBatchId = paramBatch.trim();
+        // 1. Check Session first (set by Batch Queue Controller)
+        String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_INWARD_BATCH_ID");
+        if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
+            currentBatchId = sessionBatch.trim();
+        } else {
+            // 2. Fallback to URL parameter
+            String paramBatch = execution.getParameter("batchId");
+            if (paramBatch != null && !paramBatch.trim().isEmpty()) {
+                currentBatchId = paramBatch.trim();
+            }
         }
 
-        // Fast initial load: loads batch and cheque without hitting dropdown reference tables
-        loadBatch(currentBatchId);
+        System.out.println("DEBUG: InwardDataEntryController loaded with Batch ID -> " + currentBatchId);
+
+        if (currentBatchId != null) {
+            loadBatch(currentBatchId);
+        } else {
+            Messagebox.show("No active batch selected for Data Entry.", "Warning", Messagebox.OK, Messagebox.EXCLAMATION);
+        }
     }
 
     private void populateRejectedReasons() {
@@ -155,7 +168,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             }
         }
 
-        // Fetch all cheques in batch
+        // Fetch cheques for this batch
         this.activeQueue = chequeService.getChequesByBatchAndStatus(batchId, null);
         this.currentIndex = 0;
 
@@ -180,14 +193,16 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         InwardCheque item = activeQueue.get(currentIndex);
 
         // Header and position indicators
-        if (lblChequeNo != null) lblChequeNo.setValue(item.getChequeNumber());
+        if (lblChequeNo != null) lblChequeNo.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "-");
         if (lblChequePosition != null) lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
 
         if (lblDataStatus != null) {
             String status = item.getChequeStatus();
-            if ("PENDING_DATA_ENTRY".equalsIgnoreCase(status)) {
+            if ("DATA_ENTRY_PENDING".equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("PENDING");
-            } else if ("DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)) {
+            } else if ("DATA_ENTRY_IN_PROGRESS".equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("IN PROGRESS");
+            } else if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status) || "ACCEPTED".equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("COMPLETED");
             } else {
                 lblDataStatus.setValue(status != null ? status : "PENDING");
@@ -199,7 +214,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         resetImageTransformations();
         updateDisplayedImage(item);
 
-        // Form Fields
+        // Form Fields (populate strictly with database record values)
         if (txtChequeNumber != null) txtChequeNumber.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "");
         if (txtChequeDate != null) txtChequeDate.setValue(item.getChequeDate() != null ? item.getChequeDate().toString() : "");
         if (txtAmount != null) txtAmount.setValue(item.getChequeAmount() != null ? "₹ " + item.getChequeAmount().toPlainString() : "");
@@ -222,7 +237,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
         int total = activeQueue.size();
         long resolvedCount = activeQueue.stream()
-                .filter(c -> "ACCEPTED".equalsIgnoreCase(c.getChequeStatus()) 
+                .filter(c -> "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(c.getChequeStatus())
+                          || "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
                           || "REJECTED".equalsIgnoreCase(c.getChequeStatus())
                           || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
                 .count();
@@ -236,7 +252,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             lblProgressText.setValue(resolvedCount + "/" + total + " (" + percentage + "%)");
         }
 
-        // Reveal the "Proceed with Maker Completion" button once all items in the batch are decided
         boolean allResolved = (resolvedCount == total);
         if (btnProceedToCompletion != null) {
             btnProceedToCompletion.setVisible(allResolved);
@@ -298,9 +313,31 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     // --- IMAGE VIEWER CONTROLS ---
     private void updateDisplayedImage(InwardCheque item) {
         if (imgCheque == null) return;
-        String[] paths = IMAGE_MAP.get(item.getInwardChequeId());
-        if (paths != null) {
-            imgCheque.setSrc(isViewingFront ? paths[0] : paths[1]);
+        
+        String frontImg = null;
+        String backImg = null;
+
+        // Try to obtain image paths directly from entity if methods exist
+        try {
+            java.lang.reflect.Method mFront = item.getClass().getMethod("getFrontImagePath");
+            frontImg = (String) mFront.invoke(item);
+            java.lang.reflect.Method mBack = item.getClass().getMethod("getBackImagePath");
+            backImg = (String) mBack.invoke(item);
+        } catch (Exception ignored) {}
+
+        // Fallback to static mapping if entity paths are null
+        if (frontImg == null || frontImg.trim().isEmpty()) {
+            String[] paths = IMAGE_MAP.get(item.getInwardChequeId());
+            if (paths != null) {
+                frontImg = paths[0];
+                backImg = paths[1];
+            }
+        }
+
+        if (frontImg != null) {
+            imgCheque.setSrc(isViewingFront ? frontImg : (backImg != null ? backImg : frontImg));
+        } else {
+            imgCheque.setSrc(null);
         }
         applyImageStyle();
     }
@@ -377,7 +414,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         String rawAmount = txtAmount.getValue().replace("₹", "").replace(",", "").trim();
         current.setChequeAmount(new BigDecimal(rawAmount));
         current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
-        current.setChequeStatus("ACCEPTED");
+        current.setChequeStatus("CHECKER_PROCESSING_PENDING");
 
         chequeService.updateChequeDetails(current);
 
@@ -397,7 +434,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     public void onClick$btnRequestRejection() {
         if (activeQueue == null || activeQueue.isEmpty()) return;
 
-        // Lazy-load rejected reasons from database on first open
         if (cmbModalRejectionReason != null && cmbModalRejectionReason.getItemCount() == 0) {
             populateRejectedReasons();
         }
@@ -447,7 +483,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     public void onClick$btnProceedToCompletion() {
         if (activeQueue == null || activeQueue.isEmpty()) return;
 
-        long accepted = activeQueue.stream().filter(c -> "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())).count();
+        long accepted = activeQueue.stream().filter(c -> "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(c.getChequeStatus()) || "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())).count();
         long rejected = activeQueue.stream().filter(c -> "REJECTED".equalsIgnoreCase(c.getChequeStatus())).count();
 
         if (lblModalTotal != null) lblModalTotal.setValue(String.valueOf(activeQueue.size()));
@@ -470,10 +506,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             winCompletionConfirmModal.setVisible(false);
         }
 
-        // 1. Transition batch status to remove it from Data Entry queue
-        batchService.updateBatchStatus(currentBatchId, "READY_FOR_COMPLETION");
-
-        // 2. Redirect to Maker Completion module
+        batchService.updateBatchStatus(currentBatchId, "CHECKER_PROCESSING_PENDING");
         Executions.sendRedirect("/inward/maker/maker-completion.zul?batchId=" + currentBatchId);
     }
 

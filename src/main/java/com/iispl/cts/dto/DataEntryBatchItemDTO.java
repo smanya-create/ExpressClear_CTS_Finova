@@ -2,42 +2,66 @@ package com.iispl.cts.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 
 public class DataEntryBatchItemDTO implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
-    // Fields matching inward_batch directly
     private String batchId;
     private int totalCheques;
+    private int pendingCheques;
     private BigDecimal totalAmount;
     private String batchStatus;
 
-    // The single dynamic metric from inward_cheque
-    private int pendingCheques;
+    public DataEntryBatchItemDTO() {
+    }
 
-    public DataEntryBatchItemDTO() {}
+    public String getBatchId() {
+        return batchId;
+    }
 
-    // Getters and Setters
-    public String getBatchId() { return batchId; }
-    public void setBatchId(String batchId) { this.batchId = batchId; }
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
+    }
 
-    public int getTotalCheques() { return totalCheques; }
-    public void setTotalCheques(int totalCheques) { this.totalCheques = totalCheques; }
+    public int getTotalCheques() {
+        return totalCheques;
+    }
 
-    public BigDecimal getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    public void setTotalCheques(int totalCheques) {
+        this.totalCheques = totalCheques;
+    }
 
-    public String getBatchStatus() { return batchStatus; }
-    public void setBatchStatus(String batchStatus) { this.batchStatus = batchStatus; }
+    public int getPendingCheques() {
+        return pendingCheques;
+    }
 
-    public int getPendingCheques() { return pendingCheques; }
-    public void setPendingCheques(int pendingCheques) { this.pendingCheques = pendingCheques; }
+    public void setPendingCheques(int pendingCheques) {
+        this.pendingCheques = pendingCheques;
+    }
 
-    // UI Presentation Helpers
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public String getBatchStatus() {
+        return batchStatus;
+    }
+
+    public void setBatchStatus(String batchStatus) {
+        this.batchStatus = batchStatus;
+    }
+
+    // Dynamic UI helper methods for ZUL template expressions
     public String getFormattedAmount() {
-        if (totalAmount == null) return "0.00";
-        return new DecimalFormat("##,##,##0.00").format(totalAmount);
+        if (totalAmount == null) {
+            return "₹ 0.00";
+        }
+        return String.format("₹ %,.2f", totalAmount);
     }
 
     public String getActionLabel() {
@@ -51,8 +75,12 @@ public class DataEntryBatchItemDTO implements Serializable {
     }
 
     public String getActionButtonClass() {
-        if (pendingCheques == 0) return "btn-action-submit";
-        if (pendingCheques < totalCheques) return "btn-action-resume";
-        return "btn-action-start";
+        if (pendingCheques == 0) {
+            return "btn-action-submit";
+        } else if (pendingCheques < totalCheques) {
+            return "btn-action-resume";
+        } else {
+            return "btn-action-start";
+        }
     }
 }

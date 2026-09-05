@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <?page title="Data Entry Batches" contentType="text/html;charset=UTF-8"?>
 <zk xmlns:n="native">
   <style>
@@ -13,7 +14,7 @@
   </style>
 
   <vlayout hflex="1" style="min-height: 350px; background-color: #f1f5f9; padding: 18px 24px;" 
-         apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController" spacing="16px">
+           apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController" spacing="16px">
              
     <div sclass="cts-card" hflex="1">
       <hlayout style="display: flex; justify-content: space-between; align-items: center;">
@@ -36,21 +37,6 @@
           <listheader label="Batch Status" width="170px" align="center" />
           <listheader label="Action" hflex="1" align="center" />
         </listhead>
-
-        <template name="model">
-          <listitem value="${each}" style="border-bottom: 1px solid #f1f5f9;">
-            <listcell label="${each.batchId}" style="font-weight: 700; color: #1e293b;" />
-            <listcell label="${each.totalCheques}" style="font-weight: 500;" />
-            <listcell label="${each.pendingCheques}" style="color: #0284c7; font-weight: 600;" />
-            <listcell label="${each.formattedAmount}" style="font-family: monospace; font-size: 13px; font-weight: 600;" />
-            <listcell label="${each.batchStatus}" />
-            <listcell>
-              <button label="${each.actionLabel}" 
-                      sclass="${each.actionButtonClass}"
-                      forward="onClick=lbxDataEntryBatches.onProcessBatch(${each})" />
-            </listcell>
-          </listitem>
-        </template>
       </listbox>
     </div>
 
