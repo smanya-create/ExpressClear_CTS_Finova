@@ -14,6 +14,7 @@
         <!-- =====================================================
              MAIN PAGE CONTENT
              ===================================================== -->
+
         <div width="100%"
              sclass="upload-batch-page">
 
@@ -37,7 +38,7 @@
                       sclass="batch-control-groupbox">
 
                 <caption label="BATCH CONTROL INFORMATION"
-                          sclass="groupbox-caption" />
+                         sclass="groupbox-caption" />
 
                 <vlayout width="100%"
                          spacing="16px"
@@ -55,7 +56,7 @@
                             <label value="Expected Cheque Count *"
                                    sclass="form-label" />
 
-                            <intbox id="expectedTotalCheques"
+                            <intbox id="txtExpectedTotalCheques"
                                     placeholder="Enter expected number of cheques"
                                     sclass="form-input"
                                     width="100%" />
@@ -68,7 +69,7 @@
                             <label value="Expected Total Amount *"
                                    sclass="form-label" />
 
-                            <decimalbox id="expectedTotalChequeAmount"
+                            <decimalbox id="txtExpectedTotalChequeAmount"
                                         placeholder="Enter expected total amount"
                                         sclass="form-input"
                                         width="100%" />
@@ -89,13 +90,13 @@
                                  spacing="12px"
                                  sclass="folder-row">
 
-                            <textbox id="chequeFolder"
+                            <textbox id="txtChequeFolder"
                                      placeholder="Cheque ZIP file selected"
                                      readonly="true"
                                      hflex="1"
                                      sclass="form-input folder-input" />
 
-                            <button id="browseButton"
+                            <button id="btnBrowse"
                                     label="Browse"
                                     sclass="btn-browse"
                                     upload="true,maxsize=104857600" />
@@ -115,7 +116,7 @@
                         <label value="Batch Number"
                                sclass="form-label" />
 
-                        <textbox id="batchNumber"
+                        <textbox id="txtBatchNumber"
                                  readonly="true"
                                  placeholder="Generated from batch XML"
                                  sclass="form-input"
@@ -131,7 +132,7 @@
 
                     <div class="form-actions-inline">
 
-                        <button id="validateBatchButton"
+                        <button id="btnValidateBatch"
                                 label="Validate Batch"
                                 sclass="btn-validate"
                                 disabled="true" />
@@ -145,7 +146,7 @@
 
             <!-- ================= SUCCESS MESSAGE ================= -->
 
-            <div id="successMessage"
+            <div id="divSuccessMessage"
                  visible="false"
                  sclass="success-message">
 
@@ -158,7 +159,7 @@
                     <label value="Batch Uploaded Successfully"
                            sclass="success-title" />
 
-                    <label id="successText"
+                    <label id="lblSuccessText"
                            value=""
                            sclass="success-text" />
 
@@ -169,13 +170,13 @@
 
             <!-- ================= SCANNED CHEQUES ================= -->
 
-            <groupbox id="scannedChequesWindow"
+            <groupbox id="grpScannedChequesWindow"
                       visible="false"
                       width="100%"
                       sclass="scanned-cheques-section">
 
                 <caption label="Scanned Cheques"
-                          sclass="groupbox-caption" />
+                         sclass="groupbox-caption" />
 
                 <div width="100%"
                      sclass="scanned-cheques-content">
@@ -184,20 +185,20 @@
                              spacing="12px"
                              sclass="section-header">
 
-                        <label id="scannedChequeTitle"
+                        <label id="lblScannedChequeTitle"
                                value="Scanned Cheques"
                                sclass="section-title" />
 
                         <div sclass="stat-badge normal">
 
-                            <label id="normalCount"
+                            <label id="lblNormalCount"
                                    value="0 NORMAL" />
 
                         </div>
 
                         <div sclass="stat-badge micr-repair">
 
-                            <label id="micrRepairCount"
+                            <label id="lblMicrRepairCount"
                                    value="0 MICR REPAIR" />
 
                         </div>
@@ -207,7 +208,7 @@
 
                     <!-- ================= CHEQUE LIST ================= -->
 
-                    <listbox id="chequeList"
+                    <listbox id="lstChequeList"
                              width="100%"
                              sclass="scanned-cheques-table"
                              mold="paging"

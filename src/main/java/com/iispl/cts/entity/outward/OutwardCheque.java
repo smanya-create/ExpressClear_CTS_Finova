@@ -27,9 +27,7 @@ public class OutwardCheque implements Serializable {
     private String cityCode;
     private String bankCode;
     private String branchCode;
-    
-    private String chequeImageFront;
-    private String chequeImageBack;
+   
 
     public OutwardCheque() {
     }
@@ -39,7 +37,7 @@ public class OutwardCheque implements Serializable {
     public OutwardCheque(String outwardChequeId, String outwardBatchId, String chequeNumber, String micrCode,
 			String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber,
 			BigDecimal chequeAmount, Date chequeDate, String chequeStatus, String accountId, Timestamp createdAt,
-			String cityCode, String bankCode, String branchCode, String chequeImageFront, String chequeImageBack) {
+			String cityCode, String bankCode, String branchCode) {
 		super();
 		this.outwardChequeId = outwardChequeId;
 		this.outwardBatchId = outwardBatchId;
@@ -57,27 +55,10 @@ public class OutwardCheque implements Serializable {
 		this.cityCode = cityCode;
 		this.bankCode = bankCode;
 		this.branchCode = branchCode;
-		this.chequeImageFront = chequeImageFront;
-		this.chequeImageBack = chequeImageBack;
+	
 	}
 
 
-
-	public String getChequeImageFront() {
-		return chequeImageFront;
-	}
-
-	public void setChequeImageFront(String chequeImageFront) {
-		this.chequeImageFront = chequeImageFront;
-	}
-
-	public String getChequeImageBack() {
-		return chequeImageBack;
-	}
-
-	public void setChequeImageBack(String chequeImageBack) {
-		this.chequeImageBack = chequeImageBack;
-	}
 
     public String getOutwardChequeId() {
         return outwardChequeId;

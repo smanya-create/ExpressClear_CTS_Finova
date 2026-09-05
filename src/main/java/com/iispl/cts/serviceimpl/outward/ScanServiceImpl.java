@@ -32,7 +32,7 @@ public class ScanServiceImpl implements ScanService {
 	 */
 
 	@Override
-	public String saveScanBatch(ScanBatch scanBatch, List<ScanCheque> chequeList, List<ScanChequeImage> imageList) {
+	public String saveScanBatch(ScanBatch scanBatch, List<ScanCheque> chequeList) {
 
 		/*
 		 * ------------------------------------------------- Validate input

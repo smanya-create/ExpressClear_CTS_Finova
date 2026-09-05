@@ -18,4 +18,5 @@ public interface OutwardBatchService {
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 
+
 }

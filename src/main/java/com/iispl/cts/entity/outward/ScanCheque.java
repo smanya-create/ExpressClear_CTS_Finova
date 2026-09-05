@@ -1,7 +1,5 @@
 package com.iispl.cts.entity.outward;
 
-
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -9,31 +7,29 @@ import java.sql.Timestamp;
 
 public class ScanCheque implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private String scannedChequeId;
-    private String scannedBatchId;
-    private String chequeNumber;
-    private String micrCode;
-    private String draweeName;
-    private String draweeAccountNumber;
-    private String payeeName;
-    private String payeeAccountNumber;
-    private BigDecimal chequeAmount;
-    private Date chequeDate;
-    private String chequeStatus;
-    private String accountId;
-    private Timestamp createdAt;
-    private String cityCode;
-    private String bankCode;
-    private String branchCode;
-    private String chequeImageFront;
-    private String chequeImageBack;
+	private String scannedChequeId;
+	private String scannedBatchId;
+	private String chequeNumber;
+	private String micrCode;
+	private String draweeName;
+	private String draweeAccountNumber;
+	private String payeeName;
+	private String payeeAccountNumber;
+	private BigDecimal chequeAmount;
+	private Date chequeDate;
+	private String chequeStatus;
+	private String accountId;
+	private Timestamp createdAt;
+	private String cityCode;
+	private String bankCode;
+	private String branchCode;
+	private String chequeImageFront;
+	private String chequeImageBack;
 
-    public ScanCheque() {
-    }
-
-	
+	public ScanCheque() {
+	}
 
 	public ScanCheque(String scannedChequeId, String scannedBatchId, String chequeNumber, String micrCode,
 			String draweeName, String draweeAccountNumber, String payeeName, String payeeAccountNumber,
@@ -59,68 +55,6 @@ public class ScanCheque implements Serializable {
 		this.chequeImageFront = chequeImageFront;
 		this.chequeImageBack = chequeImageBack;
 	}
-
-
-
-	public String getChequeImageFront() {
-		return chequeImageFront;
-	}
-
-
-
-	public void setChequeImageFront(String chequeImageFront) {
-		this.chequeImageFront = chequeImageFront;
-	}
-
-
-
-	public String getChequeImageBack() {
-		return chequeImageBack;
-	}
-
-
-
-	public void setChequeImageBack(String chequeImageBack) {
-		this.chequeImageBack = chequeImageBack;
-	}
-
-
-
-	public String getCityCode() {
-		return cityCode;
-	}
-
-
-
-	public void setCityCode(String cityCode) {
-		this.cityCode = cityCode;
-	}
-
-
-
-	public String getBankCode() {
-		return bankCode;
-	}
-
-
-
-	public void setBankCode(String bankCode) {
-		this.bankCode = bankCode;
-	}
-
-
-
-	public String getBranchCode() {
-		return branchCode;
-	}
-
-
-
-	public void setBranchCode(String branchCode) {
-		this.branchCode = branchCode;
-	}
-
-
 
 	public String getScannedChequeId() {
 		return scannedChequeId;
@@ -226,9 +160,44 @@ public class ScanCheque implements Serializable {
 		this.createdAt = createdAt;
 	}
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
+	public String getCityCode() {
+		return cityCode;
 	}
 
-   
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
+	}
+
+	public String getBankCode() {
+		return bankCode;
+	}
+
+	public void setBankCode(String bankCode) {
+		this.bankCode = bankCode;
+	}
+
+	public String getBranchCode() {
+		return branchCode;
+	}
+
+	public void setBranchCode(String branchCode) {
+		this.branchCode = branchCode;
+	}
+
+	public String getChequeImageFront() {
+		return chequeImageFront;
+	}
+
+	public void setChequeImageFront(String chequeImageFront) {
+		this.chequeImageFront = chequeImageFront;
+	}
+
+	public String getChequeImageBack() {
+		return chequeImageBack;
+	}
+
+	public void setChequeImageBack(String chequeImageBack) {
+		this.chequeImageBack = chequeImageBack;
+	}
+
 }

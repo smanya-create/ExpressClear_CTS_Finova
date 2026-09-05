@@ -17,7 +17,7 @@ public interface ScanService {
 	 * If anything fails: ROLLBACK everything
 	 * =====================================================
 	 */
-	String saveScanBatch(ScanBatch scanBatch, List<ScanCheque> chequeList, List<ScanChequeImage> imageList);
+	String saveScanBatch(ScanBatch scanBatch, List<ScanCheque> chequeList);
 
 	/*
 	 * ===================================================== Retrieve batch by batch
