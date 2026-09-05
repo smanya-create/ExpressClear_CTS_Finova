@@ -21,7 +21,7 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 
-import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.RejectedReasonService;
@@ -130,9 +130,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         if (cmbModalRejectionReason == null) return;
         cmbModalRejectionReason.getChildren().clear();
 
-        List<RejectedResaon> reasons = rejectedReasonService.getAllRejectedReasons();
+        List<RejectedReason> reasons = rejectedReasonService.getAllRejectedReasons();
         if (reasons != null) {
-            for (RejectedResaon r : reasons) {
+            for (RejectedReason r : reasons) {
                 String label = "[" + r.getRejectedReasonCode() + "] " + r.getRejectedReasonName();
                 Comboitem item = new Comboitem(label);
                 item.setValue(r.getRejectedReasonCode());

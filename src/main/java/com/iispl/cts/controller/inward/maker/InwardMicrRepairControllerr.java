@@ -11,7 +11,7 @@ import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 import com.iispl.cts.validator.MICRValidator;
 import com.iispl.cts.validatorimpl.MICRValidatorImpl;
-import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.entity.inward.InwardBatch;
@@ -75,7 +75,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private RejectedReasonService rejectedReasonService;
 
-	private List<RejectedResaon> rejectedReasons;
+	private List<RejectedReason> rejectedReasons;
 
 	private Combobox cmbRejectReason;
 
@@ -111,7 +111,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		for (RejectedResaon reason : rejectedReasons) {
+		for (RejectedReason reason : rejectedReasons) {
 			Comboitem item = new Comboitem();
 
 			item.setLabel(reason.getRejectedReasonCode() + " - " + reason.getRejectedReasonName());
