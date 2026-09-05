@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="MICR Cheque List" contentType="text/html;charset=UTF-8"?>
+
+<zk>
+
+	<style src="/css/inward/micr-cheque-list.css" />
+
+	<vlayout id="micrChequeListRoot" sclass="micr-cheque-list-page"
+		width="100%" spacing="0">
+
+		
+		<hlayout sclass="page-heading-row" width="100%"
+			valign="middle">
+
+			<vlayout spacing="2px" hflex="1">
+
+				<label value="MICR Repair — Cheque List"
+					sclass="page-title" />
+
+				<label
+					value="Select a cheque to open the MICR repair workspace."
+					sclass="page-subtitle" />
+
+			</vlayout>
+
+			<button label="Back to Queue" sclass="back-button"
+				onClick="$composer.backToQueue()" />
+
+		</hlayout>
+
+
+	
+		<hlayout sclass="batch-summary-row" width="100%"
+			spacing="10px">
+
+			<div sclass="summary-card">
+				<vlayout spacing="3px">
+					<label value="Batch ID" sclass="summary-label" />
+					<label id="lblBatchId" value="BATCH-2026-09-04-001"
+						sclass="summary-value batch-value" />
+				</vlayout>
+			</div>
+
+			<div sclass="summary-card">
+				<vlayout spacing="3px">
+					<label value="Total Cheques" sclass="summary-label" />
+					<label id="lblTotalCheques" value="8"
+						sclass="summary-value" />
+				</vlayout>
+			</div>
+
+			<div sclass="summary-card">
+				<vlayout spacing="3px">
+					<label value="MICR Repair Pending"
+						sclass="summary-label" />
+					<label id="lblPendingCount" value="4"
+						sclass="summary-value warning-value" />
+				</vlayout>
+			</div>
+
+		</hlayout>
+
+
+		<div sclass="cheque-list-card">
+
+			<hlayout sclass="list-card-header" width="100%"
+				valign="middle">
+
+				<vlayout spacing="2px" hflex="1">
+
+					<label value="Cheques Requiring MICR Repair"
+						sclass="card-title" />
+
+					<label
+						value="Only cheques pending MICR repair are shown."
+						sclass="card-subtitle" />
+
+				</vlayout>
+
+			</hlayout>
+
+
+			<listbox id="chequeList" sclass="cheque-list" width="100%"
+				mold="paging" pageSize="10"
+				emptyMessage="No cheques are currently pending MICR repair.">
+
+				<listhead sizable="true">
+
+					<listheader label="Item" width="8%" align="center" />
+
+					<listheader label="Cheque Number" width="16%" />
+
+					<listheader label="Current MICR" width="18%" />
+
+					<listheader label="Drawee" width="20%" />
+
+					<listheader label="Amount" width="14%"
+						align="right" />
+
+					<listheader label="Status" width="12%"
+						align="center" />
+
+					<listheader label="Action" width="12%"
+						align="center" />
+
+				</listhead>
+
+
+				
+				<listitem>
+
+					<listcell>
+						<label value="1"
+							sclass="table-text center-text" />
+					</listcell>
+
+					<listcell>
+						<label value="104521" sclass="cheque-number" />
+					</listcell>
+
+					<listcell>
+						<label value="560229001" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="Rajesh Sharma"
+							sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="₹25,000.00" sclass="amount-text" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+						<button label="Open" sclass="open-button" />
+					</listcell>
+
+				</listitem>
+
+
+				<listitem>
+
+					<listcell>
+						<label value="2"
+							sclass="table-text center-text" />
+					</listcell>
+
+					<listcell>
+						<label value="104522" sclass="cheque-number" />
+					</listcell>
+
+					<listcell>
+						<label value="560229002" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="Amit Kumar" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="₹18,500.00" sclass="amount-text" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+						<button label="Open" sclass="open-button" />
+					</listcell>
+
+				</listitem>
+
+
+			
+				<listitem>
+
+					<listcell>
+						<label value="3"
+							sclass="table-text center-text" />
+					</listcell>
+
+					<listcell>
+						<label value="104523" sclass="cheque-number" />
+					</listcell>
+
+					<listcell>
+						<label value="560229003" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="Priya Nair" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="₹42,000.00" sclass="amount-text" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+						<button label="Open" sclass="open-button" />
+					</listcell>
+
+				</listitem>
+
+
+			
+				<listitem>
+
+					<listcell>
+						<label value="4"
+							sclass="table-text center-text" />
+					</listcell>
+
+					<listcell>
+						<label value="104524" sclass="cheque-number" />
+					</listcell>
+
+					<listcell>
+						<label value="560229004" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="Suresh Patel" sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="₹31,750.00" sclass="amount-text" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+						<button label="Open" sclass="open-button" />
+					</listcell>
+
+				</listitem>
+
+			</listbox>
+
+		</div>
+
+	</vlayout>
+
+</zk>
