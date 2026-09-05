@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.outward.maker;
 
 import java.math.BigDecimal;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
-import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.outward.OutwardChequeService;
@@ -439,7 +440,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 	private void loadRejectedReasons() {
 
-		List<RejectedResaon> rejectedReasons = rejectedReasonService.getAllRejectedReasons();
+		List<RejectedReason> rejectedReasons = rejectedReasonService.getAllRejectedReasons();
 
 		outwardChequeDataEntryCmbRejectReason.getItems().clear();
 
@@ -447,7 +448,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
-		for (RejectedResaon rejectedReason : rejectedReasons) {
+		for (RejectedReason rejectedReason : rejectedReasons) {
 
 			Comboitem comboitem = new Comboitem();
 
