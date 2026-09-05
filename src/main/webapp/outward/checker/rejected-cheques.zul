@@ -1,0 +1,321 @@
+<?page title="Rejected Cheques" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet"
+        type="text/css"
+        href="/css/outward/rejected-cheques.css"?>
+
+<zk>
+
+    <zscript>
+        org.zkoss.zk.ui.Sessions.getCurrent()
+            .setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
+
+        org.zkoss.zk.ui.Sessions.getCurrent()
+            .setAttribute("CTS_USERNAME", "Alex");
+    </zscript>
+
+    <window id="rejectedWindow"
+            border="none"
+            width="100%"
+            height="100%"
+            sclass="rejected-window"
+            apply="com.iispl.cts.controller.outward.checker.OutwardCheckerRejectionController">
+
+        <!-- Modal Window Host -->
+        <div id="windowHost"/>
+
+        <vlayout width="100%"
+                 height="100%"
+                 spacing="0">
+
+            <!-- TOP GAP -->
+            <div width="100%"
+                 height="10px"
+                 sclass="top-page-gap"/>
+
+            <!-- MAIN BORDER LAYOUT -->
+            <borderlayout width="100%"
+                          vflex="1">
+
+                <!-- ================= SIDEBAR ================= -->
+
+                <west width="220px"
+                      border="none"
+                      collapsible="false"
+                      splittable="false">
+
+                    <include src="/components/sidebar.zul"
+                             width="100%"
+                             height="100%"
+                             activeTab="outward-rejected-cheques"/>
+
+                </west>
+
+
+                <!-- ================= CENTER ================= -->
+
+                <center border="none">
+
+                    <borderlayout width="100%"
+                                  height="100%">
+
+                        <!-- ================= HEADER ================= -->
+
+                        <north height="90px"
+                               border="none">
+
+                            <div sclass="header-wrapper"
+                                 width="100%"
+                                 height="90px">
+
+                                <div sclass="header-page-title">
+
+                                    <label value="Outward Rejected Cheques"
+                                           sclass="header-title"/>
+
+                                    <label value="Outward Checker"
+                                           sclass="header-subtitle"/>
+
+                                </div>
+
+                                <div sclass="common-header-container">
+
+                                    <include src="/components/header.zul"
+                                             width="100%"
+                                             height="100%"/>
+
+                                </div>
+
+                            </div>
+
+                        </north>
+
+
+                        <!-- ================= MAIN CONTENT ================= -->
+
+                        <center border="none"
+                                autoscroll="false">
+
+                            <div sclass="main-page"
+                                 width="100%"
+                                 height="100%">
+
+                                <div sclass="content-area"
+                                     width="100%"
+                                     height="100%">
+
+                                    <!-- PAGE HEADING -->
+
+                                    <div sclass="page-heading">
+
+                                        <label value="Rejected Cheques"
+                                               sclass="section-title"/>
+
+                                        <label value="Only individual cheques rejected by the Checker are listed here."
+                                               sclass="section-description"/>
+
+                                    </div>
+
+
+                                    <!-- ================= SUMMARY ================= -->
+
+                                    <div sclass="summary-card">
+
+                                        <div sclass="summary-item">
+
+                                            <label value="TOTAL REJECTED CHEQUES"
+                                                   sclass="summary-label"/>
+
+                                            <label id="lblTotalRejected"
+                                                   value="0"
+                                                   sclass="summary-number"/>
+
+                                        </div>
+
+
+                                        <div sclass="summary-divider"/>
+
+
+                                        <div sclass="summary-item source-item">
+
+                                            <label value="SOURCE"
+                                                   sclass="summary-label"/>
+
+                                            <label value="Checker Queue"
+                                                   sclass="summary-value"/>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- ================= SEARCH ================= -->
+
+                                    <div sclass="search-card">
+
+                                        <div sclass="search-field">
+
+                                            <label value="SEARCH"
+                                                   sclass="field-label"/>
+
+                                            <textbox id="txtSearch"
+                                                     placeholder="Batch or cheque number"
+                                                     width="100%"
+                                                     sclass="search-input"/>
+
+                                        </div>
+
+
+                                        <div sclass="search-field date-field">
+
+                                            <label value="DATE"
+                                                   sclass="field-label"/>
+
+                                            <datebox id="dateRejected"
+                                                     format="dd-MM-yyyy"
+                                                     placeholder="Select rejected date"
+                                                     width="180px"
+                                                     buttonVisible="true"/>
+
+                                        </div>
+
+
+                                        <button id="btnSearch"
+                                                label="SEARCH"
+                                                sclass="search-button"/>
+
+
+                                        <button id="btnClear"
+                                                label="CLEAR"
+                                                sclass="clear-button"/>
+
+                                    </div>
+
+
+                                    <!-- ================= TABLE ================= -->
+
+                                    <div sclass="table-card"
+                                         width="100%">
+
+                                        <div sclass="list-title-section">
+
+                                            <label value="Rejected Cheques List"
+                                                   sclass="list-title"/>
+
+                                            <label value="List of cheques rejected by the Checker"
+                                                   sclass="list-subtitle"/>
+
+                                        </div>
+
+
+                                        <!-- ONLY LISTBOX SCROLLS -->
+
+                                        <listbox id="lstRejectedCheques"
+                                                 width="100%"
+                                                 height="300px"
+                                                 emptyMessage="No rejected cheques found."
+                                                 sclass="rejected-listbox">
+
+                                            <listhead sizable="false">
+
+                                                <listheader label="BATCH ID"
+                                                            width="15%"/>
+
+                                                <listheader label="CHEQUE NUMBER"
+                                                            width="17%"/>
+
+                                                <listheader label="AMOUNT"
+                                                            width="15%"/>
+
+                                                <listheader label="REJECTION REASON"
+                                                            width="25%"/>
+
+                                                <listheader label="REJECTED ON"
+                                                            width="15%"/>
+
+                                                <listheader label="ACTION"
+                                                            width="13%"/>
+
+                                            </listhead>
+
+                                        </listbox>
+
+
+                                        <!-- ================= PAGINATION ================= -->
+
+                                        <div sclass="pagination-bar">
+
+                                            <button id="btnFirst"
+                                                    label="|&lt;"
+                                                    sclass="pagination-button"/>
+
+                                            <button id="btnPrevious"
+                                                    label="&lt;"
+                                                    sclass="pagination-button"/>
+
+                                            <label id="lblPageInfo"
+                                                   value="Page 1"
+                                                   sclass="page-info"/>
+
+                                            <button id="btnNext"
+                                                    label="&gt;"
+                                                    sclass="pagination-button"/>
+
+                                            <button id="btnLast"
+                                                    label="&gt;|"
+                                                    sclass="pagination-button"/>
+
+                                        </div>
+
+
+                                        <!-- ================= IMPORTANT INFORMATION ================= -->
+
+                                        <div sclass="important-box">
+
+                                            <label value="IMPORTANT"
+                                                   sclass="important-title"/>
+
+                                            <label value="Rejected Files contains only rejected individual cheques. The complete batch is not moved here."
+                                                   sclass="important-text"/>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </center>
+
+
+                        <!-- ================= FOOTER ================= -->
+
+                        <south height="60px"
+                               border="none">
+
+                            <div sclass="hardcoded-footer"
+                                 width="100%"
+                                 height="50px">
+
+                                <label value="Express Clear CTS · Checker Portal"
+                                       sclass="footer-left"/>
+
+                                <label value="Rejected Cheques"
+                                       sclass="footer-right"/>
+
+                            </div>
+
+                        </south>
+
+                    </borderlayout>
+
+                </center>
+
+            </borderlayout>
+
+        </vlayout>
+
+    </window>
+
+</zk>

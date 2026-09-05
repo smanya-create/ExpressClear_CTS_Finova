@@ -140,7 +140,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
     public void navToCheckerDashboard() { Executions.sendRedirect("/outward/checker/dashboard.zul"); }
     public void navToOutwardCheckerQueue() { Executions.sendRedirect("/checker/queue.zul"); }
     public void navToOutwardXmlGeneration() { Executions.sendRedirect("/checker/xml-gen.zul"); }
-    public void navToOutwardRejectedCheques() { Executions.sendRedirect("/checker/rejected.zul"); }
+    public void navToOutwardRejectedCheques() { Executions.sendRedirect("/outward/checker/rejected-cheques.zul"); }
     public void navToOutwardCheckerReports() { Executions.sendRedirect("/checker/reports.zul"); }
 
     // Inward Maker Navigation Actions
