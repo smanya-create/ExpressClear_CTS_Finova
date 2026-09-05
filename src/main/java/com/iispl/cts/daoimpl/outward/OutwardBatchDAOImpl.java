@@ -163,7 +163,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 		return outwardBatch;
 	}
 
-	@Overrid
+	@Override
 	public List<OutwardBatch> getBatchesReadyForDataEntry() {
 
 		List<OutwardBatch> batches = new ArrayList<>();
