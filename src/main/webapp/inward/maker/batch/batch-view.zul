@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+	<style src="/css/inward/batch.css" />
+
+	<window id="batchViewWindow" title="Batch Intake" border="none"
+		width="100%">
+
+		<vlayout width="100%" sclass="batch-view-page">
+
+
+			<!-- PAGE HEADER -->
+
+			<vlayout spacing="2px" sclass="view-header">
+
+				<label value="Batch Intake" sclass="view-page-title" />
+
+				<label
+					value="View the details of the received batch and parsed cheque information."
+					sclass="view-page-subtitle" />
+
+			</vlayout>
+
+
+			<!-- BATCH INFORMATION -->
+
+			<div sclass="information-card">
+
+				<label value="Batch Information"
+					sclass="view-section-title" />
+
+
+				<hlayout width="100%" spacing="20px"
+					sclass="information-columns">
+
+
+					<!-- LEFT COLUMN -->
+
+					<vlayout width="50%" spacing="0"
+						sclass="information-column">
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Batch ID"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="batchIdLabel" value="BAT1001"
+								sclass="information-value" />
+
+						</hlayout>
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Batch Reference ID"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="batchReferenceLabel"
+								value="NPCI2609030001" sclass="information-value" />
+
+						</hlayout>
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Received Date &amp; Time"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="receivedDateTimeLabel"
+								value="03-Sep-2026 10:15:24" sclass="information-value" />
+
+						</hlayout>
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="File Name"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="fileNameLabel"
+								value="NPCI_INW_BAT1001.pfx" sclass="information-value" />
+
+						</hlayout>
+
+					</vlayout>
+
+
+					<!-- RIGHT COLUMN -->
+
+					<vlayout width="50%" spacing="0"
+						sclass="information-column">
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Total Cheques"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="totalChequesLabel" value="10"
+								sclass="information-value" />
+
+						</hlayout>
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Total Amount"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="totalAmountLabel"
+								value="₹ 12,50,000.00" sclass="information-value" />
+
+						</hlayout>
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Parsing Status"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="parsingStatusLabel"
+								value="SUCCESS" sclass="status-badge status-success" />
+
+						</hlayout>
+
+
+						<hlayout width="100%"
+							sclass="information-row">
+
+							<label value="Batch Status"
+								sclass="information-label" />
+
+							<label value=":" sclass="information-colon" />
+
+							<label id="batchStatusLabel" value="ON HOLD"
+								sclass="status-badge status-hold" />
+
+						</hlayout>
+
+					</vlayout>
+
+				</hlayout>
+
+			</div>
+
+
+			<!-- CHEQUE LIST -->
+
+			<div sclass="cheque-card">
+
+
+				<hlayout width="100%" sclass="cheque-header">
+
+
+					<hlayout spacing="4px" sclass="cheque-title-area">
+
+						<label value="Cheque List"
+							sclass="view-section-title" />
+
+						<label value="(Parsed from XML)"
+							sclass="cheque-header-subtitle" />
+
+					</hlayout>
+
+
+					<hlayout spacing="8px" sclass="cheque-tools">
+
+
+						<textbox id="chequeSearchTextbox"
+							placeholder="Search by Cheque No. / Account No." width="210px"
+							sclass="cheque-search" />
+
+
+						<button id="filterButton" label="Filter"
+							width="78px" sclass="filter-button" />
+
+					</hlayout>
+
+				</hlayout>
+
+
+				<listbox id="chequeListbox" width="100%"
+					sclass="cheque-listbox" mold="paging" pageSize="5"
+					emptyMessage="No cheque records found">
+
+
+					<listhead>
+
+						<listheader label="Item No." width="8%" />
+
+						<listheader label="Cheque No." width="11%" />
+
+						<listheader label="MICR Code" width="15%" />
+
+						<listheader label="Drawee Account No."
+							width="17%" />
+
+						<listheader label="Payee Name" width="17%" />
+
+						<listheader label="Amount (₹)" width="13%" />
+
+						<listheader label="Status" width="11%" />
+
+						<listheader label="View" width="8%" />
+
+					</listhead>
+
+
+					<!-- CHEQUE 1 -->
+
+					<listitem>
+
+						<listcell label="1" />
+
+						<listcell label="204512" />
+
+						<listcell label="560229005123" />
+
+						<listcell label="000123456789" />
+
+						<listcell label="Rajesh Sharma" />
+
+						<listcell label="1,00,000.00" />
+
+						<listcell>
+
+							<label value="NORMAL"
+								sclass="cheque-status-normal" />
+
+						</listcell>
+
+						<listcell>
+
+							<button label="View" sclass="view-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<!-- CHEQUE 2 -->
+
+					<listitem>
+
+						<listcell label="2" />
+
+						<listcell label="204513" />
+
+						<listcell label="560229005124" />
+
+						<listcell label="000987654321" />
+
+						<listcell label="Amit Kumar" />
+
+						<listcell label="75,000.00" />
+
+						<listcell>
+
+							<label value="NORMAL"
+								sclass="cheque-status-normal" />
+
+						</listcell>
+
+						<listcell>
+
+							<button label="View" sclass="view-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<!-- CHEQUE 3 -->
+
+					<listitem>
+
+						<listcell label="3" />
+
+						<listcell label="204514" />
+
+						<listcell label="560229005125" />
+
+						<listcell label="001122334455" />
+
+						<listcell label="Global Traders" />
+
+						<listcell label="50,000.00" />
+
+						<listcell>
+
+							<label value="MICR REPAIR"
+								sclass="cheque-status-repair" />
+
+						</listcell>
+
+						<listcell>
+
+							<button label="View" sclass="view-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<!-- CHEQUE 4 -->
+
+					<listitem>
+
+						<listcell label="4" />
+
+						<listcell label="204515" />
+
+						<listcell label="560229005126" />
+
+						<listcell label="009988776655" />
+
+						<listcell label="Priya Enterprises" />
+
+						<listcell label="1,25,000.00" />
+
+						<listcell>
+
+							<label value="NORMAL"
+								sclass="cheque-status-normal" />
+
+						</listcell>
+
+						<listcell>
+
+							<button label="View" sclass="view-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<!-- CHEQUE 5 -->
+
+					<listitem>
+
+						<listcell label="5" />
+
+						<listcell label="204516" />
+
+						<listcell label="560229005127" />
+
+						<listcell label="000111222333" />
+
+						<listcell label="Suresh &amp; Co" />
+
+						<listcell label="2,00,000.00" />
+
+						<listcell>
+
+							<label value="MICR REPAIR"
+								sclass="cheque-status-repair" />
+
+						</listcell>
+
+						<listcell>
+
+							<button label="View" sclass="view-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+				</listbox>
+
+
+				<hlayout width="100%" sclass="cheque-footer">
+
+					<label id="chequeCountLabel"
+						value="Showing 1 to 5 of 10 cheques" sclass="pagination-info" />
+
+				</hlayout>
+
+			</div>
+
+
+			<!-- ACTIONS -->
+
+			<hlayout width="100%" spacing="10px"
+				sclass="view-actions">
+
+
+				<button id="backButton" label="Back" width="100px"
+					sclass="back-button" />
+
+
+				<button id="holdButton" label="Hold" width="100px"
+					sclass="hold-button" />
+
+			</hlayout>
+
+
+		</vlayout>
+
+	</window>
+
+</zk>
