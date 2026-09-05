@@ -275,16 +275,15 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToInwardDataEntry() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
+	    Component root = sidebarComponent.getPage().getFirstRoot();
+	    Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-
-			Include include = (Include) mainContentArea;
-
-			include.setSrc("/inward/maker/data-entry/data-entry.zul");
-		}
+	    if (mainContentArea instanceof Include) {
+	        Include include = (Include) mainContentArea;
+	        // Reset src first to force a clean re-render, then route to the batch queue
+	        include.setSrc(null);
+	        include.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
+	    }
 	}
 
 	public void navToMakerCompletion() {

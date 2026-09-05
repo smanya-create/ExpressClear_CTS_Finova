@@ -1,0 +1,58 @@
+<?page title="Data Entry Batches" contentType="text/html;charset=UTF-8"?>
+<zk xmlns:n="native">
+  <style>
+    .cts-page-container { background-color: #f1f5f9; padding: 18px 24px; }
+    .cts-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 16px 20px; }
+    .cts-page-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .cts-page-subtitle { font-size: 13px; color: #64748b; }
+    .z-listheader-content { color: #1e293b !important; font-weight: 700 !important; font-size: 13px !important; background-color: #f8fafc !important; }
+    
+    .btn-action-start { background-color: #0284c7 !important; color: #fff !important; border: none !important; border-radius: 4px; padding: 5px 14px; font-weight: 600; cursor: pointer; }
+    .btn-action-resume { background-color: #d97706 !important; color: #fff !important; border: none !important; border-radius: 4px; padding: 5px 14px; font-weight: 600; cursor: pointer; }
+    .btn-action-submit { background-color: #16a34a !important; color: #fff !important; border: none !important; border-radius: 4px; padding: 5px 14px; font-weight: 600; cursor: pointer; }
+  </style>
+
+  <vlayout hflex="1" style="min-height: 350px; background-color: #f1f5f9; padding: 18px 24px;" 
+         apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController" spacing="16px">
+             
+    <div sclass="cts-card" hflex="1">
+      <hlayout style="display: flex; justify-content: space-between; align-items: center;">
+        <vlayout spacing="3px">
+          <label value="Inward Data Entry — Batch Queue" sclass="cts-page-title" />
+          <label value="Batches cleared from MICR repair ready for verification." sclass="cts-page-subtitle" />
+        </vlayout>
+        <button id="btnRefresh" label="Refresh" iconSclass="z-icon-refresh" 
+                style="background-color: #334155; color: #fff; border-radius: 4px; padding: 6px 14px;" />
+      </hlayout>
+    </div>
+
+    <div sclass="cts-card" hflex="1" vflex="1" style="display: flex; flex-direction: column; padding: 12px;">
+      <listbox id="lbxDataEntryBatches" emptyMessage="No batches waiting for Data Entry." vflex="1" mold="paging" pageSize="12">
+        <listhead sizable="true">
+          <listheader label="Batch ID" width="160px" sort="auto(batchId)" />
+          <listheader label="Total Items" width="120px" align="center" />
+          <listheader label="Pending Items" width="130px" align="center" />
+          <listheader label="Batch Total (INR)" width="180px" align="right" />
+          <listheader label="Batch Status" width="170px" align="center" />
+          <listheader label="Action" hflex="1" align="center" />
+        </listhead>
+
+        <template name="model">
+          <listitem value="${each}" style="border-bottom: 1px solid #f1f5f9;">
+            <listcell label="${each.batchId}" style="font-weight: 700; color: #1e293b;" />
+            <listcell label="${each.totalCheques}" style="font-weight: 500;" />
+            <listcell label="${each.pendingCheques}" style="color: #0284c7; font-weight: 600;" />
+            <listcell label="${each.formattedAmount}" style="font-family: monospace; font-size: 13px; font-weight: 600;" />
+            <listcell label="${each.batchStatus}" />
+            <listcell>
+              <button label="${each.actionLabel}" 
+                      sclass="${each.actionButtonClass}"
+                      forward="onClick=lbxDataEntryBatches.onProcessBatch(${each})" />
+            </listcell>
+          </listitem>
+        </template>
+      </listbox>
+    </div>
+
+  </vlayout>
+</zk>
