@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+	<style src="/css/inward/batch.css" />
+
+	<window id="inwardBatchQueueWindow" title="Inward Batch Queue"
+		border="none" width="95%"  >
+
+		<vlayout width="100%" sclass="batch-page">
+
+			<label value="Inward Batch Queue" sclass="page-title" />
+
+			<label
+				value="Manage received inward batches and initiate XML parsing."
+				sclass="page-subtitle" />
+
+
+			<div sclass="search-container">
+
+				<label value="SEARCH BATCH" sclass="section-title" />
+
+				<hlayout width="100%" spacing="20px"
+					sclass="search-row">
+
+
+					<vlayout hflex="1" sclass="search-field">
+
+						<label value="Batch No." sclass="field-label" />
+
+						<textbox id="batchSearchTextbox"
+							placeholder="Batch No." width="100%" sclass="input-field" />
+
+					</vlayout>
+
+
+					<vlayout width="220px" sclass="search-field">
+
+						<label value="Status" sclass="field-label" />
+
+						<combobox id="statusCombobox" width="100%"
+							value="All" readonly="true">
+
+							<comboitem label="All" value="ALL" />
+
+							<comboitem label="Received"
+								value="RECEIVED" />
+
+							<comboitem label="Parsing" value="PARSING" />
+
+							<comboitem label="Validation Failed"
+								value="VALIDATION_FAILED" />
+
+							<comboitem label="Processing"
+								value="PROCESSING" />
+
+							<comboitem
+								label="Checker Processing Pending"
+								value="CHECKER_PROCESSING_PENDING" />
+
+							<comboitem label="Checker Processing"
+								value="CHECKER_PROCESSING" />
+
+							<comboitem label="Completed"
+								value="COMPLETED" />
+
+							<comboitem label="Hold" value="HOLD" />
+
+						</combobox>
+
+					</vlayout>
+
+
+					<vlayout width="250px" sclass="search-field">
+
+						<label value="Received Date"
+							sclass="field-label" />
+
+						<datebox id="receivedDatebox" width="100%"
+							placeholder="Select Date" format="dd-MMM-yyyy" />
+
+					</vlayout>
+
+
+					<vlayout width="120px"
+						sclass="search-button-area">
+
+						<space height="27px" />
+
+						<button id="searchButton" label="Search"
+							width="100%" sclass="search-button" />
+
+					</vlayout>
+
+				</hlayout>
+
+			</div>
+
+
+			<div sclass="batch-container">
+
+				<label value="Received Inward Batches"
+					sclass="batch-title" />
+
+				<label
+					value="Parse each received batch before it enters the next stage of inward processing."
+					sclass="section-description" />
+
+
+				<listbox id="batchListbox" width="100%"
+					sclass="batch-table" emptyMessage="No inward batches found">
+
+					<listhead>
+
+						<listheader label="Batch No." width="19%" />
+
+						<listheader label="Received On" width="20%" />
+
+						<listheader label="Amount" width="18%" />
+
+						<listheader label="Status" width="22%" />
+
+						<listheader label="Action" width="21%" />
+
+					</listhead>
+
+
+					<listitem value="BAT1001">
+
+						<listcell label="BAT1001" />
+
+						<listcell label="2026-08-31 15:14:01" />
+
+						<listcell label="₹ 37,75,000.00" />
+
+						<listcell>
+
+							<label value="RECEIVED"
+								sclass="status-badge status-received" />
+
+						</listcell>
+
+						<listcell>
+
+							<button id="parseButton1" label="Parse"
+								width="95px" sclass="parse-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<listitem value="BAT1002">
+
+						<listcell label="BAT1002" />
+
+						<listcell label="2026-08-31 15:14:01" />
+
+						<listcell label="₹ 6,97,500.00" />
+
+						<listcell>
+
+							<label value="RECEIVED"
+								sclass="status-badge status-received" />
+
+						</listcell>
+
+						<listcell>
+
+							<button id="parseButton2" label="Parse"
+								width="95px" sclass="parse-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<listitem value="BAT1003">
+
+						<listcell label="BAT1003" />
+
+						<listcell label="2026-08-31 15:18:22" />
+
+						<listcell label="₹ 12,50,000.00" />
+
+						<listcell>
+
+							<label value="RECEIVED"
+								sclass="status-badge status-received" />
+
+						</listcell>
+
+						<listcell>
+
+							<button id="parseButton3" label="Parse"
+								width="95px" sclass="parse-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<listitem value="BAT1004">
+
+						<listcell label="BAT1004" />
+
+						<listcell label="2026-09-01 09:25:10" />
+
+						<listcell label="₹ 18,25,000.00" />
+
+						<listcell>
+
+							<label value="RECEIVED"
+								sclass="status-badge status-received" />
+
+						</listcell>
+
+						<listcell>
+
+							<button id="parseButton4" label="Parse"
+								width="95px" sclass="parse-button" />
+
+						</listcell>
+
+					</listitem>
+
+
+					<listitem value="BAT1005">
+
+						<listcell label="BAT1005" />
+
+						<listcell label="2026-09-01 10:12:45" />
+
+						<listcell label="₹ 22,40,000.00" />
+
+						<listcell>
+
+							<label value="RECEIVED"
+								sclass="status-badge status-received" />
+
+						</listcell>
+
+						<listcell>
+
+							<button id="parseButton5" label="Parse"
+								width="95px" sclass="parse-button" />
+
+						</listcell>
+
+					</listitem>
+
+				</listbox>
+
+
+				<label id="batchCountLabel"
+					value="Showing 1 to 5 of 5 batches" sclass="batch-count" />
+
+			</div>
+
+		</vlayout>
+
+	</window>
+
+</zk>

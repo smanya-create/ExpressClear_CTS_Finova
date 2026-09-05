@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='utf-8'?>
+<CTSBatchOCR>
+	<BatchHeader>
+		<BatchReferenceId>BATCH-2026-09-04-001</BatchReferenceId>
+		<PresentingBranchId>BR001</PresentingBranchId>
+		<ScannerDeviceModel>Canon CR-190II</ScannerDeviceModel>
+		<CapturedTimestamp>2026-09-04T12:08:33</CapturedTimestamp>
+		<ItemCount>8</ItemCount>
+		<OCRStatus>MOCK_OCR</OCRStatus>
+	</BatchHeader>
+	<Instruments>
+		<OCRCheque>
+			<ItemSequenceNumber>1</ItemSequenceNumber>
+			<ChequeNumber>301234</ChequeNumber>
+			<DetectedPayee>TECHNO CORP SOLUTIONS</DetectedPayee>
+			<DetectedAmountText>430610.00</DetectedAmountText>
+			<DetectedDate>18-11-2026</DetectedDate>
+			<DetectedDrawerAccount>8877665544</DetectedDrawerAccount>
+			<DetectedPayeeAccount>409921008712</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>301234 9876543 12345 54</RawLine>
+				<SortCode>9876543</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>54</TransCode>
+				<OcrConfidenceScore>58.4</OcrConfidenceScore>
+				<NeedsRepair>true</NeedsRepair>
+				<RepairReason>SORT_CODE_LENGTH_INVALID</RepairReason>
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ001_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ001_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>2</ItemSequenceNumber>
+			<ChequeNumber>502345</ChequeNumber>
+			<DetectedPayee>OM PRAKASH YADAV</DetectedPayee>
+			<DetectedAmountText>82900.00</DetectedAmountText>
+			<DetectedDate>05-11-2026</DetectedDate>
+			<DetectedDrawerAccount>1122334455</DetectedDrawerAccount>
+			<DetectedPayeeAccount>308819????09</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>502345 987654321 12345 36</RawLine>
+				<SortCode>987654321</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>36</TransCode>
+				<OcrConfidenceScore>92.1</OcrConfidenceScore>
+				<NeedsRepair>false</NeedsRepair>
+				<RepairReason />
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ002_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ002_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>3</ItemSequenceNumber>
+			<ChequeNumber>501234</ChequeNumber>
+			<DetectedPayee>RACHEL D'SOUZA</DetectedPayee>
+			<DetectedAmountText />
+			<DetectedDate>12-10-2026</DetectedDate>
+			<DetectedDrawerAccount>4098712365</DetectedDrawerAccount>
+			<DetectedPayeeAccount>204918736154</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>501234 987654321 12345 33</RawLine>
+				<SortCode>987654321</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>33</TransCode>
+				<OcrConfidenceScore>95.7</OcrConfidenceScore>
+				<NeedsRepair>false</NeedsRepair>
+				<RepairReason />
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ003_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ003_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>4</ItemSequenceNumber>
+			<ChequeNumber>602945</ChequeNumber>
+			<DetectedPayee>RAJESH K. SINGH</DetectedPayee>
+			<DetectedAmountText>843000.00</DetectedAmountText>
+			<DetectedDate>15-09-2026</DetectedDate>
+			<DetectedDrawerAccount>9876543210</DetectedDrawerAccount>
+			<DetectedPayeeAccount>501928471625</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>602945 98765432 12345 44</RawLine>
+				<SortCode>98765432</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>44</TransCode>
+				<OcrConfidenceScore>52.3</OcrConfidenceScore>
+				<NeedsRepair>true</NeedsRepair>
+				<RepairReason>UNREADABLE_GLYPH_IN_SORT_CODE</RepairReason>
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ004_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ004_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>5</ItemSequenceNumber>
+			<ChequeNumber>602345</ChequeNumber>
+			<DetectedPayee>SNEHA SHARMA</DetectedPayee>
+			<DetectedAmountText>425000.00</DetectedAmountText>
+			<DetectedDate>25-09-2026</DetectedDate>
+			<DetectedDrawerAccount>9876543210</DetectedDrawerAccount>
+			<DetectedPayeeAccount>110928374652</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>602345 987654321 12345 55</RawLine>
+				<SortCode>987654321</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>55</TransCode>
+				<OcrConfidenceScore>94.8</OcrConfidenceScore>
+				<NeedsRepair>false</NeedsRepair>
+				<RepairReason />
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ005_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ005_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>6</ItemSequenceNumber>
+			<ChequeNumber>703451</ChequeNumber>
+			<DetectedPayee>ROHINI SINGHAL</DetectedPayee>
+			<DetectedAmountText>631000.00</DetectedAmountText>
+			<DetectedDate>25-09-2026</DetectedDate>
+			<DetectedDrawerAccount>3456789012</DetectedDrawerAccount>
+			<DetectedPayeeAccount>774910283461</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>703451 892345 01234 33</RawLine>
+				<SortCode>892345</SortCode>
+				<AccountShortCode>01234</AccountShortCode>
+				<TransCode>33</TransCode>
+				<OcrConfidenceScore>49.1</OcrConfidenceScore>
+				<NeedsRepair>true</NeedsRepair>
+				<RepairReason>SORT_CODE_UNDERFLOW</RepairReason>
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ006_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ006_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>7</ItemSequenceNumber>
+			<ChequeNumber>502345</ChequeNumber>
+			<DetectedPayee>RAJESH KUMAR SINGH</DetectedPayee>
+			<DetectedAmountText>352000.00</DetectedAmountText>
+			<DetectedDate>14-09-2026</DetectedDate>
+			<DetectedDrawerAccount>9876543210</DetectedDrawerAccount>
+			<DetectedPayeeAccount />
+			<RawMICRRead>
+				<RawLine>502345 987654321 12345 44</RawLine>
+				<SortCode>987654321</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>44</TransCode>
+				<OcrConfidenceScore>93.8</OcrConfidenceScore>
+				<NeedsRepair>false</NeedsRepair>
+				<RepairReason />
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ007_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ007_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+		<OCRCheque>
+			<ItemSequenceNumber>8</ItemSequenceNumber>
+			<ChequeNumber>703456</ChequeNumber>
+			<DetectedPayee>PRIYA S. PATEL</DetectedPayee>
+			<DetectedAmountText>57?000.00</DetectedAmountText>
+			<DetectedDate>28-08-2026</DetectedDate>
+			<DetectedDrawerAccount>9876543210</DetectedDrawerAccount>
+			<DetectedPayeeAccount>881920471536</DetectedPayeeAccount>
+			<RawMICRRead>
+				<RawLine>703456 987654321 12345 55</RawLine>
+				<SortCode>987654321</SortCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransCode>55</TransCode>
+				<OcrConfidenceScore>94.2</OcrConfidenceScore>
+				<NeedsRepair>false</NeedsRepair>
+				<RepairReason />
+			</RawMICRRead>
+			<ScannedImages>
+				<FrontImage
+					path="BATCH-2026-09-04-001/images/CHQ008_front.jpg" type="FRONT" />
+				<BackImage
+					path="BATCH-2026-09-04-001/images/CHQ008_back.png" type="BACK" />
+			</ScannedImages>
+			<OCRSource>CHEQUE_IMAGE</OCRSource>
+		</OCRCheque>
+	</Instruments>
+</CTSBatchOCR>
