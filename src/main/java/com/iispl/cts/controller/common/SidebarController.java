@@ -269,7 +269,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 			Include include = (Include) mainContentArea;
 
-			include.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+			include.setSrc("//inward/maker/micr-repair/micr-repair-queue.zul");
 		}
 
 	}
