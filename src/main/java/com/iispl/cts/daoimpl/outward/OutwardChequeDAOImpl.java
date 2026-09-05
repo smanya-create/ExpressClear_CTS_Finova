@@ -180,30 +180,43 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	    }
 
 	    String sql =
-	        "SELECT " +
-	        "    oc.outward_cheque_id, " +
-	        "    oc.outward_batch_id, " +
-	        "    oc.cheque_number, " +
-	        "    oc.micr_code, " +
-	        "    oc.drawee_name, " +
-	        "    oc.drawee_account_number, " +
-	        "    oc.payee_name, " +
-	        "    oc.payee_account_number, " +
-	        "    oc.cheque_amount, " +
-	        "    oc.cheque_date, " +
-	        "    oc.cheque_status, " +
-	        "    oc.account_id, " +
-	        "    oc.created_at, " +
-	        "    oc.city_code, " +
-	        "    oc.bank_code, " +
-	        "    oc.branch_code " +
-	        "FROM outward_cheque oc " +
-	        "WHERE oc.outward_batch_id = ? " +
-	        "ORDER BY oc.outward_cheque_id";
+	            "SELECT " +
+	            "    oc.outward_cheque_id, " +
+	            "    oc.outward_batch_id, " +
+	            "    oc.cheque_number, " +
+	            "    oc.micr_code, " +
+	            "    oc.drawee_name, " +
+	            "    oc.drawee_account_number, " +
+	            "    oc.payee_name, " +
+	            "    oc.payee_account_number, " +
+	            "    oc.cheque_amount, " +
+	            "    oc.cheque_date, " +
+	            "    oc.cheque_status, " +
+	            "    oc.account_id, " +
+	            "    oc.created_at, " +
+	            "    oc.city_code, " +
+	            "    oc.bank_code, " +
+	            "    oc.branch_code, " +
+	            "    front.image_path AS cheque_image_front, " +
+	            "    back.image_path AS cheque_image_back " +
 
-	    try (Connection connection = DBConnection.getConnection();
-	         PreparedStatement ps =
-	                 connection.prepareStatement(sql)) {
+	            "FROM outward_cheque oc " +
+	            "LEFT JOIN outward_cheque_image front " +
+	            "    ON oc.outward_cheque_id = front.outward_cheque_id " +
+	            "    AND front.image_type = 'FRONT' " +
+
+	            "LEFT JOIN outward_cheque_image back " +
+	            "    ON oc.outward_cheque_id = back.outward_cheque_id " +
+	            "    AND back.image_type = 'BACK' " +
+
+	            "WHERE oc.outward_batch_id = ? " +
+
+	            "ORDER BY oc.outward_cheque_id";
+
+	    try (
+	        Connection connection = DBConnection.getConnection();
+	        PreparedStatement ps = connection.prepareStatement(sql)
+	    ) {
 
 	        ps.setString(1, batchId);
 
@@ -261,15 +274,33 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	                cheque.setBranchCode(
 	                        rs.getString("branch_code"));
 
+	                // IMPORTANT: image paths
+	                cheque.setChequeImageFront(
+	                        rs.getString("cheque_image_front"));
+
+	                cheque.setChequeImageBack(
+	                        rs.getString("cheque_image_back"));
+
+	                // DEBUG
+	                System.out.println(
+	                        "Cheque Number: " + cheque.getChequeNumber());
+
+	                System.out.println(
+	                        "Front Image: " + cheque.getChequeImageFront());
+
+	                System.out.println(
+	                        "Back Image: " + cheque.getChequeImageBack());
+	               
+
 	                cheques.add(cheque);
 	            }
 	        }
-
+	        
 	    } catch (SQLException e) {
 
 	        throw new RuntimeException(
-	                "Error fetching outward cheques for "
-	                + "outward batch ID: " + batchId,
+	                "Error fetching outward cheques for outward batch ID: "
+	                        + batchId,
 	                e);
 	    }
 

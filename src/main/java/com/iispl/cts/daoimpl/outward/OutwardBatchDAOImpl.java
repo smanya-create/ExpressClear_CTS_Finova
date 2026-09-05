@@ -22,7 +22,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 				+ "WHERE batch_status = ?";
 		try (Connection connection = DBConnection.getDataSource().getConnection();
 				PreparedStatement prepStmt = connection.prepareStatement(selectSql)) {
-			prepStmt.setString(1, "Verified");
+			prepStmt.setString(1, "VERIFIED");
 			ResultSet rs = prepStmt.executeQuery();
 			while (rs.next()) {
 				batches.add(new OutwardBatch(rs.getString("outward_batch_id"), rs.getString("batch_reference_id"),
@@ -76,7 +76,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 		if (batchId != null && !batchId.trim().isEmpty()) {
 
-			sql.append("AND (" + "LOWER(outward_batch_id) LIKE LOWER(?) " + "OR LOWER(batch_reference_id) LIKE LOWER(?)"
+			sql.append("AND (" + "LOWER(o	utward_batch_id) LIKE LOWER(?) " + "OR LOWER(batch_reference_id) LIKE LOWER(?)"
 					+ ") ");
 
 			String searchBatchId = "%" + batchId.trim() + "%";
