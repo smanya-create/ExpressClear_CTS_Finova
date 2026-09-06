@@ -30,14 +30,14 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 		this.xmlParser = new InwardBatchXmlParser();
 	}
 
-	@Override
-	public List<InwardBatch> getAllActiveBatches() {
-		return inwardBatchDAO.findAllActiveBatches();
-	}
+//	@Override
+//	public List<InwardBatch> getAllActiveBatches() {
+//		return inwardBatchDAO.findAllActiveBatches();
+//	}
 
 	@Override
 	public InwardBatch getBatchById(String batchId) {
-		return inwardBatchDAO.findById(batchId);
+		return inwardBatchDAO.getBatchById(batchId);
 	}
 
 	@Override
