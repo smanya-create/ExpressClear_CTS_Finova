@@ -1,6 +1,7 @@
 package com.iispl.cts.parser;
 
 import java.io.File;
+import java.net.URL;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -33,10 +35,13 @@ public class InwardBatchXmlParser {
 
 		Map<Integer, OcrData> ocrDataMap = parseOcrXml(ocrXmlPath);
 
-		return parseNpciXml(npciXmlPath, ocrDataMap);
+		String ocrBatchReferenceId = getOcrBatchReferenceId(ocrXmlPath);
+
+		return parseNpciXml(npciXmlPath, ocrDataMap, ocrBatchReferenceId);
 	}
 
-	private ParsedBatchData parseNpciXml(String npciXmlPath, Map<Integer, OcrData> ocrDataMap) throws Exception {
+	private ParsedBatchData parseNpciXml(String npciXmlPath, Map<Integer, OcrData> ocrDataMap,
+			String ocrBatchReferenceId) throws Exception {
 
 		VTDGen vtdGen = new VTDGen();
 
@@ -62,8 +67,7 @@ public class InwardBatchXmlParser {
 		String batchStatus = getAbsoluteText(vn, "/*[local-name()='ChequeBatchTransmission']"
 				+ "/*[local-name()='BatchHeader']" + "/*[local-name()='BatchStatus']");
 
-		String uploadedBy = getAbsoluteText(vn, "/*[local-name()='ChequeBatchTransmission']"
-				+ "/*[local-name()='BatchHeader']" + "/*[local-name()='UploadedBy']");
+		String uploadedBy = "USR1004";
 
 		String uploadedAtText = getAbsoluteText(vn, "/*[local-name()='ChequeBatchTransmission']"
 				+ "/*[local-name()='BatchHeader']" + "/*[local-name()='UploadedAt']");
@@ -76,6 +80,11 @@ public class InwardBatchXmlParser {
 		if (batchReferenceId == null || batchReferenceId.isEmpty()) {
 
 			throw new Exception("BatchReferenceId is missing for batch " + batchId);
+		}
+
+		if (!batchReferenceId.equals(ocrBatchReferenceId)) {
+			throw new Exception("BatchReferenceId mismatch for batch " + batchId + ". NPCI = " + batchReferenceId
+					+ ", OCR = " + ocrBatchReferenceId);
 		}
 
 		if (chequeCountText == null || chequeCountText.isEmpty()) {
@@ -136,6 +145,8 @@ public class InwardBatchXmlParser {
 
 		chequeAp.selectXPath("/*[local-name()='ChequeBatchTransmission']" + "/*[local-name()='Cheques']"
 				+ "/*[local-name()='ChequeItem']");
+
+		HashSet<Integer> npciSequenceNumbers = new HashSet<Integer>();
 
 		int parsedChequeCount = 0;
 
@@ -206,6 +217,11 @@ public class InwardBatchXmlParser {
 				throw new Exception("Amount is missing for cheque " + scannedChequeId);
 			}
 
+			if (!npciSequenceNumbers.add(itemSequenceNumber)) {
+				throw new Exception(
+						"Duplicate NPCI ItemSequenceNumber: " + itemSequenceNumber + " in batch " + batchId);
+			}
+
 			BigDecimal chequeAmount;
 
 			try {
@@ -221,11 +237,20 @@ public class InwardBatchXmlParser {
 
 			OcrData ocrData = ocrDataMap.get(itemSequenceNumber);
 
-			String finalChequeStatus = chequeStatus;
+			if (ocrData == null) {
+				throw new Exception(
+						"OCR data is missing for cheque " + scannedChequeId + " at sequence " + itemSequenceNumber);
+			}
 
-			if (ocrData != null && ocrData.needsRepair) {
+			boolean micrRepairRequired = isMicrRepairRequired(chequeNumber, cityCode, bankCode, branchCode,
+					transactionCode, ocrData);
 
-				finalChequeStatus = "MICR_REPAIR_REQUIRED";
+			String finalChequeStatus;
+
+			if (micrRepairRequired) {
+				finalChequeStatus = "MICR_REPAIR_PENDING";
+			} else {
+				finalChequeStatus = "DATA_ENTRY_PENDING";
 			}
 
 			InwardCheque inwardCheque = new InwardCheque();
@@ -252,7 +277,7 @@ public class InwardBatchXmlParser {
 
 			inwardCheque.setChequeStatus(finalChequeStatus);
 
-			inwardCheque.setAccountId(draweeAccountNumber);
+			inwardCheque.setAccountId(null);
 
 			inwardCheque.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
@@ -342,6 +367,24 @@ public class InwardBatchXmlParser {
 		return new ParsedBatchData(inwardBatch, inwardCheques, inwardChequeImages, stagingStatus);
 	}
 
+	private String getOcrBatchReferenceId(String ocrXmlPath) throws Exception {
+
+		VTDGen vtdGen = new VTDGen();
+
+		parseFile(vtdGen, ocrXmlPath);
+
+		VTDNav vn = vtdGen.getNav();
+
+		String batchReferenceId = getAbsoluteText(vn, "/*[local-name()='CTSBatchOCR']"
+				+ "/*[local-name()='BatchHeader']" + "/*[local-name()='BatchReferenceId']");
+
+		if (batchReferenceId == null || batchReferenceId.isEmpty()) {
+			throw new Exception("OCR BatchReferenceId is missing");
+		}
+
+		return batchReferenceId;
+	}
+
 	private Map<Integer, OcrData> parseOcrXml(String ocrXmlPath) throws Exception {
 
 		VTDGen vtdGen = new VTDGen();
@@ -389,6 +432,10 @@ public class InwardBatchXmlParser {
 
 			String chequeNumber = getCurrentText(vn, "./*[local-name()='ChequeNumber']");
 
+			String sortCode = getCurrentText(vn, "./*[local-name()='RawMICRRead']" + "/*[local-name()='SortCode']");
+
+			String transCode = getCurrentText(vn, "./*[local-name()='RawMICRRead']" + "/*[local-name()='TransCode']");
+
 			String needsRepairText = getCurrentText(vn,
 					"./*[local-name()='RawMICRRead']" + "/*[local-name()='NeedsRepair']");
 
@@ -403,6 +450,10 @@ public class InwardBatchXmlParser {
 			data.sequenceNumber = sequenceNumber;
 
 			data.chequeNumber = chequeNumber;
+
+			data.sortCode = sortCode;
+
+			data.transCode = transCode;
 
 			data.needsRepair = "true".equalsIgnoreCase(needsRepairText);
 
@@ -420,12 +471,49 @@ public class InwardBatchXmlParser {
 				}
 			}
 
+			if (result.containsKey(sequenceNumber)) {
+				throw new Exception("Duplicate OCR ItemSequenceNumber: " + sequenceNumber);
+			}
+
 			result.put(sequenceNumber, data);
 		}
 
 		ocrAp.resetXPath();
 
 		return result;
+	}
+
+	private boolean isMicrRepairRequired(String npciChequeNumber, String npciCityCode, String npciBankCode,
+			String npciBranchCode, String npciTransactionCode, OcrData ocrData) {
+
+		if (ocrData == null) {
+			return true;
+		}
+
+		boolean chequeNumberMismatch = !safeEquals(npciChequeNumber, ocrData.chequeNumber);
+
+		String npciSortCode = buildMicrSortCode(npciCityCode, npciBankCode, npciBranchCode);
+
+		boolean sortCodeMismatch = !safeEquals(npciSortCode, ocrData.sortCode);
+
+		boolean transactionCodeMismatch = !safeEquals(npciTransactionCode, ocrData.transCode);
+
+		return chequeNumberMismatch || sortCodeMismatch || transactionCodeMismatch;
+	}
+
+	private String buildMicrSortCode(String cityCode, String bankCode, String branchCode) {
+
+		return safe(cityCode) + safe(bankCode) + safe(branchCode);
+	}
+
+	private boolean safeEquals(String first, String second) {
+
+		return safe(first).equals(safe(second));
+	}
+
+	private String safe(String value) {
+
+		return value == null ? "" : value.trim();
 	}
 
 	private String getAbsoluteText(VTDNav vn, String xpath) throws Exception {
@@ -570,9 +658,9 @@ public class InwardBatchXmlParser {
 			vtdGen.setDoc(bytes);
 
 			try {
-			    vtdGen.parse(true);
+				vtdGen.parse(true);
 			} catch (Exception e) {
-			    throw new Exception("Unable to parse XML file: " + xmlFilePath, e);
+				throw new Exception("Unable to parse XML file: " + xmlFilePath, e);
 			}
 
 		} finally {
@@ -627,6 +715,10 @@ public class InwardBatchXmlParser {
 		private int sequenceNumber;
 
 		private String chequeNumber;
+
+		private String sortCode;
+
+		private String transCode;
 
 		private boolean needsRepair;
 
