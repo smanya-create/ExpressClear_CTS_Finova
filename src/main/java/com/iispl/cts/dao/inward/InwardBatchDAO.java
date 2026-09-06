@@ -17,8 +17,8 @@ public interface InwardBatchDAO {
 
     boolean deleteBatch(String inwardBatchId);
     
-    List<InwardBatch> findAllActiveBatches();
-    InwardBatch findById(String batchId);
+//    List<InwardBatch> findAllActiveBatches();
+//    InwardBatch findById(String batchId);
     boolean updateStatus(String batchId, String status);
     
     List<DashboardSummaryDTO> getDashboardBatches();

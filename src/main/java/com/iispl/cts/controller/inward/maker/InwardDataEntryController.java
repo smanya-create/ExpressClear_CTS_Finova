@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
@@ -17,6 +18,7 @@ import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Image;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
@@ -70,6 +72,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     private Textbox txtChequeNumber;
     private Textbox txtChequeDate;
     private Textbox txtAmount;
+    private Textbox txtAmountInWords;
     private Textbox txtDraweeAccount;
     private Textbox txtDraweeBankName;
     private Textbox txtPayeeName;
@@ -218,6 +221,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         if (txtChequeNumber != null) txtChequeNumber.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "");
         if (txtChequeDate != null) txtChequeDate.setValue(item.getChequeDate() != null ? item.getChequeDate().toString() : "");
         if (txtAmount != null) txtAmount.setValue(item.getChequeAmount() != null ? "₹ " + item.getChequeAmount().toPlainString() : "");
+        
+     // Populate generated words
+        if (txtAmountInWords != null) {
+            txtAmountInWords.setValue(convertToIndianCurrencyWords(item.getChequeAmount()));
+        }
+        
         if (txtDraweeAccount != null) txtDraweeAccount.setValue(item.getDraweeAccountNumber() != null ? item.getDraweeAccountNumber() : "");
         if (txtDraweeBankName != null) txtDraweeBankName.setValue(item.getDraweeName() != null ? item.getDraweeName() : "");
         if (txtPayeeName != null) txtPayeeName.setValue(item.getPayeeName() != null ? item.getPayeeName() : "");
@@ -506,8 +515,48 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             winCompletionConfirmModal.setVisible(false);
         }
 
+        // 1. Update batch status in database
         batchService.updateBatchStatus(currentBatchId, "CHECKER_PROCESSING_PENDING");
-        Executions.sendRedirect("/inward/maker/maker-completion.zul?batchId=" + currentBatchId);
+
+        // 2. Set the active batch ID in session for the completion screen
+        Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", currentBatchId);
+
+        // 3. Locate the SPA mainContentArea Include component
+        Include mainInclude = null;
+
+        // Try direct lookup via the root window path
+        try {
+            mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
+        } catch (Exception ignored) {}
+
+        // Fallback: search desktop pages
+        if (mainInclude == null && self != null && self.getDesktop() != null) {
+            for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+                Component comp = p.getFellowIfAny("mainContentArea", true);
+                if (comp instanceof Include) {
+                    mainInclude = (Include) comp;
+                    break;
+                }
+            }
+        }
+
+        // 4. Swap views dynamically within the SPA
+        if (mainInclude != null) {
+            mainInclude.setSrc(null);
+            mainInclude.setSrc("/inward/maker/submission/batch-submission.zul");
+
+            // Update page header subtitle if component exists
+            Component root = (self.getPage() != null) ? self.getPage().getFirstRoot() : null;
+            if (root != null) {
+                Label lblSubtitle = (Label) root.getFellowIfAny("lblPageSubtitle", true);
+                if (lblSubtitle != null) {
+                    lblSubtitle.setValue("Batch Completion");
+                }
+            }
+        } else {
+            System.err.println("DEBUG: Failed to locate mainContentArea for SPA navigation!");
+            Messagebox.show("Navigation container (mainContentArea) not found.", "Navigation Error", Messagebox.OK, Messagebox.ERROR);
+        }
     }
 
     private String validateFormFields() {
@@ -543,9 +592,88 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         if (txtChequeNumber != null) txtChequeNumber.setValue("");
         if (txtChequeDate != null) txtChequeDate.setValue("");
         if (txtAmount != null) txtAmount.setValue("");
+        
+        if (txtAmountInWords != null) txtAmountInWords.setValue("");
+        
         if (txtDraweeAccount != null) txtDraweeAccount.setValue("");
         if (txtDraweeBankName != null) txtDraweeBankName.setValue("");
         if (txtPayeeName != null) txtPayeeName.setValue("");
         if (txtEntryRemark != null) txtEntryRemark.setValue("");
     }
+    
+    private static final String[] UNITS = {
+    	    "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+    	    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+    	};
+
+    	private static final String[] TENS = {
+    	    "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    	};
+
+    	public static String convertToIndianCurrencyWords(BigDecimal amount) {
+    	    if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+    	        return "";
+    	    }
+
+    	    long wholeNumber = amount.longValue();
+    	    int paise = amount.remainder(BigDecimal.ONE).movePointRight(2).intValue();
+
+    	    StringBuilder words = new StringBuilder("Rupees ");
+    	    words.append(convertNumberToWords(wholeNumber));
+
+    	    if (paise > 0) {
+    	        words.append(" and ").append(convertNumberToWords(paise)).append(" Paise");
+    	    }
+
+    	    words.append(" Only");
+    	    return words.toString();
+    	}
+
+    	private static String convertNumberToWords(long n) {
+    	    if (n == 0) return "Zero";
+    	    if (n < 0) return "Minus " + convertNumberToWords(Math.abs(n));
+
+    	    StringBuilder sb = new StringBuilder();
+
+    	    if ((n / 10000000) > 0) { // Crores
+    	        sb.append(convertNumberToWords(n / 10000000)).append(" Crore ");
+    	        n %= 10000000;
+    	    }
+    	    if ((n / 100000) > 0) { // Lakhs
+    	        sb.append(convertNumberToWords(n / 100000)).append(" Lakh ");
+    	        n %= 100000;
+    	    }
+    	    if ((n / 1000) > 0) { // Thousands
+    	        sb.append(convertNumberToWords(n / 1000)).append(" Thousand ");
+    	        n %= 1000;
+    	    }
+    	    if ((n / 100) > 0) { // Hundreds
+    	        sb.append(convertNumberToWords(n / 100)).append(" Hundred ");
+    	        n %= 100;
+    	    }
+    	    if (n > 0) {
+    	        if (n < 20) {
+    	            sb.append(UNITS[(int) n]).append(" ");
+    	        } else {
+    	            sb.append(TENS[(int) (n / 10)]).append(" ");
+    	            if ((n % 10) > 0) {
+    	                sb.append(UNITS[(int) (n % 10)]).append(" ");
+    	            }
+    	        }
+    	    }
+    	    return sb.toString().trim();
+    	}
+    	
+    	public void onChange$txtAmount() {
+    	    if (txtAmount == null || txtAmountInWords == null) return;
+    	    String raw = txtAmount.getValue().replace("₹", "").replace(",", "").trim();
+    	    try {
+    	        BigDecimal val = new BigDecimal(raw);
+    	        txtAmountInWords.setValue(convertToIndianCurrencyWords(val));
+    	    } catch (Exception e) {
+    	        txtAmountInWords.setValue("Invalid Amount");
+    	    }
+    	}
+    	
+ 	
 }

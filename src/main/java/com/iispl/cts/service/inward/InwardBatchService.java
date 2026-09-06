@@ -21,7 +21,7 @@ public interface InwardBatchService {
 
 	boolean saveParsedBatch(ParsedBatchData parsedBatchData);
 
-	List<InwardBatch> getAllActiveBatches();
+//	List<InwardBatch> getAllActiveBatches();
 
 	InwardBatch getBatchById(String batchId);
 
