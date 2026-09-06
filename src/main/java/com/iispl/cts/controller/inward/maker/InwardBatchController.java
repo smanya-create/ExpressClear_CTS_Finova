@@ -1,8 +1,8 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.ArrayList;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -289,33 +289,25 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			String ocrXml = "Inward-data/" + folderName + "/OCR_Mock.xml";
 
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			String npciPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + npciXml);
 
-			URL npciResource = classLoader.getResource(npciXml);
+			String ocrPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + ocrXml);
 
-			URL ocrResource = classLoader.getResource(ocrXml);
-
-			if (npciResource == null) {
-
+			if (npciPath == null || !(new File(npciPath).isFile())) {
 				Messagebox.show("NPCI XML not found:\n" + npciXml, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
-			if (ocrResource == null) {
-
+			if (ocrPath == null || !(new File(ocrPath).isFile())) {
 				Messagebox.show("OCR XML not found:\n" + ocrXml, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
 			batch.setBatchStatus("Parsing");
-
 			updateParsingRow(item);
 
-			final String npciPath = new File(npciResource.toURI()).getAbsolutePath();
-
-			final String ocrPath = new File(ocrResource.toURI()).getAbsolutePath();
+			final String finalNpciPath = npciPath;
+			final String finalOcrPath = ocrPath;
 
 			final String finalBatchId = batchId;
 
@@ -327,7 +319,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 				try {
 
-					ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(npciPath, ocrPath);
+					ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(finalNpciPath, finalOcrPath);
 
 					if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
 
