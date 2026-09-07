@@ -4,14 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Window;
+import org.zkoss.zk.ui.select.Selectors;
+import org.zkoss.zk.ui.event.Events;
 
+import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
+import org.zkoss.zk.ui.select.annotation.Wire;
 
 public class InwardCheckerVerificationController
         extends GenericForwardComposer<Component> {
@@ -40,30 +54,76 @@ public class InwardCheckerVerificationController
 
     private Button btnPrevious;
     private Button btnNext;
-    private Button btnRunCbsValidation;
+
     private Button btnAccept;
     private Button btnReturn;
     private Button btnSendBack;
     private Label lblChequePosition;
+    private Label lblVerificationStatus;
 
     private InwardChequeService inwardChequeService;
+    private RejectedReasonService rejectedReasonService =
+            RejectedReasonServiceImpl.getInstance();
     private List<InwardCheque> currentBatchCheques = new ArrayList<>();
     private String currentChequeId;
     private String currentBatchId;
     private int currentChequeIndex = 0;
     private Button btnProceedRrf;
+    @Wire
+    private Window rejectReasonWindow;
+    
+    @Wire
+    Combobox cmbRejectedReason;
+    @Wire
+    private Textbox txtRejectRemarks;
+    @Wire
+    private Button btnCancelReject;
+    @Wire
+    private Button btnProceedReject;
+    private Component pageRoot;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
         super.doAfterCompose(comp);
 
+        pageRoot = comp.getPage().getFirstRoot();
+
         inwardChequeService = new InwardChequeServiceImpl();
+
+        // Get reject popup
+        Window window =
+                (Window) pageRoot.getFellow("rejectReasonWindow");
+
+        // Get Proceed button from popup ID space
+        Button proceedButton =
+                (Button) window.getFellow("btnProceedReject");
+
+        // Get Cancel button from popup ID space
+        Button cancelButton =
+                (Button) window.getFellow("btnCancelReject");
+
+        // Manually register events because popup has its own ID space
+        proceedButton.addEventListener(
+                Events.ON_CLICK,
+                event -> onClick$btnProceedReject());
+
+        cancelButton.addEventListener(
+                Events.ON_CLICK,
+                event -> onClick$btnCancelReject());
 
         System.out.println(
                 "INWARD CHECKER VERIFICATION CONTROLLER LOADED");
+        List<InwardCheque> cheques =
+                inwardChequeService.getChequesByBatchAndStatus(
+                        "BAT1111",
+                        null);
 
-        loadChequeDetails("CH1117");
+        if (cheques != null && !cheques.isEmpty()) {
+
+            loadChequeDetails(
+                    cheques.get(0).getInwardChequeId());
+        }
     }
     private void loadChequeDetails(String inwardChequeId) {
 
@@ -89,15 +149,23 @@ public class InwardCheckerVerificationController
                             currentBatchId,
                             null);
 
+            int foundIndex = -1;
+
             for (int i = 0; i < currentBatchCheques.size(); i++) {
 
-                if (currentBatchCheques.get(i)
-                        .getInwardChequeId()
+                InwardCheque batchCheque =
+                        currentBatchCheques.get(i);
+
+                if (batchCheque.getInwardChequeId()
                         .equalsIgnoreCase(currentChequeId)) {
 
-                    currentChequeIndex = i;
+                    foundIndex = i;
                     break;
                 }
+            }
+
+            if (foundIndex >= 0) {
+                currentChequeIndex = foundIndex;
             }
 
             if (lblBatchId != null) {
@@ -192,7 +260,34 @@ public class InwardCheckerVerificationController
             if (lblAccountBalance != null) {
                 lblAccountBalance.setValue("₹50,000.00");
             }
+         // Verification status
+         // Verification status
+            if (lblVerificationStatus != null) {
 
+                String status = cheque.getChequeStatus();
+
+                if ("ACCEPTED".equalsIgnoreCase(status)
+                        || "REJECTED".equalsIgnoreCase(status)) {
+
+                    lblVerificationStatus.setValue("VERIFIED");
+
+                    lblVerificationStatus.setStyle(
+                            "background:#E8F5E9;"
+                            + "color:#198754;"
+                            + "border:1px solid #198754;"
+                            + "border-radius:12px;"
+                            + "padding:3px 10px;"
+                            + "font-size:11px;"
+                            + "font-weight:600;"
+                    );
+
+                } else {
+
+                    lblVerificationStatus.setValue("PENDING");
+                    lblVerificationStatus.setSclass("verification-status-badge");
+                    lblVerificationStatus.setStyle("");
+                }
+            }
             updateChequePosition();
 
 
@@ -207,24 +302,14 @@ public class InwardCheckerVerificationController
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
-    }    public void onClick$btnRunCbsValidation() {
-
-        loadChequeDetails("CH1005");
-
-        Messagebox.show(
-                "CBS Validation Completed Successfully",
-                "CBS Validation",
-                Messagebox.OK,
-                Messagebox.INFORMATION);
-    }
+    }   
 
     public void onClick$btnAccept() {
 
         try {
 
             InwardCheque cheque =
-                    inwardChequeService.findById(
-                            currentChequeId);
+                    inwardChequeService.findById(currentChequeId);
 
             if (cheque == null) {
 
@@ -237,15 +322,107 @@ public class InwardCheckerVerificationController
                 return;
             }
 
+            // -------------------------------------------------
+            // CHECK WHETHER CHEQUE IS ALREADY VERIFIED
+            // -------------------------------------------------
+
+            String currentStatus = cheque.getChequeStatus();
+
+            if ("ACCEPTED".equalsIgnoreCase(currentStatus)
+                    || "REJECTED".equalsIgnoreCase(currentStatus)) {
+
+                Messagebox.show(
+                        "This cheque is already verified.",
+                        "Verification",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // RUN CBS VALIDATION AUTOMATICALLY
+            // -------------------------------------------------
+
+            boolean cbsPassed = runCbsValidation(cheque);
+
+            // -------------------------------------------------
+            // CBS VALIDATION FAILED
+            // -------------------------------------------------
+
+            if (!cbsPassed) {
+
+                cheque.setChequeStatus("REJECTED");
+
+                boolean updated =
+                        inwardChequeService.updateChequeDetails(
+                                cheque);
+
+                if (!updated) {
+
+                    Messagebox.show(
+                            "CBS validation failed and "
+                            + "cheque status could not be updated.",
+                            "CBS Validation",
+                            Messagebox.OK,
+                            Messagebox.ERROR);
+
+                    return;
+                }
+
+                // Cheque Status = REJECTED
+                if (lblChequeStatus != null) {
+
+                    lblChequeStatus.setValue("REJECTED");
+
+                    lblChequeStatus.setSclass(
+                            "status-badge mismatch");
+                }
+
+                // Verification = VERIFIED
+                if (lblVerificationStatus != null) {
+
+                    lblVerificationStatus.setValue("VERIFIED");
+
+                    lblVerificationStatus.setStyle(
+                            "background:#E8F5E9;"
+                            + "color:#198754;"
+                            + "border:1px solid #198754;"
+                            + "border-radius:12px;"
+                            + "padding:3px 10px;"
+                            + "font-size:11px;"
+                            + "font-weight:600;"
+                    );
+                }
+
+                updateVerificationCount();
+
+                Messagebox.show(
+                        "CBS validation failed.\n"
+                        + "Cheque has been rejected.",
+                        "CBS Validation Failed",
+                        Messagebox.OK,
+                        Messagebox.ERROR,
+                        event -> moveToNextCheque());
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // CBS VALIDATION PASSED
+            // -------------------------------------------------
+
             cheque.setChequeStatus("ACCEPTED");
 
             boolean updated =
-                    inwardChequeService.updateChequeDetails(cheque);
+                    inwardChequeService.updateChequeDetails(
+                            cheque);
 
             if (!updated) {
 
                 Messagebox.show(
-                        "Unable to update cheque status.",
+                        "CBS validation passed, "
+                        + "but cheque status could not be updated.",
                         "Verification",
                         Messagebox.OK,
                         Messagebox.ERROR);
@@ -253,40 +430,52 @@ public class InwardCheckerVerificationController
                 return;
             }
 
+            // Cheque Status = ACCEPTED
+            if (lblChequeStatus != null) {
+
+                lblChequeStatus.setValue("ACCEPTED");
+
+                lblChequeStatus.setSclass(
+                        "status-badge");
+            }
+
+            // Verification = VERIFIED
+            if (lblVerificationStatus != null) {
+
+                lblVerificationStatus.setValue("VERIFIED");
+
+                lblVerificationStatus.setStyle(
+                        "background:#E8F5E9;"
+                        + "color:#198754;"
+                        + "border:1px solid #198754;"
+                        + "border-radius:12px;"
+                        + "padding:3px 10px;"
+                        + "font-size:11px;"
+                        + "font-weight:600;"
+                );
+            }
+
+            // Update 1/4, 2/4, 3/4, 4/4
             updateVerificationCount();
 
+            // -------------------------------------------------
+            // SHOW SUCCESS MESSAGE THEN MOVE NEXT
+            // -------------------------------------------------
 
-            if (currentChequeIndex
-                    < currentBatchCheques.size() - 1) {
-
-                currentChequeIndex++;
-
-                InwardCheque nextCheque =
-                        currentBatchCheques.get(
-                                currentChequeIndex);
-
-                loadChequeDetails(
-                        nextCheque.getInwardChequeId());
-
-            } else {
-
-                // Last cheque
-                updateChequePosition();
-
-                Messagebox.show(
-                        "All cheques in this batch have been verified.",
-                        "Verification Completed",
-                        Messagebox.OK,
-                        Messagebox.INFORMATION);
-            }
+            Messagebox.show(
+                    "Cheque accepted successfully.",
+                    "Verification",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION,
+                    event -> moveToNextCheque());
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
             Messagebox.show(
-                    "Unable to accept cheque.\n"
-                            + e.getMessage(),
+                    "Unable to complete verification.\n"
+                    + e.getMessage(),
                     "Verification Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
@@ -300,38 +489,94 @@ public class InwardCheckerVerificationController
                     inwardChequeService.findById(currentChequeId);
 
             if (cheque == null) {
+
                 Messagebox.show(
                         "Cheque not found.",
                         "Verification",
                         Messagebox.OK,
                         Messagebox.ERROR);
+
                 return;
             }
 
-            cheque.setChequeStatus("REJECTED");
+            // -------------------------------------------------
+            // CHECK WHETHER CHEQUE IS ALREADY VERIFIED
+            // -------------------------------------------------
 
-            inwardChequeService.updateChequeDetails(cheque);
+            String currentStatus = cheque.getChequeStatus();
 
-            updateVerificationCount();
+            if ("ACCEPTED".equalsIgnoreCase(currentStatus)
+                    || "REJECTED".equalsIgnoreCase(currentStatus)) {
 
-            Messagebox.show(
-                    "Cheque rejected successfully.",
-                    "Verification",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION);
+                Messagebox.show(
+                        "This cheque is already verified.",
+                        "Verification",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // OPEN REJECT POPUP
+            // -------------------------------------------------
+
+            Window window =
+                    (Window) pageRoot.getFellow(
+                            "rejectReasonWindow");
+
+            Combobox comboBox =
+                    (Combobox) window.getFellow(
+                            "cmbRejectedReason");
+
+            Textbox remarks =
+                    (Textbox) window.getFellow(
+                            "txtRejectRemarks");
+
+            loadRejectedReasons(comboBox);
+
+            comboBox.setSelectedItem(null);
+
+            remarks.setValue("");
+
+            window.doModal();
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
             Messagebox.show(
-                    "Unable to reject cheque.\n" + e.getMessage(),
+                    "Unable to open reject window.\n"
+                    + e.getMessage(),
                     "Verification Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
     }
-   
+    
+    
+    private void loadRejectedReasons(Combobox comboBox) {
+
+        comboBox.getItems().clear();
+
+        List<RejectedReason> reasons =
+                rejectedReasonService.getAllRejectedReasons();
+
+        for (RejectedReason reason : reasons) {
+
+            Comboitem item = new Comboitem();
+
+            item.setLabel(
+                    reason.getRejectedReasonCode()
+                    + " - "
+                    + reason.getRejectedReasonName());
+
+            item.setValue(reason);
+
+            comboBox.appendChild(item);
+        }
+    }
+    
     public void onClick$btnSendBack() {
 
         Messagebox.show(
@@ -339,6 +584,42 @@ public class InwardCheckerVerificationController
                 "Verification",
                 Messagebox.OK,
                 Messagebox.INFORMATION);
+    }
+    
+    private void moveToNextCheque() {
+
+        // Refresh the batch data from database
+        currentBatchCheques =
+                inwardChequeService.getChequesByBatchAndStatus(
+                        currentBatchId,
+                        null);
+
+        // Move to next cheque
+        if (currentChequeIndex < currentBatchCheques.size() - 1) {
+
+            currentChequeIndex++;
+
+            InwardCheque nextCheque =
+                    currentBatchCheques.get(currentChequeIndex);
+
+            currentChequeId =
+                    nextCheque.getInwardChequeId();
+
+            loadChequeDetails(currentChequeId);
+
+            updateChequePosition();
+
+        } else {
+
+            // Last cheque
+            updateChequePosition();
+
+            Messagebox.show(
+                    "All cheques in this batch have been verified.",
+                    "Verification Completed",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION);
+        }
     }
     
     private void updateChequePosition() {
@@ -419,14 +700,12 @@ public class InwardCheckerVerificationController
             lblVerification.setValue(
                     verified + "/" + total);
 
-            if (lblChequePosition != null && total > 0) {
 
-                int percentage = (verified * 100) / total;
+            // Show Proceed to RRF only when ALL cheques are verified
+            if (btnProceedRrf != null) {
 
-                lblChequePosition.setValue(
-                        (currentChequeIndex + 1)
-                        + "/" + total
-                        + " (" + percentage + "%)");
+                btnProceedRrf.setVisible(
+                        total > 0 && verified == total);
             }
 
             // Show Proceed to RRF only when ALL cheques are verified
@@ -451,13 +730,11 @@ public class InwardCheckerVerificationController
 
         if (currentBatchCheques == null
                 || currentBatchCheques.isEmpty()) {
-
             return;
         }
 
         if (currentChequeIndex
                 >= currentBatchCheques.size() - 1) {
-
             return;
         }
 
@@ -466,19 +743,21 @@ public class InwardCheckerVerificationController
         InwardCheque nextCheque =
                 currentBatchCheques.get(currentChequeIndex);
 
-        loadChequeDetails(
-                nextCheque.getInwardChequeId());
+        currentChequeId =
+                nextCheque.getInwardChequeId();
+
+        loadChequeDetails(currentChequeId);
+
+        updateChequePosition();
     }
     public void onClick$btnPrevious() {
 
         if (currentBatchCheques == null
                 || currentBatchCheques.isEmpty()) {
-
             return;
         }
 
         if (currentChequeIndex <= 0) {
-
             return;
         }
 
@@ -487,7 +766,298 @@ public class InwardCheckerVerificationController
         InwardCheque previousCheque =
                 currentBatchCheques.get(currentChequeIndex);
 
-        loadChequeDetails(
-                previousCheque.getInwardChequeId());
+        currentChequeId =
+                previousCheque.getInwardChequeId();
+
+        loadChequeDetails(currentChequeId);
+
+        updateChequePosition();
     }
-}
+    public void onClick$btnProceedReject() {
+
+        try {
+
+            Window window =
+                    (Window) pageRoot.getFellow(
+                            "rejectReasonWindow");
+
+            Combobox comboBox =
+                    (Combobox) window.getFellow(
+                            "cmbRejectedReason");
+
+            Textbox remarksBox =
+                    (Textbox) window.getFellow(
+                            "txtRejectRemarks");
+
+            // -------------------------------------------------
+            // GET SELECTED REASON
+            // -------------------------------------------------
+
+            Comboitem selectedItem =
+                    comboBox.getSelectedItem();
+
+            if (selectedItem == null) {
+
+                Messagebox.show(
+                        "Please select a rejected reason.",
+                        "Validation",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            RejectedReason reason =
+                    (RejectedReason) selectedItem.getValue();
+
+            if (reason == null) {
+
+                Messagebox.show(
+                        "Invalid rejected reason selected.",
+                        "Validation",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            String remarks =
+                    remarksBox.getValue();
+
+            if (remarks != null) {
+                remarks = remarks.trim();
+            }
+
+            // -------------------------------------------------
+            // GET CURRENT CHEQUE
+            // -------------------------------------------------
+
+            InwardCheque cheque =
+                    inwardChequeService.findById(currentChequeId);
+
+            if (cheque == null) {
+
+                Messagebox.show(
+                        "Cheque not found.",
+                        "Verification",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // CHECK WHETHER ALREADY VERIFIED
+            // -------------------------------------------------
+
+            String currentStatus =
+                    cheque.getChequeStatus();
+
+            if ("ACCEPTED".equalsIgnoreCase(currentStatus)
+                    || "REJECTED".equalsIgnoreCase(currentStatus)) {
+
+                window.setVisible(false);
+
+                Messagebox.show(
+                        "This cheque is already verified.",
+                        "Verification",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // GET LOGGED-IN USER
+            // -------------------------------------------------
+
+            Object userObject =
+                    Sessions.getCurrent()
+                            .getAttribute("CTS_USERNAME");
+
+            String rejectedBy;
+
+            if (userObject != null) {
+
+                rejectedBy =
+                        userObject.toString();
+
+            } else {
+
+                rejectedBy = "Alex";
+            }
+
+            // -------------------------------------------------
+            // SAVE REJECTION DETAILS
+            // -------------------------------------------------
+
+            boolean rejectionSaved =
+                    inwardChequeService.saveRejection(
+                            cheque.getInwardChequeId(),
+                            reason.getRejectedReasonId(),
+                            remarks,
+                            rejectedBy);
+
+            if (!rejectionSaved) {
+
+                Messagebox.show(
+                        "Unable to save rejection details.",
+                        "Verification",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // UPDATE CHEQUE STATUS
+            // -------------------------------------------------
+
+            cheque.setChequeStatus("REJECTED");
+
+            boolean chequeUpdated =
+                    inwardChequeService.updateChequeDetails(
+                            cheque);
+
+            if (!chequeUpdated) {
+
+                Messagebox.show(
+                        "Rejection details were saved, "
+                        + "but cheque status could not be updated.",
+                        "Verification",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            // -------------------------------------------------
+            // UPDATE SCREEN
+            // -------------------------------------------------
+
+            if (lblChequeStatus != null) {
+
+                lblChequeStatus.setValue("REJECTED");
+
+                lblChequeStatus.setSclass(
+                        "status-badge mismatch");
+            }
+
+            if (lblVerificationStatus != null) {
+
+                lblVerificationStatus.setValue("VERIFIED");
+
+                lblVerificationStatus.setStyle(
+                        "background:#E8F5E9;"
+                        + "color:#198754;"
+                        + "border:1px solid #198754;"
+                        + "border-radius:12px;"
+                        + "padding:3px 10px;"
+                        + "font-size:11px;"
+                        + "font-weight:600;"
+                );
+            }
+
+            // -------------------------------------------------
+            // CLOSE POPUP
+            // -------------------------------------------------
+
+            window.setVisible(false);
+
+            comboBox.setSelectedItem(null);
+
+            remarksBox.setValue("");
+
+            // -------------------------------------------------
+            // UPDATE VERIFICATION COUNT
+            // -------------------------------------------------
+
+            updateVerificationCount();
+
+            // -------------------------------------------------
+            // SHOW MESSAGE THEN MOVE NEXT
+            // -------------------------------------------------
+
+            Messagebox.show(
+                    "Cheque rejected successfully.",
+                    "Verification",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION,
+                    event -> moveToNextCheque());
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to process rejection.\n"
+                    + e.getMessage(),
+                    "Verification Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
+    }
+    
+    public void onClick$btnCancelReject() {
+
+        try {
+
+            Window window =
+                    (Window) pageRoot.getFellow("rejectReasonWindow");
+
+            Combobox comboBox =
+                    (Combobox) window.getFellow("cmbRejectedReason");
+
+            Textbox remarksBox =
+                    (Textbox) window.getFellow("txtRejectRemarks");
+
+            comboBox.setSelectedItem(null);
+            remarksBox.setValue("");
+
+            window.setVisible(false);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+    }
+    
+    private boolean runCbsValidation(InwardCheque cheque) {
+
+        try {
+
+            if (cheque == null) {
+                return false;
+            }
+
+            String micr = cheque.getMicrCode();
+            String accountNumber =
+                    cheque.getDraweeAccountNumber();
+            String chequeNumber =
+                    cheque.getChequeNumber();
+
+            // Mandatory CBS validation fields
+            if (micr == null || micr.trim().isEmpty()) {
+                return false;
+            }
+
+            if (accountNumber == null
+                    || accountNumber.trim().isEmpty()) {
+                return false;
+            }
+
+            if (chequeNumber == null
+                    || chequeNumber.trim().isEmpty()) {
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return false;
+        }
+    }
+    }

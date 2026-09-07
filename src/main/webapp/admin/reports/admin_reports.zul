@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/admin-report.css"?>
+<zk>
+<borderlayout apply="com.iispl.cts.controller.admin.AdminReportController" hflex="1" vflex="1">
+
+    <!-- Shared Left Sidebar Navigation -->
+    <west width="240px" border="none" collapsible="false">
+        <include src="/components/sidebar.zul" role="ADMIN" activeTab="reports" />
+    </west>
+
+    <!-- Main Workspace -->
+    <center border="none" autoscroll="true" style="background-color: #f8fafc;">
+        <vlayout spacing="0" hflex="1">
+
+            <!-- Shared Header -->
+            <include id="incHeader" src="/components/header.zul" 
+                     pageTitle="Admin Dashboard" 
+                     pageSubtitle="Reports" />
+
+            <!-- Content Area Container -->
+            <vlayout spacing="20px" style="padding: 24px;" hflex="1">
+                
+                <!-- Page Title Header -->
+                <vlayout spacing="4px">
+                    <label value="REPORTS" sclass="page-title"/>
+                    <label value="Generate and download system reports." sclass="page-subtitle"/>
+                </vlayout>
+
+                <!-- Report Card Panel -->
+                <vlayout sclass="card-panel" spacing="24px" hflex="1">
+                    
+                    <!-- Date Inputs (Side by Side) -->
+                    <hlayout spacing="24px" hflex="1">
+                        <vlayout spacing="6px" hflex="1">
+                            <label value="FROM DATE" sclass="field-label"/>
+                            <datebox id="dtFromDate" format="yyyy-MM-dd" constraint="no empty: Select start date" 
+                                     height="40px" width="100%" sclass="input-box"/>
+                        </vlayout>
+
+                        <vlayout spacing="6px" hflex="1">
+                            <label value="TO DATE" sclass="field-label"/>
+                            <datebox id="dtToDate" format="yyyy-MM-dd" constraint="no empty: Select end date" 
+                                     height="40px" width="100%" sclass="input-box"/>
+                        </vlayout>
+                    </hlayout>
+
+                    <separator bar="true" sclass="panel-separator"/>
+
+                    <!-- Report Details Description Section -->
+                    <vlayout spacing="8px" hflex="1">
+                        <label value="REPORT DETAILS" sclass="section-subtitle"/>
+                        <label value="Select a date range, then generate the consolidated PDF report containing batch metrics, dual-control audit trails, and clearing summaries." 
+                               sclass="section-desc"/>
+                    </vlayout>
+
+                    <!-- Action Button Area -->
+                    <hlayout hflex="1" style="justify-content: flex-end; padding-top: 8px;">
+                        <button id="btnGenerate" label="GENERATE REPORT" height="42px" sclass="btn-primary" iconSclass="z-icon-file-pdf-o" onClick='org.zkoss.zk.ui.util.Clients.showNotification("Button Clicked!")'/>
+                    </hlayout>
+
+                </vlayout>
+
+            </vlayout>
+
+        </vlayout>
+    </center>
+</borderlayout>
+</zk>

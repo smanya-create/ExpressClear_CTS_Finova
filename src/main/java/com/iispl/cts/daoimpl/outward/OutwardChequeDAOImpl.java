@@ -1,7 +1,7 @@
+
 package com.iispl.cts.daoimpl.outward;
 
 import java.math.BigDecimal;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,29 +17,30 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 
 	@Override
 	public int getTotalChequeCountByBatchId(String outwardBatchId) {
-		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ?";
+		String sql = "SELECT COUNT(outward_cheque_id) " + "FROM outward_cheque " + "WHERE outward_batch_id = ?";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
 			preparedStatement.setString(1, outwardBatchId);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
 				if (resultSet.next()) {
 					return resultSet.getInt(1);
 				}
 			}
 
 		} catch (Exception exception) {
+
 			throw new RuntimeException("Unable to fetch total cheque count", exception);
 		}
-
 		return 0;
 	}
 
 	@Override
 	public BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId) {
-		String sql = "SELECT COALESCE(SUM(cheque_amount), 0) FROM outward_cheque WHERE outward_batch_id = ?";
+
+		String sql = "SELECT COALESCE(SUM(cheque_amount), 0) " + "FROM outward_cheque " + "WHERE outward_batch_id = ?";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -47,12 +48,14 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 			preparedStatement.setString(1, outwardBatchId);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
 				if (resultSet.next()) {
 					return resultSet.getBigDecimal(1);
 				}
 			}
 
 		} catch (Exception exception) {
+
 			throw new RuntimeException("Unable to fetch total cheque amount", exception);
 		}
 
@@ -62,6 +65,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	public void transferChequeFromScanToOutwrd(Connection connection, String scannedBatchId) {
 
 		if (connection == null) {
+
 			throw new IllegalArgumentException("Connection cannot be null");
 		}
 
@@ -107,23 +111,25 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 		List<OutwardCheque> cheques = new ArrayList<>();
 
 		if (batchId == null || batchId.trim().isEmpty()) {
+
 			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
 		}
 
-		String sql = "SELECT " + "    oc.outward_cheque_id, " + "    oc.outward_batch_id, " + "    oc.cheque_number, "
-				+ "    oc.micr_code, " + "    oc.drawee_name, " + "    oc.drawee_account_number, "
-				+ "    oc.payee_name, " + "    oc.payee_account_number, " + "    oc.cheque_amount, "
-				+ "    oc.cheque_date, " + "    oc.cheque_status, " + "    oc.account_id, " + "    oc.created_at, "
-				+ "    oc.city_code, " + "    oc.bank_code, " + "    oc.branch_code " + "FROM outward_cheque oc "
-				+ "WHERE oc.outward_batch_id = ? " + "ORDER BY oc.outward_cheque_id";
+		String sql = "SELECT " + "oc.outward_cheque_id, " + "oc.outward_batch_id, " + "oc.cheque_number, "
+				+ "oc.micr_code, " + "oc.drawee_name, " + "oc.drawee_account_number, " + "oc.payee_name, "
+				+ "oc.payee_account_number, " + "oc.cheque_amount, " + "oc.cheque_date, " + "oc.cheque_status, "
+				+ "oc.account_id, " + "oc.created_at, " + "oc.city_code, " + "oc.bank_code, " + "oc.branch_code, "
+				+ "front.image_path AS cheque_image_front, " + "back.image_path AS cheque_image_back "
+				+ "FROM outward_cheque oc " + "LEFT JOIN outward_cheque_image front " + "ON oc.outward_cheque_id = "
+				+ "front.outward_cheque_id " + " AND front.image_type = 'FRONT' "
+				+ "LEFT JOIN outward_cheque_image back " + "ON oc.outward_cheque_id = " + "back.outward_cheque_id "
+				+ "AND back.image_type = 'BACK' " + "WHERE oc.outward_batch_id = ? " + "ORDER BY oc.outward_cheque_id";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
-
 			ps.setString(1, batchId);
 
 			try (ResultSet rs = ps.executeQuery()) {
-
 				while (rs.next()) {
 
 					OutwardCheque cheque = new OutwardCheque();
@@ -159,6 +165,10 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 					cheque.setBankCode(rs.getString("bank_code"));
 
 					cheque.setBranchCode(rs.getString("branch_code"));
+
+					cheque.setChequeImageFront(rs.getString("cheque_image_front"));
+
+					cheque.setChequeImageBack(rs.getString("cheque_image_back"));
 
 					cheques.add(cheque);
 				}
@@ -237,25 +247,30 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	public boolean updateChequeStatus(String outwardChequeId, String chequeStatus) {
 
 		if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
+
 			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
 		}
 
 		if (chequeStatus == null || chequeStatus.trim().isEmpty()) {
+
 			throw new IllegalArgumentException("Cheque status cannot be null or empty");
 		}
 
 		String sql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE outward_cheque_id = ?";
 
 		try (Connection connection = DBConnection.getConnection();
+
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 			preparedStatement.setString(1, chequeStatus.trim());
+
 			preparedStatement.setString(2, outwardChequeId.trim());
 
 			return preparedStatement.executeUpdate() > 0;
 
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to update cheque status for outward cheque ID: " + outwardChequeId,
+
+			throw new RuntimeException("Unable to update cheque status " + "for outward cheque ID: " + outwardChequeId,
 					exception);
 		}
 	}

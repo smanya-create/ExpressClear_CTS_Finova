@@ -34,9 +34,13 @@ public class OutwardXmlGenerator {
 
 		Path xmlFile = directory.resolve(fileName);
 
-		XMLOutputFactory factory = XMLOutputFactory.newInstance();
+		XMLOutputFactory factory = XMLOutputFactory.newFactory();
 
-		XMLStreamWriter writer = factory.createXMLStreamWriter(Files.newOutputStream(xmlFile), "UTF-8");
+		XMLStreamWriter writer =
+		    factory.createXMLStreamWriter(
+		        Files.newOutputStream(xmlFile),
+		        "UTF-8"
+		    );
 
 		writer.writeStartDocument("UTF-8", "1.0");
 
@@ -147,11 +151,11 @@ public class OutwardXmlGenerator {
 
 		writeSimpleElement(writer, 3, "FullMICR", cheque.getMicrCode());
 
-//		writeSimpleElement(writer, 3, "CityCode", cheque.getCityCode());
-//
-//		writeSimpleElement(writer, 3, "BankCode", cheque.getBankCode());
-//
-//		writeSimpleElement(writer, 3, "BranchCode", cheque.getBranchCode());
+		writeSimpleElement(writer, 3, "CityCode", cheque.getCityCode());
+
+		writeSimpleElement(writer, 3, "BankCode", cheque.getBankCode());
+
+		writeSimpleElement(writer, 3, "BranchCode", cheque.getBranchCode());
 
 		writeIndent(writer, 2);
 		writer.writeEndElement();
@@ -176,6 +180,22 @@ public class OutwardXmlGenerator {
 		writeSimpleElement(writer, 3, "Name", cheque.getPayeeName());
 
 		writeSimpleElement(writer, 3, "AccountNumber", cheque.getPayeeAccountNumber());
+
+		writeIndent(writer, 2);
+		writer.writeEndElement();
+		writer.writeCharacters("\n");
+		
+		System.out.println("Writing XML Front: "
+		        + cheque.getChequeImageFront());
+
+		System.out.println("Writing XML Back: "
+		        + cheque.getChequeImageBack());
+
+		writeIndent(writer, 2);
+		writer.writeStartElement("ScannedImages");
+		writer.writeCharacters("\n");
+		writeSimpleElement(writer, 3, "FrontImagePath", cheque.getChequeImageFront());
+		writeSimpleElement(writer, 3, "BackImagePath", cheque.getChequeImageBack());
 
 		writeIndent(writer, 2);
 		writer.writeEndElement();

@@ -52,7 +52,7 @@
                         <vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:12px;background:white">
                            	<label value="All Batches" style="font-weight:bold;font-size:14px"/>
                             <listbox id="batchListbox" 
-                                     sclass="listbox-header z-listbox-grid" 
+                            		sclass="listbox-header"
                                      nonselectableTags="*" 
                                      emptyMessage="No batch details found">
                                 <listhead>
