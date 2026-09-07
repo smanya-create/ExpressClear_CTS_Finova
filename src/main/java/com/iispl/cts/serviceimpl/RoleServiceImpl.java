@@ -52,4 +52,16 @@ public class RoleServiceImpl implements RoleService {
     public String generateNextRoleId() {
         return roleDAO.generateNextRoleId();
     }
+
+	@Override
+	public boolean isRoleNameExists(String roleName) {
+		// TODO Auto-generated method stub
+		return roleDAO.isRoleNameExists(roleName);
+	}
+
+	@Override
+	public boolean isRoleNameExists(String roleName, String excludeRoleId) {
+		// TODO Auto-generated method stub
+		return roleDAO.isRoleNameExists(roleName, excludeRoleId);
+	}
 }

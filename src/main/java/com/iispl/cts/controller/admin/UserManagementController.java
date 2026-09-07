@@ -22,10 +22,12 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
-import com.iispl.cts.common.util.SecurityUtil;
+import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
+import com.iispl.cts.service.RoleService;
 import com.iispl.cts.service.UserService;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
+import com.iispl.cts.serviceimpl.RoleServiceImpl;
 import com.iispl.cts.serviceimpl.UserServiceImpl;
 
 public class UserManagementController extends GenericForwardComposer<Component> {
@@ -78,24 +80,71 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     private User currentModUser;
 
     private final UserService userService = UserServiceImpl.getInstance();
+    private final RoleService roleService = RoleServiceImpl.getInstance();
 
-    private static final Map<String, String> ROLE_MAP = new LinkedHashMap<>();
-    static {
-        ROLE_MAP.put("ROL1004", "Maker Inward");
-        ROLE_MAP.put("ROL1002", "Maker Outward");
-        ROLE_MAP.put("ROL1005", "Checker Inward");
-        ROLE_MAP.put("ROL1003", "Checker Outward");
-        ROLE_MAP.put("ROL1001", "Admin");
-    }
+    // Cache of roleId -> roleName loaded dynamically from DB
+    private final Map<String, String> roleMap = new LinkedHashMap<>();
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        
+
+        refreshRoleCache();
+        populateRoleFilterDropdown();
+
         if (cmbRoleFilter != null && cmbRoleFilter.getItemCount() > 0) cmbRoleFilter.setSelectedIndex(0);
         if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) cmbStatusFilter.setSelectedIndex(0);
+        
         loadUserData();
         switchView("LIST");
+    }
+
+    /**
+     * Loads all active roles directly from PostgreSQL into memory.
+     */
+    private void refreshRoleCache() {
+        roleMap.clear();
+        List<Role> roles = roleService.getAllRoles();
+        if (roles != null) {
+            for (Role r : roles) {
+                if ("Active".equalsIgnoreCase(r.getStatus())) {
+                    roleMap.put(r.getRoleId(), r.getRoleName());
+                }
+            }
+        }
+    }
+
+    /**
+     * Fills the search filter dropdown with all active roles from DB.
+     */
+    private void populateRoleFilterDropdown() {
+        if (cmbRoleFilter == null) return;
+        
+        // Preserve the default 'All Roles' option
+        cmbRoleFilter.getItems().clear();
+        Comboitem allItem = new Comboitem("All Roles");
+        allItem.setValue("ALL");
+        cmbRoleFilter.appendChild(allItem);
+
+        for (Map.Entry<String, String> entry : roleMap.entrySet()) {
+            Comboitem item = new Comboitem(entry.getValue());
+            item.setValue(entry.getKey());
+            cmbRoleFilter.appendChild(item);
+        }
+    }
+
+    /**
+     * Fills the Add User role combobox with all active roles from DB.
+     */
+    private void populateAddRoleDropdown() {
+        if (cmbAddRole == null) return;
+        cmbAddRole.getItems().clear();
+
+        for (Map.Entry<String, String> entry : roleMap.entrySet()) {
+            Comboitem item = new Comboitem(entry.getValue());
+            item.setValue(entry.getKey());
+            cmbAddRole.appendChild(item);
+        }
     }
 
     private void switchView(String target) {
@@ -116,7 +165,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     }
 
     private String getRoleDisplayName(String roleId) {
-        return ROLE_MAP.getOrDefault(roleId, roleId);
+        return roleMap.getOrDefault(roleId, roleId);
     }
 
     // --- SCREEN 1: LIST VIEW ---
@@ -198,10 +247,14 @@ public class UserManagementController extends GenericForwardComposer<Component> 
         txtAddEmail.setValue("");
         txtAddPhone.setValue("");
         txtAddPassword.setValue("");
-        cmbAddRole.setValue(null);
         isPasswordVisible = false;
         txtAddPassword.setType("password");
         btnTogglePassword.setLabel("Show");
+
+        // Refresh roles from DB dynamically so newly created roles appear
+        refreshRoleCache();
+        populateAddRoleDropdown();
+        cmbAddRole.setValue(null);
 
         switchView("ADD");
     }
@@ -253,7 +306,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
         boolean success = userService.registerOrUpdateUser(newUser, password.trim());
         if (success) {
-            // --- AUDIT LOG: CREATE USER SUCCESS ---
             AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER", 
                 "Created user: " + username.trim() + " (Emp ID: " + empId + ", Role: " + roleDisplayName + ")", "SUCCESS");
 
@@ -261,7 +313,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             loadUserData();
             switchView("LIST");
         } else {
-            // --- AUDIT LOG: CREATE USER FAILED ---
             AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER_FAILED", 
                 "Failed to register user: " + username.trim() + " (Emp ID: " + empId + ")", "FAILED");
 
@@ -283,15 +334,16 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
     // --- SCREEN 3: MODIFY USER VIEW ---
     private void openModifyView(User user) {
-    	this.currentModUser = user;
+        this.currentModUser = user;
         txtModEmployeeId.setValue(user.getEmployeeId());
         txtModUsername.setValue(user.getUsername());
         txtModEmail.setValue(user.getEmail());
         txtModCurrentRole.setValue(getRoleDisplayName(user.getRoleId()));
 
-        // Populate new roles dropdown excluding the user's current role
+        // Refresh roles so new roles appear in Modify view as well
+        refreshRoleCache();
         cmbNewRole.getChildren().clear();
-        for (Map.Entry<String, String> entry : ROLE_MAP.entrySet()) {
+        for (Map.Entry<String, String> entry : roleMap.entrySet()) {
             if (!entry.getKey().equalsIgnoreCase(user.getRoleId())) {
                 Comboitem item = new Comboitem(entry.getValue());
                 item.setValue(entry.getKey());
@@ -299,7 +351,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             }
         }
 
-        // Default action to empty/none when opening the page
         this.selectedModifyAction = "";
         updateModifyActionStyles();
         switchView("MODIFY");
@@ -321,18 +372,17 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     }
 
     private void updateModifyActionStyles() {
-    	btnActionEnable.setSclass("ENABLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
+        btnActionEnable.setSclass("ENABLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
         btnActionDisable.setSclass("DISABLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
         btnActionChangeRole.setSclass("CHANGE_ROLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
 
-        // 2. Show combobox container ONLY if CHANGE_ROLE is selected
         if (divNewRoleContainer != null) {
             divNewRoleContainer.setVisible("CHANGE_ROLE".equals(selectedModifyAction));
         }
     }
 
     public void onClick$btnSaveModifications(Event event) {
-    	if (currentModUser == null) return;
+        if (currentModUser == null) return;
 
         if (selectedModifyAction == null || selectedModifyAction.trim().isEmpty()) {
             Clients.showNotification("Please choose an action: ENABLE, DISABLE, or CHANGE ROLE.", "warning", null, "top_center", 2500);
@@ -343,8 +393,12 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
         if ("ENABLE".equals(selectedModifyAction)) {
             currentModUser.setStatus("ACTIVE");
+            auditAction = "ENABLE_USER";
+            auditDetail = "Enabled user account: " + currentModUser.getUsername();
         } else if ("DISABLE".equals(selectedModifyAction)) {
             currentModUser.setStatus("INACTIVE");
+            auditAction = "DISABLE_USER";
+            auditDetail = "Disabled user account: " + currentModUser.getUsername();
         } else if ("CHANGE_ROLE".equals(selectedModifyAction)) {
             Comboitem selectedItem = cmbNewRole.getSelectedItem();
             if (selectedItem == null) {
@@ -352,21 +406,19 @@ public class UserManagementController extends GenericForwardComposer<Component> 
                 return;
             }
             currentModUser.setRoleId((String) selectedItem.getValue());
+            auditAction = "CHANGE_ROLE";
+            auditDetail = "Changed role of user " + currentModUser.getUsername() + " to " + selectedItem.getLabel();
         }
 
         boolean saved = userService.registerOrUpdateUser(currentModUser, null);
         if (saved) {
-            // --- AUDIT LOG: MODIFY USER SUCCESS ---
             AuditServiceImpl.getInstance().log("USER_MGMT", auditAction, auditDetail, "SUCCESS");
-
             Clients.showNotification("User " + currentModUser.getUsername() + " updated in database!", "info", null, "top_center", 2500);
             loadUserData();
             switchView("LIST");
         } else {
-            // --- AUDIT LOG: MODIFY USER FAILED ---
             AuditServiceImpl.getInstance().log("USER_MGMT", auditAction + "_FAILED", 
                 "Failed to update user: " + currentModUser.getUsername() + " (" + currentModUser.getEmployeeId() + ")", "FAILED");
-
             Clients.showNotification("Failed to update user in database.", "error", null, "top_center", 2500);
         }
     }
