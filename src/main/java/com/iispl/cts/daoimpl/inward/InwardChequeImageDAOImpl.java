@@ -257,5 +257,54 @@ public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
 		return null;
 	}
+	@Override
+	public InwardChequeImage findBackImageByChequeId(String inwardChequeId) {
+
+	    String sql = "SELECT inward_image_id, inward_cheque_id, "
+	            + "image_type, image_path, created_at "
+	            + "FROM inward_cheque_image "
+	            + "WHERE inward_cheque_id = ? "
+	            + "AND LOWER(image_type) = 'back' "
+	            + "LIMIT 1";
+
+	    try (Connection connection = DBConnection.getConnection();
+	            PreparedStatement preparedStatement =
+	                    connection.prepareStatement(sql)) {
+
+	        preparedStatement.setString(1, inwardChequeId);
+
+	        try (ResultSet resultSet =
+	                preparedStatement.executeQuery()) {
+
+	            if (resultSet.next()) {
+
+	                InwardChequeImage image =
+	                        new InwardChequeImage();
+
+	                image.setInwardImageId(
+	                        resultSet.getString("inward_image_id"));
+
+	                image.setInwardChequeId(
+	                        resultSet.getString("inward_cheque_id"));
+
+	                image.setImageType(
+	                        resultSet.getString("image_type"));
+
+	                image.setImagePath(
+	                        resultSet.getString("image_path"));
+
+	                image.setCreatedAt(
+	                        resultSet.getTimestamp("created_at"));
+
+	                return image;
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
 
 }
