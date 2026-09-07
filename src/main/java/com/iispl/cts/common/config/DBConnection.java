@@ -75,7 +75,7 @@ public class DBConnection {
     }
 
 
-			e.printStackTrace();
+			
 
 
     public static Connection getConnection() throws SQLException {
@@ -83,9 +83,10 @@ public class DBConnection {
             String cause = (initError != null) ? initError.getMessage() : "Unknown init failure";
             throw new SQLException("DataSource is not initialized properly. Cause: " + cause, initError);
         }
+          return dataSource.getConnection();
 
-
-	public static Connection getConnection() throws SQLException {
+    }
+	
 
 
     public static void closeQuietly(AutoCloseable... resources) {
