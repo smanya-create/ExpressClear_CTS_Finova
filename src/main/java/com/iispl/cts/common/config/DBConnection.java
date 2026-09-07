@@ -42,12 +42,8 @@ public class DBConnection {
             config.setPassword(DB_PASSWORD.trim());
             config.setDriverClassName("org.postgresql.Driver");
 
-            // Pool sizing tuned for Supabase limits
-            config.setMaximumPoolSize(3);
-            config.setMinimumIdle(1);
-
-            config.setConnectionTimeout(10000);
-            config.setValidationTimeout(3000);
+            config.setConnectionTimeout(30000);
+            config.setValidationTimeout(5000);
 
             // Stale connection prevention
             config.setIdleTimeout(30000);
@@ -56,13 +52,9 @@ public class DBConnection {
             // Do not fail JVM / Tomcat startup if connection is slow to initialize
             config.setInitializationFailTimeout(-1);
 
-            dataSource = new HikariDataSource(config);
+            config.setPoolName("CTS-HikariPool");
 
-            System.out.println("======================================");
-            System.out.println(" HikariCP Connection Pool ACTIVE");
-            System.out.println(" Supabase Host : " + SUPABASE_HOST);
-            System.out.println(" Port          : " + PORT);
-            System.out.println("======================================");
+            dataSource = new HikariDataSource(config);
 
         } catch (Throwable e) {
             initError = e;
@@ -71,16 +63,11 @@ public class DBConnection {
         }
     }
 
-    public static DataSource getDataSource() {
-        return dataSource;
-    }
-
     public static Connection getConnection() throws SQLException {
         if (dataSource == null) {
             String cause = (initError != null) ? initError.getMessage() : "Unknown init failure";
             throw new SQLException("DataSource is not initialized properly. Cause: " + cause, initError);
         }
-
         return dataSource.getConnection();
     }
 
@@ -94,6 +81,7 @@ public class DBConnection {
             }
         }
     }
+
     public static void shutdown() {
         if (dataSource != null && !dataSource.isClosed()) {
             try {
