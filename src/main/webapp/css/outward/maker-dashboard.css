@@ -13,17 +13,17 @@
 
 .outward-maker-welcome-title {
 	display: block;
-	font-size: 26px;
-	font-weight: 800;
-	color: #0f172a;
+	font-size: 26px !important;
+	font-weight: 800 !important;
+	color: #0f172a !important;
 	letter-spacing: 0.3px;
 }
 
 .outward-maker-welcome-subtitle {
 	display: block;
 	margin-top: 4px;
-	font-size: 13px;
-	color: #64748b;
+	font-size: 13px !important;
+	color: #64748b !important;
 }
 
 .outward-maker-section-header {
@@ -35,16 +35,16 @@
 
 .outward-maker-section-title {
 	display: block;
-	font-size: 19px;
-	font-weight: 750;
-	color: #0f172a;
+	font-size: 19px !important;
+	font-weight: 750 !important;
+	color: #0f172a !important;
 }
 
 .outward-maker-section-subtitle {
 	display: block;
 	margin-top: 3px;
-	font-size: 12px;
-	color: #64748b;
+	font-size: 12px !important;
+	color: #64748b !important;
 }
 
 .outward-maker-table-card {
@@ -166,59 +166,78 @@
 .outward-maker-batch-id {
 	display: block;
 	width: 100%;
-	font-size: 13px;
-	font-weight: 800;
-	color: #1d4ed8;
+	font-size: 13px !important;
+	font-weight: 800 !important;
+	color: #1d4ed8 !important;
 	text-align: center;
 }
 
 .outward-maker-cheque-count {
 	display: block;
 	width: 100%;
-	font-size: 13px;
-	font-weight: 700;
-	color: #334155;
+	font-size: 13px !important;
+	font-weight: 700 !important;
+	color: #334155 !important;
 	text-align: center;
 }
 
 .outward-maker-total-amount {
 	display: block;
 	width: 100%;
-	font-size: 13px;
-	font-weight: 700;
-	color: #334155;
+	font-size: 13px !important;
+	font-weight: 700 !important;
+	color: #334155 !important;
 	text-align: center;
 }
 
 .outward-maker-status {
-	display: inline-block;
-	min-width: 82px;
-	padding: 5px 12px;
-	border-radius: 16px;
-	font-size: 10px;
-	font-weight: 800;
-	letter-spacing: 0.5px;
-	text-align: center;
+	display: inline-block !important;
+	min-width: 88px !important;
+	padding: 6px 14px !important;
+	box-sizing: border-box !important;
+	border-radius: 16px !important;
+	font-size: 10px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.5px !important;
+	line-height: 1.2 !important;
+	text-align: center !important;
+	white-space: nowrap !important;
 }
 
 .outward-maker-status.processing {
-	background: #dbeafe;
-	color: #1d4ed8;
+	background: linear-gradient(135deg, #fffde7 0%, #fff59d 25%, #fdd835 60%, #f9a825
+		100%) !important;
+	background-color: #fdd835 !important;
+	color: #5d4037 !important;
+	border: 1px solid #f9a825 !important;
+	box-shadow: 0 2px 7px rgba(249, 168, 37, 0.30) !important;
 }
 
 .outward-maker-status.completed {
-	background: #dcfce7;
-	color: #15803d;
+	background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 35%, #4ade80 70%, #16a34a
+		100%) !important;
+	background-color: #4ade80 !important;
+	color: #14532d !important;
+	border: 1px solid #22c55e !important;
+	box-shadow: 0 2px 7px rgba(34, 197, 94, 0.22) !important;
 }
 
 .outward-maker-status.rejected {
-	background: #fee2e2;
-	color: #b91c1c;
+	background: linear-gradient(135deg, #fff1f2 0%, #fecaca 30%, #f87171 65%, #dc2626
+		100%) !important;
+	background-color: #f87171 !important;
+	color: #7f1d1d !important;
+	border: 1px solid #ef4444 !important;
+	box-shadow: 0 2px 7px rgba(239, 68, 68, 0.24) !important;
 }
 
 .outward-maker-status.pending {
-	background: #fef3c7;
-	color: #b45309;
+	background: linear-gradient(135deg, #fffbeb 0%, #fde68a 35%, #fbbf24 70%, #d97706
+		100%) !important;
+	background-color: #fbbf24 !important;
+	color: #78350f !important;
+	border: 1px solid #f59e0b !important;
+	box-shadow: 0 2px 7px rgba(245, 158, 11, 0.22) !important;
 }
 
 .outward-maker-view-button {
@@ -232,6 +251,7 @@
 	font-size: 11px !important;
 	font-weight: 800 !important;
 	cursor: pointer;
+	box-shadow: 0 2px 5px rgba(15, 23, 42, 0.12);
 }
 
 .outward-maker-view-button:hover {
@@ -255,17 +275,17 @@
 
 .outward-maker-empty-title {
 	display: block;
-	font-size: 15px;
-	font-weight: 700;
-	color: #475569;
+	font-size: 15px !important;
+	font-weight: 700 !important;
+	color: #475569 !important;
 	text-align: center;
 }
 
 .outward-maker-empty-subtitle {
 	display: block;
 	margin-top: 5px;
-	font-size: 12px;
-	color: #94a3b8;
+	font-size: 12px !important;
+	color: #94a3b8 !important;
 	text-align: center;
 }
 
@@ -287,6 +307,8 @@
 	color: #334155 !important;
 	font-size: 12px !important;
 	font-weight: 700 !important;
+	cursor: pointer;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 .outward-maker-pagination-button:hover {
@@ -295,8 +317,8 @@
 }
 
 .outward-maker-pagination-button:disabled {
-	opacity: 0.45;
-	cursor: default;
+	opacity: 0.45 !important;
+	cursor: default !important;
 }
 
 .outward-maker-pagination-label {
@@ -319,5 +341,10 @@
 	.outward-maker-view-button {
 		min-width: 90px;
 		padding: 0 10px;
+	}
+	.outward-maker-status {
+		min-width: 78px !important;
+		padding-left: 8px !important;
+		padding-right: 8px !important;
 	}
 }

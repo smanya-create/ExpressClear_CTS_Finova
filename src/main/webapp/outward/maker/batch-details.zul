@@ -5,7 +5,8 @@
 	<style src="/css/outward/maker-batch-details.css" />
 
 	<div id="outwardMakerBatchDetailsDiv" width="100%"
-		sclass="outward-maker-batch-details">
+		sclass="outward-maker-batch-details"
+		apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchDetailsController">
 
 		<div sclass="outward-maker-batch-details-header">
 

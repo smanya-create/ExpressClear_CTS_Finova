@@ -41,11 +41,16 @@
 	font-size: 11px !important;
 	font-weight: 800 !important;
 	cursor: pointer;
+	box-shadow: 0 2px 5px rgba(15, 23, 42, 0.08);
 }
 
 .outward-maker-back-button:hover {
 	background: #f1f5f9 !important;
 	border-color: #94a3b8 !important;
+}
+
+.outward-maker-back-button:active {
+	background: #e2e8f0 !important;
 }
 
 .outward-maker-summary-card {
@@ -240,32 +245,46 @@
 
 .outward-maker-cheque-status {
 	display: inline-block;
-	min-width: 70px;
-	padding: 5px 8px;
+	min-width: 82px;
+	padding: 6px 10px;
 	border-radius: 14px;
 	font-size: 9px !important;
 	font-weight: 800 !important;
 	text-align: center;
+	box-sizing: border-box;
+	line-height: 1.2;
 }
 
 .outward-maker-cheque-status.micr-repair {
-	background: #fee2e2 !important;
-	color: #dc2626 !important;
+	background: linear-gradient(135deg, #fecaca 0%, #fca5a5 30%, #f87171 65%, #dc2626
+		100%) !important;
+	color: #ffffff !important;
+	border: 1px solid #b91c1c !important;
+	box-shadow: 0 2px 6px rgba(220, 38, 38, 0.24);
 }
 
 .outward-maker-cheque-status.data-entry {
-	background: #fef3c7 !important;
-	color: #d97706 !important;
+	background: linear-gradient(135deg, #fef3c7 0%, #fde68a 40%, #fbbf24 70%, #d97706
+		100%) !important;
+	color: #78350f !important;
+	border: 1px solid #d97706 !important;
+	box-shadow: 0 2px 6px rgba(217, 119, 6, 0.20);
 }
 
 .outward-maker-cheque-status.completed {
-	background: #dcfce7 !important;
-	color: #15803d !important;
+	background: linear-gradient(135deg, #dcfce7 0%, #86efac 50%, #22c55e 100%)
+		!important;
+	color: #ffffff !important;
+	border: 1px solid #15803d !important;
+	box-shadow: 0 2px 6px rgba(34, 197, 94, 0.20);
 }
 
 .outward-maker-cheque-status.pending {
-	background: #e2e8f0 !important;
-	color: #475569 !important;
+	background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%)
+		!important;
+	color: #334155 !important;
+	border: 1px solid #94a3b8 !important;
+	box-shadow: 0 2px 6px rgba(100, 116, 139, 0.16);
 }
 
 .outward-maker-cheque-amount {
@@ -293,6 +312,11 @@
 .outward-maker-action-button:hover {
 	background: #0f1b3d !important;
 	border-color: #0f1b3d !important;
+}
+
+.outward-maker-action-button:active {
+	background: #0b1530 !important;
+	border-color: #0b1530 !important;
 }
 
 .outward-maker-empty-state {
@@ -337,6 +361,7 @@
 	color: #334155 !important;
 	font-size: 12px !important;
 	font-weight: 700 !important;
+	cursor: pointer;
 }
 
 .outward-maker-pagination-button:hover {
@@ -355,4 +380,31 @@
 	font-size: 12px !important;
 	font-weight: 800 !important;
 	color: #334155 !important;
+}
+
+@media ( max-width : 900px) {
+	.outward-maker-batch-details {
+		padding: 4px 16px 24px 16px;
+	}
+	.outward-maker-batch-details-header {
+		align-items: flex-start;
+	}
+	.outward-maker-back-button {
+		min-width: 135px;
+		padding: 0 10px;
+	}
+	.outward-maker-cheque-grid .z-column-content, .outward-maker-cheque-grid .z-row-content
+		{
+		padding-left: 8px !important;
+		padding-right: 8px !important;
+	}
+	.outward-maker-action-button {
+		min-width: 105px;
+		padding: 0 7px;
+	}
+	.outward-maker-cheque-status {
+		min-width: 70px;
+		padding-left: 7px;
+		padding-right: 7px;
+	}
 }
