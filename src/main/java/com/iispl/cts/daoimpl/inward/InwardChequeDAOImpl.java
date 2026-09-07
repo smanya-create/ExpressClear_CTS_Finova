@@ -459,4 +459,55 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 		return cheque;
 	}
+	
+	@Override
+	public boolean saveRejection(
+	        String inwardChequeId,
+	        String rejectedReasonId,
+	        String remarks,
+	        String rejectedBy) {
+
+	    String sql =
+	            "INSERT INTO inward_cheque_rejection "
+	          + "(inward_cheque_id, rejected_reason_id, remarks, rejected_by) "
+	          + "VALUES (?, ?, ?, ?)";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, inwardChequeId);
+	        ps.setString(2, rejectedReasonId);
+	        ps.setString(3, remarks);
+	        ps.setString(4, rejectedBy);
+
+	        int rowsInserted = ps.executeUpdate();
+
+	        System.out.println(
+	                "Rejection record inserted. Rows: " + rowsInserted);
+
+	        return rowsInserted > 0;
+
+	    } catch (SQLException e) {
+
+	        System.err.println(
+	                "Failed to save rejection for cheque: "
+	                + inwardChequeId);
+
+	        System.err.println(
+	                "Reason ID: " + rejectedReasonId);
+
+	        System.err.println(
+	                "Remarks: " + remarks);
+
+	        System.err.println(
+	                "Rejected By: " + rejectedBy);
+
+	        System.err.println(
+	                "SQL Error: " + e.getMessage());
+
+	        e.printStackTrace();
+
+	        return false;
+	    }
+	}
 }

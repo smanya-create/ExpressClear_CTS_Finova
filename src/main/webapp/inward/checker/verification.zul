@@ -351,9 +351,10 @@
         value="Cheque Verification"
         sclass="card-title"
         hflex="1"/>
-    <label
-        value="PENDING"
-	sclass="verification-status-badge"/>
+   <label
+    id="lblVerificationStatus"
+    value="PENDING"
+    sclass="verification-status-badge"/>
 
 </hlayout>
 
@@ -474,15 +475,7 @@
         </hlayout>
 
     </vlayout>
-    <!-- CBS VALIDATION BUTTON -->
-
-    <button
-
-        id="btnRunCbsValidation"
-
-        label="🔍 Run CBS Validation"
-
-        sclass="cbs-validation-btn"/>
+    
 
 </vlayout>
 
@@ -686,6 +679,89 @@
         sclass="footer-version"/>
 
 </hlayout>
+<window
+    id="rejectReasonWindow"
+    title="Reject Cheque"
+    width="600px"
+    closable="true"
+    sizable="false"
+    mode="modal"
+    visible="false"
+    border="normal">
+
+    <vlayout
+        width="100%"
+        spacing="15px"
+        style="padding:20px;">
+
+        <!-- REJECTED REASONS -->
+
+        <vlayout
+            width="100%"
+            spacing="6px">
+
+            <label
+                value="Rejected Reason"
+                style="font-weight:bold;font-size:14px;color:#0B2344;"/>
+
+            <label
+                value="Select the reason for rejecting this cheque."
+                style="font-size:12px;color:#6B7A90;"/>
+
+     <combobox
+    id="cmbRejectedReason"
+    width="100%"
+    placeholder="Select rejected reason"
+    readonly="true"
+    autodrop="true"/>
+
+        </vlayout>
+
+
+        <!-- REMARKS -->
+
+        <vlayout
+            width="100%"
+            spacing="6px">
+
+            <label
+                value="Remarks"
+                style="font-weight:bold;font-size:14px;color:#0B2344;"/>
+
+            <textbox
+                id="txtRejectRemarks"
+                width="100%"
+                height="90px"
+                multiline="true"
+                placeholder="Enter remarks..."/>
+
+        </vlayout>
+
+
+        <!-- BUTTONS -->
+
+        <hlayout
+            width="100%"
+            spacing="8px">
+
+            <button
+                id="btnCancelReject"
+                label="Cancel"
+                width="90px"
+                height="34px"/>
+
+            <button
+                id="btnProceedReject"
+                label="✓ Proceed"
+                width="110px"
+                height="34px"
+                style="background:#C62828;color:white;border:0;border-radius:4px;"/>
+
+        </hlayout>
+
+    </vlayout>
+
+</window>
 
                     </vlayout>
 

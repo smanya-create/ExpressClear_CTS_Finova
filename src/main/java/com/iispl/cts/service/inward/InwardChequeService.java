@@ -19,6 +19,11 @@ public interface InwardChequeService {
     
     InwardChequeImage getFrontImage(String inwardChequeId);
     
+    boolean saveRejection(
+            String inwardChequeId,
+            String rejectedReasonId,
+            String remarks,
+            String rejectedBy);
   
   
     
