@@ -10,11 +10,14 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class DBConnection {
 
+
     private static Throwable initError;
 
     private static final String SUPABASE_HOST = "aws-0-ap-northeast-2.pooler.supabase.com";
 
-    private static final String DB_NAME = "postgres";
+
+	private static final String DB_NAME = "postgres";
+
 
     // Transaction pooler (Port 6543 avoids EMAXCONNSESSION errors)
     private static final int PORT = 6543;
@@ -23,7 +26,9 @@ public class DBConnection {
 
     private static final String DB_PASSWORD = "Imageinfo@123";
 
-    private static HikariDataSource dataSource;
+
+	private static HikariDataSource dataSource;
+
 
     static {
         try {
@@ -37,17 +42,17 @@ public class DBConnection {
                     DB_NAME
             );
 
-            config.setJdbcUrl(jdbcUrl);
-            config.setUsername(DB_USER.trim());
-            config.setPassword(DB_PASSWORD.trim());
-            config.setDriverClassName("org.postgresql.Driver");
 
-            // Pool sizing tuned for Supabase limits
-            config.setMaximumPoolSize(3);
-            config.setMinimumIdle(1);
+			config.setJdbcUrl(jdbcUrl);
+			config.setUsername(DB_USER.trim());
+			config.setPassword(DB_PASSWORD.trim());
+			config.setDriverClassName("org.postgresql.Driver");
 
-            config.setConnectionTimeout(10000);
-            config.setValidationTimeout(3000);
+
+
+			config.setConnectionTimeout(30000);
+			config.setValidationTimeout(5000);
+
 
             // Stale connection prevention
             config.setIdleTimeout(30000);
@@ -56,13 +61,11 @@ public class DBConnection {
             // Do not fail JVM / Tomcat startup if connection is slow to initialize
             config.setInitializationFailTimeout(-1);
 
-            dataSource = new HikariDataSource(config);
 
-            System.out.println("======================================");
-            System.out.println(" HikariCP Connection Pool ACTIVE");
-            System.out.println(" Supabase Host : " + SUPABASE_HOST);
-            System.out.println(" Port          : " + PORT);
-            System.out.println("======================================");
+			config.setPoolName("CTS-HikariPool");
+
+			dataSource = new HikariDataSource(config);
+
 
         } catch (Throwable e) {
             initError = e;
@@ -71,9 +74,9 @@ public class DBConnection {
         }
     }
 
-    public static DataSource getDataSource() {
-        return dataSource;
-    }
+
+			e.printStackTrace();
+
 
     public static Connection getConnection() throws SQLException {
         if (dataSource == null) {
@@ -81,8 +84,9 @@ public class DBConnection {
             throw new SQLException("DataSource is not initialized properly. Cause: " + cause, initError);
         }
 
-        return dataSource.getConnection();
-    }
+
+	public static Connection getConnection() throws SQLException {
+
 
     public static void closeQuietly(AutoCloseable... resources) {
         for (AutoCloseable resource : resources) {
@@ -94,4 +98,5 @@ public class DBConnection {
             }
         }
     }
+
 }
