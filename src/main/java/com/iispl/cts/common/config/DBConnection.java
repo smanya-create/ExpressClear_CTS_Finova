@@ -10,6 +10,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class DBConnection {
 
+
     private static Throwable initError;
 
     private static final String SUPABASE_HOST = "aws-0-ap-northeast-2.pooler.supabase.com";
@@ -23,15 +24,18 @@ public class DBConnection {
 
     private static final String DB_PASSWORD = "Imageinfo@123";
 
+
     private static HikariDataSource dataSource;
 
     static {
         try {
+
             HikariConfig config = new HikariConfig();
 
             // Note: prepareThreshold=0 is required for PostgreSQL connection poolers in transaction mode
             String jdbcUrl = String.format(
                     "jdbc:postgresql://%s:%d/%s?sslmode=require&prepareThreshold=0&preferQueryMode=simple",
+
                     SUPABASE_HOST,
                     PORT,
                     DB_NAME
@@ -41,6 +45,7 @@ public class DBConnection {
             config.setUsername(DB_USER.trim());
             config.setPassword(DB_PASSWORD.trim());
             config.setDriverClassName("org.postgresql.Driver");
+
 
             config.setConnectionTimeout(30000);
             config.setValidationTimeout(5000);
@@ -52,9 +57,11 @@ public class DBConnection {
             // Do not fail JVM / Tomcat startup if connection is slow to initialize
             config.setInitializationFailTimeout(-1);
 
+
             config.setPoolName("CTS-HikariPool");
 
             dataSource = new HikariDataSource(config);
+
 
         } catch (Throwable e) {
             initError = e;
@@ -76,6 +83,7 @@ public class DBConnection {
             if (resource != null) {
                 try {
                     resource.close();
+
                 } catch (Exception ignored) {
                 }
             }
@@ -92,4 +100,5 @@ public class DBConnection {
             }
         }
     }
+
 }
