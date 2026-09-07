@@ -1,3 +1,4 @@
+
 package com.iispl.cts.daoimpl.outward;
 
 import java.sql.Connection;
@@ -13,713 +14,758 @@ import com.iispl.cts.entity.outward.ScanCheque;
 
 public class ScanChequeDAOImpl implements ScanChequeDAO {
 
-	@Override
-	public String saveBatch(Connection connection, List<ScanCheque> chequeList) {
+    @Override
+    public String saveBatch(Connection connection, List<ScanCheque> chequeList) {
+
+        if (connection == null) {
+            throw new IllegalArgumentException("Database connection cannot be null");
+        }
+
+        if (chequeList == null || chequeList.isEmpty()) {
+            throw new IllegalArgumentException("Cheque list cannot be null or empty");
+        }
+
+        String checkSql =
+                "SELECT scanned_cheque_id " +
+                "FROM scan_cheque " +
+                "WHERE scanned_cheque_id = ?";
+
+        String insertSql =
+                "INSERT INTO scan_cheque (" +
+                "scanned_cheque_id, " +
+                "scanned_batch_id, " +
+                "cheque_number, " +
+                "micr_code, " +
+                "drawee_name, " +
+                "drawee_account_number, " +
+                "payee_name, " +
+                "payee_account_number, " +
+                "cheque_amount, " +
+                "cheque_date, " +
+                "cheque_status, " +
+                "account_id, " +
+                "created_at, " +
+                "city_code, " +
+                "bank_code, " +
+                "branch_code, " +
+                "cheque_image_front, " +
+                "cheque_image_back" +
+                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        String updateSql =
+                "UPDATE scan_cheque SET " +
+                "scanned_batch_id = ?, " +
+                "cheque_number = ?, " +
+                "micr_code = ?, " +
+                "drawee_name = ?, " +
+                "drawee_account_number = ?, " +
+                "payee_name = ?, " +
+                "payee_account_number = ?, " +
+                "cheque_amount = ?, " +
+                "cheque_date = ?, " +
+                "cheque_status = ?, " +
+                "account_id = ?, " +
+                "created_at = ?, " +
+                "city_code = ?, " +
+                "bank_code = ?, " +
+                "branch_code = ?, " +
+                "cheque_image_front = ?, " +
+                "cheque_image_back = ? " +
+                "WHERE scanned_cheque_id = ?";
+
+        String scannedBatchId = null;
+
+        try (
+                PreparedStatement checkStatement =
+                        connection.prepareStatement(checkSql);
+
+                PreparedStatement insertStatement =
+                        connection.prepareStatement(insertSql);
+
+                PreparedStatement updateStatement =
+                        connection.prepareStatement(updateSql)
+        ) {
+
+            for (ScanCheque cheque : chequeList) {
+
+                if (cheque == null) {
+                    throw new IllegalArgumentException(
+                            "Cheque object cannot be null");
+                }
+
+                if (cheque.getScannedChequeId() == null ||
+                        cheque.getScannedChequeId().trim().isEmpty()) {
+
+                    throw new IllegalArgumentException(
+                            "Scanned cheque ID cannot be null or empty");
+                }
+
+                /*
+                 * Get batch ID
+                 */
+                if (scannedBatchId == null) {
+
+                    scannedBatchId = cheque.getScannedBatchId();
+
+                } else if (!scannedBatchId.equals(
+                        cheque.getScannedBatchId())) {
+
+                    throw new IllegalArgumentException(
+                            "Cheque list contains multiple batch IDs");
+                }
+
+                /*
+                 * Check whether cheque already exists
+                 */
+                boolean chequeExists = false;
 
-		if (connection == null) {
-			throw new IllegalArgumentException("Database connection cannot be null");
-		}
+                checkStatement.clearParameters();
+                checkStatement.setString(
+                        1,
+                        cheque.getScannedChequeId());
 
-		if (chequeList == null || chequeList.isEmpty()) {
+                try (ResultSet resultSet =
+                        checkStatement.executeQuery()) {
 
-			throw new IllegalArgumentException("Cheque list cannot be null or empty");
-		}
+                    if (resultSet.next()) {
+                        chequeExists = true;
+                    }
+                }
 
-		String checkSql = "SELECT scanned_cheque_id " + "FROM scan_cheque " + "WHERE scanned_cheque_id = ?";
+                /*
+                 * Existing cheque -> UPDATE
+                 */
+                if (chequeExists) {
 
-		/*
-		 * ===================================================== INSERT NEW CHEQUE
-		 * =====================================================
-		 *
-		 * Added:
-		 *
-		 * cheque_image_front cheque_image_back
-		 *
-		 */
+                    updateStatement.clearParameters();
 
-		String insertSql = "INSERT INTO scan_cheque (" + "scanned_cheque_id, " + "scanned_batch_id, "
-				+ "cheque_number, " + "micr_code, " + "drawee_name, " + "drawee_account_number, " + "payee_name, "
-				+ "payee_account_number, " + "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, "
-				+ "created_at, " + "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, "
-				+ "cheque_image_back" + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    updateStatement.setString(
+                            1, cheque.getScannedBatchId());
 
-		/*
-		 * ===================================================== UPDATE EXISTING CHEQUE
-		 * =====================================================
-		 *
-		 * Added:
-		 *
-		 * cheque_image_front cheque_image_back
-		 *
-		 */
+                    updateStatement.setString(
+                            2, cheque.getChequeNumber());
 
-		String updateSql = "UPDATE scan_cheque SET " + "scanned_batch_id = ?, " + "cheque_number = ?, "
-				+ "micr_code = ?, " + "drawee_name = ?, " + "drawee_account_number = ?, " + "payee_name = ?, "
-				+ "payee_account_number = ?, " + "cheque_amount = ?, " + "cheque_date = ?, " + "cheque_status = ?, "
-				+ "account_id = ?, " + "created_at = ?, " + "city_code = ?, " + "bank_code = ?, " + "branch_code = ?, "
-				+ "cheque_image_front = ?, " + "cheque_image_back = ? " + "WHERE scanned_cheque_id = ?";
+                    updateStatement.setString(
+                            3, cheque.getMicrCode());
 
-		String scannedBatchId = null;
+                    updateStatement.setString(
+                            4, cheque.getDraweeName());
 
-		try {
+                    updateStatement.setString(
+                            5, cheque.getDraweeAccountNumber());
 
-			/*
-			 * ===================================================== Prepare statements
-			 * using the SAME connection received from ScanServiceImpl.
-			 * =====================================================
-			 */
+                    updateStatement.setString(
+                            6, cheque.getPayeeName());
 
-			try (PreparedStatement checkStatement = connection.prepareStatement(checkSql);
+                    updateStatement.setString(
+                            7, cheque.getPayeeAccountNumber());
 
-					PreparedStatement insertStatement = connection.prepareStatement(insertSql);
+                    updateStatement.setBigDecimal(
+                            8, cheque.getChequeAmount());
 
-					PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                    updateStatement.setDate(
+                            9, cheque.getChequeDate());
 
-				/*
-				 * ================================================= Process every cheque
-				 * =================================================
-				 */
+                    updateStatement.setString(
+                            10, cheque.getChequeStatus());
 
-				for (ScanCheque cheque : chequeList) {
+                    updateStatement.setString(
+                            11, cheque.getAccountId());
 
-					if (cheque == null) {
+                    if (cheque.getCreatedAt() != null) {
 
-						throw new IllegalArgumentException("Cheque object cannot be null");
-					}
+                        updateStatement.setTimestamp(
+                                12, cheque.getCreatedAt());
 
-					if (cheque.getScannedChequeId() == null || cheque.getScannedChequeId().trim().isEmpty()) {
+                    } else {
 
-						throw new IllegalArgumentException("Scanned cheque ID cannot be null " + "or empty");
-					}
+                        updateStatement.setTimestamp(
+                                12,
+                                new java.sql.Timestamp(
+                                        System.currentTimeMillis()));
+                    }
 
-					/*
-					 * ------------------------------------------------- Get batch ID
-					 * -------------------------------------------------
-					 */
+                    updateStatement.setString(
+                            13, cheque.getCityCode());
 
-					if (scannedBatchId == null) {
+                    updateStatement.setString(
+                            14, cheque.getBankCode());
 
-						scannedBatchId = cheque.getScannedBatchId();
+                    updateStatement.setString(
+                            15, cheque.getBranchCode());
 
-					} else if (!scannedBatchId.equals(cheque.getScannedBatchId())) {
+                    updateStatement.setString(
+                            16, cheque.getChequeImageFront());
 
-						throw new IllegalArgumentException("Cheque list contains multiple " + "batch IDs");
-					}
+                    updateStatement.setString(
+                            17, cheque.getChequeImageBack());
 
-					/*
-					 * ================================================= Check whether cheque
-					 * already exists =================================================
-					 */
+                    updateStatement.setString(
+                            18, cheque.getScannedChequeId());
 
-					boolean chequeExists = false;
+                    updateStatement.executeUpdate();
 
-					checkStatement.clearParameters();
+                } else {
 
-					checkStatement.setString(1, cheque.getScannedChequeId());
+                    /*
+                     * New cheque -> INSERT
+                     */
 
-					try (ResultSet resultSet = checkStatement.executeQuery()) {
+                    insertStatement.clearParameters();
 
-						if (resultSet.next()) {
+                    insertStatement.setString(
+                            1, cheque.getScannedChequeId());
 
-							chequeExists = true;
-						}
-					}
+                    insertStatement.setString(
+                            2, cheque.getScannedBatchId());
 
-					/*
-					 * ================================================= CASE 1: Existing cheque →
-					 * UPDATE =================================================
-					 */
+                    insertStatement.setString(
+                            3, cheque.getChequeNumber());
 
-					if (chequeExists) {
+                    insertStatement.setString(
+                            4, cheque.getMicrCode());
 
-						updateStatement.clearParameters();
+                    insertStatement.setString(
+                            5, cheque.getDraweeName());
 
-						/*
-						 * 1. scanned_batch_id
-						 */
+                    insertStatement.setString(
+                            6, cheque.getDraweeAccountNumber());
 
-						updateStatement.setString(1, cheque.getScannedBatchId());
+                    insertStatement.setString(
+                            7, cheque.getPayeeName());
 
-						/*
-						 * 2. cheque_number
-						 */
+                    insertStatement.setString(
+                            8, cheque.getPayeeAccountNumber());
 
-						updateStatement.setString(2, cheque.getChequeNumber());
+                    insertStatement.setBigDecimal(
+                            9, cheque.getChequeAmount());
 
-						/*
-						 * 3. micr_code
-						 */
+                    insertStatement.setDate(
+                            10, cheque.getChequeDate());
 
-						updateStatement.setString(3, cheque.getMicrCode());
+                    insertStatement.setString(
+                            11, cheque.getChequeStatus());
 
-						/*
-						 * 4. drawee_name
-						 */
+                    insertStatement.setString(
+                            12, cheque.getAccountId());
 
-						updateStatement.setString(4, cheque.getDraweeName());
+                    if (cheque.getCreatedAt() != null) {
 
-						/*
-						 * 5. drawee_account_number
-						 */
+                        insertStatement.setTimestamp(
+                                13, cheque.getCreatedAt());
 
-						updateStatement.setString(5, cheque.getDraweeAccountNumber());
+                    } else {
 
-						/*
-						 * 6. payee_name
-						 */
+                        insertStatement.setTimestamp(
+                                13,
+                                new java.sql.Timestamp(
+                                        System.currentTimeMillis()));
+                    }
 
-						updateStatement.setString(6, cheque.getPayeeName());
+                    insertStatement.setString(
+                            14, cheque.getCityCode());
 
-						/*
-						 * 7. payee_account_number
-						 */
+                    insertStatement.setString(
+                            15, cheque.getBankCode());
 
-						updateStatement.setString(7, cheque.getPayeeAccountNumber());
+                    insertStatement.setString(
+                            16, cheque.getBranchCode());
 
-						/*
-						 * 8. cheque_amount
-						 */
+                    insertStatement.setString(
+                            17, cheque.getChequeImageFront());
 
-						updateStatement.setBigDecimal(8, cheque.getChequeAmount());
+                    insertStatement.setString(
+                            18, cheque.getChequeImageBack());
 
-						/*
-						 * 9. cheque_date
-						 */
+                    insertStatement.executeUpdate();
+                }
+            }
 
-						updateStatement.setDate(9, cheque.getChequeDate());
+        } catch (SQLException e) {
 
-						/*
-						 * 10. cheque_status
-						 */
+            /*
+             * Do NOT rollback here.
+             *
+             * ScanServiceImpl owns the transaction.
+             */
+            throw new RuntimeException(
+                    "Error while saving scanned cheques", e);
+        }
 
-						updateStatement.setString(10, cheque.getChequeStatus());
+        System.out.println(
+                "Scanned cheque data processed successfully.");
 
-						/*
-						 * 11. account_id
-						 */
+        return scannedBatchId;
+    }
 
-						updateStatement.setString(11, cheque.getAccountId());
 
-						/*
-						 * 12. created_at
-						 */
+    @Override
+    public List<ScanCheque> getChequesByBatchId(
+            String scannedBatchId) {
 
-						if (cheque.getCreatedAt() != null) {
+        if (scannedBatchId == null ||
+                scannedBatchId.trim().isEmpty()) {
 
-							updateStatement.setTimestamp(12, cheque.getCreatedAt());
+            throw new IllegalArgumentException(
+                    "Scanned batch ID cannot be null or empty");
+        }
 
-						} else {
+        String sql =
+                "SELECT " +
+                "scanned_cheque_id, " +
+                "scanned_batch_id, " +
+                "cheque_number, " +
+                "micr_code, " +
+                "drawee_name, " +
+                "drawee_account_number, " +
+                "payee_name, " +
+                "payee_account_number, " +
+                "cheque_amount, " +
+                "cheque_date, " +
+                "cheque_status, " +
+                "account_id, " +
+                "created_at, " +
+                "city_code, " +
+                "bank_code, " +
+                "branch_code, " +
+                "cheque_image_front, " +
+                "cheque_image_back " +
+                "FROM scan_cheque " +
+                "WHERE scanned_batch_id = ? " +
+                "ORDER BY scanned_cheque_id";
 
-							updateStatement.setTimestamp(12, new java.sql.Timestamp(System.currentTimeMillis()));
-						}
+        List<ScanCheque> chequeList =
+                new ArrayList<>();
 
-						/*
-						 * 13. city_code
-						 */
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-						updateStatement.setString(13, cheque.getCityCode());
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
 
-						/*
-						 * 14. bank_code
-						 */
+            statement.setString(1, scannedBatchId);
 
-						updateStatement.setString(14, cheque.getBankCode());
+            try (ResultSet resultSet =
+                    statement.executeQuery()) {
 
-						/*
-						 * 15. branch_code
-						 */
+                while (resultSet.next()) {
 
-						updateStatement.setString(15, cheque.getBranchCode());
+                    ScanCheque cheque =
+                            new ScanCheque();
 
-						/*
-						 * 16. cheque_image_front
-						 */
+                    cheque.setScannedChequeId(
+                            resultSet.getString(
+                                    "scanned_cheque_id"));
 
-						updateStatement.setString(16, cheque.getChequeImageFront());
+                    cheque.setScannedBatchId(
+                            resultSet.getString(
+                                    "scanned_batch_id"));
 
-						/*
-						 * 17. cheque_image_back
-						 */
+                    cheque.setChequeNumber(
+                            resultSet.getString(
+                                    "cheque_number"));
 
-						updateStatement.setString(17, cheque.getChequeImageBack());
+                    cheque.setMicrCode(
+                            resultSet.getString(
+                                    "micr_code"));
 
-						/*
-						 * 18. scanned_cheque_id
-						 */
+                    cheque.setDraweeName(
+                            resultSet.getString(
+                                    "drawee_name"));
 
-						updateStatement.setString(18, cheque.getScannedChequeId());
+                    cheque.setDraweeAccountNumber(
+                            resultSet.getString(
+                                    "drawee_account_number"));
 
-						updateStatement.executeUpdate();
+                    cheque.setPayeeName(
+                            resultSet.getString(
+                                    "payee_name"));
 
-					} else {
+                    cheque.setPayeeAccountNumber(
+                            resultSet.getString(
+                                    "payee_account_number"));
 
-						/*
-						 * ================================================= CASE 2: New cheque → INSERT
-						 * =================================================
-						 */
+                    cheque.setChequeAmount(
+                            resultSet.getBigDecimal(
+                                    "cheque_amount"));
 
-						insertStatement.clearParameters();
+                    cheque.setChequeDate(
+                            resultSet.getDate(
+                                    "cheque_date"));
 
-						/*
-						 * 1. scanned_cheque_id
-						 */
+                    cheque.setChequeStatus(
+                            resultSet.getString(
+                                    "cheque_status"));
 
-						insertStatement.setString(1, cheque.getScannedChequeId());
+                    cheque.setAccountId(
+                            resultSet.getString(
+                                    "account_id"));
 
-						/*
-						 * 2. scanned_batch_id
-						 */
+                    cheque.setCreatedAt(
+                            resultSet.getTimestamp(
+                                    "created_at"));
 
-						insertStatement.setString(2, cheque.getScannedBatchId());
+                    cheque.setCityCode(
+                            resultSet.getString(
+                                    "city_code"));
 
-						/*
-						 * 3. cheque_number
-						 */
+                    cheque.setBankCode(
+                            resultSet.getString(
+                                    "bank_code"));
 
-						insertStatement.setString(3, cheque.getChequeNumber());
+                    cheque.setBranchCode(
+                            resultSet.getString(
+                                    "branch_code"));
 
-						/*
-						 * 4. micr_code
-						 */
+                    cheque.setChequeImageFront(
+                            resultSet.getString(
+                                    "cheque_image_front"));
 
-						insertStatement.setString(4, cheque.getMicrCode());
+                    cheque.setChequeImageBack(
+                            resultSet.getString(
+                                    "cheque_image_back"));
 
-						/*
-						 * 5. drawee_name
-						 */
+                    chequeList.add(cheque);
+                }
+            }
 
-						insertStatement.setString(5, cheque.getDraweeName());
+            return chequeList;
 
-						/*
-						 * 6. drawee_account_number
-						 */
+        } catch (SQLException e) {
 
-						insertStatement.setString(6, cheque.getDraweeAccountNumber());
+            throw new RuntimeException(
+                    "Error while retrieving cheques for batch: "
+                            + scannedBatchId,
+                    e);
+        }
+    }
 
-						/*
-						 * 7. payee_name
-						 */
 
-						insertStatement.setString(7, cheque.getPayeeName());
+    @Override
+    public void updateChequeStatus(
+            Connection connection,
+            String batchId,
+            String status) {
 
-						/*
-						 * 8. payee_account_number
-						 */
+        if (connection == null) {
+            throw new IllegalArgumentException(
+                    "Connection cannot be null");
+        }
 
-						insertStatement.setString(8, cheque.getPayeeAccountNumber());
+        if (batchId == null ||
+                batchId.trim().isEmpty()) {
 
-						/*
-						 * 9. cheque_amount
-						 */
+            throw new IllegalArgumentException(
+                    "Batch ID cannot be null or empty");
+        }
 
-						insertStatement.setBigDecimal(9, cheque.getChequeAmount());
+        if (status == null ||
+                status.trim().isEmpty()) {
 
-						/*
-						 * 10. cheque_date
-						 */
+            throw new IllegalArgumentException(
+                    "Cheque status cannot be null or empty");
+        }
 
-						insertStatement.setDate(10, cheque.getChequeDate());
+        String sql =
+                "UPDATE scan_cheque " +
+                "SET cheque_status = ? " +
+                "WHERE scanned_batch_id = ?";
 
-						/*
-						 * 11. cheque_status
-						 */
+        try (PreparedStatement ps =
+                connection.prepareStatement(sql)) {
 
-						insertStatement.setString(11, cheque.getChequeStatus());
+            ps.setString(1, status);
+            ps.setString(2, batchId);
 
-						/*
-						 * 12. account_id
-						 *
-						 * Nullable in database.
-						 */
+            int rowsUpdated =
+                    ps.executeUpdate();
 
-						insertStatement.setString(12, cheque.getAccountId());
+            if (rowsUpdated == 0) {
 
-						/*
-						 * 13. created_at
-						 */
+                throw new IllegalStateException(
+                        "No cheques found for batch ID: "
+                                + batchId);
+            }
 
-						if (cheque.getCreatedAt() != null) {
+        } catch (SQLException e) {
 
-							insertStatement.setTimestamp(13, cheque.getCreatedAt());
+            throw new RuntimeException(
+                    "Failed to update cheque status for batch ID: "
+                            + batchId,
+                    e);
+        }
+    }
 
-						} else {
 
-							insertStatement.setTimestamp(13, new java.sql.Timestamp(System.currentTimeMillis()));
-						}
+    @Override
+    public List<ScanCheque> getScanMicrRepairCheques(
+            String scannedBatchId) {
 
-						/*
-						 * 14. city_code
-						 */
+        if (scannedBatchId == null ||
+                scannedBatchId.trim().isEmpty()) {
 
-						insertStatement.setString(14, cheque.getCityCode());
+            throw new IllegalArgumentException(
+                    "Scanned batch ID cannot be null or empty");
+        }
 
-						/*
-						 * 15. bank_code
-						 */
+        String sql =
+                "SELECT " +
+                "scanned_cheque_id, " +
+                "scanned_batch_id, " +
+                "cheque_number, " +
+                "micr_code, " +
+                "drawee_name, " +
+                "drawee_account_number, " +
+                "payee_name, " +
+                "payee_account_number, " +
+                "cheque_amount, " +
+                "cheque_date, " +
+                "cheque_status, " +
+                "account_id, " +
+                "created_at, " +
+                "city_code, " +
+                "bank_code, " +
+                "branch_code, " +
+                "cheque_image_front, " +
+                "cheque_image_back " +
+                "FROM scan_cheque " +
+                "WHERE scanned_batch_id = ? " +
+                "AND UPPER(TRIM(cheque_status)) = " +
+                "'MICR_REPAIR_REQUIRED' " +
+                "ORDER BY scanned_cheque_id";
 
-						insertStatement.setString(15, cheque.getBankCode());
+        List<ScanCheque> chequeList =
+                new ArrayList<>();
 
-						/*
-						 * 16. branch_code
-						 */
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-						insertStatement.setString(16, cheque.getBranchCode());
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
 
-						/*
-						 * 17. cheque_image_front
-						 */
+            statement.setString(1, scannedBatchId);
 
-						insertStatement.setString(17, cheque.getChequeImageFront());
+            try (ResultSet resultSet =
+                    statement.executeQuery()) {
 
-						/*
-						 * 18. cheque_image_back
-						 */
+                while (resultSet.next()) {
 
-						insertStatement.setString(18, cheque.getChequeImageBack());
+                    ScanCheque cheque =
+                            new ScanCheque();
 
-						insertStatement.executeUpdate();
-					}
-				}
-			}
+                    cheque.setScannedChequeId(
+                            resultSet.getString(
+                                    "scanned_cheque_id"));
 
-			System.out.println("Scanned cheque data processed successfully.");
+                    cheque.setScannedBatchId(
+                            resultSet.getString(
+                                    "scanned_batch_id"));
 
-			return scannedBatchId;
+                    cheque.setChequeNumber(
+                            resultSet.getString(
+                                    "cheque_number"));
 
-		} catch (SQLException e) {
+                    cheque.setMicrCode(
+                            resultSet.getString(
+                                    "micr_code"));
 
-			/*
-			 * IMPORTANT:
-			 *
-			 * Do NOT rollback here.
-			 *
-			 * ScanServiceImpl owns the transaction and will rollback the batch + cheque
-			 * operations.
-			 */
+                    cheque.setDraweeName(
+                            resultSet.getString(
+                                    "drawee_name"));
 
-			throw new RuntimeException("Error while saving scanned cheques", e);
-		}
-	}
+                    cheque.setDraweeAccountNumber(
+                            resultSet.getString(
+                                    "drawee_account_number"));
 
-	@Override
-	public List<ScanCheque> getChequesByBatchId(String scannedBatchId) {
+                    cheque.setPayeeName(
+                            resultSet.getString(
+                                    "payee_name"));
 
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+                    cheque.setPayeeAccountNumber(
+                            resultSet.getString(
+                                    "payee_account_number"));
 
-			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
-		}
+                    cheque.setChequeAmount(
+                            resultSet.getBigDecimal(
+                                    "cheque_amount"));
 
-		String sql = "SELECT " + "scanned_cheque_id, " + "scanned_batch_id, " + "cheque_number, " + "micr_code, "
-				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
-				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
-				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
-				+ "FROM scan_cheque " + "WHERE scanned_batch_id = ? " + "ORDER BY scanned_cheque_id";
+                    cheque.setChequeDate(
+                            resultSet.getDate(
+                                    "cheque_date"));
 
-		List<ScanCheque> chequeList = new java.util.ArrayList<>();
+                    cheque.setChequeStatus(
+                            resultSet.getString(
+                                    "cheque_status"));
 
-		try (Connection connection = com.iispl.cts.common.config.DBConnection.getConnection();
+                    cheque.setAccountId(
+                            resultSet.getString(
+                                    "account_id"));
 
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+                    cheque.setCreatedAt(
+                            resultSet.getTimestamp(
+                                    "created_at"));
 
-			statement.setString(1, scannedBatchId);
+                    cheque.setCityCode(
+                            resultSet.getString(
+                                    "city_code"));
 
-			try (ResultSet resultSet = statement.executeQuery()) {
+                    cheque.setBankCode(
+                            resultSet.getString(
+                                    "bank_code"));
 
-				while (resultSet.next()) {
+                    cheque.setBranchCode(
+                            resultSet.getString(
+                                    "branch_code"));
 
-					ScanCheque cheque = new ScanCheque();
+                    cheque.setChequeImageFront(
+                            resultSet.getString(
+                                    "cheque_image_front"));
 
-					/*
-					 * 1. scanned_cheque_id
-					 */
+                    cheque.setChequeImageBack(
+                            resultSet.getString(
+                                    "cheque_image_back"));
 
-					cheque.setScannedChequeId(resultSet.getString("scanned_cheque_id"));
+                    chequeList.add(cheque);
+                }
+            }
 
-					/*
-					 * 2. scanned_batch_id
-					 */
+            return chequeList;
 
-					cheque.setScannedBatchId(resultSet.getString("scanned_batch_id"));
+        } catch (SQLException e) {
 
-					/*
-					 * 3. cheque_number
-					 */
+            throw new RuntimeException(
+                    "Error while retrieving MICR repair cheques "
+                            + "for batch: " + scannedBatchId,
+                    e);
+        }
+    }
 
-					cheque.setChequeNumber(resultSet.getString("cheque_number"));
 
-					/*
-					 * 4. micr_code
-					 */
+    @Override
+    public int getDataEnteredCountByBatchId(
+            String scannedBatchId) {
 
-					cheque.setMicrCode(resultSet.getString("micr_code"));
+        if (scannedBatchId == null ||
+                scannedBatchId.trim().isEmpty()) {
 
-					/*
-					 * 5. drawee_name
-					 */
+            throw new IllegalArgumentException(
+                    "Scanned batch ID cannot be null or empty");
+        }
 
-					cheque.setDraweeName(resultSet.getString("drawee_name"));
+        String sql =
+                "SELECT COUNT(scanned_cheque_id) " +
+                "FROM scan_cheque " +
+                "WHERE scanned_batch_id = ? " +
+                "AND UPPER(TRIM(cheque_status)) NOT IN " +
+                "('PENDING_DATA_ENTRY', " +
+                "'PENDING_MICR_REPAIR', " +
+                "'MICR_REPAIR', " +
+                "'MICR_REPAIR_REQUIRED')";
 
-					/*
-					 * 6. drawee_account_number
-					 */
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-					cheque.setDraweeAccountNumber(resultSet.getString("drawee_account_number"));
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
 
-					/*
-					 * 7. payee_name
-					 */
+            statement.setString(1, scannedBatchId);
 
-					cheque.setPayeeName(resultSet.getString("payee_name"));
+            try (ResultSet resultSet =
+                    statement.executeQuery()) {
 
-					/*
-					 * 8. payee_account_number
-					 */
+                if (resultSet.next()) {
 
-					cheque.setPayeeAccountNumber(resultSet.getString("payee_account_number"));
+                    return resultSet.getInt(1);
+                }
+            }
 
-					/*
-					 * 9. cheque_amount
-					 */
+        } catch (SQLException e) {
 
-					cheque.setChequeAmount(resultSet.getBigDecimal("cheque_amount"));
+            throw new RuntimeException(
+                    "Error while retrieving data entered count "
+                            + "for batch: " + scannedBatchId,
+                    e);
+        }
 
-					/*
-					 * 10. cheque_date
-					 */
+        return 0;
+    }
 
-					cheque.setChequeDate(resultSet.getDate("cheque_date"));
 
-					/*
-					 * 11. cheque_status
-					 */
+    @Override
+    public void saveScanMicrRepair(
+            ScanCheque cheque) {
 
-					cheque.setChequeStatus(resultSet.getString("cheque_status"));
+        if (cheque == null) {
 
-					/*
-					 * 12. account_id
-					 */
+            throw new IllegalArgumentException(
+                    "Scan cheque cannot be null");
+        }
 
-					cheque.setAccountId(resultSet.getString("account_id"));
+        if (cheque.getScannedChequeId() == null ||
+                cheque.getScannedChequeId().trim().isEmpty()) {
 
-					/*
-					 * 13. created_at
-					 */
+            throw new IllegalArgumentException(
+                    "Scanned cheque ID cannot be null or empty");
+        }
 
-					cheque.setCreatedAt(resultSet.getTimestamp("created_at"));
+        String sql =
+                "UPDATE scan_cheque SET " +
+                "micr_code = ?, " +
+                "city_code = ?, " +
+                "bank_code = ?, " +
+                "branch_code = ?, " +
+                "cheque_status = ? " +
+                "WHERE scanned_cheque_id = ?";
 
-					/*
-					 * 14. city_code
-					 */
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-					cheque.setCityCode(resultSet.getString("city_code"));
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
 
-					/*
-					 * 15. bank_code
-					 */
+            statement.setString(
+                    1, cheque.getMicrCode());
 
-					cheque.setBankCode(resultSet.getString("bank_code"));
+            statement.setString(
+                    2, cheque.getCityCode());
 
-					/*
-					 * 16. branch_code
-					 */
+            statement.setString(
+                    3, cheque.getBankCode());
 
-					cheque.setBranchCode(resultSet.getString("branch_code"));
+            statement.setString(
+                    4, cheque.getBranchCode());
 
-					/*
-					 * 17. cheque_image_front
-					 */
+            statement.setString(
+                    5, cheque.getChequeStatus());
 
-					cheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
+            statement.setString(
+                    6, cheque.getScannedChequeId());
 
-					/*
-					 * 18. cheque_image_back
-					 */
+            int rowsUpdated =
+                    statement.executeUpdate();
 
-					cheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
+            if (rowsUpdated == 0) {
 
-					chequeList.add(cheque);
-				}
-			}
+                throw new IllegalStateException(
+                        "Scan cheque not found for ID: "
+                                + cheque.getScannedChequeId());
+            }
 
-			return chequeList;
+        } catch (SQLException e) {
 
-		} catch (SQLException e) {
-
-			throw new RuntimeException("Error while retrieving cheques for batch: " + scannedBatchId, e);
-		}
-	}
-
-	@Override
-	public void updateChequeStatus(Connection connection, String batchId, String status) {
-
-		if (connection == null) {
-			throw new IllegalArgumentException("Connection cannot be null");
-		}
-
-		if (batchId == null || batchId.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Batch ID cannot be null or empty");
-		}
-
-		if (status == null || status.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Cheque status cannot be null or empty");
-		}
-
-		String sql = "UPDATE scan_cheque " + "SET cheque_status = ? " + "WHERE scanned_batch_id = ?";
-
-		try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-			ps.setString(1, status);
-
-			ps.setString(2, batchId);
-
-			int rowsUpdated = ps.executeUpdate();
-
-			if (rowsUpdated == 0) {
-
-				throw new IllegalStateException("No cheques found for batch ID: " + batchId);
-			}
-
-		} catch (SQLException e) {
-
-			throw new RuntimeException("Failed to update cheque status for batch ID: " + batchId, e);
-		}
-	}
-
-	@Override
-	public List<ScanCheque> getScanMicrRepairCheques(String scannedBatchId) {
-
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT " + "scanned_cheque_id, " + "scanned_batch_id, " + "cheque_number, " + "micr_code, "
-				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
-				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
-				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
-				+ "FROM scan_cheque " + "WHERE scanned_batch_id = ? " + "AND UPPER(TRIM(cheque_status)) = "
-				+ "'MICR_REPAIR_REQUIRED' " + "ORDER BY scanned_cheque_id";
-
-		List<ScanCheque> chequeList = new ArrayList<>();
-
-		try (Connection connection = DBConnection.getConnection();
-
-	public int getDataEnteredCountByBatchId(String scannedBatchId) {
-
-		String sql = "SELECT COUNT(scanned_cheque_id) " + "FROM scan_cheque " + "WHERE scanned_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) NOT IN " + "('PENDING_DATA_ENTRY', " + "'PENDING_MICR_REPAIR', "
-				+ "'MICR_REPAIR', " + "'MICR_REPAIR_REQUIRED')";
-
-		try (Connection connection = com.iispl.cts.common.config.DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
-
-			statement.setString(1, scannedBatchId);
-
-			try (ResultSet resultSet = statement.executeQuery()) {
-
-				while (resultSet.next()) {
-
-					ScanCheque cheque = new ScanCheque();
-
-					cheque.setScannedChequeId(resultSet.getString("scanned_cheque_id"));
-
-					cheque.setScannedBatchId(resultSet.getString("scanned_batch_id"));
-
-					cheque.setChequeNumber(resultSet.getString("cheque_number"));
-
-					cheque.setMicrCode(resultSet.getString("micr_code"));
-
-					cheque.setDraweeName(resultSet.getString("drawee_name"));
-
-					cheque.setDraweeAccountNumber(resultSet.getString("drawee_account_number"));
-
-					cheque.setPayeeName(resultSet.getString("payee_name"));
-
-					cheque.setPayeeAccountNumber(resultSet.getString("payee_account_number"));
-
-					cheque.setChequeAmount(resultSet.getBigDecimal("cheque_amount"));
-
-					cheque.setChequeDate(resultSet.getDate("cheque_date"));
-
-					cheque.setChequeStatus(resultSet.getString("cheque_status"));
-
-					cheque.setAccountId(resultSet.getString("account_id"));
-
-					cheque.setCreatedAt(resultSet.getTimestamp("created_at"));
-
-					cheque.setCityCode(resultSet.getString("city_code"));
-
-					cheque.setBankCode(resultSet.getString("bank_code"));
-
-					cheque.setBranchCode(resultSet.getString("branch_code"));
-
-					cheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
-
-					cheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
-
-					chequeList.add(cheque);
-				if (resultSet.next()) {
-					return resultSet.getInt(1);
-				}
-			}
-
-		} catch (SQLException e) {
-
-			throw new RuntimeException("Error while retrieving MICR repair cheques " + "for batch: " + scannedBatchId,
-					e);
-		}
-
-		return chequeList;
-	}
-
-	@Override
-	public void saveScanMicrRepair(ScanCheque cheque) {
-
-		if (cheque == null) {
-
-			throw new IllegalArgumentException("Scan cheque cannot be null");
-		}
-
-		if (cheque.getScannedChequeId() == null || cheque.getScannedChequeId().trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Scanned cheque ID cannot be null or empty");
-		}
-
-		String sql = "UPDATE scan_cheque SET " + "micr_code = ?, " + "city_code = ?, " + "bank_code = ?, "
-				+ "branch_code = ?, " + "cheque_status = ? " + "WHERE scanned_cheque_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-
-				PreparedStatement statement = connection.prepareStatement(sql)) {
-
-			statement.setString(1, cheque.getMicrCode());
-
-			statement.setString(2, cheque.getCityCode());
-
-			statement.setString(3, cheque.getBankCode());
-
-			statement.setString(4, cheque.getBranchCode());
-
-			statement.setString(5, cheque.getChequeStatus());
-
-			statement.setString(6, cheque.getScannedChequeId());
-
-			int rowsUpdated = statement.executeUpdate();
-
-			if (rowsUpdated == 0) {
-
-				throw new IllegalStateException("Scan cheque not found for ID: " + cheque.getScannedChequeId());
-			}
-
-		} catch (SQLException e) {
-
-			throw new RuntimeException("Failed to save MICR repair for scan cheque: " + cheque.getScannedChequeId(), e);
-		}
-			throw new RuntimeException("Error while retrieving data entered count for batch: " + scannedBatchId, e);
-		}
-
-		return 0;
-	}
+            throw new RuntimeException(
+                    "Failed to save MICR repair for scan cheque: "
+                            + cheque.getScannedChequeId(),
+                    e);
+        }
+    }
 }
+
