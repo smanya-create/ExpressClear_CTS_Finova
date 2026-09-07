@@ -1,140 +1,180 @@
 package com.iispl.cts.controller.inward.maker;
 
-import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Sessions;
-import org.zkoss.zk.ui.select.SelectorComposer;
-import org.zkoss.zk.ui.select.annotation.Listen;
-import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zul.Button;
-import org.zkoss.zul.Label;
-import org.zkoss.zul.Listbox;
-import org.zkoss.zul.Listcell;
-import org.zkoss.zul.Listitem;
-import org.zkoss.zul.Textbox;
+import java.util.List;
 
-public class InwardMakerDashboardController extends SelectorComposer<Component> {
+import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Path;
+import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zul.*;
+
+import com.iispl.cts.dto.InwardDashboardBatchDTO;
+import com.iispl.cts.dto.InwardDashboardKpiDTO;
+import com.iispl.cts.service.inward.InwardDashboardService;
+import com.iispl.cts.serviceimpl.inward.InwardDashboardServiceImpl;
+
+public class InwardMakerDashboardController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    @Wire("#lblPartiallyProcessed")
-    private Label lblPartiallyProcessed;
+    // Injected Service Layer
+    private InwardDashboardService dashboardService;
 
-    @Wire("#lblSentBackToMaker")
-    private Label lblSentBackToMaker;
+    // UI Bindings
+    private Label lblPartiallyProcessedCount;
+    private Label lblSentBackCount;
+    private Label lblSentToRrfCount;
 
-    @Wire("#lblSentToRrf")
-    private Label lblSentToRrf;
-
-    @Wire("#txtSearchBatchId")
     private Textbox txtSearchBatchId;
+    private Button btnSearchBatch;
+    private Button btnClearSearch;
+    private Button btnRefreshDashboard;
 
-    @Wire("#batchStatusListbox")
-    private Listbox batchStatusListbox;
-
-    @Wire("#btnRefresh")
-    private Button btnRefresh;
+    private Listbox lbxBatchStatus;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-
-        Sessions.getCurrent().setAttribute("USER_ROLE", "INWARD_MAKER");
-
-        loadDashboardMetrics();
-        populateBatchTable();
+        this.dashboardService = new InwardDashboardServiceImpl();
+        initListRenderer();
+        refreshAllDashboardData();
     }
 
-    private void loadDashboardMetrics() {
-        if (lblPartiallyProcessed != null) lblPartiallyProcessed.setValue("2");
-        if (lblSentBackToMaker != null) lblSentBackToMaker.setValue("1");
-        if (lblSentToRrf != null) lblSentToRrf.setValue("3");
+    public void onClick$btnRefreshDashboard() {
+        refreshAllDashboardData();
     }
 
-    private void populateBatchTable() {
-        if (batchStatusListbox == null) return;
-
-        batchStatusListbox.getItems().clear();
-
-        Listitem item = new Listitem();
-        item.setSelected(false);
-
-        // 1. Batch ID (Left aligned)
-        Listcell c1 = new Listcell("IN-B004");
-        c1.setStyle("color: #3182ce; font-weight: 700; font-size: 13px; cursor: pointer; text-align: left; padding: 12px 14px;");
-        item.appendChild(c1);
-
-        // 2. Date (Left aligned)
-        Listcell c2 = new Listcell("21-08-2026");
-        c2.setStyle("color: #2d3748; font-size: 13px; font-weight: 500; text-align: left; padding: 12px 14px;");
-        item.appendChild(c2);
-
-        // 3. Source (Center aligned)
-        Listcell c3 = new Listcell("CHI");
-        c3.setStyle("color: #2d3748; font-size: 13px; font-weight: 500; text-align: center; padding: 12px;");
-        item.appendChild(c3);
-
-        // 4. Cheques (Center aligned)
-        Listcell c4 = new Listcell("99");
-        c4.setStyle("color: #2d3748; font-size: 13px; font-weight: 500; text-align: center; padding: 12px;");
-        item.appendChild(c4);
-
-        // 5. Accepted (Center aligned)
-        Listcell c5 = new Listcell("84");
-        c5.setStyle("color: #38a169; font-weight: 700; font-size: 13px; text-align: center; padding: 12px;");
-        item.appendChild(c5);
-
-        // 6. Back to Maker (Center aligned)
-        Listcell c6 = new Listcell("5");
-        c6.setStyle("color: #dd6b20; font-weight: 700; font-size: 13px; text-align: center; padding: 12px;");
-        item.appendChild(c6);
-
-        // 7. RRF (Center aligned)
-        Listcell c7 = new Listcell("10");
-        c7.setStyle("color: #e53e3e; font-weight: 700; font-size: 13px; text-align: center; padding: 12px;");
-        item.appendChild(c7);
-
-        // 8. Status Pill (Center aligned)
-        Listcell c8 = new Listcell();
-        c8.setStyle("text-align: center; padding: 12px;");
-        Label pill = new Label("Partially Processed");
-        pill.setStyle("background-color: #feebc8; color: #c05621; border: 1px solid #fbd38d; border-radius: 12px; padding: 3px 12px; font-size: 11px; font-weight: 700; display: inline-block;");
-        c8.appendChild(pill);
-        item.appendChild(c8);
-
-        batchStatusListbox.appendChild(item);
+    public void onClick$btnSearchBatch() {
+        loadBatchData();
     }
 
-    @Listen("onClick = #btnRefresh")
-    public void onRefresh() {
-        loadDashboardMetrics();
-        populateBatchTable();
+    public void onOK$txtSearchBatchId() {
+        loadBatchData();
     }
 
-    @Listen("onClick = #btnSearch")
-    public void onSearch() {
-        if (txtSearchBatchId == null || batchStatusListbox == null) return;
-        String val = txtSearchBatchId.getValue() != null ? txtSearchBatchId.getValue().trim() : "";
-        if (!val.isEmpty() && !"IN-B004".equalsIgnoreCase(val)) {
-            batchStatusListbox.getItems().clear();
-        } else {
-            populateBatchTable();
+    public void onClick$btnClearSearch() {
+        if (txtSearchBatchId != null) {
+            txtSearchBatchId.setValue("");
+        }
+        loadBatchData();
+    }
+
+    private void refreshAllDashboardData() {
+        loadKpiCounters();
+        loadBatchData();
+    }
+
+    private void loadKpiCounters() {
+        InwardDashboardKpiDTO kpi = dashboardService.getDashboardSummary();
+        if (lblPartiallyProcessedCount != null) {
+            lblPartiallyProcessedCount.setValue(String.valueOf(kpi.getPartiallyProcessedBatches()));
+        }
+        if (lblSentBackCount != null) {
+            lblSentBackCount.setValue(String.valueOf(kpi.getSentBackBatches()));
+        }
+        if (lblSentToRrfCount != null) {
+            lblSentToRrfCount.setValue(String.valueOf(kpi.getReturnRequestCheques()));
         }
     }
 
-    @Listen("onClick = #btnClearSearch")
-    public void onClearSearch() {
-        if (txtSearchBatchId != null) txtSearchBatchId.setValue("");
-        populateBatchTable();
+    private void loadBatchData() {
+        if (lbxBatchStatus == null) return;
+        String query = (txtSearchBatchId != null && txtSearchBatchId.getValue() != null)
+                ? txtSearchBatchId.getValue() : "";
+
+        List<InwardDashboardBatchDTO> batches = dashboardService.getRecentBatches(query);
+        lbxBatchStatus.setModel(new ListModelList<>(batches));
     }
 
-    @Listen("onClick = #btnViewBatch")
-    public void onViewBatch() {
-        Executions.getCurrent().getSession().setAttribute("ACTIVE_BATCH_ID", "IN-B004");
+    private void initListRenderer() {
+        if (lbxBatchStatus == null) return;
+
+        lbxBatchStatus.setItemRenderer((Listitem item, InwardDashboardBatchDTO batch, int index) -> {
+            item.setValue(batch);
+            item.setStyle("cursor: pointer;");
+
+            // 1. Batch ID
+            Listcell cellId = new Listcell(batch.getBatchId());
+            cellId.setStyle("color: #2563eb; font-weight: 700; font-size: 12px; white-space: nowrap;");
+            cellId.setParent(item);
+
+            // 2. Date
+            Listcell cellDate = new Listcell(batch.getBatchDate());
+            cellDate.setStyle("color: #475569; font-weight: 500; font-size: 11.5px; white-space: nowrap;");
+            cellDate.setParent(item);
+
+            // 3. Source
+            Listcell cellSource = new Listcell(batch.getSource());
+            cellSource.setStyle("color: #475569; font-weight: 600; font-size: 11.5px;");
+            cellSource.setParent(item);
+
+            // 4. Cheques Total
+            Listcell cellCheques = new Listcell(String.valueOf(batch.getTotalCheques()));
+            cellCheques.setStyle("font-weight: 700; font-size: 12px; color: #0f172a;");
+            cellCheques.setParent(item);
+
+            // 5. Accepted (Green)
+            Listcell cellAccepted = new Listcell(String.valueOf(batch.getAcceptedCheques()));
+            cellAccepted.setStyle("color: #16a34a; font-weight: 700; font-size: 12px;");
+            cellAccepted.setParent(item);
+
+            // 6. Back to Maker
+            Listcell cellBack = new Listcell(String.valueOf(batch.getBackToMakerCheques()));
+            cellBack.setStyle(batch.getBackToMakerCheques() > 0 
+                ? "color: #ea580c; font-weight: 800; font-size: 12px;" 
+                : "color: #94a3b8; font-size: 12px;");
+            cellBack.setParent(item);
+
+            // 7. Returns
+            Listcell cellRrf = new Listcell(String.valueOf(batch.getReturnRequestCheques()));
+            cellRrf.setStyle(batch.getReturnRequestCheques() > 0 
+                ? "color: #dc2626; font-weight: 800; font-size: 12px;" 
+                : "color: #94a3b8; font-size: 12px;");
+            cellRrf.setParent(item);
+
+            // 8. Status Badge
+            Listcell cellStatus = new Listcell();
+            Label lblBadge = new Label(batch.getDisplayStatus());
+            lblBadge.setStyle(batch.getStatusBadgeStyle());
+            lblBadge.setParent(cellStatus);
+            cellStatus.setParent(item);
+
+            // 9. View Action Button
+            Listcell cellAction = new Listcell();
+            cellAction.setStyle("text-align: center;");
+            Button btnView = new Button("View");
+            btnView.setSclass("cts-btn-action");
+            btnView.addEventListener("onClick", event -> {
+                Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());
+                String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
+                navigateToSpaPage(targetZul);
+            });
+            btnView.setParent(cellAction);
+            cellAction.setParent(item);
+        });
     }
 
-    @Listen("onClick = #btnViewHistory")
-    public void onViewHistory() {
-        // history navigation
+    private void navigateToSpaPage(String zulPath) {
+        Include mainInclude = null;
+        try {
+            mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
+        } catch (Exception ignored) {}
+
+        if (mainInclude == null && self != null && self.getDesktop() != null) {
+            for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+                Component comp = p.getFellowIfAny("mainContentArea", true);
+                if (comp instanceof Include) {
+                    mainInclude = (Include) comp;
+                    break;
+                }
+            }
+        }
+
+        if (mainInclude != null) {
+            mainInclude.setSrc(null);
+            mainInclude.setSrc(zulPath);
+        } else {
+            Messagebox.show("Navigation container (mainContentArea) not found.", "Error", Messagebox.OK, Messagebox.ERROR);
+        }
     }
 }

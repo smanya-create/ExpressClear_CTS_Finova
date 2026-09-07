@@ -102,51 +102,52 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	@Override
 	public List<InwardCheque> findByBatchAndStatus(String batchId, String status) {
 
-		List<InwardCheque> cheques = new ArrayList<>();
+	    List<InwardCheque> cheques = new ArrayList<>();
 
-		if (batchId == null || batchId.trim().isEmpty()) {
+	    if (batchId == null || batchId.trim().isEmpty()) {
+	        return cheques;
+	    }
 
-			return cheques;
-		}
+	    StringBuilder sql = new StringBuilder();
 
-		StringBuilder sql = new StringBuilder();
+	    sql.append("SELECT ").append(SELECT_COLUMNS)
+	       .append("FROM inward_cheque ")
+	       .append("WHERE inward_batch_id = ? ");
 
-		sql.append("SELECT ").append(SELECT_COLUMNS).append("FROM inward_cheque ").append("WHERE inward_batch_id = ? ");
+	    if (status != null && !status.trim().isEmpty()) {
+	        sql.append("AND cheque_status = ? ");
+	    }
 
-		if (status != null && !status.trim().isEmpty()) {
+	    // Prioritize SEND_BACK_TO_MAKER first, then pending/in-progress, then completed
+	    sql.append("ORDER BY ")
+	       .append("CASE ")
+	       .append("    WHEN cheque_status = 'SEND_BACK_TO_MAKER' THEN 1 ")
+	       .append("    WHEN cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS') THEN 2 ")
+	       .append("    ELSE 3 ")
+	       .append("END ASC, ")
+	       .append("item_sequence_number ASC, created_at ASC");
 
-			sql.append("AND cheque_status = ? ");
-		}
+	    try (Connection connection = DBConnection.getConnection();
+	         PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 
-		sql.append("ORDER BY item_sequence_number ASC, created_at ASC");
+	        statement.setString(1, batchId.trim());
 
-		try (Connection connection = DBConnection.getConnection();
+	        if (status != null && !status.trim().isEmpty()) {
+	            statement.setString(2, status.trim());
+	        }
 
-				PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+	        try (ResultSet resultSet = statement.executeQuery()) {
+	            while (resultSet.next()) {
+	                cheques.add(mapResultSet(resultSet));
+	            }
+	        }
 
-			statement.setString(1, batchId.trim());
+	    } catch (SQLException e) {
+	        System.err.println("Failed to load cheques for batch: " + batchId);
+	        e.printStackTrace();
+	    }
 
-			if (status != null && !status.trim().isEmpty()) {
-
-				statement.setString(2, status.trim());
-			}
-
-			try (ResultSet resultSet = statement.executeQuery()) {
-
-				while (resultSet.next()) {
-
-					cheques.add(mapResultSet(resultSet));
-				}
-			}
-
-		} catch (SQLException e) {
-
-			System.err.println("Failed to load cheques for batch: " + batchId);
-
-			e.printStackTrace();
-		}
-
-		return cheques;
+	    return cheques;
 	}
 
 	@Override
@@ -458,56 +459,5 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 		}
 
 		return cheque;
-	}
-	
-	@Override
-	public boolean saveRejection(
-	        String inwardChequeId,
-	        String rejectedReasonId,
-	        String remarks,
-	        String rejectedBy) {
-
-	    String sql =
-	            "INSERT INTO inward_cheque_rejection "
-	          + "(inward_cheque_id, rejected_reason_id, remarks, rejected_by) "
-	          + "VALUES (?, ?, ?, ?)";
-
-	    try (Connection conn = DBConnection.getConnection();
-	         PreparedStatement ps = conn.prepareStatement(sql)) {
-
-	        ps.setString(1, inwardChequeId);
-	        ps.setString(2, rejectedReasonId);
-	        ps.setString(3, remarks);
-	        ps.setString(4, rejectedBy);
-
-	        int rowsInserted = ps.executeUpdate();
-
-	        System.out.println(
-	                "Rejection record inserted. Rows: " + rowsInserted);
-
-	        return rowsInserted > 0;
-
-	    } catch (SQLException e) {
-
-	        System.err.println(
-	                "Failed to save rejection for cheque: "
-	                + inwardChequeId);
-
-	        System.err.println(
-	                "Reason ID: " + rejectedReasonId);
-
-	        System.err.println(
-	                "Remarks: " + remarks);
-
-	        System.err.println(
-	                "Rejected By: " + rejectedBy);
-
-	        System.err.println(
-	                "SQL Error: " + e.getMessage());
-
-	        e.printStackTrace();
-
-	        return false;
-	    }
 	}
 }
