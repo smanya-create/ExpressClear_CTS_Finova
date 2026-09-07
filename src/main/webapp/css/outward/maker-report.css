@@ -1,0 +1,87 @@
+/* Page Header Typography */
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: 0.5px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #64748B;
+}
+
+/* Card Panel Layout */
+.card-panel {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+}
+
+/* Form Fields */
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  letter-spacing: 0.5px;
+}
+
+.input-box input {
+  font-size: 13px !important;
+  color: #0F172A !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+}
+
+.input-box input:focus {
+  border-color: #1B4372 !important;
+  box-shadow: 0 0 0 1px #1B4372 !important;
+}
+
+/* Panel Separator */
+.panel-separator {
+  border-color: #F1F5F9 !important;
+  margin: 4px 0 !important;
+}
+
+/* Details Section */
+.section-subtitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1E293B;
+  letter-spacing: 0.5px;
+}
+
+.section-desc {
+  font-size: 12px;
+  color: #64748B;
+  line-height: 1.5;
+}
+
+.section-bullet {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* Primary Action Button */
+.btn-primary {
+  background-color: #1B4372 !important;
+  border-color: #1B4372 !important;
+  color: #FFFFFF !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  border-radius: 6px !important;
+  padding: 0 20px !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #15355B !important;
+  border-color: #15355B !important;
+}
