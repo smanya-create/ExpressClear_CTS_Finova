@@ -195,7 +195,14 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardDataEntry() {
-		Executions.sendRedirect("/maker/data-entry.zul");
+		Component root = sidebarComponent.getPage().getFirstRoot();
+
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+
+		if (mainContentArea instanceof Include) {
+			Include include = (Include) mainContentArea;
+			include.setSrc("/outward/maker/data-entry.zul");
+		}
 	}
 
 	public void navToOutwardMakerReports() {
@@ -275,15 +282,15 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToInwardDataEntry() {
-	    Component root = sidebarComponent.getPage().getFirstRoot();
-	    Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		Component root = sidebarComponent.getPage().getFirstRoot();
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
-	    if (mainContentArea instanceof Include) {
-	        Include include = (Include) mainContentArea;
-	        // Reset src first to force a clean re-render, then route to the batch queue
-	        include.setSrc(null);
-	        include.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
-	    }
+		if (mainContentArea instanceof Include) {
+			Include include = (Include) mainContentArea;
+			// Reset src first to force a clean re-render, then route to the batch queue
+			include.setSrc(null);
+			include.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
+		}
 	}
 
 	public void navToMakerCompletion() {

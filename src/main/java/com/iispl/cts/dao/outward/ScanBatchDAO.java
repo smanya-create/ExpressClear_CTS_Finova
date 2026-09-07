@@ -20,4 +20,5 @@ public interface ScanBatchDAO {
 	void updateBatchStatus(Connection connection, String batchId, String status);
 
 	List<ScanBatch> getMakerDashboardBatches();
+
 }
