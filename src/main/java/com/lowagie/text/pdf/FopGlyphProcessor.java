@@ -7,6 +7,9 @@ package com.lowagie.text.pdf;
 public class FopGlyphProcessor {
 	public FopGlyphProcessor() {
     }
+	public static boolean isFopSupported() {
+        return false;
+    }
 
     public static Object[] getGlyphPositions(String text) {
         return null;
