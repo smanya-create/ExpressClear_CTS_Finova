@@ -23,4 +23,5 @@ public interface ScanBatchDAO {
 	List<ScanBatch> getMakerDashboardBatches();
 	
 	List<MicrRepairBatch> getScanMicrRepairBatches();
+
 }

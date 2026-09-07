@@ -28,15 +28,15 @@
 			<center border="none" autoscroll="true"
 				sclass="main-content">
 
-				<vlayout spacing="16px" sclass="dashboard-container"
-					hflex="1">
+				<vlayout hflex="1" vflex="1" spacing="16px"
+					sclass="dashboard-container">
 
 					<include id="headerInclude"
 						src="/components/header.zul" pageTitle="Maker Dashboard"
 						pageSubtitle="" hflex="1" />
 
 					<include id="mainContentArea" mode="instant"
-						src="/outward/maker/dashboard.zul" hflex="1" />
+						src="/outward/maker/dashboard.zul" hflex="1" vflex="1" />
 
 				</vlayout>
 

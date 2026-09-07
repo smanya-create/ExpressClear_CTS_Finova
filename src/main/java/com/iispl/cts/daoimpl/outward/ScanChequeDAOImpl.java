@@ -606,6 +606,13 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
 		try (Connection connection = DBConnection.getConnection();
 
+	public int getDataEnteredCountByBatchId(String scannedBatchId) {
+
+		String sql = "SELECT COUNT(scanned_cheque_id) " + "FROM scan_cheque " + "WHERE scanned_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) NOT IN " + "('PENDING_DATA_ENTRY', " + "'PENDING_MICR_REPAIR', "
+				+ "'MICR_REPAIR', " + "'MICR_REPAIR_REQUIRED')";
+
+		try (Connection connection = com.iispl.cts.common.config.DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, scannedBatchId);
@@ -653,6 +660,8 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 					cheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
 
 					chequeList.add(cheque);
+				if (resultSet.next()) {
+					return resultSet.getInt(1);
 				}
 			}
 
@@ -708,5 +717,9 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
 			throw new RuntimeException("Failed to save MICR repair for scan cheque: " + cheque.getScannedChequeId(), e);
 		}
+			throw new RuntimeException("Error while retrieving data entered count for batch: " + scannedBatchId, e);
+		}
+
+		return 0;
 	}
 }

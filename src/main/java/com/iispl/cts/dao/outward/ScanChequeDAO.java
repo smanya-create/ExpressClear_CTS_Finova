@@ -18,4 +18,5 @@ public interface ScanChequeDAO {
 
     void saveScanMicrRepair(ScanCheque cheque);
 
+	int getDataEnteredCountByBatchId(String scannedBatchId);
 }
