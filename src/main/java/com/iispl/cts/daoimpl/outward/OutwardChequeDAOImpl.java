@@ -274,4 +274,186 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 					exception);
 		}
 	}
+
+
+	@Override
+	public List<OutwardCheque> getOutwardMicrRepairCheques(String outwardBatchId) {
+
+	    if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+	        throw new IllegalArgumentException(
+	                "Outward batch ID cannot be null or empty");
+	    }
+
+	    List<OutwardCheque> chequeList = new ArrayList<>();
+
+	    String sql =
+	            "SELECT "
+	          + "outward_cheque_id, "
+	          + "outward_batch_id, "
+	          + "cheque_number, "
+	          + "micr_code, "
+	          + "drawee_name, "
+	          + "drawee_account_number, "
+	          + "payee_name, "
+	          + "payee_account_number, "
+	          + "cheque_amount, "
+	          + "cheque_date, "
+	          + "cheque_status, "
+	          + "account_id, "
+	          + "created_at, "
+	          + "city_code, "
+	          + "bank_code, "
+	          + "branch_code "
+	          + "FROM outward_cheque "
+	          + "WHERE outward_batch_id = ? "
+	          + "AND UPPER(TRIM(cheque_status)) = "
+	          + "'PENDING_MICR_REPAIR' "
+	          + "ORDER BY outward_cheque_id";
+
+	    try (
+	        Connection connection = DBConnection.getConnection();
+	        PreparedStatement preparedStatement =
+	                connection.prepareStatement(sql)
+	    ) {
+
+	        preparedStatement.setString(1, outwardBatchId);
+
+	        try (ResultSet resultSet =
+	                preparedStatement.executeQuery()) {
+
+	            while (resultSet.next()) {
+
+	                OutwardCheque cheque = new OutwardCheque();
+
+	                cheque.setOutwardChequeId(
+	                        resultSet.getString("outward_cheque_id"));
+
+	                cheque.setOutwardBatchId(
+	                        resultSet.getString("outward_batch_id"));
+
+	                cheque.setChequeNumber(
+	                        resultSet.getString("cheque_number"));
+
+	                cheque.setMicrCode(
+	                        resultSet.getString("micr_code"));
+
+	                cheque.setDraweeName(
+	                        resultSet.getString("drawee_name"));
+
+	                cheque.setDraweeAccountNumber(
+	                        resultSet.getString(
+	                                "drawee_account_number"));
+
+	                cheque.setPayeeName(
+	                        resultSet.getString("payee_name"));
+
+	                cheque.setPayeeAccountNumber(
+	                        resultSet.getString(
+	                                "payee_account_number"));
+
+	                cheque.setChequeAmount(
+	                        resultSet.getBigDecimal("cheque_amount"));
+
+	                cheque.setChequeDate(
+	                        resultSet.getDate("cheque_date"));
+
+	                cheque.setChequeStatus(
+	                        resultSet.getString("cheque_status"));
+
+	                cheque.setAccountId(
+	                        resultSet.getString("account_id"));
+
+	                cheque.setCreatedAt(
+	                        resultSet.getTimestamp("created_at"));
+
+	                cheque.setCityCode(
+	                        resultSet.getString("city_code"));
+
+	                cheque.setBankCode(
+	                        resultSet.getString("bank_code"));
+
+	                cheque.setBranchCode(
+	                        resultSet.getString("branch_code"));
+
+	                chequeList.add(cheque);
+	            }
+	        }
+
+	    } catch (SQLException e) {
+
+	        throw new RuntimeException(
+	                "Error while retrieving outward MICR repair cheques "
+	              + "for batch: " + outwardBatchId,
+	                e);
+	    }
+
+	    return chequeList;
+	}
+
+	@Override
+	public void saveOutwardMicrRepair(OutwardCheque cheque) {
+
+	    if (cheque == null) {
+	        throw new IllegalArgumentException(
+	                "Outward cheque cannot be null");
+	    }
+
+	    if (cheque.getOutwardChequeId() == null
+	            || cheque.getOutwardChequeId().trim().isEmpty()) {
+
+	        throw new IllegalArgumentException(
+	                "Outward cheque ID cannot be null or empty");
+	    }
+
+	    String sql =
+	            "UPDATE outward_cheque SET "
+	          + "micr_code = ?, "
+	          + "city_code = ?, "
+	          + "bank_code = ?, "
+	          + "branch_code = ?, "
+	          + "cheque_status = ? "
+	          + "WHERE outward_cheque_id = ?";
+
+	    try (
+	        Connection connection = DBConnection.getConnection();
+	        PreparedStatement preparedStatement =
+	                connection.prepareStatement(sql)
+	    ) {
+
+	        preparedStatement.setString(
+	                1, cheque.getMicrCode());
+
+	        preparedStatement.setString(
+	                2, cheque.getCityCode());
+
+	        preparedStatement.setString(
+	                3, cheque.getBankCode());
+
+	        preparedStatement.setString(
+	                4, cheque.getBranchCode());
+
+	        preparedStatement.setString(
+	                5, cheque.getChequeStatus());
+
+	        preparedStatement.setString(
+	                6, cheque.getOutwardChequeId());
+
+	        int rowsUpdated =
+	                preparedStatement.executeUpdate();
+
+	        if (rowsUpdated == 0) {
+
+	            throw new IllegalStateException(
+	                    "Outward cheque not found for ID: "
+	                  + cheque.getOutwardChequeId());
+	        }
+
+	    } catch (SQLException e) {
+
+	        throw new RuntimeException(
+	                "Failed to save MICR repair for outward cheque: "
+	              + cheque.getOutwardChequeId(),
+	                e);
+	    }
+	}
 }
