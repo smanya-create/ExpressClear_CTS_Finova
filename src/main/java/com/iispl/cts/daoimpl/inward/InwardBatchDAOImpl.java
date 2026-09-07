@@ -273,51 +273,88 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	@Override
 	public List<InwardBatch> getBatchesForMicrRepair() {
 
-		List<InwardBatch> batches = new ArrayList<>();
+	    List<InwardBatch> batches = new ArrayList<>();
 
-		String sql = "SELECT ib.inward_batch_id, " + "ib.batch_reference_id, " + "ib.actual_cheque_count, "
-				+ "ib.actual_total_amount, " + "ib.batch_status, " + "ib.uploaded_by, " + "ib.uploaded_at, "
-				+ "(SELECT COUNT(*) " + " FROM inward_cheque ic2 " + " WHERE ic2.inward_batch_id = ib.inward_batch_id "
-				+ " AND ic2.cheque_status IN " + " ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS')) "
-				+ "AS micr_repair_pending_count " + "FROM inward_batch ib " + "WHERE EXISTS ( " + "    SELECT 1 "
-				+ "    FROM inward_cheque ic " + "    WHERE ic.inward_batch_id = ib.inward_batch_id "
-				+ "    AND ic.cheque_status IN " + "    ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') " + ") "
-				+ "ORDER BY ib.uploaded_at DESC";
+	    String sql =
+	            "SELECT ib.inward_batch_id, "
+	          + "ib.batch_reference_id, "
+	          + "ib.actual_cheque_count, "
+	          + "ib.actual_total_amount, "
+	          + "ib.batch_status, "
+	          + "ib.uploaded_by, "
+	          + "ib.uploaded_at, "
 
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql);
-				ResultSet resultSet = statement.executeQuery()) {
+	          + "(SELECT COUNT(*) "
+	          + " FROM inward_cheque ic2 "
+	          + " WHERE ic2.inward_batch_id = ib.inward_batch_id "
+	          + " AND ic2.cheque_status IN "
+	          + " ('MICR_REPAIR_PENDING', "
+	          + "  'MICR_REPAIR_IN_PROGRESS', "
+	          + "  'SEND_BACK_TO_MAKER')) "
+	          + "AS micr_repair_pending_count "
 
-			while (resultSet.next()) {
+	          + "FROM inward_batch ib "
 
-				InwardBatch batch = new InwardBatch();
+	          + "WHERE EXISTS ( "
+	          + "    SELECT 1 "
+	          + "    FROM inward_cheque ic "
+	          + "    WHERE ic.inward_batch_id = ib.inward_batch_id "
+	          + "    AND ic.cheque_status IN "
+	          + "    ('MICR_REPAIR_PENDING', "
+	          + "     'MICR_REPAIR_IN_PROGRESS', "
+	          + "     'SEND_BACK_TO_MAKER') "
+	          + ") "
 
-				batch.setInwardBatchId(resultSet.getString("inward_batch_id"));
+	          + "ORDER BY ib.uploaded_at DESC";
 
-				batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
+	    try (Connection connection = DBConnection.getConnection();
+	         PreparedStatement statement =
+	                 connection.prepareStatement(sql);
+	         ResultSet resultSet =
+	                 statement.executeQuery()) {
 
-				batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
+	        while (resultSet.next()) {
 
-				batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
+	            InwardBatch batch = new InwardBatch();
 
-				batch.setBatchStatus(resultSet.getString("batch_status"));
+	            batch.setInwardBatchId(
+	                    resultSet.getString("inward_batch_id"));
 
-				batch.setUploadedBy(resultSet.getString("uploaded_by"));
+	            batch.setBatchReferenceId(
+	                    resultSet.getString("batch_reference_id"));
 
-				batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
+	            batch.setActualChequeCount(
+	                    resultSet.getInt("actual_cheque_count"));
 
-				batch.setMicrRepairPendingCount(resultSet.getInt("micr_repair_pending_count"));
+	            batch.setActualTotalAmount(
+	                    resultSet.getBigDecimal("actual_total_amount"));
 
-				batches.add(batch);
-			}
+	            batch.setBatchStatus(
+	                    resultSet.getString("batch_status"));
 
-			return batches;
+	            batch.setUploadedBy(
+	                    resultSet.getString("uploaded_by"));
 
-		} catch (Exception e) {
+	            batch.setUploadedAt(
+	                    resultSet.getTimestamp("uploaded_at"));
 
-			e.printStackTrace();
+	            batch.setMicrRepairPendingCount(
+	                    resultSet.getInt("micr_repair_pending_count"));
 
-			throw new RuntimeException("Failed to load MICR repair batches: " + e.getMessage(), e);
-		}
+	            batches.add(batch);
+	        }
+
+	        return batches;
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        throw new RuntimeException(
+	                "Failed to load MICR repair batches: "
+	                + e.getMessage(),
+	                e);
+	    }
 	}
+	
 }
