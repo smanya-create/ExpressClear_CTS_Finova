@@ -32,4 +32,6 @@ public interface ScanService {
 	List<ScanCheque> getChequesByBatchId(String scannedBatchId);
 
 	List<ScanBatch> getMakerDashboardBatches();
+
+	int getDataEnteredCountByBatchId(String scannedBatchId);
 }

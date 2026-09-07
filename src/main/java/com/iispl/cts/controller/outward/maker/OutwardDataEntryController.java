@@ -1,217 +1,337 @@
 package com.iispl.cts.controller.outward.maker;
 
-import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.select.SelectorComposer;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 
-import com.iispl.cts.entity.outward.OutwardBatch;
-import com.iispl.cts.service.outward.OutwardBatchService;
-import com.iispl.cts.service.outward.OutwardChequeService;
-import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
-import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.service.outward.ScanService;
+import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
-public class OutwardDataEntryController extends SelectorComposer<Component> {
+public class OutwardDataEntryController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
 
-	private Rows outwardDataEntryRowsBatch;
-	private Label outwardDataEntryLblEmpty;
-	private Label outwardDataEntryLblSessionDate;
-	private Label outwardDataEntryLblSessionStatus;
-	private Label outwardDataEntryLblSessionDateTime;
+	private static final int PAGE_SIZE = 5;
 
-	private final OutwardBatchService outwardBatchService;
-	private final OutwardChequeService outwardChequeService;
+	@Wire
+	private Rows outwardDataEntryRowsBatch;
+
+	@Wire
+	private Div outwardDataEntryEmptyState;
+
+	@Wire
+	private Label outwardDataEntryLblCurrentPage;
+
+	@Wire
+	private Button outwardDataEntryBtnFirst;
+
+	@Wire
+	private Button outwardDataEntryBtnPrevious;
+
+	@Wire
+	private Button outwardDataEntryBtnNext;
+
+	@Wire
+	private Button outwardDataEntryBtnLast;
+
+	private final ScanService scanService;
+
+	private List<ScanBatch> outwardDataEntryBatchList;
+
+	private int outwardDataEntryCurrentPage = 1;
 
 	public OutwardDataEntryController() {
-
-		outwardBatchService = new OutwardBatchServiceImpl();
-		outwardChequeService = new OutwardChequeServiceImpl();
+		scanService = new ScanServiceImpl();
+		outwardDataEntryBatchList = new ArrayList<>();
 	}
 
 	@Override
-	public void doAfterCompose(Component component) throws Exception {
+	public void doAfterCompose(Component comp) throws Exception {
+		super.doAfterCompose(comp);
 
-		super.doAfterCompose(component);
+		bindPaginationEvents();
 
-		outwardDataEntryRowsBatch = (Rows) component.getFellow("outwardDataEntryRowsBatch");
-
-		outwardDataEntryLblEmpty = (Label) component.getFellow("outwardDataEntryLblEmpty");
-
-		outwardDataEntryLblSessionDate = (Label) component.getFellow("outwardDataEntryLblSessionDate");
-
-		outwardDataEntryLblSessionStatus = (Label) component.getFellow("outwardDataEntryLblSessionStatus");
-
-		outwardDataEntryLblSessionDateTime = (Label) component.getFellow("outwardDataEntryLblSessionDateTime");
-
-		loadSessionInformation();
-		loadReadyBatches();
+		loadBatches();
 	}
 
-	private void loadSessionInformation() {
+	private void bindPaginationEvents() {
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+		outwardDataEntryBtnFirst.addEventListener("onClick", event -> goToFirstPage());
 
-		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd-MMM-yyyy hh:mm a");
+		outwardDataEntryBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
 
-		java.util.Date currentDate = new java.util.Date();
+		outwardDataEntryBtnNext.addEventListener("onClick", event -> goToNextPage());
 
-		outwardDataEntryLblSessionDate.setValue(dateFormat.format(currentDate));
-
-		outwardDataEntryLblSessionStatus.setValue("OPEN");
-
-		outwardDataEntryLblSessionDateTime.setValue(dateTimeFormat.format(currentDate));
+		outwardDataEntryBtnLast.addEventListener("onClick", event -> goToLastPage());
 	}
 
-	private void loadReadyBatches() {
-
-		System.out.println("======================================");
-		System.out.println("DATA ENTRY BATCH LOAD STARTED");
+	private void loadBatches() {
 
 		try {
 
-			List<OutwardBatch> batches = outwardBatchService.getBatchesReadyForDataEntry();
+			List<ScanBatch> batches = scanService.getMakerDashboardBatches();
 
-			System.out.println("Batches returned: " + (batches == null ? "NULL" : batches.size()));
-
-			if (batches != null) {
-
-				for (OutwardBatch batch : batches) {
-
-					System.out.println("Batch ID: " + batch.getOutwardBatchId() + " | Reference: "
-							+ batch.getBatchReferenceId() + " | Status: " + batch.getBatchStatus() + " | Cheques: "
-							+ batch.getActualChequeCount());
-				}
+			if (batches == null) {
+				outwardDataEntryBatchList = new ArrayList<>();
+			} else {
+				outwardDataEntryBatchList = new ArrayList<>(batches);
 			}
 
-			renderBatches(batches);
+			outwardDataEntryCurrentPage = 1;
 
-			System.out.println("DATA ENTRY BATCH LOAD COMPLETED");
+			renderCurrentPage();
 
-		} catch (Exception exception) {
+		} catch (Exception e) {
 
-			System.out.println("DATA ENTRY BATCH LOAD ERROR");
+			outwardDataEntryBatchList = new ArrayList<>();
 
-			exception.printStackTrace();
+			outwardDataEntryCurrentPage = 1;
 
-			outwardDataEntryRowsBatch.getChildren().clear();
+			renderCurrentPage();
 
-			outwardDataEntryLblEmpty.setVisible(true);
+			e.printStackTrace();
 		}
-
-		System.out.println("======================================");
 	}
 
-	private void renderBatches(List<OutwardBatch> batches) {
+	private void renderCurrentPage() {
 
 		outwardDataEntryRowsBatch.getChildren().clear();
 
-		if (batches == null || batches.isEmpty()) {
+		if (outwardDataEntryBatchList == null || outwardDataEntryBatchList.isEmpty()) {
 
-			outwardDataEntryLblEmpty.setVisible(true);
+			outwardDataEntryEmptyState.setVisible(true);
+
+			updatePagination();
 
 			return;
 		}
 
-		outwardDataEntryLblEmpty.setVisible(false);
+		outwardDataEntryEmptyState.setVisible(false);
 
-		for (OutwardBatch batch : batches) {
+		int totalPages = getTotalPages();
+
+		if (outwardDataEntryCurrentPage > totalPages) {
+			outwardDataEntryCurrentPage = totalPages;
+		}
+
+		int startIndex = (outwardDataEntryCurrentPage - 1) * PAGE_SIZE;
+
+		int endIndex = Math.min(startIndex + PAGE_SIZE, outwardDataEntryBatchList.size());
+
+		for (int i = startIndex; i < endIndex; i++) {
+
+			ScanBatch batch = outwardDataEntryBatchList.get(i);
 
 			createBatchRow(batch);
 		}
+
+		updatePagination();
 	}
 
-	private void createBatchRow(final OutwardBatch batch) {
+	private void createBatchRow(final ScanBatch batch) {
+
+		Row outwardDataEntryRow = new Row();
+
+		outwardDataEntryRow.setSclass("outward-data-entry-row");
+
+		String batchId = getValue(batch.getScannedBatchId());
+
+		Label outwardDataEntryLblBatch = new Label(batchId);
+
+		outwardDataEntryLblBatch.setSclass("outward-data-entry-cell " + "outward-data-entry-batch-id");
 
 		int totalCheques = batch.getActualChequeCount();
 
-		int dataEntered = 0;
+		Label outwardDataEntryLblTotal = new Label(String.valueOf(totalCheques));
+
+		outwardDataEntryLblTotal.setSclass("outward-data-entry-cell " + "outward-data-entry-number");
+
+		int dataEntered = getDataEnteredCount(batch.getScannedBatchId());
+
+		Label outwardDataEntryLblDataEntered = new Label(dataEntered + " / " + totalCheques);
+
+		outwardDataEntryLblDataEntered.setSclass("outward-data-entry-cell " + "outward-data-entry-progress");
+
+		String batchStatus = getValue(batch.getBatchStatus());
+
+		Label outwardDataEntryLblStatus = new Label(batchStatus);
+
+		outwardDataEntryLblStatus
+				.setSclass("outward-data-entry-cell " + "outward-data-entry-status " + getStatusClass(batchStatus));
+
+		Button outwardDataEntryBtnProceed = new Button("PROCEED");
+
+		outwardDataEntryBtnProceed.setSclass("outward-data-entry-proceed-button");
+
+		outwardDataEntryBtnProceed.addEventListener("onClick", event -> openChequeDataEntry(batch));
+
+		outwardDataEntryRow.appendChild(outwardDataEntryLblBatch);
+
+		outwardDataEntryRow.appendChild(outwardDataEntryLblTotal);
+
+		outwardDataEntryRow.appendChild(outwardDataEntryLblDataEntered);
+
+		outwardDataEntryRow.appendChild(outwardDataEntryLblStatus);
+
+		outwardDataEntryRow.appendChild(outwardDataEntryBtnProceed);
+
+		outwardDataEntryRowsBatch.appendChild(outwardDataEntryRow);
+	}
+
+	private int getDataEnteredCount(String scannedBatchId) {
+
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+
+			return 0;
+		}
 
 		try {
 
-			dataEntered = outwardChequeService.getDataEnteredCountByBatchId(batch.getOutwardBatchId());
+			return scanService.getDataEnteredCountByBatchId(scannedBatchId);
 
-		} catch (Exception exception) {
+		} catch (Exception e) {
 
-			System.out.println("Unable to get data entered count for batch " + batch.getOutwardBatchId());
+			e.printStackTrace();
 
-			exception.printStackTrace();
-
-			dataEntered = 0;
+			return 0;
 		}
-
-		if (dataEntered < 0) {
-			dataEntered = 0;
-		}
-
-		if (dataEntered > totalCheques) {
-			dataEntered = totalCheques;
-		}
-
-		Row row = new Row();
-
-		Label batchLabel = new Label(getValue(batch.getOutwardBatchId()));
-
-		batchLabel.setSclass("outward-data-entry-batch-id");
-
-		row.appendChild(batchLabel);
-
-		Label totalLabel = new Label(String.valueOf(totalCheques));
-
-		row.appendChild(totalLabel);
-
-		Label enteredLabel = new Label(dataEntered + " / " + totalCheques);
-
-		enteredLabel.setSclass("outward-data-entry-entered");
-
-		row.appendChild(enteredLabel);
-
-		Label statusLabel = new Label("READY");
-
-		statusLabel.setSclass("outward-data-entry-status");
-
-		row.appendChild(statusLabel);
-
-		Button proceedButton = new Button("PROCEED");
-
-		proceedButton.setSclass("outward-data-entry-proceed");
-
-		proceedButton.addEventListener("onClick", event -> openChequeDataEntry(batch));
-
-		row.appendChild(proceedButton);
-
-		outwardDataEntryRowsBatch.appendChild(row);
 	}
 
-	private void openChequeDataEntry(OutwardBatch batch) {
+	private void openChequeDataEntry(ScanBatch batch) {
 
-		if (batch == null) {
+		if (batch == null || batch.getScannedBatchId() == null || batch.getScannedBatchId().trim().isEmpty()) {
+
 			return;
 		}
 
-		String batchId = batch.getOutwardBatchId();
-
-		if (batchId == null || batchId.trim().isEmpty()) {
-			return;
-		}
+		String batchId = batch.getScannedBatchId();
 
 		Executions.sendRedirect("/outward/maker/cheque-data-entry.zul?batchId=" + batchId);
+	}
+
+	private void goToFirstPage() {
+
+		if (outwardDataEntryCurrentPage == 1) {
+			return;
+		}
+
+		outwardDataEntryCurrentPage = 1;
+
+		renderCurrentPage();
+	}
+
+	private void goToPreviousPage() {
+
+		if (outwardDataEntryCurrentPage <= 1) {
+			return;
+		}
+
+		outwardDataEntryCurrentPage--;
+
+		renderCurrentPage();
+	}
+
+	private void goToNextPage() {
+
+		int totalPages = getTotalPages();
+
+		if (outwardDataEntryCurrentPage >= totalPages) {
+			return;
+		}
+
+		outwardDataEntryCurrentPage++;
+
+		renderCurrentPage();
+	}
+
+	private void goToLastPage() {
+
+		int totalPages = getTotalPages();
+
+		if (outwardDataEntryCurrentPage == totalPages) {
+			return;
+		}
+
+		outwardDataEntryCurrentPage = totalPages;
+
+		renderCurrentPage();
+	}
+
+	private void updatePagination() {
+
+		int totalPages = getTotalPages();
+
+		outwardDataEntryLblCurrentPage.setValue(outwardDataEntryCurrentPage + " / " + totalPages);
+
+		outwardDataEntryBtnFirst.setDisabled(outwardDataEntryCurrentPage <= 1);
+
+		outwardDataEntryBtnPrevious.setDisabled(outwardDataEntryCurrentPage <= 1);
+
+		outwardDataEntryBtnNext.setDisabled(outwardDataEntryCurrentPage >= totalPages);
+
+		outwardDataEntryBtnLast.setDisabled(outwardDataEntryCurrentPage >= totalPages);
+	}
+
+	private int getTotalPages() {
+
+		if (outwardDataEntryBatchList == null || outwardDataEntryBatchList.isEmpty()) {
+
+			return 1;
+		}
+
+		return (int) Math.ceil((double) outwardDataEntryBatchList.size() / PAGE_SIZE);
+	}
+
+	private String getStatusClass(String status) {
+
+		if (status == null || status.trim().isEmpty()) {
+
+			return "pending";
+		}
+
+		String normalizedStatus = status.trim().toLowerCase().replace(" ", "-").replace("_", "-");
+
+		if ("processing".equals(normalizedStatus)) {
+			return "processing";
+		}
+
+		if ("completed".equals(normalizedStatus)) {
+			return "completed";
+		}
+
+		if ("rejected".equals(normalizedStatus)) {
+			return "rejected";
+		}
+
+		if ("pending".equals(normalizedStatus)) {
+			return "pending";
+		}
+
+		return "pending";
 	}
 
 	private String getValue(String value) {
 
 		if (value == null || value.trim().isEmpty()) {
 
-			return "-";
+			return "--";
 		}
 
-		return value;
+		return value.trim();
 	}
 }

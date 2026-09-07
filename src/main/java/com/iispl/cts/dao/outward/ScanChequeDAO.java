@@ -20,4 +20,5 @@ public interface ScanChequeDAO {
 
 	void updateChequeStatus(Connection connection, String batchId, String status);
 
+	int getDataEnteredCountByBatchId(String scannedBatchId);
 }
