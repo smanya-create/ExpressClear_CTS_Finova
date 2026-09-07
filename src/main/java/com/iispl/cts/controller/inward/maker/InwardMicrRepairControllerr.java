@@ -1,5 +1,11 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.ArrayList;
+
+import java.io.InputStream;
+
+import org.zkoss.image.AImage;
+
 import java.util.HashMap;
 
 import java.util.List;
@@ -126,18 +132,51 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		try {
 
-			String batchId = (String) Executions.getCurrent().getDesktop().getSession()
-					.getAttribute("MICR_REPAIR_BATCH_ID");
+			String batchId = Executions.getCurrent().getParameter("batchId");
 
 			if (batchId == null || batchId.trim().isEmpty()) {
+
+				Object sessionBatchId = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_BATCH_ID");
+
+				if (sessionBatchId != null) {
+					batchId = String.valueOf(sessionBatchId);
+				}
+			}
+
+			if (batchId == null || batchId.trim().isEmpty()) {
+
 				Messagebox.show("No MICR repair batch was selected.", "MICR Repair", Messagebox.OK,
 						Messagebox.EXCLAMATION);
+
 				return;
 			}
 
-			repairCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, "MICR_REPAIR_PENDING");
+			batchId = batchId.trim();
 
-			if (repairCheques == null || repairCheques.isEmpty()) {
+			List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, null);
+
+			repairCheques = new java.util.ArrayList<>();
+
+			if (batchCheques != null) {
+
+				for (InwardCheque cheque : batchCheques) {
+
+					if (cheque == null) {
+						continue;
+					}
+
+					String status = cheque.getChequeStatus();
+
+					if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status)
+							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)) {
+
+						repairCheques.add(cheque);
+					}
+				}
+			}
+
+			if (repairCheques.isEmpty()) {
 
 				totalRecords = 0;
 				currentRecord = 0;
@@ -150,7 +189,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				return;
 			}
 
-			// Total MICR repair cheques
 			totalRecords = repairCheques.size();
 
 			if (currentRecord < 0) {
@@ -161,14 +199,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				currentRecord = totalRecords - 1;
 			}
 
-			// Get the current cheque
 			currentCheque = repairCheques.get(currentRecord);
 
 			loadBatchSummary(currentCheque);
-			// Populate UI fields
+
 			populateChequeFields(currentCheque);
 
-			// Update Previous / Next buttons
 			updateNavigation();
 
 			loadChequeImage(currentCheque.getInwardChequeId());
@@ -307,17 +343,55 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		InwardChequeImage image = inwardChequeService.getFrontImage(inwardChequeId);
+		try {
 
-		if (image != null && image.getImagePath() != null && !image.getImagePath().trim().isEmpty()) {
+			InwardChequeImage image = inwardChequeService.getFrontImage(inwardChequeId);
 
-			String imageSrc = "/" + image.getImagePath();
+			if (image == null || image.getImagePath() == null || image.getImagePath().trim().isEmpty()) {
+
+				System.out.println("MICR Repair: No front image found for cheque -> " + inwardChequeId);
+
+				return;
+			}
+
+			String imagePath = image.getImagePath().trim();
+
+			/*
+			 * Images are stored under:
+			 *
+			 * src/main/resources/Inward-data/
+			 *
+			 * Eclipse deploys src/main/resources to the web application root.
+			 *
+			 * Therefore the browser URL is:
+			 *
+			 * /Inward-data/<stored image path>
+			 *
+			 * Example: /Inward-data/BATCH-2026-09-04-003/images/CHQ001_front.jpg
+			 */
+			String imageSrc = "/Inward-data/" + imagePath;
+
+			System.out.println("MICR Repair: Loading image URL -> " + imageSrc);
 
 			chequeImage.setSrc(imageSrc);
 			chequeImage.setVisible(true);
 
 			if (emptyImageState != null) {
 				emptyImageState.setVisible(false);
+			}
+
+		} catch (Exception e) {
+
+			System.err.println("MICR Repair: Failed to load image for cheque -> " + inwardChequeId);
+
+			e.printStackTrace();
+
+			if (chequeImage != null) {
+				chequeImage.setVisible(false);
+			}
+
+			if (emptyImageState != null) {
+				emptyImageState.setVisible(true);
 			}
 		}
 	}
@@ -386,9 +460,31 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		Messagebox.show("MICR correction saved successfully.", "MICR Repair", Messagebox.OK, Messagebox.INFORMATION);
 
-		repairCheques = inwardChequeService.getMicrRepairRequiredCheques();
+		String batchId = (String) Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_BATCH_ID");
 
-		totalRecords = repairCheques != null ? repairCheques.size() : 0;
+		List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, null);
+
+		repairCheques = new java.util.ArrayList<>();
+
+		if (batchCheques != null) {
+
+			for (InwardCheque cheque : batchCheques) {
+
+				if (cheque == null) {
+					continue;
+				}
+
+				String status = cheque.getChequeStatus();
+
+				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status) || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)) {
+
+					repairCheques.add(cheque);
+				}
+			}
+		}
+
+		totalRecords = repairCheques.size();
 
 		if (totalRecords == 0) {
 
@@ -467,22 +563,35 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		// Cheque number
 		if (txtChequeNumber != null) {
 			txtChequeNumber.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "");
 		}
 
-		// Current MICR
+		if (txtCityCode != null) {
+			txtCityCode.setValue(cheque.getCityCode() != null ? cheque.getCityCode() : "");
+		}
+
+		if (txtBankCode != null) {
+			txtBankCode.setValue(cheque.getBankCode() != null ? cheque.getBankCode() : "");
+		}
+
+		if (txtBranchCode != null) {
+			txtBranchCode.setValue(cheque.getBranchCode() != null ? cheque.getBranchCode() : "");
+		}
+
 		if (txtCurrentMicr != null) {
 			txtCurrentMicr.setValue(cheque.getMicrCode() != null ? cheque.getMicrCode() : "");
 		}
 
-		// Corrected MICR starts empty for the maker
-		if (txtCorrectedMicr != null) {
-			txtCorrectedMicr.setValue("");
+		if (txtTransactionCode != null) {
+			txtTransactionCode.setValue(cheque.getTransactionCode() != null ? cheque.getTransactionCode() : "");
 		}
 
-		// Remarks start empty
+		if (txtCorrectedMicr != null) {
+			txtCorrectedMicr.setValue("");
+			txtCorrectedMicr.clearErrorMessage();
+		}
+
 		if (txtRemarks != null) {
 			txtRemarks.setValue("");
 		}

@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
+import org.zkoss.zk.ui.Sessions;
 
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -23,6 +25,7 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+
 		super.doAfterCompose(comp);
 
 		inwardBatchService = new InwardBatchServiceImpl();
@@ -39,19 +42,50 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 
 	public void openBatch(Object batchId) {
 
-		String batchIdValue = String.valueOf(batchId);
+		if (batchId == null) {
+			return;
+		}
 
-		Executions.getCurrent().getDesktop().getSession().setAttribute("MICR_REPAIR_BATCH_ID", batchIdValue);
+		String batchIdValue = String.valueOf(batchId).trim();
 
-		Component root = self.getPage().getFirstRoot();
+		if (batchIdValue.isEmpty()) {
+			return;
+		}
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		
+		Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", batchIdValue);
+		
+		Include mainInclude = null;
 
-		if (mainContentArea instanceof Include) {
+		try {
+			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
+		} catch (Exception ignored) {
+		}
 
-			Include include = (Include) mainContentArea;
+		
+		if (mainInclude == null && self != null && self.getDesktop() != null) {
 
-			include.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+			for (org.zkoss.zk.ui.Page page : self.getDesktop().getPages()) {
+
+				Component component = page.getFellowIfAny("mainContentArea", true);
+
+				if (component instanceof Include) {
+					mainInclude = (Include) component;
+					break;
+				}
+			}
+		}
+
+		
+		if (mainInclude != null) {
+
+			mainInclude.setSrc(null);
+
+			mainInclude.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+
+		} else {
+
+			System.err.println("DEBUG: Failed to locate mainContentArea " + "for MICR Repair navigation!");
 		}
 	}
 }
