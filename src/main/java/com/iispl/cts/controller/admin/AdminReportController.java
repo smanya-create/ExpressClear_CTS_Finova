@@ -2,6 +2,10 @@ package com.iispl.cts.controller.admin;
 
 import com.iispl.cts.common.config.DBConnection;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -10,6 +14,7 @@ import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Messagebox;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
@@ -21,7 +26,6 @@ public class AdminReportController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // Auto-wired by id from reports.zul
     private Datebox dtFromDate;
     private Datebox dtToDate;
     private Button btnGenerate;
@@ -67,8 +71,9 @@ public class AdminReportController extends GenericForwardComposer<Component> {
         String withSlashPath = reportPath.startsWith("/") ? reportPath : "/" + reportPath;
         return getClass().getResourceAsStream(withSlashPath);
     }
-
     public void onClick$btnGenerate() {
+        System.out.println(">>> 0. GENERATE BUTTON CLICKED");
+
         Date fromDate = dtFromDate.getValue();
         Date toDate = dtToDate.getValue();
 
@@ -98,33 +103,41 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             parameters.put("TO_DATE", new java.sql.Date(toDate.getTime()));
             parameters.put("GENERATED_BY", "ADMIN");
 
-            // Direct HikariCP pool connection via DBConnection
             try (Connection conn = DBConnection.getConnection()) {
+                System.out.println(">>> 1. Connection acquired from pool");
+
                 JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
+                System.out.println(">>> 2. Report filled. Page count: " + jasperPrint.getPages().size());
 
                 if (jasperPrint.getPages().isEmpty()) {
                     Messagebox.show("No clearing records found for the selected date range.", "No Data", Messagebox.OK, Messagebox.INFORMATION);
                     return;
                 }
-                System.out.println("=== PHRASE LOADED FROM: " + 
-                	    com.lowagie.text.Phrase.class.getProtectionDomain().getCodeSource().getLocation());
 
-                byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
+                // ==========================================
+                // ZERO iText / ZERO FopGlyphProcessor EXPORT
+                // ==========================================
+                ByteArrayOutputStream htmlOut = new ByteArrayOutputStream();
+                net.sf.jasperreports.engine.export.HtmlExporter htmlExporter = new net.sf.jasperreports.engine.export.HtmlExporter();
+                htmlExporter.setExporterInput(new net.sf.jasperreports.export.SimpleExporterInput(jasperPrint));
+                htmlExporter.setExporterOutput(new net.sf.jasperreports.export.SimpleHtmlExporterOutput(htmlOut));
+                htmlExporter.exportReport();
+
+                byte[] htmlBytes = htmlOut.toByteArray();
+                System.out.println(">>> 3. HTML generated successfully, byte size: " + htmlBytes.length);
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                String fileName = "CTS_Report_" + sdf.format(fromDate) + "_to_" + sdf.format(toDate) + ".pdf";
+                String fileName = "CTS_Report_" + sdf.format(fromDate) + "_to_" + sdf.format(toDate) + ".html";
 
-                Filedownload.save(pdfBytes, "application/pdf", fileName);
+                Filedownload.save(htmlBytes, "text/html", fileName);
+                System.out.println(">>> 4. Download delivered to browser");
             }
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Throwable root = ex;
-            while (root.getCause() != null) {
-                root = root.getCause();
-            }
-            System.err.println("DATABASE ERROR ROOT CAUSE: " + root.getMessage());
-            Messagebox.show("SQL Error: " + root.getMessage(), "Database Error", Messagebox.OK, Messagebox.ERROR);
+        } catch (Throwable t) {
+            System.err.println(">>> CRITICAL ERROR:");
+            t.printStackTrace();
+            Messagebox.show("Export failed: " + t.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
         }
     }
+
 }

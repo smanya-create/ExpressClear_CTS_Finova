@@ -31,7 +31,7 @@ public class DBConnection {
 
             // Note: prepareThreshold=0 is required for PostgreSQL connection poolers in transaction mode
             String jdbcUrl = String.format(
-                    "jdbc:postgresql://%s:%d/%s?sslmode=require&prepareThreshold=0",
+                    "jdbc:postgresql://%s:%d/%s?sslmode=require&prepareThreshold=0&preferQueryMode=simple",
                     SUPABASE_HOST,
                     PORT,
                     DB_NAME
@@ -91,6 +91,16 @@ public class DBConnection {
                     resource.close();
                 } catch (Exception ignored) {
                 }
+            }
+        }
+    }
+    public static void shutdown() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            try {
+                dataSource.close();
+                System.out.println("HikariCP Connection Pool closed successfully.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
