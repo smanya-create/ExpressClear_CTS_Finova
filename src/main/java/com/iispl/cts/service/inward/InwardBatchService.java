@@ -10,6 +10,8 @@ import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
 public interface InwardBatchService {
 
 	List<InwardBatch> getAllBatches();
+	
+	List<InwardBatch> getBatchesForMicrRepair();
 
 	boolean saveBatch(InwardBatch inwardBatch);
 
