@@ -17,13 +17,13 @@ import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 
 public class InwardBatchDAOImpl implements InwardBatchDAO {
-	
+
 	// Static in-memory storage (replace with JDBC ResultSet later)
 //    private final List<InwardBatch> batchTable = new ArrayList<>();
 
-    public InwardBatchDAOImpl() {
+	public InwardBatchDAOImpl() {
 //        initStaticBatches();
-    }
+	}
 
 //    private void initStaticBatches() {
 //        batchTable.add(new InwardBatch(
@@ -60,252 +60,264 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 //                .orElse(null);
 //    }
 
-    @Override
-    public boolean updateStatus(String batchId, String status) {
-        InwardBatch batch = getBatchById(batchId);
-        if (batch != null) {
-            batch.setBatchStatus(status);
-            return true;
-        }
-        return false;
-    }
-	
-	
-    
-    @Override
-    public List<InwardBatch> getAllBatches() {
+	@Override
+	public boolean updateStatus(String batchId, String status) {
+		InwardBatch batch = getBatchById(batchId);
+		if (batch != null) {
+			batch.setBatchStatus(status);
+			return true;
+		}
+		return false;
+	}
 
-        List<InwardBatch> batches = new ArrayList<>();
+	@Override
+	public List<InwardBatch> getAllBatches() {
 
-        String sql = "SELECT inward_batch_id, batch_reference_id, "
-                + "actual_cheque_count, actual_total_amount, "
-                + "batch_status, uploaded_by, uploaded_at "
-                + "FROM inward_batch "
-                + "ORDER BY uploaded_at DESC";
+		List<InwardBatch> batches = new ArrayList<>();
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
+		String sql = "SELECT inward_batch_id, batch_reference_id, " + "actual_cheque_count, actual_total_amount, "
+				+ "batch_status, uploaded_by, uploaded_at " + "FROM inward_batch " + "ORDER BY uploaded_at DESC";
 
-            while (resultSet.next()) {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
+				ResultSet resultSet = statement.executeQuery()) {
 
-                InwardBatch batch = new InwardBatch();
+			while (resultSet.next()) {
 
-                batch.setInwardBatchId(
-                        resultSet.getString("inward_batch_id"));
+				InwardBatch batch = new InwardBatch();
 
-                batch.setBatchReferenceId(
-                        resultSet.getString("batch_reference_id"));
+				batch.setInwardBatchId(resultSet.getString("inward_batch_id"));
 
-                batch.setActualChequeCount(
-                        resultSet.getInt("actual_cheque_count"));
+				batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
 
-                batch.setActualTotalAmount(
-                        resultSet.getBigDecimal("actual_total_amount"));
+				batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
 
-                batch.setBatchStatus(
-                        resultSet.getString("batch_status"));
+				batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
 
-                batch.setUploadedBy(
-                        resultSet.getString("uploaded_by"));
+				batch.setBatchStatus(resultSet.getString("batch_status"));
 
-                batch.setUploadedAt(
-                        resultSet.getTimestamp("uploaded_at"));
+				batch.setUploadedBy(resultSet.getString("uploaded_by"));
 
-                batches.add(batch);
-            }
+				batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
 
-            return batches;
+				batches.add(batch);
+			}
 
-        } catch (Exception e) {
+			return batches;
 
-            e.printStackTrace();
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Failed to load inward batches: " + e.getMessage(), e);
-        }
-    }
+			e.printStackTrace();
 
-    @Override
-    public InwardBatch getBatchById(String inwardBatchId) {
+			throw new RuntimeException("Failed to load inward batches: " + e.getMessage(), e);
+		}
+	}
 
-        String sql = "SELECT inward_batch_id, batch_reference_id, "
-                + "actual_cheque_count, actual_total_amount, "
-                + "batch_status, uploaded_by, uploaded_at "
-                + "FROM inward_batch "
-                + "WHERE inward_batch_id = ?";
+	@Override
+	public InwardBatch getBatchById(String inwardBatchId) {
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+		String sql = "SELECT inward_batch_id, batch_reference_id, " + "actual_cheque_count, actual_total_amount, "
+				+ "batch_status, uploaded_by, uploaded_at " + "FROM inward_batch " + "WHERE inward_batch_id = ?";
 
-            statement.setString(1, inwardBatchId);
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+			statement.setString(1, inwardBatchId);
 
-                if (resultSet.next()) {
+			try (ResultSet resultSet = statement.executeQuery()) {
 
-                    InwardBatch batch = new InwardBatch();
+				if (resultSet.next()) {
 
-                    batch.setInwardBatchId(
-                            resultSet.getString("inward_batch_id"));
+					InwardBatch batch = new InwardBatch();
 
-                    batch.setBatchReferenceId(
-                            resultSet.getString("batch_reference_id"));
+					batch.setInwardBatchId(resultSet.getString("inward_batch_id"));
 
-                    batch.setActualChequeCount(
-                            resultSet.getInt("actual_cheque_count"));
+					batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
 
-                    batch.setActualTotalAmount(
-                            resultSet.getBigDecimal("actual_total_amount"));
+					batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
 
-                    batch.setBatchStatus(
-                            resultSet.getString("batch_status"));
+					batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
 
-                    batch.setUploadedBy(
-                            resultSet.getString("uploaded_by"));
+					batch.setBatchStatus(resultSet.getString("batch_status"));
 
-                    batch.setUploadedAt(
-                            resultSet.getTimestamp("uploaded_at"));
+					batch.setUploadedBy(resultSet.getString("uploaded_by"));
 
-                    return batch;
-                }
-            }
+					batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
 
-        } catch (Exception e) {
+					return batch;
+				}
+			}
 
-            e.printStackTrace();
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Failed to get inward batch: " + e.getMessage(), e);
-        }
+			e.printStackTrace();
 
-        return null;
-    }
+			throw new RuntimeException("Failed to get inward batch: " + e.getMessage(), e);
+		}
 
-    @Override
-    public boolean saveBatch(InwardBatch inwardBatch) {
+		return null;
+	}
 
-        String sql = "INSERT INTO inward_batch "
-                + "(inward_batch_id, batch_reference_id, "
-                + "actual_cheque_count, actual_total_amount, "
-                + "batch_status, uploaded_by, uploaded_at) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+	@Override
+	public boolean saveBatch(InwardBatch inwardBatch) {
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+		String sql = "INSERT INTO inward_batch " + "(inward_batch_id, batch_reference_id, "
+				+ "actual_cheque_count, actual_total_amount, " + "batch_status, uploaded_by, uploaded_at) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-            statement.setString(1, inwardBatch.getInwardBatchId());
-            statement.setString(2, inwardBatch.getBatchReferenceId());
-            statement.setInt(3, inwardBatch.getActualChequeCount());
-            statement.setBigDecimal(4, inwardBatch.getActualTotalAmount());
-            statement.setString(5, inwardBatch.getBatchStatus());
-            statement.setString(6, inwardBatch.getUploadedBy());
-            statement.setTimestamp(7, inwardBatch.getUploadedAt());
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            return statement.executeUpdate() > 0;
+			statement.setString(1, inwardBatch.getInwardBatchId());
+			statement.setString(2, inwardBatch.getBatchReferenceId());
+			statement.setInt(3, inwardBatch.getActualChequeCount());
+			statement.setBigDecimal(4, inwardBatch.getActualTotalAmount());
+			statement.setString(5, inwardBatch.getBatchStatus());
+			statement.setString(6, inwardBatch.getUploadedBy());
+			statement.setTimestamp(7, inwardBatch.getUploadedAt());
 
-        } catch (Exception e) {
+			return statement.executeUpdate() > 0;
 
-            e.printStackTrace();
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Failed to save inward batch: " + e.getMessage(), e);
-        }
-    }
+			e.printStackTrace();
 
-    @Override
-    public boolean updateBatch(InwardBatch inwardBatch) {
+			throw new RuntimeException("Failed to save inward batch: " + e.getMessage(), e);
+		}
+	}
 
-        String sql = "UPDATE inward_batch SET "
-                + "batch_reference_id = ?, "
-                + "actual_cheque_count = ?, "
-                + "actual_total_amount = ?, "
-                + "batch_status = ?, "
-                + "uploaded_by = ?, "
-                + "uploaded_at = ? "
-                + "WHERE inward_batch_id = ?";
+	@Override
+	public boolean updateBatch(InwardBatch inwardBatch) {
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+		String sql = "UPDATE inward_batch SET " + "batch_reference_id = ?, " + "actual_cheque_count = ?, "
+				+ "actual_total_amount = ?, " + "batch_status = ?, " + "uploaded_by = ?, " + "uploaded_at = ? "
+				+ "WHERE inward_batch_id = ?";
 
-            statement.setString(1, inwardBatch.getBatchReferenceId());
-            statement.setInt(2, inwardBatch.getActualChequeCount());
-            statement.setBigDecimal(3, inwardBatch.getActualTotalAmount());
-            statement.setString(4, inwardBatch.getBatchStatus());
-            statement.setString(5, inwardBatch.getUploadedBy());
-            statement.setTimestamp(6, inwardBatch.getUploadedAt());
-            statement.setString(7, inwardBatch.getInwardBatchId());
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            return statement.executeUpdate() > 0;
+			statement.setString(1, inwardBatch.getBatchReferenceId());
+			statement.setInt(2, inwardBatch.getActualChequeCount());
+			statement.setBigDecimal(3, inwardBatch.getActualTotalAmount());
+			statement.setString(4, inwardBatch.getBatchStatus());
+			statement.setString(5, inwardBatch.getUploadedBy());
+			statement.setTimestamp(6, inwardBatch.getUploadedAt());
+			statement.setString(7, inwardBatch.getInwardBatchId());
 
-        } catch (Exception e) {
+			return statement.executeUpdate() > 0;
 
-            e.printStackTrace();
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Failed to update inward batch: " + e.getMessage(), e);
-        }
-    }
+			e.printStackTrace();
 
-    @Override
-    public boolean deleteBatch(String inwardBatchId) {
+			throw new RuntimeException("Failed to update inward batch: " + e.getMessage(), e);
+		}
+	}
 
-        String sql = "DELETE FROM inward_batch "
-                + "WHERE inward_batch_id = ?";
+	@Override
+	public boolean deleteBatch(String inwardBatchId) {
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+		String sql = "DELETE FROM inward_batch " + "WHERE inward_batch_id = ?";
 
-            statement.setString(1, inwardBatchId);
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            return statement.executeUpdate() > 0;
+			statement.setString(1, inwardBatchId);
 
-        } catch (Exception e) {
+			return statement.executeUpdate() > 0;
 
-            e.printStackTrace();
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Failed to delete inward batch: " + e.getMessage(), e);
-        }
-    
-}
+			e.printStackTrace();
+
+			throw new RuntimeException("Failed to delete inward batch: " + e.getMessage(), e);
+		}
+
+	}
 
 	@Override
 	public List<DashboardSummaryDTO> getDashboardBatches() {
 
-	    String dashboardSummaryQuery =
-	            "SELECT ib.inward_batch_id, ib.actual_cheque_count AS total_cheques, "
-	          + "COUNT(CASE WHEN ic.cheque_status = 'maker_approved' THEN 1 END) AS normal_cheques, "
-	          + "COUNT(CASE WHEN ic.cheque_status = 'rejection_request' THEN 1 END) AS rejected_cheques "
-	          + "FROM inward_batch ib "
-	          + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
-	          + "WHERE ib.batch_status = 'submit_to_ichecker' "
-	          + "GROUP BY ib.inward_batch_id "
-	          + "ORDER BY ib.inward_batch_id;";
+		String dashboardSummaryQuery = "SELECT ib.inward_batch_id, ib.actual_cheque_count AS total_cheques, "
+				+ "COUNT(CASE WHEN ic.cheque_status = 'maker_approved' THEN 1 END) AS normal_cheques, "
+				+ "COUNT(CASE WHEN ic.cheque_status = 'rejection_request' THEN 1 END) AS rejected_cheques "
+				+ "FROM inward_batch ib " + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
+				+ "WHERE ib.batch_status = 'submit_to_ichecker' " + "GROUP BY ib.inward_batch_id "
+				+ "ORDER BY ib.inward_batch_id;";
 
-	    List<DashboardSummaryDTO> batchList = new ArrayList<>();
+		List<DashboardSummaryDTO> batchList = new ArrayList<>();
 
-	    try (Connection conn = DBConnection.getConnection();
-	         PreparedStatement ps = conn.prepareStatement(dashboardSummaryQuery);
-	         ResultSet rs = ps.executeQuery()) {
-	        
-	        while (rs.next()) {
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(dashboardSummaryQuery);
+				ResultSet rs = ps.executeQuery()) {
 
-	            DashboardSummaryDTO summary = new DashboardSummaryDTO();
+			while (rs.next()) {
 
-	            summary.setBatchId(rs.getString("inward_batch_id"));
-	            summary.setTotalCheques(rs.getInt("total_cheques"));
-	            summary.setRejectionRequestCheques(rs.getInt("rejected_cheques"));
-	            summary.setMakerApprovedCheques(rs.getInt("normal_cheques"));
+				DashboardSummaryDTO summary = new DashboardSummaryDTO();
 
-	            batchList.add(summary);
-	        }
+				summary.setBatchId(rs.getString("inward_batch_id"));
+				summary.setTotalCheques(rs.getInt("total_cheques"));
+				summary.setRejectionRequestCheques(rs.getInt("rejected_cheques"));
+				summary.setMakerApprovedCheques(rs.getInt("normal_cheques"));
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
+				batchList.add(summary);
+			}
 
-	    return batchList;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return batchList;
+	}
+
+	@Override
+	public List<InwardBatch> getBatchesForMicrRepair() {
+
+		List<InwardBatch> batches = new ArrayList<>();
+
+		String sql = "SELECT ib.inward_batch_id, " + "ib.batch_reference_id, " + "ib.actual_cheque_count, "
+				+ "ib.actual_total_amount, " + "ib.batch_status, " + "ib.uploaded_by, " + "ib.uploaded_at, "
+				+ "(SELECT COUNT(*) " + " FROM inward_cheque ic2 " + " WHERE ic2.inward_batch_id = ib.inward_batch_id "
+				+ " AND ic2.cheque_status IN " + " ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS')) "
+				+ "AS micr_repair_pending_count " + "FROM inward_batch ib " + "WHERE EXISTS ( " + "    SELECT 1 "
+				+ "    FROM inward_cheque ic " + "    WHERE ic.inward_batch_id = ib.inward_batch_id "
+				+ "    AND ic.cheque_status IN " + "    ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') " + ") "
+				+ "ORDER BY ib.uploaded_at DESC";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
+				ResultSet resultSet = statement.executeQuery()) {
+
+			while (resultSet.next()) {
+
+				InwardBatch batch = new InwardBatch();
+
+				batch.setInwardBatchId(resultSet.getString("inward_batch_id"));
+
+				batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
+
+				batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
+
+				batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
+
+				batch.setBatchStatus(resultSet.getString("batch_status"));
+
+				batch.setUploadedBy(resultSet.getString("uploaded_by"));
+
+				batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
+
+				batch.setMicrRepairPendingCount(resultSet.getInt("micr_repair_pending_count"));
+
+				batches.add(batch);
+			}
+
+			return batches;
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			throw new RuntimeException("Failed to load MICR repair batches: " + e.getMessage(), e);
+		}
 	}
 }
-
