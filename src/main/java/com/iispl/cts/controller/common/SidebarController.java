@@ -199,7 +199,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardMakerReports() {
-		Executions.sendRedirect("/maker/reports.zul");
+		Executions.sendRedirect("/maker/reports/maker-reports.zul");
 	}
 
 	// Outward Checker Navigation Actions
