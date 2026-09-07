@@ -142,3 +142,27 @@
     background-color: #020617 !important;
     transform: translateY(0);
 }
+/* Custom Listbox Header */
+.custom-listbox .z-listheader {
+    background: #173b69 !important;
+    border-color: #123055 !important;
+}
+
+.custom-listbox .z-listheader-content {
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    padding: 10px 14px !important;
+}
+
+/* Subtle border and zebra stripe for rows */
+.custom-listbox .z-listitem {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.custom-listbox .z-listcell-content {
+    font-size: 13px;
+    color: #334155;
+    padding: 10px 14px;
+}

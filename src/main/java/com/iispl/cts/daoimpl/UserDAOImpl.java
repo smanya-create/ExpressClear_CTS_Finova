@@ -190,4 +190,36 @@ public class UserDAOImpl implements UserDAO {
         u.setUserCreatedAt(rs.getTimestamp("user_created_at"));
         return u;
     }
+
+    @Override
+    public List<User> findUsersByRoleId(String roleId) {
+        List<User> userList = new ArrayList<>();
+        String sql = "SELECT user_id, role_id, employee_id, username, full_name, email, mobile_number, status, user_created_at " +
+                     "FROM \"users\" WHERE role_id = ? ORDER BY full_name ASC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, roleId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setUserId(rs.getString("user_id"));
+                    user.setRoleId(rs.getString("role_id"));
+                    user.setEmployeeId(rs.getString("employee_id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setMobileNumber(rs.getString("mobile_number"));
+                    user.setStatus(rs.getString("status"));
+                    user.setUserCreatedAt(rs.getTimestamp("user_created_at"));
+                    userList.add(user);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
 }

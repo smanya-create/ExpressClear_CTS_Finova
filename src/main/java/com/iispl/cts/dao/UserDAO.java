@@ -12,4 +12,5 @@ public interface UserDAO {
     boolean saveUser(User user);
     String generateNextUserId();
     String generateNextEmployeeId();
+    List<User> findUsersByRoleId(String roleId);
 }

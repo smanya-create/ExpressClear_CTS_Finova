@@ -188,4 +188,40 @@ public class RoleDAOImpl implements RoleDAO {
                 rs.getTimestamp("role_created_at")
         );
     }
+    public boolean isRoleNameExists(String roleName) {
+        String sql = "SELECT COUNT(*) FROM role WHERE UPPER(TRIM(role_name)) = UPPER(TRIM(?))";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, roleName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+
+	@Override
+	public boolean isRoleNameExists(String roleName, String excludeRoleId) {
+		// TODO Auto-generated method stub
+		String sql = "SELECT COUNT(*) FROM role WHERE UPPER(TRIM(role_name)) = UPPER(TRIM(?)) AND role_id != ?";
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setString(1, roleName);
+	        ps.setString(2, excludeRoleId);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                return rs.getInt(1) > 0;
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
 }
