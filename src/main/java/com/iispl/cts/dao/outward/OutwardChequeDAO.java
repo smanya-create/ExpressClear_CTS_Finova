@@ -19,4 +19,8 @@ public interface OutwardChequeDAO {
 	int getDataEnteredCountByBatchId(String outwardBatchId);
 	
 	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
+	
+	List<OutwardCheque> getOutwardMicrRepairCheques(String outwardBatchId);
+
+	void saveOutwardMicrRepair(OutwardCheque cheque);
 }

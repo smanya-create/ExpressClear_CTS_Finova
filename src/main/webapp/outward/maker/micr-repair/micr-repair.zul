@@ -1,145 +1,365 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <zk>
 
-	<style src="/css/outward/micr-repair.css" />
-    <window id="micrEntryWindow"  
-            width="100%" height="100%" sclass="micr-entry-page">
-        
-        <!-- Page Header -->
+    <style src="/css/outward/micr-repair.css" />
+
+    <window id="micrEntryWindow"
+            width="100%"
+            height="100%"
+            apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairController"
+            sclass="micr-entry-page">
+
+        <!-- ===================================================== -->
+        <!-- PAGE HEADER                                           -->
+        <!-- ===================================================== -->
+
         <div class="page-header-entry">
+
             <div class="header-left">
-                <button label="← Back to List" sclass="btn-back" 
+
+                <button id="btnBackToList"
+                        label="← Back to List"
+                        sclass="btn-back"
                         onClick="@command('backToList')" />
-                <div class="batch-badge">BATCH: B004</div>
+
+                <div class="batch-badge">
+                    BATCH:
+                    <label id="lblBatchNumber"
+                           value="" />
+                </div>
+
             </div>
+
         </div>
 
-        <!-- Completion Success Message (Hidden initially) -->
-        <div id="completionMessage" class="completion-message" style="display:none;">
+
+        <!-- ===================================================== -->
+        <!-- COMPLETION SUCCESS MESSAGE                            -->
+        <!-- ===================================================== -->
+
+        <div id="divCompletionMessage"
+             class="completion-message"
+             visible="false">
+
             <div class="completion-content">
-                <div class="completion-icon">✓</div>
-                <label value="MICR REPAIR COMPLETED" sclass="completion-title" />
-                <label value="Both MICR-error cheques have been repaired. Batch B004 is ready for Data Entry." 
+
+                <div class="completion-icon">
+                    ✓
+                </div>
+
+                <label id="lblCompletionTitle"
+                       value="MICR REPAIR COMPLETED"
+                       sclass="completion-title" />
+
+                <label id="lblCompletionText"
+                       value=""
                        sclass="completion-text" />
+
             </div>
+
         </div>
 
-        <!-- Main Content Container -->
-        <div id="formContainer" class="micr-entry-container">
-            
-            <!-- Left Side: Cheque Image -->
-            <div class="cheque-image-section">
-                <label value="Cheque Image" sclass="section-label" />
-                
-                <div class="cheque-image-wrapper">
-                    <image id="chequeImage" src="/images/cheque-sample.png" width="100%" height="auto" />
+
+        <!-- ===================================================== -->
+        <!-- MAIN CONTENT                                          -->
+        <!-- ===================================================== -->
+
+        <div id="divFormContainer"
+             class="micr-entry-container">
+
+
+            <!-- ================================================= -->
+            <!-- LEFT SIDE : CHEQUE IMAGE                          -->
+            <!-- ================================================= -->
+
+            <div id="divChequeImageSection"
+                 class="cheque-image-section">
+
+                <label id="lblChequeImageTitle"
+                       value="Cheque Image"
+                       sclass="section-label" />
+
+
+                <div id="divChequeImageWrapper"
+                     class="cheque-image-wrapper">
+
+                    <!-- Image is populated dynamically -->
+                    <image id="imgCheque"
+                           width="100%"
+                           height="auto" />
+
                 </div>
-                
-                <div class="cheque-details">
+
+
+                <!-- ============================================= -->
+                <!-- CHEQUE DETAILS                                -->
+                <!-- ============================================= -->
+
+                <div id="divChequeDetails"
+                     class="cheque-details">
+
+
+                    <!-- Bank and Branch -->
                     <div class="detail-row">
-                        <label id="bankName" value="HDFC Bank Ltd" sclass="bank-name" />
-                        <label id="branchName" value="Main Branch" sclass="branch-name" />
+
+                        <label id="lblBankName"
+                               value=""
+                               sclass="bank-name" />
+
+                        <label id="lblBranchName"
+                               value=""
+                               sclass="branch-name" />
+
                     </div>
-                    
+
+
+                    <!-- Payee -->
                     <div class="detail-row">
-                        <label value="Pay" sclass="label-key" />
-                        <label id="payTo" value="CBS Bank Limited" sclass="label-value" />
+
+                        <label id="lblPayLabel"
+                               value="Pay"
+                               sclass="label-key" />
+
+                        <label id="lblPayTo"
+                               value=""
+                               sclass="label-value" />
+
                     </div>
-                    
+
+
+                    <!-- Amount in words -->
                     <div class="detail-row">
-                        <label id="amountWords" value="Twelve Thousand Five Hundred Only" sclass="amount-text" />
+
+                        <label id="lblAmountWords"
+                               value=""
+                               sclass="amount-text" />
+
                     </div>
-                    
+
+
+                    <!-- Amount -->
                     <div class="detail-row amount-box">
-                        <label id="amountNumeric" value="₹ 12,500.00" sclass="amount-numeric" />
+
+                        <label id="lblAmountNumeric"
+                               value=""
+                               sclass="amount-numeric" />
+
                     </div>
-                    
-                    <div class="ocr-reference">
-                        <label id="ocrReference" value=":100041: 600987001 :29:" sclass="ocr-text" />
+
+
+                    <!-- OCR Reference -->
+                    <div id="divOcrReference"
+                         class="ocr-reference">
+
+                        <label id="lblOcrReference"
+                               value=""
+                               sclass="ocr-text" />
+
                     </div>
+
                 </div>
-                
-                <div class="cheque-note">
-                    <label value="Blue fields are OCR-filled — verify against the cheque image." sclass="note-text" />
+
+
+                <!-- Image Note -->
+                <div id="divChequeNote"
+                     class="cheque-note">
+
+                    <label id="lblChequeNote"
+                           value="Blue fields are OCR-filled — verify against the cheque image."
+                           sclass="note-text" />
+
                 </div>
+
             </div>
 
-            <!-- Right Side: MICR Data Entry Form -->
-            <div class="form-section">
-                
-                <!-- Progress Indicator -->
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill" style="width: 50%;"></div>
+
+            <!-- ================================================= -->
+            <!-- RIGHT SIDE : MICR REPAIR FORM                     -->
+            <!-- ================================================= -->
+
+            <div id="divFormSection"
+                 class="form-section">
+
+
+                <!-- ============================================= -->
+                <!-- PROGRESS                                       -->
+                <!-- ============================================= -->
+
+                <div id="divProgressContainer"
+                     class="progress-container">
+
+                    <div id="divProgressBar"
+                         class="progress-bar">
+
+                        <div id="divProgressFill"
+                             class="progress-fill"
+                             style="width: 0%;" />
+
                     </div>
-                    <label id="progressText" value="Record 1 of 2" sclass="progress-text" />
+
+                    <label id="lblProgressText"
+                           value=""
+                           sclass="progress-text" />
+
                 </div>
 
-                <!-- MICR Error Badge -->
-                <div class="micr-error-badge">
-                    <label value="MICR ERROR" />
+
+                <!-- ============================================= -->
+                <!-- MICR ERROR BADGE                               -->
+                <!-- ============================================= -->
+
+                <div id="divMicrErrorBadge"
+                     class="micr-error-badge">
+
+                    <label id="lblMicrError"
+                           value="MICR ERROR" />
+
                 </div>
 
-                <!-- Form Fields -->
-                <div class="form-group">
-                    <label value="CHEQUE NUMBER *" sclass="form-label" />
-                    <textbox id="chequeNumber" value="100041" readonly="true" sclass="form-input" />
-                </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label value="CITY CODE *" sclass="form-label" />
-                        <textbox id="cityCode" value="600" sclass="form-input" />
-                    </div>
-                    <div class="form-group">
-                        <label value="BANK CODE *" sclass="form-label" />
-                        <textbox id="bankCode" value="987" sclass="form-input" />
-                    </div>
-                </div>
+                <!-- ============================================= -->
+                <!-- CHEQUE NUMBER                                 -->
+                <!-- ============================================= -->
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label value="BRANCH CODE *" sclass="form-label" />
-                        <textbox id="branchCode" value="001" sclass="form-input" />
-                    </div>
-                    <div class="form-group">
-                        <label value="TRANSACTION CODE *" sclass="form-label" />
-                        <textbox id="transactionCode" value="29" sclass="form-input" />
-                    </div>
-                </div>
+                <div id="divChequeNumberGroup"
+                     class="form-group">
 
-                <div class="form-group">
-                    <label value="CURRENT MICR REPAIR *" sclass="form-label" />
-                    <textbox id="currentMicr" value="600987001" readonly="true" 
-                             sclass="form-input ocr-filled" />
-                </div>
+                    <label id="lblChequeNumber"
+                           value="CHEQUE NUMBER *"
+                           sclass="form-label" />
 
-                <div class="form-group">
-                    <label value="CORRECTED MICR CODE *" sclass="form-label" />
-                    <textbox id="correctedMicr" placeholder="Enter corrected MICR code" 
+                    <textbox id="txtChequeNumber"
+                             readonly="true"
                              sclass="form-input" />
+
                 </div>
 
-                <div class="form-group">
-                    <label value="REMARKS" sclass="form-label" />
-                    <textbox id="remarks" placeholder="Optional remarks" rows="4" 
+
+                <!-- ============================================= -->
+                <!-- CITY CODE + BANK CODE                         -->
+                <!-- ============================================= -->
+
+                <div id="divCityBankRow"
+                     class="form-row">
+
+
+                    <!-- City Code -->
+                    <div id="divCityCodeGroup"
+                         class="form-group">
+
+                        <label id="lblCityCode"
+                               value="CITY CODE *"
+                               sclass="form-label" />
+
+                        <textbox id="txtCityCode"
+                                 sclass="form-input" />
+
+                    </div>
+
+
+                    <!-- Bank Code -->
+                    <div id="divBankCodeGroup"
+                         class="form-group">
+
+                        <label id="lblBankCode"
+                               value="BANK CODE *"
+                               sclass="form-label" />
+
+                        <textbox id="txtBankCode"
+                                 sclass="form-input" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- BRANCH CODE                                   -->
+                <!-- ============================================= -->
+
+                <div id="divBranchCodeRow"
+                     class="form-row">
+
+                    <div id="divBranchCodeGroup"
+                         class="form-group">
+
+                        <label id="lblBranchCode"
+                               value="BRANCH CODE *"
+                               sclass="form-label" />
+
+                        <textbox id="txtBranchCode"
+                                 sclass="form-input" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- CURRENT MICR                                  -->
+                <!-- ============================================= -->
+
+                <div id="divCurrentMicrGroup"
+                     class="form-group">
+
+                    <label id="lblCurrentMicr"
+                           value="CURRENT MICR"
+                           sclass="form-label" />
+
+                    <textbox id="txtCurrentMicr"
+                             readonly="true"
+                             sclass="form-input ocr-filled" />
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- REJECTION REMARKS                             -->
+                <!-- Hidden initially                              -->
+                <!-- Shown only when Reject Request is clicked     -->
+                <!-- ============================================= -->
+
+                <div id="divRejectRemarks"
+                     class="form-group"
+                     visible="false">
+
+                    <label id="lblRejectRemarks"
+                           value="REJECTION REMARKS *"
+                           sclass="form-label" />
+
+                    <textbox id="txtRemarks"
+                             placeholder="Enter reason for rejection"
+                             rows="4"
                              sclass="form-textarea" />
+
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="form-actions">
-                    <button id="saveNextBtn" label="Save and Next" sclass="btn-save-next" 
+
+                <!-- ============================================= -->
+                <!-- ACTION BUTTONS                                -->
+                <!-- ============================================= -->
+
+                <div id="divFormActions"
+                     class="form-actions">
+
+                    <button id="btnSaveNext"
+                            label="Save and Next"
+                            sclass="btn-save-next"
                             onClick="@command('saveAndNext')" />
-                    <button id="rejectBtn" label="Reject Request" sclass="btn-reject" 
+
+                    <button id="btnRejectRequest"
+                            label="Reject Request"
+                            sclass="btn-reject"
                             onClick="@command('rejectRequest')" />
+
                 </div>
+
+
             </div>
+
         </div>
 
-        <!-- Move to Data Entry Button (Visible after completion) -->
-        <div id="moveDataEntryButtonContainer" class="move-data-entry-container" style="display:none;">
-            <button id="moveDataEntryBtn" label="MOVE BATCH TO DATA ENTRY" sclass="btn-move-data-entry" 
-                    onClick="@command('moveToDataEntry')" />
-        </div>
     </window>
+
 </zk>

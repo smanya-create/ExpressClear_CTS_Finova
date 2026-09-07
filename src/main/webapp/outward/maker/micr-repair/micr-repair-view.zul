@@ -14,6 +14,7 @@
 
         <vlayout width="100%" spacing="20px">
 
+
             <!-- ================================================= -->
             <!-- PAGE TITLE -->
             <!-- ================================================= -->
@@ -66,7 +67,11 @@
 
                             <column id="colMicrRepairScanBatch"
                                     label="BATCH"
-                                    width="22%" />
+                                    width="18%" />
+
+                            <column id="colMicrRepairScanDate"
+                                    label="SCAN DATE"
+                                    width="16%" />
 
                             <column id="colMicrRepairScanTotal"
                                     label="TOTAL CHEQUES"
@@ -74,15 +79,15 @@
 
                             <column id="colMicrRepairScanErrors"
                                     label="MICR ERRORS"
-                                    width="18%" />
+                                    width="16%" />
 
                             <column id="colMicrRepairScanStatus"
                                     label="STATUS"
-                                    width="22%" />
+                                    width="16%" />
 
                             <column id="colMicrRepairScanAction"
                                     label="ACTION"
-                                    width="20%" />
+                                    width="16%" />
 
                         </columns>
 
@@ -138,7 +143,11 @@
 
                             <column id="colMicrRepairCheckerBatch"
                                     label="BATCH"
-                                    width="22%" />
+                                    width="18%" />
+
+                            <column id="colMicrRepairCheckerDate"
+                                    label="SCAN DATE"
+                                    width="16%" />
 
                             <column id="colMicrRepairCheckerTotal"
                                     label="TOTAL CHEQUES"
@@ -146,15 +155,15 @@
 
                             <column id="colMicrRepairCheckerErrors"
                                     label="MICR ERRORS"
-                                    width="18%" />
+                                    width="16%" />
 
                             <column id="colMicrRepairCheckerStatus"
                                     label="STATUS"
-                                    width="22%" />
+                                    width="16%" />
 
                             <column id="colMicrRepairCheckerAction"
                                     label="ACTION"
-                                    width="20%" />
+                                    width="16%" />
 
                         </columns>
 
@@ -199,6 +208,7 @@
                 </vlayout>
 
             </div>
+
 
         </vlayout>
 

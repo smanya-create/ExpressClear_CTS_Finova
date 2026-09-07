@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.ScanBatchDAO;
+import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.ScanBatch;
 
 public class ScanBatchDAOImpl implements ScanBatchDAO {
@@ -272,5 +273,78 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 			throw new RuntimeException("Failed to update scan batch status for batch ID: " + batchId, e);
 		}
 
+	}
+
+	@Override
+	public List<MicrRepairBatch> getScanMicrRepairBatches() {
+
+	    List<MicrRepairBatch> batchList =
+	            new ArrayList<>();
+
+	    String sql =
+	            "SELECT "
+	          + "sb.scanned_batch_id, "
+	          + "sb.uploaded_at, "
+	          + "sb.actual_cheque_count, "
+	          + "sb.batch_status, "
+	          + "COUNT(sc.scanned_cheque_id) AS micr_errors "
+	          + "FROM scan_batch sb "
+	          + "JOIN scan_cheque sc "
+	          + "ON sc.scanned_batch_id = sb.scanned_batch_id "
+	          + "WHERE sc.cheque_status = 'MICR_REPAIR_REQUIRED' "
+	          + "GROUP BY "
+	          + "sb.scanned_batch_id, "
+	          + "sb.uploaded_at, "
+	          + "sb.actual_cheque_count, "
+	          + "sb.batch_status "
+	          + "ORDER BY sb.uploaded_at DESC";
+
+	    try (
+	            Connection connection =
+	                    DBConnection.getConnection();
+
+	            PreparedStatement preparedStatement =
+	                    connection.prepareStatement(sql);
+
+	            ResultSet resultSet =
+	                    preparedStatement.executeQuery()
+	    ) {
+
+	        while (resultSet.next()) {
+
+	            MicrRepairBatch batch =
+	                    new MicrRepairBatch();
+
+	            batch.setBatchId(
+	                    resultSet.getString(
+	                            "scanned_batch_id"));
+
+	            batch.setScanDate(
+	                    resultSet.getTimestamp(
+	                            "uploaded_at"));
+
+	            batch.setTotalCheques(
+	                    resultSet.getInt(
+	                            "actual_cheque_count"));
+
+	            batch.setMicrErrors(
+	                    resultSet.getInt(
+	                            "micr_errors"));
+
+	            batch.setStatus(
+	                    resultSet.getString(
+	                            "batch_status"));
+
+	            batchList.add(batch);
+	        }
+
+	    } catch (SQLException e) {
+
+	        throw new RuntimeException(
+	                "Error while retrieving scan MICR repair batches",
+	                e);
+	    }
+
+	    return batchList;
 	}
 }
