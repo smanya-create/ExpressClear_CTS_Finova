@@ -8,7 +8,10 @@ import javax.sql.DataSource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+
 public class DBConnection {
+	
+    private static Throwable initError;
 
     private static final String SUPABASE_HOST =
             "aws-0-ap-northeast-2.pooler.supabase.com";
@@ -16,7 +19,7 @@ public class DBConnection {
     private static final String DB_NAME = "postgres";
 
     // Session pooler
-    private static final int PORT = 5432;
+    private static final int PORT = 6543;
 
     private static final String DB_USER =
             "postgres.wrqvispigpddkbanlxfw";
@@ -44,15 +47,15 @@ public class DBConnection {
             config.setDriverClassName("org.postgresql.Driver");
 
             // HikariCP
-            config.setMaximumPoolSize(10);
+            config.setMaximumPoolSize(3);
             config.setMinimumIdle(1);
 
             config.setConnectionTimeout(10000);
             config.setValidationTimeout(3000);
 
             // Keep connections for a reasonable period
-            config.setIdleTimeout(60000);
-            config.setMaxLifetime(300000);
+            config.setIdleTimeout(30000);
+            config.setMaxLifetime(120000);
 
             dataSource = new HikariDataSource(config);
 
@@ -62,12 +65,9 @@ public class DBConnection {
             System.out.println(" Port          : " + PORT);
             System.out.println("======================================");
 
-        } catch (Exception e) {
-
-            System.err.println(
-                    "Failed to initialize HikariCP DataSource."
-            );
-
+        } catch (Throwable e) {
+            initError = e;
+            System.err.println("CRITICAL: Failed to initialize HikariCP DataSource:");
             e.printStackTrace();
         }
     }
@@ -78,12 +78,10 @@ public class DBConnection {
 
     public static Connection getConnection() throws SQLException {
 
-        if (dataSource == null) {
-            throw new SQLException(
-                    "DataSource is not initialized properly."
-            );
+    	if (dataSource == null) {
+            String cause = (initError != null) ? initError.getMessage() : "Unknown init failure";
+            throw new SQLException("DataSource is not initialized properly. Cause: " + cause, initError);
         }
-
         return dataSource.getConnection();
     }
 
