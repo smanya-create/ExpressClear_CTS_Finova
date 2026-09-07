@@ -514,7 +514,7 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 	    }
 
 	    String url =
-	            "micr-repair.zul"
+	            "/outward/maker/micr-repair/micr-repair.zul"
 	            + "?source=" + source.trim()
 	            + "&batchId=" + batchId.trim();
 

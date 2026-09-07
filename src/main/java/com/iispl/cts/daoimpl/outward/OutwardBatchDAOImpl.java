@@ -21,7 +21,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 		String selectSql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
 				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
 				+ "WHERE batch_status = ?";
-		try (Connection connection = DBConnection.getDataSource().getConnection();
+		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement prepStmt = connection.prepareStatement(selectSql)) {
 			prepStmt.setString(1, "VERIFIED");
 			ResultSet rs = prepStmt.executeQuery();
