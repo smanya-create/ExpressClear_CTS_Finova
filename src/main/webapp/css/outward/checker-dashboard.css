@@ -1,9 +1,11 @@
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     height: 100%;
     font-family: Arial, sans-serif;
     background: #eaf2f8;
+    font-size : 14px;
 }
 
 .dashboard-content {
@@ -93,24 +95,34 @@ html, body {
     box-sizing: border-box;
 }
 
+.batch-table .z-listbox-header-bg {
+    background: #1d5689;
+    background-image: none;
+}
+
 .batch-table .z-listbox-header {
-    background: #e8f1f8;
+    background: #1d5689;
+    background-image: none;
+}
+
+.batch-table .z-listbox-header table {
+    background: #1d5689;
+}
+
+.batch-table .z-listhead {
+    background: #1d5689;
 }
 
 .batch-table .z-listheader {
-    background: #e8f1f8;
-    color: #526f8b;
-    font-size: 10px;
-    font-weight: bold;
-    text-align: left;
-    border-right: 1px solid #d3e0ea;
-    border-bottom: 1px solid #d3e0ea;
-    height: 42px;
-    padding: 0;
+    background: #1d5689;
+    color: white;
+    border-right: 1px solid #174a78;
+    border-bottom: 1px solid #174a78;
 }
 
 .batch-table .z-listheader-content {
-    color: #526f8b;
+    background: #1d5689;
+    color: white;
     font-size: 10px;
     font-weight: bold;
     padding: 14px 12px;
@@ -175,6 +187,7 @@ html, body {
 }
 
 .queue-button .z-button-content {
+    background: #1d5689;
     color: white;
     font-size: 9px;
     font-weight: bold;
