@@ -29,6 +29,11 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 		this.inwardChequeImageDAO = InwardChequeImageDAOImpl.getInstance();
 		this.xmlParser = new InwardBatchXmlParser();
 	}
+	
+	@Override
+	public List<InwardBatch> getBatchesForMicrRepair() {
+	    return inwardBatchDAO.getBatchesForMicrRepair();
+	}
 
 //	@Override
 //	public List<InwardBatch> getAllActiveBatches() {

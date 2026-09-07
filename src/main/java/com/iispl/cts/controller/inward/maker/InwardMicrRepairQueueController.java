@@ -1,29 +1,57 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.List;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Include;
+import org.zkoss.zul.ListModelList;
+import org.zkoss.zul.Listbox;
 
-public class InwardMicrRepairQueueController extends GenericForwardComposer<Component>{
+import com.iispl.cts.entity.inward.InwardBatch;
+import com.iispl.cts.service.inward.InwardBatchService;
+import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
-	
-	  private static final long serialVersionUID = 1L;
+public class InwardMicrRepairQueueController extends GenericForwardComposer<Component> {
 
-	    public void openBatch(Object batchId) {
+	private static final long serialVersionUID = 1L;
 
-	        String batchIdValue = String.valueOf(batchId);
+	private Listbox batchQueueList;
 
-	        Executions.getCurrent().getDesktop().getSession()
-	                .setAttribute("MICR_REPAIR_BATCH_ID", batchIdValue);
+	private InwardBatchService inwardBatchService;
 
-	        Component root = self.getPage().getFirstRoot();
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
+		super.doAfterCompose(comp);
 
-	        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		inwardBatchService = new InwardBatchServiceImpl();
 
-	        if (mainContentArea instanceof Include) {
-	            Include include = (Include) mainContentArea;
-	            include.setSrc("/inward/maker/micr-repair/micr-cheque-list.zul");
-	        }
-	    }
+		loadBatchQueue();
+	}
+
+	private void loadBatchQueue() {
+
+		List<InwardBatch> batches = inwardBatchService.getBatchesForMicrRepair();
+
+		batchQueueList.setModel(new ListModelList<>(batches));
+	}
+
+	public void openBatch(Object batchId) {
+
+		String batchIdValue = String.valueOf(batchId);
+
+		Executions.getCurrent().getDesktop().getSession().setAttribute("MICR_REPAIR_BATCH_ID", batchIdValue);
+
+		Component root = self.getPage().getFirstRoot();
+
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+
+		if (mainContentArea instanceof Include) {
+
+			Include include = (Include) mainContentArea;
+
+			include.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+		}
+	}
 }
