@@ -5,16 +5,18 @@ import java.sql.Connection;
 import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
+
 public interface OutwardChequeDAO {
 
-    List<OutwardCheque> getChequesByBatchId(String outwardBatchId);
+	List<OutwardCheque> getChequesByBatchId(String outwardBatchId);
 
-    int getTotalChequeCountByBatchId(String outwardBatchId);
+	int getTotalChequeCountByBatchId(String outwardBatchId);
 
-    BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
-    
-    void transferChequeFromScanToOutwrd(
-            Connection connection,
-            String scannedBatchId);
+	BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
 
+	void transferChequeFromScanToOutwrd(Connection connection, String scannedBatchId);
+
+	int getDataEnteredCountByBatchId(String outwardBatchId);
+	
+	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
 }

@@ -5,15 +5,13 @@
 
 	<style src="/css/inward/micr-repair.css" />
 
-	<!-- Main MICR Repair page -->
-	<vlayout id="inwardMicrRepairRoot" width="100%" spacing="14px"
-		sclass="micr-repair-page"
-		apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairControllerr">
+	<vlayout id="inwardMicrRepairRoot" width="100%" spacing="6px"
+		sclass="micr-repair-page">
 
-		<!-- Page heading -->
+
 		<hlayout width="100%" valign="middle"
 			sclass="page-heading-row">
-			<vlayout spacing="2px">
+			<vlayout spacing="1px">
 				<label value="MICR Repair" sclass="page-title" />
 				<label
 					value="Inward — Fix OCR errors for flagged cheques."
@@ -26,40 +24,83 @@
 				sclass="secondary-button" />
 		</hlayout>
 
-		<!-- Batch -->
+
 		<hlayout width="100%" valign="middle"
 			sclass="batch-navigation-row">
-			<label id="lblBatchId" value="BATCH: —" sclass="batch-pill" />
+			<grid sclass="batch-summary-grid">
+				<columns>
+					<column width="14%" />
+					<column width="14%" />
+					<column width="15%" />
+					<column width="15%" />
+					<column width="22%" />
+					<column width="20%" />
+				</columns>
+				<rows>
+					<row>
+						<vlayout spacing="1px">
+							<label value="BATCH ID"
+								sclass="batch-label-cell" />
+							<label id="lblBatchId"
+								sclass="batch-val-cell" />
+						</vlayout>
+						<vlayout spacing="1px">
+							<label value="SOURCE"
+								sclass="batch-label-cell" />
+							<label id="lblBatchSource"
+								sclass="batch-val-cell" />
+						</vlayout>
+						<vlayout spacing="1px">
+							<label value="TOTAL CHEQUES"
+								sclass="batch-label-cell" />
+							<label id="lblTotalCheques"
+								sclass="batch-val-cell" />
+						</vlayout>
+						<vlayout spacing="1px">
+							<label value="CHEQUE NO."
+								sclass="batch-label-cell" />
+							<label id="lblHeaderChequeNo"
+								sclass="batch-val-cell" />
+						</vlayout>
+						<vlayout spacing="1px">
+							<label value="ITEM STATUS"
+								sclass="batch-label-cell" />
+							<label id="lblHeaderItemStatus"
+								sclass="batch-pill" />
+						</vlayout>
+						<vlayout spacing="1px">
+							<label value="RECEIVED DATE"
+								sclass="batch-label-cell" />
+							<label id="lblReceivedDate"
+								sclass="batch-val-cell" />
+						</vlayout>
+					</row>
+				</rows>
+			</grid>
 		</hlayout>
 
-		<!-- Main workspace: image on left, MICR form on right -->
-		<hlayout width="100%" spacing="16px" valign="top"
+
+		<hlayout width="100%" spacing="12px" valign="stretch"
 			sclass="repair-workspace">
 
-			<!-- LEFT: Cheque image -->
+
 			<panel hflex="5" sclass="workspace-card">
 				<caption label="Cheque Image" />
-
 				<panelchildren>
-					<vlayout width="100%" spacing="12px"
+					<vlayout width="100%" spacing="8px"
 						sclass="image-panel-content">
 
-						<!-- Cheque navigation stays with the cheque image -->
 						<hlayout width="100%" valign="middle"
 							spacing="8px" sclass="cheque-navigation-row">
-
 							<separator hflex="1" />
-
 							<label id="lblRecordPosition"
-								value="No records" sclass="record-position" />
-
+								sclass="record-position" />
 							<button id="btnPrevious" label="← Prev"
 								sclass="small-button" />
-
 							<button id="btnNext" label="Next →"
 								sclass="small-button" />
-
 						</hlayout>
+
 						<image id="chequeImage" visible="false"
 							width="100%" sclass="cheque-image" />
 
@@ -70,8 +111,6 @@
 								value="The cheque image will be loaded from the database when a repair record is available." />
 						</groupbox>
 
-						<separator />
-
 						<label
 							value="OCR-filled MICR values are shown in blue. Verify them against the cheque image."
 							sclass="image-help-text" />
@@ -79,7 +118,7 @@
 				</panelchildren>
 			</panel>
 
-			<!-- RIGHT: MICR data entry -->
+
 			<panel hflex="5" sclass="workspace-card">
 				<caption>
 					<hlayout width="100%" valign="middle">
@@ -92,27 +131,24 @@
 				</caption>
 
 				<panelchildren>
-					<vlayout width="100%" spacing="12px"
+					<vlayout width="100%" spacing="8px"
 						sclass="form-panel-content">
 
-						<!-- MICR fields -->
+
 						<grid sclass="micr-form-grid">
 							<columns>
 								<column hflex="1" />
 								<column hflex="1" />
 							</columns>
-
 							<rows>
-
 								<row>
-									<vlayout spacing="4px">
+									<vlayout spacing="2px">
 										<label value="CHEQUE NUMBER *"
 											sclass="field-label" />
 										<textbox id="txtChequeNumber"
 											readonly="true" sclass="readonly-field" />
 									</vlayout>
-
-									<vlayout spacing="4px">
+									<vlayout spacing="2px">
 										<label value="CITY CODE *"
 											sclass="field-label" />
 										<textbox id="txtCityCode"
@@ -121,14 +157,13 @@
 								</row>
 
 								<row>
-									<vlayout spacing="4px">
+									<vlayout spacing="2px">
 										<label value="BANK CODE *"
 											sclass="field-label" />
 										<textbox id="txtBankCode"
 											readonly="true" sclass="ocr-field" />
 									</vlayout>
-
-									<vlayout spacing="4px">
+									<vlayout spacing="2px">
 										<label value="BRANCH CODE *"
 											sclass="field-label" />
 										<textbox id="txtBranchCode"
@@ -137,14 +172,13 @@
 								</row>
 
 								<row>
-									<vlayout spacing="4px">
+									<vlayout spacing="2px">
 										<label
 											value="CURRENT MICR CODE *" sclass="field-label" />
 										<textbox id="txtCurrentMicr"
 											readonly="true" sclass="error-field" />
 									</vlayout>
-
-									<vlayout spacing="4px">
+									<vlayout spacing="2px">
 										<label
 											value="TRANSACTION CODE *" sclass="field-label" />
 										<textbox id="txtTransactionCode"
@@ -155,7 +189,7 @@
 								<row>
 									<cell colspan="2">
 										<vlayout width="100%"
-											spacing="4px">
+											spacing="2px">
 											<label
 												value="CORRECTED MICR CODE *" sclass="field-label" />
 											<textbox
@@ -169,7 +203,7 @@
 								<row>
 									<cell colspan="2">
 										<vlayout width="100%"
-											spacing="4px">
+											spacing="2px">
 											<label value="REMARKS"
 												sclass="field-label" />
 											<textbox id="txtRemarks"
@@ -178,30 +212,27 @@
 										</vlayout>
 									</cell>
 								</row>
-
 							</rows>
 						</grid>
 
-						<!-- Progress -->
-						<vlayout spacing="4px">
+
+						<vlayout spacing="2px">
 							<progressmeter id="progressMeter" value="0"
 								sclass="repair-progress" />
-
 							<hlayout width="100%">
 								<label value="Progress"
 									sclass="progress-label" />
 								<separator hflex="1" />
-								<label id="lblProgress" value="0 / 0"
+								<label id="lblProgress"
 									sclass="progress-label" />
 							</hlayout>
 						</vlayout>
 
-						<!-- Actions -->
-						<hlayout width="100%" spacing="10px">
+
+						<hlayout width="100%" spacing="8px">
 							<separator hflex="1" />
 							<button id="btnSaveAndNext"
 								label="Save &amp; Next" sclass="primary-button" />
-
 							<button id="btnRejectRequest"
 								label="Reject Request" sclass="reject-button" />
 						</hlayout>
@@ -212,7 +243,7 @@
 
 		</hlayout>
 
-		<!-- Page footer -->
+
 		<hlayout width="100%" sclass="page-footer">
 			<label value="ClearPay CTS • Inward Operations"
 				sclass="footer-text" />
@@ -220,34 +251,27 @@
 			<label value="MICR Repair" sclass="footer-text" />
 		</hlayout>
 
-		<!-- Reject Request modal -->
+
 		<window id="rejectRequestWindow"
 			title="Reject MICR Repair Request" mode="modal" visible="false"
 			closable="true" width="430px" sclass="reject-modal">
-
-			<vlayout width="100%" spacing="14px">
-
+			<vlayout width="100%" spacing="12px">
 				<label
 					value="Select the reason for sending this cheque to the checker."
 					sclass="modal-description" />
-
-				<vlayout width="100%" spacing="5px">
+				<vlayout width="100%" spacing="4px">
 					<label value="Rejection Reason *"
 						sclass="field-label" />
-
 					<combobox id="cmbRejectReason" width="100%"
 						placeholder="Select rejection reason" readonly="true" />
 				</vlayout>
-
-				<hlayout width="100%" spacing="10px" >
-
+				<hlayout width="100%" spacing="8px">
+					<separator hflex="1" />
 					<button id="btnCancelReject" label="Cancel"
 						sclass="secondary-button" />
-
 					<button id="btnConfirmReject" label="Reject Request"
 						sclass="reject-button" />
 				</hlayout>
-
 			</vlayout>
 		</window>
 

@@ -33,6 +33,18 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
               + "FROM scan_cheque "
               + "WHERE scanned_cheque_id = ?";
 
+        /*
+         * =====================================================
+         * INSERT NEW CHEQUE
+         * =====================================================
+         *
+         * Added:
+         *
+         * cheque_image_front
+         * cheque_image_back
+         *
+         */
+
         String insertSql =
                 "INSERT INTO scan_cheque ("
               + "scanned_cheque_id, "
@@ -50,8 +62,22 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
               + "created_at, "
               + "city_code, "
               + "bank_code, "
-              + "branch_code"
-              + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+              + "branch_code, "
+              + "cheque_image_front, "
+              + "cheque_image_back"
+              + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        /*
+         * =====================================================
+         * UPDATE EXISTING CHEQUE
+         * =====================================================
+         *
+         * Added:
+         *
+         * cheque_image_front
+         * cheque_image_back
+         *
+         */
 
         String updateSql =
                 "UPDATE scan_cheque SET "
@@ -69,7 +95,9 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
               + "created_at = ?, "
               + "city_code = ?, "
               + "bank_code = ?, "
-              + "branch_code = ? "
+              + "branch_code = ?, "
+              + "cheque_image_front = ?, "
+              + "cheque_image_back = ? "
               + "WHERE scanned_cheque_id = ?";
 
         String scannedBatchId = null;
@@ -85,16 +113,13 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
             try (
                     PreparedStatement checkStatement =
-                            connection.prepareStatement(
-                                    checkSql);
+                            connection.prepareStatement(checkSql);
 
                     PreparedStatement insertStatement =
-                            connection.prepareStatement(
-                                    insertSql);
+                            connection.prepareStatement(insertSql);
 
                     PreparedStatement updateStatement =
-                            connection.prepareStatement(
-                                    updateSql)) {
+                            connection.prepareStatement(updateSql)) {
 
                 /*
                  * =================================================
@@ -117,7 +142,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
                         throw new IllegalArgumentException(
                                 "Scanned cheque ID cannot be null "
-                                + "or empty");
+                              + "or empty");
                     }
 
                     /*
@@ -136,7 +161,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
                         throw new IllegalArgumentException(
                                 "Cheque list contains multiple "
-                                + "batch IDs");
+                              + "batch IDs");
                     }
 
                     /*
@@ -176,6 +201,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 1. scanned_batch_id
                          */
+
                         updateStatement.setString(
                                 1,
                                 cheque.getScannedBatchId());
@@ -183,6 +209,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 2. cheque_number
                          */
+
                         updateStatement.setString(
                                 2,
                                 cheque.getChequeNumber());
@@ -190,6 +217,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 3. micr_code
                          */
+
                         updateStatement.setString(
                                 3,
                                 cheque.getMicrCode());
@@ -197,6 +225,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 4. drawee_name
                          */
+
                         updateStatement.setString(
                                 4,
                                 cheque.getDraweeName());
@@ -204,6 +233,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 5. drawee_account_number
                          */
+
                         updateStatement.setString(
                                 5,
                                 cheque.getDraweeAccountNumber());
@@ -211,6 +241,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 6. payee_name
                          */
+
                         updateStatement.setString(
                                 6,
                                 cheque.getPayeeName());
@@ -218,6 +249,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 7. payee_account_number
                          */
+
                         updateStatement.setString(
                                 7,
                                 cheque.getPayeeAccountNumber());
@@ -225,6 +257,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 8. cheque_amount
                          */
+
                         updateStatement.setBigDecimal(
                                 8,
                                 cheque.getChequeAmount());
@@ -232,6 +265,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 9. cheque_date
                          */
+
                         updateStatement.setDate(
                                 9,
                                 cheque.getChequeDate());
@@ -239,6 +273,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 10. cheque_status
                          */
+
                         updateStatement.setString(
                                 10,
                                 cheque.getChequeStatus());
@@ -246,6 +281,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 11. account_id
                          */
+
                         updateStatement.setString(
                                 11,
                                 cheque.getAccountId());
@@ -253,6 +289,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 12. created_at
                          */
+
                         if (cheque.getCreatedAt() != null) {
 
                             updateStatement.setTimestamp(
@@ -270,6 +307,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 13. city_code
                          */
+
                         updateStatement.setString(
                                 13,
                                 cheque.getCityCode());
@@ -277,6 +315,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 14. bank_code
                          */
+
                         updateStatement.setString(
                                 14,
                                 cheque.getBankCode());
@@ -284,15 +323,33 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 15. branch_code
                          */
+
                         updateStatement.setString(
                                 15,
                                 cheque.getBranchCode());
 
                         /*
-                         * 16. scanned_cheque_id
+                         * 16. cheque_image_front
                          */
+
                         updateStatement.setString(
                                 16,
+                                cheque.getChequeImageFront());
+
+                        /*
+                         * 17. cheque_image_back
+                         */
+
+                        updateStatement.setString(
+                                17,
+                                cheque.getChequeImageBack());
+
+                        /*
+                         * 18. scanned_cheque_id
+                         */
+
+                        updateStatement.setString(
+                                18,
                                 cheque.getScannedChequeId());
 
                         updateStatement.executeUpdate();
@@ -311,6 +368,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 1. scanned_cheque_id
                          */
+
                         insertStatement.setString(
                                 1,
                                 cheque.getScannedChequeId());
@@ -318,6 +376,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 2. scanned_batch_id
                          */
+
                         insertStatement.setString(
                                 2,
                                 cheque.getScannedBatchId());
@@ -325,6 +384,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 3. cheque_number
                          */
+
                         insertStatement.setString(
                                 3,
                                 cheque.getChequeNumber());
@@ -332,6 +392,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 4. micr_code
                          */
+
                         insertStatement.setString(
                                 4,
                                 cheque.getMicrCode());
@@ -339,6 +400,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 5. drawee_name
                          */
+
                         insertStatement.setString(
                                 5,
                                 cheque.getDraweeName());
@@ -346,6 +408,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 6. drawee_account_number
                          */
+
                         insertStatement.setString(
                                 6,
                                 cheque.getDraweeAccountNumber());
@@ -353,6 +416,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 7. payee_name
                          */
+
                         insertStatement.setString(
                                 7,
                                 cheque.getPayeeName());
@@ -360,6 +424,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 8. payee_account_number
                          */
+
                         insertStatement.setString(
                                 8,
                                 cheque.getPayeeAccountNumber());
@@ -367,6 +432,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 9. cheque_amount
                          */
+
                         insertStatement.setBigDecimal(
                                 9,
                                 cheque.getChequeAmount());
@@ -374,6 +440,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 10. cheque_date
                          */
+
                         insertStatement.setDate(
                                 10,
                                 cheque.getChequeDate());
@@ -381,6 +448,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 11. cheque_status
                          */
+
                         insertStatement.setString(
                                 11,
                                 cheque.getChequeStatus());
@@ -390,6 +458,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                          *
                          * Nullable in database.
                          */
+
                         insertStatement.setString(
                                 12,
                                 cheque.getAccountId());
@@ -397,6 +466,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 13. created_at
                          */
+
                         if (cheque.getCreatedAt() != null) {
 
                             insertStatement.setTimestamp(
@@ -414,6 +484,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 14. city_code
                          */
+
                         insertStatement.setString(
                                 14,
                                 cheque.getCityCode());
@@ -421,6 +492,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 15. bank_code
                          */
+
                         insertStatement.setString(
                                 15,
                                 cheque.getBankCode());
@@ -428,9 +500,26 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                         /*
                          * 16. branch_code
                          */
+
                         insertStatement.setString(
                                 16,
                                 cheque.getBranchCode());
+
+                        /*
+                         * 17. cheque_image_front
+                         */
+
+                        insertStatement.setString(
+                                17,
+                                cheque.getChequeImageFront());
+
+                        /*
+                         * 18. cheque_image_back
+                         */
+
+                        insertStatement.setString(
+                                18,
+                                cheque.getChequeImageBack());
 
                         insertStatement.executeUpdate();
                     }
@@ -487,7 +576,9 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
               + "created_at, "
               + "city_code, "
               + "bank_code, "
-              + "branch_code "
+              + "branch_code, "
+              + "cheque_image_front, "
+              + "cheque_image_back "
               + "FROM scan_cheque "
               + "WHERE scanned_batch_id = ? "
               + "ORDER BY scanned_cheque_id";
@@ -495,12 +586,13 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
         List<ScanCheque> chequeList =
                 new java.util.ArrayList<>();
 
-        try (Connection connection =
-                    com.iispl.cts.common.config.DBConnection
-                            .getConnection();
+        try (
+                Connection connection =
+                        com.iispl.cts.common.config.DBConnection
+                                .getConnection();
 
-             PreparedStatement statement =
-                    connection.prepareStatement(sql)) {
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
 
             statement.setString(
                     1,
@@ -514,69 +606,149 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                     ScanCheque cheque =
                             new ScanCheque();
 
+                    /*
+                     * 1. scanned_cheque_id
+                     */
+
                     cheque.setScannedChequeId(
                             resultSet.getString(
                                     "scanned_cheque_id"));
+
+                    /*
+                     * 2. scanned_batch_id
+                     */
 
                     cheque.setScannedBatchId(
                             resultSet.getString(
                                     "scanned_batch_id"));
 
+                    /*
+                     * 3. cheque_number
+                     */
+
                     cheque.setChequeNumber(
                             resultSet.getString(
                                     "cheque_number"));
+
+                    /*
+                     * 4. micr_code
+                     */
 
                     cheque.setMicrCode(
                             resultSet.getString(
                                     "micr_code"));
 
+                    /*
+                     * 5. drawee_name
+                     */
+
                     cheque.setDraweeName(
                             resultSet.getString(
                                     "drawee_name"));
+
+                    /*
+                     * 6. drawee_account_number
+                     */
 
                     cheque.setDraweeAccountNumber(
                             resultSet.getString(
                                     "drawee_account_number"));
 
+                    /*
+                     * 7. payee_name
+                     */
+
                     cheque.setPayeeName(
                             resultSet.getString(
                                     "payee_name"));
+
+                    /*
+                     * 8. payee_account_number
+                     */
 
                     cheque.setPayeeAccountNumber(
                             resultSet.getString(
                                     "payee_account_number"));
 
+                    /*
+                     * 9. cheque_amount
+                     */
+
                     cheque.setChequeAmount(
                             resultSet.getBigDecimal(
                                     "cheque_amount"));
+
+                    /*
+                     * 10. cheque_date
+                     */
 
                     cheque.setChequeDate(
                             resultSet.getDate(
                                     "cheque_date"));
 
+                    /*
+                     * 11. cheque_status
+                     */
+
                     cheque.setChequeStatus(
                             resultSet.getString(
                                     "cheque_status"));
+
+                    /*
+                     * 12. account_id
+                     */
 
                     cheque.setAccountId(
                             resultSet.getString(
                                     "account_id"));
 
+                    /*
+                     * 13. created_at
+                     */
+
                     cheque.setCreatedAt(
                             resultSet.getTimestamp(
                                     "created_at"));
+
+                    /*
+                     * 14. city_code
+                     */
 
                     cheque.setCityCode(
                             resultSet.getString(
                                     "city_code"));
 
+                    /*
+                     * 15. bank_code
+                     */
+
                     cheque.setBankCode(
                             resultSet.getString(
                                     "bank_code"));
 
+                    /*
+                     * 16. branch_code
+                     */
+
                     cheque.setBranchCode(
                             resultSet.getString(
                                     "branch_code"));
+
+                    /*
+                     * 17. cheque_image_front
+                     */
+
+                    cheque.setChequeImageFront(
+                            resultSet.getString(
+                                    "cheque_image_front"));
+
+                    /*
+                     * 18. cheque_image_back
+                     */
+
+                    cheque.setChequeImageBack(
+                            resultSet.getString(
+                                    "cheque_image_back"));
 
                     chequeList.add(cheque);
                 }
@@ -588,10 +760,11 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
             throw new RuntimeException(
                     "Error while retrieving cheques for batch: "
-                    + scannedBatchId,
+                  + scannedBatchId,
                     e);
         }
     }
+
     @Override
     public void updateChequeStatus(
             Connection connection,
@@ -603,39 +776,52 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                     "Connection cannot be null");
         }
 
-        if (batchId == null || batchId.trim().isEmpty()) {
+        if (batchId == null
+                || batchId.trim().isEmpty()) {
+
             throw new IllegalArgumentException(
                     "Batch ID cannot be null or empty");
         }
 
-        if (status == null || status.trim().isEmpty()) {
+        if (status == null
+                || status.trim().isEmpty()) {
+
             throw new IllegalArgumentException(
                     "Cheque status cannot be null or empty");
         }
 
         String sql =
-                "UPDATE scan_cheque " +
-                "SET cheque_status = ? " +
-                "WHERE scanned_batch_id = ?";
+                "UPDATE scan_cheque "
+              + "SET cheque_status = ? "
+              + "WHERE scanned_batch_id = ?";
 
-        try (PreparedStatement ps =
-                     connection.prepareStatement(sql)) {
+        try (
+                PreparedStatement ps =
+                        connection.prepareStatement(sql)) {
 
-            ps.setString(1, status);
-            ps.setString(2, batchId);
+            ps.setString(
+                    1,
+                    status);
 
-            int rowsUpdated = ps.executeUpdate();
+            ps.setString(
+                    2,
+                    batchId);
+
+            int rowsUpdated =
+                    ps.executeUpdate();
 
             if (rowsUpdated == 0) {
+
                 throw new IllegalStateException(
                         "No cheques found for batch ID: "
-                        + batchId);
+                      + batchId);
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Failed to update cheque status for batch ID: "
-                    + batchId,
+                  + batchId,
                     e);
         }
     }

@@ -1,338 +1,808 @@
 package com.iispl.cts.controller.inward.maker;
 
-import java.net.URL;
 import java.util.ArrayList;
+import java.io.File;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.inward.InwardBatch;
+import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
-import com.iispl.cts.serviceimpl.inward.InwardBatchXmlParser.ParsedBatchData;
 
 public class InwardBatchController extends SelectorComposer<Window> {
 
-private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-private InwardBatchService inwardBatchService;
+	private InwardBatchService inwardBatchService;
 
-private Listbox batchListbox;
+	private Window currentWindow;
 
-@Override
-public void doAfterCompose(Window window) throws Exception {
+	private Listbox batchListbox;
 
-super.doAfterCompose(window);
+	private Textbox batchSearchTextbox;
 
-inwardBatchService = new InwardBatchServiceImpl();
+	private Combobox statusCombobox;
 
-batchListbox = (Listbox) window.getFellow("batchListbox");
+	private Datebox receivedDatebox;
 
-loadBatches();
-}
+	private List<InwardBatch> allBatches = new ArrayList<InwardBatch>();
 
-private void loadBatches() {
+	@Override
+	public void doAfterCompose(Window window) throws Exception {
 
-batchListbox.getItems().clear();
+		super.doAfterCompose(window);
 
-List<InwardBatch> batches = new ArrayList<>();
+		this.currentWindow = window;
 
-loadXmlBatch("Batch1001new.xml", batches);
+		window.getDesktop().enableServerPush(true);
 
-loadXmlBatch("Batch1002_ChequeTransmission.xml", batches);
+		inwardBatchService = new InwardBatchServiceImpl();
 
-for (InwardBatch batch : batches) {
+		batchListbox = (Listbox) window.getFellow("batchListbox");
 
-Listitem item = new Listitem();
+		batchSearchTextbox = (Textbox) window.getFellow("batchSearchTextbox");
 
-item.setValue(batch);
+		statusCombobox = (Combobox) window.getFellow("statusCombobox");
 
-Listcell batchCell = new Listcell();
+		receivedDatebox = (Datebox) window.getFellow("receivedDatebox");
 
-batchCell.appendChild(new Label(batch.getInwardBatchId()));
+		Button searchButton = (Button) window.getFellow("searchButton");
 
-item.appendChild(batchCell);
+		searchButton.addEventListener("onClick", event -> searchBatches());
 
-Listcell dateCell = new Listcell();
+		loadBatches();
+	}
 
-if (batch.getUploadedAt() != null) {
+	private void loadBatches() {
 
-dateCell.appendChild(new Label(batch.getUploadedAt().toString()));
+		allBatches.clear();
 
-} else {
+		addBatchToQueue("INW260904001", "BATCH-2026-09-04-001");
 
-dateCell.appendChild(new Label(""));
-}
+		addBatchToQueue("INW260904002", "BATCH-2026-09-04-002");
 
-item.appendChild(dateCell);
+		addBatchToQueue("INW260904003", "BATCH-2026-09-04-003");
 
-Listcell amountCell = new Listcell();
+		displayBatches(allBatches);
+	}
 
-if (batch.getActualTotalAmount() != null) {
+	private void addBatchToQueue(String batchId, String folderName) {
 
-amountCell.appendChild(new Label("₹ " + batch.getActualTotalAmount().toPlainString()));
+		try {
 
-} else {
+			InwardBatch dbBatch = inwardBatchService.getBatchById(batchId);
 
-amountCell.appendChild(new Label("₹ 0"));
-}
+			if (dbBatch != null) {
 
-item.appendChild(amountCell);
+				allBatches.add(dbBatch);
 
-Listcell statusCell = new Listcell();
+				return;
+			}
 
-String status = batch.getBatchStatus();
+		} catch (Exception e) {
 
-if (status == null || status.trim().isEmpty() || "Processing".equalsIgnoreCase(status)
-|| "Pending".equalsIgnoreCase(status)) {
+			e.printStackTrace();
+		}
 
-status = "Pending Validation";
-}
+		InwardBatch batch = new InwardBatch();
 
-Label statusLabel = new Label(status);
+		batch.setInwardBatchId(batchId);
 
-setStatusStyle(statusLabel, status);
+		batch.setBatchReferenceId(folderName);
 
-statusCell.appendChild(statusLabel);
+		batch.setBatchStatus("Pending Validation");
 
-item.appendChild(statusCell);
+		batch.setActualChequeCount(0);
 
-Listcell actionCell = new Listcell();
+		batch.setActualTotalAmount(java.math.BigDecimal.ZERO);
 
-if ("Validated".equalsIgnoreCase(batch.getBatchStatus())) {
+		allBatches.add(batch);
+	}
 
-Button repairButton = new Button("Open MICR Repair");
+	private void displayBatches(List<InwardBatch> batches) {
 
-repairButton.setSclass("repair-button");
+		batchListbox.getItems().clear();
 
-repairButton.addEventListener("onClick", event -> openMicrRepair(item));
+		for (InwardBatch batch : batches) {
 
-actionCell.appendChild(repairButton);
+			Listitem item = new Listitem();
 
-} else {
+			item.setValue(batch);
 
-Button validateButton = new Button("Validate");
+			Listcell batchCell = new Listcell();
 
-validateButton.setSclass("validate-button");
+			String batchId = batch.getInwardBatchId();
 
-validateButton.addEventListener("onClick", event -> validateBatch(event));
+			batchCell.appendChild(new Label(batchId == null ? "" : batchId));
 
-actionCell.appendChild(validateButton);
-}
+			item.appendChild(batchCell);
 
-item.appendChild(actionCell);
+			Listcell dateCell = new Listcell();
 
-batchListbox.appendChild(item);
-}
-}
+			if (batch.getUploadedAt() != null) {
 
-private void loadXmlBatch(String xmlFileName, List<InwardBatch> batches) {
+				dateCell.appendChild(new Label(batch.getUploadedAt().toString()));
 
-try {
+			} else {
 
-URL resource = Thread.currentThread().getContextClassLoader().getResource(xmlFileName);
+				dateCell.appendChild(new Label(""));
+			}
 
-if (resource == null) {
-return;
-}
+			item.appendChild(dateCell);
 
-ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(resource.toURI().getPath());
+			Listcell amountCell = new Listcell();
 
-if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
+			if (batch.getActualTotalAmount() != null) {
 
-return;
-}
+				amountCell.appendChild(new Label("₹ " + batch.getActualTotalAmount().toPlainString()));
 
-InwardBatch batch = parsedBatchData.getInwardBatch();
+			} else {
 
-InwardBatch dbBatch = inwardBatchService.getBatchById(batch.getInwardBatchId());
+				amountCell.appendChild(new Label("₹ 0"));
+			}
 
-if (dbBatch != null) {
+			item.appendChild(amountCell);
 
-batches.add(dbBatch);
+			Listcell statusCell = new Listcell();
 
-} else {
+			String status = getDisplayStatus(batch);
 
-batch.setBatchStatus("Pending Validation");
+			Label statusLabel = new Label(status);
 
-batches.add(batch);
-}
+			setStatusStyle(statusLabel, status);
 
-} catch (Exception e) {
+			statusCell.appendChild(statusLabel);
 
-e.printStackTrace();
-}
-}
+			item.appendChild(statusCell);
 
-private void validateBatch(Event event) {
+			Listcell actionCell = new Listcell();
 
-try {
+			createActionButton(item, actionCell, batch);
 
-Button clickedButton = (Button) event.getTarget();
+			item.appendChild(actionCell);
 
-Listcell actionCell = (Listcell) clickedButton.getParent();
+			batchListbox.appendChild(item);
+		}
+	}
 
-Listitem item = (Listitem) actionCell.getParent();
+	private void createActionButton(Listitem item, Listcell actionCell, InwardBatch batch) {
 
-InwardBatch queueBatch = (InwardBatch) item.getValue();
+		String status = getDisplayStatus(batch);
 
-if (queueBatch == null) {
+		if ("Validated".equalsIgnoreCase(status)) {
 
-Messagebox.show("Batch information not found.", "Validation Failed", Messagebox.OK, Messagebox.ERROR);
+			Button repairButton = new Button("Open MICR Repair");
 
-return;
-}
+			repairButton.setSclass("repair-button");
 
-String batchId = queueBatch.getInwardBatchId();
+			repairButton.addEventListener("onClick", event -> openMicrRepair(item));
 
-if (batchId == null || batchId.trim().isEmpty()) {
+			actionCell.appendChild(repairButton);
 
-Messagebox.show("Batch number is missing.", "Validation Failed", Messagebox.OK, Messagebox.ERROR);
+			Button viewButton = new Button("View");
 
-return;
-}
+			viewButton.setSclass("view-button");
 
-String xmlFileName = getXmlFileName(batchId);
+			viewButton.addEventListener("onClick", event -> openBatchView(item));
 
-if (xmlFileName == null) {
+			actionCell.appendChild(viewButton);
 
-Messagebox.show("XML file mapping not found for batch " + batchId, "Validation Failed", Messagebox.OK,
-Messagebox.ERROR);
+			return;
+		}
 
-return;
-}
+		if ("Parsing".equalsIgnoreCase(status)) {
 
-URL resource = Thread.currentThread().getContextClassLoader().getResource(xmlFileName);
+			Button parsingButton = new Button("Parsing...");
 
-if (resource == null) {
+			parsingButton.setDisabled(true);
 
-Messagebox.show(xmlFileName + " not found in src/main/resources.", "Validation Failed", Messagebox.OK,
-Messagebox.ERROR);
+			parsingButton.setSclass("parsing-button");
 
-return;
-}
+			actionCell.appendChild(parsingButton);
 
-ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(resource.toURI().getPath());
+			return;
+		}
 
-if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
+		Button parseButton = new Button("Parse");
 
-Messagebox.show("Unable to read batch XML.", "Validation Failed", Messagebox.OK, Messagebox.ERROR);
+		parseButton.setSclass("parse-button");
 
-return;
-}
+		parseButton.addEventListener("onClick", event -> parseBatch(event));
 
-InwardBatch parsedBatch = parsedBatchData.getInwardBatch();
+		actionCell.appendChild(parseButton);
+	}
 
-String xmlBatchId = parsedBatch.getInwardBatchId();
+	private String getDisplayStatus(InwardBatch batch) {
 
-if (xmlBatchId == null || xmlBatchId.trim().isEmpty()) {
+		if (batch == null) {
 
-Messagebox.show("Batch ID is missing in XML.", "Validation Failed", Messagebox.OK, Messagebox.ERROR);
+			return "Pending Validation";
+		}
 
-return;
-}
+		String status = batch.getBatchStatus();
 
-if (!batchId.equalsIgnoreCase(xmlBatchId)) {
+		if (status == null || status.trim().isEmpty()) {
 
-Messagebox.show(
-"Batch number mismatch.\n\n" + "Queue Batch: " + batchId + "\n" + "XML Batch: " + xmlBatchId,
-"Validation Failed", Messagebox.OK, Messagebox.ERROR);
+			return "Pending Validation";
+		}
 
-return;
-}
+		return status;
+	}
 
-parsedBatch.setBatchStatus("Validated");
+	private void parseBatch(Event event) {
 
-boolean saved = inwardBatchService.saveParsedBatch(parsedBatchData);
+		try {
 
-if (!saved) {
+			Button clickedButton = (Button) event.getTarget();
 
-Messagebox.show(
-"Validation was successful, " + "but the batch could not be saved " + "in the database.",
-"Database Error", Messagebox.OK, Messagebox.ERROR);
+			Listcell actionCell = (Listcell) clickedButton.getParent();
 
-return;
-}
+			Listitem item = (Listitem) actionCell.getParent();
 
-item.setValue(parsedBatch);
+			InwardBatch batch = (InwardBatch) item.getValue();
 
-updateValidatedRow(item);
+			if (batch == null) {
 
-Messagebox.show("Batch " + batchId + " validated and saved successfully.", "Validation Successful",
-Messagebox.OK, Messagebox.INFORMATION);
+				Messagebox.show("Batch information not found.", "Parse Failed", Messagebox.OK, Messagebox.ERROR);
 
-} catch (Exception e) {
+				return;
+			}
 
-e.printStackTrace();
+			String batchId = batch.getInwardBatchId();
 
-Messagebox.show("Validation failed: " + e.getMessage(), "Validation Failed", Messagebox.OK,
-Messagebox.ERROR);
-}
-}
+			if (batchId == null || batchId.trim().isEmpty()) {
 
-private String getXmlFileName(String batchId) {
+				Messagebox.show("Batch number is missing.", "Parse Failed", Messagebox.OK, Messagebox.ERROR);
 
-if ("BAT1001".equalsIgnoreCase(batchId)) {
+				return;
+			}
 
-return "Batch1001new.xml";
-}
+			String folderName = getBatchFolderName(batchId);
 
-if ("BAT1002".equalsIgnoreCase(batchId)) {
+			if (folderName == null) {
 
-return "Batch1002_ChequeTransmission.xml";
-}
+				Messagebox.show("Batch folder not found for: " + batchId, "Parse Failed", Messagebox.OK,
+						Messagebox.ERROR);
 
-return null;
-}
+				return;
+			}
 
-private void updateValidatedRow(Listitem item) {
+			String npciXml = "Inward-data/" + folderName + "/NPCI_Inward.xml";
 
-Listcell statusCell = (Listcell) item.getChildren().get(3);
+			String ocrXml = "Inward-data/" + folderName + "/OCR_Mock.xml";
 
-statusCell.getChildren().clear();
+			String npciPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + npciXml);
 
-Label statusLabel = new Label("Validated");
+			String ocrPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + ocrXml);
 
-setStatusStyle(statusLabel, "Validated");
+			if (npciPath == null || !(new File(npciPath).isFile())) {
+				Messagebox.show("NPCI XML not found:\n" + npciXml, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
+				return;
+			}
 
-statusCell.appendChild(statusLabel);
+			if (ocrPath == null || !(new File(ocrPath).isFile())) {
+				Messagebox.show("OCR XML not found:\n" + ocrXml, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
+				return;
+			}
 
-Listcell actionCell = (Listcell) item.getChildren().get(4);
+			batch.setBatchStatus("Parsing");
+			updateParsingRow(item);
 
-actionCell.getChildren().clear();
+			final String finalNpciPath = npciPath;
+			final String finalOcrPath = ocrPath;
 
-Button repairButton = new Button("Open MICR Repair");
+			final String finalBatchId = batchId;
 
-repairButton.setSclass("repair-button");
+			final String finalFolderName = folderName;
 
-repairButton.addEventListener("onClick", event -> openMicrRepair(item));
+			Thread parsingThread = new Thread(() -> {
 
-actionCell.appendChild(repairButton);
-}
+				ParseResult result;
 
-private void openMicrRepair(Listitem item) {
+				try {
 
-InwardBatch batch = (InwardBatch) item.getValue();
+					ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(finalNpciPath, finalOcrPath);
 
-Messagebox.show("Opening MICR Repair for batch " + batch.getInwardBatchId(), "MICR Repair", Messagebox.OK,
-Messagebox.INFORMATION);
-}
-private void setStatusStyle(Label label, String status) {
+					if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
 
-if ("Validated".equalsIgnoreCase(status)) {
-label.setSclass("status-validated");
-} else if ("Validation Failed".equalsIgnoreCase(status)) {
-label.setSclass("status-failed");
-} else {
-label.setSclass("status-pending");
-}
-}
+						result = new ParseResult(finalBatchId, null, "Validation Failed",
+								"Unable to parse NPCI and OCR XML.");
+
+					} else {
+
+						InwardBatch parsedBatch = parsedBatchData.getInwardBatch();
+
+						String xmlBatchId = parsedBatch.getInwardBatchId();
+
+						if (xmlBatchId == null || xmlBatchId.trim().isEmpty()) {
+
+							parsedBatch.setInwardBatchId(finalBatchId);
+
+						} else if (!finalBatchId.equalsIgnoreCase(xmlBatchId)) {
+
+							result = new ParseResult(finalBatchId, null, "Validation Failed",
+									"Batch number mismatch. Queue Batch: " + finalBatchId + " XML Batch: "
+											+ xmlBatchId);
+
+							Executions.schedule(currentWindow.getDesktop(), new EventListener<Event>() {
+
+								@Override
+								public void onEvent(Event event) throws Exception {
+
+									handleParseComplete((ParseResult) event.getData());
+								}
+							}, new Event("onParseComplete", currentWindow, result));
+
+							return;
+						}
+
+						if (parsedBatch.getBatchReferenceId() == null
+								|| parsedBatch.getBatchReferenceId().trim().isEmpty()) {
+
+							parsedBatch.setBatchReferenceId(finalFolderName);
+						}
+
+						if (parsedBatch.getActualChequeCount() <= 0) {
+
+							int chequeCount = parsedBatchData.getInwardCheques() == null ? 0
+									: parsedBatchData.getInwardCheques().size();
+
+							parsedBatch.setActualChequeCount(chequeCount);
+						}
+
+						parsedBatch.setBatchStatus("Validated");
+
+						boolean saved = inwardBatchService.saveParsedBatch(parsedBatchData);
+
+						if (saved) {
+
+							result = new ParseResult(finalBatchId, parsedBatchData, "Validated", null);
+
+						} else {
+
+							result = new ParseResult(finalBatchId, null, "Validation Failed",
+									"Batch parsed successfully but database save failed.");
+						}
+					}
+
+				} catch (Exception e) {
+
+					e.printStackTrace();
+
+					String errorMessage = e.getMessage();
+
+					if (errorMessage == null || errorMessage.trim().isEmpty()) {
+
+						errorMessage = e.getClass().getSimpleName();
+					}
+
+					result = new ParseResult(finalBatchId, null, "Validation Failed", errorMessage);
+				}
+
+				final ParseResult finalResult = result;
+
+				Executions.schedule(currentWindow.getDesktop(), new EventListener<Event>() {
+
+					@Override
+					public void onEvent(Event event) throws Exception {
+
+						handleParseComplete((ParseResult) event.getData());
+					}
+				}, new Event("onParseComplete", currentWindow, finalResult));
+			});
+
+			parsingThread.setName("InwardBatchParser-" + batchId);
+
+			parsingThread.start();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to start parsing: " + e.getMessage(), "Parse Failed", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
+
+	private void handleParseComplete(ParseResult result) {
+
+		if (result == null) {
+			return;
+		}
+
+		try {
+
+			String batchId = result.getBatchId();
+
+			Listitem targetItem = null;
+
+			for (Listitem item : batchListbox.getItems()) {
+
+				InwardBatch itemBatch = (InwardBatch) item.getValue();
+
+				if (itemBatch != null && itemBatch.getInwardBatchId() != null
+						&& batchId.equalsIgnoreCase(itemBatch.getInwardBatchId())) {
+
+					targetItem = item;
+
+					break;
+				}
+			}
+
+			if ("Validated".equalsIgnoreCase(result.getStatus())) {
+
+				ParsedBatchData data = result.getParsedBatchData();
+
+				if (data == null || data.getInwardBatch() == null) {
+
+					return;
+				}
+
+				InwardBatch parsedBatch = data.getInwardBatch();
+
+				parsedBatch.setBatchStatus("Validated");
+
+				if (targetItem != null) {
+
+					targetItem.setValue(parsedBatch);
+
+					updateValidatedRow(targetItem);
+				}
+
+				for (int i = 0; i < allBatches.size(); i++) {
+
+					InwardBatch current = allBatches.get(i);
+
+					if (current != null && current.getInwardBatchId() != null
+							&& batchId.equalsIgnoreCase(current.getInwardBatchId())) {
+
+						allBatches.set(i, parsedBatch);
+
+						break;
+					}
+				}
+
+				Messagebox.show("Batch " + batchId + " parsed, validated and saved successfully.", "Parsing Successful",
+						Messagebox.OK, Messagebox.INFORMATION);
+
+			} else {
+
+				if (targetItem != null) {
+
+					InwardBatch failedBatch = (InwardBatch) targetItem.getValue();
+
+					if (failedBatch != null) {
+
+						failedBatch.setBatchStatus("Validation Failed");
+					}
+
+					updateFailedRow(targetItem);
+				}
+
+				String message = result.getMessage();
+
+				if (message == null || message.trim().isEmpty()) {
+
+					message = "NPCI/OCR parsing or validation failed.";
+				}
+
+				Messagebox.show(message, "Validation Failed", Messagebox.OK, Messagebox.ERROR);
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to update batch status: " + e.getMessage(), "Error", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
+
+	private void updateParsingRow(Listitem item) {
+
+		Listcell statusCell = (Listcell) item.getChildren().get(3);
+
+		statusCell.getChildren().clear();
+
+		Label statusLabel = new Label("Parsing");
+
+		setStatusStyle(statusLabel, "Parsing");
+
+		statusCell.appendChild(statusLabel);
+
+		Listcell actionCell = (Listcell) item.getChildren().get(4);
+
+		actionCell.getChildren().clear();
+
+		Button parsingButton = new Button("Parsing...");
+
+		parsingButton.setDisabled(true);
+
+		parsingButton.setSclass("parsing-button");
+
+		actionCell.appendChild(parsingButton);
+	}
+
+	private void updateValidatedRow(Listitem item) {
+
+		Listcell statusCell = (Listcell) item.getChildren().get(3);
+
+		statusCell.getChildren().clear();
+
+		Label statusLabel = new Label("Validated");
+
+		setStatusStyle(statusLabel, "Validated");
+
+		statusCell.appendChild(statusLabel);
+
+		Listcell actionCell = (Listcell) item.getChildren().get(4);
+
+		actionCell.getChildren().clear();
+
+		Button repairButton = new Button("Open MICR Repair");
+
+		repairButton.setSclass("repair-button");
+
+		repairButton.addEventListener("onClick", event -> openMicrRepair(item));
+
+		actionCell.appendChild(repairButton);
+
+		Button viewButton = new Button("View");
+
+		viewButton.setSclass("view-button");
+
+		viewButton.addEventListener("onClick", event -> openBatchView(item));
+
+		actionCell.appendChild(viewButton);
+	}
+
+	private void updateFailedRow(Listitem item) {
+
+		Listcell statusCell = (Listcell) item.getChildren().get(3);
+
+		statusCell.getChildren().clear();
+
+		Label statusLabel = new Label("Validation Failed");
+
+		setStatusStyle(statusLabel, "Validation Failed");
+
+		statusCell.appendChild(statusLabel);
+
+		Listcell actionCell = (Listcell) item.getChildren().get(4);
+
+		actionCell.getChildren().clear();
+
+		Button parseButton = new Button("Parse");
+
+		parseButton.setSclass("parse-button");
+
+		parseButton.addEventListener("onClick", event -> parseBatch(event));
+
+		actionCell.appendChild(parseButton);
+	}
+
+	private void openMicrRepair(Listitem item) {
+
+		InwardBatch batch = (InwardBatch) item.getValue();
+
+		if (batch == null) {
+			return;
+		}
+
+		Messagebox.show("Opening MICR Repair for batch " + batch.getInwardBatchId(), "MICR Repair", Messagebox.OK,
+				Messagebox.INFORMATION);
+	}
+
+	private void openBatchView(Listitem item) {
+
+		InwardBatch batch = (InwardBatch) item.getValue();
+
+		if (batch == null) {
+			return;
+		}
+
+		Messagebox.show("Opening batch details for " + batch.getInwardBatchId(), "Batch View", Messagebox.OK,
+				Messagebox.INFORMATION);
+	}
+
+	private void searchBatches() {
+
+		String batchNo = batchSearchTextbox.getValue();
+
+		if (batchNo == null) {
+			batchNo = "";
+		}
+
+		batchNo = batchNo.trim();
+
+		String selectedStatus = "All";
+
+		if (statusCombobox.getSelectedItem() != null) {
+
+			selectedStatus = statusCombobox.getSelectedItem().getLabel();
+
+		} else if (statusCombobox.getValue() != null && !statusCombobox.getValue().trim().isEmpty()) {
+
+			selectedStatus = statusCombobox.getValue().trim();
+		}
+
+		Date selectedDate = receivedDatebox.getValue();
+
+		List<InwardBatch> filteredBatches = new ArrayList<InwardBatch>();
+
+		for (InwardBatch batch : allBatches) {
+
+			boolean batchMatch = true;
+
+			boolean statusMatch = true;
+
+			boolean dateMatch = true;
+
+			if (!batchNo.isEmpty()) {
+
+				String currentBatchNo = batch.getInwardBatchId();
+
+				if (currentBatchNo == null || !currentBatchNo.toLowerCase().contains(batchNo.toLowerCase())) {
+
+					batchMatch = false;
+				}
+			}
+
+			if (!"All".equalsIgnoreCase(selectedStatus)) {
+
+				String currentStatus = getDisplayStatus(batch);
+
+				if (!selectedStatus.equalsIgnoreCase(currentStatus)) {
+
+					statusMatch = false;
+				}
+			}
+
+			if (selectedDate != null) {
+
+				if (batch.getUploadedAt() == null) {
+
+					dateMatch = false;
+
+				} else {
+
+					dateMatch = isSameDate(selectedDate, batch.getUploadedAt());
+				}
+			}
+
+			if (batchMatch && statusMatch && dateMatch) {
+
+				filteredBatches.add(batch);
+			}
+		}
+
+		displayBatches(filteredBatches);
+
+		if (filteredBatches.isEmpty()) {
+
+			Messagebox.show("No batches found matching the search criteria.", "Search Result", Messagebox.OK,
+					Messagebox.INFORMATION);
+		}
+	}
+
+	private boolean isSameDate(Date selectedDate, Date uploadedDate) {
+
+		Calendar selectedCalendar = Calendar.getInstance();
+
+		selectedCalendar.setTime(selectedDate);
+
+		Calendar uploadedCalendar = Calendar.getInstance();
+
+		uploadedCalendar.setTime(uploadedDate);
+
+		return selectedCalendar.get(Calendar.YEAR) == uploadedCalendar.get(Calendar.YEAR)
+
+				&&
+
+				selectedCalendar.get(Calendar.MONTH) == uploadedCalendar.get(Calendar.MONTH)
+
+				&&
+
+				selectedCalendar.get(Calendar.DAY_OF_MONTH) == uploadedCalendar.get(Calendar.DAY_OF_MONTH);
+	}
+
+	private void setStatusStyle(Label label, String status) {
+
+		if ("Validated".equalsIgnoreCase(status)) {
+
+			label.setSclass("status-validated");
+
+		} else if ("Validation Failed".equalsIgnoreCase(status)) {
+
+			label.setSclass("status-failed");
+
+		} else if ("Parsing".equalsIgnoreCase(status)) {
+
+			label.setSclass("status-parsing");
+
+		} else {
+
+			label.setSclass("status-pending");
+		}
+	}
+
+	private String getBatchFolderName(String batchId) {
+
+		if ("INW260904001".equalsIgnoreCase(batchId)) {
+
+			return "BATCH-2026-09-04-001";
+		}
+
+		if ("INW260904002".equalsIgnoreCase(batchId)) {
+
+			return "BATCH-2026-09-04-002";
+		}
+
+		if ("INW260904003".equalsIgnoreCase(batchId)) {
+
+			return "BATCH-2026-09-04-003";
+		}
+
+		return null;
+	}
+
+	private static class ParseResult {
+
+		private final String batchId;
+
+		private final ParsedBatchData parsedBatchData;
+
+		private final String status;
+
+		private final String message;
+
+		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
+
+			this.batchId = batchId;
+
+			this.parsedBatchData = parsedBatchData;
+
+			this.status = status;
+
+			this.message = message;
+		}
+
+		String getBatchId() {
+
+			return batchId;
+		}
+
+		ParsedBatchData getParsedBatchData() {
+
+			return parsedBatchData;
+		}
+
+		String getStatus() {
+
+			return status;
+		}
+
+		String getMessage() {
+
+			return message;
+		}
+	}
 }

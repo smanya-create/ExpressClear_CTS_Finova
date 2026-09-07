@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.iispl.cts.dao.RejectedReasonDao;
 import com.iispl.cts.daoimpl.RejectedReasonDaoImpl;
-import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.service.RejectedReasonService;
 
 public class RejectedReasonServiceImpl implements RejectedReasonService {
@@ -25,7 +25,7 @@ public class RejectedReasonServiceImpl implements RejectedReasonService {
 	    }
 
 	    @Override
-	    public List<RejectedResaon> getAllRejectedReasons() {
+	    public List<RejectedReason> getAllRejectedReasons() {
 	        return rejectedReasonDao.getAllRejectedReasons();
 	    }
 

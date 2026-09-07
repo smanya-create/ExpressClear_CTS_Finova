@@ -1,0 +1,337 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ChequeBatchTransmission
+	xmlns="urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing">
+	<BatchHeader>
+		<ScannedBatchId>INW260904001</ScannedBatchId>
+		<BatchReferenceId>BATCH-2026-09-04-001</BatchReferenceId>
+		<ActualChequeCount>8</ActualChequeCount>
+		<ActualTotalAmount currency="INR">4113510.00
+		</ActualTotalAmount>
+		<StagingStatus>RAW</StagingStatus>
+		<BatchStatus>PROCESSING</BatchStatus>
+		<UploadedBy>USR_INWARD</UploadedBy>
+		<UploadedAt>2026-09-04T12:08:33</UploadedAt>
+	</BatchHeader>
+	<Cheques>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ001</ScannedChequeId>
+			<ItemSequenceNumber>1</ItemSequenceNumber>
+			<ChequeNumber>301234</ChequeNumber>
+			<ChequeDate>2026-11-18</ChequeDate>
+			<Amount currency="INR">430610.00</Amount>
+			<AmountInWords>INR 430610.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>54</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>State Bank of India</BankName>
+				<BranchName>Mumbai Main Branch</BranchName>
+				<IFSCCode>SBIN0000001</IFSCCode>
+				<AccountHolderName>SANJAY GUPTA</AccountHolderName>
+				<AccountNumber>8877665544</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>TECHNO CORP SOLUTIONS</AccountHolderName>
+				<AccountNumber>409921008712</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ001-F"
+					path="BATCH-2026-09-04-001/images/CHQ001_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ001-B"
+					path="BATCH-2026-09-04-001/images/CHQ001_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-11-18</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ002</ScannedChequeId>
+			<ItemSequenceNumber>2</ItemSequenceNumber>
+			<ChequeNumber>502345</ChequeNumber>
+			<ChequeDate>2026-11-05</ChequeDate>
+			<Amount currency="INR">82900.00</Amount>
+			<AmountInWords>INR 82900.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>36</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>State Bank of India</BankName>
+				<BranchName>Mumbai Main Branch</BranchName>
+				<IFSCCode>SBIN0000001</IFSCCode>
+				<AccountHolderName>GEETA RASHMI YADAV</AccountHolderName>
+				<AccountNumber>1122334455</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>OM PRAKASH YADAV</AccountHolderName>
+				<AccountNumber>308819245109</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ002-F"
+					path="BATCH-2026-09-04-001/images/CHQ002_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ002-B"
+					path="BATCH-2026-09-04-001/images/CHQ002_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-11-05</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ003</ScannedChequeId>
+			<ItemSequenceNumber>3</ItemSequenceNumber>
+			<ChequeNumber>501234</ChequeNumber>
+			<ChequeDate>2026-10-12</ChequeDate>
+			<Amount currency="INR">775000.00</Amount>
+			<AmountInWords>INR 775000.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>33</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>State Bank of India</BankName>
+				<BranchName>Mumbai Main Branch</BranchName>
+				<IFSCCode>SBIN0000001</IFSCCode>
+				<AccountHolderName>JOHN NEIL D'SOUZA</AccountHolderName>
+				<AccountNumber>4098712365</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>RACHEL D'SOUZA</AccountHolderName>
+				<AccountNumber>204918736154</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ003-F"
+					path="BATCH-2026-09-04-001/images/CHQ003_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ003-B"
+					path="BATCH-2026-09-04-001/images/CHQ003_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-10-12</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ004</ScannedChequeId>
+			<ItemSequenceNumber>4</ItemSequenceNumber>
+			<ChequeNumber>602345</ChequeNumber>
+			<ChequeDate>2026-09-15</ChequeDate>
+			<Amount currency="INR">843000.00</Amount>
+			<AmountInWords>INR 843000.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>44</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>State Bank of India</BankName>
+				<BranchName>Mumbai Main Branch</BranchName>
+				<IFSCCode>SBIN0000001</IFSCCode>
+				<AccountHolderName>RAJESH K. SINGH</AccountHolderName>
+				<AccountNumber>9876543210</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>RAJESH K. SINGH</AccountHolderName>
+				<AccountNumber>501928471625</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ004-F"
+					path="BATCH-2026-09-04-001/images/CHQ004_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ004-B"
+					path="BATCH-2026-09-04-001/images/CHQ004_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-09-15</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ005</ScannedChequeId>
+			<ItemSequenceNumber>5</ItemSequenceNumber>
+			<ChequeNumber>602345</ChequeNumber>
+			<ChequeDate>2026-09-25</ChequeDate>
+			<Amount currency="INR">425000.00</Amount>
+			<AmountInWords>INR 425000.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>55</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>Bank of Baroda</BankName>
+				<BranchName>Chandni Chowk</BranchName>
+				<IFSCCode>BARB0DELCHCC</IFSCCode>
+				<AccountHolderName>SNEHA SHARMA</AccountHolderName>
+				<AccountNumber>9876543210</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>SNEHA SHARMA</AccountHolderName>
+				<AccountNumber>110928374652</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ005-F"
+					path="BATCH-2026-09-04-001/images/CHQ005_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ005-B"
+					path="BATCH-2026-09-04-001/images/CHQ005_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-09-25</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ006</ScannedChequeId>
+			<ItemSequenceNumber>6</ItemSequenceNumber>
+			<ChequeNumber>703451</ChequeNumber>
+			<ChequeDate>2026-09-25</ChequeDate>
+			<Amount currency="INR">631000.00</Amount>
+			<AmountInWords>INR 631000.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>892345000</FullMICR>
+				<CityCode>892</CityCode>
+				<BankCode>345</BankCode>
+				<BranchCode>000</BranchCode>
+				<AccountShortCode>01234</AccountShortCode>
+				<TransactionCode>33</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>Bank of Baroda</BankName>
+				<BranchName>Chandni Chowk</BranchName>
+				<IFSCCode>BARB0DELCHCC</IFSCCode>
+				<AccountHolderName>ROHINI SINGHAL</AccountHolderName>
+				<AccountNumber>3456789012</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>ROHINI SINGHAL</AccountHolderName>
+				<AccountNumber>774910283461</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ006-F"
+					path="BATCH-2026-09-04-001/images/CHQ006_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ006-B"
+					path="BATCH-2026-09-04-001/images/CHQ006_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-09-25</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ007</ScannedChequeId>
+			<ItemSequenceNumber>7</ItemSequenceNumber>
+			<ChequeNumber>502345</ChequeNumber>
+			<ChequeDate>2026-09-14</ChequeDate>
+			<Amount currency="INR">352000.00</Amount>
+			<AmountInWords>INR 352000.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>44</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>State Bank of India</BankName>
+				<BranchName>Mumbai Main Branch</BranchName>
+				<IFSCCode>SBIN0000001</IFSCCode>
+				<AccountHolderName>RAJESH KUMAR SINGH</AccountHolderName>
+				<AccountNumber>9876543210</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>RAJESH KUMAR SINGH</AccountHolderName>
+				<AccountNumber>662019483720</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ007-F"
+					path="BATCH-2026-09-04-001/images/CHQ007_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ007-B"
+					path="BATCH-2026-09-04-001/images/CHQ007_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-09-14</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+		<ChequeItem>
+			<ScannedChequeId>INW260904001-CHQ008</ScannedChequeId>
+			<ItemSequenceNumber>8</ItemSequenceNumber>
+			<ChequeNumber>703456</ChequeNumber>
+			<ChequeDate>2026-08-28</ChequeDate>
+			<Amount currency="INR">574000.00</Amount>
+			<AmountInWords>INR 574000.00</AmountInWords>
+			<ChequeStatus>RECEIVED</ChequeStatus>
+			<MICRDetails>
+				<FullMICR>987654321</FullMICR>
+				<CityCode>987</CityCode>
+				<BankCode>654</BankCode>
+				<BranchCode>321</BranchCode>
+				<AccountShortCode>12345</AccountShortCode>
+				<TransactionCode>55</TransactionCode>
+			</MICRDetails>
+			<Drawee>
+				<BankName>State Bank of India</BankName>
+				<BranchName>Mumbai Main Branch</BranchName>
+				<IFSCCode>SBIN0000004</IFSCCode>
+				<AccountHolderName>PRIYA S. PATEL</AccountHolderName>
+				<AccountNumber>9876543210</AccountNumber>
+			</Drawee>
+			<Payee>
+				<AccountHolderName>PRIYA S. PATEL</AccountHolderName>
+				<AccountNumber>881920471536</AccountNumber>
+			</Payee>
+			<ChequeImages>
+				<FrontImage imageId="INW260904001-CHQ008-F"
+					path="BATCH-2026-09-04-001/images/CHQ008_front.jpg" type="FRONT" />
+				<BackImage imageId="INW260904001-CHQ008-B"
+					path="BATCH-2026-09-04-001/images/CHQ008_back.png" type="BACK" />
+			</ChequeImages>
+			<ClearingDetails>
+				<PresentingBank>BR001</PresentingBank>
+				<PresentingBranch>BR001</PresentingBranch>
+				<PresentmentDate>2026-08-28</PresentmentDate>
+				<ClearingType>CTS CLEARING</ClearingType>
+			</ClearingDetails>
+		</ChequeItem>
+	</Cheques>
+</ChequeBatchTransmission>

@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.RejectedReasonDao;
-import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.entity.RejectedReason;
 
 public class RejectedReasonDaoImpl implements RejectedReasonDao {
 
@@ -29,9 +29,9 @@ public class RejectedReasonDaoImpl implements RejectedReasonDao {
 
 	// Fetch all rejection reasons.
 	@Override
-	public List<RejectedResaon> getAllRejectedReasons() {
+	public List<RejectedReason> getAllRejectedReasons() {
 
-		List<RejectedResaon> list = new ArrayList<>();
+		List<RejectedReason> list = new ArrayList<>();
 
 		String sql = "SELECT rejected_reason_id, rejected_reason_code, "+ "rejected_reason_name, rejected_reason_description " + "FROM rejected_reasons "
 				      + "ORDER BY rejected_reason_code ASC";
@@ -57,7 +57,7 @@ public class RejectedReasonDaoImpl implements RejectedReasonDao {
 
 	// Fetch one rejection reason by ID.
 	@Override
-	public RejectedResaon findById(String rejectedReasonId) {
+	public RejectedReason findById(String rejectedReasonId) {
 
 		if (rejectedReasonId == null || rejectedReasonId.trim().isEmpty()) {
 
@@ -89,9 +89,9 @@ public class RejectedReasonDaoImpl implements RejectedReasonDao {
 	}
 
 	// Map database row to entity.
-	private RejectedResaon mapResultSet(ResultSet rs) throws SQLException {
+	private RejectedReason mapResultSet(ResultSet rs) throws SQLException {
 
-		RejectedResaon reason = new RejectedResaon();
+		RejectedReason reason = new RejectedReason();
 
 		reason.setRejectedReasonId(rs.getString("rejected_reason_id"));
 

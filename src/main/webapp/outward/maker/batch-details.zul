@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+	<style src="/css/outward/maker-batch-details.css" />
+
+	<div id="outwardMakerBatchDetailsDiv" width="100%"
+		sclass="outward-maker-batch-details">
+
+		<div sclass="outward-maker-batch-details-header">
+
+			<div>
+
+				<label value="Batch Details"
+					sclass="outward-maker-batch-details-title" />
+
+				<label value="View and process cheques in this batch."
+					sclass="outward-maker-batch-details-subtitle" />
+
+			</div>
+
+			<button id="outwardMakerBtnBack" label="BACK TO DASHBOARD"
+				sclass="outward-maker-back-button" />
+
+		</div>
+
+		<div sclass="outward-maker-summary-card">
+
+			<div sclass="outward-maker-summary-item">
+
+				<label value="BATCH ID"
+					sclass="outward-maker-summary-label" />
+
+				<label id="outwardMakerLblBatchId" value="-"
+					sclass="outward-maker-summary-value" />
+
+			</div>
+
+			<div sclass="outward-maker-summary-item">
+
+				<label value="NO. OF CHEQUES"
+					sclass="outward-maker-summary-label" />
+
+				<label id="outwardMakerLblChequeCount" value="0"
+					sclass="outward-maker-summary-value" />
+
+			</div>
+
+			<div sclass="outward-maker-summary-item">
+
+				<label value="TOTAL AMOUNT"
+					sclass="outward-maker-summary-label" />
+
+				<label id="outwardMakerLblTotalAmount" value="₹0.00"
+					sclass="outward-maker-summary-value" />
+
+			</div>
+
+		</div>
+
+		<div sclass="outward-maker-cheque-section">
+
+			<label value="Cheque Details"
+				sclass="outward-maker-cheque-section-title" />
+
+			<label
+				value="Review cheque information and take the required action."
+				sclass="outward-maker-cheque-section-subtitle" />
+
+		</div>
+
+		<div sclass="outward-maker-cheque-table-card">
+
+			<grid id="outwardMakerGridChequeDetails" width="100%"
+				sclass="outward-maker-cheque-grid">
+
+				<columns sizable="true">
+
+					<column label="Cheque No." width="15%" />
+
+					<column label="Payee Account No." width="18%" />
+
+					<column label="Cheque Date" width="13%" />
+
+					<column label="MICR Code" width="15%" />
+
+					<column label="Cheque Status" width="15%" />
+
+					<column label="Cheque Amount" width="12%" />
+
+					<column label="Action" width="12%" />
+
+				</columns>
+
+				<rows id="outwardMakerRowsChequeDetails" />
+
+			</grid>
+
+			<vlayout id="outwardMakerVlayoutEmptyState" visible="false"
+				sclass="outward-maker-empty-state">
+
+				<label value="No cheques found"
+					sclass="outward-maker-empty-title" />
+
+				<label
+					value="There are currently no cheques available in this batch."
+					sclass="outward-maker-empty-subtitle" />
+
+			</vlayout>
+
+		</div>
+
+		<div sclass="outward-maker-pagination">
+
+			<button id="outwardMakerBtnFirst" label="&lt;&lt;"
+				sclass="outward-maker-pagination-button" />
+
+			<button id="outwardMakerBtnPrevious" label="&lt;"
+				sclass="outward-maker-pagination-button" />
+
+			<label id="outwardMakerLblCurrentPage" value="1 / 1"
+				sclass="outward-maker-pagination-label" />
+
+			<button id="outwardMakerBtnNext" label="&gt;"
+				sclass="outward-maker-pagination-button" />
+
+			<button id="outwardMakerBtnLast" label="&gt;&gt;"
+				sclass="outward-maker-pagination-button" />
+
+		</div>
+
+	</div>
+
+</zk>

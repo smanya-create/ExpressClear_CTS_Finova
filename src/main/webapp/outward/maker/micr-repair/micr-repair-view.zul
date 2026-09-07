@@ -1,85 +1,207 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="CTS - MICR Repair" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet" type="text/css"
+        href="/css/outward/micr-repair-view.css"?>
+
 <zk>
-	
-	<style src="/css/outward/micr-repair-view.css" />
-    <window id="mainWindow" 
-            width="100%" height="100%" sclass="micr-repair-page">
-        
-        <!-- Page Title and Description -->
-        <div class="page-header">
-            <label value="MICR Repair" sclass="page-title" />
-            <label value="Outward processing — Fix OCR errors for flagged cheques." sclass="page-description" />
-        </div>
 
-        <!-- Batch Selection Section -->
-        <div class="batch-section">
-            <label value="Select Batch for MICR Repair" sclass="section-title" />
-            
-            <!-- Batch List Table -->
-            <grid id="batchGrid" model="@bind(vm.batches)" 
-                  sclass="batch-table">
-                <columns>
-                    <column label="BATCH ID" width="15%" />
-                    <column label="SCAN DATE" width="20%" />
-                    <column label="TOTAL CHEQUES" width="15%" />
-                    <column label="MICR ERRORS" width="15%" />
-                    <column label="STATUS" width="20%" />
-                    <column label="ACTION" width="15%" />
-                </columns>
-                <rows>
-                    <row>
-                        <label value="B004" />
-                        <label value="23-08-2026" />
-                        <label value="5" />
-                        <label value="2" />
-                        <div class="status-badge needs-repair">NEEDS REPAIR</div>
-                        <button label="Open" sclass="btn-primary" 
-                                onClick="@command('expandBatch', batchId='B004')" />
-                    </row>
-                </rows>
-            </grid>
-            
-            <div class="no-other-batches">
-                <label value="No other batches require MICR repair" />
+    <div id="micrRepairViewMain"
+         width="100%"
+         apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairViewController"
+         sclass="micr-repair-view-page">
+
+        <vlayout width="100%" spacing="20px">
+
+            <!-- ================================================= -->
+            <!-- PAGE TITLE -->
+            <!-- ================================================= -->
+
+            <vlayout spacing="4px"
+                     sclass="micr-repair-view-title-section">
+
+                <label id="lblMicrRepairViewTitle"
+                       value="MICR REPAIR"
+                       sclass="micr-repair-view-title" />
+
+                <label id="lblMicrRepairViewSubtitle"
+                       value="Select a batch requiring MICR repair."
+                       sclass="micr-repair-view-subtitle" />
+
+            </vlayout>
+
+
+            <!-- ================================================= -->
+            <!-- SCANNING BATCHES -->
+            <!-- ================================================= -->
+
+            <div id="divMicrRepairScanSection"
+                 width="100%"
+                 sclass="micr-repair-section-card"
+                 visible="false">
+
+                <vlayout width="100%" spacing="8px">
+
+                    <vlayout spacing="3px">
+
+                        <label id="lblMicrRepairScanTitle"
+                               value="Scanning Batches"
+                               sclass="micr-repair-section-title" />
+
+                        <label id="lblMicrRepairScanSubtitle"
+                               value="Batches from scanning that contain cheques requiring MICR repair."
+                               sclass="micr-repair-section-subtitle" />
+
+                    </vlayout>
+
+
+                    <!-- SCAN BATCH TABLE -->
+
+                    <grid id="grdMicrRepairScanBatches"
+                          width="100%"
+                          sclass="micr-repair-grid">
+
+                        <columns sizable="false">
+
+                            <column id="colMicrRepairScanBatch"
+                                    label="BATCH"
+                                    width="22%" />
+
+                            <column id="colMicrRepairScanTotal"
+                                    label="TOTAL CHEQUES"
+                                    width="18%" />
+
+                            <column id="colMicrRepairScanErrors"
+                                    label="MICR ERRORS"
+                                    width="18%" />
+
+                            <column id="colMicrRepairScanStatus"
+                                    label="STATUS"
+                                    width="22%" />
+
+                            <column id="colMicrRepairScanAction"
+                                    label="ACTION"
+                                    width="20%" />
+
+                        </columns>
+
+                        <rows id="rowsMicrRepairScanBatches" />
+
+                    </grid>
+
+
+                    <!-- SCAN PAGINATION -->
+
+                    <paging id="pagingMicrRepairScan"
+                            pageSize="10"
+                            detailed="true"
+                            visible="false"
+                            sclass="micr-repair-paging" />
+
+                </vlayout>
+
             </div>
-        </div>
 
-        <!-- Cheques List Section (Initially Hidden, Shows on Batch Expand) -->
-        <div id="chequesSection" class="cheques-section" style="display:block;">
-            <label value="Batch B004 — Cheques Requiring MICR Repair" sclass="section-title" />
-            <label value="Only cheques with MICR errors are displayed." sclass="section-description" />
-            
-            <grid id="chequesGrid" model="@bind(vm.cheques)" 
-                  sclass="cheques-table">
-                <columns>
-                    <column label="CHEQUE NO." width="15%" />
-                    <column label="BANK NAME" width="25%" />
-                    <column label="MICR CODE" width="20%" />
-                    <column label="ERROR" width="15%" />
-                    <column label="STATUS" width="15%" />
-                    <column label="ACTION" width="10%" />
-                </columns>
-                <rows>
-                    <row>
-                        <label value="100041" />
-                        <label value="HDFC Bank Ltd" />
-                        <label value="6000287001" sclass="micr-code-error" />
-                        <label value="MICR mismatch" sclass="error-text" />
-                        <div class="status-badge needs-repair">NEEDS REPAIR</div>
-                        <button label="Repair" sclass="btn-secondary" 
-                                onClick="@command('openChequeForm', chequeNo='100041')" />
-                    </row>
-                    <row>
-                        <label value="100043" />
-                        <label value="Axis Bank" />
-                        <label value="6000387001" sclass="micr-code-error" />
-                        <label value="MICR mismatch" sclass="error-text" />
-                        <div class="status-badge needs-repair">NEEDS REPAIR</div>
-                        <button label="Repair" sclass="btn-secondary" 
-                                onClick="@command('openChequeForm', chequeNo='100043')" />
-                    </row>
-                </rows>
-            </grid>
-        </div>
-    </window>
+
+            <!-- ================================================= -->
+            <!-- CHECKER RETURNED BATCHES -->
+            <!-- ================================================= -->
+
+            <div id="divMicrRepairCheckerSection"
+                 width="100%"
+                 sclass="micr-repair-section-card"
+                 visible="false">
+
+                <vlayout width="100%" spacing="8px">
+
+                    <vlayout spacing="3px">
+
+                        <label id="lblMicrRepairCheckerTitle"
+                               value="Batches Returned by Checker"
+                               sclass="micr-repair-section-title" />
+
+                        <label id="lblMicrRepairCheckerSubtitle"
+                               value="Batches returned by Checker to Maker that require MICR repair."
+                               sclass="micr-repair-section-subtitle" />
+
+                    </vlayout>
+
+
+                    <!-- CHECKER RETURNED TABLE -->
+
+                    <grid id="grdMicrRepairCheckerBatches"
+                          width="100%"
+                          sclass="micr-repair-grid">
+
+                        <columns sizable="false">
+
+                            <column id="colMicrRepairCheckerBatch"
+                                    label="BATCH"
+                                    width="22%" />
+
+                            <column id="colMicrRepairCheckerTotal"
+                                    label="TOTAL CHEQUES"
+                                    width="18%" />
+
+                            <column id="colMicrRepairCheckerErrors"
+                                    label="MICR ERRORS"
+                                    width="18%" />
+
+                            <column id="colMicrRepairCheckerStatus"
+                                    label="STATUS"
+                                    width="22%" />
+
+                            <column id="colMicrRepairCheckerAction"
+                                    label="ACTION"
+                                    width="20%" />
+
+                        </columns>
+
+                        <rows id="rowsMicrRepairCheckerBatches" />
+
+                    </grid>
+
+
+                    <!-- CHECKER PAGINATION -->
+
+                    <paging id="pagingMicrRepairChecker"
+                            pageSize="10"
+                            detailed="true"
+                            visible="false"
+                            sclass="micr-repair-paging" />
+
+                </vlayout>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- NO MICR REPAIR MESSAGE -->
+            <!-- ================================================= -->
+
+            <div id="divMicrRepairEmpty"
+                 width="100%"
+                 visible="false"
+                 sclass="micr-repair-empty-card">
+
+                <vlayout width="100%"
+                         spacing="6px">
+
+                    <label id="lblMicrRepairEmptyTitle"
+                           value="No MICR repair required"
+                           sclass="micr-repair-empty-title" />
+
+                    <label id="lblMicrRepairEmptyMessage"
+                           value="There are currently no batches requiring MICR repair."
+                           sclass="micr-repair-empty-message" />
+
+                </vlayout>
+
+            </div>
+
+        </vlayout>
+
+    </div>
+
 </zk>

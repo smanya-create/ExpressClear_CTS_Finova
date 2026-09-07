@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="CTS - Cheque Data Entry" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet" type="text/css" href="/css/outward/cheque-data-entry.css"?>
+
+<zk>
+
+	<window id="outwardChequeDataEntryRootWin" border="none"
+		width="100%" height="100%"
+		style="margin:0 !important; padding:0 !important; position:absolute; top:0; left:0; right:0; bottom:0;">
+
+		<borderlayout hflex="1" vflex="1"
+			style="margin:0 !important; padding:0 !important; background:transparent;">
+
+			<west size="220px" border="none"
+				style="margin:0 !important; padding:0 !important; background-color:#0b1d3a !important;">
+
+				<include src="/components/sidebar.zul"
+					role="OUTWARD_MAKER" activeTab="outward-data-entry" vflex="1"
+					hflex="1" />
+
+			</west>
+
+			<center border="none" autoscroll="true"
+				sclass="main-content">
+
+				<vlayout spacing="16px" sclass="dashboard-container"
+					hflex="1">
+
+					<include id="headerInclude"
+						src="/components/header.zul" pageTitle="Maker Dashboard"
+						pageSubtitle="Data Entry" />
+
+					<div id="outwardChequeDataEntryMain" width="100%"
+						apply="com.iispl.cts.controller.outward.maker.OutwardChequeDataEntryController"
+						sclass="outward-cheque-data-entry-page">
+
+						<vlayout width="100%" spacing="18px">
+
+							<vlayout spacing="4px">
+
+								<label value="Data Entry"
+									sclass="outward-cheque-data-entry-title" />
+
+								<label
+									value="Enter and validate cheque details against the cheque image."
+									sclass="outward-cheque-data-entry-subtitle" />
+
+							</vlayout>
+
+							<div sclass="outward-cheque-batch-summary"
+								width="100%">
+
+								<hlayout width="100%" valign="middle"
+									spacing="0">
+
+									<vlayout hflex="1" spacing="4px">
+
+										<label value="BATCH"
+											sclass="outward-cheque-summary-label" />
+
+										<label
+											id="outwardChequeDataEntryLblBatchId" value="-"
+											sclass="outward-cheque-summary-value" />
+
+									</vlayout>
+
+									<vlayout width="150px"
+										spacing="4px">
+
+										<label value="TOTAL CHEQUES"
+											sclass="outward-cheque-summary-label" />
+
+										<label
+											id="outwardChequeDataEntryLblTotal" value="0"
+											sclass="outward-cheque-summary-value" />
+
+									</vlayout>
+
+									<vlayout width="150px"
+										spacing="4px">
+
+										<label value="ENTERED"
+											sclass="outward-cheque-summary-label" />
+
+										<label
+											id="outwardChequeDataEntryLblEntered" value="0"
+											sclass="outward-cheque-summary-value" />
+
+									</vlayout>
+
+									<vlayout width="150px"
+										spacing="4px">
+
+										<label value="REMAINING"
+											sclass="outward-cheque-summary-label" />
+
+										<label
+											id="outwardChequeDataEntryLblRemaining" value="0"
+											sclass="outward-cheque-summary-value" />
+
+									</vlayout>
+
+									<button
+										id="outwardChequeDataEntryBtnSubmitChecker"
+										label="Submit to Checker" disabled="true"
+										sclass="outward-cheque-submit-checker" />
+
+								</hlayout>
+
+							</div>
+
+							<hlayout
+								id="outwardChequeDataEntryContentLayout" width="100%"
+								spacing="14px" valign="top"
+								sclass="outward-cheque-content-layout">
+
+								<div
+									id="outwardChequeDataEntryImageCard" hflex="55"
+									sclass="outward-cheque-image-card">
+
+									<vlayout width="100%" height="100%"
+										spacing="12px">
+
+										<vlayout spacing="3px">
+
+											<label value="Cheque Image"
+												sclass="outward-cheque-card-title" />
+
+											<label
+												id="outwardChequeDataEntryLblRecord" value="Record 0 of 0"
+												sclass="outward-cheque-record-label" />
+
+										</vlayout>
+
+										<div
+											id="outwardChequeDataEntryImageContainer" width="100%"
+											sclass="outward-cheque-image-container">
+
+											<image
+												id="outwardChequeDataEntryImgCheque" visible="false"
+												width="100%" height="100%" sclass="outward-cheque-image" />
+
+											<label
+												id="outwardChequeDataEntryLblImage"
+												value="Cheque Front Image"
+												sclass="outward-cheque-image-placeholder" />
+
+										</div>
+
+										<hlayout
+											id="outwardChequeDataEntryImageButtons" width="100%"
+											spacing="8px" sclass="outward-cheque-image-buttons">
+
+											<button
+												id="outwardChequeDataEntryBtnZoom" label="Zoom"
+												sclass="outward-cheque-image-button" />
+
+											<button
+												id="outwardChequeDataEntryBtnRotate" label="Rotate"
+												sclass="outward-cheque-image-button" />
+
+											<button
+												id="outwardChequeDataEntryBtnFront" label="View Front"
+												sclass="outward-cheque-image-button" />
+
+											<button
+												id="outwardChequeDataEntryBtnBack" label="View Back"
+												sclass="outward-cheque-image-button" />
+
+										</hlayout>
+
+									</vlayout>
+
+								</div>
+
+								<div
+									id="outwardChequeDataEntryDetailsCard" hflex="45"
+									sclass="outward-cheque-details-card">
+
+									<vlayout width="100%" height="100%"
+										spacing="12px">
+
+										<hlayout width="100%"
+											valign="middle">
+
+											<label
+												value="Cheque Details" hflex="1"
+												sclass="outward-cheque-card-title" />
+
+											<label
+												id="outwardChequeDataEntryLblValidationStatus"
+												value="VALIDATED" visible="false"
+												sclass="outward-cheque-validation-status" />
+
+										</hlayout>
+
+										<separator />
+
+										<grid width="100%"
+											sclass="outward-cheque-form-grid">
+
+											<columns>
+
+												<column width="50%" />
+
+												<column width="50%" />
+
+											</columns>
+
+											<rows>
+
+												<row>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="CHEQUE NUMBER *"
+															sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtChequeNumber" width="100%"
+															sclass="outward-cheque-field" />
+
+													</vlayout>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="PAYEE ACCOUNT NUMBER *"
+															sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtPayeeAccount" width="100%"
+															sclass="outward-cheque-field" />
+
+													</vlayout>
+
+												</row>
+
+												<row>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="AMOUNT *" sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtAmount" width="100%"
+															sclass="outward-cheque-field" />
+
+													</vlayout>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="CHEQUE DATE" sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtChequeDate" width="100%"
+															sclass="outward-cheque-readonly-field" />
+
+													</vlayout>
+
+												</row>
+
+												<row>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="MICR CODE" sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtMicrCode" width="100%"
+															sclass="outward-cheque-readonly-field" />
+
+													</vlayout>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="DRAWEE NAME" sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtDraweeName" width="100%"
+															sclass="outward-cheque-readonly-field" />
+
+													</vlayout>
+
+												</row>
+
+												<row>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label
+															value="PAYEE NAME" sclass="outward-cheque-field-label" />
+
+														<textbox
+															id="outwardChequeDataEntryTxtPayeeName" width="100%"
+															sclass="outward-cheque-readonly-field" />
+
+													</vlayout>
+
+													<vlayout
+														width="100%" spacing="4px">
+
+														<label value=""
+															sclass="outward-cheque-field-label" />
+
+														<label value="" />
+
+													</vlayout>
+
+												</row>
+
+											</rows>
+
+										</grid>
+
+										<hlayout width="100%"
+											sclass="outward-cheque-main-validate">
+
+											<button
+												id="outwardChequeDataEntryBtnValidate" label="Validate"
+												sclass="outward-cheque-validate-button" />
+
+										</hlayout>
+
+										<div
+											id="outwardChequeDataEntryValidationResults" width="100%"
+											visible="false" sclass="outward-cheque-validation-results">
+
+											<label
+												id="outwardChequeValidationChequeNumber"
+												value="✓ Cheque Number"
+												sclass="outward-cheque-validation-item valid" />
+
+											<label
+												id="outwardChequeValidationPayeeAccount"
+												value="✓ Payee Account No."
+												sclass="outward-cheque-validation-item valid" />
+
+											<label
+												id="outwardChequeValidationAmount" value="✓ Amount"
+												sclass="outward-cheque-validation-item valid" />
+
+											<label
+												id="outwardChequeValidationMicr" value="✓ MICR Code"
+												sclass="outward-cheque-validation-item valid" />
+
+											<label
+												id="outwardChequeValidationDate" value="✓ Cheque Date"
+												sclass="outward-cheque-validation-item valid" />
+
+										</div>
+
+										<hlayout width="100%"
+											spacing="10px" sclass="outward-cheque-action-buttons">
+
+											<button
+												id="outwardChequeDataEntryBtnSaveNext"
+												label="Save &amp; Next" sclass="outward-cheque-save-button" />
+
+											<button
+												id="outwardChequeDataEntryBtnReject" label="Request Reject"
+												sclass="outward-cheque-reject-button" />
+
+										</hlayout>
+
+									</vlayout>
+
+								</div>
+
+							</hlayout>
+
+						</vlayout>
+
+					</div>
+
+				</vlayout>
+
+			</center>
+
+		</borderlayout>
+
+	</window>
+
+	<window id="outwardChequeDataEntryRejectWin" title="Request Reject"
+		border="normal" width="520px" closable="true" visible="false"
+		mode="modal" sclass="outward-cheque-reject-modal">
+
+		<vlayout width="100%" spacing="18px">
+
+			<vlayout spacing="6px">
+
+				<label value="Reason *"
+					sclass="outward-cheque-modal-label" />
+
+				<combobox id="outwardChequeDataEntryCmbRejectReason"
+					width="100%" readonly="true" autodrop="true" popupWidth="470px"
+					placeholder="Select rejection reason"
+					sclass="outward-cheque-modal-field" />
+
+			</vlayout>
+
+			<vlayout spacing="6px">
+
+				<label value="Remarks *"
+					sclass="outward-cheque-modal-label" />
+
+				<textbox id="outwardChequeDataEntryTxtRejectRemarks"
+					width="100%" height="100px" multiline="true" maxlength="500"
+					placeholder="Enter remarks" sclass="outward-cheque-modal-remarks" />
+
+			</vlayout>
+
+			<hlayout width="100%" spacing="10px"
+				sclass="outward-cheque-modal-buttons">
+
+				<button id="outwardChequeDataEntryBtnCancelReject"
+					label="Cancel" sclass="outward-cheque-modal-cancel-button" />
+
+				<button id="outwardChequeDataEntryBtnConfirmReject"
+					label="Request Reject"
+					sclass="outward-cheque-modal-confirm-button" />
+
+			</hlayout>
+
+		</vlayout>
+
+	</window>
+
+</zk>

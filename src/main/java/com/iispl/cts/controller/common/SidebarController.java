@@ -269,22 +269,21 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 			Include include = (Include) mainContentArea;
 
-			include.setSrc("/inward/maker/micr-repair/micr-repair.zul");
+			include.setSrc("//inward/maker/micr-repair/micr-repair-queue.zul");
 		}
 
 	}
 
 	public void navToInwardDataEntry() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
+	    Component root = sidebarComponent.getPage().getFirstRoot();
+	    Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-
-			Include include = (Include) mainContentArea;
-
-			include.setSrc("/inward/maker/data-entry/data-entry.zul");
-		}
+	    if (mainContentArea instanceof Include) {
+	        Include include = (Include) mainContentArea;
+	        // Reset src first to force a clean re-render, then route to the batch queue
+	        include.setSrc(null);
+	        include.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
+	    }
 	}
 
 	public void navToMakerCompletion() {
@@ -328,21 +327,21 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	public void onClickLogout() {
 		AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
 
-	    // Clear and invalidate current HTTP session
-	    if (Sessions.getCurrent() != null) {
-	        String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
-	        if (userId == null) {
-	            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
-	        }
-	        
-	        // Deregister user from real-time tracker
-	        ActiveUserManager.userLoggedOut(userId);
+		// Clear and invalidate current HTTP session
+		if (Sessions.getCurrent() != null) {
+			String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
+			if (userId == null) {
+				userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
+			}
 
-	        Sessions.getCurrent().invalidate();
-	    }
+			// Deregister user from real-time tracker
+			ActiveUserManager.userLoggedOut(userId);
 
-	    // Redirect back to login page
-	    Executions.sendRedirect("/common/login.zul");
+			Sessions.getCurrent().invalidate();
+		}
+
+		// Redirect back to login page
+		Executions.sendRedirect("/common/login.zul");
 	}
 
 }

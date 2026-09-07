@@ -1,0 +1,405 @@
+.outward-cheque-data-entry-page {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 4px 24px 28px 24px;
+	background: transparent;
+}
+
+.outward-cheque-data-entry-title {
+	font-size: 24px;
+	font-weight: 800;
+	color: #0f172a;
+	letter-spacing: -0.3px;
+}
+
+.outward-cheque-data-entry-subtitle {
+	font-size: 12px;
+	color: #64748b;
+}
+
+.outward-cheque-batch-summary {
+	box-sizing: border-box;
+	width: 100%;
+	padding: 15px 18px;
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05);
+}
+
+.outward-cheque-summary-label {
+	font-size: 9px;
+	font-weight: 800;
+	color: #94a3b8;
+	letter-spacing: 0.7px;
+}
+
+.outward-cheque-summary-value {
+	font-size: 14px;
+	font-weight: 800;
+	color: #172554;
+}
+
+.outward-cheque-submit-checker {
+	min-width: 135px;
+	height: 36px;
+	padding: 0 16px;
+	background: #e2e8f0 !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px;
+	color: #94a3b8 !important;
+	font-size: 11px;
+	font-weight: 800;
+	cursor: not-allowed;
+}
+
+.outward-cheque-content-layout {
+	width: 100%;
+	align-items: stretch;
+}
+
+.outward-cheque-image-card, .outward-cheque-details-card {
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 18px;
+	box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05);
+	min-width: 0;
+}
+
+.outward-cheque-image-card {
+	min-height: 580px;
+}
+
+.outward-cheque-details-card {
+	min-height: 580px;
+}
+
+.outward-cheque-card-title {
+	font-size: 17px;
+	font-weight: 800;
+	color: #172554;
+}
+
+.outward-cheque-record-label {
+	font-size: 11px;
+	color: #64748b;
+	font-weight: 600;
+}
+
+.outward-cheque-image-container {
+	width: 100%;
+	height: 420px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f8fafc;
+	border: 1px solid #dbe3ee;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.outward-cheque-image {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
+}
+
+.outward-cheque-image-placeholder {
+	font-size: 13px;
+	font-weight: 700;
+	color: #94a3b8;
+}
+
+.outward-cheque-image-buttons {
+	width: 100%;
+	justify-content: center;
+	align-items: center;
+}
+
+.outward-cheque-image-button {
+	min-width: 88px;
+	height: 34px;
+	padding: 0 14px;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px;
+	color: #334155 !important;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.outward-cheque-image-button:hover {
+	background: #f8fafc !important;
+	border-color: #94a3b8 !important;
+}
+
+.outward-cheque-form-grid {
+	width: 100%;
+	border: none !important;
+	background: transparent !important;
+	border-collapse: separate !important;
+	border-spacing: 10px 8px !important;
+}
+
+.outward-cheque-form-grid .z-grid-header {
+	display: none !important;
+}
+
+.outward-cheque-form-grid .z-row, .outward-cheque-form-grid .z-row-inner,
+	.outward-cheque-form-grid .z-cell, .outward-cheque-form-grid .z-row-content
+	{
+	border: none !important;
+	background: transparent !important;
+}
+
+.outward-cheque-form-grid .z-row-content, .outward-cheque-form-grid .z-cell-content
+	{
+	padding: 0 !important;
+}
+
+.outward-cheque-field-label {
+	font-size: 10px;
+	font-weight: 800;
+	color: #475569;
+	letter-spacing: 0.45px;
+}
+
+.outward-cheque-field {
+	width: 100% !important;
+	height: 37px !important;
+	box-sizing: border-box !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	background: #ffffff !important;
+	color: #1e293b !important;
+	font-size: 12px !important;
+}
+
+.outward-cheque-field:focus {
+	border-color: #2563eb !important;
+	box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.10) !important;
+}
+
+.outward-cheque-readonly-field {
+	background: #f1f5f9 !important;
+	color: #64748b !important;
+	border-color: #dbe3ee !important;
+	cursor: not-allowed !important;
+}
+
+.outward-cheque-account-validate-button {
+	min-width: 78px;
+	height: 37px;
+	padding: 0 12px;
+	background: #172554 !important;
+	border: 1px solid #172554 !important;
+	border-radius: 6px;
+	color: #ffffff !important;
+	font-size: 10px;
+	font-weight: 800;
+}
+
+.outward-cheque-account-validate-button:hover {
+	background: #2563eb !important;
+	border-color: #2563eb !important;
+}
+
+.outward-cheque-account-validation {
+	display: block;
+	font-size: 11px !important;
+	font-weight: 700 !important;
+	padding-top: 2px;
+}
+
+.outward-cheque-account-validation.valid {
+	color: #15803d !important;
+}
+
+.outward-cheque-account-validation.invalid {
+	color: #dc2626 !important;
+}
+
+.outward-cheque-action-buttons {
+	width: 100%;
+	justify-content: flex-end;
+	align-items: center;
+	margin-top: auto;
+}
+
+.outward-cheque-save-button {
+	min-width: 105px;
+	height: 37px;
+	padding: 0 18px;
+	background: #172554 !important;
+	border: 1px solid #172554 !important;
+	border-radius: 6px;
+	color: #ffffff !important;
+	font-size: 11px;
+	font-weight: 800;
+}
+
+.outward-cheque-save-button:hover {
+	background: #0f1b3d !important;
+	border-color: #0f1b3d !important;
+}
+
+.outward-cheque-reject-button {
+	min-width: 115px;
+	height: 37px;
+	padding: 0 18px;
+	background: #ffffff !important;
+	border: 1px solid #dc2626 !important;
+	border-radius: 6px;
+	color: #dc2626 !important;
+	font-size: 11px;
+	font-weight: 800;
+}
+
+.outward-cheque-reject-button:hover {
+	background: #fef2f2 !important;
+	border-color: #b91c1c !important;
+	color: #b91c1c !important;
+}
+
+.outward-cheque-validation-status {
+	display: inline-block;
+	padding: 5px 10px;
+	background: #dcfce7;
+	border: 1px solid #bbf7d0;
+	border-radius: 15px;
+	color: #15803d;
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: 0.4px;
+}
+
+.outward-cheque-reject-modal {
+	background: #ffffff !important;
+	border: none !important;
+	border-radius: 8px !important;
+	box-shadow: 0 12px 35px rgba(15, 23, 42, 0.30) !important;
+	overflow: hidden !important;
+}
+
+.outward-cheque-reject-modal>.z-window-header {
+	background: linear-gradient(135deg, #0b1d3a 0%, #155eaa 100%) !important;
+	color: #ffffff !important;
+	font-size: 18px !important;
+	font-weight: 700 !important;
+	padding: 16px 18px !important;
+	border: none !important;
+}
+
+.outward-cheque-reject-modal>.z-window-content {
+	background: #ffffff !important;
+	padding: 20px !important;
+}
+
+.outward-cheque-modal-label {
+	color: #172554 !important;
+	font-size: 13px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-modal-field {
+	width: 100% !important;
+	height: 38px !important;
+	box-sizing: border-box !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	background: #ffffff !important;
+	color: #1e293b !important;
+	font-size: 12px !important;
+}
+
+.outward-cheque-modal-field:focus {
+	border-color: #1683e8 !important;
+	box-shadow: 0 0 0 2px rgba(22, 131, 232, 0.12) !important;
+}
+
+.outward-cheque-modal-remarks {
+	width: 100% !important;
+	height: 90px !important;
+	box-sizing: border-box !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	background: #ffffff !important;
+	color: #1e293b !important;
+	font-size: 12px !important;
+	resize: none !important;
+}
+
+.outward-cheque-modal-remarks:focus {
+	border-color: #1683e8 !important;
+	box-shadow: 0 0 0 2px rgba(22, 131, 232, 0.12) !important;
+}
+
+.outward-cheque-modal-buttons {
+	width: 100%;
+	justify-content: flex-end !important;
+	align-items: center !important;
+}
+
+.outward-cheque-modal-cancel-button {
+	height: 38px !important;
+	padding: 0 20px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	color: #172554 !important;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-modal-cancel-button:hover {
+	background: #f8fafc !important;
+	border-color: #94a3b8 !important;
+}
+
+.outward-cheque-modal-confirm-button {
+	height: 38px !important;
+	padding: 0 20px !important;
+	background: #dc2626 !important;
+	border: 1px solid #dc2626 !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+	font-size: 12px !important;
+	font-weight: 800 !important;
+}
+
+.outward-cheque-modal-confirm-button:hover {
+	background: #b91c1c !important;
+	border-color: #b91c1c !important;
+}
+
+@media ( max-width : 1100px) {
+	.outward-cheque-data-entry-page {
+		padding: 4px 16px 24px 16px;
+	}
+	.outward-cheque-image-card {
+		min-height: 520px;
+	}
+	.outward-cheque-details-card {
+		min-height: 520px;
+	}
+	.outward-cheque-image-container {
+		height: 350px;
+	}
+}
+
+@media ( max-width : 850px) {
+	.outward-cheque-content-layout {
+		flex-wrap: wrap !important;
+	}
+	.outward-cheque-image-card, .outward-cheque-details-card {
+		width: 100% !important;
+		flex: none !important;
+	}
+	.outward-cheque-image-container {
+		height: 320px;
+	}
+}

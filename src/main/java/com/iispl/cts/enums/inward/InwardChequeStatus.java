@@ -1,0 +1,30 @@
+package com.iispl.cts.enums.inward;
+
+public enum InwardChequeStatus {
+
+	    RECEIVED,
+
+	    MICR_REPAIR_PENDING,
+
+	    MICR_REPAIR_IN_PROGRESS,
+
+	    DATA_ENTRY_PENDING,
+
+	    DATA_ENTRY_IN_PROGRESS,
+
+	    CHECKER_PROCESSING_PENDING,
+
+	    CHECKER_VERIFICATION_IN_PROGRESS,
+
+	    SEND_BACK_TO_MAKER,
+
+	    REJECTED,
+
+	    RRF_PENDING,
+
+	    RETURNED,
+
+	    CLEARED,
+
+	    COMPLETED
+}

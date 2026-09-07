@@ -1,0 +1,358 @@
+.outward-maker-batch-details {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 4px 28px 32px 28px;
+	background: #f8fafc;
+	min-height: 100%;
+}
+
+.outward-maker-batch-details-header {
+	width: 100%;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 0 20px 0;
+}
+
+.outward-maker-batch-details-title {
+	display: block;
+	font-size: 26px !important;
+	font-weight: 800 !important;
+	color: #0f172a !important;
+	letter-spacing: 0.3px;
+}
+
+.outward-maker-batch-details-subtitle {
+	display: block;
+	margin-top: 4px;
+	font-size: 13px !important;
+	color: #64748b !important;
+}
+
+.outward-maker-back-button {
+	min-width: 160px;
+	height: 36px;
+	padding: 0 16px;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px;
+	color: #172554 !important;
+	font-size: 11px !important;
+	font-weight: 800 !important;
+	cursor: pointer;
+}
+
+.outward-maker-back-button:hover {
+	background: #f1f5f9 !important;
+	border-color: #94a3b8 !important;
+}
+
+.outward-maker-summary-card {
+	display: flex;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	overflow: hidden;
+	margin-bottom: 24px;
+}
+
+.outward-maker-summary-item {
+	flex: 1;
+	box-sizing: border-box;
+	min-height: 82px;
+	padding: 17px 22px;
+	border-right: 1px solid #e2e8f0;
+}
+
+.outward-maker-summary-item:last-child {
+	border-right: none;
+}
+
+.outward-maker-summary-label {
+	display: block;
+	font-size: 10px !important;
+	font-weight: 800 !important;
+	color: #64748b !important;
+	letter-spacing: 0.6px;
+	text-align: left;
+}
+
+.outward-maker-summary-value {
+	display: block;
+	margin-top: 7px;
+	font-size: 16px !important;
+	font-weight: 800 !important;
+	color: #0f172a !important;
+	text-align: left;
+}
+
+.outward-maker-cheque-section {
+	margin-bottom: 12px;
+}
+
+.outward-maker-cheque-section-title {
+	display: block;
+	font-size: 19px !important;
+	font-weight: 800 !important;
+	color: #0f172a !important;
+}
+
+.outward-maker-cheque-section-subtitle {
+	display: block;
+	margin-top: 3px;
+	font-size: 12px !important;
+	color: #64748b !important;
+}
+
+.outward-maker-cheque-table-card {
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #cbd5e1;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.outward-maker-cheque-grid {
+	width: 100%;
+	border: none !important;
+	background: #f8fafc !important;
+	border-spacing: 0 !important;
+	border-collapse: collapse !important;
+}
+
+.outward-maker-cheque-grid .z-grid-header {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #172554 !important;
+	border: none !important;
+}
+
+.outward-maker-cheque-grid .z-grid-header table {
+	border-spacing: 0 !important;
+	border-collapse: collapse !important;
+}
+
+.outward-maker-cheque-grid .z-column {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #172554 !important;
+	border-right: 1px solid #2563eb !important;
+	border-bottom: none !important;
+}
+
+.outward-maker-cheque-grid .z-column:last-child {
+	border-right: none !important;
+}
+
+.outward-maker-cheque-grid .z-column-content {
+	margin: 0 !important;
+	padding: 14px 12px !important;
+	background: #172554 !important;
+	color: #ffffff !important;
+	font-size: 11px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.4px;
+	text-align: center !important;
+	border: none !important;
+}
+
+.outward-maker-cheque-grid .z-grid-body {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #f8fafc !important;
+	border: none !important;
+}
+
+.outward-maker-cheque-grid .z-grid-body table {
+	width: 100%;
+	margin: 0 !important;
+	padding: 0 !important;
+	border-spacing: 0 !important;
+	border-collapse: collapse !important;
+}
+
+.outward-maker-cheque-grid .z-row {
+	height: 58px;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #ffffff !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.outward-maker-cheque-grid .z-row:last-child {
+	border-bottom: none !important;
+}
+
+.outward-maker-cheque-grid .z-row-inner {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #ffffff !important;
+	border: none !important;
+}
+
+.outward-maker-cheque-grid .z-cell {
+	margin: 0 !important;
+	padding: 0 !important;
+	background: #ffffff !important;
+	border: none !important;
+	text-align: center !important;
+}
+
+.outward-maker-cheque-grid .z-row-content {
+	margin: 0 !important;
+	padding: 15px 10px !important;
+	background: #ffffff !important;
+	color: #334155 !important;
+	font-size: 10px !important;
+	vertical-align: middle;
+	text-align: center !important;
+	border: none !important;
+}
+
+.outward-maker-cheque-grid .z-row:hover, .outward-maker-cheque-grid .z-row:hover .z-row-inner,
+	.outward-maker-cheque-grid .z-row:hover .z-cell,
+	.outward-maker-cheque-grid .z-row:hover .z-row-content {
+	background: #f1f5f9 !important;
+}
+
+.outward-maker-cheque-number {
+	display: block;
+	width: 100%;
+	font-size: 11px !important;
+	font-weight: 800 !important;
+	color: #1d4ed8 !important;
+	text-align: center;
+}
+
+.outward-maker-payee-account, .outward-maker-cheque-date,
+	.outward-maker-micr-code {
+	display: block;
+	width: 100%;
+	font-size: 10px !important;
+	font-weight: 600 !important;
+	color: #334155 !important;
+	text-align: center;
+}
+
+.outward-maker-cheque-status {
+	display: inline-block;
+	min-width: 70px;
+	padding: 5px 8px;
+	border-radius: 14px;
+	font-size: 9px !important;
+	font-weight: 800 !important;
+	text-align: center;
+}
+
+.outward-maker-cheque-status.micr-repair {
+	background: #fee2e2 !important;
+	color: #dc2626 !important;
+}
+
+.outward-maker-cheque-status.data-entry {
+	background: #fef3c7 !important;
+	color: #d97706 !important;
+}
+
+.outward-maker-cheque-status.completed {
+	background: #dcfce7 !important;
+	color: #15803d !important;
+}
+
+.outward-maker-cheque-status.pending {
+	background: #e2e8f0 !important;
+	color: #475569 !important;
+}
+
+.outward-maker-cheque-amount {
+	display: block;
+	width: 100%;
+	font-size: 10px !important;
+	font-weight: 700 !important;
+	color: #334155 !important;
+	text-align: center;
+}
+
+.outward-maker-action-button {
+	min-width: 128px;
+	height: 32px;
+	padding: 0 10px;
+	background: #172554 !important;
+	border: 1px solid #172554 !important;
+	border-radius: 6px;
+	color: #ffffff !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
+	cursor: pointer;
+}
+
+.outward-maker-action-button:hover {
+	background: #0f1b3d !important;
+	border-color: #0f1b3d !important;
+}
+
+.outward-maker-empty-state {
+	box-sizing: border-box;
+	width: 100%;
+	padding: 42px 20px;
+	text-align: center;
+	background: #ffffff;
+}
+
+.outward-maker-empty-title {
+	display: block;
+	font-size: 15px !important;
+	font-weight: 700 !important;
+	color: #475569 !important;
+	text-align: center;
+}
+
+.outward-maker-empty-subtitle {
+	display: block;
+	margin-top: 5px;
+	font-size: 12px !important;
+	color: #94a3b8 !important;
+	text-align: center;
+}
+
+.outward-maker-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 18px 0 4px 0;
+}
+
+.outward-maker-pagination-button {
+	min-width: 34px;
+	height: 32px;
+	padding: 0 9px;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px;
+	color: #334155 !important;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+}
+
+.outward-maker-pagination-button:hover {
+	background: #f1f5f9 !important;
+	border-color: #94a3b8 !important;
+}
+
+.outward-maker-pagination-button:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.outward-maker-pagination-label {
+	min-width: 58px;
+	text-align: center;
+	font-size: 12px !important;
+	font-weight: 800 !important;
+	color: #334155 !important;
+}

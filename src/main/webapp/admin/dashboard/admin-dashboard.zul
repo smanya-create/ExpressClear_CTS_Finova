@@ -12,7 +12,7 @@
         <!-- Main Body Area -->
         <center border="none" autoscroll="true" style="background: #eef3f8;">
             <vlayout spacing="0" hflex="1">
-                
+               <timer id="timerActiveUsers" delay="3000" repeats="true" onTimer="$composer.refreshActiveUsers()" />
                 <!-- Reusable Header Component -->
                 <include src="/components/header.zul" 
                          pageTitle="Admin Dashboard" 

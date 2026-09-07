@@ -1,0 +1,190 @@
+@charset "UTF-8";
+
+/* Main Queue Page */
+.micr-repair-queue-page {
+    padding: 8px 12px 16px 12px;
+    box-sizing: border-box;
+    background: #f8fafc;
+}
+
+/* Page Heading */
+.page-heading-row {
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.page-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.page-subtitle {
+    font-size: 11px;
+    color: #64748b;
+}
+
+
+/* Summary Cards */
+.summary-row {
+    margin-bottom: 12px;
+}
+
+.summary-card {
+    flex: 1;
+    min-height: 62px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+}
+
+.summary-label {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.warning-value {
+    color: #d97706;
+}
+
+
+/* Queue Card */
+.queue-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    box-sizing: border-box;
+}
+
+.queue-card-header {
+    padding: 10px 14px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.card-subtitle {
+    font-size: 10px;
+    color: #64748b;
+}
+
+
+/* Batch Queue */
+.batch-queue-list {
+    border: none;
+    background: #ffffff;
+}
+
+.batch-queue-list .z-listhead {
+    background: #f8fafc;
+}
+
+.batch-queue-list .z-listheader {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569 !important;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 9px 10px;
+}
+
+.batch-queue-list .z-listheader-content {
+    color: #475569 !important;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.batch-queue-list .z-listitem {
+    background: #ffffff;
+}
+
+.batch-queue-list .z-listitem:hover {
+    background: #f8fafc;
+}
+
+.batch-queue-list .z-listcell {
+    border-bottom: 1px solid #eef2f7;
+    padding: 9px 10px;
+    vertical-align: middle;
+}
+
+
+/* Table Text */
+.batch-id {
+    font-size: 11px;
+    font-weight: 600;
+    color: #24588d;
+}
+
+.table-text {
+    font-size: 11px;
+    color: #475569;
+}
+
+.count-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.pending-count {
+    display: inline-block;
+    min-width: 24px;
+    padding: 3px 7px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    background: #fff7ed;
+    color: #d97706;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+}
+
+
+/* Status */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.pending-status {
+    background: #fff7ed;
+    color: #d97706;
+}
+
+
+/* Open Button */
+.open-button {
+    min-width: 58px;
+    height: 28px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 5px;
+    background: #24588d;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.open-button:hover {
+    background: #1d4d7c;
+}

@@ -1,122 +1,128 @@
 package com.iispl.cts.serviceimpl.outward;
 
-import java.sql.Connection;
+import java.util.List;
 
-import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.dao.outward.OutwardChequeDAO;
 import com.iispl.cts.dao.outward.ScanBatchDAO;
-import com.iispl.cts.daoimpl.outward.OutwardBatchDAOImpl;
-import com.iispl.cts.daoimpl.outward.OutwardChequeDAOImpl;
-import com.iispl.cts.daoimpl.outward.ScanBatchDAOImpl;
+import com.iispl.cts.dao.outward.ScanChequeDAO;
+import com.iispl.cts.entity.outward.OutwardBatch;
+import com.iispl.cts.entity.outward.OutwardCheque;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
 import com.iispl.cts.service.outward.OutwardMakerService;
 
 public class OutwardMakerServiceImpl
         implements OutwardMakerService {
+//
+//    private final ScanBatchDAO scanBatchDAO;
+//    private final ScanChequeDAO scanChequeDAO;
+//
+//    private final OutwardBatchDAO outwardBatchDAO;
+//    private final OutwardChequeDAO outwardChequeDAO;
 
-    private ScanBatchDAO scanBatchDAO;
-    private OutwardBatchDAO outwardBatchDAO;
-    private OutwardChequeDAO outwardChequeDAO;
 
-    public OutwardMakerServiceImpl() {
+//    public OutwardMakerServiceImpl() {
+//
+//        scanBatchDAO = new ScanBatchDAO();
+//        scanChequeDAO = new ScanChequeDAO();
+//
+//        outwardBatchDAO = new OutwardBatchDAO();
+//        outwardChequeDAO = new OutwardChequeDAO();
+//    }
 
-        scanBatchDAO =
-                new ScanBatchDAOImpl();
 
-        outwardBatchDAO =
-                new OutwardBatchDAOImpl();
-
-        outwardChequeDAO =
-                new OutwardChequeDAOImpl();
-    }
+    // =========================================================
+    // SCAN MICR REPAIR
+    // =========================================================
 
     @Override
-    public String getBatchFromScan(
+    public List<ScanBatch> getScanMicrRepairBatches() {
+
+        // We will add the actual DAO call here
+        // after checking ScanBatchDAO.
+
+        return null;
+    }
+
+
+    @Override
+    public List<ScanCheque> getScanMicrRepairCheques(
             String scannedBatchId) {
 
-        Connection connection = null;
+        // We will add the actual DAO call here
+        // after checking ScanChequeDAO.
 
-        try {
-
-            // =============================================
-            // COMMON CONNECTION
-            // =============================================
-
-            connection =
-                    DBConnection.getConnection();
-
-            connection.setAutoCommit(false);
-
-            // =============================================
-            // 1. UPDATE SCAN BATCH STATUS
-            // =============================================
-
-            scanBatchDAO.updateBatchStatus(
-                    connection,
-                    scannedBatchId,
-                    "VALIDATED");
-
-            // =============================================
-            // 2. TRANSFER BATCH
-            // scan_batch → outward_batch
-            // =============================================
-
-            String outwardBatchId = outwardBatchDAO.transferBatchFromScanToOutward(
-            		connection,
-                    scannedBatchId);
-
-            // =============================================
-            // 3. TRANSFER CHEQUES
-            // scan_cheque → outward_cheque
-            // =============================================
-
-            outwardChequeDAO.transferChequeFromScanToOutwrd(
-                    connection,
-                    scannedBatchId);
-
-            // =============================================
-            // EVERYTHING SUCCESSFUL
-            // =============================================
-
-            connection.commit();
-            return outwardBatchId;
-
-        } catch (Exception e) {
-
-            // =============================================
-            // ANY FAILURE → ROLLBACK EVERYTHING
-            // =============================================
-
-            if (connection != null) {
-
-                try {
-                    connection.rollback();
-                } catch (Exception rollbackException) {
-                    rollbackException.printStackTrace();
-                }
-            }
-
-            throw new RuntimeException(
-                    "Failed to process batch: "
-                    + scannedBatchId,
-                    e);
-
-        } finally {
-
-            if (connection != null) {
-
-                try {
-                    connection.setAutoCommit(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    connection.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        return null;
     }
+
+
+    public void updateScanMicrRepair(
+            ScanCheque cheque) {
+
+        // We will add the actual DAO update here
+        // after checking ScanChequeDAO.
+    }
+
+
+    // =========================================================
+    // OUTWARD MAKER MICR REPAIR
+    // =========================================================
+
+    @Override
+    public List<OutwardBatch> getMakerMicrRepairBatches() {
+
+        // We will add the actual DAO call here
+        // after checking OutwardBatchDAO.
+
+        return null;
+    }
+
+
+    @Override
+    public List<OutwardCheque> getMakerMicrRepairCheques(
+            String outwardBatchId) {
+
+        // We will add the actual DAO call here
+        // after checking OutwardChequeDAO.
+
+        return null;
+    }
+
+
+    
+    public void updateMakerMicrRepair(
+            OutwardCheque cheque) {
+
+        // We will add the actual DAO update here
+        // after checking OutwardChequeDAO.
+    }
+
+
+	@Override
+	public void saveScanMicrRepair(ScanCheque cheque) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void saveMakerMicrRepair(OutwardCheque cheque) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public int getMakerMicrRepairChequeCount(String outwardBatchId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int getScanMicrRepairChequeCount(String scannedBatchId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

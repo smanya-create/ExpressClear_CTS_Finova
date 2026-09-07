@@ -2,7 +2,6 @@ package com.iispl.cts.serviceimpl.outward;
 
 import java.math.BigDecimal;
 
-
 import java.util.List;
 
 import com.iispl.cts.dao.outward.OutwardChequeDAO;
@@ -35,5 +34,16 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 
 		return outwardChequeDAO.getTotalChequeAmountByBatchId(outwardBatchId);
 	}
-}
 
+	@Override
+	public int getDataEnteredCountByBatchId(String outwardBatchId) {
+
+		return outwardChequeDAO.getDataEnteredCountByBatchId(outwardBatchId);
+	}
+
+	@Override
+	public boolean updateChequeStatus(String outwardChequeId, String chequeStatus) {
+
+		return outwardChequeDAO.updateChequeStatus(outwardChequeId, chequeStatus);
+	}
+}

@@ -185,7 +185,11 @@ public class LoginController extends GenericForwardComposer<Component> {
         session.setAttribute("USER_PERMISSIONS", userPermissions);
 
         // Register user in active user registry
-        ActiveUserManager.userLoggedIn(authenticatedUser.getUserId());
+       
+
+        // Audit success log
+        AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
+                "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName, "SUCCESS");
 
         // Audit success log
         AuditServiceImpl.getInstance().log("AUTH", "LOGIN",

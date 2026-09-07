@@ -6,39 +6,23 @@ import com.iispl.cts.entity.inward.InwardCheque;
 
 public interface InwardChequeDAO {
 
-    List<InwardCheque> getAllCheques();
+	List<InwardCheque> getMicrRepairRequiredCheques();
 
-    InwardCheque getChequeById(String inwardChequeId);
+	InwardCheque findById(String inwardChequeId);
 
-    List<InwardCheque> getChequesByBatchId(String inwardBatchId);
+	List<InwardCheque> findByBatchAndStatus(String batchId, String status);
 
-    boolean saveCheque(InwardCheque inwardCheque);
+	List<InwardCheque> getAllCheques();
 
-    boolean deleteCheque(String inwardChequeId);
- 
-    boolean updatecheque(InwardCheque cheque);
-    
-    
-    
-    
-    
-    
-     // Fetch all inward cheques require MICR repair.
-     
-    List<InwardCheque> getMicrRepairRequiredCheques();
-    
-     // Fetch a inward cheque by its ID.
-    
-    InwardCheque findById(String inwardChequeId);
-   
-     // Update the MICR code and status after MICR repair.
-   
-  boolean updateMicrRepair(String inwardChequeId,String correctedMicrCode,String chequeStatus);
-  
-    List<InwardCheque> findByBatchAndStatus(String batchId, String status);
-  
-    boolean updateCheque(InwardCheque cheque);
-    
-    
-    
+	InwardCheque getChequeById(String inwardChequeId);
+
+	List<InwardCheque> getChequesByBatchId(String inwardBatchId);
+
+	boolean saveCheque(InwardCheque inwardCheque);
+
+	boolean updateCheque(InwardCheque inwardCheque);
+
+	boolean updateMicrRepair(String inwardChequeId, String correctedMicrCode, String chequeStatus);
+
+	boolean deleteCheque(String inwardChequeId);
 }

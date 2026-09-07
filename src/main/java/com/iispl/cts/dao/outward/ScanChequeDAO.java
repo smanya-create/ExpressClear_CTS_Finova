@@ -8,19 +8,16 @@ import com.iispl.cts.entity.outward.ScanCheque;
 
 public interface ScanChequeDAO {
 
-    /**
-     * Saves the scanned batch information into the database.
-     *
-     * @param scanBatch batch information parsed from XML
-     * @return scanned batch ID
-     */
-    String saveBatch(Connection connection,List<ScanCheque> chequeList );
-    List<ScanCheque> getChequesByBatchId(
-            String scannedBatchId);
-    
-    void updateChequeStatus(
-            Connection connection,
-            String batchId,
-            String status);
+	/**
+	 * Saves the scanned batch information into the database.
+	 *
+	 * @param scanBatch batch information parsed from XML
+	 * @return scanned batch ID
+	 */
+	String saveBatch(Connection connection, List<ScanCheque> chequeList);
+
+	List<ScanCheque> getChequesByBatchId(String scannedBatchId);
+
+	void updateChequeStatus(Connection connection, String batchId, String status);
 
 }

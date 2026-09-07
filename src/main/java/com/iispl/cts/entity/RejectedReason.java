@@ -1,17 +1,17 @@
 package com.iispl.cts.entity;
 
-public class RejectedResaon {
+public class RejectedReason {
 
 	private String rejectedReasonId;
 	private String rejectedReasonCode;
 	private String rejectedReasonName;
 	private String rejectedReasonDescription;
 
-	public RejectedResaon() {
+	public RejectedReason() {
 	    }
 	
 
-	public RejectedResaon(String rejectedReasonId,String rejectedReasonCode,String rejectedReasonName,String rejectedReasonDescription) {
+	public RejectedReason(String rejectedReasonId,String rejectedReasonCode,String rejectedReasonName,String rejectedReasonDescription) {
 					        this.rejectedReasonId = rejectedReasonId;
 					        this.rejectedReasonCode = rejectedReasonCode;
 					        this.rejectedReasonName = rejectedReasonName;

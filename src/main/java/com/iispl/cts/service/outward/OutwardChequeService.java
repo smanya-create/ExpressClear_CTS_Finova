@@ -1,9 +1,11 @@
 package com.iispl.cts.service.outward;
+
 import java.math.BigDecimal;
 
 import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
+
 public interface OutwardChequeService {
 
 	List<OutwardCheque> getChequesByBatchId(String outwardBatchId);
@@ -12,5 +14,7 @@ public interface OutwardChequeService {
 
 	BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
 
-
+	int getDataEnteredCountByBatchId(String outwardBatchId);
+	
+	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
 }

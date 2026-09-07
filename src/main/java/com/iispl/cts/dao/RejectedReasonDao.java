@@ -2,14 +2,14 @@ package com.iispl.cts.dao;
 
 import java.util.List;
 
-import com.iispl.cts.entity.RejectedResaon;
+import com.iispl.cts.entity.RejectedReason;
 
 public  interface RejectedReasonDao {
 	
 	
-   List<RejectedResaon> getAllRejectedReasons();
+   List<RejectedReason> getAllRejectedReasons();
 
    
-   RejectedResaon findById(String rejectedReasonId);
+   RejectedReason findById(String rejectedReasonId);
 
 }

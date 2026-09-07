@@ -1,6 +1,7 @@
 package com.iispl.cts.entity.outward;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class OutwardRejectedCheques implements Serializable {
@@ -12,20 +13,41 @@ public class OutwardRejectedCheques implements Serializable {
     private String rejectedBy;
     private Timestamp rejectedDate;
     private String remarks;
+    private String outwardBatchId;       
+    private BigDecimal chequeAmount; 
 
     public OutwardRejectedCheques() {
     }
 
     public OutwardRejectedCheques(String outwardRejectedChequeId, String outwardChequeId, 
-                                  String rejectedBy, Timestamp rejectedDate, String remarks) {
+                                  String rejectedBy, Timestamp rejectedDate, String remarks, String outwardBatchId, BigDecimal chequeAmount) {
         this.outwardRejectedChequeId = outwardRejectedChequeId;
         this.outwardChequeId = outwardChequeId;
         this.rejectedBy = rejectedBy;
         this.rejectedDate = rejectedDate;
         this.remarks = remarks;
+        this.outwardBatchId = outwardBatchId;
+        this.chequeAmount = chequeAmount;
+
     }
 
-    public String getOutwardRejectedChequeId() { return outwardRejectedChequeId; }
+    public String getOutwardBatchId() {
+		return outwardBatchId;
+	}
+
+	public void setOutwardBatchId(String outwardBatchId) {
+		this.outwardBatchId = outwardBatchId;
+	}
+
+	public BigDecimal getChequeAmount() {
+		return chequeAmount;
+	}
+
+	public void setChequeAmount(BigDecimal chequeAmount) {
+		this.chequeAmount = chequeAmount;
+	}
+
+	public String getOutwardRejectedChequeId() { return outwardRejectedChequeId; }
     public void setOutwardRejectedChequeId(String outwardRejectedChequeId) { this.outwardRejectedChequeId = outwardRejectedChequeId; }
 
     public String getOutwardChequeId() { return outwardChequeId; }

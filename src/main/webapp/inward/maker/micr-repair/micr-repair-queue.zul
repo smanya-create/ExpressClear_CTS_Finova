@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="MICR Repair Queue" contentType="text/html;charset=UTF-8"?>
+
+<zk>
+
+	<style src="/css/inward/micr-repair-queue.css" />
+
+	<vlayout id="micrRepairQueueRoot" 
+	  apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairQueueController"
+	 sclass="micr-repair-queue-page"
+		width="100%" spacing="0">
+
+		<!-- Page Heading -->
+		<hlayout sclass="page-heading-row" width="100%"
+			valign="middle">
+
+			<vlayout spacing="2px" hflex="1">
+				<label value="MICR Repair Queue" sclass="page-title" />
+
+				<label
+					value="Inward — Select a batch containing cheques that require MICR repair."
+					sclass="page-subtitle" />
+			</vlayout>
+
+		</hlayout>
+
+
+		
+		<hlayout sclass="summary-row" width="100%" spacing="10px">
+
+			<div sclass="summary-card">
+				<vlayout spacing="3px">
+					<label value="Pending Batches"
+						sclass="summary-label" />
+					<label value="3" sclass="summary-value" />
+				</vlayout>
+			</div>
+
+			<div sclass="summary-card">
+				<vlayout spacing="3px">
+					<label value="MICR Repair Pending"
+						sclass="summary-label" />
+					<label value="10"
+						sclass="summary-value warning-value" />
+				</vlayout>
+			</div>
+
+			<div sclass="summary-card">
+				<vlayout spacing="3px">
+					<label value="In Progress" sclass="summary-label" />
+					<label value="0" sclass="summary-value" />
+				</vlayout>
+			</div>
+
+		</hlayout>
+
+
+		
+		<div sclass="queue-card">
+
+			<hlayout sclass="queue-card-header" width="100%"
+				valign="middle">
+
+				<vlayout spacing="2px" hflex="1">
+					<label value="Batches Requiring MICR Repair"
+						sclass="card-title" />
+
+					<label
+						value="Open a batch to view and repair its flagged cheques."
+						sclass="card-subtitle" />
+				</vlayout>
+
+			</hlayout>
+
+
+			
+			<listbox id="batchQueueList" sclass="batch-queue-list"
+				width="100%" mold="paging" pageSize="10"
+				emptyMessage="No batches are currently pending MICR repair.">
+
+				<listhead sizable="true">
+
+					<listheader label="Batch ID" width="18%" />
+
+					<listheader label="Received" width="18%" />
+
+					<listheader label="Total Cheques" width="14%"
+						align="center" />
+
+					<listheader label="MICR Repair Pending" width="18%"
+						align="center" />
+
+					<listheader label="Status" width="16%"
+						align="center" />
+
+					<listheader label="Action" width="16%"
+						align="center" />
+
+				</listhead>
+
+
+				
+				<listitem value="BATCH-2026-09-04-001">
+
+					<listcell>
+						<label value="BATCH-2026-09-04-001"
+							sclass="batch-id" />
+					</listcell>
+
+					<listcell>
+						<label value="04-Sep-2026 09:15 AM"
+							sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="8" sclass="count-text" />
+					</listcell>
+
+					<listcell>
+						<label value="4" sclass="pending-count" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+					<button label="Open" sclass="open-button"
+                       onClick="$composer.openBatch(self.getParent().getParent().getValue())" />
+					</listcell>
+
+				</listitem>
+
+
+				
+				<listitem value="BATCH-2026-09-04-002">
+
+					<listcell>
+						<label value="BATCH-2026-09-04-002"
+							sclass="batch-id" />
+					</listcell>
+
+					<listcell>
+						<label value="04-Sep-2026 10:05 AM"
+							sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="6" sclass="count-text" />
+					</listcell>
+
+					<listcell>
+						<label value="4" sclass="pending-count" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+						<button label="Open" sclass="open-button"
+                          onClick="$composer.openBatch(self.getParent().getParent().getValue())" />
+					</listcell>
+
+				</listitem>
+
+
+			
+				<listitem value="BATCH-2026-09-04-003">
+
+					<listcell>
+						<label value="BATCH-2026-09-04-003"
+							sclass="batch-id" />
+					</listcell>
+
+					<listcell>
+						<label value="04-Sep-2026 11:20 AM"
+							sclass="table-text" />
+					</listcell>
+
+					<listcell>
+						<label value="4" sclass="count-text" />
+					</listcell>
+
+					<listcell>
+						<label value="2" sclass="pending-count" />
+					</listcell>
+
+					<listcell>
+						<label value="MICR REPAIR"
+							sclass="status-badge pending-status" />
+					</listcell>
+
+					<listcell>
+						
+						<button label="Open" sclass="open-button"
+                          onClick="$composer.openBatch(self.getParent().getParent().getValue())" />
+					</listcell>
+
+				</listitem>
+
+			</listbox>
+
+		</div>
+
+	</vlayout>
+
+</zk>

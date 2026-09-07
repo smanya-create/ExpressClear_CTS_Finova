@@ -1,76 +1,139 @@
+/* --- micr-repair.css --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
 .micr-repair-page {
-    padding: 0 0 24px 0;
+    padding: 8px 12px;
+    height: 100vh;
+    max-height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .page-heading-row {
-    padding: 2px 0 0 0;
+    padding: 0;
+    margin-bottom: 4px;
 }
 
 .page-title {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
     color: #1e293b;
 }
 
 .page-subtitle {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
 }
 
 .batch-navigation-row {
-    padding: 2px 0;
+    padding: 4px 10px;
+    margin-bottom: 6px;
+    background: #ffffff;
+   
+    border-radius: 6px;
+}
+
+.batch-summary-grid {
+    width: 100%;
+}
+
+.batch-summary-grid .z-row-content {
+    padding: 2px 4px;
+    vertical-align: middle;
+}
+
+.batch-label-cell {
+    font-size: 9px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.batch-val-cell {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .batch-pill {
-    padding: 6px 14px;
-    border: 1px solid #93c5fd;
-    border-radius: 16px;
-    background: #eff6ff;
-    color: #2563eb;
-    font-size: 11px;
+    padding: 2px 8px;
+    border: 1px solid #fcd34d;
+    border-radius: 12px;
+    background: #fef3c7;
+    color: #d97706;
+    font-size: 10px;
     font-weight: 700;
 }
 
 .record-position {
     font-size: 11px;
     color: #94a3b8;
+    font-weight: 600;
 }
 
-.workspace-card {
-    border: 1px solid #dbe3ee;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+.repair-workspace {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+}
+
+.repair-workspace > .workspace-card {
+    height: calc(100vh - 165px) !important;
+    min-height: calc(100vh - 165px) !important;
+    max-height: calc(100vh - 165px) !important;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.workspace-card > .z-panelchildren {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .workspace-card > .z-caption {
     border-bottom: 1px solid #e5e7eb;
-    padding: 12px 16px;
+    padding: 8px 12px;
     background: #ffffff;
 }
 
 .card-title {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     color: #1e293b;
 }
 
 .image-panel-content,
 .form-panel-content {
-    padding: 16px;
+    padding: 10px 12px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.cheque-navigation-row {
+    margin-bottom: 4px;
 }
 
 .empty-image-state {
-    min-height: 250px;
+    flex: 1;
+    min-height: 180px;
     border: 1px dashed #cbd5e1;
     border-radius: 6px;
     background: #f8fafc;
-    padding: 20px;
+    padding: 10px;
     text-align: center;
 }
 
 .empty-image-state .z-groupbox-header {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #475569;
     border-bottom: none;
@@ -78,26 +141,33 @@
 
 .empty-image-state .z-groupbox-content {
     color: #94a3b8;
-    font-size: 12px;
-    padding-top: 70px;
+    font-size: 11px;
+    padding-top: 20px;
 }
 
 .cheque-image {
     border: 1px solid #cbd5e1;
     border-radius: 4px;
+    max-height: 280px;
+    object-fit: contain;
 }
 
 .image-help-text {
     font-size: 10px;
     color: #6b7280;
+    margin-top: auto;
+}
+
+.micr-form-grid {
+    flex: 1;
 }
 
 .micr-form-grid .z-row-content {
-    padding: 6px 5px;
+    padding: 3px 4px;
 }
 
 .field-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     color: #475569;
 }
@@ -108,8 +178,8 @@
 .correction-field,
 .remarks-field {
     width: 100%;
-    border-radius: 5px;
-    font-size: 12px;
+    border-radius: 4px;
+    font-size: 11px;
 }
 
 .readonly-field .z-textbox-input,
@@ -117,8 +187,8 @@
 .error-field .z-textbox-input,
 .correction-field .z-textbox-input,
 .remarks-field .z-textbox-input {
-    height: 34px;
-    padding: 7px 10px;
+    height: 28px;
+    padding: 4px 8px;
     box-sizing: border-box;
 }
 
@@ -147,13 +217,13 @@
 
 .remarks-field .z-textbox-input {
     height: auto;
-    min-height: 52px;
+    min-height: 38px;
 }
 
 .error-status {
-    padding: 4px 10px;
+    padding: 2px 8px;
     border: 1px solid #fb923c;
-    border-radius: 14px;
+    border-radius: 12px;
     color: #c2410c;
     background: #fff7ed;
     font-size: 9px;
@@ -165,33 +235,34 @@
     border: 1px solid #d1d5db;
     background: #ffffff;
     color: #475569;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 10px;
     font-weight: 600;
+    padding: 3px 8px;
 }
 
 .primary-button {
     border: 1px solid #24588d;
     background: #24588d;
     color: #ffffff;
-    border-radius: 5px;
-    font-size: 11px;
+    border-radius: 4px;
+    font-size: 10px;
     font-weight: 700;
-    padding: 8px;
+    padding: 6px 12px;
 }
 
 .reject-button {
     border: 1px solid #ef4444;
     background: #ef4444;
     color: #ffffff;
-    border-radius: 5px;
-    font-size: 11px;
+    border-radius: 4px;
+    font-size: 10px;
     font-weight: 700;
-    padding: 8px;
+    padding: 6px 12px;
 }
 
 .repair-progress {
-    height: 5px;
+    height: 4px;
 }
 
 .progress-label {
@@ -200,11 +271,11 @@
 }
 
 .page-footer {
-    padding-top: 10px;
+    padding-top: 4px;
     border-top: 1px solid #e5e7eb;
 }
 
 .footer-text {
-    font-size: 10px;
+    font-size: 9px;
     color: #94a3b8;
 }

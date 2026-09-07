@@ -1,0 +1,355 @@
+@charset "UTF-8";
+/* =========================================================
+   COMMON PAGE
+   ========================================================= */
+.common-window {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #eef4fa;
+}
+
+.main-page {
+    width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box;
+    padding: 28px 50px !important;
+    background: #eef4fa;
+}
+
+
+/* =========================================================
+   CONTENT AREA
+   ========================================================= */
+
+.content-area {
+    width: 100%;
+    min-height: 100%;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE HEADING
+   ========================================================= */
+
+.page-heading {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    display: block;
+
+    font-size: 23px;
+    font-weight: 700;
+
+    color: #1f2937;
+
+    margin-bottom: 6px;
+}
+
+.section-description {
+    display: block;
+
+    font-size: 13px;
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   COMMON CARD
+   ========================================================= */
+
+.summary-card,
+.search-card,
+.table-card,
+.details-card,
+.image-card,
+.action-card {
+    box-sizing: border-box;
+
+    width: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #d9e2ec;
+    border-radius: 12px;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   SUMMARY CARD
+   ========================================================= */
+
+.summary-card {
+    min-height: 105px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 20px 28px;
+}
+
+
+/* =========================================================
+   SEARCH CARD
+   ========================================================= */
+
+.search-card {
+    min-height: 74px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 12px 29px;
+}
+
+
+/* =========================================================
+   TABLE CARD
+   ========================================================= */
+
+.table-card {
+    padding: 0;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   LIST TITLE
+   ========================================================= */
+
+.list-title-section {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 20px 24px 16px 24px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.list-title {
+    display: block;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    color: #1f2937;
+
+    margin-bottom: 4px;
+}
+
+.list-subtitle {
+    display: block;
+
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   LISTBOX
+   ========================================================= */
+
+.rejected-listbox,
+.common-listbox {
+    width: 100%;
+
+    border: none;
+}
+
+
+/* =========================================================
+   LIST HEADER
+   ========================================================= */
+
+.rejected-listbox .z-listheader-content,
+.common-listbox .z-listheader-content {
+    font-weight: 700 !important;
+}
+
+.rejected-listbox .z-listheader,
+.common-listbox .z-listheader {
+    font-weight: 700 !important;
+}
+
+
+/* =========================================================
+   SEARCH FIELD
+   ========================================================= */
+
+.search-field {
+    box-sizing: border-box;
+
+    width: 340px;
+
+    margin-right: 27px;
+}
+
+.date-field {
+    width: 198px;
+
+    margin-right: 24px;
+}
+
+
+/* =========================================================
+   FIELD LABEL
+   ========================================================= */
+
+.field-label {
+    display: block;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #6b7280;
+
+    margin-bottom: 5px;
+}
+
+
+/* =========================================================
+   TEXTBOX
+   ========================================================= */
+
+.search-input {
+    box-sizing: border-box;
+
+    height: 30px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   DATEBOX
+   ========================================================= */
+
+.date-field .z-datebox {
+    width: 100% !important;
+}
+
+.date-field .z-datebox-input {
+    height: 30px !important;
+
+    box-sizing: border-box;
+
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px 0 0 6px !important;
+}
+
+.date-field .z-datebox-button {
+    height: 30px !important;
+
+    border: 1px solid #cbd5e1 !important;
+    border-left: none !important;
+
+    border-radius: 0 6px 6px 0 !important;
+}
+
+
+/* =========================================================
+   SEARCH BUTTON
+   ========================================================= */
+
+.search-button {
+    width: 98px;
+    height: 30px;
+
+    margin-top: 18px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.hardcoded-footer {
+    width: 100%;
+    height: 50px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+
+    background: #ffffff;
+
+    border-top: 1px solid #d9e2ec;
+}
+
+.footer-left {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.footer-right {
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   COMMON BUTTON
+   ========================================================= */
+
+.common-button {
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   IMPORTANT BOX
+   ========================================================= */
+
+.important-box {
+    box-sizing: border-box;
+
+    margin: 16px 24px 20px 24px;
+    padding: 12px 16px;
+
+    border: 1px solid #d9e2ec;
+    border-radius: 8px;
+
+    background: #f8fafc;
+}
+
+.important-title {
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #475569;
+
+    margin-right: 8px;
+}
+
+.important-text {
+    font-size: 11px;
+
+    color: #64748b;
+}
