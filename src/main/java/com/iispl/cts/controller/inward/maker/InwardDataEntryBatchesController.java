@@ -22,6 +22,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dto.DataEntryBatchItemDTO;
@@ -32,6 +33,11 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
     private Listbox lbxDataEntryBatches;
     private Button btnRefresh;
+    private Textbox txtSearchBatch;
+    private Button btnClearSearch;
+
+    // Cache the full batch list for instant search/filtering
+    private List<DataEntryBatchItemDTO> allBatches = new ArrayList<>();
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -44,10 +50,19 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         loadBatches();
     }
 
-    private void initListRenderer() {
-        if (lbxDataEntryBatches == null) {
-            return;
+    public void onChange$txtSearchBatch() {
+        applyFilter();
+    }
+
+    public void onClick$btnClearSearch() {
+        if (txtSearchBatch != null) {
+            txtSearchBatch.setValue("");
         }
+        applyFilter();
+    }
+
+    private void initListRenderer() {
+        if (lbxDataEntryBatches == null) return;
 
         lbxDataEntryBatches.setItemRenderer(new ListitemRenderer<DataEntryBatchItemDTO>() {
             @Override
@@ -75,20 +90,18 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                 cellAmount.setStyle("font-family: monospace; font-size: 13px; font-weight: 600;");
                 cellAmount.setParent(item);
 
-                // 5. Batch Status
-                Listcell cellStatus = new Listcell(batch.getBatchStatus());
+                // 5. Dynamic Operational Status Badge (Replaces static "PROCESSING")
+                Listcell cellStatus = new Listcell();
+                Label lblStatus = new Label(batch.getDisplayStatus());
+                lblStatus.setStyle(batch.getStatusBadgeStyle());
+                lblStatus.setParent(cellStatus);
                 cellStatus.setParent(item);
 
                 // 6. Action Button
                 Listcell cellAction = new Listcell();
                 Button btnAction = new Button(batch.getActionLabel());
                 btnAction.setSclass(batch.getActionButtonClass());
-
-                // Direct click listener: holds direct reference to this row's DTO
-                btnAction.addEventListener(Events.ON_CLICK, (Event e) -> {
-                    processBatch(batch);
-                });
-
+                btnAction.addEventListener(Events.ON_CLICK, (Event e) -> processBatch(batch));
                 btnAction.setParent(cellAction);
                 cellAction.setParent(item);
             }
@@ -96,10 +109,32 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     }
 
     private void loadBatches() {
-        List<DataEntryBatchItemDTO> list = fetchEligibleBatches();
-        if (lbxDataEntryBatches != null) {
-            lbxDataEntryBatches.setModel(new ListModelList<>(list));
+        this.allBatches = fetchEligibleBatches();
+        applyFilter();
+    }
+
+    private void applyFilter() {
+        if (lbxDataEntryBatches == null) return;
+
+        String query = (txtSearchBatch != null && txtSearchBatch.getValue() != null)
+                ? txtSearchBatch.getValue().trim().toLowerCase()
+                : "";
+
+        if (query.isEmpty()) {
+            lbxDataEntryBatches.setModel(new ListModelList<>(allBatches));
+            return;
         }
+
+        List<DataEntryBatchItemDTO> filtered = new ArrayList<>();
+        for (DataEntryBatchItemDTO item : allBatches) {
+            boolean matchesId = item.getBatchId() != null && item.getBatchId().toLowerCase().contains(query);
+            boolean matchesStatus = item.getDisplayStatus() != null && item.getDisplayStatus().toLowerCase().contains(query);
+
+            if (matchesId || matchesStatus) {
+                filtered.add(item);
+            }
+        }
+        lbxDataEntryBatches.setModel(new ListModelList<>(filtered));
     }
 
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
@@ -143,20 +178,14 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     }
 
     private void processBatch(DataEntryBatchItemDTO batch) {
-        System.out.println("DEBUG: Processing batch -> " + batch.getBatchId() + ", pending -> " + batch.getPendingCheques());
-
-        // 1. Promote to Checker if all items in batch are completed
         if (batch.getPendingCheques() == 0) {
             submitBatchToChecker(batch.getBatchId());
             return;
         }
 
-        // 2. Put selected batch ID into session for the workspace
         Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());
 
-        // 3. Resolve mainContentArea Include container
         Include mainInclude = null;
-
         try {
             mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
         } catch (Exception ignored) {}
@@ -171,13 +200,10 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
             }
         }
 
-        // 4. Navigate into Data Entry workspace
         if (mainInclude != null) {
-            System.out.println("DEBUG: mainContentArea found! Loading data-entry.zul...");
             mainInclude.setSrc(null);
             mainInclude.setSrc("/inward/maker/data-entry/data-entry.zul");
 
-            // Update page header subtitle if component is available
             Component root = (self.getPage() != null) ? self.getPage().getFirstRoot() : null;
             if (root != null) {
                 Label lblSubtitle = (Label) root.getFellowIfAny("lblPageSubtitle", true);
@@ -186,7 +212,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                 }
             }
         } else {
-            System.err.println("DEBUG: Failed to locate mainContentArea Include component!");
             Messagebox.show("Navigation container (mainContentArea) not found.", "Navigation Error", Messagebox.OK, Messagebox.ERROR);
         }
     }

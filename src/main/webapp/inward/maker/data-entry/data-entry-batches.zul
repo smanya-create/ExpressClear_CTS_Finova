@@ -17,18 +17,27 @@
            apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController" spacing="16px">
              
     <div sclass="cts-card" hflex="1">
-      <hlayout style="display: flex; justify-content: space-between; align-items: center;">
+      <hlayout style="display: flex; justify-content: space-between; align-items: center;" valign="middle">
         <vlayout spacing="3px">
           <label value="Inward Data Entry — Batch Queue" sclass="cts-page-title" />
           <label value="Batches cleared from MICR repair ready for verification." sclass="cts-page-subtitle" />
         </vlayout>
-        <button id="btnRefresh" label="Refresh" iconSclass="z-icon-refresh" 
-                style="background-color: #334155; color: #fff; border-radius: 4px; padding: 6px 14px;" />
+
+        <!-- Search Controls -->
+        <hlayout spacing="8px" valign="middle">
+          <textbox id="txtSearchBatch" placeholder="Search Batch ID or Status..." 
+                   instant="true"
+                   style="height: 32px; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 4px; width: 210px; font-size: 13px;" />
+          <button id="btnClearSearch" label="Clear" iconSclass="z-icon-times"
+                  style="background-color: #64748b; color: #fff; border-radius: 4px; height: 32px; padding: 0 10px; font-size: 13px;" />
+          <button id="btnRefresh" label="Refresh" iconSclass="z-icon-refresh" 
+                  style="background-color: #334155; color: #fff; border-radius: 4px; height: 32px; padding: 0 12px; font-size: 13px;" />
+        </hlayout>
       </hlayout>
     </div>
 
     <div sclass="cts-card" hflex="1" vflex="1" style="display: flex; flex-direction: column; padding: 12px;">
-      <listbox id="lbxDataEntryBatches" emptyMessage="No batches waiting for Data Entry." vflex="1" mold="paging" pageSize="12">
+      <listbox id="lbxDataEntryBatches" emptyMessage="No batches found." vflex="1" mold="paging" pageSize="12">
         <listhead sizable="true">
           <listheader label="Batch ID" width="160px" sort="auto(batchId)" />
           <listheader label="Total Items" width="120px" align="center" />
