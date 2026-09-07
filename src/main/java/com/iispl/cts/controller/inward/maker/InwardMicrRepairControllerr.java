@@ -126,8 +126,16 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		try {
 
-			// Get cheques waiting for MICR repair
-			repairCheques = inwardChequeService.getMicrRepairRequiredCheques();
+			String batchId = (String) Executions.getCurrent().getDesktop().getSession()
+					.getAttribute("MICR_REPAIR_BATCH_ID");
+
+			if (batchId == null || batchId.trim().isEmpty()) {
+				Messagebox.show("No MICR repair batch was selected.", "MICR Repair", Messagebox.OK,
+						Messagebox.EXCLAMATION);
+				return;
+			}
+
+			repairCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, "MICR_REPAIR_PENDING");
 
 			if (repairCheques == null || repairCheques.isEmpty()) {
 
@@ -183,43 +191,39 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private void loadBatchSummary(InwardCheque cheque) {
 
-	    if (cheque == null) {
-	        return;
-	    }
+		if (cheque == null) {
+			return;
+		}
 
-	    InwardBatch batch =
-	            inwardBatchService.getBatchById(cheque.getInwardBatchId());
+		InwardBatch batch = inwardBatchService.getBatchById(cheque.getInwardBatchId());
 
-	    if (batch == null) {
-	        return;
-	    }
+		if (batch == null) {
+			return;
+		}
 
-	    if (lblBatchId != null) {
-	        lblBatchId.setValue(String.valueOf(batch.getInwardBatchId()));
-	    }
+		if (lblBatchId != null) {
+			lblBatchId.setValue(String.valueOf(batch.getInwardBatchId()));
+		}
 
-	    if (lblBatchSource != null) {
-	        lblBatchSource.setValue("CHI");
-	    }
+		if (lblBatchSource != null) {
+			lblBatchSource.setValue("CHI");
+		}
 
-	    if (lblTotalCheques != null) {
-	        lblTotalCheques.setValue(
-	                String.valueOf(batch.getActualChequeCount()));
-	    }
+		if (lblTotalCheques != null) {
+			lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
+		}
 
-	    if (lblHeaderChequeNo != null) {
-	        lblHeaderChequeNo.setValue(cheque.getChequeNumber());
-	    }
+		if (lblHeaderChequeNo != null) {
+			lblHeaderChequeNo.setValue(cheque.getChequeNumber());
+		}
 
-	    if (lblHeaderItemStatus != null) {
-	        lblHeaderItemStatus.setValue(cheque.getChequeStatus());
-	    }
+		if (lblHeaderItemStatus != null) {
+			lblHeaderItemStatus.setValue(cheque.getChequeStatus());
+		}
 
-	    if (lblReceivedDate != null && batch.getUploadedAt() != null) {
-	        lblReceivedDate.setValue(
-	                new java.text.SimpleDateFormat("dd-MM-yyyy")
-	                        .format(batch.getUploadedAt()));
-	    }
+		if (lblReceivedDate != null && batch.getUploadedAt() != null) {
+			lblReceivedDate.setValue(new java.text.SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
+		}
 	}
 
 	private void clearRecordFields() {

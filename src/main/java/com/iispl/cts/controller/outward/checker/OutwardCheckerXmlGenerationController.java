@@ -1,5 +1,6 @@
 package com.iispl.cts.controller.outward.checker;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 				item.appendChild(new Listcell(String.valueOf(verifiedBatch.getActualTotalAmount())));
 				item.appendChild(new Listcell(verifiedBatch.getBatchStatus()));
 				Listcell actionCell = new Listcell();
-				Button generateXmlButton = new Button("Generate Xml");
+				Button generateXmlButton = new Button("Generate bxf");
 				generateXmlButton.setClass("generate-button");
 
 				generateXmlButton.setAttribute("batch", verifiedBatch);
@@ -76,20 +77,23 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 		try {
 
 			String batchId = batch.getOutwardBatchId();
-
 			List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId);
-
 			if (cheques == null || cheques.isEmpty()) {
-
 				Messagebox.show("No cheques found for batch " + batchId, "XML Generation", Messagebox.OK,
 						Messagebox.EXCLAMATION);
-
 				return;
 			}
 
-			String outputDirectory = "xml-output";
+			String outputDirectory =
+			        "/home/administrator/WS_IISPL0229082026_GKProjects/ExpressClear_CTS_Finova/src/main/resources/xml-output"; 
 
 			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
+			
+			System.out.println("======================================");
+			System.out.println("XML FILE PATH : " + xmlFile.toAbsolutePath());
+			System.out.println("FILE EXISTS   : " + Files.exists(xmlFile));
+			System.out.println("FILE SIZE     : " + Files.size(xmlFile));
+			System.out.println("======================================");
 			lblXmlFileName.setValue(
 			        xmlFile.getFileName().toString());
 
