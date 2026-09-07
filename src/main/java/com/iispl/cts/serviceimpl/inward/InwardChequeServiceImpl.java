@@ -47,6 +47,19 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	public InwardChequeImage getFrontImage(String inwardChequeId) {
 		return InwardChequeImageDAOImpl.getInstance().findFrontImageByChequeId(inwardChequeId);
 	}
+	@Override
+	public boolean saveRejection(
+	        String inwardChequeId,
+	        String rejectedReasonId,
+	        String remarks,
+	        String rejectedBy) {
+
+	    return inwardChequeDAO.saveRejection(
+	            inwardChequeId,
+	            rejectedReasonId,
+	            remarks,
+	            rejectedBy);
+	}
 
 	
 }

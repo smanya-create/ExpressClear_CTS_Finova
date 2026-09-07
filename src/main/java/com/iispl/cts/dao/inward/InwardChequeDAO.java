@@ -25,4 +25,11 @@ public interface InwardChequeDAO {
 	boolean updateMicrRepair(String inwardChequeId, String correctedMicrCode, String chequeStatus);
 
 	boolean deleteCheque(String inwardChequeId);
+	
+	boolean saveRejection(
+            String inwardChequeId,
+            String rejectedReasonId,
+            String remarks,
+            String rejectedBy);
+	
 }
