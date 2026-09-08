@@ -18,6 +18,7 @@ public enum InwardChequeStatus {
 
 	    SEND_BACK_TO_MAKER,
 
+	    REJECTION_REQUESTED,
 	    REJECTED,
 
 	    RRF_PENDING,
