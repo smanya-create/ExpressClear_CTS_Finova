@@ -63,9 +63,10 @@
     </vlayout>
 
     <hlayout
-        valign="middle"
-        spacing="8px"
-        sclass="cheque-navigation">
+    id="verificationNavigation"
+    valign="middle"
+    spacing="8px"
+    sclass="cheque-navigation">
 
         <button
             id="btnPrevious"
@@ -88,17 +89,18 @@
             height="32px"
             style="background:#0B2344;color:white;border:0;border-radius:4px;font-size:12px;"/>
 
-        <button
-    id="btnProceedRrf"
-    label="✓ Proceed to RRF"
-    sclass="verification-action-btn accept-action-btn"
+       <button
+    id="btnSubmitVerification"
+    label="✓ Submit"
     visible="false"
-    height="32px"/>
+    width="110px"
+    height="30px"
+    style="background:#198754;color:white;border:0;border-radius:4px;font-weight:600;"/>
 
     </hlayout>
 
 </hlayout>
-				<div sclass="batch-info-card">
+				<div id="batchInfoCard" sclass="batch-info-card">
 			    <hlayout
 			        width="100%"
 
@@ -202,11 +204,12 @@
 
                         <!-- MAIN VERIFICATION AREA-->
 							<hlayout
-							    width="100%"
-							    spacing="18px"
-							    valign="top"
-							    vflex="1"
-							    sclass="verification-content">
+    id="verificationContent"
+    width="100%"
+    spacing="18px"
+    valign="top"
+    vflex="1"
+    sclass="verification-content">
 
 <!--  LEFT SIDE - CHEQUE IMAGE -->
 
@@ -668,6 +671,12 @@
 <!-- CLOSE MAIN VERIFICATION AREA -->
 </hlayout>
 
+<label
+    id="lblNoCheques"
+    value="No cheques to verify"
+    visible="false"
+    style="font-size:18px;font-weight:600;color:#0B2344;text-align:center;padding:50px;"/>
+
 <!-- FOOTER -->
 
 
@@ -840,6 +849,117 @@
                 width="110px"
                 height="34px"
                 style="background:#0B2344;color:white;border:0;border-radius:4px;"/>
+
+        </hlayout>
+
+    </vlayout>
+
+</window>
+<!-- =========================================================
+     CHECKER VERIFICATION SUMMARY
+     ========================================================= -->
+
+<window
+    id="verificationSummaryWindow"
+    title="Complete Verification"
+    width="520px"
+    closable="true"
+    sizable="false"
+    mode="modal"
+    visible="false"
+    border="normal">
+
+    <vlayout
+        width="100%"
+        spacing="15px"
+        style="padding:20px;">
+
+        <label
+            value="All cheques in this batch have been verified."
+            style="font-size:13px;color:#6B7A90;"/>
+
+        <!-- SUMMARY -->
+
+        <hlayout
+            width="100%"
+            spacing="10px">
+
+            <vlayout
+                hflex="1"
+                spacing="5px"
+                style="padding:15px;text-align:center;border:1px solid #D9E2EC;border-radius:6px;">
+
+                <label
+                    value="TOTAL"
+                    style="font-size:11px;color:#6B7A90;font-weight:600;"/>
+
+                <label
+                    id="lblSummaryTotal"
+                    value="0"
+                    style="font-size:24px;font-weight:700;color:#0B2344;"/>
+
+            </vlayout>
+
+            <vlayout
+                hflex="1"
+                spacing="5px"
+                style="padding:15px;text-align:center;border:1px solid #C8E6C9;border-radius:6px;">
+
+                <label
+                    value="ACCEPTED"
+                    style="font-size:11px;color:#198754;font-weight:600;"/>
+
+                <label
+                    id="lblSummaryAccepted"
+                    value="0"
+                    style="font-size:24px;font-weight:700;color:#198754;"/>
+
+            </vlayout>
+
+            <vlayout
+                hflex="1"
+                spacing="5px"
+                style="padding:15px;text-align:center;border:1px solid #F5C6CB;border-radius:6px;">
+
+                <label
+                    value="REJECTED"
+                    style="font-size:11px;color:#C62828;font-weight:600;"/>
+
+                <label
+                    id="lblSummaryRejected"
+                    value="0"
+                    style="font-size:24px;font-weight:700;color:#C62828;"/>
+
+            </vlayout>
+
+        </hlayout>
+
+        <!-- MESSAGE -->
+
+        <label
+            value="Submitting will mark this batch as COMPLETED and remove it from the active Verification queue."
+            multiline="true"
+            style="font-size:12px;color:#6B7A90;text-align:center;"/>
+
+        <!-- BUTTONS -->
+
+        <hlayout
+            width="100%"
+            spacing="8px"
+            style="justify-content:center;">
+
+            <button
+                id="btnStayVerification"
+                label="Stay in Verification"
+                width="150px"
+                height="34px"/>
+
+            <button
+                id="btnSubmitBatch"
+                label="✓ Submit"
+                width="110px"
+                height="34px"
+                style="background:#198754;color:white;border:0;border-radius:4px;"/>
 
         </hlayout>
 
