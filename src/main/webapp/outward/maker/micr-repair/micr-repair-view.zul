@@ -2,15 +2,22 @@
 
 <?page title="CTS - MICR Repair" contentType="text/html;charset=UTF-8"?>
 
-<?link rel="stylesheet" type="text/css"
-        href="/css/outward/micr-repair-view.css"?>
 
 <zk>
+	<html>
+        <link rel="stylesheet"
+              type="text/css"
+              href="/ExpressClear_CTS_Finova/css/outward/micr-repair-view.css?v=1"/>
+    </html>
+
+
 
     <div id="micrRepairViewMain"
          width="100%"
+         height="100%"
          apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairViewController"
-         sclass="micr-repair-view-page">
+         sclass="micr-repair-view-page"
+         style="overflow-y:auto; overflow-x:hidden;">
 
         <vlayout width="100%" spacing="20px">
 
@@ -99,7 +106,7 @@
                     <!-- SCAN PAGINATION -->
 
                     <paging id="pagingMicrRepairScan"
-                            pageSize="10"
+                            pageSize="5"
                             detailed="true"
                             visible="false"
                             sclass="micr-repair-paging" />
@@ -175,7 +182,7 @@
                     <!-- CHECKER PAGINATION -->
 
                     <paging id="pagingMicrRepairChecker"
-                            pageSize="10"
+                            pageSize="5"
                             detailed="true"
                             visible="false"
                             sclass="micr-repair-paging" />

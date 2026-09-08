@@ -1,4 +1,3 @@
-
 package com.iispl.cts.controller.outward.maker;
 
 import java.lang.reflect.Method;
@@ -7,6 +6,7 @@ import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -85,6 +85,12 @@ public class OutwardMakerMicrRepairController
     private Button btnZoom;
 
     @Wire
+    private Button btnZoomOut;
+
+    @Wire
+    private Button btnZoomReset;
+
+    @Wire
     private Button btnRotate;
 
     @Wire
@@ -110,8 +116,15 @@ public class OutwardMakerMicrRepairController
     private String source;
     private String batchId;
 
+    /*
+     * Image viewing state
+     */
     private double zoomLevel = 1.0;
+
     private int rotation = 0;
+
+    private int imageX = 0;
+    private int imageY = 0;
 
     private boolean showingBackImage = false;
     private boolean updatingMicrFields = false;
@@ -143,12 +156,15 @@ public class OutwardMakerMicrRepairController
 
             updateSummary();
             updateProgress();
+
             return;
         }
 
         currentIndex = 0;
 
         loadCurrentCheque();
+
+        initializeImageViewer();
     }
 
     private void loadParameters() {
@@ -179,12 +195,14 @@ public class OutwardMakerMicrRepairController
         }
 
         if (source == null || source.trim().isEmpty()) {
+
             source =
                     Executions.getCurrent()
                             .getParameter("source");
         }
 
         if (batchId == null || batchId.trim().isEmpty()) {
+
             batchId =
                     Executions.getCurrent()
                             .getParameter("batchId");
@@ -235,15 +253,14 @@ public class OutwardMakerMicrRepairController
                 || micrRepairCheques.isEmpty()
                 || currentIndex < 0
                 || currentIndex >= micrRepairCheques.size()) {
+
             return;
         }
 
         Object cheque =
                 micrRepairCheques.get(currentIndex);
 
-        zoomLevel = 1.0;
-        rotation = 0;
-        showingBackImage = false;
+        resetImageViewState();
 
         if (cheque instanceof ScanCheque) {
 
@@ -323,6 +340,7 @@ public class OutwardMakerMicrRepairController
         if (cheque == null) {
 
             imgCheque.setVisible(false);
+
             lblChequeImageTitle
                     .setValue("Cheque Image");
 
@@ -367,10 +385,11 @@ public class OutwardMakerMicrRepairController
         }
 
         try {
-        	
-        	if (!imagePath.startsWith("/")) {
-        	    imagePath = "/" + imagePath;
-        	}
+
+            if (!imagePath.startsWith("/")) {
+                imagePath = "/" + imagePath;
+            }
+
             imgCheque.setSrc(imagePath);
             imgCheque.setVisible(true);
 
@@ -384,19 +403,127 @@ public class OutwardMakerMicrRepairController
         } catch (Exception e) {
 
             imgCheque.setVisible(false);
+
             e.printStackTrace();
         }
+    }
+
+    /*
+     * Initialize browser-side image viewer.
+     *
+     * The viewer remains fixed.
+     * The image can be zoomed and dragged inside it.
+     */
+    private void initializeImageViewer() {
+
+        Clients.evalJavaScript(
+                "window.setTimeout(function(){"
+                + "var img=document.getElementById('"
+                + imgCheque.getUuid()
+                + "');"
+                + "if(!img)return;"
+
+                + "img.style.cursor='grab';"
+                + "img.style.userSelect='none';"
+                + "img.style.webkitUserSelect='none';"
+
+                + "if(img.dataset.micrViewerReady==='true')return;"
+                + "img.dataset.micrViewerReady='true';"
+
+                + "var dragging=false;"
+                + "var startX=0;"
+                + "var startY=0;"
+                + "var startLeft=0;"
+                + "var startTop=0;"
+
+                + "img.addEventListener('mousedown',function(e){"
+                + "if(e.button!==0)return;"
+                + "dragging=true;"
+                + "startX=e.clientX;"
+                + "startY=e.clientY;"
+                + "startLeft=parseFloat(img.dataset.posX||'0');"
+                + "startTop=parseFloat(img.dataset.posY||'0');"
+                + "img.style.cursor='grabbing';"
+                + "e.preventDefault();"
+                + "});"
+
+                + "document.addEventListener('mousemove',function(e){"
+                + "if(!dragging)return;"
+                + "var x=startLeft+(e.clientX-startX);"
+                + "var y=startTop+(e.clientY-startY);"
+                + "img.dataset.posX=x;"
+                + "img.dataset.posY=y;"
+                + "img.style.transform="
+                + "'translate('+x+'px,'+y+'px) scale('+"
+                + "(img.dataset.zoom||'1')"
+                + " + ') rotate('+"
+                + "(img.dataset.rotation||'0')"
+                + " + 'deg)';"
+                + "});"
+
+                + "document.addEventListener('mouseup',function(){"
+                + "if(!dragging)return;"
+                + "dragging=false;"
+                + "img.style.cursor='grab';"
+                + "});"
+
+                + "img.addEventListener('wheel',function(e){"
+                + "e.preventDefault();"
+                + "var oldZoom=parseFloat(img.dataset.zoom||'1');"
+                + "var newZoom=e.deltaY<0"
+                + "?Math.min(oldZoom+0.1,3)"
+                + ":Math.max(oldZoom-0.1,1);"
+                + "if(newZoom===oldZoom)return;"
+
+                + "var rect=img.getBoundingClientRect();"
+                + "var mouseX=e.clientX-(rect.left+rect.width/2);"
+                + "var mouseY=e.clientY-(rect.top+rect.height/2);"
+
+                + "var currentX=parseFloat(img.dataset.posX||'0');"
+                + "var currentY=parseFloat(img.dataset.posY||'0');"
+
+                + "var ratio=newZoom/oldZoom;"
+
+                + "currentX=currentX-(mouseX*(ratio-1));"
+                + "currentY=currentY-(mouseY*(ratio-1));"
+
+                + "img.dataset.zoom=newZoom;"
+                + "img.dataset.posX=currentX;"
+                + "img.dataset.posY=currentY;"
+
+                + "img.style.transform="
+                + "'translate('+currentX+'px,'+currentY+'px) scale('+"
+                + "newZoom"
+                + " + ') rotate('+"
+                + "(img.dataset.rotation||'0')"
+                + " + 'deg)';"
+                + "},{passive:false});"
+
+                + "},100);");
+    }
+
+    private void resetImageViewState() {
+
+        zoomLevel = 1.0;
+        rotation = 0;
+
+        imageX = 0;
+        imageY = 0;
+
+        applyImageTransform();
     }
 
     @Listen("onClick = #btnImageToggle")
     public void toggleImage() {
 
-        zoomLevel = 1.0;
-        rotation = 0;
+        resetImageViewState();
 
         if (showingBackImage) {
+
             showFrontImage();
+
         } else {
+
             showBackImage();
         }
     }
@@ -409,6 +536,7 @@ public class OutwardMakerMicrRepairController
 
         if (micrRepairCheques == null
                 || micrRepairCheques.isEmpty()) {
+
             return;
         }
 
@@ -426,6 +554,7 @@ public class OutwardMakerMicrRepairController
 
         if (micrRepairCheques == null
                 || micrRepairCheques.isEmpty()) {
+
             return;
         }
 
@@ -436,13 +565,40 @@ public class OutwardMakerMicrRepairController
     }
 
     @Listen("onClick = #btnZoom")
-    public void zoomImage() {
+    public void zoomIn() {
 
         zoomLevel += 0.25;
 
         if (zoomLevel > 3.0) {
+            zoomLevel = 3.0;
+        }
+
+        applyImageTransform();
+    }
+
+    @Listen("onClick = #btnZoomOut")
+    public void zoomOut() {
+
+        zoomLevel -= 0.25;
+
+        if (zoomLevel < 1.0) {
             zoomLevel = 1.0;
         }
+
+        if (zoomLevel == 1.0) {
+            imageX = 0;
+            imageY = 0;
+        }
+
+        applyImageTransform();
+    }
+
+    @Listen("onClick = #btnZoomReset")
+    public void resetZoom() {
+
+        zoomLevel = 1.0;
+        imageX = 0;
+        imageY = 0;
 
         applyImageTransform();
     }
@@ -466,14 +622,49 @@ public class OutwardMakerMicrRepairController
         }
 
         String transform =
-                "transform: scale("
+                "translate("
+                + imageX
+                + "px,"
+                + imageY
+                + "px) "
+                + "scale("
                 + zoomLevel
-                + ") rotate("
+                + ") "
+                + "rotate("
                 + rotation
-                + "deg);"
-                + " transform-origin:center center;";
+                + "deg);";
 
-        imgCheque.setStyle(transform);
+        imgCheque.setStyle(
+                "transform:"
+                + transform
+                + "transform-origin:center center;"
+                + "cursor:"
+                + (zoomLevel > 1.0
+                        ? "grab;"
+                        : "default;")
+                + "user-select:none;"
+                + "-webkit-user-select:none;");
+
+        String script =
+                "var img=document.getElementById('"
+                + imgCheque.getUuid()
+                + "');"
+                + "if(img){"
+                + "img.dataset.zoom='"
+                + zoomLevel
+                + "';"
+                + "img.dataset.rotation='"
+                + rotation
+                + "';"
+                + "img.dataset.posX='"
+                + imageX
+                + "';"
+                + "img.dataset.posY='"
+                + imageY
+                + "';"
+                + "}";
+
+        Clients.evalJavaScript(script);
     }
 
     @Listen("onClick = #btnPrevious")
@@ -494,6 +685,7 @@ public class OutwardMakerMicrRepairController
         if (micrRepairCheques == null
                 || currentIndex
                     >= micrRepairCheques.size() - 1) {
+
             return;
         }
 
@@ -941,6 +1133,7 @@ public class OutwardMakerMicrRepairController
                 outwardMakerService
                         .saveScanMicrRepair(
                                 cheque);
+
                 completedCount++;
 
             } else if (currentCheque
@@ -961,6 +1154,7 @@ public class OutwardMakerMicrRepairController
                 outwardMakerService
                         .saveOutwardMicrRepair(
                                 cheque);
+
                 completedCount++;
             }
 
@@ -1015,6 +1209,7 @@ public class OutwardMakerMicrRepairController
                 outwardMakerService
                         .saveScanMicrRepair(
                                 cheque);
+
                 completedCount++;
 
             } else if (currentCheque
@@ -1029,6 +1224,7 @@ public class OutwardMakerMicrRepairController
                 outwardMakerService
                         .saveOutwardMicrRepair(
                                 cheque);
+
                 completedCount++;
             }
 
