@@ -4,56 +4,62 @@
 <borderlayout apply="com.iispl.cts.controller.admin.RoleFormController" hflex="1" vflex="1">
 
     <!-- Shared Left Sidebar Navigation -->
-    <west width="240px" border="none" collapsible="false">
+    <west width="220px" border="none" collapsible="false">
         <include src="/components/sidebar.zul" role="ADMIN" activeTab="role-management" />
     </west>
 
     <!-- Main Workspace -->
-    <center border="none" autoscroll="true" style="background-color: #f8fafc;">
+    <center border="none" autoscroll="true" style="background-color: #f1f5f9;">
         <vlayout spacing="0" hflex="1">
             
             <!-- Shared Header -->
             <include id="incHeader" src="/components/header.zul" 
                      pageTitle="Admin Dashboard" 
-                     pageSubtitle="Role Management / Add Role" />
+                     pageSubtitle="Role Management / Add Role"
+                      />
 
             <!-- Form Content Container -->
-            <vlayout sclass="role-content" spacing="24px" style="padding: 24px;" hflex="1">
-                <vlayout spacing="4px">
+            <vlayout spacing="22px" style="padding: 28px 36px;" hflex="1">
+                <vlayout spacing="3px">
                     <label value="Add Role" sclass="page-title"/>
                     <label value="Create a new system role definition for operator assignment." sclass="page-subtitle"/>
                 </vlayout>
 
                 <!-- Card Panel -->
-                <vlayout sclass="card-panel" spacing="20px" style="padding: 32px;" hflex="1">
-                    <hlayout spacing="24px" hflex="1">
+                <vlayout sclass="card-panel" spacing="20px" style="padding: 24px 28px;" hflex="1">
+                    <vlayout spacing="2px">
+                        <label value="Role Details" sclass="cts-card-title" />
+                        <label value="Enter the basic specifications and system status for this role." sclass="cts-card-subtitle" />
+                    </vlayout>
+
+                    <hlayout spacing="20px" hflex="1">
                         <vlayout spacing="6px" hflex="1">
                             <label value="ROLE ID" sclass="field-label"/>
-                            <textbox id="txtRoleId" readonly="true" hflex="1" height="42px" sclass="input-box input-box-readonly"/>
+                            <textbox id="txtRoleId" readonly="true" placeholder="Auto generated" hflex="1" height="38px" sclass="input-box input-box-readonly"/>
                         </vlayout>
                         <vlayout spacing="6px" hflex="1">
                             <label value="ROLE NAME" sclass="field-label"/>
-                            <textbox id="txtRoleName" placeholder="Enter role name" hflex="1" height="42px" sclass="input-box"/>
+                            <textbox id="txtRoleName" placeholder="Enter role name" hflex="1" height="38px" sclass="input-box"/>
                         </vlayout>
                     </hlayout>
 
                     <vlayout spacing="6px" hflex="1">
                         <label value="DESCRIPTION" sclass="field-label"/>
-                        <textbox id="txtDescription" placeholder="Enter role description" hflex="1" height="42px" sclass="input-box"/>
+                        <textbox id="txtDescription" placeholder="Enter role description" hflex="1" height="38px" sclass="input-box"/>
                     </vlayout>
 
-                    <vlayout spacing="6px" width="50%">
+                    <vlayout spacing="6px" width="49%">
                         <label value="STATUS" sclass="field-label"/>
-                        <combobox id="cmbStatus" readonly="true" width="100%" height="42px">
+                        <combobox id="cmbStatus" readonly="true" width="100%" height="38px">
                             <comboitem label="Active" value="Active"/>
                             <comboitem label="Inactive" value="Inactive"/>
                         </combobox>
                     </vlayout>
 
-                    <!-- Actions -->
-                    <hlayout hflex="1" style="justify-content: flex-end; margin-top: 12px;" spacing="12px">
-                        <button id="btnCancel" label="CANCEL" height="42px" sclass="btn-outline"/>
-                        <button id="btnSave" label="CREATE ROLE" height="42px" sclass="btn-primary"/>
+                    <!-- Actions (Left-aligned, matching Add User) -->
+                    <hlayout hflex="1" spacing="10px" style="margin-top: 14px;">
+                        <button id="btnSave" label="CREATE ROLE" sclass="btn-primary"/>
+                        <button id="btnCancel" label="CANCEL" sclass="btn-outline"/>
                     </hlayout>
                 </vlayout>
             </vlayout>
