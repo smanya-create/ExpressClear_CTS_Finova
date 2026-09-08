@@ -7,22 +7,21 @@
 }
 
 .listbox-header .z-listheader {
-    background: #1B4A8F !important;
-    border-bottom: 1px solid #163D73 !important;
-}
-
-.listbox-header .z-listheader-content {
-    color: white !important;
-    font-weight: bold !important;
-    font-size: 12px !important;
-}
-
-.listbox-header .z-listcell-content {
-    font-size: 12px !important;
-    color: black !important;
-}
-
-.listbox-header .z-listitem:hover {
-    background: transparent !important;
-    color: inherit !important;
-}
+            background: #1C3673 !important;
+            border-bottom: 1px solid #E0E6ED !important;
+        }
+        .listbox-header .z-listheader-content {
+            color:white  !important;
+            font-weight: bold !important;
+            font-size: 12px !important;
+        }
+        .listbox-header .z-listcell-content {
+            font-size: 12px !important;
+            color: black !important;
+        }
+        .listbox-header .z-listitem:hover{
+            background: transparent !important;
+            color: inherit !important;
+        }
+        
+    

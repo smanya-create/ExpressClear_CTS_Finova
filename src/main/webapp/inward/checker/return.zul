@@ -27,11 +27,10 @@
  						
  						<vlayout spacing="0px">
     						<label value="RRF" style="font-size:24px;font-weight:bold;color:#1D2D46"/>
-    						<label value="View rejected cheques, reject reasons and return processing status" style="font-size:11px;color:#8793A6"/>
 						</vlayout>
                        
                         <!-- Search Section -->
-						<vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:8px 12px;background:white">
+						<vlayout >
    						<label value="Search Rejected Cheques" style="font-weight:bold;font-size:14px"/>
     					<hlayout spacing="6px" style="align-items:center">
         					<textbox id="txtSearchBatchIDOrChequeNumber" 
@@ -51,7 +50,7 @@
 					</vlayout>
 						
                         <!-- Rejected Cheques Table -->
-                        <vlayout style="border:1px solid #E0E6ED;border-radius:6px;padding:12px;background:white">
+                        <vlayout >
                             <label value="Rejected Cheques" style="font-size:14px;font-weight:bold;"/>
                             <listbox id="rrfListbox" 
                                      sclass="listbox-header z-listbox-grid" 
