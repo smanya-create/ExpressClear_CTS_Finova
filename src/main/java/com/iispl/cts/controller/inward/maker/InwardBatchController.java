@@ -238,11 +238,80 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			return "Received";
 		}
 
-		if ("Validated".equalsIgnoreCase(status)) {
+		status = status.trim();
+
+		if ("VALIDATED".equalsIgnoreCase(status)) {
 			return "Processing";
 		}
 
-		return status;
+		if ("PROCESSING".equalsIgnoreCase(status)) {
+			return "Processing";
+		}
+
+		if ("RECEIVED".equalsIgnoreCase(status)) {
+			return "Received";
+		}
+
+		if ("PARSING".equalsIgnoreCase(status)) {
+			return "Parsing";
+		}
+
+		if ("COMPLETED".equalsIgnoreCase(status)) {
+			return "Completed";
+		}
+
+		if ("VALIDATION_FAILED".equalsIgnoreCase(status)) {
+			return "Validation Failed";
+		}
+
+		if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status)) {
+			return "Checker Processing Pending";
+		}
+
+		if ("CHECKER_PROCESSING".equalsIgnoreCase(status)) {
+			return "Checker Processing";
+		}
+
+		if ("IN_VERIFICATION".equalsIgnoreCase(status)) {
+			return "In Verification";
+		}
+
+		if ("HOLD".equalsIgnoreCase(status)) {
+			return "Hold";
+		}
+
+		if ("REJECTED".equalsIgnoreCase(status)) {
+			return "Rejected";
+		}
+
+		if ("FAILED".equalsIgnoreCase(status)) {
+			return "Failed";
+		}
+
+		return formatStatus(status);
+	}
+
+	private String formatStatus(String status) {
+		String[] words = status.replace('_', ' ').trim().toLowerCase().split("\\s+");
+		StringBuilder result = new StringBuilder();
+
+		for (String word : words) {
+			if (word.isEmpty()) {
+				continue;
+			}
+
+			if (result.length() > 0) {
+				result.append(" ");
+			}
+
+			result.append(Character.toUpperCase(word.charAt(0)));
+
+			if (word.length() > 1) {
+				result.append(word.substring(1));
+			}
+		}
+
+		return result.toString();
 	}
 
 	private void parseBatch(Event event) {
@@ -682,21 +751,31 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void setStatusStyle(Label label, String status) {
-	    if ("Processing".equalsIgnoreCase(status)) {
-	        label.setSclass("status-processing");
-
-	    } else if ("Validation Failed".equalsIgnoreCase(status)) {
-
-	        label.setSclass("status-validation-failed");
-
-	    } else if ("Parsing".equalsIgnoreCase(status)) {
-
-	        label.setSclass("status-parsing");
-
-	    } else {
-
-	        label.setSclass("status-received");
-	    }
+		if ("Processing".equalsIgnoreCase(status)) {
+			label.setSclass("status-processing");
+		} else if ("Received".equalsIgnoreCase(status)) {
+			label.setSclass("status-received");
+		} else if ("Parsing".equalsIgnoreCase(status)) {
+			label.setSclass("status-parsing");
+		} else if ("Completed".equalsIgnoreCase(status)) {
+			label.setSclass("status-completed");
+		} else if ("Validation Failed".equalsIgnoreCase(status)) {
+			label.setSclass("status-validation-failed");
+		} else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
+			label.setSclass("status-processing-pending");
+		} else if ("Checker Processing".equalsIgnoreCase(status)) {
+			label.setSclass("status-checker-processing");
+		} else if ("In Verification".equalsIgnoreCase(status)) {
+			label.setSclass("status-in-verification");
+		} else if ("Hold".equalsIgnoreCase(status)) {
+			label.setSclass("status-hold");
+		} else if ("Rejected".equalsIgnoreCase(status)) {
+			label.setSclass("status-rejected");
+		} else if ("Failed".equalsIgnoreCase(status)) {
+			label.setSclass("status-failed");
+		} else {
+			label.setSclass("status-received");
+		}
 	}
 
 	private String getBatchFolderName(String batchId) {
@@ -741,6 +820,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			backButton.addEventListener("onClick",
 					event -> Executions.sendRedirect("/inward/maker/index.zul?page=batch-intake"));
+
 			String batchId = Executions.getCurrent().getParameter("batchId");
 
 			if (batchId == null || batchId.trim().isEmpty()) {
@@ -913,6 +993,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			item.appendChild(new Listcell(valueOrEmpty(cheque.getPayeeName())));
 
 			String amount = "₹ 0";
+
 			if (cheque.getChequeAmount() != null) {
 
 				amount = "₹ " + cheque.getChequeAmount().toPlainString();
@@ -1270,7 +1351,6 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			}
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
 
@@ -1425,19 +1505,19 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
-
 			this.parsedBatchData = parsedBatchData;
-
 			this.status = status;
-
 			this.message = message;
 		}
+
 		String getBatchId() {
 			return batchId;
 		}
+
 		ParsedBatchData getParsedBatchData() {
 			return parsedBatchData;
 		}
+
 		String getStatus() {
 			return status;
 		}
