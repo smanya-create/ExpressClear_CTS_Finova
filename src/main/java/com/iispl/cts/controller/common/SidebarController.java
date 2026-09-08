@@ -232,7 +232,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	public void navToOutwardCheckerUnprocessedQueue() {
 		Executions.sendRedirect("outward/checker/checker-unprocessed-cheques.zul");
-			}
+	}
 
 	// Inward Maker Navigation Actions
 	public void navToInwardDashboard() {
@@ -305,7 +305,18 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToInwardMakerReports() {
-		Executions.sendRedirect("/inward-maker/reports.zul");
+		Component root = sidebarComponent.getPage().getFirstRoot();
+
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+
+		if (mainContentArea instanceof Include) {
+			Include include = (Include) mainContentArea;
+
+			include.setSrc(null);
+			include.setSrc("/inward/maker/reports/maker-reports.zul");
+		} else {
+			Executions.sendRedirect("/inward/maker/reports/maker-reports.zul");
+		}
 	}
 
 	// Inward Checker Navigation Actions

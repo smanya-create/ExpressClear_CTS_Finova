@@ -112,6 +112,27 @@
 								value="The cheque image will be loaded from the database when a repair record is available." />
 						</groupbox>
 
+						<vlayout id="micrRepairCompletedState"
+							visible="false" width="100%" spacing="12px"
+							sclass="micr-completed-state">
+
+							<label value="✓" sclass="completion-icon" />
+
+							<label value="MICR REPAIR COMPLETED"
+								sclass="completion-title" />
+
+							<label id="lblCompletedBatchId" value=""
+								sclass="completion-batch-id" />
+
+							<label
+								value="All MICR exceptions in this batch have been successfully repaired."
+								sclass="completion-message" />
+
+							<label value="Ready for Data Entry"
+								sclass="completion-next-step" />
+
+						</vlayout>
+
 						<label
 							value="OCR-filled MICR values are shown in blue. Verify them against the cheque image."
 							sclass="image-help-text" />
