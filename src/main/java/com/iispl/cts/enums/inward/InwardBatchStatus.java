@@ -15,6 +15,8 @@ public enum InwardBatchStatus {
 	    CHECKER_PROCESSING,
 
 	    COMPLETED,
+	    
+	    IN_VERIFICATION,
 
 	    HOLD
 
