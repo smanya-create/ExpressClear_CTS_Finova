@@ -2,7 +2,9 @@ package com.iispl.cts.controller.outward.maker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -12,6 +14,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Cell;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Paging;
 import org.zkoss.zul.Row;
@@ -28,6 +31,7 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 	// =========================================================
 	// ZUL COMPONENTS
 	// =========================================================
+	private Component sidebarComponent;
 
 	private Div divMicrRepairScanSection;
 	private Div divMicrRepairCheckerSection;
@@ -513,14 +517,31 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 	        return;
 	    }
 
-	    String url =
-	            "/outward/maker/micr-repair/micr-repair.zul"
-	            + "?source=" + source.trim()
-	            + "&batchId=" + batchId.trim();
+	    Component root =
+	            Executions.getCurrent()
+	                      .getDesktop()
+	                      .getFirstPage()
+	                      .getFirstRoot();
 
-	    System.out.println("MICR REPAIR OPEN URL = " + url);
+	    Component mainContentArea =
+	            root.getFellowIfAny("mainContentArea", true);
 
-	    Executions.getCurrent().sendRedirect(url);
+	    if (mainContentArea instanceof Include) {
+
+	        Include include = (Include) mainContentArea;
+
+	        include.setAttribute("MICR_REPAIR_SOURCE", source.trim());
+	        include.setAttribute("MICR_REPAIR_BATCH_ID", batchId.trim());
+
+	        include.setSrc(
+	                "/outward/maker/micr-repair/micr-repair.zul"
+	        );
+
+	        System.out.println("MICR REPAIR SOURCE = " + source);
+	        System.out.println("MICR REPAIR BATCH ID = " + batchId);
+
+	        
+	    }
 	}
 	// =========================================================
 	// FORMAT DATE
