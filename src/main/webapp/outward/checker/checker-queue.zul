@@ -13,7 +13,8 @@
 </zscript>
 
 	<window id="checkerQueueWindow" border="none" width="100%"
-		height="100%" sclass="checker-queue-window" apply="com.iispl.cts.controller.outward.checker.OutwardCheckerQueueController" >
+		height="100%" sclass="checker-queue-window"
+		apply="com.iispl.cts.controller.outward.checker.OutwardCheckerQueueController">
 
 		<borderlayout width="100%" height="100%">
 
@@ -47,28 +48,29 @@
 						HEADER
 						================================================= -->
 					<north height="90px" border="none">
-    <div sclass="page-header">
+						<div sclass="page-header">
 
-        <!-- LEFT SIDE -->
-        <div sclass="header-left-content">
+							<!-- LEFT SIDE -->
+							<div sclass="header-left-content">
 
-            <label value="Cheque Verification"
-                   sclass="header-page-title" />
+								<label value="Cheque Verification"
+									sclass="header-page-title" />
 
-            <label value="Review the cheque and verify the read-only details submitted by Maker."
-                   sclass="header-page-description" />
+								<label
+									value="Review the cheque and verify the read-only details submitted by Maker."
+									sclass="header-page-description" />
 
-        </div>
+							</div>
 
-        <!-- RIGHT SIDE -->
-        <div sclass="header-right-content">
+							<!-- RIGHT SIDE -->
+							<div sclass="header-right-content">
 
-            <include src="/components/header.zul" />
+								<include src="/components/header.zul" />
 
-        </div>
+							</div>
 
-    </div>
-</north>
+						</div>
+					</north>
 
 
 					<!-- =================================================
@@ -262,7 +264,7 @@
 												readonly="true" width="100%" sclass="readonly-field" />
 
 										</div>
-										
+
 										<!-- PAYEE NAME-->
 
 										<div sclass="field-group">
