@@ -1,0 +1,1360 @@
+@charset "UTF-8";
+
+
+/* =========================================================
+   MAIN WINDOW
+   ========================================================= */
+
+.reports-window {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #eef4fa;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    color: #173b69;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   WINDOW CONTENT
+   ========================================================= */
+
+.reports-window > .z-window-content {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #eef4fa;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   TOP GAP
+   ========================================================= */
+
+.reports-window .top-page-gap {
+    width: 100% !important;
+
+    height: 10px !important;
+
+    min-height: 10px !important;
+    max-height: 10px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #eef4fa;
+}
+
+
+/* =========================================================
+   BORDER LAYOUT
+   ========================================================= */
+
+.reports-window .z-borderlayout {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   SAME AS REJECTED CHEQUES
+   ========================================================= */
+
+.reports-window .z-west {
+    width: 220px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background: #102f50 !important;
+}
+
+
+.reports-window .z-west-body {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #102f50 !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   CENTER
+   ========================================================= */
+
+.reports-window .z-center {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background: #eef4fa !important;
+
+    overflow: hidden !important;
+}
+
+
+.reports-window .z-center-body {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background: #eef4fa !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   HEADER
+   EXACTLY 90PX
+   ========================================================= */
+
+.reports-window .z-north {
+    width: 100% !important;
+
+    height: 90px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background: #ffffff !important;
+}
+
+
+.reports-window .z-north-body {
+    width: 100% !important;
+
+    height: 90px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background: #ffffff !important;
+}
+
+
+/* =========================================================
+   HEADER WRAPPER
+   FULL WIDTH LINE
+   ========================================================= */
+
+.header-wrapper {
+    position: relative !important;
+
+    width: 100% !important;
+
+    height: 90px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    background: #ffffff;
+
+    box-sizing: border-box;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   FULL HEADER BOTTOM LINE
+   ========================================================= */
+
+.header-wrapper::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+
+    height: 1px !important;
+
+    background: #d9e2ec;
+
+    pointer-events: none;
+
+    z-index: 20;
+}
+
+
+/* =========================================================
+   HEADER PAGE TITLE
+   SAME AS REJECTED CHEQUES
+   ========================================================= */
+
+.header-page-title {
+    width: 230px !important;
+
+    height: 90px !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    justify-content: center !important;
+
+    padding-left: 38px !important;
+
+    box-sizing: border-box;
+
+    flex-shrink: 0;
+
+    overflow: visible !important;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   HEADER TITLE
+   ========================================================= */
+
+.header-title {
+    display: block !important;
+
+    font-size: 20px !important;
+
+    font-weight: 700 !important;
+
+    color: #173b69 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   HEADER SUBTITLE
+   ========================================================= */
+
+.header-subtitle {
+    display: block !important;
+
+    margin-top: 4px !important;
+
+    font-size: 10px !important;
+
+    color: #6b7c93 !important;
+
+    white-space: nowrap !important;
+
+    overflow: visible !important;
+
+    text-overflow: clip !important;
+}
+
+
+/* =========================================================
+   COMMON HEADER
+   ========================================================= */
+
+.common-header-container {
+    flex: 1 1 auto !important;
+
+    width: auto !important;
+
+    height: 90px !important;
+
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   MAIN PAGE
+   SAME SPACING AS REJECTED CHEQUES
+   ========================================================= */
+
+.main-page {
+    width: 100% !important;
+
+    height: 100% !important;
+
+    box-sizing: border-box;
+
+    margin: 0 !important;
+
+    padding: 28px 40px 20px 40px !important;
+
+    background: #eef4fa;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   CONTENT AREA
+   ========================================================= */
+
+.content-area {
+    width: 100% !important;
+
+    height: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   PAGE HEADING
+   ========================================================= */
+
+.page-heading {
+    width: 100% !important;
+
+    margin: 0 0 18px 0 !important;
+
+    padding: 0 !important;
+}
+
+
+.section-title {
+    display: block !important;
+
+    font-size: 23px !important;
+
+    font-weight: 700 !important;
+
+    color: #173b69 !important;
+}
+
+
+.section-description {
+    display: block !important;
+
+    margin-top: 5px !important;
+
+    font-size: 13px !important;
+
+    color: #718096 !important;
+}
+
+
+/* =========================================================
+   REPORT CARD
+   70% WIDTH
+   ========================================================= */
+
+.report-card {
+    width: 70% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+
+    padding: 22px 28px 24px 28px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #d9e2ec !important;
+
+    border-radius: 12px !important;
+
+    box-shadow: 0 2px 6px rgba(16, 47, 80, 0.04);
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   DATE ROW
+   ========================================================= */
+
+.date-row {
+    width: 100% !important;
+
+    display: flex !important;
+
+    align-items: flex-end !important;
+
+    gap: 20px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   DATE FIELD
+   EQUAL WIDTH
+   ========================================================= */
+
+.date-field {
+    flex: 1 1 0 !important;
+
+    width: auto !important;
+
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   FIELD LABEL
+   ========================================================= */
+
+.field-label {
+    display: block !important;
+
+    margin-bottom: 7px !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing: 0.4px;
+
+    color: #6b7c93 !important;
+}
+
+
+/* =========================================================
+   DATEBOX WRAPPER
+   ========================================================= */
+
+.report-datebox {
+    width: 100% !important;
+
+    display: block !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   ZK DATEBOX
+   COMPLETE BORDER
+   ========================================================= */
+
+.reports-window .z-datebox {
+    width: 100% !important;
+
+    display: flex !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    border-radius: 6px !important;
+
+    background: #ffffff !important;
+
+    overflow: hidden !important;
+
+    transition: border-color 0.15s ease,
+                box-shadow 0.15s ease !important;
+}
+
+
+/* =========================================================
+   DATEBOX INPUT
+   ========================================================= */
+
+.reports-window .z-datebox-input {
+    flex: 1 1 auto !important;
+
+    width: auto !important;
+
+    height: 38px !important;
+
+    box-sizing: border-box !important;
+
+    border: none !important;
+
+    border-radius: 0 !important;
+
+    background: #ffffff !important;
+
+    font-size: 13px !important;
+
+    color: #334155 !important;
+
+    padding-left: 12px !important;
+
+    padding-right: 8px !important;
+
+    outline: none !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   DATEBOX BUTTON
+   ========================================================= */
+
+.reports-window .z-datebox-button {
+    flex: 0 0 38px !important;
+
+    width: 38px !important;
+
+    height: 38px !important;
+
+    box-sizing: border-box !important;
+
+    border: none !important;
+
+    border-radius: 0 !important;
+
+    background: #ffffff !important;
+
+    cursor: pointer !important;
+
+    outline: none !important;
+}
+
+
+/* =========================================================
+   DATEBOX BUTTON HOVER
+   ========================================================= */
+
+.reports-window .z-datebox-button:hover {
+    background: #f7fafd !important;
+}
+
+
+/* =========================================================
+   DATEBOX FOCUS
+   ENTIRE BORDER BLUE
+   ========================================================= */
+
+.reports-window .z-datebox:focus-within {
+    border-color: #4d9bea !important;
+
+    box-shadow: 0 0 0 1px #4d9bea !important;
+
+    outline: none !important;
+}
+
+
+/* =========================================================
+   FOCUSED INPUT
+   ========================================================= */
+
+.reports-window .z-datebox:focus-within .z-datebox-input {
+    border: none !important;
+
+    outline: none !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   FOCUSED BUTTON
+   ========================================================= */
+
+.reports-window .z-datebox:focus-within .z-datebox-button {
+    border: none !important;
+
+    outline: none !important;
+
+    box-shadow: none !important;
+
+    background: #ffffff !important;
+}
+
+
+/* =========================================================
+   HOVER DATEBOX
+   ========================================================= */
+
+.reports-window .z-datebox:hover {
+    border-color: #9fb4c9 !important;
+}
+
+
+/* =========================================================
+   FOCUS + HOVER
+   ========================================================= */
+
+.reports-window .z-datebox:focus-within:hover {
+    border-color: #4d9bea !important;
+
+    box-shadow: 0 0 0 1px #4d9bea !important;
+}
+
+
+/* =========================================================
+   ZK DATE PICKER POPUP
+   FIXED SIZE
+   ========================================================= */
+
+.z-datebox-popup {
+    width: 270px !important;
+
+    min-width: 270px !important;
+
+    max-width: 270px !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    box-sizing: border-box !important;
+
+    position: absolute !important;
+
+    z-index: 99999 !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #d9e2ec !important;
+
+    border-radius: 8px !important;
+
+    box-shadow: 0 8px 24px rgba(16, 47, 80, 0.15) !important;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   ZK CALENDAR
+   ========================================================= */
+
+.z-datebox-popup .z-calendar {
+    width: 100% !important;
+
+    min-width: 0 !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   CALENDAR HEADER
+   ========================================================= */
+
+.z-datebox-popup .z-calendar-header {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   CALENDAR BODY
+   ========================================================= */
+
+.z-datebox-popup .z-calendar-body {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   CALENDAR INNER
+   ========================================================= */
+
+.z-datebox-popup .z-calendar-inner {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   CALENDAR CELLS
+   ========================================================= */
+
+.z-datebox-popup .z-calendar-cell {
+    text-align: center !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   CALENDAR POPUP Z-INDEX
+   ========================================================= */
+
+.z-datebox-popup,
+.z-calendar-popup {
+    z-index: 99999 !important;
+}
+
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
+.report-divider {
+    width: 100% !important;
+
+    height: 1px !important;
+
+    margin-top: 30px !important;
+
+    margin-bottom: 30px !important;
+
+    background: #d9e2ec;
+}
+
+
+/* =========================================================
+   REPORT DETAILS
+   ========================================================= */
+
+.report-details {
+    width: 100% !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    box-sizing: border-box !important;
+}
+
+
+.details-title {
+    display: block !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    color: #173b69 !important;
+
+    margin-bottom: 9px !important;
+}
+
+
+.details-description {
+    display: block !important;
+
+    width: 100% !important;
+
+    font-size: 13px !important;
+
+    line-height: 20px !important;
+
+    color: #718096 !important;
+
+    max-width: 100% !important;
+}
+
+
+/* =========================================================
+   BUTTON ROW
+   ========================================================= */
+
+.button-row {
+    width: 100% !important;
+
+    margin-top: 30px !important;
+}
+
+
+/* =========================================================
+   GENERATE REPORT BUTTON
+   ========================================================= */
+
+.generate-report-button {
+    width: 205px !important;
+
+    height: 44px !important;
+
+    border: none !important;
+
+    border-radius: 6px !important;
+
+    background: #173b69 !important;
+
+    color: #ffffff !important;
+
+    font-size: 12px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+}
+
+
+/* =========================================================
+   BUTTON HOVER
+   ========================================================= */
+
+.generate-report-button:hover {
+    background: #0f2f54 !important;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.reports-window .z-south {
+    height: 50px !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    border: none !important;
+
+    overflow: hidden !important;
+}
+
+
+.hardcoded-footer {
+    width: 100% !important;
+
+    height: 50px !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: space-between !important;
+
+    margin: 0 !important;
+
+    padding: 0 50px !important;
+
+    background: #ffffff;
+
+    border-top: 1px solid #d9e2ec;
+}
+
+
+/* =========================================================
+   FOOTER LEFT
+   ========================================================= */
+
+.footer-left {
+    font-size: 12px !important;
+
+    color: #718096 !important;
+}
+
+
+/* =========================================================
+   FOOTER RIGHT
+   ========================================================= */
+
+.footer-right {
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    color: #173b69 !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media screen and (max-width: 1200px) {
+
+    .main-page {
+        padding-left: 35px !important;
+
+        padding-right: 35px !important;
+    }
+
+
+    .header-page-title {
+        width: 210px !important;
+
+        padding-left: 25px !important;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE / SMALL SCREEN
+   ========================================================= */
+
+@media screen and (max-width: 900px) {
+
+    .reports-window .z-west {
+        width: 190px !important;
+    }
+
+
+    .main-page {
+        padding-left: 25px !important;
+
+        padding-right: 25px !important;
+    }
+
+
+    .header-page-title {
+        width: 190px !important;
+
+        padding-left: 20px !important;
+    }
+
+
+    .header-title {
+        font-size: 17px !important;
+    }
+
+
+    .report-card {
+        width: 100% !important;
+
+        height: auto !important;
+
+        padding: 18px !important;
+    }
+
+
+    .date-row {
+        gap: 15px !important;
+    }
+
+
+    .generate-report-button {
+        width: 190px !important;
+    }
+}
+
+/* =========================================================
+   GENERATED REPORTS SECTION
+   ========================================================= */
+
+.generated-reports-section {
+    width: 100% !important;
+
+    margin-top: 24px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   GENERATED REPORTS HEADING
+   ========================================================= */
+
+.generated-reports-heading {
+    width: 100% !important;
+
+    margin: 0 0 12px 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   GENERATED REPORTS TITLE
+   ========================================================= */
+
+.generated-reports-title {
+    display: block !important;
+
+    font-size: 16px !important;
+
+    font-weight: 700 !important;
+
+    color: #173b69 !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+}
+
+
+/* =========================================================
+   GENERATED REPORTS SUBTITLE
+   ========================================================= */
+
+.generated-reports-subtitle {
+    display: block !important;
+
+    margin-top: 4px !important;
+
+    font-size: 11px !important;
+
+    color: #718096 !important;
+}
+
+
+/* =========================================================
+   GENERATED REPORTS CARD
+   ========================================================= */
+
+.generated-reports-card {
+    width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 120px !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #d9e2ec !important;
+
+    border-radius: 10px !important;
+
+    box-shadow: 0 2px 6px rgba(16, 47, 80, 0.04);
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   GENERATED REPORTS LISTBOX
+   ========================================================= */
+
+.generated-reports-listbox {
+    width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 90px !important;
+
+    border: none !important;
+
+    background: #ffffff !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   LISTBOX HEADER
+   ========================================================= */
+
+.generated-reports-listbox .z-listhead {
+    height: 38px !important;
+
+    background: #0f2f54 !important;
+
+    border: none !important;
+}
+
+
+/* =========================================================
+   LIST HEADER CELLS
+   ========================================================= */
+
+.generated-reports-listbox .z-listheader {
+    height: 38px !important;
+
+    padding: 0 10px !important;
+
+    box-sizing: border-box !important;
+
+    background: #0f2f54 !important;
+
+    border-right: 1px solid #294b6e !important;
+
+    border-bottom: none !important;
+
+    color: #ffffff !important;
+
+    font-size: 10px !important;
+
+    font-weight: 700 !important;
+
+    text-align: left !important;
+
+    vertical-align: middle !important;
+}
+
+
+.generated-reports-listbox .z-listheader:last-child {
+    border-right: none !important;
+}
+
+
+/* =========================================================
+   LIST HEADER LABEL
+   ========================================================= */
+
+.generated-reports-listbox .z-listheader-content {
+    color: #ffffff !important;
+
+    font-size: 10px !important;
+
+    font-weight: 700 !important;
+
+    line-height: 38px !important;
+
+    padding: 0 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   LIST ROW
+   ========================================================= */
+
+.generated-reports-listbox .z-listitem {
+    height: 50px !important;
+
+    background: #ffffff !important;
+
+    border-bottom: 1px solid #e5ebf1 !important;
+}
+
+
+/* =========================================================
+   LIST ROW HOVER
+   ========================================================= */
+
+.generated-reports-listbox .z-listitem:hover {
+    background: #f7fafd !important;
+}
+
+
+/* =========================================================
+   LIST CELLS
+   ========================================================= */
+
+.generated-reports-listbox .z-listcell {
+    height: 50px !important;
+
+    padding: 0 10px !important;
+
+    box-sizing: border-box !important;
+
+    background: transparent !important;
+
+    border: none !important;
+
+    border-bottom: 1px solid #e5ebf1 !important;
+
+    color: #536b86 !important;
+
+    font-size: 11px !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* =========================================================
+   REPORT NAME
+   ========================================================= */
+
+.generated-report-name {
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    color: #173b69 !important;
+}
+
+
+/* =========================================================
+   NORMAL REPORT TEXT
+   ========================================================= */
+
+.generated-report-text {
+    font-size: 11px !important;
+
+    color: #536b86 !important;
+}
+
+
+/* =========================================================
+   ACTION CELL
+   ========================================================= */
+
+.generated-report-action-cell {
+    padding: 0 8px !important;
+
+    white-space: nowrap !important;
+
+    text-align: left !important;
+}
+
+
+/* =========================================================
+   VIEW BUTTON
+   ========================================================= */
+
+.generated-report-view-button {
+    width: 55px !important;
+
+    height: 28px !important;
+
+    margin-right: 6px !important;
+
+    padding: 0 !important;
+
+    border: 1px solid #1f5b91 !important;
+
+    border-radius: 4px !important;
+
+    background: #ffffff !important;
+
+    color: #1f5b91 !important;
+
+    font-size: 9px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+}
+
+
+/* =========================================================
+   VIEW BUTTON HOVER
+   ========================================================= */
+
+.generated-report-view-button:hover {
+    background: #eef5fc !important;
+
+    border-color: #174a78 !important;
+
+    color: #174a78 !important;
+}
+
+
+/* =========================================================
+   DOWNLOAD BUTTON
+   ========================================================= */
+
+.generated-report-download-button {
+    width: 78px !important;
+
+    height: 28px !important;
+
+    padding: 0 !important;
+
+    border: none !important;
+
+    border-radius: 4px !important;
+
+    background: #173b69 !important;
+
+    color: #ffffff !important;
+
+    font-size: 9px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+}
+
+
+/* =========================================================
+   DOWNLOAD BUTTON HOVER
+   ========================================================= */
+
+.generated-report-download-button:hover {
+    background: #0f2f54 !important;
+}
+
+
+/* =========================================================
+   EMPTY MESSAGE
+   ========================================================= */
+
+.generated-reports-listbox
+.z-listbox-emptybody {
+    height: 70px !important;
+
+    color: #8a9aad !important;
+
+    font-size: 11px !important;
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+    padding: 25px !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media screen and (max-width: 900px) {
+
+    .generated-reports-section {
+        width: 100% !important;
+    }
+
+    .generated-reports-card {
+        width: 100% !important;
+    }
+
+}

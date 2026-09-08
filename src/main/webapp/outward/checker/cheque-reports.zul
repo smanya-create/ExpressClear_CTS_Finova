@@ -1,0 +1,259 @@
+<?page title="Checker Reports" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet"type="text/css"href="/css/outward/cheque-reports.css"?>
+
+<zk>
+
+	<!-- =========================================================
+		SESSION
+		========================================================= -->
+
+	<zscript>
+	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
+
+	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Alex");
+</zscript>
+
+
+	<!-- =========================================================
+		MAIN WINDOW
+		========================================================= -->
+
+	<window id="reportsWindow" border="none" width="100%" height="100%"
+		sclass="reports-window"
+		apply="com.iispl.cts.controller.outward.checker.OutwardChequeReportController">
+
+
+		<!-- =====================================================
+			WINDOW HOST
+			===================================================== -->
+
+		<div id="windowHost" />
+
+
+		<vlayout width="100%" height="100%" spacing="0">
+
+
+			<!-- =================================================
+				SAME TOP GAP AS REJECTED CHEQUES
+				================================================= -->
+
+			<div width="100%" height="10px" sclass="top-page-gap" />
+
+
+			<!-- =================================================
+				MAIN BORDER LAYOUT
+				================================================= -->
+
+			<borderlayout width="100%" vflex="1">
+
+
+				<!-- =================================================
+					SIDEBAR
+					EXACTLY SAME AS REJECTED CHEQUES
+					================================================= -->
+
+				<west width="220px" border="none" collapsible="false"
+					splittable="false">
+
+					<include src="/components/sidebar.zul" width="100%"
+						height="100%" activeTab="outward-checker-reports" />
+
+				</west>
+
+
+				<!-- =================================================
+					MAIN CENTER
+					================================================= -->
+
+				<center border="none">
+
+					<borderlayout width="100%" height="100%">
+
+
+						<!-- =========================================
+							HEADER
+							EXACT SAME STRUCTURE
+							========================================= -->
+
+						<north height="90px" border="none">
+
+							<div sclass="header-wrapper" width="100%"
+								height="90px">
+
+								<div sclass="header-page-title">
+
+									<label value="Checker Reports"
+										sclass="header-title" />
+
+									<label
+										value="Checker activity and processing audit reports"
+										sclass="header-subtitle" />
+
+								</div>
+
+								<div sclass="common-header-container">
+
+									<include
+										src="/components/header.zul" width="100%" height="100%" />
+
+								</div>
+
+							</div>
+
+						</north>
+
+
+						<!-- =========================================
+							MAIN CONTENT
+							========================================= -->
+
+						<center border="none" autoscroll="false">
+
+							<div sclass="main-page" width="100%"
+								height="100%">
+
+								<div sclass="content-area" width="100%"
+									height="100%">
+
+
+									<!-- =================================
+										PAGE HEADING
+										================================= -->
+
+									<div sclass="page-heading">
+
+										<label value="Reports"
+											sclass="section-title" />
+
+										<label
+											value="Generate and download system reports."
+											sclass="section-description" />
+
+									</div>
+
+
+									<!-- =================================
+										REPORT CARD
+										================================= -->
+
+									<div sclass="report-card"
+										width="70%" height="auto">
+
+
+										<!-- =============================
+											DATE ROW
+											============================= -->
+
+										<div sclass="date-row"
+											width="100%">
+
+
+											<!-- FROM DATE -->
+
+											<div sclass="date-field">
+
+												<label value="FROM DATE"
+													sclass="field-label" />
+
+												<datebox id="dateFrom"
+													format="yyyy-MM-dd" width="100%" buttonVisible="true"
+													sclass="report-datebox" />
+
+											</div>
+
+
+											<!-- TO DATE -->
+
+											<div sclass="date-field">
+
+												<label value="TO DATE"
+													sclass="field-label" />
+
+												<datebox id="dateTo"
+													format="yyyy-MM-dd" width="100%" buttonVisible="true"
+													sclass="report-datebox" />
+
+											</div>
+
+										</div>
+
+
+										<!-- =============================
+											DIVIDER
+											============================= -->
+
+										<div sclass="report-divider" />
+
+
+										<!-- =============================
+											REPORT DETAILS
+											============================= -->
+
+										<div sclass="report-details">
+
+											<label
+												value="REPORT DETAILS" sclass="details-title" />
+
+											<label
+												value="Select a date range, then generate the consolidated PDF report containing batch metrics, dual-control audit trails, and clearing summaries."
+												sclass="details-description" />
+
+										</div>
+
+
+										<!-- =============================
+											GENERATE BUTTON
+											============================= -->
+
+										<div sclass="button-row">
+
+											<button
+												id="btnGenerateReport" label="GENERATE REPORT"
+												sclass="generate-report-button" />
+
+										</div>
+
+									</div>
+
+
+								</div>
+
+							</div>
+
+						</center>
+
+
+						<!-- =========================================
+							FOOTER
+							SAME AS REJECTED CHEQUES
+							========================================= -->
+
+						<south height="50px" border="none">
+
+							<div sclass="hardcoded-footer" width="100%"
+								height="50px">
+
+								<label
+									value="Express Clear CTS · Checker Portal"
+									sclass="footer-left" />
+
+								<label value="Reports"
+									sclass="footer-right" />
+
+							</div>
+
+						</south>
+
+
+					</borderlayout>
+
+				</center>
+
+			</borderlayout>
+
+		</vlayout>
+
+	</window>
+
+</zk>
