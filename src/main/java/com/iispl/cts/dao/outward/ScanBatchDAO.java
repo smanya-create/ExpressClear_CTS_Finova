@@ -3,6 +3,7 @@ package com.iispl.cts.dao.outward;
 import java.sql.Connection;
 import java.util.List;
 
+import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.ScanBatch;
 
 public interface ScanBatchDAO {
@@ -20,4 +21,7 @@ public interface ScanBatchDAO {
 	void updateBatchStatus(Connection connection, String batchId, String status);
 
 	List<ScanBatch> getMakerDashboardBatches();
+	
+	List<MicrRepairBatch> getScanMicrRepairBatches();
+
 }

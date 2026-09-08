@@ -51,7 +51,7 @@
                        		<separator style="height: 2px;" />
                            	<label value="All Batches" style="font-weight:bold;font-size:16px"/>
                             <listbox id="batchListbox" 
-                                     sclass="listbox-header z-listbox-grid" 
+                            		sclass="listbox-header"
                                      nonselectableTags="*" 
                                      emptyMessage="No batch details found">
                                 <listhead>

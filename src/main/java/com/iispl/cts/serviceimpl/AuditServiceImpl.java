@@ -47,6 +47,9 @@ public class AuditServiceImpl implements AuditService {
                 ipAddress = Executions.getCurrent().getRemoteAddr();
             }
         } catch (Exception ignored) {}
+        if ("0:0:0:0:0:0:0:1".equals(ipAddress) || "::1".equals(ipAddress)) {
+            ipAddress = "127.0.0.1";
+        }
 
         auditLogger.info("USER:[{}] | ROLE:[{}] | MODULE:[{}] | ACTION:[{}] | STATUS:[{}] | IP:[{}] | DETAILS:[{}]",
                 userId, roleName, module, action, status, ipAddress, details);

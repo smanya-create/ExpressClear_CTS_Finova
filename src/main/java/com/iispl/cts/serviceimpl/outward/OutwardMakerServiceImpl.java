@@ -6,30 +6,41 @@ import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.dao.outward.OutwardChequeDAO;
 import com.iispl.cts.dao.outward.ScanBatchDAO;
 import com.iispl.cts.dao.outward.ScanChequeDAO;
-import com.iispl.cts.entity.outward.OutwardBatch;
+import com.iispl.cts.daoimpl.outward.OutwardBatchDAOImpl;
+import com.iispl.cts.daoimpl.outward.OutwardChequeDAOImpl;
+import com.iispl.cts.daoimpl.outward.ScanBatchDAOImpl;
+import com.iispl.cts.daoimpl.outward.ScanChequeDAOImpl;
+import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
-import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
 import com.iispl.cts.service.outward.OutwardMakerService;
 
 public class OutwardMakerServiceImpl
         implements OutwardMakerService {
-//
-//    private final ScanBatchDAO scanBatchDAO;
-//    private final ScanChequeDAO scanChequeDAO;
-//
-//    private final OutwardBatchDAO outwardBatchDAO;
-//    private final OutwardChequeDAO outwardChequeDAO;
+
+    // =========================================================
+    // DAOs
+    // =========================================================
+
+    private final ScanBatchDAO scanBatchDAO;
+    private final ScanChequeDAO scanChequeDAO;
+
+    private final OutwardBatchDAO outwardBatchDAO;
+    private final OutwardChequeDAO outwardChequeDAO;
 
 
-//    public OutwardMakerServiceImpl() {
-//
-//        scanBatchDAO = new ScanBatchDAO();
-//        scanChequeDAO = new ScanChequeDAO();
-//
-//        outwardBatchDAO = new OutwardBatchDAO();
-//        outwardChequeDAO = new OutwardChequeDAO();
-//    }
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
+
+    public OutwardMakerServiceImpl() {
+
+        scanBatchDAO = new ScanBatchDAOImpl();
+        scanChequeDAO = new ScanChequeDAOImpl();
+
+        outwardBatchDAO = new OutwardBatchDAOImpl();
+        outwardChequeDAO = new OutwardChequeDAOImpl();
+    }
 
 
     // =========================================================
@@ -37,12 +48,9 @@ public class OutwardMakerServiceImpl
     // =========================================================
 
     @Override
-    public List<ScanBatch> getScanMicrRepairBatches() {
+    public List<MicrRepairBatch> getScanMicrRepairBatches() {
 
-        // We will add the actual DAO call here
-        // after checking ScanBatchDAO.
-
-        return null;
+        return scanBatchDAO.getScanMicrRepairBatches();
     }
 
 
@@ -50,79 +58,43 @@ public class OutwardMakerServiceImpl
     public List<ScanCheque> getScanMicrRepairCheques(
             String scannedBatchId) {
 
-        // We will add the actual DAO call here
-        // after checking ScanChequeDAO.
-
-        return null;
+        return scanChequeDAO.getScanMicrRepairCheques(
+                scannedBatchId);
     }
 
 
-    public void updateScanMicrRepair(
+    @Override
+    public void saveScanMicrRepair(
             ScanCheque cheque) {
 
-        // We will add the actual DAO update here
-        // after checking ScanChequeDAO.
+        scanChequeDAO.saveScanMicrRepair(cheque);
     }
 
 
     // =========================================================
-    // OUTWARD MAKER MICR REPAIR
+    // OUTWARD MICR REPAIR
     // =========================================================
 
     @Override
-    public List<OutwardBatch> getMakerMicrRepairBatches() {
+    public List<MicrRepairBatch> getOutwardMicrRepairBatches() {
 
-        // We will add the actual DAO call here
-        // after checking OutwardBatchDAO.
-
-        return null;
+        return outwardBatchDAO.getOutwardMicrRepairBatches();
     }
 
 
     @Override
-    public List<OutwardCheque> getMakerMicrRepairCheques(
+    public List<OutwardCheque> getOutwardMicrRepairCheques(
             String outwardBatchId) {
 
-        // We will add the actual DAO call here
-        // after checking OutwardChequeDAO.
-
-        return null;
+        return outwardChequeDAO.getOutwardMicrRepairCheques(
+                outwardBatchId);
     }
 
 
-    
-    public void updateMakerMicrRepair(
+    @Override
+    public void saveOutwardMicrRepair(
             OutwardCheque cheque) {
 
-        // We will add the actual DAO update here
-        // after checking OutwardChequeDAO.
+        outwardChequeDAO.saveOutwardMicrRepair(cheque);
     }
-
-
-	@Override
-	public void saveScanMicrRepair(ScanCheque cheque) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void saveMakerMicrRepair(OutwardCheque cheque) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public int getMakerMicrRepairChequeCount(String outwardBatchId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-
-	@Override
-	public int getScanMicrRepairChequeCount(String scannedBatchId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

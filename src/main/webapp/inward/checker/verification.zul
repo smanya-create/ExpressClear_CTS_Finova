@@ -53,7 +53,7 @@
         hflex="1">
 
         <label
-            value="Cheque Verification"
+            value="CHEQUE VERIFICATION"
             sclass="page-title"/>
 
         <label
@@ -226,7 +226,7 @@
         hflex="1">
 
         <label
-            value="Cheque Image"
+            value="CHEQUE IMAGE"
             sclass="card-title"/>
 
         <label
@@ -286,14 +286,25 @@
 
 </hlayout>       
     <!-- CHEQUE IMAGE -->
-    <div
-        id="chequePreview"
-       sclass="cheque-preview-area">
-    </div>
+   <!-- CHEQUE IMAGE -->
+<div
+    id="chequePreview"
+    sclass="cheque-preview-area"
+    style="height:245px;overflow:hidden;">
+
+    <image
+        id="chequeImage"
+        width="100%"
+        height="100%"
+        style="object-fit:contain;"/>
+</div>
+
+<!-- IMAGE CONTROLS -->
     <!-- IMAGE CONTROLS -->
     <hlayout
-        spacing="8px"
-        sclass="image-controls">
+    spacing="8px"
+    sclass="image-controls"
+    style="margin-top:8px;">
         <button
             id="btnZoomOut"
             label="−"
@@ -316,12 +327,7 @@
             sclass="image-control-wide"/>
     </hlayout>
 </vlayout>                            
-    <!--  EMPTY IMAGE AREA  -->
-							  <div
-							    id="chequeImageContainer"
-							    vflex="1"
-							    sclass="cheque-preview-area">
-							</div>
+   
 <!-- RIGHT SIDE WRAPPER -->
 <vlayout
     hflex="1"
@@ -348,12 +354,13 @@
     spacing="0"
     sclass="verification-header-row">
     <label
-        value="Cheque Verification"
+        value="CHEQUE VERIFICATION"
         sclass="card-title"
         hflex="1"/>
-    <label
-        value="PENDING"
-	sclass="verification-status-badge"/>
+   <label
+    id="lblVerificationStatus"
+    value="PENDING"
+    sclass="verification-status-badge"/>
 
 </hlayout>
 
@@ -474,15 +481,7 @@
         </hlayout>
 
     </vlayout>
-    <!-- CBS VALIDATION BUTTON -->
-
-    <button
-
-        id="btnRunCbsValidation"
-
-        label="🔍 Run CBS Validation"
-
-        sclass="cbs-validation-btn"/>
+    
 
 </vlayout>
 
@@ -686,6 +685,167 @@
         sclass="footer-version"/>
 
 </hlayout>
+<window
+    id="rejectReasonWindow"
+    title="Reject Cheque"
+    width="600px"
+    closable="true"
+    sizable="false"
+    mode="modal"
+    visible="false"
+    border="normal">
+
+    <vlayout
+        width="100%"
+        spacing="15px"
+        style="padding:20px;">
+
+        <!-- REJECTED REASONS -->
+
+        <vlayout
+            width="100%"
+            spacing="6px">
+
+            <label
+                value="Rejected Reason"
+                style="font-weight:bold;font-size:14px;color:#0B2344;"/>
+
+            <label
+                value="Select the reason for rejecting this cheque."
+                style="font-size:12px;color:#6B7A90;"/>
+
+     <combobox
+    id="cmbRejectedReason"
+    width="100%"
+    placeholder="Select rejected reason"
+    readonly="true"
+    autodrop="true"/>
+
+        </vlayout>
+
+
+        <!-- REMARKS -->
+
+        <vlayout
+            width="100%"
+            spacing="6px">
+
+            <label
+                value="Remarks"
+                style="font-weight:bold;font-size:14px;color:#0B2344;"/>
+
+            <textbox
+                id="txtRejectRemarks"
+                width="100%"
+                height="90px"
+                multiline="true"
+                placeholder="Enter remarks..."/>
+
+        </vlayout>
+
+
+        <!-- BUTTONS -->
+
+        <hlayout
+            width="100%"
+            spacing="8px">
+
+            <button
+                id="btnCancelReject"
+                label="Cancel"
+                width="90px"
+                height="34px"/>
+
+            <button
+                id="btnProceedReject"
+                label="✓ Proceed"
+                width="110px"
+                height="34px"
+                style="background:#C62828;color:white;border:0;border-radius:4px;"/>
+
+        </hlayout>
+
+    </vlayout>
+
+</window>
+<window
+    id="sendBackReasonWindow"
+    title="Send Back to Maker"
+    width="600px"
+    closable="true"
+    sizable="false"
+    mode="modal"
+    visible="false"
+    border="normal">
+
+    <vlayout
+        width="100%"
+        spacing="15px"
+        style="padding:20px;">
+
+        <!-- SEND BACK REASON -->
+        <vlayout
+            width="100%"
+            spacing="6px">
+
+            <label
+                value="Send Back Reason"
+                style="font-weight:bold;font-size:14px;color:#0B2344;"/>
+
+            <label
+                value="Select the reason for sending this cheque back to Maker."
+                style="font-size:12px;color:#6B7A90;"/>
+
+            <combobox
+                id="cmbSendBackReason"
+                width="100%"
+                placeholder="Select send back reason"
+                readonly="true"
+                autodrop="true"/>
+
+        </vlayout>
+
+        <!-- REMARKS -->
+        <vlayout
+            width="100%"
+            spacing="6px">
+
+            <label
+                value="Remarks"
+                style="font-weight:bold;font-size:14px;color:#0B2344;"/>
+
+            <textbox
+                id="txtSendBackRemarks"
+                width="100%"
+                height="90px"
+                multiline="true"
+                placeholder="Enter remarks..."/>
+
+        </vlayout>
+
+        <!-- BUTTONS -->
+        <hlayout
+            width="100%"
+            spacing="8px">
+
+            <button
+                id="btnCancelSendBack"
+                label="Cancel"
+                width="90px"
+                height="34px"/>
+
+            <button
+                id="btnProceedSendBack"
+                label="✓ Proceed"
+                width="110px"
+                height="34px"
+                style="background:#0B2344;color:white;border:0;border-radius:4px;"/>
+
+        </hlayout>
+
+    </vlayout>
+
+</window>
 
                     </vlayout>
 

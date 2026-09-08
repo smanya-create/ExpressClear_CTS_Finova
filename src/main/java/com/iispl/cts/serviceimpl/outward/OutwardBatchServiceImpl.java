@@ -39,9 +39,14 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 
 	@Override
-	public List<OutwardBatch> getPendingBatches() {
+	public List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize) {
 		
-		return outwardBatchDAO.getPendingBatches();
+		return outwardBatchDAO.getPendingBatches(pageNumber,pageSize);
+	}
+	@Override
+	public int getPendingBatchCount() {
+		
+		return outwardBatchDAO.getPendingBatchCount();
 	}
 	
 	@Override
@@ -49,4 +54,6 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 		return outwardBatchDAO.getBatchesReadyForDataEntry();
 	}
+
+	
 }

@@ -10,19 +10,20 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class DBConnection {
 
-    private static final String SUPABASE_HOST =
-            "aws-0-ap-northeast-2.pooler.supabase.com";
+
+    private static Throwable initError;
+
+    private static final String SUPABASE_HOST = "aws-0-ap-northeast-2.pooler.supabase.com";
 
     private static final String DB_NAME = "postgres";
 
-    // Session pooler
-    private static final int PORT = 5432;
+    // Transaction pooler (Port 6543 avoids EMAXCONNSESSION errors)
+    private static final int PORT = 6543;
 
-    private static final String DB_USER =
-            "postgres.wrqvispigpddkbanlxfw";
+    private static final String DB_USER = "postgres.wrqvispigpddkbanlxfw";
 
-    private static final String DB_PASSWORD =
-            "Imageinfo@123";
+    private static final String DB_PASSWORD = "Imageinfo@123";
+
 
     private static HikariDataSource dataSource;
 
@@ -31,8 +32,10 @@ public class DBConnection {
 
             HikariConfig config = new HikariConfig();
 
+            // Note: prepareThreshold=0 is required for PostgreSQL connection poolers in transaction mode
             String jdbcUrl = String.format(
-                    "jdbc:postgresql://%s:%d/%s?sslmode=require",
+                    "jdbc:postgresql://%s:%d/%s?sslmode=require&prepareThreshold=0&preferQueryMode=simple",
+
                     SUPABASE_HOST,
                     PORT,
                     DB_NAME
@@ -43,57 +46,41 @@ public class DBConnection {
             config.setPassword(DB_PASSWORD.trim());
             config.setDriverClassName("org.postgresql.Driver");
 
-            // HikariCP
-            config.setMaximumPoolSize(10);
-            config.setMinimumIdle(1);
 
-            config.setConnectionTimeout(10000);
-            config.setValidationTimeout(3000);
+            config.setConnectionTimeout(30000);
+            config.setValidationTimeout(5000);
 
-            // Keep connections for a reasonable period
-            config.setIdleTimeout(60000);
-            config.setMaxLifetime(300000);
+            // Stale connection prevention
+            config.setIdleTimeout(30000);
+            config.setMaxLifetime(120000);
+
+            // Do not fail JVM / Tomcat startup if connection is slow to initialize
+            config.setInitializationFailTimeout(-1);
+
+
+            config.setPoolName("CTS-HikariPool");
 
             dataSource = new HikariDataSource(config);
 
-            System.out.println("======================================");
-            System.out.println(" HikariCP Connection Pool ACTIVE");
-            System.out.println(" Supabase Host : " + SUPABASE_HOST);
-            System.out.println(" Port          : " + PORT);
-            System.out.println("======================================");
 
-        } catch (Exception e) {
-
-            System.err.println(
-                    "Failed to initialize HikariCP DataSource."
-            );
-
+        } catch (Throwable e) {
+            initError = e;
+            System.err.println("CRITICAL: Failed to initialize HikariCP DataSource:");
             e.printStackTrace();
         }
     }
 
-    public static DataSource getDataSource() {
-        return dataSource;
-    }
-
     public static Connection getConnection() throws SQLException {
-
         if (dataSource == null) {
-            throw new SQLException(
-                    "DataSource is not initialized properly."
-            );
+            String cause = (initError != null) ? initError.getMessage() : "Unknown init failure";
+            throw new SQLException("DataSource is not initialized properly. Cause: " + cause, initError);
         }
-
         return dataSource.getConnection();
     }
 
-    public static void closeQuietly(
-            AutoCloseable... resources) {
-
+    public static void closeQuietly(AutoCloseable... resources) {
         for (AutoCloseable resource : resources) {
-
             if (resource != null) {
-
                 try {
                     resource.close();
 
@@ -102,4 +89,16 @@ public class DBConnection {
             }
         }
     }
+
+    public static void shutdown() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            try {
+                dataSource.close();
+                System.out.println("HikariCP Connection Pool closed successfully.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

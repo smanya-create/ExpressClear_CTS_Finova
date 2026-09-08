@@ -4,6 +4,7 @@ import java.util.List;
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
+import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.entity.inward.InwardChequeImage;
@@ -46,6 +47,28 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	@Override
 	public InwardChequeImage getFrontImage(String inwardChequeId) {
 		return InwardChequeImageDAOImpl.getInstance().findFrontImageByChequeId(inwardChequeId);
+	}
+	@Override
+	public InwardChequeImage getBackImage(String inwardChequeId) {
+	    return InwardChequeImageDAOImpl.getInstance()
+	            .findBackImageByChequeId(inwardChequeId);
+	}
+	@Override
+	public boolean saveRejection(
+	        String inwardChequeId,
+	        String rejectedReasonId,
+	        String remarks,
+	        String rejectedBy) {
+
+	    return inwardChequeDAO.saveRejection(
+	            inwardChequeId,
+	            rejectedReasonId,
+	            remarks,
+	            rejectedBy);
+	}
+	@Override
+	public CbsValidationResult validateCbs(InwardCheque cheque) {
+	    return inwardChequeDAO.validateCbs(cheque);
 	}
 
 	

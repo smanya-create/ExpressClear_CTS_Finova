@@ -5,8 +5,9 @@
 
 	<style src="/css/inward/micr-repair.css" />
 
-	<vlayout id="inwardMicrRepairRoot" width="100%" spacing="6px"
-		sclass="micr-repair-page">
+	<vlayout id="inwardMicrRepairRoot"
+		apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairControllerr"
+		width="100%" spacing="6px" sclass="micr-repair-page">
 
 
 		<hlayout width="100%" valign="middle"

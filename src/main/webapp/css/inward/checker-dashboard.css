@@ -1,3 +1,11 @@
+
+.cheque-verification-listbox .z-listhead th {
+    background: #1B4A8F !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-bottom: 1px solid #163D73 !important;
+}
+
 .listbox-header .z-listheader {
             background: #1C3673 !important;
             border-bottom: 1px solid #E0E6ED !important;

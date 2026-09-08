@@ -34,14 +34,21 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 	private Vlayout outwardMakerVlayoutEmptyState;
 
 	private Label outwardMakerLblBatchId;
+
 	private Label outwardMakerLblChequeCount;
+
 	private Label outwardMakerLblTotalAmount;
+
 	private Label outwardMakerLblCurrentPage;
 
 	private Button outwardMakerBtnFirst;
+
 	private Button outwardMakerBtnPrevious;
+
 	private Button outwardMakerBtnNext;
+
 	private Button outwardMakerBtnLast;
+
 	private Button outwardMakerBtnBack;
 
 	private ScanService scanService;
@@ -100,30 +107,7 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 
 		try {
 
-			Object batchIdObject = null;
-
-			Component component = outwardMakerRowsChequeDetails;
-
-			Component parent = component.getParent();
-
-			while (parent != null) {
-
-				Object attribute = parent.getAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID");
-
-				if (attribute != null) {
-
-					batchIdObject = attribute;
-
-					break;
-				}
-
-				parent = parent.getParent();
-			}
-
-			if (batchIdObject == null) {
-
-				batchIdObject = Executions.getCurrent().getAttribute("batchId");
-			}
+			Object batchIdObject = Executions.getCurrent().getAttribute("batchId");
 
 			if (batchIdObject == null) {
 

@@ -1,4 +1,3 @@
-
 .role-content {
     background-color: #f8fafc;
     min-height: calc(100vh - 75px);
@@ -6,55 +5,153 @@
 }
 
 .page-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: #0f172a;
-    letter-spacing: -0.02em;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: #1e293b !important;
+    display: block !important;
+    letter-spacing: -0.2px !important;
 }
 
 .page-subtitle {
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 500;
+    font-size: 13px !important;
+    color: #64748b !important;
+    display: block !important;
 }
 
 /* --- Card Panel --- */
 .card-panel {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 24px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+   background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 24px 28px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    box-sizing: border-box !important;
+}
+/* Ensure inner flex elements do not overflow or clip borders */
+.card-panel > .z-vlayout-inner,
+.card-panel > .z-hlayout-inner {
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-/* --- Primary Button (+ ADD ROLE) --- */
+/* Inner Card Header & Subtitle (Matched to User Details in Add User) */
+.cts-card-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    display: block !important;
+}
+
+.cts-card-subtitle {
+    font-size: 12.5px !important;
+    color: #64748b !important;
+    display: block !important;
+    margin-top: 2px !important;
+}
+
+/* --- Field Header Labels (Matched to Add User Screen) --- */
+.field-label {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+    display: block !important;
+}
+
+/* --- Input Box Styling (Matched to Add User Screen) --- */
+.input-box {
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.15s ease !important;
+}
+
+.input-box:focus {
+    border-color: #173b61 !important;
+    outline: none !important;
+}
+
+.input-box::placeholder {
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+}
+
+/* Readonly Input Styling (Matched to EMP ID) */
+.input-box-readonly {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    border-color: #e2e8f0 !important;
+    cursor: not-allowed !important;
+}
+
+/* --- Combobox Overrides in Forms --- */
+.card-panel .z-combobox-input {
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 6px 0 0 6px !important;
+    height: 38px !important;
+    font-size: 13px !important;
+    color: #1e293b !important;
+    padding: 0 12px !important;
+}
+
+.card-panel .z-combobox-button {
+    border: 1.5px solid #cbd5e1 !important;
+    border-left: none !important;
+    border-radius: 0 6px 6px 0 !important;
+    height: 38px !important;
+    background: #ffffff !important;
+}
+
+/* --- Action Buttons --- */
 .btn-primary {
-    background-color: #0f172a !important;
+    background-color: #173b61 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    font-size: 12px !important;
-    letter-spacing: 0.5px !important;
-    border: 1px solid #0f172a !important;
+    font-size: 11.5px !important;
+    letter-spacing: 0.6px !important;
+    border: 1px solid #173b61 !important;
     border-radius: 6px !important;
-    padding: 0 18px !important;
+    padding: 0 22px !important;
     cursor: pointer !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
 }
 
 .btn-primary:hover {
-    background-color: #1e293b !important;
-    border-color: #1e293b !important;
+    background-color: #0f2844 !important;
+    border-color: #0f2844 !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15) !important;
 }
 
 .btn-primary:active {
-    background-color: #020617 !important;
+    background-color: #081a2f !important;
     transform: translateY(0);
 }
 
-/* --- Secondary Button (if reused elsewhere) --- */
+.btn-outline {
+    background-color: #ffffff !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+    letter-spacing: 0.6px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 0 20px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+.btn-outline:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+}
+
 .btn-secondary {
     background-color: #f1f5f9 !important;
     color: #475569 !important;
@@ -79,7 +176,6 @@
     background: #ffffff !important;
 }
 
-/* Grid Header Row */
 .role-grid .z-columns .z-column {
     background: #f8fafc !important;
     border-bottom: 2px solid #e2e8f0 !important;
@@ -98,7 +194,6 @@
     text-transform: uppercase !important;
 }
 
-/* Grid Body Rows & Cells */
 .role-grid .z-row .z-row-inner,
 .role-grid .z-row .z-cell {
     border-bottom: 1px solid #f1f5f9 !important;
@@ -109,7 +204,6 @@
     background: #ffffff !important;
 }
 
-/* Row Hover Effect */
 .role-grid .z-row:hover .z-row-inner,
 .role-grid .z-row:hover .z-cell {
     background-color: #f8fafc !important;
@@ -141,4 +235,137 @@
 .btn-action-modify:active {
     background-color: #020617 !important;
     transform: translateY(0);
+}
+
+
+/* --- Custom Listbox & Table Container --- */
+.custom-listbox {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    width: 100% !important;
+}
+
+/* Fix header container overflow and background */
+.custom-listbox .z-listbox-header {
+    background: #173b61 !important;
+    border-bottom: none !important;
+}
+
+/* Header Cells */
+.custom-listbox .z-listheader {
+    background: #173b61 !important;
+    border: none !important;
+    height: 40px !important;
+}
+
+.custom-listbox .z-listheader-content {
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    padding: 10px 16px !important;
+    line-height: 20px !important;
+}
+
+/* Remove default ZK empty row placeholders and fix table body */
+.custom-listbox .z-listbox-body {
+    background: #ffffff !important;
+    overflow-y: auto !important;
+}
+
+/* Row & Cell Styling */
+.custom-listbox .z-listitem {
+    border-bottom: 1px solid #f1f5f9 !important;
+    background: #ffffff !important;
+    transition: background 0.15s ease !important;
+}
+
+.custom-listbox .z-listitem:hover {
+    background: #f8fafc !important;
+}
+
+.custom-listbox .z-listcell {
+    border: none !important;
+}
+
+.custom-listbox .z-listcell-content {
+    font-size: 13px !important;
+    color: #334155 !important;
+    padding: 12px 16px !important;
+    line-height: 1.4 !important;
+}
+
+/* Fix empty message styling if no operators are found */
+.custom-listbox .z-listbox-empty {
+    padding: 24px !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+}
+/* --- Pagination Toolbar --- */
+.cts-pagination-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.pg-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    color: #475569 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+}
+
+.pg-nav-btn:hover:not([disabled]) {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+.pg-nav-btn[disabled] {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+.pg-current-input {
+    width: 38px !important;
+    height: 32px !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 4px !important;
+    box-sizing: border-box !important;
+}
+
+.pg-current-input:focus {
+    border-color: #173b61 !important;
+    outline: none !important;
+}
+
+.pg-total-label {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    line-height: 32px !important;
+    vertical-align: middle !important;
+    margin: 0 8px 0 2px !important;
+    display: inline-block !important;
 }

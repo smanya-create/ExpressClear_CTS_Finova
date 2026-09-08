@@ -9,6 +9,8 @@ import com.iispl.cts.entity.inward.InwardBatch;
 public interface InwardBatchDAO {
 
     List<InwardBatch> getAllBatches();
+    
+    List<InwardBatch> getBatchesForMicrRepair();
 
     InwardBatch getBatchById(String inwardBatchId);
 
@@ -17,6 +19,7 @@ public interface InwardBatchDAO {
     boolean updateBatch(InwardBatch inwardBatch);
 
     boolean deleteBatch(String inwardBatchId);
+    
     
 //    List<InwardBatch> findAllActiveBatches();
 //    InwardBatch findById(String batchId);

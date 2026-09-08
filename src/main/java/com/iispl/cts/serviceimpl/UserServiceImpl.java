@@ -99,4 +99,18 @@ public class UserServiceImpl implements UserService {
     public String generateNextEmployeeId() {
         return userDAO.generateNextEmployeeId();
     }
+    @Override
+    public List<User> findUsersByRoleId(String roleId) {
+        if (roleId == null || roleId.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        
+        String trimmedRoleId = roleId.trim();
+        System.out.println("Fetching users for roleId: [" + trimmedRoleId + "]");
+        
+        List<User> users = userDAO.findUsersByRoleId(trimmedRoleId);
+        System.out.println("Found users count: " + (users != null ? users.size() : 0));
+        
+        return users != null ? users : java.util.Collections.emptyList();
+    }
 }

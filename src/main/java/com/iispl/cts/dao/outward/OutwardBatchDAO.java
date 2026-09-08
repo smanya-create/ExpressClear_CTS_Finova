@@ -3,6 +3,7 @@ package com.iispl.cts.dao.outward;
 import java.util.List;
 import java.sql.Connection;
 
+import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
 public interface OutwardBatchDAO {
@@ -15,11 +16,14 @@ public interface OutwardBatchDAO {
 
 	OutwardBatch getBatchById(String outwardBatchId);
 
-
 	String transferBatchFromScanToOutward(Connection connection, String scannedBatchId);
 
-	List<OutwardBatch> getPendingBatches();
+	List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize);
 
+    int getPendingBatchCount();
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
+	
+	List<MicrRepairBatch> getOutwardMicrRepairBatches();
+
 }
