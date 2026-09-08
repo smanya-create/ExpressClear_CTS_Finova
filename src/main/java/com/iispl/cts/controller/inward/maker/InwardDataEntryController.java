@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +38,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
     private static final long serialVersionUID = 1L;
 
-    // Database Services
     private final InwardBatchService batchService = new InwardBatchServiceImpl();
     private final InwardChequeService chequeService = new InwardChequeServiceImpl();
     private final RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 
-    // Top Metadata Card Labels
     private Label lblBatchId;
     private Label lblSource;
     private Label lblTotalCheques;
@@ -183,7 +182,26 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         }
 
         // Fetch cheques: priority ordering brings SEND_BACK_TO_MAKER to index 0
-        this.activeQueue = chequeService.getChequesByBatchAndStatus(batchId, null);
+        List<InwardCheque> allCheques =
+                chequeService.getChequesByBatchAndStatus(batchId, null);
+
+        this.activeQueue = new ArrayList<>();
+
+        if (allCheques != null) {
+
+            for (InwardCheque cheque : allCheques) {
+
+                String status = cheque.getChequeStatus();
+
+                if ("DATA_ENTRY_PENDING".equalsIgnoreCase(status)
+                        || "DATA_ENTRY_IN_PROGRESS".equalsIgnoreCase(status)
+                        || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
+
+                    this.activeQueue.add(cheque);
+                }
+            }
+        }
+
         this.currentIndex = 0;
 
         displayCurrentCheque();
@@ -215,7 +233,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
                 lblDataStatus.setValue("PENDING");
             } else if ("DATA_ENTRY_IN_PROGRESS".equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("IN PROGRESS");
-            } else if ("SEND_BACK_TO_MAKER".equalsIgnoreCase(status)) {
+            } else if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("SENT BACK");
             } else if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status) 
                     || "ACCEPTED".equalsIgnoreCase(status)
@@ -250,36 +268,85 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     }
 
     private void updateProgressBar() {
+
         if (activeQueue == null || activeQueue.isEmpty()) {
-            if (pmBatchProgress != null) pmBatchProgress.setValue(0);
-            if (lblProgressText != null) lblProgressText.setValue("0/0 (0%)");
-            if (btnSubmitToChecker != null) btnSubmitToChecker.setVisible(false);
+            if (pmBatchProgress != null) {
+            	pmBatchProgress.setValue(0);
+            }
+            if (lblProgressText != null) {
+                lblProgressText.setValue("0/0 (0%)");
+            }
+            if (btnSubmitToChecker != null) {
+                btnSubmitToChecker.setVisible(false);
+            }
             return;
         }
-
         int total = activeQueue.size();
-        long resolvedCount = activeQueue.stream()
-                .filter(c -> "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(c.getChequeStatus())
-                          || "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-                          || "REJECTED".equalsIgnoreCase(c.getChequeStatus())
-                          || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
-                .count();
-
-        int percentage = (int) Math.round(((double) resolvedCount / total) * 100);
-
+        long resolvedCount =
+                activeQueue.stream()
+                        .filter(c ->
+                                "CHECKER_PROCESSING_PENDING"
+                                        .equalsIgnoreCase(c.getChequeStatus())
+                                || "ACCEPTED"
+                                        .equalsIgnoreCase(c.getChequeStatus())
+                                || "REJECTED"
+                                        .equalsIgnoreCase(c.getChequeStatus())
+                                || "DATA_ENTRY_COMPLETED"
+                                        .equalsIgnoreCase(c.getChequeStatus()))
+                        .count();
+        int percentage =
+                (int) Math.round(
+                        ((double) resolvedCount / total) * 100);
         if (pmBatchProgress != null) {
             pmBatchProgress.setValue(percentage);
         }
         if (lblProgressText != null) {
-            lblProgressText.setValue(resolvedCount + "/" + total + " (" + percentage + "%)");
+            lblProgressText.setValue(
+                    resolvedCount
+                    + "/"
+                    + total
+                    + " ("
+                    + percentage
+                    + "%)");
         }
+        boolean allBatchChequesResolved =
+                areAllBatchChequesResolved();
 
-        boolean allResolved = (resolvedCount == total);
         if (btnSubmitToChecker != null) {
-            btnSubmitToChecker.setVisible(allResolved);
+            btnSubmitToChecker.setVisible(
+                    resolvedCount == total
+                    && allBatchChequesResolved);
         }
     }
-
+    private boolean areAllBatchChequesResolved() {
+        if (currentBatchId == null
+                || currentBatchId.trim().isEmpty()) {
+            return false;
+        }
+        List<InwardCheque> allCheques =
+                chequeService.getChequesByBatchAndStatus(
+                        currentBatchId,
+                        null);
+        if (allCheques == null || allCheques.isEmpty()) {
+            return false;
+        }
+        for (InwardCheque cheque : allCheques) {
+            String status = cheque.getChequeStatus();
+            boolean resolved =
+                    "CHECKER_PROCESSING_PENDING"
+                            .equalsIgnoreCase(status)
+                    || "ACCEPTED"
+                            .equalsIgnoreCase(status)
+                    || "REJECTED"
+                            .equalsIgnoreCase(status)
+                    || "DATA_ENTRY_COMPLETED"
+                            .equalsIgnoreCase(status);
+            if (!resolved) {
+                return false;
+            }
+        }
+        return true;
+    }
     private void updateNavigationState() {
         if (btnPrevCheque != null) {
             btnPrevCheque.setDisabled(activeQueue == null || currentIndex <= 0);

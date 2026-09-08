@@ -26,5 +26,9 @@ public enum InwardChequeStatus {
 
 	    CLEARED,
 
-	    COMPLETED
+	    COMPLETED,
+	    
+	    SEND_BACK_TO_MAKER_MICR,
+	    
+	    SEND_BACK_TO_MAKER_DATA_ENTRY
 }

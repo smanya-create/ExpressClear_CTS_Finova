@@ -190,11 +190,7 @@ public class InwardCheckerVerificationController
         cancelSendBackButton.addEventListener(
         Events.ON_CLICK,
         event -> onClick$btnCancelSendBack());
-        
-     // -------------------------------------------------
-     // GET VERIFICATION SUMMARY WINDOW
-     // -------------------------------------------------
-
+   
      verificationSummaryWindow =
              (Window) pageRoot.getFellow("verificationSummaryWindow");
 
@@ -212,11 +208,6 @@ public class InwardCheckerVerificationController
 
      btnSubmitBatch =
              (Button) verificationSummaryWindow.getFellow("btnSubmitBatch");
-
-
-     // -------------------------------------------------
-     // MANUALLY REGISTER SUMMARY BUTTON EVENTS
-     // -------------------------------------------------
 
      btnStayVerification.addEventListener(
              Events.ON_CLICK,
@@ -370,8 +361,7 @@ public class InwardCheckerVerificationController
             if (lblAccountBalance != null) {
                 lblAccountBalance.setValue("₹50,000.00");
             }
-         // Verification status
-         // Verification status
+        
             if (lblVerificationStatus != null) {
 
                 String status = cheque.getChequeStatus();
@@ -501,10 +491,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // -------------------------------------------------
-            // CHECK WHETHER CHEQUE IS ALREADY VERIFIED
-            // -------------------------------------------------
-
             String currentStatus = cheque.getChequeStatus();
 
             if ("ACCEPTED".equalsIgnoreCase(currentStatus)
@@ -518,11 +504,6 @@ public class InwardCheckerVerificationController
 
                 return;
             }
-
-            // -------------------------------------------------
-            // RUN CBS VALIDATION AUTOMATICALLY
-            // -------------------------------------------------
-
             CbsValidationResult cbsResult =
                     runCbsValidation(cheque);
 
@@ -583,10 +564,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // -------------------------------------------------
-            // CBS VALIDATION PASSED
-            // -------------------------------------------------
-
             cheque.setChequeStatus("ACCEPTED");
 
             boolean updated =
@@ -633,10 +610,6 @@ public class InwardCheckerVerificationController
             // Update 1/4, 2/4, 3/4, 4/4
             updateVerificationCount();
 
-            // -------------------------------------------------
-            // SHOW SUCCESS MESSAGE THEN MOVE NEXT
-            // -------------------------------------------------
-
             Messagebox.show(
                     "Cheque accepted successfully.",
                     "Verification",
@@ -674,10 +647,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // -------------------------------------------------
-            // CHECK WHETHER CHEQUE IS ALREADY VERIFIED
-            // -------------------------------------------------
-
             String currentStatus = cheque.getChequeStatus();
 
             if ("ACCEPTED".equalsIgnoreCase(currentStatus)
@@ -691,11 +660,6 @@ public class InwardCheckerVerificationController
 
                 return;
             }
-
-            // -------------------------------------------------
-            // OPEN REJECT POPUP
-            // -------------------------------------------------
-
             Window window =
                     (Window) pageRoot.getFellow(
                             "rejectReasonWindow");
@@ -833,9 +797,7 @@ public class InwardCheckerVerificationController
     private String safeValue(String value) {
 
         return value != null ? value : "";
-    }
-    
-    
+    } 
     private void updateVerificationCount() {
 
         if (lblVerification == null || currentBatchId == null) {
@@ -877,11 +839,9 @@ public class InwardCheckerVerificationController
 
             int verified = accepted + rejected;
 
-            // Example: 3/4
             lblVerification.setValue(
                     verified + "/" + total);
 
-            // Show Submit only when every cheque is verified
             if (btnSubmitVerification != null) {
 
                 btnSubmitVerification.setVisible(
@@ -963,10 +923,6 @@ public class InwardCheckerVerificationController
                     (Textbox) window.getFellow(
                             "txtRejectRemarks");
 
-            // -------------------------------------------------
-            // GET SELECTED REASON
-            // -------------------------------------------------
-
             Comboitem selectedItem =
                     comboBox.getSelectedItem();
 
@@ -1002,10 +958,6 @@ public class InwardCheckerVerificationController
                 remarks = remarks.trim();
             }
 
-            // -------------------------------------------------
-            // GET CURRENT CHEQUE
-            // -------------------------------------------------
-
             InwardCheque cheque =
                     inwardChequeService.findById(currentChequeId);
 
@@ -1019,10 +971,6 @@ public class InwardCheckerVerificationController
 
                 return;
             }
-
-            // -------------------------------------------------
-            // CHECK WHETHER ALREADY VERIFIED
-            // -------------------------------------------------
 
             String currentStatus =
                     cheque.getChequeStatus();
@@ -1041,10 +989,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // -------------------------------------------------
-            // GET LOGGED-IN USER
-            // -------------------------------------------------
-
             Object userObject =
                     Sessions.getCurrent()
                             .getAttribute("CTS_USERNAME");
@@ -1060,10 +1004,6 @@ public class InwardCheckerVerificationController
 
                 rejectedBy = "Alex";
             }
-
-            // -------------------------------------------------
-            // SAVE REJECTION DETAILS
-            // -------------------------------------------------
 
             boolean rejectionSaved =
                     inwardChequeService.saveRejection(
@@ -1083,10 +1023,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // -------------------------------------------------
-            // UPDATE CHEQUE STATUS
-            // -------------------------------------------------
-
             cheque.setChequeStatus("REJECTED");
 
             boolean chequeUpdated =
@@ -1104,11 +1040,6 @@ public class InwardCheckerVerificationController
 
                 return;
             }
-
-            // -------------------------------------------------
-            // UPDATE SCREEN
-            // -------------------------------------------------
-
             if (lblChequeStatus != null) {
 
                 lblChequeStatus.setValue("REJECTED");
@@ -1132,26 +1063,10 @@ public class InwardCheckerVerificationController
                 );
             }
 
-            // -------------------------------------------------
-            // CLOSE POPUP
-            // -------------------------------------------------
-
             window.setVisible(false);
-
             comboBox.setSelectedItem(null);
-
             remarksBox.setValue("");
-
-            // -------------------------------------------------
-            // UPDATE VERIFICATION COUNT
-            // -------------------------------------------------
-
             updateVerificationCount();
-
-            // -------------------------------------------------
-            // SHOW MESSAGE THEN MOVE NEXT
-            // -------------------------------------------------
-
             Messagebox.show(
                     "Cheque rejected successfully.",
                     "Verification",
@@ -1170,32 +1085,22 @@ public class InwardCheckerVerificationController
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
-    }
-    
+    }  
     public void onClick$btnCancelReject() {
-
         try {
-
             Window window =
                     (Window) pageRoot.getFellow("rejectReasonWindow");
-
             Combobox comboBox =
                     (Combobox) window.getFellow("cmbRejectedReason");
-
             Textbox remarksBox =
                     (Textbox) window.getFellow("txtRejectRemarks");
-
             comboBox.setSelectedItem(null);
             remarksBox.setValue("");
-
             window.setVisible(false);
-
         } catch (Exception e) {
-
             e.printStackTrace();
         }
     }
-    
     private CbsValidationResult runCbsValidation(InwardCheque cheque) {
 
         if (cheque == null) {
@@ -1203,13 +1108,43 @@ public class InwardCheckerVerificationController
                     false,
                     "Cheque information is not available.");
         }
-
         return inwardChequeService.validateCbs(cheque);
     }
+   
+    
     public void onClick$btnSendBack() {
 
         try {
 
+            InwardCheque cheque =
+                    inwardChequeService.findById(currentChequeId);
+
+            if (cheque == null) {
+                Messagebox.show(
+                        "Cheque not found.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+                return;
+            }
+
+            // Already verified cheques cannot be sent back
+            String status = cheque.getChequeStatus();
+
+            if ("ACCEPTED".equalsIgnoreCase(status)
+                    || "REJECTED".equalsIgnoreCase(status)) {
+
+                Messagebox.show(
+                        "This cheque is already verified.\n"
+                        + "Accepted or rejected cheques cannot be sent back to Maker.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            // Existing code continues here
             Window window =
                     (Window) pageRoot.getFellow(
                             "sendBackReasonWindow");
@@ -1241,6 +1176,8 @@ public class InwardCheckerVerificationController
                     Messagebox.ERROR);
         }
     }
+    
+    
     public void onClick$btnProceedSendBack() {
 
         try {
@@ -1279,11 +1216,79 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            cheque.setChequeStatus(
-                    InwardChequeStatus.SEND_BACK_TO_MAKER.name());
+        
+
+            if (selectedItem == null) {
+                Messagebox.show(
+                        "Please select a send back reason.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+                return;
+            }
+
+            SendBackReason selectedReason =
+                    (SendBackReason) selectedItem.getValue();
+
+            if (selectedReason == null) {
+                Messagebox.show(
+                        "Invalid send back reason.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+                return;
+            }
+
+            String reasonCode = selectedReason.getReasonCode();
+
+            String sendBackStatus;
+
+            if ("SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
+                    || "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
+                    || "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)) {
+
+                sendBackStatus = "SEND_BACK_TO_MAKER_MICR";
+
+            } else if ("SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
+                    || "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
+                    || "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
+                    || "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)) {
+
+                sendBackStatus = "SEND_BACK_TO_MAKER_DATA_ENTRY";
+
+            } else {
+                Messagebox.show(
+                        "This send back reason has not been mapped to a Maker queue yet.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+                return;
+            }
+
+            cheque.setChequeStatus(sendBackStatus);
 
             boolean updated =
                     inwardChequeService.updateChequeDetails(cheque);
+
+            if (!updated) {
+                Messagebox.show(
+                        "Unable to send the cheque back to Maker.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+                return;
+            }
+
+            window.setVisible(false);
+
+            Messagebox.show(
+                    "Cheque has been sent back to Maker successfully.",
+                    "Send Back",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION,
+                    event -> moveToNextCheque());
+
+        
 
             if (!updated) {
 
@@ -1487,10 +1492,8 @@ public class InwardCheckerVerificationController
 
               + "document.addEventListener('keydown',function(e){"
 
-              // Get the CURRENT zoom value from the image
               + "var scale=parseFloat(img.dataset.zoomScale || '1');"
 
-              // Only navigate when zoomed in
               + "if(scale <= 1) return;"
 
               + "var x=parseFloat(img.dataset.panX || '0');"
@@ -1498,22 +1501,18 @@ public class InwardCheckerVerificationController
 
               + "var step=30;"
 
-              // LEFT arrow → show LEFT side
               + "if(e.key==='ArrowLeft'){"
               + "x=x+step;"
               + "}"
 
-              // RIGHT arrow → show RIGHT side
               + "else if(e.key==='ArrowRight'){"
               + "x=x-step;"
               + "}"
 
-              // UP arrow → show TOP
               + "else if(e.key==='ArrowUp'){"
               + "y=y+step;"
               + "}"
 
-              // DOWN arrow → show BOTTOM
               + "else if(e.key==='ArrowDown'){"
               + "y=y-step;"
               + "}"
@@ -1658,9 +1657,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // ---------------------------------------------
-            // FINAL SAFETY CHECK
-            // ---------------------------------------------
 
             List<InwardCheque> batchCheques =
                     inwardChequeService.getChequesByBatchAndStatus(
@@ -1702,10 +1698,6 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            // ---------------------------------------------
-            // GET BATCH
-            // ---------------------------------------------
-
             InwardBatch batch =
                     inwardBatchService.getBatchById(currentBatchId);
 
@@ -1719,10 +1711,6 @@ public class InwardCheckerVerificationController
 
                 return;
             }
-
-            // ---------------------------------------------
-            // CHANGE BATCH STATUS
-            // ---------------------------------------------
 
             batch.setBatchStatus("COMPLETED");
 
@@ -1744,12 +1732,6 @@ public class InwardCheckerVerificationController
             if (verificationSummaryWindow != null) {
                 verificationSummaryWindow.setVisible(false);
             }
-
-            // ---------------------------------------------
-            // REMOVE COMPLETED BATCH FROM CURRENT
-            // VERIFICATION WORKING LIST
-            // ---------------------------------------------
-
             currentBatchCheques.clear();
             currentChequeId = null;
             currentBatchId = null;
@@ -1759,9 +1741,6 @@ public class InwardCheckerVerificationController
                 btnSubmitVerification.setVisible(false);
             }
 
-            // ---------------------------------------------
-            // SUCCESS
-            // ---------------------------------------------
             showNoChequesToVerify();
 
             Messagebox.show(
@@ -1789,22 +1768,20 @@ public class InwardCheckerVerificationController
        
     private void showNoChequesToVerify() {
 
-        // Hide batch information
+     
         if (batchInfoCard != null) {
             batchInfoCard.setVisible(false);
         }
 
-        // Hide cheque image + verification details + action buttons
         if (verificationContent != null) {
             verificationContent.setVisible(false);
         }
 
-        // Hide Prev / Next / Submit buttons
+
         if (verificationNavigation != null) {
             verificationNavigation.setVisible(false);
         }
 
-        // Show message
         if (lblNoCheques != null) {
             lblNoCheques.setVisible(true);
         }

@@ -855,9 +855,7 @@
     </vlayout>
 
 </window>
-<!-- =========================================================
-     CHECKER VERIFICATION SUMMARY
-     ========================================================= -->
+
 
 <window
     id="verificationSummaryWindow"
