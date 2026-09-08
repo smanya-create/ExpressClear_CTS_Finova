@@ -283,11 +283,11 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 
 		divMicrRepairScanSection.setVisible(true);
 
-		pagingMicrRepairScan.setVisible(scanBatchRows.size() > 10);
+		pagingMicrRepairScan.setVisible(scanBatchRows.size() > 5);
 
 		pagingMicrRepairScan.setTotalSize(scanBatchRows.size());
 
-		pagingMicrRepairScan.setPageSize(10);
+		pagingMicrRepairScan.setPageSize(5);
 
 		populateScanPage(0);
 
@@ -320,11 +320,11 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 
 		divMicrRepairCheckerSection.setVisible(true);
 
-		pagingMicrRepairChecker.setVisible(checkerBatchRows.size() > 10);
+		pagingMicrRepairChecker.setVisible(checkerBatchRows.size() > 5);
 
 		pagingMicrRepairChecker.setTotalSize(checkerBatchRows.size());
 
-		pagingMicrRepairChecker.setPageSize(10);
+		pagingMicrRepairChecker.setPageSize(5);
 
 		populateCheckerPage(0);
 
@@ -346,7 +346,7 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 
 		rowsMicrRepairScanBatches.getChildren().clear();
 
-		int pageSize = 10;
+		int pageSize = 5;
 
 		int start = page * pageSize;
 
@@ -362,8 +362,9 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 			// BATCH ID
 			// =================================================
 
-			row.appendChild(new Label(safe(batch.getBatchId())));
-
+			Label batchLabel = new Label(safe(batch.getBatchId()));
+			batchLabel.setSclass("micr-repair-batch-id");
+			row.appendChild(batchLabel);
 			// =================================================
 			// SCAN DATE
 			// =================================================
@@ -386,7 +387,9 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 			// STATUS
 			// =================================================
 
-			row.appendChild(new Label(safe(batch.getStatus())));
+			Label statusLabel = new Label(safe(batch.getStatus()));
+			statusLabel.setSclass("micr-repair-status");
+			row.appendChild(statusLabel);
 
 			// =================================================
 			// ACTION
@@ -412,6 +415,7 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 			                        selectedBatchId);
 			            }
 			        });
+
 			actionCell.appendChild(openButton);
 
 			row.appendChild(actionCell);
@@ -428,7 +432,7 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 
 		rowsMicrRepairCheckerBatches.getChildren().clear();
 
-		int pageSize = 10;
+		int pageSize = 5;
 
 		int start = page * pageSize;
 
@@ -444,7 +448,9 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 			// BATCH ID
 			// =================================================
 
-			row.appendChild(new Label(safe(batch.getBatchId())));
+			Label batchLabel = new Label(safe(batch.getBatchId()));
+			batchLabel.setSclass("micr-repair-batch-id");
+			row.appendChild(batchLabel);
 
 			// =================================================
 			// SCAN DATE
@@ -468,8 +474,9 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 			// STATUS
 			// =================================================
 
-			row.appendChild(new Label(safe(batch.getStatus())));
-
+			Label statusLabel = new Label(safe(batch.getStatus()));
+			statusLabel.setSclass("micr-repair-status");
+			row.appendChild(statusLabel);
 			// =================================================
 			// ACTION
 			// =================================================
@@ -543,6 +550,7 @@ public class OutwardMakerMicrRepairViewController extends GenericForwardComposer
 	        
 	    }
 	}
+
 	// =========================================================
 	// FORMAT DATE
 	// =========================================================

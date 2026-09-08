@@ -1,282 +1,405 @@
-/* ============================================
-   MICR Repair - Page 1: Batch List & Cheques
-   ============================================ */
+/* =========================================================
+   MICR REPAIR VIEW
+   ========================================================= */
 
-/* Main Container */
-.micr-repair-page {
-    background-color: #f5f7fa;
-    padding: 30px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Page Header */
-.page-header {
-    margin-bottom: 40px;
-}
-
-.page-header .page-title {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1a1a1a;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.page-header .page-description {
-    font-size: 14px;
-    color: #666;
-    display: block;
-}
-
-/* Batch Section */
-.batch-section {
-    background-color: white;
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 30px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.batch-section .section-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1a1a1a;
-    display: block;
-    margin-bottom: 16px;
-}
-
-/* Batch Table */
-.batch-table {
+.micr-repair-view-page {
     width: 100%;
-    border-collapse: collapse;
+    box-sizing: border-box;
+    padding: 18px 12px 24px 12px;
+    margin: 0;
+    background: #f8fafc !important;
+    overflow-x: hidden;
 }
 
-.batch-table .z-grid-head {
-    background-color: #f0f3f7;
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.micr-repair-view-title-section {
+    padding: 0;
+    margin: 0 0 16px 0;
 }
 
-.batch-table .z-grid-hd {
-    padding: 12px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #0052cc;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.micr-repair-view-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    line-height: 25px !important;
 }
 
-.batch-table .z-row {
-    border-bottom: 1px solid #e8ecf1;
-    height: 56px;
+.micr-repair-view-subtitle {
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    color: #374151 !important;
+    line-height: 15px !important;
 }
 
-.batch-table .z-row:hover {
-    background-color: #fafbfc;
+
+/* =========================================================
+   SECTION CARD
+   ========================================================= */
+
+.micr-repair-section-card {
+    width: 100%;
+    box-sizing: border-box;
+
+    background: #ffffff !important;
+    border: 1px solid #d9dee7 !important;
+    border-radius: 8px !important;
+
+    padding: 12px 12px 8px 12px;
+    margin: 0 0 16px 0;
 }
 
-.batch-table .z-cell {
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #333;
-    vertical-align: middle;
+
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
+
+.micr-repair-section-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    line-height: 19px !important;
 }
 
-.batch-table .z-cell label {
-    display: block;
+.micr-repair-section-subtitle {
+    font-size: 10px !important;
+    font-weight: 400 !important;
+    color: #6b7280 !important;
+    line-height: 14px !important;
 }
 
-/* Status Badge */
-.status-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.micr-repair-grid {
+    width: 100% !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 7px !important;
+
+    overflow: hidden !important;
+    border-collapse: separate !important;
+}
+
+
+/* =========================================================
+   GRID HEADER
+   ========================================================= */
+
+.micr-repair-grid .z-grid-header {
+    background: #18275c !important;
+    border: none !important;
+}
+
+.micr-repair-grid .z-columns {
+    background: #18275c !important;
+}
+
+.micr-repair-grid .z-column {
+    background: #18275c !important;
+
+    border-right: 1px solid #30406f !important;
+    border-bottom: none !important;
+}
+
+.micr-repair-grid .z-column:last-child {
+    border-right: none !important;
+}
+
+.micr-repair-grid .z-column-content {
+    height: 36px !important;
+    line-height: 36px !important;
+
+    padding: 0 8px !important;
+
+    background: #18275c !important;
+    color: #ffffff !important;
+
+    font-size: 9px !important;
+    font-weight: 700 !important;
+
+    text-align: center !important;
+
     white-space: nowrap;
 }
 
-.status-badge.needs-repair {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeaa7;
+
+/* =========================================================
+   GRID ROWS
+   ========================================================= */
+
+.micr-repair-grid .z-row {
+    height: 48px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
 }
 
-.status-badge.completed {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+.micr-repair-grid .z-row-inner {
+    height: 48px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
 }
 
-.status-badge.ready {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+.micr-repair-grid .z-cell {
+    height: 48px !important;
+    padding: 0 8px !important;
+
+    background: #ffffff !important;
+
+    border-right: none !important;
+    border-bottom: 1px solid #e5e7eb !important;
+
+    vertical-align: middle !important;
 }
 
-/* Buttons */
-.btn-primary {
-    background-color: #1e5ba8;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+.micr-repair-grid .z-row-content {
+    text-align: center !important;
+    white-space: nowrap;
 }
 
-.btn-primary:hover {
-    background-color: #1a4a8a;
+
+/* Actual Labels inside the cells */
+.micr-repair-grid .z-cell > .z-label {
+    font-size: 9px !important;
+    font-weight: 500 !important;
+    color: #111827 !important;
+
+    line-height: normal !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-.btn-secondary {
-    background-color: #f8f9fa;
-    color: #1e5ba8;
-    border: 1px solid #dee2e6;
-    padding: 6px 16px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+
+/* Batch ID */
+.micr-repair-batch-id {
+    color: #075bd3 !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
 }
 
-.btn-secondary:hover {
-    background-color: #e9ecef;
-    border-color: #1e5ba8;
-    color: #1e5ba8;
+/* =========================================================
+   BATCH ID
+   ========================================================= */
+
+.micr-repair-batch-id {
+    color: #075bd3 !important;
+
+    font-size: 9px !important;
+    font-weight: 700 !important;
+
+    text-align: center !important;
 }
 
-/* No Other Batches Message */
-.no-other-batches {
-    text-align: center;
-    padding: 20px;
-    color: #999;
-    font-size: 13px;
-    margin-top: 16px;
+
+/* =========================================================
+   STATUS CELL
+   ========================================================= */
+
+.micr-repair-grid .z-cell:nth-child(5) {
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-/* Cheques Section */
-.cheques-section {
-    background-color: white;
-    border-radius: 8px;
-    padding: 24px;
-    margin-top: 30px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+/* =========================================================
+   STATUS PILL
+   ========================================================= */
+
+.micr-repair-status {
+    display: inline-block !important;
+
+    min-width: 82px !important;
+    height: 22px !important;
+    line-height: 20px !important;
+
+    padding: 0 12px !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    background: linear-gradient(
+        90deg,
+        #fff8d6 0%,
+        #ffd84d 55%,
+        #ffb71b 100%
+    ) !important;
+
+    color: #172554 !important;
+
+    border: 1px solid #ffb000 !important;
+    border-radius: 14px !important;
+
+    font-size: 8px !important;
+    font-weight: 700 !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    box-shadow: 0 2px 5px rgba(255, 183, 27, 0.35) !important;
 }
 
-.cheques-section .section-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1a1a1a;
-    display: block;
-    margin-bottom: 8px;
+
+/* =========================================================
+   ACTION CELL
+   ========================================================= */
+
+.micr-repair-grid .z-cell:last-child {
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-.cheques-section .section-description {
-    font-size: 13px;
-    color: #666;
-    display: block;
-    margin-bottom: 16px;
+
+/* =========================================================
+   OPEN BUTTON
+   ========================================================= */
+
+.micr-repair-grid .z-cell:last-child .btn-action-repair {
+    display: inline-block !important;
+    vertical-align: middle !important;
+
+    width: 82px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+
+    padding: 0 !important;
+    margin: 0 auto !important;
+
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
+
+    border-radius: 5px !important;
+
+    color: #ffffff !important;
+
+    font-size: 8px !important;
+    font-weight: 700 !important;
+
+    text-align: center !important;
+
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.20) !important;
 }
 
-/* Cheques Table */
-.cheques-table {
+.micr-repair-grid .z-cell:last-child .btn-action-repair:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
+}
+
+.micr-repair-grid .z-cell:last-child .btn-action-repair:active {
+    background: #0d1738 !important;
+    border-color: #0d1738 !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.micr-repair-paging {
+    width: 100% !important;
+    box-sizing: border-box;
+
+    padding: 12px 0 2px 0 !important;
+
+    text-align: center !important;
+    background: transparent !important;
+}
+
+.micr-repair-paging .z-paging-button {
+    min-width: 32px !important;
+    height: 30px !important;
+    line-height: 28px !important;
+
+    margin: 0 2px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 5px !important;
+
+    color: #111827 !important;
+
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+.micr-repair-paging .z-paging-button:hover {
+    background: #f1f5f9 !important;
+}
+
+
+/* =========================================================
+   EMPTY MESSAGE
+   ========================================================= */
+
+.micr-repair-empty-card {
     width: 100%;
-    border-collapse: collapse;
+    box-sizing: border-box;
+
+    background: #ffffff !important;
+
+    border: 1px solid #d9dee7 !important;
+    border-radius: 8px !important;
+
+    padding: 22px !important;
+
+    text-align: center;
 }
 
-.cheques-table .z-grid-head {
-    background-color: #f0f3f7;
+.micr-repair-empty-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
 }
 
-.cheques-table .z-grid-hd {
-    padding: 12px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #0052cc;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.micr-repair-empty-message {
+    font-size: 10px !important;
+    font-weight: 400 !important;
+    color: #6b7280 !important;
 }
 
-.cheques-table .z-row {
-    border-bottom: 1px solid #e8ecf1;
-    height: 56px;
-}
 
-.cheques-table .z-row:hover {
-    background-color: #fafbfc;
-}
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
-.cheques-table .z-cell {
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #333;
-    vertical-align: middle;
-}
+@media (max-width: 900px) {
 
-.cheques-table .z-cell label {
-    display: block;
-}
-
-/* MICR Code Error (Red Color) */
-.micr-code-error {
-    color: #dc3545;
-    font-weight: 600;
-}
-
-/* Error Text */
-.error-text {
-    color: #dc3545;
-    font-weight: 500;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .micr-repair-page {
-        padding: 20px;
+    .micr-repair-view-page {
+        padding: 14px 8px 20px 8px;
     }
-    
-    .batch-section,
-    .cheques-section {
-        padding: 16px;
-    }
-    
-    .page-header .page-title {
-        font-size: 24px;
-    }
-    
-    .batch-table .z-cell,
-    .cheques-table .z-cell {
-        padding: 10px 12px;
-        font-size: 12px;
-    }
-}
 
-@media (max-width: 768px) {
-    .micr-repair-page {
-        padding: 16px;
+    .micr-repair-section-card {
+        padding: 10px 8px 8px 8px;
     }
-    
-    .batch-section,
-    .cheques-section {
-        padding: 12px;
+
+    .micr-repair-grid .z-column-content {
+        font-size: 8px !important;
+        padding: 0 5px !important;
     }
-    
-    .page-header .page-title {
-        font-size: 20px;
+
+    .micr-repair-grid .z-row-content {
+        font-size: 8px !important;
     }
-    
-    .batch-table .z-cell,
-    .cheques-table .z-cell {
-        padding: 8px 10px;
-        font-size: 11px;
+
+    .micr-repair-batch-id {
+        font-size: 8px !important;
     }
-    
-    .btn-primary,
-    .btn-secondary {
-        padding: 6px 12px;
-        font-size: 11px;
+
+    .micr-repair-status {
+        min-width: 76px !important;
+        font-size: 8px !important;
+    }
+
+    .micr-repair-grid .z-cell:last-child .btn-action-repair {
+        width: 70px !important;
     }
 }
