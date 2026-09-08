@@ -26,6 +26,7 @@ import org.zkoss.zul.Textbox;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.enums.inward.InwardChequeStatus;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
@@ -226,20 +227,24 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
 
 		if (lblDataStatus != null) {
-			String status = item.getChequeStatus();
-			if ("DATA_ENTRY_PENDING".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("PENDING");
-			} else if ("DATA_ENTRY_IN_PROGRESS".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("IN PROGRESS");
-			} else if ("SEND_BACK_TO_MAKER".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("SENT BACK");
-			} else if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status) || "ACCEPTED".equalsIgnoreCase(status)
-					|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("COMPLETED");
-			} else {
-				lblDataStatus.setValue(status != null ? status : "PENDING");
-			}
-		}
+            String status = item.getChequeStatus();
+            if ("DATA_ENTRY_PENDING".equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("PENDING");
+            } else if ("DATA_ENTRY_IN_PROGRESS".equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("IN PROGRESS");
+            } else if ("SEND_BACK_TO_MAKER".equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("SENT BACK");
+            } else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("REJECT REQ");
+                lblDataStatus.setStyle("background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;");
+            } else if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status) 
+                    || "ACCEPTED".equalsIgnoreCase(status)
+                    || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("COMPLETED");
+            } else {
+                lblDataStatus.setValue(status != null ? status : "PENDING");
+            }
+        }
 
 		// Reset viewer to front view
 		isViewingFront = true;
@@ -284,11 +289,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		int total = activeQueue.size();
 		long resolvedCount = activeQueue.stream()
-				.filter(c -> "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(c.getChequeStatus())
-						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-						|| "REJECTED".equalsIgnoreCase(c.getChequeStatus())
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
-				.count();
+                .filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
+                          || InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
+                          || "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
+                          || "REJECTED".equalsIgnoreCase(c.getChequeStatus())
+                          || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
+                .count();
 
 		int percentage = (int) Math.round(((double) resolvedCount / total) * 100);
 
@@ -553,7 +559,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		InwardCheque current = activeQueue.get(currentIndex);
-		current.setChequeStatus("REJECTED");
+		current.setChequeStatus(InwardChequeStatus.REJECTION_REQUESTED.name());
 
 		chequeService.updateChequeDetails(current);
 
@@ -576,8 +582,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
 						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
 				.count();
-		long rejected = activeQueue.stream().filter(c -> "REJECTED".equalsIgnoreCase(c.getChequeStatus())).count();
-
+		long rejected = activeQueue.stream()
+                .filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
+                          || "REJECTED".equalsIgnoreCase(c.getChequeStatus()))
+                .count();
 		if (lblModalTotal != null)
 			lblModalTotal.setValue(String.valueOf(activeQueue.size()));
 		if (lblModalAccepted != null)
