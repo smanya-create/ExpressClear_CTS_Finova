@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<zk xmlns:h="xhtml">
+<zk xmlns:h="xhtml" title="CTS - Checker Dashboard">
 
 	<style src="/css/outward/checker-dashboard.css" />
 
@@ -81,7 +81,7 @@
 
 						</div>
 						<listbox id="lstBatches" sclass="batch-table"
-							mold="paging" pageSize="5" height="350px" span="true">
+							height="270px">
 
 							<listhead>
 								<listheader label="BATCH" width="12%"
@@ -107,6 +107,23 @@
 							</listhead>
 
 						</listbox>
+						<vlayout hflex="1" style="margin-top:10px;">
+
+							<hbox hflex="1" pack="center"
+								spacing="10px">
+
+								<button id="btnPrevious"
+									label="Previous" disabled="true" sclass="pagination-button" />
+
+								<label id="lblPage" value="1/5"
+									sclass="page-number" />
+
+								<button id="btnNext" label="Next"
+									sclass="pagination-button" />
+
+							</hbox>
+
+						</vlayout>
 
 					</div>
 

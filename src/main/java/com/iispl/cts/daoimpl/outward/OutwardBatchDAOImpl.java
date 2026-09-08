@@ -183,30 +183,63 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
     }
 
     @Override
-    public List<OutwardBatch> getPendingBatches() {
+    public List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize) {
+
         List<OutwardBatch> batches = new ArrayList<>();
+
         String sql = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, "
                 + "actual_total_amount, batch_status, uploaded_by, uploaded_at "
                 + "FROM outward_batch "
                 + "WHERE UPPER(TRIM(batch_status)) = ? "
-                + "ORDER BY uploaded_at DESC";
+                + "ORDER BY uploaded_at DESC "
+                + "LIMIT ? OFFSET ?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sql)) {
 
+            int offset = (pageNumber - 1) * pageSize;
+
             prepStmt.setString(1, "PENDING");
+            prepStmt.setInt(2, pageSize);
+            prepStmt.setInt(3, offset);
+
             try (ResultSet resultSet = prepStmt.executeQuery()) {
+
                 while (resultSet.next()) {
                     batches.add(mapOutwardBatch(resultSet));
                 }
             }
+
         } catch (Exception exception) {
             throw new RuntimeException("Unable to fetch pending batches", exception);
         }
 
         return batches;
     }
+    @Override
+    public int getPendingBatchCount() {
 
+        String sql = "SELECT COUNT(*) "
+                + "FROM outward_batch "
+                + "WHERE UPPER(TRIM(batch_status)) = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+
+            prepStmt.setString(1, "PENDING");
+
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+
+        } catch (Exception exception) {
+            throw new RuntimeException("Unable to count pending batches", exception);
+        }
+
+        return 0;
+    }
     private OutwardBatch mapOutwardBatch(ResultSet resultSet) throws SQLException {
         OutwardBatch outwardBatch = new OutwardBatch();
         outwardBatch.setOutwardBatchId(resultSet.getString("outward_batch_id"));

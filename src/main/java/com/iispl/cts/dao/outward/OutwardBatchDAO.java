@@ -18,8 +18,9 @@ public interface OutwardBatchDAO {
 
 	String transferBatchFromScanToOutward(Connection connection, String scannedBatchId);
 
-	List<OutwardBatch> getPendingBatches();
+	List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize);
 
+    int getPendingBatchCount();
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 }

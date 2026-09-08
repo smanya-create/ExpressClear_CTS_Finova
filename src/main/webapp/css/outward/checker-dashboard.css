@@ -1,11 +1,10 @@
-html,
-body {
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     font-family: Arial, sans-serif;
     background: #eaf2f8;
-    font-size : 14px;
+    font-size: 14px;
 }
 
 .dashboard-content {
@@ -171,8 +170,10 @@ body {
     white-space: nowrap;
 }
 
-.queue-button {
+.queue-button,
+.pagination-button {
     background: #1d5689;
+    background-image: none;
     color: white;
     border: none;
     border-radius: 6px;
@@ -182,15 +183,39 @@ body {
     cursor: pointer;
 }
 
-.queue-button:hover {
+.queue-button:hover,
+.pagination-button:hover {
     background: #174a78;
+    background-image: none;
 }
 
-.queue-button .z-button-content {
-    background: #1d5689;
+.queue-button .z-button-content,
+.pagination-button .z-button-content {
+    background: transparent;
+    background-image: none;
     color: white;
     font-size: 9px;
     font-weight: bold;
+}
+
+.pagination-button.z-button-disabled {
+    background: #1d5689;
+    background-image: none;
+    color: white;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-button.z-button-disabled .z-button-content {
+    background: transparent;
+    color: white;
+}
+
+.page-number {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1c3854;
+    line-height: 32px;
 }
 
 .batch-table .z-paging {
