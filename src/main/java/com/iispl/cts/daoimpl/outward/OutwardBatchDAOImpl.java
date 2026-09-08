@@ -4,61 +4,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
+import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
 public class OutwardBatchDAOImpl implements OutwardBatchDAO {
-
-    @Override
-    public List<OutwardBatch> getVerifiedBatches() {
-        List<OutwardBatch> batches = new ArrayList<>();
-        String selectSql = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, "
-                + "actual_total_amount, batch_status, uploaded_by, uploaded_at "
-                + "FROM outward_batch "
-                + "WHERE UPPER(TRIM(batch_status)) = ?";
-
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(selectSql)) {
-
-            prepStmt.setString(1, "VERIFIED");
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                while (rs.next()) {
-                    batches.add(mapOutwardBatch(rs));
-                }
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Unable to fetch verified outward batches", ex);
-        }
-
-        return batches;
-    }
-
-    @Override
-    public List<OutwardBatch> getRecentBatches() {
-        List<OutwardBatch> batchList = new ArrayList<>();
-        String sql = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, "
-                + "actual_total_amount, batch_status, uploaded_by, uploaded_at "
-                + "FROM outward_batch "
-                + "ORDER BY uploaded_at DESC LIMIT 20";
-
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-
-            while (resultSet.next()) {
-                batchList.add(mapOutwardBatch(resultSet));
-            }
-        } catch (Exception exception) {
-            throw new RuntimeException("Unable to fetch recent outward batches", exception);
-        }
-
-        return batchList;
-    }
-
+   
     @Override
     public List<OutwardBatch> searchBatches(String batchId, String status) {
         List<OutwardBatch> batchList = new ArrayList<>();
@@ -251,4 +207,124 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
         outwardBatch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
         return outwardBatch;
     }
+	@Override
+	public List<OutwardBatch> getVerifiedBatches() {
+		List<OutwardBatch> batches = new ArrayList<>();
+		String selectSql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
+				+ "WHERE batch_status = ?";
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement prepStmt = connection.prepareStatement(selectSql)) {
+			prepStmt.setString(1, "VERIFIED");
+			ResultSet rs = prepStmt.executeQuery();
+			while (rs.next()) {
+				batches.add(new OutwardBatch(rs.getString("outward_batch_id"), rs.getString("batch_reference_id"),
+						rs.getInt("actual_cheque_count"), rs.getBigDecimal("actual_total_amount"),
+						rs.getString("batch_status"), rs.getString("uploaded_by"), rs.getTimestamp("uploaded_at")));
+			}
+
+		} catch (SQLException ex) {
+			System.out.println(ex.getMessage());
+		}
+
+		return batches;
+	}
+
+	@Override
+	public List<OutwardBatch> getRecentBatches() {
+
+		List<OutwardBatch> batchList = new ArrayList<>();
+
+		String sql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
+				+ "ORDER BY uploaded_at DESC " + "LIMIT 20";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql);
+				ResultSet resultSet = preparedStatement.executeQuery()) {
+
+			while (resultSet.next()) {
+				batchList.add(mapOutwardBatch(resultSet));
+			}
+
+		} catch (Exception exception) {
+			throw new RuntimeException("Unable to fetch recent outward batches", exception);
+		}
+
+		return batchList;
+	}
+
+	@Override
+	public List<MicrRepairBatch> getOutwardMicrRepairBatches() {
+
+	    List<MicrRepairBatch> batchList =
+	            new ArrayList<>();
+
+	    String sql =
+	            "SELECT "
+	          + "ob.outward_batch_id, "
+	          + "ob.uploaded_at, "
+	          + "ob.actual_cheque_count, "
+	          + "ob.batch_status, "
+	          + "COUNT(oc.outward_cheque_id) AS micr_errors "
+	          + "FROM outward_batch ob "
+	          + "JOIN outward_cheque oc "
+	          + "ON oc.outward_batch_id = ob.outward_batch_id "
+	          + "WHERE UPPER(TRIM(oc.cheque_status)) = 'PENDING_MICR_REPAIR' "
+	          + "GROUP BY "
+	          + "ob.outward_batch_id, "
+	          + "ob.uploaded_at, "
+	          + "ob.actual_cheque_count, "
+	          + "ob.batch_status "
+	          + "ORDER BY ob.uploaded_at DESC";
+
+	    try (
+	            Connection connection =
+	                    DBConnection.getConnection();
+
+	            PreparedStatement preparedStatement =
+	                    connection.prepareStatement(sql);
+
+	            ResultSet resultSet =
+	                    preparedStatement.executeQuery()
+	    ) {
+
+	        while (resultSet.next()) {
+
+	            MicrRepairBatch batch =
+	                    new MicrRepairBatch();
+
+	            batch.setBatchId(
+	                    resultSet.getString(
+	                            "outward_batch_id"));
+
+	            batch.setScanDate(
+	                    resultSet.getTimestamp(
+	                            "uploaded_at"));
+
+	            batch.setTotalCheques(
+	                    resultSet.getInt(
+	                            "actual_cheque_count"));
+
+	            batch.setMicrErrors(
+	                    resultSet.getInt(
+	                            "micr_errors"));
+
+	            batch.setStatus(
+	                    resultSet.getString(
+	                            "batch_status"));
+
+	            batchList.add(batch);
+	        }
+
+	    } catch (SQLException e) {
+
+	        throw new RuntimeException(
+	                "Error while retrieving outward MICR repair batches",
+	                e);
+	    }
+
+	    return batchList;
+	}
+
 }

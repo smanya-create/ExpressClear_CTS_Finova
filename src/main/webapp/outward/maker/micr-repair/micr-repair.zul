@@ -1,145 +1,502 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="CTS - MICR Repair" contentType="text/html;charset=UTF-8"?>
+
 <zk>
 
-	<style src="/css/outward/micr-repair.css" />
-    <window id="micrEntryWindow"  
-            width="100%" height="100%" sclass="micr-entry-page">
-        
-        <!-- Page Header -->
-        <div class="page-header-entry">
-            <div class="header-left">
-                <button label="← Back to List" sclass="btn-back" 
-                        onClick="@command('backToList')" />
-                <div class="batch-badge">BATCH: B004</div>
+    <window id="micrEntryWindow"
+            border="none"
+            width="100%"
+            height="100%"
+            apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairController"
+            style="margin:0 !important; padding:0 !important;">
+
+        <vlayout width="100%"
+                 height="100%"
+                 spacing="18px"
+                 sclass="outward-cheque-data-entry-page">
+
+            <!-- Heading -->
+
+            <hlayout width="100%" valign="middle">
+
+                <vlayout hflex="1" spacing="4px">
+
+                    <label value="MICR REPAIR"
+                           sclass="outward-cheque-data-entry-title" />
+
+                    <label value="Review and correct MICR details against the cheque image."
+                           sclass="outward-cheque-data-entry-subtitle" />
+
+                </vlayout>
+
+                <button id="btnBackToList"
+                        label="Back to List"
+                        sclass="outward-cheque-image-button" />
+
+            </hlayout>
+
+
+            <!-- Batch Summary -->
+
+            <div width="100%"
+                 sclass="outward-cheque-batch-summary">
+
+                <hlayout width="100%"
+                         valign="middle"
+                         spacing="0">
+
+                    <vlayout hflex="1" spacing="4px">
+
+                        <label value="BATCH"
+                               sclass="outward-cheque-summary-label" />
+
+                        <label id="lblBatchNumber"
+                               value="-"
+                               sclass="outward-cheque-summary-value" />
+
+                    </vlayout>
+
+
+                    <vlayout width="150px" spacing="4px">
+
+                        <label value="TOTAL CHEQUES"
+                               sclass="outward-cheque-summary-label" />
+
+                        <label id="lblTotalCheques"
+                               value="0"
+                               sclass="outward-cheque-summary-value" />
+
+                    </vlayout>
+
+
+                    <vlayout width="150px" spacing="4px">
+
+                        <label value="COMPLETED"
+                               sclass="outward-cheque-summary-label" />
+
+                        <label id="lblCompletedCheques"
+                               value="0"
+                               sclass="outward-cheque-summary-value" />
+
+                    </vlayout>
+
+
+                    <vlayout width="150px" spacing="4px">
+
+                        <label value="REMAINING"
+                               sclass="outward-cheque-summary-label" />
+
+                        <label id="lblRemainingCheques"
+                               value="0"
+                               sclass="outward-cheque-summary-value" />
+
+                    </vlayout>
+
+                </hlayout>
+
             </div>
-        </div>
 
-        <!-- Completion Success Message (Hidden initially) -->
-        <div id="completionMessage" class="completion-message" style="display:none;">
-            <div class="completion-content">
-                <div class="completion-icon">✓</div>
-                <label value="MICR REPAIR COMPLETED" sclass="completion-title" />
-                <label value="Both MICR-error cheques have been repaired. Batch B004 is ready for Data Entry." 
-                       sclass="completion-text" />
-            </div>
-        </div>
 
-        <!-- Main Content Container -->
-        <div id="formContainer" class="micr-entry-container">
-            
-            <!-- Left Side: Cheque Image -->
-            <div class="cheque-image-section">
-                <label value="Cheque Image" sclass="section-label" />
-                
-                <div class="cheque-image-wrapper">
-                    <image id="chequeImage" src="/images/cheque-sample.png" width="100%" height="auto" />
-                </div>
-                
-                <div class="cheque-details">
-                    <div class="detail-row">
-                        <label id="bankName" value="HDFC Bank Ltd" sclass="bank-name" />
-                        <label id="branchName" value="Main Branch" sclass="branch-name" />
-                    </div>
-                    
-                    <div class="detail-row">
-                        <label value="Pay" sclass="label-key" />
-                        <label id="payTo" value="CBS Bank Limited" sclass="label-value" />
-                    </div>
-                    
-                    <div class="detail-row">
-                        <label id="amountWords" value="Twelve Thousand Five Hundred Only" sclass="amount-text" />
-                    </div>
-                    
-                    <div class="detail-row amount-box">
-                        <label id="amountNumeric" value="₹ 12,500.00" sclass="amount-numeric" />
-                    </div>
-                    
-                    <div class="ocr-reference">
-                        <label id="ocrReference" value=":100041: 600987001 :29:" sclass="ocr-text" />
-                    </div>
-                </div>
-                
-                <div class="cheque-note">
-                    <label value="Blue fields are OCR-filled — verify against the cheque image." sclass="note-text" />
-                </div>
-            </div>
+            <!-- Main Content -->
 
-            <!-- Right Side: MICR Data Entry Form -->
-            <div class="form-section">
-                
-                <!-- Progress Indicator -->
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill" style="width: 50%;"></div>
-                    </div>
-                    <label id="progressText" value="Record 1 of 2" sclass="progress-text" />
-                </div>
+            <hlayout width="100%"
+                     spacing="14px"
+                     valign="top"
+                     sclass="outward-cheque-content-layout">
 
-                <!-- MICR Error Badge -->
-                <div class="micr-error-badge">
-                    <label value="MICR ERROR" />
-                </div>
 
-                <!-- Form Fields -->
-                <div class="form-group">
-                    <label value="CHEQUE NUMBER *" sclass="form-label" />
-                    <textbox id="chequeNumber" value="100041" readonly="true" sclass="form-input" />
-                </div>
+                <!-- Image Card -->
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label value="CITY CODE *" sclass="form-label" />
-                        <textbox id="cityCode" value="600" sclass="form-input" />
-                    </div>
-                    <div class="form-group">
-                        <label value="BANK CODE *" sclass="form-label" />
-                        <textbox id="bankCode" value="987" sclass="form-input" />
-                    </div>
-                </div>
+                <div id="micrRepairImageCard"
+                     hflex="55"
+                     sclass="outward-cheque-image-card">
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label value="BRANCH CODE *" sclass="form-label" />
-                        <textbox id="branchCode" value="001" sclass="form-input" />
-                    </div>
-                    <div class="form-group">
-                        <label value="TRANSACTION CODE *" sclass="form-label" />
-                        <textbox id="transactionCode" value="29" sclass="form-input" />
-                    </div>
-                </div>
+                    <vlayout width="100%"
+                             height="100%"
+                             spacing="12px">
 
-                <div class="form-group">
-                    <label value="CURRENT MICR REPAIR *" sclass="form-label" />
-                    <textbox id="currentMicr" value="600987001" readonly="true" 
-                             sclass="form-input ocr-filled" />
-                </div>
+                        <vlayout spacing="3px">
 
-                <div class="form-group">
-                    <label value="CORRECTED MICR CODE *" sclass="form-label" />
-                    <textbox id="correctedMicr" placeholder="Enter corrected MICR code" 
-                             sclass="form-input" />
+                            <label value="Cheque Image"
+                                   sclass="outward-cheque-card-title" />
+
+                            <label id="lblRecordPosition"
+                                   value="Record 0 of 0"
+                                   sclass="outward-cheque-record-label" />
+
+                        </vlayout>
+
+
+                        <!-- Image Container -->
+
+                        <div id="micrRepairImageContainer"
+                             width="100%"
+                             sclass="outward-cheque-image-container">
+
+                            <image id="imgCheque"
+                                   visible="false"
+                                   width="100%"
+                                   height="100%"
+                                   sclass="outward-cheque-image" />
+
+                            <label id="lblChequeImageTitle"
+                                   value="Cheque Front Image"
+                                   sclass="outward-cheque-image-placeholder" />
+
+                        </div>
+
+
+                        <!-- Image Buttons -->
+
+                        <hlayout id="micrRepairImageButtons"
+                                 width="100%"
+                                 spacing="8px"
+                                 sclass="outward-cheque-image-buttons">
+
+                            <button id="btnZoom"
+                                    label="Zoom"
+                                    sclass="outward-cheque-image-button" />
+
+                            <button id="btnRotate"
+                                    label="Rotate"
+                                    sclass="outward-cheque-image-button" />
+
+                            <button id="btnFront"
+                                    label="View Front"
+                                    sclass="outward-cheque-image-button" />
+
+                            <button id="btnBack"
+                                    label="View Back"
+                                    sclass="outward-cheque-image-button" />
+
+                        </hlayout>
+
+
+                        <!-- Record Navigation -->
+
+                        <hlayout width="100%"
+                                 spacing="8px"
+                                 valign="middle"
+                                 sclass="outward-cheque-image-buttons">
+
+                            <button id="btnPrevious"
+                                    label="Previous"
+                                    sclass="outward-cheque-image-button" />
+
+                            <label id="lblChequeNavigation"
+                                   value=""
+                                   hflex="1"
+                                   style="text-align:center;"
+                                   sclass="outward-cheque-record-label" />
+
+                            <button id="btnNext"
+                                    label="Next"
+                                    sclass="outward-cheque-image-button" />
+
+                        </hlayout>
+
+                    </vlayout>
+
                 </div>
 
-                <div class="form-group">
-                    <label value="REMARKS" sclass="form-label" />
-                    <textbox id="remarks" placeholder="Optional remarks" rows="4" 
-                             sclass="form-textarea" />
+
+                <!-- Details Card -->
+
+                <div id="micrRepairDetailsCard"
+                     hflex="45"
+                     sclass="outward-cheque-details-card">
+
+                    <vlayout width="100%"
+                             height="100%"
+                             spacing="12px">
+
+                        <hlayout width="100%" valign="middle">
+
+                            <label value="MICR Data Entry"
+                                   hflex="1"
+                                   sclass="outward-cheque-card-title" />
+
+                        </hlayout>
+
+
+                        <separator />
+
+
+                        <!-- MICR Fields -->
+
+                        <grid width="100%"
+                              sclass="outward-cheque-form-grid">
+
+                            <columns>
+
+                                <column width="50%" />
+
+                                <column width="50%" />
+
+                            </columns>
+
+
+                            <rows>
+
+                                <row>
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="CHEQUE NUMBER"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtChequeNumber"
+                                                 width="100%"
+                                                 readonly="true"
+                                                 sclass="outward-cheque-readonly-field" />
+
+                                    </vlayout>
+
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="CITY CODE"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtCityCode"
+                                                 width="100%"
+                                                 sclass="outward-cheque-field" />
+
+                                    </vlayout>
+
+                                </row>
+
+
+                                <row>
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="BANK CODE"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtBankCode"
+                                                 width="100%"
+                                                 sclass="outward-cheque-field" />
+
+                                    </vlayout>
+
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="BRANCH CODE"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtBranchCode"
+                                                 width="100%"
+                                                 sclass="outward-cheque-field" />
+
+                                    </vlayout>
+
+                                </row>
+
+
+                                <row>
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="CURRENT MICR"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtCurrentMicr"
+                                                 width="100%"
+                                                 readonly="true"
+                                                 sclass="outward-cheque-readonly-field" />
+
+                                    </vlayout>
+
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="CORRECTED MICR"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtCorrectedMicr"
+                                                 width="100%"
+                                                 sclass="outward-cheque-field" />
+
+                                    </vlayout>
+
+                                </row>
+
+                            </rows>
+
+                        </grid>
+
+
+                        <!-- Additional Details -->
+
+                        <grid width="100%"
+                              sclass="outward-cheque-form-grid">
+
+                            <columns>
+
+                                <column width="50%" />
+
+                                <column width="50%" />
+
+                            </columns>
+
+
+                            <rows>
+
+                                <row>
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="BANK NAME"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtBankName"
+                                                 width="100%"
+                                                 readonly="true"
+                                                 sclass="outward-cheque-readonly-field" />
+
+                                    </vlayout>
+
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="BRANCH NAME"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtBranchName"
+                                                 width="100%"
+                                                 readonly="true"
+                                                 sclass="outward-cheque-readonly-field" />
+
+                                    </vlayout>
+
+                                </row>
+
+
+                                <row>
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="PAYEE"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtPayTo"
+                                                 width="100%"
+                                                 readonly="true"
+                                                 sclass="outward-cheque-readonly-field" />
+
+                                    </vlayout>
+
+
+                                    <vlayout width="100%" spacing="4px">
+
+                                        <label value="AMOUNT"
+                                               sclass="outward-cheque-field-label" />
+
+                                        <textbox id="txtAmount"
+                                                 width="100%"
+                                                 readonly="true"
+                                                 sclass="outward-cheque-readonly-field" />
+
+                                    </vlayout>
+
+                                </row>
+
+                            </rows>
+
+                        </grid>
+
+
+                        <!-- Rejection Remarks -->
+
+                        <div id="divRejectRemarks"
+                             width="100%"
+                             visible="false">
+
+                            <vlayout width="100%"
+                                     spacing="4px">
+
+                                <label id="lblRejectRemarks"
+                                       value="REJECTION REMARKS"
+                                       sclass="outward-cheque-field-label" />
+
+                                <textbox id="txtRemarks"
+                                         width="100%"
+                                         height="70px"
+                                         multiline="true"
+                                         maxlength="500"
+                                         placeholder="Enter rejection remarks"
+                                         sclass="outward-cheque-field" />
+
+                            </vlayout>
+
+                        </div>
+
+
+                        <!-- Error -->
+
+                        <label id="lblMicrError"
+                               value=""
+                               visible="false"
+                               sclass="outward-cheque-account-validation invalid" />
+
+
+                        <!-- Progress -->
+
+                        <vlayout spacing="5px">
+
+                            <hlayout width="100%"
+                                     valign="middle">
+
+                                <label value="PROGRESS"
+                                       hflex="1"
+                                       sclass="outward-cheque-field-label" />
+
+                                <label id="lblProgressText"
+                                       value="Record 0 of 0"
+                                       sclass="outward-cheque-record-label" />
+
+                            </hlayout>
+
+
+                            <div width="100%"
+                                 style="height:8px; background:#e2e8f0; border-radius:6px; overflow:hidden;">
+
+                                <div id="divProgressFill"
+                                     width="0%"
+                                     style="height:100%; border-radius:6px;" />
+
+                            </div>
+
+                        </vlayout>
+
+
+                        <!-- Action Buttons -->
+
+                        <hlayout width="100%"
+                                 spacing="10px"
+                                 sclass="outward-cheque-action-buttons">
+
+                            <button id="btnRejectRequest"
+                                    label="Request Reject"
+                                    sclass="outward-cheque-reject-button" />
+
+                            <button id="btnSaveNext"
+                                    label="Save &amp; Next"
+                                    sclass="outward-cheque-save-button" />
+
+                        </hlayout>
+
+                    </vlayout>
+
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="form-actions">
-                    <button id="saveNextBtn" label="Save and Next" sclass="btn-save-next" 
-                            onClick="@command('saveAndNext')" />
-                    <button id="rejectBtn" label="Reject Request" sclass="btn-reject" 
-                            onClick="@command('rejectRequest')" />
-                </div>
-            </div>
-        </div>
+            </hlayout>
 
-        <!-- Move to Data Entry Button (Visible after completion) -->
-        <div id="moveDataEntryButtonContainer" class="move-data-entry-container" style="display:none;">
-            <button id="moveDataEntryBtn" label="MOVE BATCH TO DATA ENTRY" sclass="btn-move-data-entry" 
-                    onClick="@command('moveToDataEntry')" />
-        </div>
+        </vlayout>
+
     </window>
+
 </zk>

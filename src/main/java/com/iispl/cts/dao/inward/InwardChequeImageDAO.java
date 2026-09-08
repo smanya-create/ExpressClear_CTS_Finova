@@ -18,4 +18,5 @@ public interface InwardChequeImageDAO {
 
     boolean deleteImage(String inwardImageId);
     InwardChequeImage findFrontImageByChequeId(String inwardChequeId);
+    InwardChequeImage findBackImageByChequeId(String inwardChequeId);
 }

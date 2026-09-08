@@ -21,7 +21,7 @@
             <vlayout sclass="role-content" spacing="24px" style="padding: 24px;" hflex="1">
                 <vlayout spacing="4px">
                     <label value="MODIFY ROLE" sclass="page-title"/>
-                    <label value="Update role details and screen permissions." sclass="page-subtitle"/>
+                    <label value="Update role details and review assigned system operators." sclass="page-subtitle"/>
                 </vlayout>
 
                 <!-- Card Panel -->
@@ -50,39 +50,25 @@
                         </combobox>
                     </vlayout>
 
-                    <!-- Permissions Section -->
-                    <vlayout spacing="16px" hflex="1" style="border-top: 1px solid #f1f5f9; padding-top: 24px; margin-bottom: 8px;">
-                        <vlayout spacing="4px">
-                            <label value="Screen Permissions" style="font-size: 15px; font-weight: 700; color: #0f172a;"/>
-                            <label value="Select the screens this role is allowed to view and access." style="color: #64748b; font-size: 13px;"/>
-                        </vlayout>
+                    <!-- Assigned Operators Section (Replaces Screen Permissions) -->
+                    <!-- Assigned Operators Section -->
+<vlayout spacing="16px" hflex="1" style="border-top: 1px solid #f1f5f9; padding-top: 24px; margin-bottom: 8px;">
+    <vlayout spacing="4px">
+        <label value="Assigned Operators" style="font-size: 15px; font-weight: 700; color: #0f172a;"/>
+        <label value="Bank personnel currently provisioned under this role." style="color: #64748b; font-size: 13px;"/>
+    </vlayout>
 
-                        <checkbox id="chkSelectAll" label="Select All" style="font-weight: 700; color: #0f172a; font-size: 13px;"/>
-
-                        <hlayout spacing="24px" hflex="1">
-                            <vlayout sclass="permission-box" spacing="12px" hflex="1">
-                                <label value="AVAILABLE SCREENS" sclass="permission-title"/>
-                                <vlayout spacing="10px">
-                                    <checkbox id="chkDashboard" label="Dashboard"/>
-                                    <checkbox id="chkBatchUpload" label="Batch Upload / Batch Intake"/>
-                                    <checkbox id="chkBatchList" label="Batch List"/>
-                                    <checkbox id="chkUnprocessedQueue" label="Unprocessed Queue"/>
-                                    <checkbox id="chkMicrRepair" label="MICR Repair"/>
-                                </vlayout>
-                            </vlayout>
-
-                            <vlayout sclass="permission-box" spacing="12px" hflex="1">
-                                <label value="AVAILABLE SCREENS" sclass="permission-title"/>
-                                <vlayout spacing="10px">
-                                    <checkbox id="chkDataEntry" label="Data Entry"/>
-                                    <checkbox id="chkChequeDetails" label="Cheque Details"/>
-                                    <checkbox id="chkSubmitBatch" label="Submit Batch"/>
-                                    <checkbox id="chkCheckerVerification" label="Checker Verification"/>
-                                    <checkbox id="chkReports" label="Reports / EOD-BOD / Admin"/>
-                                </vlayout>
-                            </vlayout>
-                        </hlayout>
-                    </vlayout>
+    <listbox id="lstAssignedUsers" height="220px" emptyMessage="No operators are currently assigned to this role." hflex="1" sclass="custom-listbox">
+        <listhead>
+            <listheader label="EMPLOYEE ID" width="130px"/>
+            <listheader label="OPERATOR NAME" width="220px"/>
+            <listheader label="USERNAME" width="160px"/>
+            <listheader label="EMAIL" hflex="1"/>
+            <listheader label="MOBILE" width="140px"/>
+            <listheader label="STATUS" width="110px"/>
+        </listhead>
+    </listbox>
+</vlayout>
 
                     <!-- Actions -->
                     <hlayout hflex="1" style="justify-content: flex-end;" spacing="12px">

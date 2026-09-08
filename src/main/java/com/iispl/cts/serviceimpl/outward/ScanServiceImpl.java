@@ -181,4 +181,9 @@ public class ScanServiceImpl implements ScanService {
 		return scanBatchDAO.getMakerDashboardBatches();
 	}
 
+	@Override
+	public int getDataEnteredCountByBatchId(String scannedBatchId) {
+		return scanChequeDAO.getDataEnteredCountByBatchId(scannedBatchId);
+	}
+
 }

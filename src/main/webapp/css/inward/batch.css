@@ -704,3 +704,131 @@
 .hold-button:hover {
     background: #fff0d0;
 }
+
+
+.information-card {
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d6e2ee;
+	border-radius: 6px;
+	padding: 16px 14px 18px 14px;
+	margin-bottom: 14px;
+}
+
+.batch-information-grid {
+	width: 100%;
+	margin-top: 10px;
+	border: none;
+}
+
+.batch-information-grid .z-grid-body {
+	border: none;
+}
+
+.batch-information-grid .z-row {
+	border-top: 1px solid #e7edf3;
+	background: #ffffff;
+}
+
+.batch-information-grid .z-row:last-child {
+	border-bottom: 1px solid #e7edf3;
+}
+
+.batch-information-grid .z-row > td {
+	padding: 10px 8px;
+	vertical-align: middle;
+}
+
+.information-label {
+	font-size: 11px;
+	font-weight: 600;
+	color: #506a85;
+	white-space: nowrap;
+}
+
+.information-value {
+	font-size: 11px;
+	font-weight: 500;
+	color: #173b5e;
+	white-space: normal;
+	word-break: break-word;
+}
+
+.batch-information-grid .information-value {
+	padding-left: 4px;
+}
+
+.batch-information-grid .status-badge {
+	margin-left: 4px;
+}
+
+.view-section-title {
+	font-size: 15px;
+	font-weight: 600;
+	color: #173f67;
+}
+
+.cheque-image-popup {
+    box-sizing: border-box;
+    padding: 18px;
+    background: #f7faff;
+}
+
+.cheque-image-popup-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d5787;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #d6e2ee;
+}
+
+.cheque-image-container {
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.cheque-image-section {
+    box-sizing: border-box;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #d6e2ee;
+    border-radius: 6px;
+    align-items: center;
+}
+
+.cheque-image-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d5787;
+}
+
+.cheque-preview-image {
+    width: 400px;
+    height: 250px;
+    object-fit: contain;
+    background: #f4f6f8;
+    border: 1px solid #d5e0eb;
+    border-radius: 4px;
+}
+
+.cheque-image-status {
+    font-size: 11px;
+    font-weight: 600;
+    color: #536b82;
+    padding-top: 5px;
+}
+
+.no-cheque-image {
+    width: 400px;
+    height: 250px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f6f8;
+    border: 1px solid #d5e0eb;
+    border-radius: 4px;
+    color: #8999aa;
+    font-size: 11px;
+}

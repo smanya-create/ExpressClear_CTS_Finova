@@ -2,6 +2,7 @@ package com.iispl.cts.dao.inward;
 
 import java.util.List;
 
+import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
 
 public interface InwardChequeDAO {
@@ -31,5 +32,6 @@ public interface InwardChequeDAO {
             String rejectedReasonId,
             String remarks,
             String rejectedBy);
+	CbsValidationResult validateCbs(InwardCheque cheque);
 	
 }

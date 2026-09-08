@@ -9,6 +9,8 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Groupbox;
+import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
@@ -19,11 +21,18 @@ import org.zkoss.zul.Window;
 import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.event.Events;
 
+import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
 import com.iispl.cts.entity.RejectedReason;
+import com.iispl.cts.entity.SendBackReason;
+import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.enums.inward.InwardChequeStatus;
 import com.iispl.cts.service.RejectedReasonService;
+import com.iispl.cts.service.SendBackReasonService;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
+import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 import org.zkoss.zk.ui.select.annotation.Wire;
 
@@ -37,6 +46,7 @@ public class InwardCheckerVerificationController
     private Label lblChequeStatus;
     private Label lblReceivedDate;
     private Label lblVerification;
+    private SendBackReasonService sendBackReasonService;
 
     private Label lblMicrCode;
     private Label lblBankCode;
@@ -81,6 +91,20 @@ public class InwardCheckerVerificationController
     @Wire
     private Button btnProceedReject;
     private Component pageRoot;
+    @Wire
+    private Image chequeImage;
+    @Wire
+    private Groupbox emptyImageState;
+    @Wire
+    private Window sendBackReasonWindow;
+
+    @Wire
+    private Combobox cmbSendBackReason;
+
+    @Wire
+    private Textbox txtSendBackRemarks;
+    
+    private InwardChequeImageDAOImpl inwardChequeImageDAO;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -90,6 +114,10 @@ public class InwardCheckerVerificationController
         pageRoot = comp.getPage().getFirstRoot();
 
         inwardChequeService = new InwardChequeServiceImpl();
+        inwardChequeImageDAO =
+                InwardChequeImageDAOImpl.getInstance();
+        sendBackReasonService =
+                new SendBackReasonServiceImpl();
 
         // Get reject popup
         Window window =
@@ -116,7 +144,7 @@ public class InwardCheckerVerificationController
                 "INWARD CHECKER VERIFICATION CONTROLLER LOADED");
         List<InwardCheque> cheques =
                 inwardChequeService.getChequesByBatchAndStatus(
-                        "BAT1111",
+                        "BAT1001",
                         null);
 
         if (cheques != null && !cheques.isEmpty()) {
@@ -131,6 +159,7 @@ public class InwardCheckerVerificationController
 
             InwardCheque cheque =
                     inwardChequeService.findById(inwardChequeId);
+          
 
             if (cheque == null) {
 
@@ -142,6 +171,8 @@ public class InwardCheckerVerificationController
 
                 return;
             }
+            
+            loadChequeImage(inwardChequeId,"FRONT");
             currentChequeId = cheque.getInwardChequeId();
             currentBatchId = cheque.getInwardBatchId();
             currentBatchCheques =
@@ -214,17 +245,9 @@ public class InwardCheckerVerificationController
             }
 
 
-            if (lblBankCode != null) {
-                lblBankCode.setValue("110");
-            }
-
-            if (lblBranchCode != null) {
-                lblBranchCode.setValue("532");
-            }
-
-            if (lblTransactionCode != null) {
-                lblTransactionCode.setValue("19");
-            }
+            lblBankCode.setValue(cheque.getBankCode());
+            lblBranchCode.setValue(cheque.getBranchCode());
+            lblTransactionCode.setValue(cheque.getTransactionCode());
 
             if (lblPresentingBank != null) {
                 lblPresentingBank.setValue("NPCI");
@@ -302,7 +325,71 @@ public class InwardCheckerVerificationController
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
-    }   
+    }  
+    private void loadChequeImage(
+            String inwardChequeId,
+            String imageType) {
+
+        if (chequeImage != null) {
+            chequeImage.setVisible(false);
+            chequeImage.setSrc(null);
+        }
+
+        if (emptyImageState != null) {
+            emptyImageState.setVisible(true);
+        }
+
+        if (inwardChequeId == null
+                || inwardChequeId.trim().isEmpty()) {
+            return;
+        }
+
+        InwardChequeImage image = null;
+
+        if ("FRONT".equalsIgnoreCase(imageType)) {
+
+            image = inwardChequeService
+                    .getFrontImage(inwardChequeId);
+
+        } else if ("BACK".equalsIgnoreCase(imageType)) {
+
+            image = inwardChequeService
+                    .getBackImage(inwardChequeId);
+        }
+
+        if (image != null
+                && image.getImagePath() != null
+                && !image.getImagePath().trim().isEmpty()) {
+
+            String imageSrc =
+                    "/" + image.getImagePath();
+
+            chequeImage.setSrc(imageSrc);
+            chequeImage.setVisible(true);
+
+            if (emptyImageState != null) {
+                emptyImageState.setVisible(false);
+            }
+        }
+    }
+    public void onClick$btnFront() {
+
+        if (currentChequeId != null) {
+
+            loadChequeImage(
+                    currentChequeId,"FRONT"
+                   );
+        }
+    }
+    public void onClick$btnBack() {
+
+        if (currentChequeId != null) {
+
+            loadChequeImage(
+                    currentChequeId,"BACK"
+                   );
+        }
+    }
 
     public void onClick$btnAccept() {
 
@@ -344,14 +431,10 @@ public class InwardCheckerVerificationController
             // RUN CBS VALIDATION AUTOMATICALLY
             // -------------------------------------------------
 
-            boolean cbsPassed = runCbsValidation(cheque);
+            CbsValidationResult cbsResult =
+                    runCbsValidation(cheque);
 
-            // -------------------------------------------------
-            // CBS VALIDATION FAILED
-            // -------------------------------------------------
-
-            if (!cbsPassed) {
-
+            if (!cbsResult.isPassed()) {
                 cheque.setChequeStatus("REJECTED");
 
                 boolean updated =
@@ -576,15 +659,7 @@ public class InwardCheckerVerificationController
             comboBox.appendChild(item);
         }
     }
-    
-    public void onClick$btnSendBack() {
 
-        Messagebox.show(
-                "Cheque sent back successfully.",
-                "Verification",
-                Messagebox.OK,
-                Messagebox.INFORMATION);
-    }
     
     private void moveToNextCheque() {
 
@@ -1022,42 +1097,145 @@ public class InwardCheckerVerificationController
         }
     }
     
-    private boolean runCbsValidation(InwardCheque cheque) {
+    private CbsValidationResult runCbsValidation(InwardCheque cheque) {
+
+        if (cheque == null) {
+            return new CbsValidationResult(
+                    false,
+                    "Cheque information is not available.");
+        }
+
+        return inwardChequeService.validateCbs(cheque);
+    }
+    public void onClick$btnSendBack() {
 
         try {
 
-            if (cheque == null) {
-                return false;
-            }
+            Window window =
+                    (Window) pageRoot.getFellow(
+                            "sendBackReasonWindow");
 
-            String micr = cheque.getMicrCode();
-            String accountNumber =
-                    cheque.getDraweeAccountNumber();
-            String chequeNumber =
-                    cheque.getChequeNumber();
+            Combobox comboBox =
+                    (Combobox) window.getFellow(
+                            "cmbSendBackReason");
 
-            // Mandatory CBS validation fields
-            if (micr == null || micr.trim().isEmpty()) {
-                return false;
-            }
+            Textbox remarks =
+                    (Textbox) window.getFellow(
+                            "txtSendBackRemarks");
 
-            if (accountNumber == null
-                    || accountNumber.trim().isEmpty()) {
-                return false;
-            }
+            loadSendBackReasons(comboBox);
 
-            if (chequeNumber == null
-                    || chequeNumber.trim().isEmpty()) {
-                return false;
-            }
+            comboBox.setSelectedItem(null);
+            remarks.setValue("");
 
-            return true;
+            window.doModal();
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            return false;
+            Messagebox.show(
+                    "Unable to open Send Back window.\n"
+                    + e.getMessage(),
+                    "Send Back Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
         }
     }
+    public void onClick$btnProceedSendBack() {
+
+        try {
+
+            Comboitem selectedItem =
+                    cmbSendBackReason.getSelectedItem();
+
+            if (selectedItem == null) {
+
+                Messagebox.show(
+                        "Please select a send back reason.",
+                        "Validation",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            InwardCheque cheque =
+                    inwardChequeService.findById(currentChequeId);
+
+            if (cheque == null) {
+
+                Messagebox.show(
+                        "Cheque not found.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            cheque.setChequeStatus(
+                    InwardChequeStatus.SEND_BACK_TO_MAKER.name());
+
+            boolean updated =
+                    inwardChequeService.updateChequeDetails(cheque);
+
+            if (!updated) {
+
+                Messagebox.show(
+                        "Unable to send the cheque back to Maker.",
+                        "Send Back",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            sendBackReasonWindow.setVisible(false);
+
+            Messagebox.show(
+                    "Cheque has been sent back to Maker successfully.",
+                    "Send Back",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION,
+                    event -> moveToNextCheque());
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to process Send Back.\n"
+                    + e.getMessage(),
+                    "Send Back Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
     }
+    public void onClick$btnCancelSendBack() {
+
+        sendBackReasonWindow.setVisible(false);
+    }
+    private void loadSendBackReasons(Combobox comboBox) {
+
+        comboBox.getItems().clear();
+
+        List<SendBackReason> reasons =
+                sendBackReasonService.getAllSendBackReasons();
+
+        for (SendBackReason reason : reasons) {
+
+            Comboitem item = new Comboitem();
+
+            item.setLabel(
+                    reason.getReasonCode()
+                    + " - "
+                    + reason.getReasonName());
+
+            item.setValue(reason);
+
+            comboBox.appendChild(item);
+        }
+    }
+    
+}

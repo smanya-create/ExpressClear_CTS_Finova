@@ -1,13 +1,9 @@
 package com.iispl.cts.controller.inward.maker;
 
 import java.util.ArrayList;
-
 import java.io.InputStream;
-
 import org.zkoss.image.AImage;
-
 import java.util.HashMap;
-
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +19,14 @@ import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import org.zkoss.zk.ui.event.InputEvent;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -86,6 +90,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private Combobox cmbRejectReason;
 
 	private InwardCheque currentCheque;
+
+	private String ocrSortCode = "";
+
+	private boolean cityCodeError;
+	private boolean bankCodeError;
+	private boolean branchCodeError;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -356,19 +366,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			String imagePath = image.getImagePath().trim();
 
-			/*
-			 * Images are stored under:
-			 *
-			 * src/main/resources/Inward-data/
-			 *
-			 * Eclipse deploys src/main/resources to the web application root.
-			 *
-			 * Therefore the browser URL is:
-			 *
-			 * /Inward-data/<stored image path>
-			 *
-			 * Example: /Inward-data/BATCH-2026-09-04-003/images/CHQ001_front.jpg
-			 */
 			String imageSrc = "/Inward-data/" + imagePath;
 
 			System.out.println("MICR Repair: Loading image URL -> " + imageSrc);
@@ -556,6 +553,113 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		Executions.sendRedirect("/inward/maker/index.zul");
 	}
 
+	private String loadOcrSortCode(InwardCheque cheque) {
+
+		if (cheque == null || cheque.getInwardBatchId() == null || cheque.getItemSequenceNumber() == null) {
+
+			return "";
+		}
+
+		try {
+
+			InwardBatch batch = inwardBatchService.getBatchById(cheque.getInwardBatchId());
+
+			if (batch == null || batch.getBatchReferenceId() == null || batch.getBatchReferenceId().trim().isEmpty()) {
+
+				return "";
+			}
+
+			String resourcePath = "/Inward-data/" + batch.getBatchReferenceId().trim() + "/OCR_Mock.xml";
+
+			InputStream inputStream = Executions.getCurrent().getDesktop().getWebApp()
+					.getResourceAsStream(resourcePath);
+
+			if (inputStream == null) {
+
+				System.err.println("MICR Repair: OCR resource not found -> " + resourcePath);
+
+				return "";
+			}
+
+			try (InputStream stream = inputStream) {
+
+				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+
+				NodeList chequeNodes = document.getElementsByTagName("OCRCheque");
+
+				for (int i = 0; i < chequeNodes.getLength(); i++) {
+
+					Element ocrCheque = (Element) chequeNodes.item(i);
+
+					String sequenceText = getXmlValue(ocrCheque, "ItemSequenceNumber");
+
+					if (sequenceText == null || sequenceText.trim().isEmpty()) {
+						continue;
+					}
+
+					int sequence = Integer.parseInt(sequenceText.trim());
+
+					if (sequence != cheque.getItemSequenceNumber()) {
+						continue;
+					}
+
+					Element rawMicr = getChildElement(ocrCheque, "RawMICRRead");
+
+					if (rawMicr == null) {
+						return "";
+					}
+
+					String sortCode = getXmlValue(rawMicr, "SortCode");
+
+					return sortCode != null ? sortCode.trim() : "";
+				}
+
+			}
+
+		} catch (Exception e) {
+
+			System.err.println("MICR Repair: Unable to read OCR data for cheque " + cheque.getInwardChequeId());
+
+			e.printStackTrace();
+		}
+
+		return "";
+	}
+
+	private String getXmlValue(Element parent, String tagName) {
+
+		if (parent == null) {
+			return "";
+		}
+
+		NodeList nodes = parent.getElementsByTagName(tagName);
+
+		if (nodes.getLength() == 0) {
+			return "";
+		}
+
+		if (nodes.item(0).getTextContent() == null) {
+			return "";
+		}
+
+		return nodes.item(0).getTextContent().trim();
+	}
+
+	private Element getChildElement(Element parent, String tagName) {
+
+		if (parent == null) {
+			return null;
+		}
+
+		NodeList nodes = parent.getElementsByTagName(tagName);
+
+		if (nodes.getLength() == 0) {
+			return null;
+		}
+
+		return (Element) nodes.item(0);
+	}
+
 	private void populateChequeFields(InwardCheque cheque) {
 
 		if (cheque == null) {
@@ -567,33 +671,184 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			txtChequeNumber.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "");
 		}
 
-		if (txtCityCode != null) {
-			txtCityCode.setValue(cheque.getCityCode() != null ? cheque.getCityCode() : "");
-		}
-
-		if (txtBankCode != null) {
-			txtBankCode.setValue(cheque.getBankCode() != null ? cheque.getBankCode() : "");
-		}
-
-		if (txtBranchCode != null) {
-			txtBranchCode.setValue(cheque.getBranchCode() != null ? cheque.getBranchCode() : "");
-		}
-
-		if (txtCurrentMicr != null) {
-			txtCurrentMicr.setValue(cheque.getMicrCode() != null ? cheque.getMicrCode() : "");
-		}
-
 		if (txtTransactionCode != null) {
 			txtTransactionCode.setValue(cheque.getTransactionCode() != null ? cheque.getTransactionCode() : "");
 		}
 
-		if (txtCorrectedMicr != null) {
-			txtCorrectedMicr.setValue("");
-			txtCorrectedMicr.clearErrorMessage();
-		}
-
 		if (txtRemarks != null) {
 			txtRemarks.setValue("");
+		}
+
+		prepareMicrRepairFields(cheque);
+	}
+
+	private void prepareMicrRepairFields(InwardCheque cheque) {
+
+		cityCodeError = false;
+		bankCodeError = false;
+		branchCodeError = false;
+
+		ocrSortCode = loadOcrSortCode(cheque);
+
+		String expectedCity = safe(cheque != null ? cheque.getCityCode() : "");
+
+		String expectedBank = safe(cheque != null ? cheque.getBankCode() : "");
+
+		String expectedBranch = safe(cheque != null ? cheque.getBranchCode() : "");
+
+		String expectedSortCode = expectedCity + expectedBank + expectedBranch;
+
+		if (ocrSortCode == null || ocrSortCode.trim().isEmpty()) {
+
+			ocrSortCode = safe(cheque != null ? cheque.getMicrCode() : "");
+		}
+
+		ocrSortCode = ocrSortCode.replaceAll("\\s+", "");
+
+		StringBuilder normalized = new StringBuilder();
+
+		for (int i = 0; i < expectedSortCode.length(); i++) {
+
+			if (i < ocrSortCode.length()) {
+
+				char ocrChar = ocrSortCode.charAt(i);
+
+				char expectedChar = expectedSortCode.charAt(i);
+
+				if (ocrChar == '?' || !Character.isDigit(ocrChar)) {
+
+					normalized.append('?');
+
+				} else {
+
+					normalized.append(ocrChar);
+
+					if (ocrChar != expectedChar) {
+
+						markMicrPositionError(i);
+					}
+				}
+
+			} else {
+
+				normalized.append('?');
+
+				markMicrPositionError(i);
+			}
+		}
+
+		ocrSortCode = normalized.toString();
+
+		if (ocrSortCode.length() > 9) {
+			ocrSortCode = ocrSortCode.substring(0, 9);
+		}
+
+		for (int i = 0; i < ocrSortCode.length() && i < 9; i++) {
+
+			if (ocrSortCode.charAt(i) == '?') {
+				markMicrPositionError(i);
+			}
+		}
+
+		String cityDisplay = getMicrPart(ocrSortCode, 0, 3);
+		String bankDisplay = getMicrPart(ocrSortCode, 3, 6);
+		String branchDisplay = getMicrPart(ocrSortCode, 6, 9);
+
+		txtCityCode.setValue(cityDisplay);
+		txtBankCode.setValue(bankDisplay);
+		txtBranchCode.setValue(branchDisplay);
+
+		txtCityCode.setReadonly(!cityCodeError);
+		txtBankCode.setReadonly(!bankCodeError);
+		txtBranchCode.setReadonly(!branchCodeError);
+
+		txtCityCode.setSclass(cityCodeError ? "repair-editable-field" : "ocr-field");
+
+		txtBankCode.setSclass(bankCodeError ? "repair-editable-field" : "ocr-field");
+
+		txtBranchCode.setSclass(branchCodeError ? "repair-editable-field" : "ocr-field");
+
+		txtCurrentMicr.setValue(ocrSortCode);
+		txtCurrentMicr.setSclass("error-field");
+
+		txtCorrectedMicr.setValue("");
+		txtCorrectedMicr.clearErrorMessage();
+
+		txtTransactionCode.setReadonly(true);
+		txtTransactionCode.setSclass("ocr-field");
+	}
+
+	private void markMicrPositionError(int position) {
+
+		if (position >= 0 && position < 3) {
+			cityCodeError = true;
+		} else if (position >= 3 && position < 6) {
+			bankCodeError = true;
+		} else if (position >= 6 && position < 9) {
+			branchCodeError = true;
+		}
+	}
+
+	private String getMicrPart(String value, int start, int end) {
+
+		StringBuilder result = new StringBuilder();
+
+		for (int i = start; i < end; i++) {
+
+			if (value != null && i < value.length()) {
+				result.append(value.charAt(i));
+			} else {
+				result.append('?');
+			}
+		}
+
+		return result.toString();
+	}
+
+	private String safe(String value) {
+
+		return value == null ? "" : value.trim();
+	}
+
+	public void onChanging$txtCityCode(InputEvent event) {
+		updateCorrectedMicr(event.getValue(), null, null);
+	}
+
+	public void onChanging$txtBankCode(InputEvent event) {
+		updateCorrectedMicr(null, event.getValue(), null);
+	}
+
+	public void onChanging$txtBranchCode(InputEvent event) {
+		updateCorrectedMicr(null, null, event.getValue());
+	}
+
+	private void updateCorrectedMicr(String cityOverride, String bankOverride, String branchOverride) {
+
+		if (currentCheque == null) {
+			return;
+		}
+
+		String city = cityOverride != null ? cityOverride : txtCityCode.getValue();
+
+		String bank = bankOverride != null ? bankOverride : txtBankCode.getValue();
+
+		String branch = branchOverride != null ? branchOverride : txtBranchCode.getValue();
+
+		city = safe(city);
+		bank = safe(bank);
+		branch = safe(branch);
+
+		if (city.matches("\\d{3}") && bank.matches("\\d{3}") && branch.matches("\\d{3}")) {
+
+			String correctedMicr = city + bank + branch;
+
+			txtCorrectedMicr.setValue(correctedMicr);
+
+			txtCorrectedMicr.clearErrorMessage();
+
+		} else {
+
+			txtCorrectedMicr.setValue("");
 		}
 	}
 }

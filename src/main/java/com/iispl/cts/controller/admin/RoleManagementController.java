@@ -34,6 +34,7 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
         
+        
         loadRoles();
     }
 

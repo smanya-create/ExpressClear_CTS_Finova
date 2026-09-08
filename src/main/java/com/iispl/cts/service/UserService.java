@@ -13,4 +13,5 @@ public interface UserService {
     List<User> searchUsers(String query, String roleId, String status);
     String generateNextUserId();
     String generateNextEmployeeId();
+    List<User> findUsersByRoleId(String roleId);
 }

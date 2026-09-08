@@ -12,4 +12,7 @@ public interface RoleDAO {
     boolean saveRole(Role role);
     boolean updateRole(Role role);
     String generateNextRoleId();
+    boolean isRoleNameExists(String roleName);
+    boolean isRoleNameExists(String roleName, String excludeRoleId);
+    
 }
