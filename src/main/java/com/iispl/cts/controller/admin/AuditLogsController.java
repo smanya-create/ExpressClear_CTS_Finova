@@ -19,6 +19,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.AuditLog;
 import com.iispl.cts.service.AuditService;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -56,6 +57,9 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	if(!SecurityUtil.checkAccess(null)) {
+    		return;
+    	}
         super.doAfterCompose(comp);
 
         resetFiltersToToday();
@@ -183,13 +187,21 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
             // Status Badge
             Label lblStatus = new Label(log.getStatus() != null ? log.getStatus() : "SUCCESS");
-            if ("SUCCESS".equalsIgnoreCase(log.getStatus())) {
-                lblStatus.setStyle("background: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;");
-            } else {
-                lblStatus.setStyle("background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;");
-            }
-            row.appendChild(lblStatus);
 
+            String baseBadgeStyle = "display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
+
+            if ("SUCCESS".equalsIgnoreCase(log.getStatus())) {
+                lblStatus.setStyle(baseBadgeStyle + " background: #dcfce7; color: #15803d;");
+            } else {
+                lblStatus.setStyle(baseBadgeStyle + " background: #fee2e2; color: #b91c1c;");
+            }
+
+            // Wrap in a centered Div or Cell so it does not touch the grid border
+            org.zkoss.zul.Cell cellStatus = new org.zkoss.zul.Cell();
+            cellStatus.setStyle("text-align: center; padding-right: 14px;");
+            cellStatus.appendChild(lblStatus);
+
+            row.appendChild(cellStatus);
             rowsAudit.appendChild(row);
         }
     }
