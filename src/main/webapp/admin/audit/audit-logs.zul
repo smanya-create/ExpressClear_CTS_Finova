@@ -73,7 +73,7 @@
                             <column label="ACTION" width="150px"/>
                             <column label="DETAILS" hflex="1"/>
                             <column label="IP ADDRESS" width="130px"/>
-                            <column label="STATUS" width="100px"/>
+                            <column label="STATUS" width="110px" align="center" style="text-align: center;"/>
                         </columns>
                         <rows id="rowsAudit">
                             <!-- Populated dynamically by AuditLogsController -->
