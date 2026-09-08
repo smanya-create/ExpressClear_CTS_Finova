@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.outward.checker;
 
 import java.math.BigDecimal;
+
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Paging;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardBatchService;
@@ -26,21 +28,50 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	private Label lblTotalBatches;
 	private Label lblTotalCheques;
 	private Listbox lstBatches;
+	private Button btnPrevious;
+	private Button btnNext;
+	private Label lblPage;
 
 	private OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
+	int pageNumber = 1;
+	int pageSize = 5;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		super.doAfterCompose(comp);
-		String role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
+		String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
+		btnPrevious.addEventListener(Events.ON_CLICK, event -> {
+			if (pageNumber > 1) {
+				pageNumber--;
+				loadDashboard();
+			}
+		});
+
+		btnNext.addEventListener(Events.ON_CLICK, event -> {
+			int totalBatches = outwardBatchService.getPendingBatchCount();
+			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
+
+			if (pageNumber < totalPages) {
+				pageNumber++;
+				loadDashboard();
+			}
+		});
+
 		loadDashboard();
 	}
 
 	private void loadDashboard() {
-		try {
-			List<OutwardBatch> pendingBatches = outwardBatchService.getPendingBatches();
 
-			int totalBatches = pendingBatches.size();
+		try {
+			List<OutwardBatch> pendingBatches = outwardBatchService.getPendingBatches(pageNumber, pageSize);
+
+			int totalBatches = outwardBatchService.getPendingBatchCount();
+			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
+
+			lblPage.setValue(pageNumber + "/" + totalPages);
+
+			btnPrevious.setDisabled(pageNumber == 1);
+			btnNext.setDisabled(pageNumber >= totalPages);
 
 			int totalCheques = 0;
 

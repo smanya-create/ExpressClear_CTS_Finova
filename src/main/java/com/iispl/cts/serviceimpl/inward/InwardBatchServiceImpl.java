@@ -9,6 +9,7 @@ import com.iispl.cts.daoimpl.inward.InwardBatchDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
 import com.iispl.cts.dto.DashboardSummaryDTO;
+import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
@@ -146,5 +147,11 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 	@Override
 	public List<DashboardSummaryDTO> getDashboardBatches() {
 		return inwardBatchDAO.getDashboardBatches();
+	}
+
+	@Override
+	public List<InwardReportChequeDTO> getChequesByBatch() {
+		// TODO Auto-generated method stub
+		return inwardBatchDAO.getChequesByBatch();
 	}
 }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -58,8 +59,21 @@ public class HeaderController extends GenericForwardComposer<Component> {
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
         initUserProfile();
+     // --- HIDE NOTIFICATION BELL FOR ADMIN OR WHEN SUPPRESSED ---
+        String currentRole = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
+        Object showNotifArg = Executions.getCurrent().getArg().get("showNotifications");
+
+        if ("ADMIN".equalsIgnoreCase(currentRole) || "false".equalsIgnoreCase(String.valueOf(showNotifArg))) {
+            if (divNotificationBell != null) {
+                divNotificationBell.setVisible(false);
+            }
+        }
         loadSessionState();
-        loadDatabaseNotifications();
+     // Optional optimization: skip querying notifications for Admin
+        if (divNotificationBell != null && divNotificationBell.isVisible()) {
+            loadDatabaseNotifications();
+        }
+        
 
         // Attach listener to first root element of the page
         if (getPage() != null && getPage().getFirstRoot() != null) {

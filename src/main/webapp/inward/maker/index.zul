@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?page title="CTS - Inward Processing" contentType="text/html;charset=UTF-8"?>
+
 <?link rel="stylesheet" type="text/css" href="/css/inward/maker-dashboard.css"?>
 
 <zk xmlns:h="xhtml">
 
-	
 	<window id="inwardMakerRootWin" border="none" width="100%"
 		height="100%"
 		style="margin: 0 !important; padding: 0 !important; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
@@ -12,30 +13,36 @@
 		<borderlayout hflex="1" vflex="1"
 			style="margin: 0 !important; padding: 0 !important; background: transparent;">
 
-			
 			<west size="220px" border="none"
 				style="margin: 0 !important; padding: 0 !important; background-color: #0b1d3a !important; height: 100%;">
+
 				<include src="/components/sidebar.zul"
-					role="INWARD_MAKER" activeTab="inward-dashboard" vflex="1"
-					hflex="1" />
+					role="INWARD_MAKER"
+					activeTab="${param.page == 'batch-intake' ? 'inward-batch-intake' : 'inward-dashboard'}"
+					vflex="1" hflex="1" />
+
 			</west>
-		
+
 			<center border="none" autoscroll="true"
 				sclass="main-content">
+
 				<vlayout spacing="1px" sclass="dashboard-container"
 					hflex="1">
 
-				
 					<include id="headerInclude"
 						src="/components/header.zul" pageTitle="Inward Processing"
-						pageSubtitle="Maker Dashboard" />
+						pageSubtitle="${param.page == 'batch-intake' ? 'Batch Intake' : 'Maker Dashboard'}" />
 
-					
 					<include id="mainContentArea" mode="instant"
-						src="/inward/maker/dashboard.zul" hflex="1" />
+						src="${param.page == 'batch-intake' ? '/inward/maker/batch/batch-list.zul' : '/inward/maker/dashboard.zul'}"
+						hflex="1" />
 
 				</vlayout>
+
 			</center>
+
 		</borderlayout>
+
 	</window>
+
 </zk>

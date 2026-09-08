@@ -304,21 +304,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		Executions.sendRedirect("/inward-maker/unprocessed.zul");
 	}
 
-	public void navToInwardMakerReports() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-
-			include.setSrc(null);
-			include.setSrc("/inward/maker/reports/maker-reports.zul");
-		} else {
-			Executions.sendRedirect("/inward/maker/reports/maker-reports.zul");
-		}
-	}
-
 	// Inward Checker Navigation Actions
 	public void navToInwardCheckerDashboard() {
 		Executions.sendRedirect("/inward/checker/dashboard.zul");

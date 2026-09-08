@@ -103,6 +103,11 @@ public class InwardCheckerVerificationController
 
     @Wire
     private Textbox txtSendBackRemarks;
+    private double zoomScale = 1.0;
+    private int rotationAngle = 0;
+    private double panX = 0;
+    private double panY = 0;
+    
     
     private InwardChequeImageDAOImpl inwardChequeImageDAO;
 
@@ -139,6 +144,23 @@ public class InwardCheckerVerificationController
         cancelButton.addEventListener(
                 Events.ON_CLICK,
                 event -> onClick$btnCancelReject());
+        Window sendBackWindow =
+                (Window) pageRoot.getFellow("sendBackReasonWindow");
+
+        Button proceedSendBackButton =
+                (Button) sendBackWindow.getFellow("btnProceedSendBack");
+
+        Button cancelSendBackButton =
+                (Button) sendBackWindow.getFellow("btnCancelSendBack");
+
+
+        proceedSendBackButton.addEventListener(
+        Events.ON_CLICK,
+        event -> onClick$btnProceedSendBack());
+
+        cancelSendBackButton.addEventListener(
+        Events.ON_CLICK,
+        event -> onClick$btnCancelSendBack());
 
         System.out.println(
                 "INWARD CHECKER VERIFICATION CONTROLLER LOADED");
@@ -329,6 +351,11 @@ public class InwardCheckerVerificationController
     private void loadChequeImage(
             String inwardChequeId,
             String imageType) {
+    	zoomScale = 1.0;
+        rotationAngle = 0;
+        panX = 0;
+        panY = 0;
+
 
         if (chequeImage != null) {
             chequeImage.setVisible(false);
@@ -1146,8 +1173,14 @@ public class InwardCheckerVerificationController
 
         try {
 
+            Window window =
+                    (Window) pageRoot.getFellow("sendBackReasonWindow");
+
+            Combobox comboBox =
+                    (Combobox) window.getFellow("cmbSendBackReason");
+
             Comboitem selectedItem =
-                    cmbSendBackReason.getSelectedItem();
+                    comboBox.getSelectedItem();
 
             if (selectedItem == null) {
 
@@ -1191,7 +1224,7 @@ public class InwardCheckerVerificationController
                 return;
             }
 
-            sendBackReasonWindow.setVisible(false);
+            window.setVisible(false);
 
             Messagebox.show(
                     "Cheque has been sent back to Maker successfully.",
@@ -1206,7 +1239,7 @@ public class InwardCheckerVerificationController
 
             Messagebox.show(
                     "Unable to process Send Back.\n"
-                    + e.getMessage(),
+                            + e.getMessage(),
                     "Send Back Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
@@ -1214,7 +1247,10 @@ public class InwardCheckerVerificationController
     }
     public void onClick$btnCancelSendBack() {
 
-        sendBackReasonWindow.setVisible(false);
+        Window window =
+                (Window) pageRoot.getFellow("sendBackReasonWindow");
+
+        window.setVisible(false);
     }
     private void loadSendBackReasons(Combobox comboBox) {
 
@@ -1237,5 +1273,200 @@ public class InwardCheckerVerificationController
             comboBox.appendChild(item);
         }
     }
+    
+ // ================= IMAGE CONTROLS =================
+
+    public void onClick$btnZoomOut() {
+
+        if (chequeImage == null || !chequeImage.isVisible()) {
+            return;
+        }
+
+        zoomScale -= 0.1;
+
+        // Minimum zoom
+        if (zoomScale < 0.5) {
+            zoomScale = 0.5;
+        }
+
+        applyImageTransform();
+    }
+
+    public void onClick$btnZoomReset() {
+
+        if (chequeImage == null || !chequeImage.isVisible()) {
+            return;
+        }
+
+        zoomScale = 1.0;
+        rotationAngle = 0;
+        panX = 0;
+        panY = 0;
+
+        applyImageTransform();
+    }
+
+
+    public void onClick$btnZoomIn() {
+
+        if (chequeImage == null || !chequeImage.isVisible()) {
+            return;
+        }
+
+        zoomScale += 0.1;
+
+        // Maximum zoom
+        if (zoomScale > 3.0) {
+            zoomScale = 3.0;
+        }
+
+        applyImageTransform();
+    }
+
+
+    public void onClick$btnZoomFit() {
+
+        if (chequeImage == null || !chequeImage.isVisible()) {
+            return;
+        }
+
+        zoomScale = 1.0;
+        panX = 0;
+        panY = 0;
+
+        applyImageTransform();
+    }
+
+
+    public void onClick$btnRotate() {
+
+        if (chequeImage == null || !chequeImage.isVisible()) {
+            return;
+        }
+
+        rotationAngle += 90;
+
+        if (rotationAngle >= 360) {
+            rotationAngle = 0;
+        }
+
+        applyImageTransform();
+    }
+
+
+    private void applyImageTransform() {
+
+        if (chequeImage == null) {
+            return;
+        }
+
+        String imageUuid = chequeImage.getUuid();
+
+        String script =
+                "(function(){"
+              + "var img=document.getElementById('" + imageUuid + "');"
+              + "if(!img) return;"
+
+              + "var panX=" + panX + ";"
+              + "var panY=" + panY + ";"
+
+              + "img.dataset.panX=panX;"
+              + "img.dataset.panY=panY;"
+              + "img.dataset.zoomScale=" + zoomScale + ";"
+
+              + "img.style.width='100%';"
+              + "img.style.height='100%';"
+              + "img.style.objectFit='contain';"
+
+              + "img.style.transform="
+              + "'translate('+panX+'px,'+panY+'px) "
+              + "scale(" + zoomScale + ") "
+              + "rotate(" + rotationAngle + "deg)';"
+
+              + "img.style.transformOrigin='center center';"
+
+              // Disable mouse dragging
+              + "img.style.cursor='default';"
+
+              + "})();";
+
+        org.zkoss.zk.ui.util.Clients.evalJavaScript(script);
+
+        enableKeyboardImageNavigation();
+    }
+    
+   
+    
+    private void enableKeyboardImageNavigation() {
+
+        if (chequeImage == null) {
+            return;
+        }
+
+        String imageUuid = chequeImage.getUuid();
+
+        String script =
+                "(function(){"
+              + "var img=document.getElementById('" + imageUuid + "');"
+              + "if(!img) return;"
+
+              + "if(img.dataset.keyboardEnabled==='true') return;"
+              + "img.dataset.keyboardEnabled='true';"
+
+              + "document.addEventListener('keydown',function(e){"
+
+              // Get the CURRENT zoom value from the image
+              + "var scale=parseFloat(img.dataset.zoomScale || '1');"
+
+              // Only navigate when zoomed in
+              + "if(scale <= 1) return;"
+
+              + "var x=parseFloat(img.dataset.panX || '0');"
+              + "var y=parseFloat(img.dataset.panY || '0');"
+
+              + "var step=30;"
+
+              // LEFT arrow → show LEFT side
+              + "if(e.key==='ArrowLeft'){"
+              + "x=x+step;"
+              + "}"
+
+              // RIGHT arrow → show RIGHT side
+              + "else if(e.key==='ArrowRight'){"
+              + "x=x-step;"
+              + "}"
+
+              // UP arrow → show TOP
+              + "else if(e.key==='ArrowUp'){"
+              + "y=y+step;"
+              + "}"
+
+              // DOWN arrow → show BOTTOM
+              + "else if(e.key==='ArrowDown'){"
+              + "y=y-step;"
+              + "}"
+
+              + "else {"
+              + "return;"
+              + "}"
+
+              + "e.preventDefault();"
+
+              + "img.dataset.panX=x;"
+              + "img.dataset.panY=y;"
+
+              + "img.style.transform="
+              + "'translate('+x+'px,'+y+'px) "
+              + "scale('+scale+') "
+              + "rotate(" + rotationAngle + "deg)';"
+
+              + "});"
+
+              + "})();";
+
+        org.zkoss.zk.ui.util.Clients.evalJavaScript(script);
+    }   
+    
+    
     
 }

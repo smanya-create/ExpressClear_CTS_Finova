@@ -16,7 +16,8 @@
                 <!-- Reusable Header Component -->
                 <include src="/components/header.zul" 
                          pageTitle="Admin Dashboard" 
-                         pageSubtitle="Session Management" />
+                         pageSubtitle="Session Management"
+                         showNotifications="false" />
 
                 <!-- Main Content Body Container -->
                 <vlayout sclass="cts-content-wrapper" spacing="16px" hflex="1">
@@ -27,35 +28,40 @@
                         <label value="Select EOD or BOD and start the required CTS session." sclass="cts-main-subtitle" />
                     </vlayout>
 
-                    <!-- 4-Column Stat KPI Card -->
-                    <hlayout sclass="cts-stats-card" hflex="1" spacing="0">
-                        <vlayout sclass="cts-stat-col" hflex="1" spacing="4px">
-                            <label value="CURRENT CLEARING DATE" sclass="cts-stat-header" />
-                            <label id="lblClearingDate" sclass="cts-stat-num" />
-                        </vlayout>
-                        
-                        <vlayout sclass="cts-stat-col" hflex="1" spacing="4px">
-                            <label value="SESSION STATUS" sclass="cts-stat-header" />
-                            <hlayout sclass="cts-status-container" valign="middle" spacing="6px">
-                                <div id="dotSessionStatus" sclass="cts-status-dot-open" />
-                                <label id="lblSessionStatus" value="OPEN" sclass="cts-status-text-open" />
-                            </hlayout>
-                        </vlayout>
-                        
-                        <vlayout sclass="cts-stat-col" hflex="1" spacing="4px">
-                            <label value="LOGGED-IN USERS" sclass="cts-stat-header" />
-                            <label id="lblLoggedInUsers" value="0" sclass="cts-stat-num" />
-                        </vlayout>
-                        
-                        <vlayout sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px">
-                            <label value="PENDING CHEQUES" sclass="cts-stat-header" />
-                            <hlayout sclass="cts-pending-flex" valign="middle" spacing="8px">
-                                <label id="lblPendingCount" value="0" sclass="cts-stat-num cts-pending-num" />
-                                <label id="lblPendingTag" value="Requires attention before EOD" sclass="cts-pending-warning-tag" />
-                            </hlayout>
-                        </vlayout>
-                    </hlayout>
+                   <!-- 4-Column Stat KPI Card -->
+<hlayout sclass="cts-stats-card" hflex="1" spacing="0">
+    
+    <!-- Col 1: CURRENT CLEARING DATE (No left border) -->
+    <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="padding: 12px 20px 12px 16px;">
+        <label value="CURRENT CLEARING DATE" sclass="cts-stat-header" />
+        <label id="lblClearingDate" sclass="cts-stat-num" />
+    </vlayout>
+    
+    <!-- Col 2: SESSION STATUS -->
+    <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 12px 20px 12px 28px;">
+        <label value="SESSION STATUS" sclass="cts-stat-header" />
+        <hlayout sclass="cts-status-container" valign="middle" spacing="6px">
+            <div id="dotSessionStatus" sclass="cts-status-dot-open" />
+            <label id="lblSessionStatus" value="OPEN" sclass="cts-status-text-open" />
+        </hlayout>
+    </vlayout>
+    
+    <!-- Col 3: LOGGED-IN USERS -->
+    <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 12px 20px 12px 28px;">
+        <label value="LOGGED-IN USERS" sclass="cts-stat-header" />
+        <label id="lblLoggedInUsers" value="0" sclass="cts-stat-num" />
+    </vlayout>
+    
+    <!-- Col 4: PENDING CHEQUES -->
+    <vlayout sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 12px 20px 12px 28px;">
+        <label value="PENDING CHEQUES" sclass="cts-stat-header" />
+        <hlayout sclass="cts-pending-flex" valign="middle" spacing="8px">
+            <label id="lblPendingCount" value="0" sclass="cts-stat-num cts-pending-num" />
+            <label id="lblPendingTag" value="Requires attention before EOD" sclass="cts-pending-warning-tag" />
+        </hlayout>
+    </vlayout>
 
+</hlayout>
                     <!-- Session Action Selection Card -->
                     <vlayout sclass="cts-action-card" spacing="14px">
                         <vlayout spacing="2px">

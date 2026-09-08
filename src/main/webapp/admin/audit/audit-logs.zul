@@ -15,7 +15,8 @@
             <!-- Shared Header -->
             <include id="incHeader" src="/components/header.zul" 
                      pageTitle="Admin Dashboard" 
-                     pageSubtitle="Audit Logs" />
+                     pageSubtitle="Audit Logs"
+                     showNotifications="false" />
 
             <!-- Content Area Container -->
             <vlayout sclass="role-content" spacing="20px" style="padding: 24px;">
@@ -27,19 +28,19 @@
                 </vlayout>
 
                 <!-- Filter Controls Card -->
-                <vlayout sclass="card-panel" spacing="0">
+                <vlayout sclass="card-panel" hflex="1" spacing="0" style="padding: 24px 28px; box-sizing: border-box;">
                     <hlayout spacing="16px" valign="bottom" hflex="1">
-                        <vlayout spacing="6px" width="160px">
+                        <vlayout spacing="6px" width="150px">
                             <label value="FROM DATE" sclass="field-label"/>
-                            <datebox id="dtFrom" format="yyyy-MM-dd" height="40px" width="100%"/>
+                            <datebox id="dtFrom" format="yyyy-MM-dd" height="38px" width="100%"/>
                         </vlayout>
-                        <vlayout spacing="6px" width="160px">
+                        <vlayout spacing="6px" width="150px">
                             <label value="TO DATE" sclass="field-label"/>
-                            <datebox id="dtTo" format="yyyy-MM-dd" height="40px" width="100%"/>
+                            <datebox id="dtTo" format="yyyy-MM-dd" height="38px" width="100%"/>
                         </vlayout>
-                        <vlayout spacing="6px" width="180px">
+                        <vlayout spacing="6px" width="170px">
                             <label value="MODULE" sclass="field-label"/>
-                            <combobox id="cmbModuleFilter" readonly="true" width="100%" height="40px">
+                            <combobox id="cmbModuleFilter" readonly="true" width="100%" height="38px">
                                 <comboitem label="All Modules" value="ALL"/>
                                 <comboitem label="AUTH" value="AUTH"/>
                                 <comboitem label="ROLE_MGMT" value="ROLE_MGMT"/>
@@ -50,10 +51,10 @@
                         </vlayout>
                         <vlayout spacing="6px" hflex="1">
                             <label value="SEARCH USER / DETAILS" sclass="field-label"/>
-                            <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="40px" sclass="input-box"/>
+                            <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="38px" sclass="input-box"/>
                         </vlayout>
-                        <button id="btnSearch" label="SEARCH" height="40px" sclass="btn-primary"/>
-                        <button id="btnReset" label="RESET" height="40px" sclass="btn-secondary"/>
+                        <button id="btnSearch" label="SEARCH" height="38px" sclass="btn-primary"/>
+                        <button id="btnReset" label="RESET" height="38px" sclass="btn-secondary"/>
                     </hlayout>
                 </vlayout>
 
@@ -78,8 +79,16 @@
                             <!-- Populated dynamically by AuditLogsController -->
                         </rows>
                     </grid>
-                    <hlayout hflex="1" style="justify-content: flex-end; padding-top: 8px;">
-                        <paging id="auditPaging" pageSize="15" detailed="true"/>
+                    <hlayout valign="middle" style="margin-top: 14px;">
+                        <space hflex="1" />
+                        <hlayout spacing="4px" valign="middle" sclass="cts-pagination-wrapper">
+                            <button id="btnFirstPage" label="«" sclass="pg-nav-btn" tooltiptext="First Page" />
+                            <button id="btnPrevPage" label="‹" sclass="pg-nav-btn" tooltiptext="Previous Page" />
+                            <intbox id="ibCurrentPage" value="1" sclass="pg-current-input" />
+                            <label id="lblTotalPages" value="/ 1" sclass="pg-total-label" />
+                            <button id="btnNextPage" label="›" sclass="pg-nav-btn" tooltiptext="Next Page" />
+                            <button id="btnLastPage" label="»" sclass="pg-nav-btn" tooltiptext="Last Page" />
+                        </hlayout>
                     </hlayout>
                 </vlayout>
 

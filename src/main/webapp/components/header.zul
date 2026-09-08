@@ -36,6 +36,7 @@
 
             <!-- Notification Bell Icon -->
             <div id="divNotificationBell" 
+                 visible="${empty arg.showNotifications or arg.showNotifications ne 'false'}"
                  style="position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #f1f5f9;"
                  onClick='popupNotifications.open(self, "after_end")'>
                 <label value="🔔" style="font-size: 15px;"/>
