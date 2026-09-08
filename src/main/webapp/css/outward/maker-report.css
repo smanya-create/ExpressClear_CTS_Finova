@@ -85,3 +85,61 @@
   background-color: #15355B !important;
   border-color: #15355B !important;
 }
+/* Base font stack for the entire view */
+.maker-report-wrapper,
+.maker-report-wrapper * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Section & Page Title */
+.report-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+/* Subtitle / Descriptive Text */
+.report-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Uppercase Form Field Labels */
+.report-field-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Card Panel Container */
+.report-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Bullet Items */
+.report-bullet-item {
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.6;
+}
+
+/* Action Button */
+.btn-generate-report {
+    background-color: #0284c7; /* or #0f172a for navy primary */
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
