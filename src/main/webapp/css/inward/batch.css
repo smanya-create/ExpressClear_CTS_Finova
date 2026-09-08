@@ -1,710 +1,690 @@
 .batch-page {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 20px 28px 30px 28px;
-    background: #f5f8fc;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 20px 28px 30px 28px;
+	background: #f5f8fc;
 }
 
 .page-title {
-    font-size: 21px;
-    font-weight: 600;
-    color: #234e78;
-    margin-bottom: 3px;
+	font-size: 21px;
+	font-weight: 600;
+	color: #234e78;
+	margin-bottom: 3px;
 }
 
 .page-subtitle {
-    font-size: 12px;
-    color: #71839a;
-    margin-bottom: 18px;
+	font-size: 12px;
+	color: #71839a;
+	margin-bottom: 18px;
 }
 
 .search-container {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d7e1ec;
-    border-radius: 7px;
-    padding: 22px;
-    margin-bottom: 18px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d7e1ec;
+	border-radius: 7px;
+	padding: 22px;
+	margin-bottom: 18px;
 }
 
 .section-title {
-    font-size: 17px;
-    font-weight: 600;
-    color: #185487;
+	font-size: 17px;
+	font-weight: 600;
+	color: #185487;
 }
 
 .search-row {
-    margin-top: 18px;
-    align-items: flex-end;
+	margin-top: 18px;
+	align-items: flex-end;
 }
 
 .search-field {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .field-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #274764;
-    margin-bottom: 7px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #274764;
+	margin-bottom: 7px;
 }
 
-.input-field,
-.search-combobox,
-.search-date {
-    height: 40px;
-    border: 1px solid #cbd8e6;
-    border-radius: 5px;
-    background: #ffffff;
-    box-sizing: border-box;
+.input-field, .search-combobox, .search-date {
+	height: 40px;
+	border: 1px solid #cbd8e6;
+	border-radius: 5px;
+	background: #ffffff;
+	box-sizing: border-box;
 }
 
-.input-field:focus,
-.search-combobox:focus,
-.search-date:focus {
-    border-color: #2a679b;
+.input-field:focus, .search-combobox:focus, .search-date:focus {
+	border-color: #2a679b;
 }
 
 .search-button-area {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .search-button {
-    height: 40px;
-    background: #1d5787;
-    border: 1px solid #1d5787;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
+	height: 40px;
+	background: #1d5787;
+	border: 1px solid #1d5787;
+	border-radius: 5px;
+	color: #ffffff;
+	font-size: 13px;
+	font-weight: 600;
 }
 
 .search-button:hover {
-    background: #16476f;
-    border-color: #16476f;
+	background: #16476f;
+	border-color: #16476f;
 }
 
 .batch-container {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d7e1ec;
-    border-radius: 7px;
-    padding: 22px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d7e1ec;
+	border-radius: 7px;
+	padding: 22px;
 }
 
 .batch-title {
-    display: block;
-    font-size: 17px;
-    font-weight: 600;
-    color: #185487;
-    margin-bottom: 3px;
+	display: block;
+	font-size: 17px;
+	font-weight: 600;
+	color: #185487;
+	margin-bottom: 3px;
 }
 
 .section-description {
-    display: block;
-    font-size: 12px;
-    color: #71839a;
-    margin-bottom: 16px;
+	display: block;
+	font-size: 12px;
+	color: #71839a;
+	margin-bottom: 16px;
 }
 
 .batch-table {
-    width: 100%;
-    border: 1px solid #d5dfeb;
-    border-radius: 5px;
-    overflow: hidden;
+	width: 100%;
+	border: 1px solid #d5dfeb;
+	border-radius: 5px;
+	overflow: hidden;
 }
 
 .batch-table .z-listbox-header th {
-    background: #1d5787;
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 12px 10px;
-    border-right: 1px solid rgba(255,255,255,0.25);
+	background: #1d5787;
+	color: #ffffff;
+	font-size: 13px;
+	font-weight: 600;
+	padding: 12px 10px;
+	border-right: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .batch-table .z-listcell-content {
-    color: #173b5e;
-    font-size: 13px;
-    padding: 15px 12px;
+	color: #173b5e;
+	font-size: 13px;
+	padding: 15px 12px;
 }
 
 .batch-table .z-listitem {
-    background: #ffffff;
+	background: #ffffff;
 }
 
 .batch-table .z-listitem:hover {
-    background: #f5f9fd;
+	background: #f5f9fd;
 }
 
-.batch-table .z-listitem + .z-listitem {
-    border-top: 1px solid #e6edf4;
+.batch-table .z-listitem+.z-listitem {
+	border-top: 1px solid #e6edf4;
 }
 
 .parse-button {
-    height: 34px;
-    min-width: 95px;
-    background: #1d5787;
-    border: 1px solid #1d5787;
-    border-radius: 5px;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 600;
+	height: 34px;
+	min-width: 95px;
+	background: #1d5787;
+	border: 1px solid #1d5787;
+	border-radius: 5px;
+	color: #ffffff;
+	font-size: 12px;
+	font-weight: 600;
 }
 
 .parse-button:hover {
-    background: #16476f;
-    border-color: #16476f;
+	background: #16476f;
+	border-color: #16476f;
 }
 
 .batch-count {
-    display: block;
-    margin-top: 12px;
-    font-size: 11px;
-    color: #71839a;
+	display: block;
+	margin-top: 12px;
+	font-size: 11px;
+	color: #71839a;
 }
 
-
 /* STATUS */
-
 .status-badge {
-    display: inline-block;
-    padding: 5px 13px;
-    border-radius: 14px;
-    font-size: 11px;
-    font-weight: 600;
-    white-space: nowrap;
+	display: inline-block;
+	padding: 5px 13px;
+	border-radius: 14px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
 }
 
 .status-received {
-    background: #e7f1fb;
-    color: #185587;
+	background: #e7f1fb;
+	color: #185587;
 }
 
 .status-parsing {
-    background: #e8efff;
-    color: #315eb7;
+	background: #e8efff;
+	color: #315eb7;
 }
 
 .status-validation-failed {
-    background: #fde8e7;
-    color: #c33a32;
+	background: #fde8e7;
+	color: #c33a32;
 }
-
 .status-processing {
-    background: #fff0d5;
-    color: #b66b00;
+	display: inline-block;
+	min-width: 58px;
+	padding: 4px 10px;
+	border-radius: 4px;
+	text-align: center;
+	background: #fff0d1;
+	color: #b56a00;
+	border: 1px solid #f3dbab;
+	font-size: 9px;
+	font-weight: 600;
+	white-space: nowrap;
 }
 
 .status-checker-pending {
-    background: #eee8ff;
-    color: #6950a8;
+	background: #eee8ff;
+	color: #6950a8;
 }
 
 .status-checker-processing {
-    background: #e6f4f0;
-    color: #16745c;
+	background: #e6f4f0;
+	color: #16745c;
 }
 
 .status-completed {
-    background: #e4f5e9;
-    color: #18723b;
+	background: #e4f5e9;
+	color: #18723b;
 }
 
 .status-hold {
-    background: #f2e6e6;
-    color: #8b3434;
+	background: #f2e6e6;
+	color: #8b3434;
 }
 
-
 /* BATCH VIEW */
-
 .batch-view-page {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px 20px 25px 20px;
-    background: #f5f8fc;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 12px 20px 25px 20px;
+	background: #f5f8fc;
 }
 
 .view-header {
-    margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 
 .view-page-title {
-    font-size: 21px;
-    font-weight: 600;
-    color: #234e78;
+	font-size: 21px;
+	font-weight: 600;
+	color: #234e78;
 }
 
 .view-page-subtitle {
-    font-size: 12px;
-    color: #71839a;
+	font-size: 12px;
+	color: #71839a;
 }
 
 .information-card {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d7e1ec;
-    border-radius: 6px;
-    padding: 14px 12px;
-    margin-bottom: 14px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d7e1ec;
+	border-radius: 6px;
+	padding: 14px 12px;
+	margin-bottom: 14px;
 }
 
 .view-section-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #173f67;
+	font-size: 14px;
+	font-weight: 600;
+	color: #173f67;
 }
 
 .information-columns {
-    margin-top: 8px;
+	margin-top: 8px;
 }
 
 .information-column {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .information-row {
-    min-height: 27px;
-    align-items: center;
-    border-top: 1px solid #e4ebf3;
+	min-height: 27px;
+	align-items: center;
+	border-top: 1px solid #e4ebf3;
 }
 
 .information-row:last-child {
-    border-bottom: 1px solid #e4ebf3;
+	border-bottom: 1px solid #e4ebf3;
 }
 
 .information-label {
-    width: 165px;
-    font-size: 11px;
-    color: #506a85;
+	width: 165px;
+	font-size: 11px;
+	color: #506a85;
 }
 
 .information-colon {
-    width: 18px;
-    font-size: 11px;
-    color: #506a85;
-    text-align: center;
+	width: 18px;
+	font-size: 11px;
+	color: #506a85;
+	text-align: center;
 }
 
 .information-value {
-    font-size: 11px;
-    color: #173b5e;
-    font-weight: 500;
+	font-size: 11px;
+	color: #173b5e;
+	font-weight: 500;
 }
 
-
 /* CHEQUE LIST */
-
 .cheque-card {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d7e1ec;
-    border-radius: 6px;
-    padding: 13px 10px 10px 10px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d7e1ec;
+	border-radius: 6px;
+	padding: 13px 10px 10px 10px;
 }
 
 .cheque-header {
-    align-items: center;
-    justify-content: space-between;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .cheque-header-subtitle {
-    font-size: 11px;
-    color: #71839a;
+	font-size: 11px;
+	color: #71839a;
 }
 
 .cheque-tools {
-    align-items: center;
+	align-items: center;
 }
 
 .cheque-search {
-    height: 32px;
-    border: 1px solid #cbd8e6;
-    border-radius: 5px;
-    font-size: 11px;
+	height: 32px;
+	border: 1px solid #cbd8e6;
+	border-radius: 5px;
+	font-size: 11px;
 }
 
 .secondary-button {
-    height: 34px;
-    background: #ffffff;
-    border: 1px solid #b7c9dc;
-    border-radius: 5px;
-    color: #28577e;
-    font-size: 12px;
-    font-weight: 600;
+	height: 34px;
+	background: #ffffff;
+	border: 1px solid #b7c9dc;
+	border-radius: 5px;
+	color: #28577e;
+	font-size: 12px;
+	font-weight: 600;
 }
 
 .secondary-button:hover {
-    background: #eef5fb;
+	background: #eef5fb;
 }
 
 .cheque-listbox {
-    width: 100%;
-    margin-top: 10px;
-    border: 1px solid #d5dfeb;
-    border-radius: 5px;
-    overflow: hidden;
+	width: 100%;
+	margin-top: 10px;
+	border: 1px solid #d5dfeb;
+	border-radius: 5px;
+	overflow: hidden;
 }
 
 .cheque-listbox .z-listbox-header th {
-    background: #1d5787;
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 9px 7px;
+	background: #1d5787;
+	color: #ffffff;
+	font-size: 10px;
+	font-weight: 600;
+	padding: 9px 7px;
 }
 
 .cheque-listbox .z-listcell-content {
-    font-size: 10px;
-    color: #173b5e;
-    padding: 10px 7px;
+	font-size: 10px;
+	color: #173b5e;
+	padding: 10px 7px;
 }
 
 .cheque-listbox .z-listitem:hover {
-    background: #f5f9fd;
+	background: #f5f9fd;
 }
 
 .cheque-status-normal {
-    display: inline-block;
-    padding: 4px 9px;
-    border-radius: 3px;
-    background: #e7f2ff;
-    color: #1762a0;
-    font-size: 9px;
-    font-weight: 600;
+	display: inline-block;
+	padding: 4px 9px;
+	border-radius: 3px;
+	background: #e7f2ff;
+	color: #1762a0;
+	font-size: 9px;
+	font-weight: 600;
 }
 
 .cheque-status-repair {
-    display: inline-block;
-    padding: 4px 9px;
-    border-radius: 3px;
-    background: #fff0d5;
-    color: #b86b00;
-    font-size: 9px;
-    font-weight: 600;
+	display: inline-block;
+	padding: 4px 9px;
+	border-radius: 3px;
+	background: #fff0d5;
+	color: #b86b00;
+	font-size: 9px;
+	font-weight: 600;
 }
 
 .cheque-footer {
-    margin-top: 9px;
+	margin-top: 9px;
 }
 
 .pagination-info {
-    font-size: 10px;
-    color: #71839a;
+	font-size: 10px;
+	color: #71839a;
 }
 
 .view-actions {
-    justify-content: flex-end;
-    margin-top: 12px;
+	justify-content: flex-end;
+	margin-top: 12px;
 }
 
 .hold-button {
-    height: 34px;
-    background: #fff7e8;
-    border: 1px solid #e4c98d;
-    border-radius: 5px;
-    color: #a76500;
-    font-size: 12px;
-    font-weight: 600;
+	height: 34px;
+	background: #fff7e8;
+	border: 1px solid #e4c98d;
+	border-radius: 5px;
+	color: #a76500;
+	font-size: 12px;
+	font-weight: 600;
 }
 
 .hold-button:hover {
-    background: #fff0d2;
+	background: #fff0d2;
 }
 
-
 .batch-view-page {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px 16px 20px 16px;
-    background: #f5f8fc;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 8px 16px 20px 16px;
+	background: #f5f8fc;
 }
 
 .view-header {
-    margin-bottom: 14px;
+	margin-bottom: 14px;
 }
 
 .view-page-title {
-    font-size: 21px;
-    font-weight: 600;
-    color: #174d7d;
+	font-size: 21px;
+	font-weight: 600;
+	color: #174d7d;
 }
 
 .view-page-subtitle {
-    font-size: 11px;
-    color: #5d7691;
+	font-size: 11px;
+	color: #5d7691;
 }
 
-
 /* BATCH INFORMATION */
-
 .information-card {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d6e2ee;
-    border-radius: 5px;
-    padding: 11px 12px 10px 12px;
-    margin-bottom: 13px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d6e2ee;
+	border-radius: 5px;
+	padding: 11px 12px 10px 12px;
+	margin-bottom: 13px;
 }
 
 .view-section-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #173f67;
+	font-size: 14px;
+	font-weight: 600;
+	color: #173f67;
 }
 
 .information-columns {
-    margin-top: 6px;
+	margin-top: 6px;
 }
 
 .information-column {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .information-row {
-    min-height: 26px;
-    align-items: center;
-    border-top: 1px solid #e3ebf3;
+	min-height: 26px;
+	align-items: center;
+	border-top: 1px solid #e3ebf3;
 }
 
 .information-row:last-child {
-    border-bottom: 1px solid #e3ebf3;
+	border-bottom: 1px solid #e3ebf3;
 }
 
 .information-label {
-    width: 160px;
-    font-size: 10px;
-    color: #4f6985;
+	width: 160px;
+	font-size: 10px;
+	color: #4f6985;
 }
 
 .information-colon {
-    width: 18px;
-    text-align: center;
-    font-size: 10px;
-    color: #4f6985;
+	width: 18px;
+	text-align: center;
+	font-size: 10px;
+	color: #4f6985;
 }
 
 .information-value {
-    font-size: 10px;
-    font-weight: 500;
-    color: #102f4e;
+	font-size: 10px;
+	font-weight: 500;
+	color: #102f4e;
 }
 
-
 /* STATUS BADGES */
-
 .status-badge {
-    display: inline-block;
-    min-width: 58px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 600;
+	display: inline-block;
+	min-width: 58px;
+	padding: 4px 10px;
+	border-radius: 4px;
+	text-align: center;
+	font-size: 9px;
+	font-weight: 600;
 }
 
 .status-success {
-    background: #e2f4e8;
-    color: #16703b;
-    border: 1px solid #c7e8d2;
+	background: #e2f4e8;
+	color: #16703b;
+	border: 1px solid #c7e8d2;
 }
 
 .status-hold {
-    background: #fff0d1;
-    color: #b56a00;
-    border: 1px solid #f3dbab;
+	background: #fff0d1;
+	color: #b56a00;
+	border: 1px solid #f3dbab;
 }
 
-
 /* CHEQUE CARD */
-
 .cheque-card {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d6e2ee;
-    border-radius: 5px;
-    padding: 10px 9px 9px 9px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #d6e2ee;
+	border-radius: 5px;
+	padding: 10px 9px 9px 9px;
 }
 
 .cheque-header {
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 9px;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 9px;
 }
 
 .cheque-title-area {
-    align-items: center;
+	align-items: center;
 }
 
 .cheque-header-subtitle {
-    font-size: 10px;
-    color: #71839a;
+	font-size: 10px;
+	color: #71839a;
 }
 
 .cheque-tools {
-    align-items: center;
+	align-items: center;
 }
 
 .cheque-search {
-    height: 27px;
-    border: 1px solid #d1ddea;
-    border-radius: 4px;
-    font-size: 9px;
-    background: #ffffff;
+	height: 27px;
+	border: 1px solid #d1ddea;
+	border-radius: 4px;
+	font-size: 9px;
+	background: #ffffff;
 }
 
 .filter-button {
-    height: 27px;
-    background: #ffffff;
-    border: 1px solid #c7d6e5;
-    border-radius: 4px;
-    color: #28577e;
-    font-size: 10px;
-    font-weight: 600;
+	height: 27px;
+	background: #ffffff;
+	border: 1px solid #c7d6e5;
+	border-radius: 4px;
+	color: #28577e;
+	font-size: 10px;
+	font-weight: 600;
 }
 
 .filter-button:hover {
-    background: #f0f6fb;
+	background: #f0f6fb;
 }
 
-
 /* CHEQUE TABLE */
-
 .cheque-listbox {
-    width: 100%;
-    border: 1px solid #d5e0eb;
-    border-radius: 4px;
-    overflow: hidden;
+	width: 100%;
+	border: 1px solid #d5e0eb;
+	border-radius: 4px;
+	overflow: hidden;
 }
 
 .cheque-listbox .z-listbox-header th {
-    background: #1d5787;
-    color: #ffffff;
-    font-size: 9px;
-    font-weight: 600;
-    padding: 8px 6px;
-    border-right: 1px solid rgba(255,255,255,0.25);
+	background: #1d5787;
+	color: #ffffff;
+	font-size: 9px;
+	font-weight: 600;
+	padding: 8px 6px;
+	border-right: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .cheque-listbox .z-listcell-content {
-    font-size: 9px;
-    color: #173b5e;
-    padding: 9px 6px;
+	font-size: 9px;
+	color: #173b5e;
+	padding: 9px 6px;
 }
 
 .cheque-listbox .z-listitem {
-    background: #ffffff;
+	background: #ffffff;
 }
 
 .cheque-listbox .z-listitem:hover {
-    background: #f5f9fd;
+	background: #f5f9fd;
 }
 
-.cheque-listbox .z-listitem + .z-listitem {
-    border-top: 1px solid #e5edf5;
+.cheque-listbox .z-listitem+.z-listitem {
+	border-top: 1px solid #e5edf5;
 }
-
 
 /* CHEQUE STATUS */
-
 .cheque-status-normal {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 3px;
-    background: #e5f1ff;
-    color: #1762a0;
-    border: 1px solid #c9e0f8;
-    font-size: 8px;
-    font-weight: 600;
-    white-space: nowrap;
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 3px;
+	background: #e5f1ff;
+	color: #1762a0;
+	border: 1px solid #c9e0f8;
+	font-size: 8px;
+	font-weight: 600;
+	white-space: nowrap;
 }
 
 .cheque-status-repair {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 3px;
-    background: #fff0d5;
-    color: #b66b00;
-    border: 1px solid #f4dcae;
-    font-size: 8px;
-    font-weight: 600;
-    white-space: nowrap;
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 3px;
+	background: #fff0d5;
+	color: #b66b00;
+	border: 1px solid #f4dcae;
+	font-size: 8px;
+	font-weight: 600;
+	white-space: nowrap;
 }
 
-
 /* VIEW BUTTON */
-
 .view-button {
-    height: 24px;
-    min-width: 55px;
-    background: #ffffff;
-    border: 1px solid #9dbbd8;
-    border-radius: 3px;
-    color: #175a91;
-    font-size: 9px;
-    font-weight: 600;
+	height: 24px;
+	min-width: 55px;
+	background: #ffffff;
+	border: 1px solid #9dbbd8;
+	border-radius: 3px;
+	color: #175a91;
+	font-size: 9px;
+	font-weight: 600;
 }
 
 .view-button:hover {
-    background: #edf5fc;
+	background: #edf5fc;
 }
 
-
 /* FOOTER */
-
 .cheque-footer {
-    margin-top: 8px;
-    align-items: center;
+	margin-top: 8px;
+	align-items: center;
 }
 
 .pagination-info {
-    font-size: 9px;
-    color: #657d95;
+	font-size: 9px;
+	color: #657d95;
 }
 
-
 /* BOTTOM ACTIONS */
-
 .view-actions {
-    justify-content: flex-start;
-    margin-top: 4px;
+	justify-content: flex-start;
+	margin-top: 4px;
 }
 
 .back-button {
-    height: 34px;
-    background: #ffffff;
-    border: 1px solid #a9bfd5;
-    border-radius: 4px;
-    color: #28577e;
-    font-size: 10px;
-    font-weight: 600;
+	height: 34px;
+	background: #ffffff;
+	border: 1px solid #a9bfd5;
+	border-radius: 4px;
+	color: #28577e;
+	font-size: 10px;
+	font-weight: 600;
 }
 
 .back-button:hover {
-    background: #eef5fb;
+	background: #eef5fb;
 }
 
 .hold-button {
-    height: 34px;
-    background: #fff7e6;
-    border: 1px solid #e6c98d;
-    border-radius: 4px;
-    color: #a66300;
-    font-size: 10px;
-    font-weight: 600;
+	height: 34px;
+	background: #fff7e6;
+	border: 1px solid #e6c98d;
+	border-radius: 4px;
+	color: #a66300;
+	font-size: 10px;
+	font-weight: 600;
 }
 
 .hold-button:hover {
-    background: #fff0d0;
+	background: #fff0d0;
 }
-
 
 .information-card {
 	width: 100%;
@@ -735,7 +715,7 @@
 	border-bottom: 1px solid #e7edf3;
 }
 
-.batch-information-grid .z-row > td {
+.batch-information-grid .z-row>td {
 	padding: 10px 8px;
 	vertical-align: middle;
 }
@@ -770,65 +750,65 @@
 }
 
 .cheque-image-popup {
-    box-sizing: border-box;
-    padding: 18px;
-    background: #f7faff;
+	box-sizing: border-box;
+	padding: 18px;
+	background: #f7faff;
 }
 
 .cheque-image-popup-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1d5787;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #d6e2ee;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d5787;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #d6e2ee;
 }
 
 .cheque-image-container {
-    align-items: flex-start;
-    justify-content: center;
+	align-items: flex-start;
+	justify-content: center;
 }
 
 .cheque-image-section {
-    box-sizing: border-box;
-    padding: 12px;
-    background: #ffffff;
-    border: 1px solid #d6e2ee;
-    border-radius: 6px;
-    align-items: center;
+	box-sizing: border-box;
+	padding: 12px;
+	background: #ffffff;
+	border: 1px solid #d6e2ee;
+	border-radius: 6px;
+	align-items: center;
 }
 
 .cheque-image-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1d5787;
+	font-size: 12px;
+	font-weight: 600;
+	color: #1d5787;
 }
 
 .cheque-preview-image {
-    width: 400px;
-    height: 250px;
-    object-fit: contain;
-    background: #f4f6f8;
-    border: 1px solid #d5e0eb;
-    border-radius: 4px;
+	width: 400px;
+	height: 250px;
+	object-fit: contain;
+	background: #f4f6f8;
+	border: 1px solid #d5e0eb;
+	border-radius: 4px;
 }
 
 .cheque-image-status {
-    font-size: 11px;
-    font-weight: 600;
-    color: #536b82;
-    padding-top: 5px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #536b82;
+	padding-top: 5px;
 }
 
 .no-cheque-image {
-    width: 400px;
-    height: 250px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f4f6f8;
-    border: 1px solid #d5e0eb;
-    border-radius: 4px;
-    color: #8999aa;
-    font-size: 11px;
+	width: 400px;
+	height: 250px;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f4f6f8;
+	border: 1px solid #d5e0eb;
+	border-radius: 4px;
+	color: #8999aa;
+	font-size: 11px;
 }

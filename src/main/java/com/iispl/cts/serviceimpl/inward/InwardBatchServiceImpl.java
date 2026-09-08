@@ -1,7 +1,6 @@
 package com.iispl.cts.serviceimpl.inward;
 
 import java.util.List;
-
 import com.iispl.cts.dao.inward.InwardBatchDAO;
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.dao.inward.InwardChequeImageDAO;
@@ -30,16 +29,11 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 		this.inwardChequeImageDAO = InwardChequeImageDAOImpl.getInstance();
 		this.xmlParser = new InwardBatchXmlParser();
 	}
-	
+
 	@Override
 	public List<InwardBatch> getBatchesForMicrRepair() {
-	    return inwardBatchDAO.getBatchesForMicrRepair();
+		return inwardBatchDAO.getBatchesForMicrRepair();
 	}
-
-//	@Override
-//	public List<InwardBatch> getAllActiveBatches() {
-//		return inwardBatchDAO.findAllActiveBatches();
-//	}
 
 	@Override
 	public InwardBatch getBatchById(String batchId) {
@@ -52,13 +46,9 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 	}
 
 	@Override
-	public ParsedBatchData parseBatchXml(
-	        String npciXmlPath,
-	        String ocrXmlPath) throws Exception {
+	public ParsedBatchData parseBatchXml(String npciXmlPath, String ocrXmlPath) throws Exception {
 
-	    return xmlParser.parse(
-	            npciXmlPath,
-	            ocrXmlPath);
+		return xmlParser.parse(npciXmlPath, ocrXmlPath);
 	}
 
 	@Override
@@ -104,14 +94,18 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 
 		InwardBatch existingBatch = inwardBatchDAO.getBatchById(batchId);
 
+		inwardBatch.setBatchStatus("PROCESSING");
+
 		if (existingBatch != null) {
-			throw new RuntimeException("Batch " + batchId + " already exists in the database.");
-		}
 
-		inwardBatch.setBatchStatus("Validated");
+			if (!inwardBatchDAO.updateBatch(inwardBatch)) {
+				throw new RuntimeException("Failed to update batch " + batchId);
+			}
+		} else {
 
-		if (!inwardBatchDAO.saveBatch(inwardBatch)) {
-			throw new RuntimeException("Failed to save batch " + batchId);
+			if (!inwardBatchDAO.saveBatch(inwardBatch)) {
+				throw new RuntimeException("Failed to save batch " + batchId);
+			}
 		}
 
 		for (InwardCheque inwardCheque : inwardCheques) {
