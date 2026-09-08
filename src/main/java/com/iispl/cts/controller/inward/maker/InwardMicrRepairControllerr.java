@@ -38,6 +38,7 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Combobox;
@@ -54,6 +55,9 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private Window rejectRequestWindow;
 	private Image chequeImage;
 	private Groupbox emptyImageState;
+
+	private Vlayout micrRepairCompletedState;
+	private Label lblCompletedBatchId;
 
 	private Textbox txtChequeNumber;
 	private Textbox txtCityCode;
@@ -165,7 +169,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, null);
 
-			repairCheques = new java.util.ArrayList<>();
+			repairCheques = new ArrayList<>();
 
 			if (batchCheques != null) {
 
@@ -211,6 +215,10 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			}
 
 			currentCheque = repairCheques.get(currentRecord);
+
+			if (micrRepairCompletedState != null) {
+				micrRepairCompletedState.setVisible(false);
+			}
 
 			loadBatchSummary(currentCheque);
 
@@ -446,8 +454,15 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		boolean updated = inwardChequeService.updateMicrRepair(currentCheque.getInwardChequeId(), correctedMicr,
-				"PENDING_DATA_ENTRY");
+		String originalMicr = ocrSortCode;
+
+		String repairedBy = (String) Executions.getCurrent().getSession().getAttribute("USER_ID");
+
+		String remarks = txtRemarks != null ? txtRemarks.getValue() : "";
+
+		boolean updated = inwardChequeService.updateMicrRepair(currentCheque.getInwardChequeId(),
+				currentCheque.getInwardBatchId(), originalMicr, correctedMicr, "DATA_ENTRY_PENDING", repairedBy,
+				remarks);
 
 		if (!updated) {
 
@@ -462,7 +477,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, null);
 
-		repairCheques = new java.util.ArrayList<>();
+		repairCheques = new ArrayList<>();
 
 		if (batchCheques != null) {
 
@@ -490,9 +505,39 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			currentRecord = 0;
 			currentCheque = null;
 
+			String completedBatchId = batchId;
+
 			clearRecordFields();
+
+			if (lblBatchId != null) {
+				lblBatchId.setValue("BATCH: " + completedBatchId);
+			}
+
+			if (lblHeaderItemStatus != null) {
+				lblHeaderItemStatus.setValue("MICR REPAIR COMPLETED");
+			}
+
+			if (lblRepairStatus != null) {
+				lblRepairStatus.setValue("MICR REPAIR COMPLETED");
+			}
+
+			if (lblCompletedBatchId != null) {
+				lblCompletedBatchId.setValue("Batch ID: " + completedBatchId);
+			}
+
 			updateNavigation();
-			loadChequeImage(null);
+
+			if (chequeImage != null) {
+				chequeImage.setVisible(false);
+			}
+
+			if (emptyImageState != null) {
+				emptyImageState.setVisible(false);
+			}
+
+			if (micrRepairCompletedState != null) {
+				micrRepairCompletedState.setVisible(true);
+			}
 
 			return;
 		}

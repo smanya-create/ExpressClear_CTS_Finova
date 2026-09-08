@@ -184,7 +184,6 @@ html, body {
 	box-sizing: border-box;
 }
 
-
 .remarks-field .z-textbox-input {
 	height: auto;
 	min-height: 38px;
@@ -249,66 +248,87 @@ html, body {
 	color: #94a3b8;
 }
 
-
-.ocr-field,
-.ocr-field.z-textbox,
-.ocr-field.z-textbox-input,
-.ocr-field .z-textbox-input {
-    background: #eff6ff !important;
-    border: 1px solid #93c5fd !important;
-    color: #475569 !important;
+.ocr-field, .ocr-field.z-textbox, .ocr-field.z-textbox-input, .ocr-field .z-textbox-input
+	{
+	background: #eff6ff !important;
+	border: 1px solid #93c5fd !important;
+	color: #475569 !important;
 }
 
-
-.error-field,
-.error-field.z-textbox,
-.error-field.z-textbox-input,
-.error-field .z-textbox-input {
-    background: #fff7ed !important;
-    border: 1px solid #fb923c !important;
-    color: #64748b !important;
+.error-field, .error-field.z-textbox, .error-field.z-textbox-input,
+	.error-field .z-textbox-input {
+	background: #fff7ed !important;
+	border: 1px solid #fb923c !important;
+	color: #64748b !important;
 }
 
-
-.repair-editable-field,
-.repair-editable-field.z-textbox,
-.repair-editable-field.z-textbox-input,
-.repair-editable-field .z-textbox-input {
-    background: #fee2e2 !important;
-    border: 2px solid #ef4444 !important;
-    color: #b91c1c !important;
-    font-weight: 700 !important;
+.repair-editable-field, .repair-editable-field.z-textbox,
+	.repair-editable-field.z-textbox-input, .repair-editable-field .z-textbox-input
+	{
+	background: #fee2e2 !important;
+	border: 2px solid #ef4444 !important;
+	color: #b91c1c !important;
+	font-weight: 700 !important;
 }
 
-
-.repair-editable-field:focus,
-.repair-editable-field.z-textbox:focus,
-.repair-editable-field.z-textbox-input:focus,
-.repair-editable-field .z-textbox-input:focus {
-    background: #fee2e2 !important;
-    border: 2px solid #dc2626 !important;
-    color: #991b1b !important;
-    font-weight: 700 !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+.repair-editable-field:focus, .repair-editable-field.z-textbox:focus,
+	.repair-editable-field.z-textbox-input:focus, .repair-editable-field .z-textbox-input:focus
+	{
+	background: #fee2e2 !important;
+	border: 2px solid #dc2626 !important;
+	color: #991b1b !important;
+	font-weight: 700 !important;
+	outline: none !important;
+	box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
 }
 
-
-.correction-field,
-.correction-field.z-textbox,
-.correction-field.z-textbox-input,
-.correction-field .z-textbox-input {
-    background: #ffffff !important;
-    border: 1px solid #93c5fd !important;
-    color: #1e3a8a !important;
+.correction-field, .correction-field.z-textbox, .correction-field.z-textbox-input,
+	.correction-field .z-textbox-input {
+	background: #ffffff !important;
+	border: 1px solid #93c5fd !important;
+	color: #1e3a8a !important;
 }
 
+.readonly-field, .readonly-field.z-textbox, .readonly-field.z-textbox-input,
+	.readonly-field .z-textbox-input {
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	color: #475569 !important;
+}
 
-.readonly-field,
-.readonly-field.z-textbox,
-.readonly-field.z-textbox-input,
-.readonly-field .z-textbox-input {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #475569 !important;
+.micr-completed-state {
+	height: 100%;
+	min-height: 420px;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 40px;
+	box-sizing: border-box;
+}
+
+.completion-icon {
+	font-size: 48px;
+	font-weight: bold;
+}
+
+.completion-title {
+	font-size: 22px;
+	font-weight: 700;
+}
+
+.completion-batch-id {
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.completion-message {
+	font-size: 14px;
+	max-width: 420px;
+	text-align: center;
+}
+
+.completion-next-step {
+	font-size: 15px;
+	font-weight: 600;
+	margin-top: 8px;
 }
