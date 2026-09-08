@@ -3,6 +3,7 @@ package com.iispl.cts.service.inward;
 import java.util.List;
 
 import com.iispl.cts.dto.DashboardSummaryDTO;
+import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.parser.InwardBatchXmlParser;
 import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
@@ -28,4 +29,5 @@ public interface InwardBatchService {
 	boolean updateBatchStatus(String batchId, String status);
 
 	List<DashboardSummaryDTO> getDashboardBatches();
+	List<InwardReportChequeDTO> getChequesByBatch();
 }
