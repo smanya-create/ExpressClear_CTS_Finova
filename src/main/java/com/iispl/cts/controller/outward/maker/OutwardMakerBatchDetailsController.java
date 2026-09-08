@@ -152,15 +152,11 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 
 			renderCurrentPage();
 
-		} catch (Exception e) {
+		} catch (Exception exception) {
 
-			e.printStackTrace();
+			exception.printStackTrace();
 
-			scanBatch = null;
-
-			chequeList = new ArrayList<>();
-
-			showEmptyState();
+			throw new RuntimeException("Unable to load batch details", exception);
 		}
 	}
 
@@ -186,15 +182,18 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 			return;
 		}
 
-		outwardMakerVlayoutEmptyState.setVisible(false);
-
 		outwardMakerGridChequeDetails.setVisible(true);
+
+		outwardMakerVlayoutEmptyState.setVisible(false);
 
 		int totalPages = getTotalPages();
 
 		if (currentPage > totalPages) {
-
 			currentPage = totalPages;
+		}
+
+		if (currentPage < 1) {
+			currentPage = 1;
 		}
 
 		int startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -206,7 +205,6 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 			ScanCheque cheque = chequeList.get(index);
 
 			if (cheque != null) {
-
 				createChequeRow(cheque);
 			}
 		}
@@ -305,22 +303,18 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 			return;
 		}
 
-		Component root = outwardMakerRowsChequeDetails.getPage().getFirstRoot();
+		Include mainContentArea = findMainContentArea(outwardMakerRowsChequeDetails);
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		if (mainContentArea == null) {
 
-		if (!(mainContentArea instanceof Include)) {
-
-			return;
+			throw new IllegalStateException("mainContentArea Include not found");
 		}
 
-		Include include = (Include) mainContentArea;
+		mainContentArea.clearDynamicProperties();
 
-		include.clearDynamicProperties();
+		mainContentArea.setDynamicProperty("chequeId", cheque.getScannedChequeId());
 
-		include.setDynamicProperty("chequeId", cheque.getScannedChequeId());
-
-		include.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
+		mainContentArea.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
 	}
 
 	private void openDataEntry(ScanCheque cheque) {
@@ -330,40 +324,49 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 			return;
 		}
 
-		Component root = outwardMakerRowsChequeDetails.getPage().getFirstRoot();
+		Include mainContentArea = findMainContentArea(outwardMakerRowsChequeDetails);
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		if (mainContentArea == null) {
 
-		if (!(mainContentArea instanceof Include)) {
-
-			return;
+			throw new IllegalStateException("mainContentArea Include not found");
 		}
 
-		Include include = (Include) mainContentArea;
+		mainContentArea.clearDynamicProperties();
 
-		include.clearDynamicProperties();
+		mainContentArea.setDynamicProperty("chequeId", cheque.getScannedChequeId());
 
-		include.setDynamicProperty("chequeId", cheque.getScannedChequeId());
-
-		include.setSrc("/maker/data-entry.zul");
+		mainContentArea.setSrc("/maker/data-entry.zul");
 	}
 
 	private void goBackToDashboard() {
 
-		Component root = outwardMakerRowsChequeDetails.getPage().getFirstRoot();
+		Include mainContentArea = findMainContentArea(outwardMakerRowsChequeDetails);
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		if (mainContentArea == null) {
 
-		if (!(mainContentArea instanceof Include)) {
-
-			return;
+			throw new IllegalStateException("mainContentArea Include not found");
 		}
 
-		Include include = (Include) mainContentArea;
+		mainContentArea.clearDynamicProperties();
 
-		include.clearDynamicProperties();
+		mainContentArea.setSrc("/outward/maker/dashboard.zul");
+	}
 
-		include.setSrc("/outward/maker/dashboard.zul");
+	private Include findMainContentArea(Component component) {
+
+		Component current = component;
+
+		while (current != null) {
+
+			if (current instanceof Include && "mainContentArea".equals(current.getId())) {
+
+				return (Include) current;
+			}
+
+			current = current.getParent();
+		}
+
+		return null;
 	}
 
 	private void goToFirstPage() {
@@ -449,7 +452,6 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 	private String formatAmount(BigDecimal amount) {
 
 		if (amount == null) {
-
 			return "₹0.00";
 		}
 
@@ -459,14 +461,12 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 	private String getValue(Object value) {
 
 		if (value == null) {
-
 			return "-";
 		}
 
 		String text = String.valueOf(value);
 
 		if (text.trim().isEmpty()) {
-
 			return "-";
 		}
 
@@ -476,7 +476,6 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 	private String getStatusClass(String status) {
 
 		if (status == null) {
-
 			return "pending";
 		}
 
