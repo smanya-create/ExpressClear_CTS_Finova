@@ -15,7 +15,7 @@
             <!-- Global Shared Header -->
             <include id="incHeader" src="/components/header.zul" 
                      pageTitle="Admin Dashboard" 
-                     pageSubtitle="Role Management" />
+                     pageSubtitle="Role Management"  />
 
             <!-- Content Workspace -->
             <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
@@ -27,10 +27,10 @@
                 </vlayout>
 
                 <!-- Roles Table Card -->
-                <vlayout sclass="card-panel" spacing="16px" hflex="1">
-                    <hlayout valign="middle" hflex="1" style="justify-content: space-between;">
+                <vlayout sclass="card-panel" spacing="16px" style="padding: 24px 28px; margin-top: 16px;" hflex="1">
+                    <hlayout valign="middle" spacing="10px" hflex="1" >
                         <hlayout valign="middle" spacing="10px">
-                            <label value="System Roles" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
+                            <label value="System Roles" style="font-size: 16px; font-weight: 800; color: #1e293b;"/>
                             <label id="lblRoleCount" value="Loading..." 
                                    style="color: #64748b; font-size: 11.5px; font-weight: 600; background: #f1f5f9; padding: 3px 10px; border-radius: 12px;"/>
                         </hlayout>

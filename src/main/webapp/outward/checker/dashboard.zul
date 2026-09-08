@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<zk xmlns:h="xhtml">
+<zk xmlns:h="xhtml" title="CTS - Checker Dashboard">
+
 	<style src="/css/outward/checker-dashboard.css" />
 
-	<borderlayout hflex="1" vflex="1" apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
+	<borderlayout hflex="1" vflex="1"
+		apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
+
 		<west width="265px" splittable="false" collapsible="false">
 
 			<include src="/components/sidebar.zul"
 				role="OUTWARD_CHECKER" activeTab="checker-dashboard" />
+
 		</west>
+
 		<center>
 
 			<borderlayout hflex="1" vflex="1">
+
 				<north height="75px" splittable="false"
 					collapsible="false">
 
 					<include src="/components/header.zul"
 						pageTitle="Checker Dashboard" />
 
-
 				</north>
+
 				<center>
 
 					<div sclass="dashboard-content">
@@ -31,6 +37,7 @@
 							sclass="page-description" />
 
 						<div sclass="summary-card">
+
 							<div sclass="summary-item">
 
 								<label value="CURRENT SESSION"
@@ -40,6 +47,7 @@
 									sclass="summary-value" />
 
 							</div>
+
 							<div sclass="summary-item">
 
 								<label value="BATCHES AWAITING CHECKER"
@@ -49,6 +57,7 @@
 									sclass="summary-value" />
 
 							</div>
+
 							<div sclass="summary-item">
 
 								<label value="CHEQUES"
@@ -71,33 +80,50 @@
 								sclass="section-description" />
 
 						</div>
-
 						<listbox id="lstBatches" sclass="batch-table"
-							mold="paging" pageSize="10" height="350px">
+							height="270px">
 
 							<listhead>
-
-								<listheader label="BATCH" width="12%" />
+								<listheader label="BATCH" width="12%"
+									style="background:#1d5689; color:white;" />
 
 								<listheader label="NO. OF CHEQUES"
-									width="14%" />
+									width="14%" style="background:#1d5689; color:white;" />
 
 								<listheader label="TOTAL AMOUNT"
-									width="19%" />
+									width="19%" style="background:#1d5689; color:white;" />
 
 								<listheader label="SUBMITTED BY"
-									width="14%" />
+									width="14%" style="background:#1d5689; color:white;" />
 
 								<listheader label="SUBMITTED AT"
-									width="16%" />
+									width="16%" style="background:#1d5689; color:white;" />
 
-								<listheader label="STATUS" width="13%" />
+								<listheader label="STATUS" width="13%"
+									style="background:#1d5689; color:white;" />
 
-								<listheader label="" width="90px" />
-
+								<listheader label="Action" width="90px"
+									style="background:#1d5689; color:white;" />
 							</listhead>
 
 						</listbox>
+						<vlayout hflex="1" style="margin-top:10px;">
+
+							<hbox hflex="1" pack="center"
+								spacing="10px">
+
+								<button id="btnPrevious"
+									label="Previous" disabled="true" sclass="pagination-button" />
+
+								<label id="lblPage" value="1/5"
+									sclass="page-number" />
+
+								<button id="btnNext" label="Next"
+									sclass="pagination-button" />
+
+							</hbox>
+
+						</vlayout>
 
 					</div>
 

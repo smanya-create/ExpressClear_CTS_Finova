@@ -75,9 +75,7 @@
                     <a id="navBatchIntake" label="Batch Intake" sclass="${arg.activeTab eq 'batch-intake' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToBatchIntake()"/>
                     <a id="navInwardMicr" label="MICR Repair" sclass="${arg.activeTab eq 'inward-micr' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardMicrRepair()"/>
                     <a id="navInwardDataEntry" label="Data Entry" sclass="${arg.activeTab eq 'inward-data-entry' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardDataEntry()"/>
-                    <a id="navMakerCompletion" label="Maker Completion" sclass="${arg.activeTab eq 'maker-completion' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToMakerCompletion()"/>
                     <a id="navInwardUnprocessed" label="Unprocessed Cheques" sclass="${arg.activeTab eq 'inward-unprocessed' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardUnprocessedQueue()"/>
-                    <a id="navInwardMakerReports" label="Reports" sclass="${arg.activeTab eq 'inward-maker-reports' ? 'nav-item active' : 'nav-item'}" onClick="$composer.navToInwardMakerReports()"/>
                 </vlayout>
             </div>
 

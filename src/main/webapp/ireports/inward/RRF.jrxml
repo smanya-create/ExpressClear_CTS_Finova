@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport 
+    xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="
+        http://jasperreports.sourceforge.net/jasperreports 
+        http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+    name="RRF" 
+    pageWidth="842" 
+    pageHeight="595" 
+    orientation="Landscape" 
+    columnWidth="782" 
+    leftMargin="30" 
+    rightMargin="30" 
+    topMargin="25" 
+    bottomMargin="25" 
+    uuid="7f9c7f2e-5a5a-4c6c-8f2b-000000000001">
+
+    <!-- EXISTING PARAMETERS -->
+    <parameter name="RRF_REFERENCE_NO" class="java.lang.String"/>
+    <parameter name="BATCH_ID" class="java.lang.String"/>
+    <parameter name="SESSION_DATE" class="java.lang.String"/>
+    <parameter name="GENERATION_DATE" class="java.util.Date"/>
+    <parameter name="GENERATED_BY" class="java.lang.String"/>
+    <parameter name="TOTAL_REJECTED_CHEQUES" class="java.lang.Integer"/>
+    <parameter name="TOTAL_REJECTED_AMOUNT" class="java.lang.Double"/>
+
+    <!-- EXISTING FIELDS -->
+    <field name="chequeNumber" class="java.lang.String"/>
+    <field name="micrCode" class="java.lang.String"/>
+    <field name="chequeAmount" class="java.lang.Object"/>
+    <field name="rejectedReasonId" class="java.lang.Object"/>
+    <field name="rejectedReasonCode" class="java.lang.String"/>
+    <field name="remarks" class="java.lang.String"/>
+
+    <!-- TITLE -->
+    <title>
+        <band height="55" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="782" height="24" uuid="11111111-1111-1111-1111-111111111111"/>
+                <textElement textAlignment="Center">
+                    <font fontName="SansSerif" size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[RETURN REASON FILE (RRF)]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="0" y="24" width="782" height="18" uuid="22222222-2222-2222-2222-222222222222"/>
+                <textElement textAlignment="Center">
+                    <font fontName="SansSerif" size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[For CTS - Cheque Truncation System]]></text>
+            </staticText>
+
+            <line>
+                <reportElement x="0" y="48" width="782" height="1" uuid="33333333-3333-3333-3333-333333333333"/>
+                <graphicElement><pen lineWidth="1.0" lineColor="#000000"/></graphicElement>
+            </line>
+        </band>
+    </title>
+
+    <!-- PAGE HEADER -->
+    <pageHeader>
+        <band height="120">
+            <!-- RRF Reference No -->
+            <staticText>
+                <reportElement x="0" y="5" width="130" height="18" uuid="44444444-4444-4444-4444-444444444444"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[RRF Reference No]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="130" y="5" width="10" height="18" uuid="44444444-4444-4444-4444-444444444445"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="145" y="5" width="400" height="18" uuid="55555555-5555-5555-5555-555555555555"/>
+                <textElement><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{RRF_REFERENCE_NO}]]></textFieldExpression>
+            </textField>
+
+            <!-- Batch ID -->
+            <staticText>
+                <reportElement x="0" y="23" width="130" height="18" uuid="66666666-6666-6666-6666-666666666666"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Batch ID]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="130" y="23" width="10" height="18" uuid="66666666-6666-6666-6666-666666666667"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="145" y="23" width="400" height="18" uuid="77777777-7777-7777-7777-777777777777"/>
+                <textElement><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{BATCH_ID}]]></textFieldExpression>
+            </textField>
+
+            <!-- Clearing/CTS Centre (Static) -->
+            <staticText>
+                <reportElement x="0" y="41" width="130" height="18" uuid="88888888-8888-8888-8888-888888888888"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Clearing/CTS Centre]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="130" y="41" width="10" height="18" uuid="88888888-8888-8888-8888-888888888889"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="145" y="41" width="400" height="18" uuid="99999999-9999-9999-9999-999999999999"/>
+                <textElement><font fontName="SansSerif" size="9"/></textElement>
+                <text><![CDATA[CHENNAI]]></text>
+            </staticText>
+
+            <!-- Session Date -->
+            <staticText>
+                <reportElement x="0" y="59" width="130" height="18" uuid="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Session Date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="130" y="59" width="10" height="18" uuid="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="145" y="59" width="400" height="18" uuid="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"/>
+                <textElement><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{SESSION_DATE}]]></textFieldExpression>
+            </textField>
+
+            <!-- Generation Date -->
+            <staticText>
+                <reportElement x="0" y="77" width="130" height="18" uuid="cccccccc-cccc-cccc-cccc-cccccccccccc"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Generation Date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="130" y="77" width="10" height="18" uuid="cccccccc-cccc-cccc-cccc-cccccccccccd"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField pattern="dd-MM-yyyy HH:mm:ss">
+                <reportElement x="145" y="77" width="400" height="18" uuid="dddddddd-dddd-dddd-dddd-dddddddddddd"/>
+                <textElement><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{GENERATION_DATE}]]></textFieldExpression>
+            </textField>
+
+            <!-- Generated By -->
+            <staticText>
+                <reportElement x="0" y="95" width="130" height="18" uuid="eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Generated By]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="130" y="95" width="10" height="18" uuid="eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeef"/>
+                <textElement><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="145" y="95" width="400" height="18" uuid="ffffffff-ffff-ffff-ffff-ffffffffffff"/>
+                <textElement><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{GENERATED_BY}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <!-- COLUMN HEADER -->
+    <columnHeader>
+        <band height="40">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="35" height="40" backcolor="#DDEBF7" uuid="a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Sl. No.]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="35" y="0" width="70" height="40" backcolor="#DDEBF7" uuid="b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Cheque No.]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="105" y="0" width="85" height="40" backcolor="#DDEBF7" uuid="c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[MICR Code]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="190" y="0" width="115" height="40" backcolor="#DDEBF7" uuid="d4d4d4d4-d4d4-d4d4-d4d4-d4d4d4d4d4d4"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Presenting Bank]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="305" y="0" width="115" height="40" backcolor="#DDEBF7" uuid="e5e5e5e5-e5e5-e5e5-e5e5-e5e5e5e5e5e5"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Drawee Bank]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="420" y="0" width="85" height="40" backcolor="#DDEBF7" uuid="f6f6f6f6-f6f6-f6f6-f6f6-f6f6f6f6f6f6"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Amount (Rs.)]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="505" y="0" width="75" height="40" backcolor="#DDEBF7" uuid="a7a7a7a7-a7a7-a7a7-a7a7-a7a7a7a7a7a7"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Return Reason Code]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement mode="Opaque" x="580" y="0" width="202" height="40" backcolor="#DDEBF7" uuid="b8b8b8b8-b8b8-b8b8-b8b8-b8b8b8b8b8b8"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Return Reason Description]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <!-- DETAIL -->
+    <detail>
+        <band height="25" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="35" height="25" uuid="c9c9c9c9-c9c9-c9c9-c9c9-c9c9c9c9c9c9"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="35" y="0" width="70" height="25" uuid="d0d0d0d0-d0d0-d0d0-d0d0-d0d0d0d0d0d0"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$F{chequeNumber}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="105" y="0" width="85" height="25" uuid="e1e1e1e1-e1e1-e1e1-e1e1-e1e1e1e1e1e1"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$F{micrCode}]]></textFieldExpression>
+            </textField>
+
+            <!-- Static placeholder for Presenting Bank -->
+            <staticText>
+                <reportElement x="190" y="0" width="115" height="25" uuid="f2f2f2f2-f2f2-f2f2-f2f2-f2f2f2f2f2f2"/>
+                <box leftPadding="5"><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <text><![CDATA[-]]></text>
+            </staticText>
+
+            <!-- Static placeholder for Drawee Bank -->
+            <staticText>
+                <reportElement x="305" y="0" width="115" height="25" uuid="a3a3a3a3-a3a3-a3a3-a3a3-a3a3a3a3a3a3"/>
+                <box leftPadding="5"><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <text><![CDATA[Bank of India]]></text>
+            </staticText>
+
+            <textField>
+                <reportElement x="420" y="0" width="85" height="25" uuid="b4b4b4b4-b4b4-b4b4-b4b4-b4b4b4b4b4b4"/>
+                <box rightPadding="5"><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$F{chequeAmount} == null ? "0.00" : String.format("%,.2f", Double.parseDouble($F{chequeAmount}.toString()))]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="505" y="0" width="75" height="25" uuid="c5c5c5c5-c5c5-c5c5-c5c5-c5c5c5c5c5c5"/>
+                <box><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$F{rejectedReasonCode} != null ? $F{rejectedReasonCode} : ($F{rejectedReasonId} == null ? "" : $F{rejectedReasonId}.toString())]]></textFieldExpression>
+            </textField>
+
+            <textField textAdjust="StretchHeight">
+                <reportElement x="580" y="0" width="202" height="25" uuid="d6d6d6d6-d6d6-d6d6-d6d6-d6d6d6d6d6d6"/>
+                <box leftPadding="5"><pen lineWidth="0.5" lineColor="#A6A6A6"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="SansSerif" size="9"/></textElement>
+                <textFieldExpression><![CDATA[($F{remarks} == null || $F{remarks}.trim().isEmpty()) ? "Cheque returned unpaid" : $F{remarks}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- SUMMARY -->
+    <summary>
+        <band height="140" splitType="Stretch">
+            <!-- Total Number of Cheques -->
+            <staticText>
+                <reportElement x="0" y="15" width="150" height="20" uuid="e7e7e7e7-e7e7-e7e7-e7e7-e7e7e7e7e7e7"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Total Number of Cheques]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="150" y="15" width="10" height="20" uuid="e7e7e7e7-e7e7-e7e7-e7e7-e7e7e7e7e7e8"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="165" y="15" width="200" height="20" uuid="f8f8f8f8-f8f8-f8f8-f8f8-f8f8f8f8f8f8"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_REJECTED_CHEQUES}]]></textFieldExpression>
+            </textField>
+
+            <!-- Total Rejected Amount -->
+            <staticText>
+                <reportElement x="0" y="35" width="150" height="20" uuid="a9a9a9a9-a9a9-a9a9-a9a9-a9a9a9a9a9a9"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Total Rejected Amount]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="150" y="35" width="10" height="20" uuid="a9a9a9a9-a9a9-a9a9-a9a9-a9a9a9a9a9aa"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="165" y="35" width="200" height="20" uuid="b0b0b0b0-b0b0-b0b0-b0b0-b0b0b0b0b0b0"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Rs. " + String.format("%,.2f", $P{TOTAL_REJECTED_AMOUNT})]]></textFieldExpression>
+            </textField>
+
+            <!-- SIGNATURE BLOCKS -->
+            <line>
+                <reportElement x="10" y="110" width="130" height="1" uuid="c1c1c1c1-c1c1-c1c1-c1c1-c1c1c1c1c1c1"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="10" y="115" width="130" height="20" uuid="d2d2d2d2-d2d2-d2d2-d2d2-d2d2d2d2d2d2"/>
+                <textElement textAlignment="Center"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Generated By]]></text>
+            </staticText>
+
+            <line>
+                <reportElement x="326" y="110" width="130" height="1" uuid="e3e3e3e3-e3e3-e3e3-e3e3-e3e3e3e3e3e3"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="326" y="115" width="130" height="20" uuid="f4f4f4f4-f4f4-f4f4-f4f4-f4f4f4f4f4f4"/>
+                <textElement textAlignment="Center"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Checked By]]></text>
+            </staticText>
+
+            <line>
+                <reportElement x="642" y="110" width="130" height="1" uuid="a5a5a5a5-a5a5-a5a5-a5a5-a5a5a5a5a5a5"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="642" y="115" width="130" height="20" uuid="b6b6b6b6-b6b6-b6b6-b6b6-b6b6b6b6b6b6"/>
+                <textElement textAlignment="Center"><font fontName="SansSerif" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Authorized By]]></text>
+            </staticText>
+        </band>
+    </summary>
+
+</jasperReport>

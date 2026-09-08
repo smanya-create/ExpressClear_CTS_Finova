@@ -738,8 +738,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			filterButton.addEventListener("onClick", event -> filterCheques());
 
 			backButton.addEventListener("onClick",
-					event -> Executions.sendRedirect("/inward/maker/batch/batch-list.zul"));
-
+					event -> Executions.sendRedirect("/inward/maker/index.zul?page=batch-intake"));
 			String batchId = Executions.getCurrent().getParameter("batchId");
 
 			if (batchId == null || batchId.trim().isEmpty()) {
@@ -912,7 +911,6 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			item.appendChild(new Listcell(valueOrEmpty(cheque.getPayeeName())));
 
 			String amount = "₹ 0";
-
 			if (cheque.getChequeAmount() != null) {
 
 				amount = "₹ " + cheque.getChequeAmount().toPlainString();

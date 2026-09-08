@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.iispl.cts.dao.inward.InwardBatchDAO;
 import com.iispl.cts.dto.DashboardSummaryDTO;
+import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 
 public class InwardBatchDAOImpl implements InwardBatchDAO {
@@ -62,12 +63,22 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 
 	@Override
 	public boolean updateStatus(String batchId, String status) {
-		InwardBatch batch = getBatchById(batchId);
-		if (batch != null) {
-			batch.setBatchStatus(status);
-			return true;
+		String sql = "UPDATE inward_batch SET batch_status = ? WHERE inward_batch_id = ?";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setString(1, status != null ? status.trim() : "");
+			statement.setString(2, batchId != null ? batchId.trim() : "");
+
+			int rows = statement.executeUpdate();
+			System.out.println("DEBUG: updateStatus updated batch " + batchId + " to " + status + " | Rows affected: " + rows);
+			return rows > 0;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Failed to update status for batch " + batchId + ": " + e.getMessage(), e);
 		}
-		return false;
 	}
 
 	@Override
@@ -356,5 +367,87 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	                e);
 	    }
 	}
-	
+
+	@Override
+	public List<InwardReportChequeDTO> getChequesByBatch() {
+
+	    List<InwardReportChequeDTO> chequeList = new ArrayList<>();
+
+	    String sql = "SELECT " +
+	            "    ic.inward_cheque_id, " +
+	            "    ic.inward_batch_id, " +
+	            "    ic.cheque_number, " +
+	            "    ic.micr_code, " +
+	            "    ic.drawee_name, " +
+	            "    ic.drawee_account_number, " +
+	            "    ic.payee_name, " +
+	            "    ic.payee_account_number, " +
+	            "    ic.cheque_amount, " +
+	            "    ic.cheque_date, " +
+	            "    ic.cheque_status, " +
+	            "    r.rejection_id, " +
+	            "    r.rejected_reason_id, " +
+	            "    r.remarks, " +
+	            "    r.rejected_by, " +
+	            "    r.rejected_at, " +
+	            "    rr.rejected_reason_code, " +
+	            "    rr.rejected_reason_name, " +
+	            "    rr.rejected_reason_description " +
+	            "FROM inward_cheque ic " +
+	            "INNER JOIN inward_batch ib ON ib.inward_batch_id = ic.inward_batch_id " +
+	            "LEFT JOIN inward_cheque_rejection r ON r.inward_cheque_id = ic.inward_cheque_id " +
+	            "LEFT JOIN rejected_reasons rr ON rr.rejected_reason_id = r.rejected_reason_id " +
+	            "WHERE ib.batch_status = 'COMPLETED' " +
+	            "ORDER BY ib.inward_batch_id, ic.inward_cheque_id";
+	   
+	    try (Connection con = DBConnection.getConnection();
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ResultSet rs = ps.executeQuery()) 
+	    {
+	        while (rs.next()) {
+	            InwardReportChequeDTO dto = new InwardReportChequeDTO();
+
+	            // Cheque Details
+	            dto.setInwardChequeId(rs.getString("inward_cheque_id"));
+	            dto.setInwardBatchId(rs.getString("inward_batch_id"));
+	            dto.setChequeNumber(rs.getString("cheque_number"));
+	            dto.setMicrCode(rs.getString("micr_code"));
+	            dto.setDraweeName(rs.getString("drawee_name"));
+	            dto.setDraweeAccountNumber(rs.getString("drawee_account_number"));
+	            dto.setPayeeName(rs.getString("payee_name"));
+	            dto.setPayeeAccountNumber(rs.getString("payee_account_number"));
+	            dto.setChequeAmount(rs.getBigDecimal("cheque_amount"));
+
+	            Timestamp chequeDate = rs.getTimestamp("cheque_date");
+	            if (chequeDate != null) {
+	                dto.setChequeDate(chequeDate.toLocalDateTime());
+	            }
+
+	            dto.setChequeStatus(rs.getString("cheque_status"));
+
+	            // Rejection Details
+	            dto.setRejectionId(rs.getString("rejection_id"));
+	            dto.setRejectedReasonId(rs.getString("rejected_reason_id"));
+	            dto.setRemarks(rs.getString("remarks"));
+	            dto.setRejectedBy(rs.getString("rejected_by"));
+
+	            Timestamp rejectedAt = rs.getTimestamp("rejected_at");
+	            if (rejectedAt != null) {
+	                dto.setRejectedAt(rejectedAt.toLocalDateTime());
+	            }
+
+	            // Rejection Reason
+	            dto.setRejectedReasonCode(rs.getString("rejected_reason_code"));
+	            dto.setRejectedReasonName(rs.getString("rejected_reason_name"));
+	            dto.setRejectedReasonDescription(rs.getString("rejected_reason_description"));
+
+	            chequeList.add(dto);
+	        }
+
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	    }
+
+	    return chequeList;
+	}
 }

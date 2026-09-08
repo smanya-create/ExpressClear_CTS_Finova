@@ -9,7 +9,6 @@ import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 
-
 public class InwardChequeServiceImpl implements InwardChequeService {
 
 	private final InwardChequeDAO inwardChequeDAO;
@@ -29,9 +28,11 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	}
 
 	@Override
-	public boolean updateMicrRepair(String inwardChequeId, String correctedMicrCode, String chequeStatus) {
+	public boolean updateMicrRepair(String inwardChequeId, String inwardBatchId, String originalMicr,
+			String correctedMicrCode, String chequeStatus, String repairedBy, String remarks) {
 
-		return inwardChequeDAO.updateMicrRepair(inwardChequeId, correctedMicrCode, chequeStatus);
+		return inwardChequeDAO.updateMicrRepair(inwardChequeId, inwardBatchId, originalMicr, correctedMicrCode,
+				chequeStatus, repairedBy, remarks);
 	}
 
 	@Override
@@ -48,28 +49,21 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	public InwardChequeImage getFrontImage(String inwardChequeId) {
 		return InwardChequeImageDAOImpl.getInstance().findFrontImageByChequeId(inwardChequeId);
 	}
+
 	@Override
 	public InwardChequeImage getBackImage(String inwardChequeId) {
-	    return InwardChequeImageDAOImpl.getInstance()
-	            .findBackImageByChequeId(inwardChequeId);
+		return InwardChequeImageDAOImpl.getInstance().findBackImageByChequeId(inwardChequeId);
 	}
-	@Override
-	public boolean saveRejection(
-	        String inwardChequeId,
-	        String rejectedReasonId,
-	        String remarks,
-	        String rejectedBy) {
 
-	    return inwardChequeDAO.saveRejection(
-	            inwardChequeId,
-	            rejectedReasonId,
-	            remarks,
-	            rejectedBy);
+	@Override
+	public boolean saveRejection(String inwardChequeId, String rejectedReasonId, String remarks, String rejectedBy) {
+
+		return inwardChequeDAO.saveRejection(inwardChequeId, rejectedReasonId, remarks, rejectedBy);
 	}
+
 	@Override
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
-	    return inwardChequeDAO.validateCbs(cheque);
+		return inwardChequeDAO.validateCbs(cheque);
 	}
 
-	
 }

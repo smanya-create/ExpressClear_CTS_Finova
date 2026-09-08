@@ -59,7 +59,6 @@
           <listheader label="BACK TO MAKER" width="110px" align="center" />
           <listheader label="RETURNS" width="75px" align="center" />
           <listheader label="STATUS" width="140px" align="center" />
-          <listheader label="ACTION" width="90px" align="center" />
         </listhead>
       </listbox>
     </div>
