@@ -45,10 +45,14 @@ public class DBConnection {
             config.setUsername(DB_USER.trim());
             config.setPassword(DB_PASSWORD.trim());
             config.setDriverClassName("org.postgresql.Driver");
+            
+            config.setMaximumPoolSize(15);
+            config.setMinimumIdle(5);
 
 
             config.setConnectionTimeout(30000);
             config.setValidationTimeout(5000);
+            config.setLeakDetectionThreshold(4000);
 
             // Stale connection prevention
             config.setIdleTimeout(30000);
