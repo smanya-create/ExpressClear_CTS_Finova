@@ -304,10 +304,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		Executions.sendRedirect("/inward-maker/unprocessed.zul");
 	}
 
-	public void navToInwardMakerReports() {
-		Executions.sendRedirect("/inward-maker/reports.zul");
-	}
-
 	// Inward Checker Navigation Actions
 	public void navToInwardCheckerDashboard() {
 		Executions.sendRedirect("/inward/checker/dashboard.zul");
