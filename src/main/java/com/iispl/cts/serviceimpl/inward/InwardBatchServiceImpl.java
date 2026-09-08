@@ -94,7 +94,6 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 		InwardBatch existingBatch = inwardBatchDAO.getBatchById(batchId);
 
 		inwardBatch.setBatchStatus("PROCESSING");
-
 		if (existingBatch != null) {
 
 			if (!inwardBatchDAO.updateBatch(inwardBatch)) {
