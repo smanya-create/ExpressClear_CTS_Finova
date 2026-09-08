@@ -62,12 +62,22 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 
 	@Override
 	public boolean updateStatus(String batchId, String status) {
-		InwardBatch batch = getBatchById(batchId);
-		if (batch != null) {
-			batch.setBatchStatus(status);
-			return true;
+		String sql = "UPDATE inward_batch SET batch_status = ? WHERE inward_batch_id = ?";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setString(1, status != null ? status.trim() : "");
+			statement.setString(2, batchId != null ? batchId.trim() : "");
+
+			int rows = statement.executeUpdate();
+			System.out.println("DEBUG: updateStatus updated batch " + batchId + " to " + status + " | Rows affected: " + rows);
+			return rows > 0;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Failed to update status for batch " + batchId + ": " + e.getMessage(), e);
 		}
-		return false;
 	}
 
 	@Override

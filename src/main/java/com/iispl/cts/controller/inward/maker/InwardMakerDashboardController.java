@@ -138,19 +138,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             lblBadge.setStyle(batch.getStatusBadgeStyle());
             lblBadge.setParent(cellStatus);
             cellStatus.setParent(item);
-
-            // 9. View Action Button
-            Listcell cellAction = new Listcell();
-            cellAction.setStyle("text-align: center;");
-            Button btnView = new Button("View");
-            btnView.setSclass("cts-btn-action");
-            btnView.addEventListener("onClick", event -> {
-                Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());
-                String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
-                navigateToSpaPage(targetZul);
-            });
-            btnView.setParent(cellAction);
-            cellAction.setParent(item);
         });
     }
 
