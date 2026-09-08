@@ -14,7 +14,8 @@ public interface OutwardBatchService {
 
 	OutwardBatch getBatchById(String outwardBatchId);
 
-	List<OutwardBatch> getPendingBatches();
+	List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize);
+	int getPendingBatchCount();
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 
