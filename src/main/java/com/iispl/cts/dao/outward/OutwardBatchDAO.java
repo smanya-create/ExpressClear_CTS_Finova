@@ -18,12 +18,13 @@ public interface OutwardBatchDAO {
 
 	String transferBatchFromScanToOutward(Connection connection, String scannedBatchId);
 
-	List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize);
+	List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize);
 
-    int getPendingBatchCount();
+	int getPendingBatchCount();
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
-	
+
 	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 
+	String getScannedBatchIdByOutwardBatchId(String outwardBatchId);
 }
