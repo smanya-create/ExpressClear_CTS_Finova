@@ -1,0 +1,43 @@
+<?page title="Batch Selected" contentType="text/html;charset=UTF-8"?>
+
+<window id="batchProceedPopup" title="Checker Queue" mode="modal"
+	border="normal" width="450px" closable="true" sizable="false"
+	apply="com.iispl.cts.controller.outward.checker.BatchProceedPopupController">
+
+	<vlayout spacing="15px" style="padding:25px;">
+
+		<label value="Batch Selected"
+			style="font-size:20px;font-weight:bold;" />
+
+		<hlayout spacing="10px">
+			<label value="Batch ID:" style="font-weight:bold;" />
+
+			<label id="lblPopupBatchId" />
+		</hlayout>
+
+		<label
+			value="Do you want to proceed with this batch for verification?"
+			multiline="true" style="font-size:14px;" />
+
+		<hlayout spacing="10px"
+			style="display:flex; justify-content:flex-end; gap:10px;">
+
+			<button id="btnProceed" label="PROCEED" sclass="btn-proceed"
+				style="background: #1d5689; background-image: none; color: white;border: none;border-radius: 6px;
+                         font-size: 9px;
+                         font-weight: bold;
+                         padding: 8px 15px;
+                         cursor: pointer;" />
+
+			<button id="btnCancel" label="CANCEL" sclass="btn-cancel"
+			style="background: #1d5689; background-image: none; color: white;border: none;border-radius: 6px;
+                         font-size: 9px;
+                         font-weight: bold;
+                         padding: 8px 15px;
+                         cursor: pointer;"  />
+
+		</hlayout>
+
+	</vlayout>
+
+</window>
