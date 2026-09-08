@@ -301,7 +301,8 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	          + " AND ic2.cheque_status IN "
 	          + " ('MICR_REPAIR_PENDING', "
 	          + "  'MICR_REPAIR_IN_PROGRESS', "
-	          + "  'SEND_BACK_TO_MAKER')) "
+	          + "  'MICR_REPAIR_REQUIRED', "
+	          + "    'SEND_BACK_TO_MAKER_MICR')) "
 	          + "AS micr_repair_pending_count "
 
 	          + "FROM inward_batch ib "
@@ -313,7 +314,8 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	          + "    AND ic.cheque_status IN "
 	          + "    ('MICR_REPAIR_PENDING', "
 	          + "     'MICR_REPAIR_IN_PROGRESS', "
-	          + "     'SEND_BACK_TO_MAKER') "
+	          + "     'MICR_REPAIR_REQUIRED',"
+	          + "    'SEND_BACK_TO_MAKER_MICR') "
 	          + ") "
 
 	          + "ORDER BY ib.uploaded_at DESC";
