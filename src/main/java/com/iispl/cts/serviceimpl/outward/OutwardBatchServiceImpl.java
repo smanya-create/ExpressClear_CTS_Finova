@@ -1,4 +1,4 @@
- package com.iispl.cts.serviceimpl.outward;
+package com.iispl.cts.serviceimpl.outward;
 
 import java.util.List;
 
@@ -37,23 +37,27 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 		return outwardBatchDAO.getBatchById(outwardBatchId);
 	}
 
+	@Override
+	public List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize) {
+
+		return outwardBatchDAO.getPendingBatches(pageNumber, pageSize);
+	}
 
 	@Override
-	public List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize) {
-		
-		return outwardBatchDAO.getPendingBatches(pageNumber,pageSize);
-	}
-	@Override
 	public int getPendingBatchCount() {
-		
+
 		return outwardBatchDAO.getPendingBatchCount();
 	}
-	
+
 	@Override
 	public List<OutwardBatch> getBatchesReadyForDataEntry() {
 
 		return outwardBatchDAO.getBatchesReadyForDataEntry();
 	}
 
-	
+	@Override
+	public String getScannedBatchIdByOutwardBatchId(String outwardBatchId) {
+		return outwardBatchDAO.getScannedBatchIdByOutwardBatchId(outwardBatchId);
+	}
+
 }
