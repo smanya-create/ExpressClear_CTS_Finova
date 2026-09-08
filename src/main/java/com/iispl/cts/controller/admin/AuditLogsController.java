@@ -8,17 +8,16 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zul.event.PagingEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Cell;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
+import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Paging;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Cell;
 
 import com.iispl.cts.entity.AuditLog;
 import com.iispl.cts.service.AuditService;
@@ -28,7 +27,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // Auto-wired components by ZUL ID match
+    // Filter controls
     private Datebox dtFrom;
     private Datebox dtTo;
     private Combobox cmbModuleFilter;
@@ -37,30 +36,32 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     private Button btnReset;
     private Label lblAuditCount;
     private Rows rowsAudit;
-    private Paging auditPaging;
+
+    // Custom Pagination Toolbar Controls
+    private Button btnFirstPage;
+    private Button btnPrevPage;
+    private Intbox ibCurrentPage;
+    private Label lblTotalPages;
+    private Button btnNextPage;
+    private Button btnLastPage;
+
+    // Pagination State
+    private static final int PAGE_SIZE = 10;
+    private int activePageIndex = 0;
+    private int totalPages = 1;
+    private int totalRecords = 0;
 
     private final AuditService auditService = AuditServiceImpl.getInstance();
-    private static final int PAGE_SIZE = 15;
     private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        if (auditPaging != null) {
-            auditPaging.setPageSize(PAGE_SIZE);
-        }
-
-        // Default to today only (per trainer's requirement)
         resetFiltersToToday();
-
-        // Load page 0 for today
         loadAuditPage(0);
     }
 
-    /**
-     * Sets date filters to the start and end of the current day.
-     */
     private void resetFiltersToToday() {
         LocalDate today = LocalDate.now();
         Date todayDate = Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -77,10 +78,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         }
     }
 
-    /**
-     * Queries database by limit and offset, updates paging bar and renders grid.
-     */
-    private void loadAuditPage(int activePageIndex) {
+    private void loadAuditPage(int pageIndex) {
         Date from = dtFrom != null ? dtFrom.getValue() : null;
         Date to = dtTo != null ? dtTo.getValue() : null;
         String mod = (cmbModuleFilter != null && cmbModuleFilter.getSelectedItem() != null)
@@ -88,30 +86,56 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         String q = (txtSearchAudit != null && txtSearchAudit.getValue() != null) 
                    ? txtSearchAudit.getValue().trim() : "";
 
-        // 1. Fetch total count for paging bar calculation
-        int totalRecords = auditService.countAuditLogs(from, to, mod, null, q);
-
-        if (auditPaging != null) {
-            auditPaging.setTotalSize(totalRecords);
-            auditPaging.setActivePage(activePageIndex);
+        // 1. Fetch total count from DB
+        this.totalRecords = auditService.countAuditLogs(from, to, mod, null, q);
+        this.totalPages = (int) Math.ceil((double) this.totalRecords / PAGE_SIZE);
+        if (this.totalPages < 1) {
+            this.totalPages = 1;
         }
 
+        // Validate index boundaries
+        if (pageIndex >= this.totalPages) {
+            pageIndex = this.totalPages - 1;
+        }
+        if (pageIndex < 0) {
+            pageIndex = 0;
+        }
+        this.activePageIndex = pageIndex;
+
+        // 2. Update pagination toolbar display
         if (lblAuditCount != null) {
-            lblAuditCount.setValue(totalRecords + " records found");
+            lblAuditCount.setValue(this.totalRecords + " records found");
+        }
+        if (ibCurrentPage != null) {
+            ibCurrentPage.setValue(this.activePageIndex + 1);
+        }
+        if (lblTotalPages != null) {
+            lblTotalPages.setValue("/ " + this.totalPages);
         }
 
-        // 2. Fetch only the active page records from database
-        int offset = activePageIndex * PAGE_SIZE;
+        boolean isFirst = (this.activePageIndex <= 0);
+        boolean isLast = (this.activePageIndex >= this.totalPages - 1);
+
+        if (btnFirstPage != null) btnFirstPage.setDisabled(isFirst);
+        if (btnPrevPage != null) btnPrevPage.setDisabled(isFirst);
+        if (btnNextPage != null) btnNextPage.setDisabled(isLast);
+        if (btnLastPage != null) btnLastPage.setDisabled(isLast);
+
+        // 3. Query DB with LIMIT & OFFSET
+        int offset = this.activePageIndex * PAGE_SIZE;
         List<AuditLog> logs = auditService.searchAuditLogs(from, to, mod, null, q, offset, PAGE_SIZE);
 
+        renderAuditRows(logs);
+    }
+
+    private void renderAuditRows(List<AuditLog> logs) {
         if (rowsAudit == null) return;
         rowsAudit.getChildren().clear();
 
-        if (logs.isEmpty()) {
+        if (logs == null || logs.isEmpty()) {
             Row emptyRow = new Row();
-            
             Cell cell = new Cell();
-            cell.setColspan(7); // Spans all 7 columns of the grid
+            cell.setColspan(7);
             cell.setStyle("text-align: center; padding: 24px;");
 
             Label emptyLbl = new Label("No audit records found for the selected criteria.");
@@ -170,24 +194,56 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // Triggered on Search button click
+    // Filter Actions
     public void onClick$btnSearch(Event event) { 
         loadAuditPage(0); 
     }
 
-    // Triggered when hitting Enter in search textbox
     public void onOK$txtSearchAudit(Event event) { 
         loadAuditPage(0); 
     }
 
-    // Reset button resets to Today's date range and loads Page 0
     public void onClick$btnReset(Event event) {
         resetFiltersToToday();
         loadAuditPage(0);
     }
 
-    // Navigation event from the ZK <paging id="auditPaging" ... /> component
-    public void onPaging$auditPaging(PagingEvent event) {
-        loadAuditPage(event.getActivePage());
+    // Pagination Toolbar Actions
+    public void onClick$btnFirstPage(Event event) {
+        if (activePageIndex > 0) {
+            loadAuditPage(0);
+        }
+    }
+
+    public void onClick$btnPrevPage(Event event) {
+        if (activePageIndex > 0) {
+            loadAuditPage(activePageIndex - 1);
+        }
+    }
+
+    public void onClick$btnNextPage(Event event) {
+        if (activePageIndex < totalPages - 1) {
+            loadAuditPage(activePageIndex + 1);
+        }
+    }
+
+    public void onClick$btnLastPage(Event event) {
+        if (activePageIndex < totalPages - 1) {
+            loadAuditPage(totalPages - 1);
+        }
+    }
+
+    public void onChange$ibCurrentPage(Event event) {
+        Integer target = ibCurrentPage.getValue();
+        if (target == null || target < 1) {
+            target = 1;
+        } else if (target > totalPages) {
+            target = totalPages;
+        }
+        loadAuditPage(target - 1);
+    }
+
+    public void onOK$ibCurrentPage(Event event) {
+        onChange$ibCurrentPage(event);
     }
 }

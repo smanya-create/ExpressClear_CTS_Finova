@@ -20,10 +20,18 @@
 
 /* --- Card Panel --- */
 .card-panel {
-    background: #ffffff !important;
+   background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 12px !important;
+    padding: 24px 28px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    box-sizing: border-box !important;
+}
+/* Ensure inner flex elements do not overflow or clip borders */
+.card-panel > .z-vlayout-inner,
+.card-panel > .z-hlayout-inner {
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 /* Inner Card Header & Subtitle (Matched to User Details in Add User) */
@@ -294,4 +302,70 @@
     padding: 24px !important;
     color: #94a3b8 !important;
     font-size: 13px !important;
+}
+/* --- Pagination Toolbar --- */
+.cts-pagination-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.pg-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    color: #475569 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+}
+
+.pg-nav-btn:hover:not([disabled]) {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+.pg-nav-btn[disabled] {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+.pg-current-input {
+    width: 38px !important;
+    height: 32px !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 4px !important;
+    box-sizing: border-box !important;
+}
+
+.pg-current-input:focus {
+    border-color: #173b61 !important;
+    outline: none !important;
+}
+
+.pg-total-label {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    line-height: 32px !important;
+    vertical-align: middle !important;
+    margin: 0 8px 0 2px !important;
+    display: inline-block !important;
 }

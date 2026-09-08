@@ -16,7 +16,8 @@
                 <!-- Reusable Header Component -->
                 <include src="/components/header.zul" 
                          pageTitle="Admin Dashboard" 
-                         pageSubtitle="Session Management" />
+                         pageSubtitle="Session Management"
+                         showNotifications="false" />
 
                 <!-- Main Content Body Container -->
                 <vlayout sclass="cts-content-wrapper" spacing="16px" hflex="1">

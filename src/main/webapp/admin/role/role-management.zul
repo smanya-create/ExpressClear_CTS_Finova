@@ -15,7 +15,7 @@
             <!-- Global Shared Header -->
             <include id="incHeader" src="/components/header.zul" 
                      pageTitle="Admin Dashboard" 
-                     pageSubtitle="Role Management" />
+                     pageSubtitle="Role Management"  />
 
             <!-- Content Workspace -->
             <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
