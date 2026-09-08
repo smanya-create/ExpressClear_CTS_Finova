@@ -1,5 +1,7 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -7,8 +9,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
@@ -27,6 +29,7 @@ import org.zkoss.zul.Textbox;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.enums.inward.InwardChequeStatus;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
@@ -95,16 +98,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     private Label lblModalRejected;
     private Button btnCancelCompletionModal;
     private Button btnConfirmCompletionModal;
-
-    // Fallback Image Mapping
-    private static final Map<String, String[]> IMAGE_MAP = new HashMap<>();
-    static {
-        IMAGE_MAP.put("CH1005", new String[]{"/Batch1001-images/cheque001_front.png", "/Batch1001-images/cheque001_back.png"});
-        IMAGE_MAP.put("CH1006", new String[]{"/Batch1001-images/cheque002_front.png", "/Batch1001-images/cheque002_back.png"});
-        IMAGE_MAP.put("CH1007", new String[]{"/Batch1002-images/cheque004_front.png", "/Batch1002-images/cheque004_back.png"});
-        IMAGE_MAP.put("CH1008", new String[]{"/Batch1002-images/cheque005_front.png", "/Batch1002-images/cheque005_back.png"});
-        IMAGE_MAP.put("CH1009", new String[]{"/Batch1002-images/cheque006_front.png", "/Batch1002-images/cheque006_back.png"});
-    }
 
     private List<InwardCheque> activeQueue;
     private int currentIndex = 0;
@@ -212,7 +205,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         if (activeQueue == null || activeQueue.isEmpty()) {
             clearForm();
             if (lblChequeNo != null) lblChequeNo.setValue("-");
-            if (lblDataStatus != null) lblDataStatus.setValue("NO CHEQUES");
+            if (lblDataStatus != null) {
+                lblDataStatus.setValue("NO CHEQUES");
+                lblDataStatus.setStyle(null);
+            }
             if (lblChequePosition != null) lblChequePosition.setValue("0 of 0");
             updateNavigationState();
             updateProgressBar();
@@ -229,18 +225,25 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
         if (lblDataStatus != null) {
             String status = item.getChequeStatus();
-            if ("DATA_ENTRY_PENDING".equalsIgnoreCase(status)) {
+            if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("PENDING");
-            } else if ("DATA_ENTRY_IN_PROGRESS".equalsIgnoreCase(status)) {
+                lblDataStatus.setStyle("background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a;");
+            } else if (InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("IN PROGRESS");
             } else if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("SENT BACK");
-            } else if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status) 
+                lblDataStatus.setStyle("background-color: #ffedd5; color: #ea580c; border: 1px solid #fed7aa;");
+            } else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)) {
+                lblDataStatus.setValue("REJECT REQ");
+                lblDataStatus.setStyle("background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;");
+            } else if (InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(status) 
                     || "ACCEPTED".equalsIgnoreCase(status)
                     || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)) {
                 lblDataStatus.setValue("COMPLETED");
+                lblDataStatus.setStyle("background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;");
             } else {
                 lblDataStatus.setValue(status != null ? status : "PENDING");
+                lblDataStatus.setStyle(null);
             }
         }
 
@@ -399,31 +402,61 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     }
 
     private void updateDisplayedImage(InwardCheque item) {
-        if (imgCheque == null) return;
-        
-        String frontImg = null;
-        String backImg = null;
+        if (imgCheque == null || item == null) return;
 
-        try {
-            java.lang.reflect.Method mFront = item.getClass().getMethod("getFrontImagePath");
-            frontImg = (String) mFront.invoke(item);
-            java.lang.reflect.Method mBack = item.getClass().getMethod("getBackImagePath");
-            backImg = (String) mBack.invoke(item);
-        } catch (Exception ignored) {}
+        String frontImg = item.getChequeImageFront();
+        String backImg = item.getChequeImageBack();
+        String rawPath = isViewingFront ? frontImg : backImg;
 
-        if (frontImg == null || frontImg.trim().isEmpty()) {
-            String[] paths = IMAGE_MAP.get(item.getInwardChequeId());
-            if (paths != null) {
-                frontImg = paths[0];
-                backImg = paths[1];
+        if (rawPath != null && !rawPath.trim().isEmpty()) {
+            rawPath = rawPath.trim();
+            if (rawPath.startsWith("/")) {
+                rawPath = rawPath.substring(1);
             }
-        }
 
-        if (frontImg != null) {
-            imgCheque.setSrc(isViewingFront ? frontImg : (backImg != null ? backImg : frontImg));
+            // 1. Prefix with Inward-data/ if needed for resources
+            String resourcePath = rawPath;
+            if (!resourcePath.startsWith("Inward-data/")) {
+                resourcePath = "Inward-data/" + resourcePath;
+            }
+
+            // 2. Load directly from classpath (src/main/resources)
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath);
+            if (is == null) {
+                is = getClass().getClassLoader().getResourceAsStream(resourcePath);
+            }
+
+            if (is != null) {
+                try {
+                    AImage aImage = new AImage(rawPath, is);
+                    imgCheque.setContent(aImage);
+                } catch (Exception e) {
+                    System.err.println("ERROR: Failed to construct AImage from stream: " + e.getMessage());
+                    imgCheque.setSrc(null);
+                } finally {
+                    try { is.close(); } catch (Exception ignored) {}
+                }
+            } else {
+                // 3. Fallback: Direct Linux filesystem read
+                String diskPath = "/home/iispl/snap/eclipse/common/git/ExpressClear_CTS_Finova/src/main/resources/" + resourcePath;
+                File file = new File(diskPath);
+
+                if (file.exists()) {
+                    try {
+                        imgCheque.setContent(new AImage(file));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        imgCheque.setSrc(null);
+                    }
+                } else {
+                    System.err.println("ERROR: Image could not be located anywhere for cheque: " + item.getChequeNumber());
+                    imgCheque.setSrc(null);
+                }
+            }
         } else {
             imgCheque.setSrc(null);
         }
+
         applyImageStyle();
     }
 
@@ -498,7 +531,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         String rawAmount = txtAmount.getValue().replace("₹", "").replace(",", "").trim();
         current.setChequeAmount(new BigDecimal(rawAmount));
         current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
-        current.setChequeStatus("CHECKER_PROCESSING_PENDING");
+        current.setChequeStatus(InwardChequeStatus.CHECKER_PROCESSING_PENDING.name());
 
         chequeService.updateChequeDetails(current);
 
@@ -548,7 +581,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         }
 
         InwardCheque current = activeQueue.get(currentIndex);
-        current.setChequeStatus("REJECTED");
+        current.setChequeStatus(InwardChequeStatus.REJECTION_REQUESTED.name());
 
         chequeService.updateChequeDetails(current);
 
@@ -565,10 +598,11 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     public void onClick$btnSubmitToChecker() {
         if (activeQueue == null || activeQueue.isEmpty()) return;
 
-        long accepted = activeQueue.stream().filter(c -> "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(c.getChequeStatus()) 
+        long accepted = activeQueue.stream().filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus()) 
                 || "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
                 || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus())).count();
-        long rejected = activeQueue.stream().filter(c -> "REJECTED".equalsIgnoreCase(c.getChequeStatus())).count();
+        long rejected = activeQueue.stream().filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
+                || "REJECTED".equalsIgnoreCase(c.getChequeStatus())).count();
 
         if (lblModalTotal != null) lblModalTotal.setValue(String.valueOf(activeQueue.size()));
         if (lblModalAccepted != null) lblModalAccepted.setValue(String.valueOf(accepted));
@@ -599,10 +633,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             System.out.println("DEBUG: Submitted batch " + currentBatchId + " to CHECKER_PROCESSING_PENDING");
         }
 
-        // 1. Remove working batch ID from session
         Sessions.getCurrent().removeAttribute("ACTIVE_INWARD_BATCH_ID");
 
-        // 2. Locate the mainContentArea Include container
         Include mainInclude = null;
         try {
             mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
@@ -618,12 +650,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
             }
         }
 
-        // 3. Cleanly reload the Data Entry batches list
         if (mainInclude != null) {
-            final Include targetInclude = mainInclude;
-            // Use invalidate + direct setSrc to ensure ZK completely re-renders the view
-            targetInclude.invalidate();
-            targetInclude.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
+            mainInclude.invalidate();
+            mainInclude.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
         } else {
             System.err.println("DEBUG: mainContentArea Include container could not be found!");
         }

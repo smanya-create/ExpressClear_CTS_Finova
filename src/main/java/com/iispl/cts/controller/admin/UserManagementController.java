@@ -25,6 +25,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.RoleService;
@@ -103,6 +104,9 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+        if (!SecurityUtil.checkAccess(null)) {
+            return;
+        }
         super.doAfterCompose(comp);
 
         refreshRoleCache();
@@ -115,9 +119,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
         switchView("LIST");
     }
 
-    /**
-     * Loads all active roles directly from PostgreSQL into memory cache.
-     */
     private void refreshRoleCache() {
         roleMap.clear();
         List<Role> roles = roleService.getAllRoles();
@@ -130,9 +131,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
         }
     }
 
-    /**
-     * Fills the search filter dropdown with all active roles from DB.
-     */
     private void populateRoleFilterDropdown() {
         if (cmbRoleFilter == null) return;
 
@@ -148,9 +146,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
         }
     }
 
-    /**
-     * Fills the Add User role combobox with all active roles from DB.
-     */
     private void populateAddRoleDropdown() {
         if (cmbAddRole == null) return;
         cmbAddRole.getItems().clear();
@@ -396,13 +391,19 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             return;
         }
 
+        // Duplicate username pre-check
+        if (userService.findByUsername(username.trim()) != null) {
+            Clients.showNotification("Username '" + username.trim() + "' already exists.", "error", txtAddUsername, "top_center", 3000);
+            return;
+        }
+
         String assignedRoleId = (String) selectedRole.getValue();
         String roleDisplayName = getRoleDisplayName(assignedRoleId);
 
         User newUser = new User();
         newUser.setUserId(userService.generateNextUserId());
         newUser.setRoleId(assignedRoleId);
-        newUser.setEmployeeId(empId);
+        newUser.setEmployeeId(empId != null ? empId.trim() : userService.generateNextEmployeeId());
         newUser.setUsername(username.trim());
         newUser.setFullName(username.trim());
         newUser.setEmail(email.trim());
@@ -413,16 +414,16 @@ public class UserManagementController extends GenericForwardComposer<Component> 
         boolean success = userService.registerOrUpdateUser(newUser, password.trim());
         if (success) {
             AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER", 
-                "Created user: " + username.trim() + " (Emp ID: " + empId + ", Role: " + roleDisplayName + ")", "SUCCESS");
+                "Created user: " + username.trim() + " (Emp ID: " + newUser.getEmployeeId() + ", Role: " + roleDisplayName + ")", "SUCCESS");
 
-            Clients.showNotification("User " + username + " (" + empId + ") added to database!", "info", null, "top_center", 2500);
+            Clients.showNotification("User " + username.trim() + " created successfully!", "info", null, "top_center", 2500);
             loadUserData();
             switchView("LIST");
         } else {
             AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER_FAILED", 
-                "Failed to register user: " + username.trim() + " (Emp ID: " + empId + ")", "FAILED");
+                "Failed to register user: " + username.trim() + " (Emp ID: " + newUser.getEmployeeId() + ")", "FAILED");
 
-            Clients.showNotification("Failed to save user in database.", "error", null, "top_center", 2500);
+            Clients.showNotification("Failed to save user in database. Ensure Employee ID or Username is not duplicated.", "error", null, "top_center", 3000);
         }
     }
 
@@ -494,6 +495,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             Clients.showNotification("Please choose an action: ENABLE, DISABLE, or CHANGE ROLE.", "warning", null, "top_center", 2500);
             return;
         }
+
         String auditAction = "";
         String auditDetail = "";
 

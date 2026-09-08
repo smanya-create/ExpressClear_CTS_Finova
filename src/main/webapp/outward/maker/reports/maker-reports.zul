@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?link rel="stylesheet" type="text/css" href="/css/maker/maker-report.css"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
 <zk>
 <borderlayout apply="com.iispl.cts.controller.outward.maker.MakerReportController" hflex="1" vflex="1">
 
     <!-- Shared Left Sidebar Navigation -->
     <west width="240px" border="none" collapsible="false">
-        <include src="/components/sidebar.zul" role="MAKER" activeTab="reports" />
+        <include src="/components/sidebar.zul" role="OUTWARD_MAKER" activeTab="outward-maker-reports" />
     </west>
 
     <!-- Main Workspace -->
@@ -17,8 +17,8 @@
                      pageTitle="Maker Dashboard" 
                      pageSubtitle="Operations &amp; Audit Reports" />
 
-            <!-- Content Area Container -->
-            <vlayout spacing="20px" style="padding: 24px;" hflex="1">
+            <!-- Content Area Container matching Role/Audit style -->
+            <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
                 
                 <!-- Page Title Header -->
                 <vlayout spacing="4px">
@@ -26,42 +26,40 @@
                     <label value="Generate and download maker daily balancing, exception handling, and audit logs." sclass="page-subtitle"/>
                 </vlayout>
 
-                <!-- Report Card Panel -->
-                <vlayout sclass="card-panel" spacing="24px" hflex="1">
+                <!-- Filter Controls Card matching the Audit Logs card style -->
+                <vlayout sclass="card-panel" spacing="20px" hflex="1" style="padding: 24px 28px;">
                     
-                    <!-- Date Inputs (Side by Side) -->
-                    <hlayout spacing="24px" hflex="1">
-                        <vlayout spacing="6px" hflex="1">
+                    <!-- Date Inputs -->
+                    <hlayout spacing="16px" valign="bottom" hflex="1">
+                        <vlayout spacing="6px" width="220px">
                             <label value="FROM DATE" sclass="field-label"/>
-                            <datebox id="dtFromDate" format="yyyy-MM-dd" constraint="no empty: Select start date" 
-                                     height="40px" width="100%" sclass="input-box"/>
+                            <datebox id="dtFromDate" format="yyyy-MM-dd" height="38px" width="100%"/>
                         </vlayout>
 
-                        <vlayout spacing="6px" hflex="1">
+                        <vlayout spacing="6px" width="220px">
                             <label value="TO DATE" sclass="field-label"/>
-                            <datebox id="dtToDate" format="yyyy-MM-dd" constraint="no empty: Select end date" 
-                                     height="40px" width="100%" sclass="input-box"/>
+                            <datebox id="dtToDate" format="yyyy-MM-dd" height="38px" width="100%"/>
                         </vlayout>
                     </hlayout>
 
-                    <separator bar="true" sclass="panel-separator"/>
+                    <separator bar="true" style="border-color: #e2e8f0; margin: 4px 0;" />
 
                     <!-- Report Details Description Section -->
                     <vlayout spacing="8px" hflex="1">
-                        <label value="REPORT DETAILS" sclass="section-subtitle"/>
+                        <label value="REPORT DETAILS" sclass="field-label"/>
                         <label value="Select a clearing date range to generate the consolidated 4-part Maker audit report covering:" 
-                               sclass="section-desc"/>
-                        <vlayout spacing="3px" style="padding-left: 8px;">
-                            <label value="• Section 1: Batches with manual MICR repairs" sclass="section-bullet"/>
-                            <label value="• Section 2: Batches pending Courtesy / Legal Amount data entry" sclass="section-bullet"/>
-                            <label value="• Section 3: Cheques blocked due to scan defects or unread codelines" sclass="section-bullet"/>
-                            <label value="• Section 4: Balanced batches cleared and submitted to Checker" sclass="section-bullet"/>
+                               sclass="page-subtitle"/>
+                        <vlayout spacing="4px" style="padding-left: 8px;">
+                            <label value="• Section 1: Batches with manual MICR repairs" sclass="page-subtitle" style="color: #334155;"/>
+                            <label value="• Section 2: Batches pending Courtesy / Legal Amount data entry" sclass="page-subtitle" style="color: #334155;"/>
+                            <label value="• Section 3: Cheques blocked due to scan defects or unread codelines" sclass="page-subtitle" style="color: #334155;"/>
+                            <label value="• Section 4: Balanced batches cleared and submitted to Checker" sclass="page-subtitle" style="color: #334155;"/>
                         </vlayout>
                     </vlayout>
 
-                    <!-- Action Button Area -->
-                    <hlayout hflex="1" style="justify-content: flex-end; padding-top: 8px;">
-                        <button id="btnGenerate" label="GENERATE REPORT" height="42px" sclass="btn-primary" iconSclass="z-icon-download"/>
+                    <!-- Button aligned to bottom-left matching your screenshot -->
+                    <hlayout hflex="1" style="justify-content: flex-start; margin-top: 12px;">
+                        <button id="btnGenerate" label="GENERATE REPORT" height="38px" sclass="btn-primary" iconSclass="z-icon-download"/>
                     </hlayout>
 
                 </vlayout>

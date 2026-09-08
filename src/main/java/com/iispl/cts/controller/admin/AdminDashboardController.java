@@ -35,6 +35,7 @@ import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.common.util.ActiveUserManager;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.PendingChequeDTO;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
 
@@ -80,6 +81,10 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	if (!SecurityUtil.checkAccess("ADMIN_DASHBOARD")) {
+            return; // Stops component initialization and redirects unauthenticated users
+        }
+    	
         super.doAfterCompose(comp);
         loadSessionData();
         refreshUI();

@@ -1,0 +1,1876 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jasperReport
+    xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    name="outward_cheque_report"
+    pageWidth="842"
+    pageHeight="595"
+    orientation="Landscape"
+    columnWidth="782"
+    leftMargin="30"
+    rightMargin="30"
+    topMargin="25"
+    bottomMargin="25"
+    whenNoDataType="NoDataSection">
+
+    <!-- =========================================================
+         PARAMETERS
+         ========================================================= -->
+
+    <parameter name="FROM_DATE"
+               class="java.sql.Date"/>
+
+    <parameter name="TO_DATE"
+               class="java.sql.Date"/>
+
+    <parameter name="GENERATED_BY"
+               class="java.lang.String"/>
+
+    <parameter name="GENERATION_DATE"
+               class="java.util.Date"/>
+
+
+    <!-- =========================================================
+         QUERY
+         ========================================================= -->
+
+    <queryString language="SQL">
+        <![CDATA[
+
+        SELECT
+            1 AS section_order,
+            'REJECTED' AS report_section,
+            b.outward_batch_id,
+            b.batch_reference_id,
+            b.actual_cheque_count,
+            b.actual_total_amount,
+            b.batch_status,
+            b.uploaded_at,
+
+            COUNT(r.outward_rejected_cheque_id)::INTEGER
+                AS rejected_cheque_count,
+
+            0::INTEGER AS unprocessed_cheque_count
+
+        FROM public.outward_batch b
+
+        INNER JOIN public.outward_rejected_cheques r
+            ON r.outward_batch_id = b.outward_batch_id
+
+        WHERE
+            b.uploaded_at >= CAST($P{FROM_DATE} AS DATE)
+
+            AND
+
+            b.uploaded_at <
+                CAST($P{TO_DATE} AS DATE) + 1
+
+        GROUP BY
+            b.outward_batch_id,
+            b.batch_reference_id,
+            b.actual_cheque_count,
+            b.actual_total_amount,
+            b.batch_status,
+            b.uploaded_at
+
+
+        UNION ALL
+
+
+        SELECT
+            2 AS section_order,
+            'NORMAL' AS report_section,
+            b.outward_batch_id,
+            b.batch_reference_id,
+            b.actual_cheque_count,
+            b.actual_total_amount,
+            b.batch_status,
+            b.uploaded_at,
+
+            0::INTEGER AS rejected_cheque_count,
+
+            (
+                SELECT COUNT(*)::INTEGER
+
+                FROM public.outward_cheque c
+
+                WHERE
+                    c.outward_batch_id = b.outward_batch_id
+
+                    AND
+                    (
+                        c.cheque_status IS NULL
+
+                        OR LOWER(TRIM(c.cheque_status))
+                           IN ('pending', 'unprocessed')
+                    )
+
+            ) AS unprocessed_cheque_count
+
+        FROM public.outward_batch b
+
+        WHERE
+            b.uploaded_at >= CAST($P{FROM_DATE} AS DATE)
+
+            AND
+
+            b.uploaded_at <
+                CAST($P{TO_DATE} AS DATE) + 1
+
+            AND NOT EXISTS
+            (
+                SELECT 1
+
+                FROM public.outward_rejected_cheques r
+
+                WHERE
+                    r.outward_batch_id =
+                        b.outward_batch_id
+            )
+
+        ORDER BY
+            section_order,
+            uploaded_at,
+            outward_batch_id
+
+        ]]>
+    </queryString>
+
+
+    <!-- =========================================================
+         FIELDS
+         ========================================================= -->
+
+    <field name="section_order"
+           class="java.lang.Integer"/>
+
+    <field name="report_section"
+           class="java.lang.String"/>
+
+    <field name="outward_batch_id"
+           class="java.lang.String"/>
+
+    <field name="batch_reference_id"
+           class="java.lang.String"/>
+
+    <field name="actual_cheque_count"
+           class="java.lang.Integer"/>
+
+    <field name="actual_total_amount"
+           class="java.math.BigDecimal"/>
+
+    <field name="batch_status"
+           class="java.lang.String"/>
+
+    <field name="uploaded_at"
+           class="java.sql.Timestamp"/>
+
+    <field name="rejected_cheque_count"
+           class="java.lang.Integer"/>
+
+    <field name="unprocessed_cheque_count"
+           class="java.lang.Integer"/>
+
+
+    <!-- =========================================================
+         SUMMARY VARIABLES
+         ========================================================= -->
+
+    <variable name="V_TOTAL_BATCHES"
+              class="java.lang.Integer"
+              calculation="Count">
+
+        <variableExpression><![CDATA[
+            Boolean.TRUE
+        ]]></variableExpression>
+
+    </variable>
+
+
+    <variable name="V_TOTAL_CHEQUES"
+              class="java.lang.Integer"
+              calculation="Sum">
+
+        <variableExpression><![CDATA[
+            $F{actual_cheque_count}
+        ]]></variableExpression>
+
+    </variable>
+
+
+    <variable name="V_TOTAL_AMOUNT"
+              class="java.math.BigDecimal"
+              calculation="Sum">
+
+        <variableExpression><![CDATA[
+            $F{actual_total_amount}
+        ]]></variableExpression>
+
+    </variable>
+
+
+    <variable name="V_REJECTED_BATCHES"
+              class="java.lang.Integer"
+              calculation="Sum">
+
+        <variableExpression><![CDATA[
+            $F{section_order} == 1 ? 1 : 0
+        ]]></variableExpression>
+
+    </variable>
+
+
+    <variable name="V_REJECTED_CHEQUES"
+              class="java.lang.Integer"
+              calculation="Sum">
+
+        <variableExpression><![CDATA[
+            $F{rejected_cheque_count}
+        ]]></variableExpression>
+
+    </variable>
+
+
+    <variable name="V_UNPROCESSED_CHEQUES"
+              class="java.lang.Integer"
+              calculation="Sum">
+
+        <variableExpression><![CDATA[
+            $F{unprocessed_cheque_count}
+        ]]></variableExpression>
+
+    </variable>
+
+
+    <!-- =========================================================
+         GROUP
+         ========================================================= -->
+
+    <group name="REPORT_SECTION_GROUP"
+           isReprintHeaderOnEachPage="true">
+
+        <groupExpression><![CDATA[
+            $F{report_section}
+        ]]></groupExpression>
+
+
+        <groupHeader>
+
+            <band height="55">
+
+
+                <!-- =================================================
+                     REJECTED TABLE HEADING
+                     ================================================= -->
+
+                <frame>
+
+                    <reportElement
+                        x="0"
+                        y="0"
+                        width="782"
+                        height="55">
+
+                        <printWhenExpression><![CDATA[
+                            "REJECTED".equals($F{report_section})
+                        ]]></printWhenExpression>
+
+                    </reportElement>
+
+
+                    <!-- REJECTED BATCHES HEADING -->
+
+                    <textField>
+
+                        <reportElement
+                            x="0"
+                            y="0"
+                            width="782"
+                            height="22"/>
+
+                        <textElement
+                            textAlignment="Left"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="12"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <textFieldExpression><![CDATA[
+                            "REJECTED BATCHES"
+                        ]]></textFieldExpression>
+
+                    </textField>
+
+
+                    <!-- BATCH ID -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="0"
+                            y="22"
+                            width="110"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            BATCH ID
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- BATCH REFERENCE -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="110"
+                            y="22"
+                            width="145"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            BATCH REFERENCE
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- TOTAL CHEQUES -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="255"
+                            y="22"
+                            width="100"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            TOTAL CHEQUES
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- REJECTED -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="355"
+                            y="22"
+                            width="100"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            REJECTED
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- TOTAL AMOUNT -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="455"
+                            y="22"
+                            width="140"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            TOTAL AMOUNT
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- UPLOADED DATE -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="595"
+                            y="22"
+                            width="187"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            UPLOADED DATE
+                        ]]></text>
+
+                    </staticText>
+
+                </frame>
+
+
+                <!-- =================================================
+                     NORMAL TABLE HEADING
+                     ================================================= -->
+
+                <frame>
+
+                    <reportElement
+                        x="0"
+                        y="0"
+                        width="782"
+                        height="55">
+
+                        <printWhenExpression><![CDATA[
+                            "NORMAL".equals($F{report_section})
+                        ]]></printWhenExpression>
+
+                    </reportElement>
+
+
+                    <!-- NORMAL TABLE HEADING -->
+
+                    <textField>
+
+                        <reportElement
+                            x="0"
+                            y="0"
+                            width="782"
+                            height="22"/>
+
+                        <textElement
+                            textAlignment="Left"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="12"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <textFieldExpression><![CDATA[
+                            "VERIFIED / PENDING / UNPROCESSED BATCHES"
+                        ]]></textFieldExpression>
+
+                    </textField>
+
+
+                    <!-- BATCH ID -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="0"
+                            y="22"
+                            width="95"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            BATCH ID
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- BATCH REFERENCE -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="95"
+                            y="22"
+                            width="125"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            BATCH REFERENCE
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- TOTAL CHEQUES -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="220"
+                            y="22"
+                            width="85"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            TOTAL CHEQUES
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- TOTAL AMOUNT -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="305"
+                            y="22"
+                            width="115"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            TOTAL AMOUNT
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- STATUS -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="420"
+                            y="22"
+                            width="115"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            STATUS
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- UNPROCESSED -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="535"
+                            y="22"
+                            width="90"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            UNPROCESSED
+                        ]]></text>
+
+                    </staticText>
+
+
+                    <!-- UPLOADED DATE -->
+
+                    <staticText>
+
+                        <reportElement
+                            x="625"
+                            y="22"
+                            width="157"
+                            height="33"/>
+
+                        <box>
+                            <pen lineWidth="0.5"/>
+                        </box>
+
+                        <textElement
+                            textAlignment="Center"
+                            verticalAlignment="Middle">
+
+                            <font
+                                fontName="SansSerif"
+                                size="7"
+                                isBold="true"/>
+
+                        </textElement>
+
+                        <text><![CDATA[
+                            UPLOADED DATE
+                        ]]></text>
+
+                    </staticText>
+
+                </frame>
+
+            </band>
+
+        </groupHeader>
+
+    </group>
+
+
+    <!-- =========================================================
+         TITLE / SUMMARY
+         ========================================================= -->
+
+    <title>
+
+        <band height="190">
+
+
+            <!-- =================================================
+                 MAIN REPORT HEADING
+                 ================================================= -->
+
+            <textField>
+
+                <reportElement
+                    x="0"
+                    y="0"
+                    width="782"
+                    height="30"/>
+
+                <textElement
+                    textAlignment="Center"
+                    verticalAlignment="Middle">
+
+                    <font
+                        fontName="SansSerif"
+                        size="18"
+                        isBold="true"/>
+
+                </textElement>
+
+                <textFieldExpression><![CDATA[
+                    "CHECKER REPORT"
+                ]]></textFieldExpression>
+
+            </textField>
+
+
+            <!-- =================================================
+                 DATE RANGE
+                 ================================================= -->
+
+            <textField>
+
+                <reportElement
+                    x="0"
+                    y="38"
+                    width="782"
+                    height="20"/>
+
+                <textElement
+                    textAlignment="Center"
+                    verticalAlignment="Middle">
+
+                    <font
+                        fontName="SansSerif"
+                        size="10"/>
+
+                </textElement>
+
+                <textFieldExpression><![CDATA[
+                    "From "
+                    +
+                    new java.text.SimpleDateFormat("dd-MM-yyyy")
+                        .format($P{FROM_DATE})
+                    +
+                    " To "
+                    +
+                    new java.text.SimpleDateFormat("dd-MM-yyyy")
+                        .format($P{TO_DATE})
+                ]]></textFieldExpression>
+
+            </textField>
+
+
+            <!-- =================================================
+                 SUMMARY HEADING
+                 ================================================= -->
+
+            <textField>
+
+                <reportElement
+                    x="0"
+                    y="62"
+                    width="782"
+                    height="22"/>
+
+                <textElement
+                    textAlignment="Left"
+                    verticalAlignment="Middle">
+
+                    <font
+                        fontName="SansSerif"
+                        size="12"
+                        isBold="true"/>
+
+                </textElement>
+
+                <textFieldExpression><![CDATA[
+                    "SUMMARY"
+                ]]></textFieldExpression>
+
+            </textField>
+
+
+            <!-- =================================================
+                 SUMMARY 1
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="0"
+                    y="88"
+                    width="245"
+                    height="40"/>
+
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="2"
+                        width="245"
+                        height="15"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="8"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        "TOTAL BATCHES"
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <textField evaluationTime="Report">
+
+                    <reportElement
+                        x="0"
+                        y="18"
+                        width="245"
+                        height="18"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="11"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $V{V_TOTAL_BATCHES}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+
+            <!-- =================================================
+                 SUMMARY 2
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="268"
+                    y="88"
+                    width="245"
+                    height="40"/>
+
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="2"
+                        width="245"
+                        height="15"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="8"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        "TOTAL CHEQUES"
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <textField evaluationTime="Report">
+
+                    <reportElement
+                        x="0"
+                        y="18"
+                        width="245"
+                        height="18"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="11"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $V{V_TOTAL_CHEQUES}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+
+            <!-- =================================================
+                 SUMMARY 3
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="537"
+                    y="88"
+                    width="245"
+                    height="40"/>
+
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="2"
+                        width="245"
+                        height="15"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="8"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        "TOTAL AMOUNT"
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <textField
+                    evaluationTime="Report"
+                    pattern="#,##0.00">
+
+                    <reportElement
+                        x="0"
+                        y="18"
+                        width="245"
+                        height="18"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="10"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $V{V_TOTAL_AMOUNT}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+
+            <!-- =================================================
+                 SUMMARY 4
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="0"
+                    y="138"
+                    width="245"
+                    height="40"/>
+
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="2"
+                        width="245"
+                        height="15"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="8"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        "REJECTED BATCHES"
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <textField evaluationTime="Report">
+
+                    <reportElement
+                        x="0"
+                        y="18"
+                        width="245"
+                        height="18"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="11"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $V{V_REJECTED_BATCHES}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+
+            <!-- =================================================
+                 SUMMARY 5
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="268"
+                    y="138"
+                    width="245"
+                    height="40"/>
+
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="2"
+                        width="245"
+                        height="15"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="8"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        "REJECTED CHEQUES"
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <textField evaluationTime="Report">
+
+                    <reportElement
+                        x="0"
+                        y="18"
+                        width="245"
+                        height="18"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="11"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $V{V_REJECTED_CHEQUES}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+
+            <!-- =================================================
+                 SUMMARY 6
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="537"
+                    y="138"
+                    width="245"
+                    height="40"/>
+
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="2"
+                        width="245"
+                        height="15"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="8"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        "UNPROCESSED CHEQUES"
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <textField evaluationTime="Report">
+
+                    <reportElement
+                        x="0"
+                        y="18"
+                        width="245"
+                        height="18"/>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="11"
+                            isBold="true"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $V{V_UNPROCESSED_CHEQUES}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+        </band>
+
+    </title>
+
+
+    <!-- =========================================================
+         DETAIL
+         ========================================================= -->
+
+    <detail>
+
+        <band height="30">
+
+
+            <!-- =================================================
+                 REJECTED ROW
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="0"
+                    y="0"
+                    width="782"
+                    height="30">
+
+                    <printWhenExpression><![CDATA[
+                        "REJECTED".equals($F{report_section})
+                    ]]></printWhenExpression>
+
+                </reportElement>
+
+
+                <!-- BATCH ID -->
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="0"
+                        width="110"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{outward_batch_id}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- BATCH REFERENCE -->
+
+                <textField>
+
+                    <reportElement
+                        x="110"
+                        y="0"
+                        width="145"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{batch_reference_id}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- TOTAL CHEQUES -->
+
+                <textField>
+
+                    <reportElement
+                        x="255"
+                        y="0"
+                        width="100"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{actual_cheque_count}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- REJECTED -->
+
+                <textField>
+
+                    <reportElement
+                        x="355"
+                        y="0"
+                        width="100"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{rejected_cheque_count}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- TOTAL AMOUNT -->
+
+                <textField pattern="#,##0.00">
+
+                    <reportElement
+                        x="455"
+                        y="0"
+                        width="140"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Right"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{actual_total_amount}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- DATE -->
+
+                <textField pattern="dd-MM-yyyy HH\:mm\:ss">
+
+                    <reportElement
+                        x="595"
+                        y="0"
+                        width="187"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{uploaded_at}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+
+            <!-- =================================================
+                 NORMAL ROW
+                 ================================================= -->
+
+            <frame>
+
+                <reportElement
+                    x="0"
+                    y="0"
+                    width="782"
+                    height="30">
+
+                    <printWhenExpression><![CDATA[
+                        "NORMAL".equals($F{report_section})
+                    ]]></printWhenExpression>
+
+                </reportElement>
+
+
+                <!-- BATCH ID -->
+
+                <textField>
+
+                    <reportElement
+                        x="0"
+                        y="0"
+                        width="95"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{outward_batch_id}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- BATCH REFERENCE -->
+
+                <textField>
+
+                    <reportElement
+                        x="95"
+                        y="0"
+                        width="125"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{batch_reference_id}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- TOTAL CHEQUES -->
+
+                <textField>
+
+                    <reportElement
+                        x="220"
+                        y="0"
+                        width="85"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{actual_cheque_count}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- TOTAL AMOUNT -->
+
+                <textField pattern="#,##0.00">
+
+                    <reportElement
+                        x="305"
+                        y="0"
+                        width="115"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Right"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{actual_total_amount}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- STATUS -->
+
+                <textField>
+
+                    <reportElement
+                        x="420"
+                        y="0"
+                        width="115"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{batch_status}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- UNPROCESSED -->
+
+                <textField>
+
+                    <reportElement
+                        x="535"
+                        y="0"
+                        width="90"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{unprocessed_cheque_count}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+
+                <!-- DATE -->
+
+                <textField pattern="dd-MM-yyyy HH\:mm\:ss">
+
+                    <reportElement
+                        x="625"
+                        y="0"
+                        width="157"
+                        height="30"/>
+
+                    <box>
+                        <pen lineWidth="0.5"/>
+                    </box>
+
+                    <textElement
+                        textAlignment="Center"
+                        verticalAlignment="Middle">
+
+                        <font
+                            fontName="SansSerif"
+                            size="7"/>
+
+                    </textElement>
+
+                    <textFieldExpression><![CDATA[
+                        $F{uploaded_at}
+                    ]]></textFieldExpression>
+
+                </textField>
+
+            </frame>
+
+        </band>
+
+    </detail>
+
+
+    <!-- =========================================================
+         PAGE FOOTER
+         ========================================================= -->
+
+    <pageFooter>
+
+        <band height="25">
+
+            <textField>
+
+                <reportElement
+                    x="0"
+                    y="5"
+                    width="300"
+                    height="15"/>
+
+                <textElement
+                    verticalAlignment="Middle">
+
+                    <font
+                        fontName="SansSerif"
+                        size="8"/>
+
+                </textElement>
+
+                <textFieldExpression><![CDATA[
+                    "CTS - Checker Report"
+                ]]></textFieldExpression>
+
+            </textField>
+
+
+            <textField>
+
+                <reportElement
+                    x="650"
+                    y="5"
+                    width="132"
+                    height="15"/>
+
+                <textElement
+                    textAlignment="Right"
+                    verticalAlignment="Middle">
+
+                    <font
+                        fontName="SansSerif"
+                        size="8"/>
+
+                </textElement>
+
+                <textFieldExpression><![CDATA[
+                    "Page " + $V{PAGE_NUMBER}
+                ]]></textFieldExpression>
+
+            </textField>
+
+        </band>
+
+    </pageFooter>
+
+
+    <!-- =========================================================
+         NO DATA
+         ========================================================= -->
+
+    <noData>
+
+        <band height="60">
+
+            <textField>
+
+                <reportElement
+                    x="0"
+                    y="15"
+                    width="782"
+                    height="30"/>
+
+                <textElement
+                    textAlignment="Center"
+                    verticalAlignment="Middle">
+
+                    <font
+                        fontName="SansSerif"
+                        size="12"
+                        isBold="true"/>
+
+                </textElement>
+
+                <textFieldExpression><![CDATA[
+                    "No batches found for the selected date range."
+                ]]></textFieldExpression>
+
+            </textField>
+
+        </band>
+
+    </noData>
+
+</jasperReport>

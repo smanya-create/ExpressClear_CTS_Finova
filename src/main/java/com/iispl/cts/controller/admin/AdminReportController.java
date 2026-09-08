@@ -1,6 +1,8 @@
 package com.iispl.cts.controller.admin;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
+
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -32,6 +34,9 @@ public class AdminReportController extends GenericForwardComposer<Component> {
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	if(!SecurityUtil.checkAccess(null)) {
+    		return;
+    	}
         super.doAfterCompose(comp);
 
         Date today = new Date();
