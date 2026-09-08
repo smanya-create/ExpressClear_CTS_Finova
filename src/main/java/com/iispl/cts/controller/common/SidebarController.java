@@ -231,7 +231,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardCheckerUnprocessedQueue() {
-		Executions.sendRedirect("outward/checker/checker-unprocessed-cheques.zul");
+		Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
 	}
 
 	// Inward Maker Navigation Actions
