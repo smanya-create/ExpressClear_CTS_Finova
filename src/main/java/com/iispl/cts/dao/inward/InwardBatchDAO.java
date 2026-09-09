@@ -5,6 +5,7 @@ import java.util.List;
 import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
+import com.iispl.cts.enums.inward.InwardBatchStatus;
 
 public interface InwardBatchDAO {
 
@@ -28,5 +29,6 @@ public interface InwardBatchDAO {
     List<DashboardSummaryDTO> getDashboardBatches();
     List<InwardReportChequeDTO> getChequesByBatch();
     
-    boolean updateProcessingBatchStatus(String batchId, String status);
+
+	boolean updateProcessingBatchStatus(String batchId, InwardBatchStatus status);
 }

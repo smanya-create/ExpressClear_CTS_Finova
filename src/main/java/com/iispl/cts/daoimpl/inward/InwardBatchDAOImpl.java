@@ -16,6 +16,7 @@ import com.iispl.cts.dao.inward.InwardBatchDAO;
 import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
+import com.iispl.cts.enums.inward.InwardBatchStatus;
 
 public class InwardBatchDAOImpl implements InwardBatchDAO {
 
@@ -249,11 +250,11 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	@Override
 	public List<DashboardSummaryDTO> getDashboardBatches() {
 		String dashboardSummaryQuery = "SELECT ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count AS total_cheques, "
-		        + "COUNT(CASE WHEN ic.cheque_status = 'maker_approved' THEN 1 END) AS normal_cheques, "
-		        + "COUNT(CASE WHEN ic.cheque_status = 'rejection_request' THEN 1 END) AS rejected_cheques "
+		        + "COUNT(CASE WHEN ic.cheque_status = 'CHECKER_PROCESSING_PENDING' THEN 1 END) AS normal_cheques, "
+		        + "COUNT(CASE WHEN ic.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS rejected_cheques "
 		        + "FROM inward_batch ib "
 		        + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
-		        + "WHERE ib.batch_status IN ('CHECKER_PROCESSING', 'IN_VERIFICATION') "
+		        + "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING') "
 		        + "GROUP BY ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count "
 		        + "ORDER BY ib.inward_batch_id;";
 
@@ -466,12 +467,12 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 
 
 	@Override
-	public boolean updateProcessingBatchStatus(String batchId, String status) {
+	public boolean updateProcessingBatchStatus(String batchId, InwardBatchStatus status) {
 	    String query = "UPDATE inward_batch SET batch_status = ? WHERE inward_batch_id = ?";
 
 	    try (Connection conn = DBConnection.getConnection();
 	            PreparedStatement ps = conn.prepareStatement(query)) {
-	        ps.setString(1, status);
+	        ps.setString(1, status.toString());
 	        ps.setString(2, batchId);
 	        return ps.executeUpdate() > 0;
 	    } catch (Exception e) {
@@ -480,4 +481,6 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 
 	    return false;
 	}
+
+	
 }

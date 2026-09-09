@@ -16,6 +16,7 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.dto.DashboardSummaryDTO;
+import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
@@ -129,7 +130,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         btnVerify.setStyle("background:#242F82; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 3px;");
 
         btnVerify.addEventListener(Events.ON_CLICK, e -> {
-            boolean updated = batchService.updateProcessingBatchStatus(batchId, "IN_VERIFICATION");
+            boolean updated = batchService.updateProcessingBatchStatus(batchId, InwardBatchStatus.CHECKER_PROCESSING);
 
             if (updated) {
                 Executions.getCurrent().sendRedirect("/inward/checker/verification.zul?batchId=" + batchId);

@@ -1,6 +1,7 @@
 package com.iispl.cts.serviceimpl.inward;
 
 import java.util.List;
+
 import com.iispl.cts.dao.inward.InwardBatchDAO;
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.dao.inward.InwardChequeImageDAO;
@@ -12,6 +13,7 @@ import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.parser.InwardBatchXmlParser;
 import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -149,7 +151,7 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 	}
 
 	@Override
-	public boolean updateProcessingBatchStatus(String batchId, String status) {
+	public boolean updateProcessingBatchStatus(String batchId, InwardBatchStatus status) {
 		
 		return inwardBatchDAO.updateProcessingBatchStatus(batchId, status);
 	}
