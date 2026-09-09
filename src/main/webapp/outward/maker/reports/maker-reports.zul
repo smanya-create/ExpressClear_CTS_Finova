@@ -58,8 +58,13 @@
                     </vlayout>
 
                     <!-- Button aligned to bottom-left matching your screenshot -->
-                    <hlayout hflex="1" style="justify-content: flex-start; margin-top: 12px;">
-                        <button id="btnGenerate" label="GENERATE REPORT" height="38px" sclass="btn-primary" iconSclass="z-icon-download"/>
+                   <hlayout spacing="12px" hflex="1" style="justify-content: flex-start; margin-top: 12px;">
+                        <button id="btnExportCsv" label="DOWNLOAD CSV" height="38px" 
+                                style="background-color: #0F766E; color: #FFFFFF; font-weight: 600; border-radius: 4px; padding: 0 18px;" 
+                                iconSclass="z-icon-file-text-o" />
+                        <button id="btnExportPdf" label="DOWNLOAD PDF REPORT" height="38px" 
+                                sclass="btn-primary" 
+                                iconSclass="z-icon-file-pdf-o" />
                     </hlayout>
 
                 </vlayout>

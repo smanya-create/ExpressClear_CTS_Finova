@@ -1,5 +1,10 @@
 package com.iispl.cts.service.outward;
 
+import java.util.Date;
+
 public interface MakerReportService {
-    byte[] generateMakerReportHtml(String makerId, java.util.Date fromDate, java.util.Date toDate) throws Exception;
+	byte[] generateMakerReportPdf(String makerId, Date fromDate, Date toDate) throws Exception;
+
+    byte[] generateMakerReportCsv(String makerId, Date fromDate, Date toDate) throws Exception;
+
 }
