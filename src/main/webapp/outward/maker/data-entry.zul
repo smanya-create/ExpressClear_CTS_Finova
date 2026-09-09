@@ -2,8 +2,8 @@
 
 <?page title="CTS - Outward Data Entry" contentType="text/html;charset=UTF-8"?>
 
-<zk>
 
+<zk>
 	<style src="/css/outward/data-entry.css" />
 
 	<div id="outwardDataEntryMain" width="100%"

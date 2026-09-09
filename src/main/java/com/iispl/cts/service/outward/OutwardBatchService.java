@@ -14,10 +14,11 @@ public interface OutwardBatchService {
 
 	OutwardBatch getBatchById(String outwardBatchId);
 
-	List<OutwardBatch> getPendingBatches(int pageNumber,int pageSize);
+	List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize);
+
 	int getPendingBatchCount();
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 
-
+	String getScannedBatchIdByOutwardBatchId(String outwardBatchId);
 }

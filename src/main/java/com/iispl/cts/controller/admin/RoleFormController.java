@@ -16,6 +16,7 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.RoleService;
@@ -46,6 +47,9 @@ public class RoleFormController extends GenericForwardComposer<Component> {
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	if(!SecurityUtil.checkAccess(null)) {
+    		return;
+    	}
         super.doAfterCompose(comp);
 
         roleIdParam = Executions.getCurrent().getParameter("roleId");

@@ -23,15 +23,13 @@ public interface InwardChequeDAO {
 
 	boolean updateCheque(InwardCheque inwardCheque);
 
-	boolean updateMicrRepair(String inwardChequeId, String correctedMicrCode, String chequeStatus);
+	boolean updateMicrRepair(String inwardChequeId, String inwardBatchId, String originalMicr, String correctedMicrCode,
+			String chequeStatus, String repairedBy, String remarks);
 
 	boolean deleteCheque(String inwardChequeId);
-	
-	boolean saveRejection(
-            String inwardChequeId,
-            String rejectedReasonId,
-            String remarks,
-            String rejectedBy);
+
+	boolean saveRejection(String inwardChequeId, String rejectedReasonId, String remarks, String rejectedBy);
+
 	CbsValidationResult validateCbs(InwardCheque cheque);
-	
+
 }

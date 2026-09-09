@@ -15,6 +15,8 @@ public interface OutwardChequeService {
 	BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId);
 
 	int getDataEnteredCountByBatchId(String outwardBatchId);
-	
+
 	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
+
+	boolean saveDataEntry(OutwardCheque cheque);
 }

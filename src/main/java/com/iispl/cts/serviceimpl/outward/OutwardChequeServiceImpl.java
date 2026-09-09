@@ -46,4 +46,9 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 
 		return outwardChequeDAO.updateChequeStatus(outwardChequeId, chequeStatus);
 	}
+
+	@Override
+	public boolean saveDataEntry(OutwardCheque cheque) {
+		return outwardChequeDAO.saveDataEntry(cheque);
+	}
 }

@@ -212,7 +212,7 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 
 		String sql = "SELECT scanned_batch_id, batch_reference_id, actual_cheque_count, "
 				+ "actual_total_amount, staging_status, batch_status, uploaded_by, uploaded_at " + "FROM scan_batch "
-				+ "WHERE UPPER(batch_status) = 'PROCESSING' " + "ORDER BY uploaded_at DESC";
+				+ "WHERE UPPER(TRIM(batch_status)) = 'PROCESSING' " + "ORDER BY uploaded_at DESC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -223,19 +223,27 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 				ScanBatch scanBatch = new ScanBatch();
 
 				scanBatch.setScannedBatchId(resultSet.getString("scanned_batch_id"));
+
 				scanBatch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
+
 				scanBatch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
+
 				scanBatch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
+
 				scanBatch.setStagingStatus(resultSet.getString("staging_status"));
+
 				scanBatch.setBatchStatus(resultSet.getString("batch_status"));
+
 				scanBatch.setUploadedBy(resultSet.getString("uploaded_by"));
+
 				scanBatch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
 
 				batchList.add(scanBatch);
 			}
 
-		} catch (SQLException e) {
-			throw new RuntimeException("Error while retrieving maker dashboard batches", e);
+		} catch (Exception exception) {
+
+			throw new RuntimeException("Unable to fetch Maker Dashboard batches from scan_batch", exception);
 		}
 
 		return batchList;
@@ -278,73 +286,42 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 	@Override
 	public List<MicrRepairBatch> getScanMicrRepairBatches() {
 
-	    List<MicrRepairBatch> batchList =
-	            new ArrayList<>();
+		List<MicrRepairBatch> batchList = new ArrayList<>();
 
-	    String sql =
-	            "SELECT "
-	          + "sb.scanned_batch_id, "
-	          + "sb.uploaded_at, "
-	          + "sb.actual_cheque_count, "
-	          + "sb.batch_status, "
-	          + "COUNT(sc.scanned_cheque_id) AS micr_errors "
-	          + "FROM scan_batch sb "
-	          + "JOIN scan_cheque sc "
-	          + "ON sc.scanned_batch_id = sb.scanned_batch_id "
-	          + "WHERE sc.cheque_status = 'MICR_REPAIR_REQUIRED' "
-	          + "GROUP BY "
-	          + "sb.scanned_batch_id, "
-	          + "sb.uploaded_at, "
-	          + "sb.actual_cheque_count, "
-	          + "sb.batch_status "
-	          + "ORDER BY sb.uploaded_at DESC";
+		String sql = "SELECT " + "sb.scanned_batch_id, " + "sb.uploaded_at, " + "sb.actual_cheque_count, "
+				+ "sb.batch_status, " + "COUNT(sc.scanned_cheque_id) AS micr_errors " + "FROM scan_batch sb "
+				+ "JOIN scan_cheque sc " + "ON sc.scanned_batch_id = sb.scanned_batch_id "
+				+ "WHERE sc.cheque_status = 'MICR_REPAIR_REQUIRED' " + "GROUP BY " + "sb.scanned_batch_id, "
+				+ "sb.uploaded_at, " + "sb.actual_cheque_count, " + "sb.batch_status " + "ORDER BY sb.uploaded_at DESC";
 
-	    try (
-	            Connection connection =
-	                    DBConnection.getConnection();
+		try (Connection connection = DBConnection.getConnection();
 
-	            PreparedStatement preparedStatement =
-	                    connection.prepareStatement(sql);
+				PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-	            ResultSet resultSet =
-	                    preparedStatement.executeQuery()
-	    ) {
+				ResultSet resultSet = preparedStatement.executeQuery()) {
 
-	        while (resultSet.next()) {
+			while (resultSet.next()) {
 
-	            MicrRepairBatch batch =
-	                    new MicrRepairBatch();
+				MicrRepairBatch batch = new MicrRepairBatch();
 
-	            batch.setBatchId(
-	                    resultSet.getString(
-	                            "scanned_batch_id"));
+				batch.setBatchId(resultSet.getString("scanned_batch_id"));
 
-	            batch.setScanDate(
-	                    resultSet.getTimestamp(
-	                            "uploaded_at"));
+				batch.setScanDate(resultSet.getTimestamp("uploaded_at"));
 
-	            batch.setTotalCheques(
-	                    resultSet.getInt(
-	                            "actual_cheque_count"));
+				batch.setTotalCheques(resultSet.getInt("actual_cheque_count"));
 
-	            batch.setMicrErrors(
-	                    resultSet.getInt(
-	                            "micr_errors"));
+				batch.setMicrErrors(resultSet.getInt("micr_errors"));
 
-	            batch.setStatus(
-	                    resultSet.getString(
-	                            "batch_status"));
+				batch.setStatus(resultSet.getString("batch_status"));
 
-	            batchList.add(batch);
-	        }
+				batchList.add(batch);
+			}
 
-	    } catch (SQLException e) {
+		} catch (SQLException e) {
 
-	        throw new RuntimeException(
-	                "Error while retrieving scan MICR repair batches",
-	                e);
-	    }
+			throw new RuntimeException("Error while retrieving scan MICR repair batches", e);
+		}
 
-	    return batchList;
+		return batchList;
 	}
 }

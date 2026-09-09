@@ -8,84 +8,90 @@
 		apply="com.iispl.cts.controller.outward.maker.OutwardMakerDashboardController"
 		sclass="outward-maker-dashboard">
 
-		<div sclass="outward-maker-welcome-section">
+		<div sclass="outward-maker-dashboard-scroll" width="100%"
+			height="100%">
 
-			<label value="Welcome, Maker"
-				sclass="outward-maker-welcome-title" />
+			<div sclass="outward-maker-welcome-section">
 
-			<label value="Manage and process outward cheque batches."
-				sclass="outward-maker-welcome-subtitle" />
-
-		</div>
-
-		<div sclass="outward-maker-section-header">
-
-			<div>
-
-				<label value="Processing Batches"
-					sclass="outward-maker-section-title" />
+				<label value="Welcome, Maker"
+					sclass="outward-maker-welcome-title" />
 
 				<label
-					value="Batches currently available for outward processing."
-					sclass="outward-maker-section-subtitle" />
+					value="Manage and process outward cheque batches."
+					sclass="outward-maker-welcome-subtitle" />
 
 			</div>
 
-		</div>
+			<div sclass="outward-maker-section-header">
 
-		<div sclass="outward-maker-table-card">
+				<div>
 
-			<grid id="outwardMakerGridBatchDetails" width="100%"
-				sclass="outward-maker-batch-grid">
+					<label value="Processing Batches"
+						sclass="outward-maker-section-title" />
 
-				<columns sizable="true">
+					<label
+						value="Batches currently available for outward processing."
+						sclass="outward-maker-section-subtitle" />
 
-					<column label="Batch ID" width="24%" />
+				</div>
 
-					<column label="No. of Cheques" width="18%" />
+			</div>
 
-					<column label="Total Amount" width="22%" />
+			<div sclass="outward-maker-table-card">
 
-					<column label="Status" width="17%" />
+				<grid id="outwardMakerGridBatchDetails" width="100%"
+					sclass="outward-maker-batch-grid">
 
-					<column label="Action" width="19%" />
+					<columns sizable="true">
 
-				</columns>
+						<column label="Batch ID" width="20%" />
 
-				<rows id="outwardMakerRowsBatchDetails" />
+						<column label="No. of Cheques" width="20%" />
 
-			</grid>
+						<column label="Total Amount" width="20%" />
 
-			<vlayout id="outwardMakerVlayoutEmptyState" visible="false"
-				sclass="outward-maker-empty-state">
+						<column label="Status" width="20%" />
 
-				<label value="No processing batches found"
-					sclass="outward-maker-empty-title" />
+						<column label="Action" width="20%" />
 
-				<label
-					value="There are currently no batches available for outward processing."
-					sclass="outward-maker-empty-subtitle" />
+					</columns>
 
-			</vlayout>
+					<rows id="outwardMakerRowsBatchDetails" />
 
-		</div>
+				</grid>
 
-		<div sclass="outward-maker-pagination">
+				<vlayout id="outwardMakerVlayoutEmptyState"
+					visible="false" sclass="outward-maker-empty-state">
 
-			<button id="outwardMakerBtnFirst" label="&lt;&lt;"
-				sclass="outward-maker-pagination-button" />
+					<label value="No processing batches found"
+						sclass="outward-maker-empty-title" />
 
-			<button id="outwardMakerBtnPrevious" label="&lt;"
-				sclass="outward-maker-pagination-button" />
+					<label
+						value="There are currently no batches available for outward processing."
+						sclass="outward-maker-empty-subtitle" />
 
-			<label id="outwardMakerLblCurrentPage" value="1 / 1"
-				sclass="outward-maker-pagination-label" />
+				</vlayout>
 
-			<button id="outwardMakerBtnNext" label="&gt;"
-				sclass="outward-maker-pagination-button" />
+			</div>
 
-			<button id="outwardMakerBtnLast" label="&gt;&gt;"
-				sclass="outward-maker-pagination-button" />
+			<div sclass="outward-maker-pagination">
+
+				<button id="outwardMakerBtnFirst" label="&lt;&lt;"
+					sclass="outward-maker-pagination-button" />
+
+				<button id="outwardMakerBtnPrevious" label="&lt;"
+					sclass="outward-maker-pagination-button" />
+
+				<label id="outwardMakerLblCurrentPage" value="1 / 1"
+					sclass="outward-maker-pagination-label" />
+
+				<button id="outwardMakerBtnNext" label="&gt;"
+					sclass="outward-maker-pagination-button" />
+
+				<button id="outwardMakerBtnLast" label="&gt;&gt;"
+					sclass="outward-maker-pagination-button" />
+
+			</div>
 
 		</div>
 

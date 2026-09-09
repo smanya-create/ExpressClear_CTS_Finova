@@ -117,13 +117,9 @@ public class LoginController extends GenericForwardComposer<Component> {
 
         final String selectedRoleId = selectedItem.getValue() != null ? selectedItem.getValue().toString().trim() : "";
         final String selectedRoleName = selectedItem.getLabel() != null ? selectedItem.getLabel().trim() : "";
-        System.out.println("========== LOGIN PERFORMANCE BENCHMARK ==========");
-        long tStart = System.currentTimeMillis();
-        // 1. Authenticate user
-        long t0 = System.currentTimeMillis();
+
+        // 1. Authenticate user credentials
         User authenticatedUser = userService.authenticate(username, password);
-        long t1 = System.currentTimeMillis();
-        System.out.println("LOG: BCrypt + User Lookup took: " + (t1 - t0) + " ms");
 
         if (authenticatedUser == null) {
             AuditServiceImpl.getInstance().log("AUTH", "LOGIN_FAILED",
@@ -132,11 +128,18 @@ public class LoginController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // 2. Fetch assigned role & permissions
+        // 2. Block inactive user accounts
+        if ("INACTIVE".equalsIgnoreCase(authenticatedUser.getStatus())) {
+            AuditServiceImpl.getInstance().log("AUTH", "LOGIN_BLOCKED",
+                    "Login denied for user " + username + ": Account inactivated by Admin.", "FAILED");
+            Messagebox.show("User inactivated by respected admin. Please contact your administrator.",
+                            "Account Inactive", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
+
+        // 3. Fetch assigned role & permissions
         String userRoleId = authenticatedUser.getRoleId() != null ? authenticatedUser.getRoleId().trim() : "";
         Role userRole = roleService.getRoleById(userRoleId);
-        long t2 = System.currentTimeMillis();
-        System.out.println("LOG: Role Lookup took: " + (t2 - t1) + " ms");
         String userPermissions = (userRole != null && userRole.getPermissions() != null) ? userRole.getPermissions().trim() : "";
 
         String computedDbRoleName;
@@ -151,7 +154,7 @@ public class LoginController extends GenericForwardComposer<Component> {
             else computedDbRoleName = selectedRoleName;
         }
 
-        // 3. Verify selected role against database role
+        // 4. Verify selected role against database role
         boolean isRoleMatch = userRoleId.equalsIgnoreCase(selectedRoleId) ||
                               computedDbRoleName.equalsIgnoreCase(selectedRoleName) ||
                               computedDbRoleName.replace(" ", "_").equalsIgnoreCase(selectedRoleId) ||
@@ -167,7 +170,7 @@ public class LoginController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // 4. Bind Session Attributes
+        // 5. Bind Session Attributes
         Session session = Sessions.getCurrent();
         String normalizedRole = computedDbRoleName.toUpperCase().replace(" ", "_");
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
@@ -184,21 +187,11 @@ public class LoginController extends GenericForwardComposer<Component> {
         session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
         session.setAttribute("USER_PERMISSIONS", userPermissions);
 
-        // Register user in active user registry
-       
-
-        // Audit success log
+        // Audit success log (Single entry)
         AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
                 "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName, "SUCCESS");
 
-        // Audit success log
-        AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
-                "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName, "SUCCESS");
-        long t3 = System.currentTimeMillis();
-        System.out.println("3. Session Bind + Audit Trigger: " + (t3 - t2) + " ms");
-        System.out.println("TOTAL LOGIN HANDSHAKE: " + (t3 - tStart) + " ms");
-
-        // 5. Navigate user directly to dashboard
+        // 6. Navigate user to their respective dashboard
         if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {
             Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
         } else if ("ROL1002".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {

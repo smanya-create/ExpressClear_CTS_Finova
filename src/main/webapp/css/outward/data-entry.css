@@ -3,7 +3,6 @@
 	box-sizing: border-box;
 	padding: 4px 28px 32px 28px;
 	background: #f8fafc;
-	min-height: 100%;
 }
 
 .outward-data-entry-heading {
@@ -110,7 +109,7 @@
 }
 
 .outward-data-entry-grid .z-row:last-child {
-	border-bottom: none !important;
+	border-bottom: none;
 }
 
 .outward-data-entry-grid .z-row-inner {

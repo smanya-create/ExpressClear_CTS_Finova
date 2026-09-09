@@ -206,7 +206,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardMakerReports() {
-		Executions.sendRedirect("/maker/reports/maker-reports.zul");
+		Executions.sendRedirect("/outward/maker/reports/maker-reports.zul");
 	}
 
 	// Outward Checker Navigation Actions
@@ -223,16 +223,16 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardRejectedCheques() {
-		Executions.sendRedirect("outward/checker/rejected-cheques.zul");
+		Executions.sendRedirect("/outward/checker/rejected-cheques.zul");
 	}
 
 	public void navToOutwardCheckerReports() {
-		Executions.sendRedirect("outward/checker/reports.zul");
+		Executions.sendRedirect("/outward/checker/cheque-reports.zul");
 	}
 
 	public void navToOutwardCheckerUnprocessedQueue() {
-		Executions.sendRedirect("outward/checker/checker-unprocessed-cheques.zul");
-			}
+		Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
+	}
 
 	// Inward Maker Navigation Actions
 	public void navToInwardDashboard() {
@@ -302,10 +302,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	public void navToInwardUnprocessedQueue() {
 		Executions.sendRedirect("/inward-maker/unprocessed.zul");
-	}
-
-	public void navToInwardMakerReports() {
-		Executions.sendRedirect("/inward-maker/reports.zul");
 	}
 
 	// Inward Checker Navigation Actions

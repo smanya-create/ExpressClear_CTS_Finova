@@ -7,12 +7,18 @@ import org.zkoss.zk.ui.Sessions;
 public class SecurityUtil {
 
     public static boolean hasPermission(String screenKey) {
-        Session session = Sessions.getCurrent();
+    	Session session = Sessions.getCurrent();
         if (session == null) {
             return false;
         }
 
-        // Fetch granular permissions assigned to this user/role during login
+        // 1. Admins bypass granular screen permission checks
+        String role = (String) session.getAttribute("USER_ROLE");
+        if (role != null && role.toUpperCase().contains("ADMIN")) {
+            return true;
+        }
+
+        // 2. Fetch granular permissions
         Object permsObj = session.getAttribute("USER_PERMISSIONS");
         if (permsObj == null || permsObj.toString().trim().isEmpty()) {
             return false;
@@ -22,7 +28,8 @@ public class SecurityUtil {
         String targetKey = screenKey.trim().toUpperCase();
 
         for (String perm : permissions) {
-            if (perm.trim().equalsIgnoreCase(targetKey)) {
+            String p = perm.trim().toUpperCase();
+            if (p.equals(targetKey) || p.equals("ALL") || p.equals("*")) {
                 return true;
             }
         }

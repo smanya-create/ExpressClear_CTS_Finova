@@ -1,9 +1,21 @@
 .outward-maker-dashboard {
 	width: 100%;
+	height: 100%;
 	box-sizing: border-box;
-	padding: 4px 28px 32px 28px;
+	margin: 0;
+	padding: 0;
 	background: #f8fafc;
-	min-height: 100%;
+	overflow: hidden;
+}
+
+.outward-maker-dashboard-scroll {
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 4px 28px 16px 28px;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .outward-maker-welcome-section {
@@ -16,7 +28,6 @@
 	font-size: 26px !important;
 	font-weight: 800 !important;
 	color: #0f172a !important;
-	letter-spacing: 0.3px;
 }
 
 .outward-maker-welcome-subtitle {
@@ -63,6 +74,7 @@
 	background: #f8fafc !important;
 	border-spacing: 0 !important;
 	border-collapse: collapse !important;
+	table-layout: fixed !important;
 }
 
 .outward-maker-batch-grid .z-grid-header {
@@ -70,10 +82,11 @@
 	padding: 0 !important;
 	background: #172554 !important;
 	border: none !important;
-	border-bottom: 1px solid #2563eb !important;
 }
 
 .outward-maker-batch-grid .z-grid-header table {
+	width: 100% !important;
+	table-layout: fixed !important;
 	border-spacing: 0 !important;
 	border-collapse: collapse !important;
 }
@@ -83,23 +96,22 @@
 	padding: 0 !important;
 	background: #172554 !important;
 	border-right: 1px solid #2563eb !important;
-	border-bottom: none !important;
 }
 
 .outward-maker-batch-grid .z-column:last-child {
 	border-right: none !important;
+	padding-right: 0 !important;
 }
 
 .outward-maker-batch-grid .z-column-content {
 	margin: 0 !important;
-	padding: 15px 18px !important;
+	padding: 15px 12px !important;
 	background: #172554 !important;
 	color: #ffffff !important;
 	font-size: 12px !important;
 	font-weight: 800 !important;
-	letter-spacing: 0.5px;
 	text-align: center !important;
-	border: none !important;
+	white-space: nowrap !important;
 }
 
 .outward-maker-batch-grid .z-grid-body {
@@ -110,20 +122,17 @@
 }
 
 .outward-maker-batch-grid .z-grid-body table {
-	width: 100%;
-	margin: 0 !important;
-	padding: 0 !important;
+	width: 100% !important;
+	table-layout: fixed !important;
 	border-spacing: 0 !important;
 	border-collapse: collapse !important;
-	background: #f8fafc !important;
 }
 
 .outward-maker-batch-grid .z-row {
+	height: 62px;
 	margin: 0 !important;
 	padding: 0 !important;
-	height: 62px;
 	background: #f8fafc !important;
-	border: none !important;
 	border-bottom: 1px solid #e2e8f0 !important;
 }
 
@@ -144,17 +153,21 @@
 	background: #f8fafc !important;
 	border: none !important;
 	text-align: center !important;
+	vertical-align: middle !important;
+}
+
+.outward-maker-batch-grid .z-cell:last-child {
+	padding-right: 0 !important;
 }
 
 .outward-maker-batch-grid .z-row-content {
 	margin: 0 !important;
-	padding: 17px 18px !important;
+	padding: 17px 12px !important;
 	background: #f8fafc !important;
 	color: #334155 !important;
-	font-size: 13px !important;
-	vertical-align: middle;
-	border: none !important;
+	font-size: 10px !important;
 	text-align: center !important;
+	vertical-align: middle !important;
 }
 
 .outward-maker-batch-grid .z-row:hover, .outward-maker-batch-grid .z-row:hover .z-row-inner,
@@ -166,7 +179,7 @@
 .outward-maker-batch-id {
 	display: block;
 	width: 100%;
-	font-size: 13px !important;
+	font-size: 10px !important;
 	font-weight: 800 !important;
 	color: #1d4ed8 !important;
 	text-align: center;
@@ -175,7 +188,7 @@
 .outward-maker-cheque-count {
 	display: block;
 	width: 100%;
-	font-size: 13px !important;
+	font-size: 10px !important;
 	font-weight: 700 !important;
 	color: #334155 !important;
 	text-align: center;
@@ -184,7 +197,7 @@
 .outward-maker-total-amount {
 	display: block;
 	width: 100%;
-	font-size: 13px !important;
+	font-size: 10px !important;
 	font-weight: 700 !important;
 	color: #334155 !important;
 	text-align: center;
@@ -192,66 +205,62 @@
 
 .outward-maker-status {
 	display: inline-block !important;
-	min-width: 88px !important;
-	padding: 6px 14px !important;
+	width: 100px !important;
+	min-width: 100px !important;
+	max-width: 100px !important;
+	height: 28px !important;
 	box-sizing: border-box !important;
+	padding: 6px 8px !important;
 	border-radius: 16px !important;
 	font-size: 10px !important;
 	font-weight: 800 !important;
-	letter-spacing: 0.5px !important;
-	line-height: 1.2 !important;
+	line-height: 14px !important;
 	text-align: center !important;
 	white-space: nowrap !important;
+	vertical-align: middle !important;
 }
 
 .outward-maker-status.processing {
 	background: linear-gradient(135deg, #fffde7 0%, #fff59d 25%, #fdd835 60%, #f9a825
 		100%) !important;
-	background-color: #fdd835 !important;
 	color: #5d4037 !important;
 	border: 1px solid #f9a825 !important;
-	box-shadow: 0 2px 7px rgba(249, 168, 37, 0.30) !important;
 }
 
 .outward-maker-status.completed {
 	background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 35%, #4ade80 70%, #16a34a
 		100%) !important;
-	background-color: #4ade80 !important;
 	color: #14532d !important;
 	border: 1px solid #22c55e !important;
-	box-shadow: 0 2px 7px rgba(34, 197, 94, 0.22) !important;
 }
 
 .outward-maker-status.rejected {
 	background: linear-gradient(135deg, #fff1f2 0%, #fecaca 30%, #f87171 65%, #dc2626
 		100%) !important;
-	background-color: #f87171 !important;
 	color: #7f1d1d !important;
 	border: 1px solid #ef4444 !important;
-	box-shadow: 0 2px 7px rgba(239, 68, 68, 0.24) !important;
 }
 
 .outward-maker-status.pending {
 	background: linear-gradient(135deg, #fffbeb 0%, #fde68a 35%, #fbbf24 70%, #d97706
 		100%) !important;
-	background-color: #fbbf24 !important;
 	color: #78350f !important;
 	border: 1px solid #f59e0b !important;
-	box-shadow: 0 2px 7px rgba(245, 158, 11, 0.22) !important;
 }
 
 .outward-maker-view-button {
+	width: 108px;
 	min-width: 108px;
 	height: 34px;
-	padding: 0 16px;
+	box-sizing: border-box;
+	padding: 0 8px;
 	background: #172554 !important;
 	border: 1px solid #172554 !important;
 	border-radius: 6px;
 	color: #ffffff !important;
-	font-size: 11px !important;
+	font-size: 10px !important;
 	font-weight: 800 !important;
-	cursor: pointer;
-	box-shadow: 0 2px 5px rgba(15, 23, 42, 0.12);
+	white-space: nowrap !important;
 }
 
 .outward-maker-view-button:hover {
@@ -259,15 +268,9 @@
 	border-color: #0f1b3d !important;
 }
 
-.outward-maker-view-button:active {
-	background: #0b1530 !important;
-	border-color: #0b1530 !important;
-}
-
 .outward-maker-empty-state {
-	display: block;
-	box-sizing: border-box;
 	width: 100%;
+	box-sizing: border-box;
 	padding: 42px 20px;
 	text-align: center;
 	background: #f8fafc;
@@ -278,7 +281,6 @@
 	font-size: 15px !important;
 	font-weight: 700 !important;
 	color: #475569 !important;
-	text-align: center;
 }
 
 .outward-maker-empty-subtitle {
@@ -286,20 +288,23 @@
 	margin-top: 5px;
 	font-size: 12px !important;
 	color: #94a3b8 !important;
-	text-align: center;
 }
 
 .outward-maker-pagination {
+	width: 100%;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	padding: 18px 0 4px 0;
+	padding: 18px 0 16px 0;
+	margin: 0;
 }
 
 .outward-maker-pagination-button {
 	min-width: 34px;
 	height: 32px;
+	box-sizing: border-box;
 	padding: 0 9px;
 	background: #ffffff !important;
 	border: 1px solid #cbd5e1 !important;
@@ -307,18 +312,14 @@
 	color: #334155 !important;
 	font-size: 12px !important;
 	font-weight: 700 !important;
-	cursor: pointer;
-	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 .outward-maker-pagination-button:hover {
 	background: #f1f5f9 !important;
-	border-color: #94a3b8 !important;
 }
 
 .outward-maker-pagination-button:disabled {
 	opacity: 0.45 !important;
-	cursor: default !important;
 }
 
 .outward-maker-pagination-label {
@@ -327,24 +328,4 @@
 	font-size: 12px !important;
 	font-weight: 800 !important;
 	color: #334155 !important;
-}
-
-@media ( max-width : 900px) {
-	.outward-maker-dashboard {
-		padding: 4px 16px 24px 16px;
-	}
-	.outward-maker-batch-grid .z-column-content, .outward-maker-batch-grid .z-row-content
-		{
-		padding-left: 10px !important;
-		padding-right: 10px !important;
-	}
-	.outward-maker-view-button {
-		min-width: 90px;
-		padding: 0 10px;
-	}
-	.outward-maker-status {
-		min-width: 78px !important;
-		padding-left: 8px !important;
-		padding-right: 8px !important;
-	}
 }

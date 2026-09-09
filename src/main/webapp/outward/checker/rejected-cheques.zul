@@ -1,10 +1,8 @@
 <?page title="Rejected Cheques" contentType="text/html;charset=UTF-8"?>
-
-<?link rel="stylesheet"
-        type="text/css"
-        href="/css/outward/rejected-cheques.css"?>
+<?link rel="stylesheet" type="text/css" href="/css/outward/rejected-cheques.css"?>
 
 <zk>
+
     <borderlayout apply="com.iispl.cts.controller.outward.checker.OutwardCheckerRejectionController"
                   hflex="1" vflex="1">
 

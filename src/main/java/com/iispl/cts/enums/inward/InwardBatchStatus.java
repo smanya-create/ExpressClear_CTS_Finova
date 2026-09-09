@@ -15,7 +15,14 @@ public enum InwardBatchStatus {
 	    CHECKER_PROCESSING,
 
 	    COMPLETED,
+	    
+	    IN_VERIFICATION,
 
-	    HOLD
+	    HOLD,
+	    
+	    SEND_BACK_TO_MAKER_MICR,
+	    
+	    SEND_BACK_TO_MAKER_DATA_ENTRY
+	    
 
 }

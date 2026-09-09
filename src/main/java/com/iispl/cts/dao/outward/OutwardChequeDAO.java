@@ -17,10 +17,12 @@ public interface OutwardChequeDAO {
 	void transferChequeFromScanToOutwrd(Connection connection, String scannedBatchId);
 
 	int getDataEnteredCountByBatchId(String outwardBatchId);
-	
+
 	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
-	
+
 	List<OutwardCheque> getOutwardMicrRepairCheques(String outwardBatchId);
 
 	void saveOutwardMicrRepair(OutwardCheque cheque);
+
+	boolean saveDataEntry(OutwardCheque cheque);
 }

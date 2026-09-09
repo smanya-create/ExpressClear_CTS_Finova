@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
@@ -27,19 +26,12 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 	private static final int PAGE_SIZE = 5;
 
 	private Rows outwardMakerRowsBatchDetails;
-
 	private Vlayout outwardMakerVlayoutEmptyState;
-
 	private Label outwardMakerLblCurrentPage;
-
 	private Button outwardMakerBtnFirst;
-
 	private Button outwardMakerBtnPrevious;
-
 	private Button outwardMakerBtnNext;
-
 	private Button outwardMakerBtnLast;
-
 	private Grid outwardMakerGridBatchDetails;
 
 	private ScanService scanService;
@@ -89,7 +81,6 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 			batchList = scanService.getMakerDashboardBatches();
 
 			if (batchList == null) {
-
 				batchList = new ArrayList<>();
 			}
 
@@ -97,9 +88,9 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 
 			renderCurrentPage();
 
-		} catch (Exception e) {
+		} catch (Exception exception) {
 
-			e.printStackTrace();
+			exception.printStackTrace();
 
 			batchList = new ArrayList<>();
 
@@ -131,7 +122,6 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 		int totalPages = getTotalPages();
 
 		if (currentPage > totalPages) {
-
 			currentPage = totalPages;
 		}
 
@@ -144,7 +134,6 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 			ScanBatch batch = batchList.get(index);
 
 			if (batch != null) {
-
 				createBatchRow(batch);
 			}
 		}
@@ -168,7 +157,9 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 
 		totalAmountLabel.setSclass("outward-maker-total-amount");
 
-		Label statusLabel = new Label(getValue(batch.getBatchStatus()));
+		String batchStatus = getValue(batch.getBatchStatus());
+
+		Label statusLabel = new Label(batchStatus.toUpperCase());
 
 		statusLabel.setSclass("outward-maker-status " + getStatusClass(batch.getBatchStatus()));
 
@@ -176,16 +167,14 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 
 		viewButton.setSclass("outward-maker-view-button");
 
-		viewButton.addEventListener("onClick", event -> openBatchDetails(batch.getScannedBatchId()));
+		String scannedBatchId = batch.getScannedBatchId();
+
+		viewButton.addEventListener("onClick", event -> openBatchDetails(scannedBatchId));
 
 		row.appendChild(batchIdLabel);
-
 		row.appendChild(chequeCountLabel);
-
 		row.appendChild(totalAmountLabel);
-
 		row.appendChild(statusLabel);
-
 		row.appendChild(viewButton);
 
 		outwardMakerRowsBatchDetails.appendChild(row);
@@ -194,32 +183,49 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 	private void openBatchDetails(String scannedBatchId) {
 
 		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
 			return;
 		}
 
 		String batchId = scannedBatchId.trim();
 
-		Component root = outwardMakerRowsBatchDetails.getPage().getFirstRoot();
+		Include mainContentArea = findMainContentArea();
 
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+		if (mainContentArea == null) {
 
-		if (!(mainContentArea instanceof Include)) {
+			System.out.println("mainContentArea Include not found");
 
 			return;
 		}
 
-		Include include = (Include) mainContentArea;
+		mainContentArea.clearDynamicProperties();
 
-		include.setAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID", batchId);
+		mainContentArea.setDynamicProperty("batchId", batchId);
 
-		Executions.getCurrent().getSession().setAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID", batchId);
+		mainContentArea.setAttribute("batchId", batchId);
 
-		include.clearDynamicProperties();
+		mainContentArea.setSrc("/outward/maker/batch-details.zul");
+	}
 
-		include.setDynamicProperty("batchId", batchId);
+	private Include findMainContentArea() {
 
-		include.setSrc("/outward/maker/batch-details.zul");
+		Component current = outwardMakerGridBatchDetails;
+
+		while (current != null) {
+
+			if (current instanceof Include) {
+
+				Include include = (Include) current;
+
+				if ("mainContentArea".equals(include.getId())) {
+
+					return include;
+				}
+			}
+
+			current = current.getParent();
+		}
+
+		return null;
 	}
 
 	private void goToFirstPage() {
@@ -292,7 +298,6 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 	private String formatAmount(BigDecimal amount) {
 
 		if (amount == null) {
-
 			return "₹0.00";
 		}
 
@@ -302,14 +307,12 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 	private String getValue(Object value) {
 
 		if (value == null) {
-
 			return "-";
 		}
 
 		String text = String.valueOf(value);
 
 		if (text.trim().isEmpty()) {
-
 			return "-";
 		}
 
@@ -319,7 +322,6 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 	private String getStatusClass(String status) {
 
 		if (status == null) {
-
 			return "processing";
 		}
 

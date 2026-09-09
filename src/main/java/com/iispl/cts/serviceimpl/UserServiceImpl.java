@@ -29,29 +29,28 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
-        // Only allow ACTIVE users to log in
-        if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-            return null;
-        }
-
         String dbPassword = user.getPassword().trim();
+        boolean passwordMatches = false;
 
         // 1. Check if DB password is a BCrypt hash (starts with $2a$, $2b$, or $2y$)
         if (dbPassword.startsWith("$2a$") || dbPassword.startsWith("$2b$") || dbPassword.startsWith("$2y$")) {
             try {
-                if (BCrypt.checkpw(rawPassword, dbPassword)) {
-                    return user;
-                }
+                passwordMatches = BCrypt.checkpw(rawPassword, dbPassword);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } 
         // 2. Fallback to direct comparison if stored as plain text
         else if (dbPassword.equals(rawPassword)) {
-            return user;
+            passwordMatches = true;
         }
 
-        return null; // Password mismatch
+        if (!passwordMatches) {
+            return null; // Password mismatch
+        }
+
+        // Return user record; status inspection is handled in the controller
+        return user;
     }
 
     @Override

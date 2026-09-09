@@ -1,8 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* =========================================================
+   BASE & TYPOGRAPHY
+   ========================================================= */
+body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.section-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    display: block !important;
+}
+
+.section-description {
+    font-size: 13px !important;
+    color: #475569 !important;
+    display: block !important;
+}
+
+/* =========================================================
+   CARDS & CONTAINERS
+   ========================================================= */
+.summary-card,
+.search-card,
+.table-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 20px 24px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    box-sizing: border-box !important;
+}
+
+/* 1. Summary Card */
+.summary-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 32px !important;
+}
+
+.summary-item {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+.summary-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+}
+
+.summary-number {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.summary-value {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+}
+
+.summary-divider {
+    width: 1px !important;
+    height: 36px !important;
+    background-color: #e2e8f0 !important;
+}
+
+/* 2. Search Card */
+.search-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-end !important;
+    gap: 16px !important;
+}
+
+.search-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    flex: 1 !important;
+}
+
+.search-field.date-field {
+    flex: 0 0 200px !important;
+}
+
+.field-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+}
+
+.search-input {
+    height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+}
+
+/* Datebox overrides */
+.z-datebox-input {
+    height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px 0 0 6px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+}
+
+.z-datebox-button {
+    height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: none !important;
+    border-radius: 0 6px 6px 0 !important;
+    background: #f8fafc !important;
+}
+
+/* Buttons */
+.search-button,
+.clear-button {
+    height: 38px !important;
+    padding: 0 20px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.search-button {
+    background-color: #173b69 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    height: 38px !important;
+    padding: 0 20px !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.search-button:hover {
+    background-color: #0f2847 !important;
+}
+
+.clear-button {
+    background-color: #334155 !important; /* Slate neutral */
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    height: 38px !important;
+    padding: 0 20px !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.clear-button:hover {
+    background-color: #1e293b !important;
+}
+
+/* 3. Table Header Titles */
+.list-title-section {
+    margin-bottom: 16px !important;
+}
+
+.list-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    display: block !important;
+}
+
+.list-subtitle {
+    font-size: 12px !important;
+    color: #64748b !important;
+    display: block !important;
+}
+
 /* =========================================================
    FORCE LISTBOX HEADER TO DARK BLUE
    ========================================================= */
-
-/* 1. Header Container & Inner Bars */
 .rejected-listbox.z-listbox .z-listbox-header,
 .rejected-listbox.z-listbox .z-listhead,
 .rejected-listbox.z-listbox .z-listbox-header-border,
@@ -13,7 +201,6 @@
     border: none !important;
 }
 
-/* 2. Individual Column Headers */
 .rejected-listbox.z-listbox th.z-listheader {
     background: #173b69 !important;
     background-color: #173b69 !important;
@@ -28,7 +215,6 @@
     border-right: none !important;
 }
 
-/* 3. Header Text & Padding */
 .rejected-listbox.z-listbox th.z-listheader .z-listheader-content {
     background: transparent !important;
     background-color: transparent !important;
@@ -39,10 +225,108 @@
     letter-spacing: 0.5px !important;
 }
 
-/* 4. Column Hover / Active State */
 .rejected-listbox.z-listbox th.z-listheader:hover,
 .rejected-listbox.z-listbox th.z-listheader.z-listheader-hover {
     background: #102f50 !important;
     background-color: #102f50 !important;
     background-image: none !important;
+}
+
+/* =========================================================
+   TABLE ROWS, PAGINATION & NOTE
+   ========================================================= */
+.rejected-listbox .z-listitem {
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.rejected-listbox .z-listcell-content {
+    font-size: 13px !important;
+    color: #1e293b !important;
+    padding: 10px 12px !important;
+}
+
+.pagination-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    margin-top: 14px !important;
+}
+
+.pagination-button {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    color: #475569 !important;
+    padding: 4px 10px !important;
+    cursor: pointer !important;
+}
+
+.page-info {
+    font-size: 12px !important;
+    color: #64748b !important;
+    margin: 0 4px !important;
+}
+
+.important-box {
+    margin-top: 16px !important;
+    background: #f8fafc !important;
+    border-left: 3px solid #0284c7 !important;
+    padding: 10px 14px !important;
+}
+
+.important-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #0284c7 !important;
+    margin-right: 6px !important;
+}
+
+.important-text {
+    font-size: 12px !important;
+    color: #475569 !important;
+}
+
+.hardcoded-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    margin-top: 10px !important;
+}
+/* =========================================================
+   GRID VIEW ACTION BUTTONS (NAVY BLUE)
+   ========================================================= */
+.rejected-listbox .z-button,
+.rejected-listbox button {
+    background: #173b69 !important;
+    background-color: #173b69 !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    padding: 5px 16px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15) !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.rejected-listbox .z-button:hover,
+.rejected-listbox button:hover {
+    background: #0f2847 !important;
+    background-color: #0f2847 !important;
+}
+/* Hide rogue selection mark / stray header bar under listheader */
+.rejected-listbox .z-listbox-header-bg,
+.rejected-listbox .z-listheader-checkable,
+.rejected-listbox .z-listitem-checkable {
+    display: none !important;
+}
+
+/* Ensure header border doesn't bleed into the first row */
+.rejected-listbox.z-listbox .z-listbox-header {
+    border-bottom: none !important;
+    overflow: hidden !important;
 }

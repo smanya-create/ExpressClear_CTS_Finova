@@ -349,36 +349,119 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	}
 
 	@Override
-	public boolean updateMicrRepair(String inwardChequeId, String correctedMicrCode, String chequeStatus) {
+	public boolean updateMicrRepair(String inwardChequeId, String inwardBatchId, String originalMicr,
+			String correctedMicrCode, String chequeStatus, String repairedBy, String remarks) {
 
-		if (inwardChequeId == null || inwardChequeId.trim().isEmpty() || correctedMicrCode == null
-				|| correctedMicrCode.trim().isEmpty() || chequeStatus == null || chequeStatus.trim().isEmpty()) {
+		if (inwardChequeId == null || inwardChequeId.trim().isEmpty() || inwardBatchId == null
+				|| inwardBatchId.trim().isEmpty() || originalMicr == null || originalMicr.trim().isEmpty()
+				|| correctedMicrCode == null || correctedMicrCode.trim().isEmpty() || chequeStatus == null
+				|| chequeStatus.trim().isEmpty()) {
 
 			return false;
 		}
 
-		String sql = "UPDATE inward_cheque " + "SET micr_code = ?, " + "cheque_status = ? "
+		String historySql = "INSERT INTO inward_micr_repair_history "
+				+ "(inward_cheque_id, inward_batch_id, original_micr, "
+				+ "corrected_micr, repaired_by, repaired_at, repair_status, remarks) "
+				+ "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+
+		String updateSql = "UPDATE inward_cheque " + "SET micr_code = ?, cheque_status = ? "
 				+ "WHERE inward_cheque_id = ?";
 
-		try (Connection connection = DBConnection.getConnection();
+		Connection connection = null;
 
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+		try {
 
-			statement.setString(1, correctedMicrCode.trim());
+			connection = DBConnection.getConnection();
 
-			statement.setString(2, chequeStatus.trim());
+			connection.setAutoCommit(false);
 
-			statement.setString(3, inwardChequeId.trim());
+	
 
-			return statement.executeUpdate() > 0;
+			try (PreparedStatement historyStatement = connection.prepareStatement(historySql)) {
+
+				historyStatement.setString(1, inwardChequeId.trim());
+
+				historyStatement.setString(2, inwardBatchId.trim());
+
+				historyStatement.setString(3, originalMicr.trim());
+
+				historyStatement.setString(4, correctedMicrCode.trim());
+
+				if (repairedBy != null && !repairedBy.trim().isEmpty()) {
+
+					historyStatement.setString(5, repairedBy.trim());
+
+				} else {
+
+					historyStatement.setNull(5, java.sql.Types.VARCHAR);
+				}
+
+				historyStatement.setString(6, "COMPLETED");
+
+				if (remarks != null && !remarks.trim().isEmpty()) {
+
+					historyStatement.setString(7, remarks.trim());
+
+				} else {
+
+					historyStatement.setNull(7, java.sql.Types.VARCHAR);
+				}
+
+				historyStatement.executeUpdate();
+			}
+
+
+			try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+
+				updateStatement.setString(1, correctedMicrCode.trim());
+
+				updateStatement.setString(2, chequeStatus.trim());
+
+				updateStatement.setString(3, inwardChequeId.trim());
+
+				int rowsUpdated = updateStatement.executeUpdate();
+
+				if (rowsUpdated <= 0) {
+
+					connection.rollback();
+
+					return false;
+				}
+			}
+
+			connection.commit();
+
+			return true;
 
 		} catch (SQLException e) {
 
-			System.err.println("Failed to update MICR repair for cheque: " + inwardChequeId);
+			if (connection != null) {
+
+				try {
+					connection.rollback();
+				} catch (SQLException rollbackException) {
+					rollbackException.printStackTrace();
+				}
+			}
+
+			System.err.println("Failed to save MICR repair history/update for cheque: " + inwardChequeId);
 
 			e.printStackTrace();
 
 			return false;
+
+		} finally {
+
+			if (connection != null) {
+
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (SQLException closeException) {
+					closeException.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -461,327 +544,199 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 		return cheque;
 	}
-	
+
 	@Override
-	public boolean saveRejection(
-	        String inwardChequeId,
-	        String rejectedReasonId,
-	        String remarks,
-	        String rejectedBy) {
+	public boolean saveRejection(String inwardChequeId, String rejectedReasonId, String remarks, String rejectedBy) {
 
-	    String sql =
-	            "INSERT INTO inward_cheque_rejection "
-	          + "(inward_cheque_id, rejected_reason_id, remarks, rejected_by) "
-	          + "VALUES (?, ?, ?, ?)";
+		String sql = "INSERT INTO inward_cheque_rejection "
+				+ "(inward_cheque_id, rejected_reason_id, remarks, rejected_by) " + "VALUES (?, ?, ?, ?)";
 
-	    try (Connection conn = DBConnection.getConnection();
-	         PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	        ps.setString(1, inwardChequeId);
-	        ps.setString(2, rejectedReasonId);
-	        ps.setString(3, remarks);
-	        ps.setString(4, rejectedBy);
+			ps.setString(1, inwardChequeId);
+			ps.setString(2, rejectedReasonId);
+			ps.setString(3, remarks);
+			ps.setString(4, rejectedBy);
 
-	        int rowsInserted = ps.executeUpdate();
+			int rowsInserted = ps.executeUpdate();
 
-	        System.out.println(
-	                "Rejection record inserted. Rows: " + rowsInserted);
+			System.out.println("Rejection record inserted. Rows: " + rowsInserted);
 
-	        return rowsInserted > 0;
+			return rowsInserted > 0;
 
-	    } catch (SQLException e) {
+		} catch (SQLException e) {
 
-	        System.err.println(
-	                "Failed to save rejection for cheque: "
-	                + inwardChequeId);
+			System.err.println("Failed to save rejection for cheque: " + inwardChequeId);
 
-	        System.err.println(
-	                "Reason ID: " + rejectedReasonId);
+			System.err.println("Reason ID: " + rejectedReasonId);
 
-	        System.err.println(
-	                "Remarks: " + remarks);
+			System.err.println("Remarks: " + remarks);
 
-	        System.err.println(
-	                "Rejected By: " + rejectedBy);
+			System.err.println("Rejected By: " + rejectedBy);
 
-	        System.err.println(
-	                "SQL Error: " + e.getMessage());
+			System.err.println("SQL Error: " + e.getMessage());
 
-	        e.printStackTrace();
+			e.printStackTrace();
 
-	        return false;
-	    }
+			return false;
+		}
 	}
+
 	@Override
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
-	    String sql =
-	            "SELECT "
-	          + "    a.account_number, "
-	          + "    a.account_holder_name, "
-	          + "    a.account_balance, "
-	          + "    a.account_status, "
-	          + "    mc.cheque_number AS master_cheque_number, "
-	          + "    mc.sort_code, "
-	          + "    b.branch_code AS master_branch_code, "
-	          + "    b.micr_code AS master_micr_code, "
-	          + "    b.status AS branch_status, "
-	          + "    bk.bank_code AS master_bank_code, "
-	          + "    bk.status AS bank_status "
-	          + "FROM master_account_new a "
-	          + "LEFT JOIN master_cheque_new mc "
-	          + "    ON mc.account_number = a.account_number "
-	          + "   AND mc.cheque_number = ? "
-	          + "LEFT JOIN branch b "
-	          + "    ON b.branch_code = ? "
-	          + "LEFT JOIN bank bk "
-	          + "    ON bk.bank_id = b.bank_id "
-	          + "WHERE a.account_number = ?";
+		String sql = "SELECT " + "    a.account_number, " + "    a.account_holder_name, " + "    a.account_balance, "
+				+ "    a.account_status, " + "    mc.cheque_number AS master_cheque_number, " + "    mc.sort_code, "
+				+ "    b.branch_code AS master_branch_code, " + "    b.micr_code AS master_micr_code, "
+				+ "    b.status AS branch_status, " + "    bk.bank_code AS master_bank_code, "
+				+ "    bk.status AS bank_status " + "FROM master_account_new a " + "LEFT JOIN master_cheque_new mc "
+				+ "    ON mc.account_number = a.account_number " + "   AND mc.cheque_number = ? "
+				+ "LEFT JOIN branch b " + "    ON b.branch_code = ? " + "LEFT JOIN bank bk "
+				+ "    ON bk.bank_id = b.bank_id " + "WHERE a.account_number = ?";
 
-	    try (Connection conn = DBConnection.getConnection();
-	         PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	        ps.setString(1, cheque.getChequeNumber());
-	        ps.setString(2, cheque.getBranchCode());
-	        ps.setString(3, cheque.getDraweeAccountNumber());
+			ps.setString(1, cheque.getChequeNumber());
+			ps.setString(2, cheque.getBranchCode());
+			ps.setString(3, cheque.getDraweeAccountNumber());
 
-	        try (ResultSet rs = ps.executeQuery()) {
+			try (ResultSet rs = ps.executeQuery()) {
 
-	            if (!rs.next()) {
+				if (!rs.next()) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Account not found - "
-	                        + cheque.getDraweeAccountNumber());
+					System.out.println("CBS Validation Failed: Account not found - " + cheque.getDraweeAccountNumber());
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Account not found: "
-	                        + cheque.getDraweeAccountNumber());
-	            }
+					return new CbsValidationResult(false, "Account not found: " + cheque.getDraweeAccountNumber());
+				}
 
-	            String accountStatus =
-	                    rs.getString("account_status");
+				String accountStatus = rs.getString("account_status");
 
-	            if (!"Active".equalsIgnoreCase(accountStatus)) {
+				if (!"Active".equalsIgnoreCase(accountStatus)) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Account is "
-	                        + accountStatus);
+					System.out.println("CBS Validation Failed: Account is " + accountStatus);
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Account is " + accountStatus + ".");
-	            }
+					return new CbsValidationResult(false, "Account is " + accountStatus + ".");
+				}
 
-	            String accountHolderName =
-	                    rs.getString("account_holder_name");
+				String accountHolderName = rs.getString("account_holder_name");
 
-	            if (cheque.getDraweeName() == null
-	                    || accountHolderName == null
-	                    || !cheque.getDraweeName()
-	                            .trim()
-	                            .equalsIgnoreCase(
-	                                    accountHolderName.trim())) {
+				if (cheque.getDraweeName() == null || accountHolderName == null
+						|| !cheque.getDraweeName().trim().equalsIgnoreCase(accountHolderName.trim())) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: "
-	                        + "Account holder name mismatch.");
+					System.out.println("CBS Validation Failed: " + "Account holder name mismatch.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Account holder name mismatch.");
-	            }
+					return new CbsValidationResult(false, "Account holder name mismatch.");
+				}
 
-	            String masterChequeNumber =
-	                    rs.getString("master_cheque_number");
+				String masterChequeNumber = rs.getString("master_cheque_number");
 
-	            if (masterChequeNumber == null) {
+				if (masterChequeNumber == null) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Cheque number "
-	                        + cheque.getChequeNumber()
-	                        + " does not exist for account "
-	                        + cheque.getDraweeAccountNumber());
+					System.out.println("CBS Validation Failed: Cheque number " + cheque.getChequeNumber()
+							+ " does not exist for account " + cheque.getDraweeAccountNumber());
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Cheque number "
-	                        + cheque.getChequeNumber()
-	                        + " does not exist for this account.");
-	            }
+					return new CbsValidationResult(false,
+							"Cheque number " + cheque.getChequeNumber() + " does not exist for this account.");
+				}
 
-	            String masterBankCode =
-	                    rs.getString("master_bank_code");
+				String masterBankCode = rs.getString("master_bank_code");
 
-	            if (masterBankCode == null
-	                    || cheque.getBankCode() == null
-	                    || !cheque.getBankCode()
-	                            .trim()
-	                            .equalsIgnoreCase(
-	                                    masterBankCode.trim())) {
+				if (masterBankCode == null || cheque.getBankCode() == null
+						|| !cheque.getBankCode().trim().equalsIgnoreCase(masterBankCode.trim())) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Bank code mismatch.");
+					System.out.println("CBS Validation Failed: Bank code mismatch.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Bank code mismatch. "
-	                        + "Cheque: " + cheque.getBankCode()
-	                        + ", Master: " + masterBankCode);
-	            }
+					return new CbsValidationResult(false,
+							"Bank code mismatch. " + "Cheque: " + cheque.getBankCode() + ", Master: " + masterBankCode);
+				}
 
-	            String masterBranchCode =
-	                    rs.getString("master_branch_code");
+				String masterBranchCode = rs.getString("master_branch_code");
 
-	            if (masterBranchCode == null
-	                    || cheque.getBranchCode() == null
-	                    || !cheque.getBranchCode()
-	                            .trim()
-	                            .equalsIgnoreCase(
-	                                    masterBranchCode.trim())) {
+				if (masterBranchCode == null || cheque.getBranchCode() == null
+						|| !cheque.getBranchCode().trim().equalsIgnoreCase(masterBranchCode.trim())) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Branch code mismatch.");
+					System.out.println("CBS Validation Failed: Branch code mismatch.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Branch code mismatch. "
-	                        + "Cheque: " + cheque.getBranchCode()
-	                        + ", Master: " + masterBranchCode);
-	            }
+					return new CbsValidationResult(false, "Branch code mismatch. " + "Cheque: " + cheque.getBranchCode()
+							+ ", Master: " + masterBranchCode);
+				}
 
-	            String masterMicrCode =
-	                    rs.getString("master_micr_code");
+				String masterMicrCode = rs.getString("master_micr_code");
 
-	            if (masterMicrCode == null
-	                    || cheque.getMicrCode() == null
-	                    || !cheque.getMicrCode()
-	                            .trim()
-	                            .equalsIgnoreCase(
-	                                    masterMicrCode.trim())) {
+				if (masterMicrCode == null || cheque.getMicrCode() == null
+						|| !cheque.getMicrCode().trim().equalsIgnoreCase(masterMicrCode.trim())) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: MICR code mismatch.");
+					System.out.println("CBS Validation Failed: MICR code mismatch.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "MICR code mismatch. "
-	                        + "Cheque: " + cheque.getMicrCode()
-	                        + ", Master: " + masterMicrCode);
-	            }
+					return new CbsValidationResult(false,
+							"MICR code mismatch. " + "Cheque: " + cheque.getMicrCode() + ", Master: " + masterMicrCode);
+				}
 
-	            String branchStatus =
-	                    rs.getString("branch_status");
+				String branchStatus = rs.getString("branch_status");
 
-	            if (!"Active".equalsIgnoreCase(branchStatus)) {
+				if (!"Active".equalsIgnoreCase(branchStatus)) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Branch is "
-	                        + branchStatus);
+					System.out.println("CBS Validation Failed: Branch is " + branchStatus);
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Branch is " + branchStatus + ".");
-	            }
+					return new CbsValidationResult(false, "Branch is " + branchStatus + ".");
+				}
 
-	            String bankStatus =
-	                    rs.getString("bank_status");
+				String bankStatus = rs.getString("bank_status");
 
-	            if (!"Active".equalsIgnoreCase(bankStatus)) {
+				if (!"Active".equalsIgnoreCase(bankStatus)) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: Bank is "
-	                        + bankStatus);
+					System.out.println("CBS Validation Failed: Bank is " + bankStatus);
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Bank is " + bankStatus + ".");
-	            }
+					return new CbsValidationResult(false, "Bank is " + bankStatus + ".");
+				}
 
-	            if (cheque.getTransactionCode() == null
-	                    || cheque.getTransactionCode()
-	                            .trim()
-	                            .isEmpty()) {
+				if (cheque.getTransactionCode() == null || cheque.getTransactionCode().trim().isEmpty()) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: "
-	                        + "Transaction code is missing.");
+					System.out.println("CBS Validation Failed: " + "Transaction code is missing.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Transaction code is missing.");
-	            }
+					return new CbsValidationResult(false, "Transaction code is missing.");
+				}
 
-	            if (cheque.getChequeDate() == null) {
+				if (cheque.getChequeDate() == null) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: "
-	                        + "Cheque date is missing.");
+					System.out.println("CBS Validation Failed: " + "Cheque date is missing.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Cheque date is missing.");
-	            }
+					return new CbsValidationResult(false, "Cheque date is missing.");
+				}
 
-	            java.sql.Date today =
-	                    new java.sql.Date(
-	                            System.currentTimeMillis());
+				java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
 
-	            if (cheque.getChequeDate().after(today)) {
+				if (cheque.getChequeDate().after(today)) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: "
-	                        + "Cheque is postdated.");
+					System.out.println("CBS Validation Failed: " + "Cheque is postdated.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Cheque is postdated. "
-	                        + "Cheque date: "
-	                        + cheque.getChequeDate());
-	            }
+					return new CbsValidationResult(false,
+							"Cheque is postdated. " + "Cheque date: " + cheque.getChequeDate());
+				}
 
-	            BigDecimal accountBalance =
-	                    rs.getBigDecimal("account_balance");
+				BigDecimal accountBalance = rs.getBigDecimal("account_balance");
 
-	            if (accountBalance == null
-	                    || cheque.getChequeAmount() == null
-	                    || accountBalance.compareTo(
-	                            cheque.getChequeAmount()) < 0) {
+				if (accountBalance == null || cheque.getChequeAmount() == null
+						|| accountBalance.compareTo(cheque.getChequeAmount()) < 0) {
 
-	                System.out.println(
-	                        "CBS Validation Failed: "
-	                        + "Insufficient balance.");
+					System.out.println("CBS Validation Failed: " + "Insufficient balance.");
 
-	                return new CbsValidationResult(
-	                        false,
-	                        "Insufficient balance. "
-	                        + "Available: ₹"
-	                        + accountBalance
-	                        + ", Cheque amount: ₹"
-	                        + cheque.getChequeAmount());
-	            }
+					return new CbsValidationResult(false, "Insufficient balance. " + "Available: ₹" + accountBalance
+							+ ", Cheque amount: ₹" + cheque.getChequeAmount());
+				}
 
-	            System.out.println(
-	                    "CBS Validation Passed for cheque: "
-	                    + cheque.getChequeNumber());
+				System.out.println("CBS Validation Passed for cheque: " + cheque.getChequeNumber());
 
-	            return new CbsValidationResult(
-	                    true,
-	                    "CBS validation passed.");
+				return new CbsValidationResult(true, "CBS validation passed.");
 
-	        }
+			}
 
-	    } 
-	    catch (SQLException e) {
+		} catch (SQLException e) {
 
-	        System.err.println(
-	                "CBS Validation Error for cheque: "
-	                + cheque.getChequeNumber());
+			System.err.println("CBS Validation Error for cheque: " + cheque.getChequeNumber());
 
-	        e.printStackTrace();
+			e.printStackTrace();
 
-	        return new CbsValidationResult(
-	                false,
-	                "Unable to perform CBS validation because of a database error.");
-	    }
+			return new CbsValidationResult(false, "Unable to perform CBS validation because of a database error.");
+		}
 	}
-	}
+}

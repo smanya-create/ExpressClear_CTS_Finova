@@ -37,22 +37,24 @@
     margin-bottom: 22px;
 }
 
+/* 1. Target ZK's generated internal wrapper cells */
+.cts-stats-card > .z-hlayout-inner {
+    border-left: 1px solid #e2e8f0;
+    padding: 6px 0 6px 28px !important; /* Pushes the entire column 28px away from the line */
+    box-sizing: border-box;
+}
+
+/* 2. Remove the left line and left padding on the very first column */
+.cts-stats-card > .z-hlayout-inner:first-child {
+    border-left: none !important;
+    padding-left: 4px !important;
+}
+
+/* 3. Column contents layout */
 .cts-stat-col {
-    flex: 1;
-    border-right: 1px solid #e2e8f0;
-    padding: 0 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.cts-stat-col:first-child {
-    padding-left: 0;
-}
-
-.cts-stat-col-last {
-    border-right: none;
-    padding-right: 0;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .cts-stat-header {
