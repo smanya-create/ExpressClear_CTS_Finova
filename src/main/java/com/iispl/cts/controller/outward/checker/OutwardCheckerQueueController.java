@@ -176,56 +176,82 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	super.doAfterCompose(comp);
          
+    	outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
 
-        super.doAfterCompose(comp);
+        // 1. Resolve Batch ID from Session or URL parameter
+        Object sessionBatchId = Sessions.getCurrent().getAttribute("SELECTED_OUTWARD_BATCH_ID");
+        String paramBatchNo = Executions.getCurrent().getParameter("batchNo");
 
-        System.out.println("======================================");
-        System.out.println("CHECKER QUEUE CONTROLLER STARTED");
-        System.out.println("======================================");
-
-        Object sessionBatchId = Sessions.getCurrent()
-                .getAttribute("SELECTED_OUTWARD_BATCH_ID");
-
-        System.out.println("SESSION OBJECT = " + sessionBatchId);
-
-        if (sessionBatchId == null) {
-            System.out.println("ERROR: NO BATCH ID IN SESSION");
-        } else {
-            System.out.println("SESSION BATCH ID = [" + sessionBatchId + "]");
+        if (sessionBatchId != null && !sessionBatchId.toString().trim().isEmpty()) {
+            this.batchId = sessionBatchId.toString().trim();
+        } else if (paramBatchNo != null && !paramBatchNo.trim().isEmpty()) {
+            this.batchId = paramBatchNo.trim();
         }
 
-        outwardCheckerQueueService =
-                new OutwardCheckerQueueServiceImpl();
-
-        if (sessionBatchId == null) {
-            noBatchMessage.setVisible(true);
-            checkerQueueContent.setVisible(false);
+        // If still missing, show the "No Batch Selected" screen
+        if (this.batchId == null || this.batchId.isEmpty()) {
+            if (noBatchMessage != null) noBatchMessage.setVisible(true);
+            if (checkerQueueContent != null) checkerQueueContent.setVisible(false);
             return;
         }
 
-        batchId = sessionBatchId.toString().trim();
-        batchNo = batchId;
+        this.batchNo = this.batchId;
+        if (lblBatchNo != null) {
+            lblBatchNo.setValue(this.batchNo);
+        }
 
-        System.out.println("FINAL batchId = [" + batchId + "]");
-        System.out.println("FINAL batchNo = [" + batchNo + "]");
-
-        lblBatchNo.setValue(batchNo);
-
-        noBatchMessage.setVisible(false);
-        checkerQueueContent.setVisible(true);
-
-        System.out.println("noBatchMessage visible = "
-                + noBatchMessage.isVisible());
-
-        System.out.println("checkerQueueContent visible = "
-                + checkerQueueContent.isVisible());
+        if (noBatchMessage != null) noBatchMessage.setVisible(false);
+        if (checkerQueueContent != null) checkerQueueContent.setVisible(true);
 
         createReturnMakerWindow();
 
+        // 2. Load all cheques belonging to this batch
         loadCheques();
 
-    }    public void onClick$btnBackToDashboard(Event event) {
+        // 3. Jump to the specific cheque routed from Unprocessed Queue
+        String targetChequeNo = Executions.getCurrent().getParameter("chequeNo");
+        if (targetChequeNo == null || targetChequeNo.trim().isEmpty()) {
+            Object sChqNo = Sessions.getCurrent().getAttribute("SELECTED_VERIFY_CHEQUE_NO");
+            if (sChqNo != null) {
+                targetChequeNo = sChqNo.toString();
+                Sessions.getCurrent().removeAttribute("SELECTED_VERIFY_CHEQUE_NO");
+            }
+        }
+
+        String targetChequeId = Executions.getCurrent().getParameter("chequeId");
+        if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
+            Object sChqId = Sessions.getCurrent().getAttribute("SELECTED_VERIFY_CHEQUE_ID");
+            if (sChqId != null) {
+                targetChequeId = sChqId.toString();
+                Sessions.getCurrent().removeAttribute("SELECTED_VERIFY_CHEQUE_ID");
+            }
+        }
+
+        if ((targetChequeNo != null && !targetChequeNo.isEmpty()) || (targetChequeId != null && !targetChequeId.isEmpty())) {
+            selectSpecificCheque(targetChequeNo, targetChequeId);
+        }
+    }
+
+    private void selectSpecificCheque(String targetChequeNo, String targetChequeId) {
+        if (cheques == null || cheques.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < cheques.size(); i++) {
+            OutwardCheque chq = cheques.get(i);
+            boolean matchNo = targetChequeNo != null && targetChequeNo.equalsIgnoreCase(chq.getChequeNumber());
+            boolean matchId = targetChequeId != null && targetChequeId.equalsIgnoreCase(chq.getOutwardChequeId());
+
+            if (matchNo || matchId) {
+                this.currentIndex = i;
+                displayCheque();
+                break;
+            }
+        }
+    }  
+    public void onClick$btnBackToDashboard(Event event) {
 
         Executions.sendRedirect("/outward/checker/dashboard.zul");
     }

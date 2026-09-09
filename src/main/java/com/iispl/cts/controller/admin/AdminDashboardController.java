@@ -441,11 +441,6 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
         String adminUserId = resolveLoggedInUserId();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        // Flag all active in-flight items as EOD rollovers while preserving their operational state
-        String updatePendingSql = "UPDATE outward_cheque " +
-                                  "SET is_eod_rollover = TRUE " +
-                                  "WHERE cheque_status IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_VERIFICATION', 'Pending', 'PENDING', 'RAW')";
-
         String updateSessionSql = "UPDATE clearing_session " +
                                   "SET session_status = 'CLOSED', closed_at = ?, closed_by = ?, remarks = ? " +
                                   "WHERE clearing_date = ? AND session_status = 'OPEN'";
@@ -453,12 +448,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
 
-            if (pendingChequesCount > 0) {
-                try (PreparedStatement ps = conn.prepareStatement(updatePendingSql)) {
-                    ps.executeUpdate();
-                }
-            }
-
+            // Close the clearing session
             try (PreparedStatement ps = conn.prepareStatement(updateSessionSql)) {
                 ps.setTimestamp(1, now);
                 ps.setString(2, adminUserId);
@@ -476,7 +466,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             conn.commit();
 
             String auditDetail = isForced
-                ? "Forced EOD completed with " + pendingChequesCount + " pending cheques flagged as Rollover. Reason: " + remarks
+                ? "Forced EOD completed with " + pendingChequesCount + " pending cheques paused. Reason: " + remarks
                 : "Normal EOD closed successfully for date " + currentClearingDate;
             AuditServiceImpl.getInstance().log("EOD_BOD", "EOD_COMPLETED", auditDetail, "SUCCESS");
 
@@ -491,7 +481,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), false));
             refreshUI();
 
-            String msg = isForced ? "Forced EOD Completed. Rollover cheques sent to Maker Unprocessed queue." : "EOD completed successfully.";
+            String msg = isForced ? "Forced EOD Completed. Pending items will move to Unprocessed on next BOD." : "EOD completed successfully.";
             Clients.showNotification(msg, "info", null, "top_center", 3000);
 
         } catch (SQLException ex) {
@@ -509,19 +499,39 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
         String adminUserId = resolveLoggedInUserId();
         LocalDate nextDate = this.currentClearingDate.plusDays(1);
-        String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(insertBodSql)) {
+        String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
+        
+        // Solution 1: Transition incomplete items directly to UNPROCESSED for the new clearing cycle
+        String updateToUnprocessedSql = "UPDATE outward_cheque " +
+                                        "SET cheque_status = 'UNPROCESSED' " +
+                                        "WHERE cheque_status IN ('RAW', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY', 'PENDING_VERIFICATION', 'Pending', 'PENDING')";
 
-            ps.setDate(1, Date.valueOf(nextDate));
-            ps.setString(2, adminUserId);
-            ps.setTimestamp(3, now);
-            ps.executeUpdate();
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
 
-            AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", "BOD initialized for clearing date: " + nextDate, "SUCCESS");
+            // 1. Open new clearing session
+            try (PreparedStatement psSession = conn.prepareStatement(insertBodSql)) {
+                psSession.setDate(1, Date.valueOf(nextDate));
+                psSession.setString(2, adminUserId);
+                psSession.setTimestamp(3, now);
+                psSession.executeUpdate();
+            }
 
+            // 2. Mark remaining cheques as UNPROCESSED
+            int rolledOverCount = 0;
+            try (PreparedStatement psRollover = conn.prepareStatement(updateToUnprocessedSql)) {
+                rolledOverCount = psRollover.executeUpdate();
+            }
+
+            conn.commit();
+
+            // 3. Log Audit
+            AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
+                    "BOD initialized for date: " + nextDate + " | Transitioned " + rolledOverCount + " cheques to UNPROCESSED", "SUCCESS");
+
+            // 4. Update UI State
             this.currentClearingDate = nextDate;
             this.isSessionOpen = true;
             this.selectedAction = "EOD";
@@ -533,7 +543,11 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
             refreshUI();
 
-            Clients.showNotification("BOD Completed. New clearing date: " + currentClearingDate.format(dateFormatter), "info", null, "top_center", 3000);
+            String successMsg = "BOD Completed. Clearing date: " + currentClearingDate.format(dateFormatter);
+            if (rolledOverCount > 0) {
+                successMsg += " (" + rolledOverCount + " cheques moved to Unprocessed Queue)";
+            }
+            Clients.showNotification(successMsg, "info", null, "top_center", 3500);
 
         } catch (SQLException ex) {
             ex.printStackTrace();

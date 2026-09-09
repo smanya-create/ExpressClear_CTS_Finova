@@ -18,15 +18,14 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
         List<UnprocessedChequeDTO> list = new ArrayList<>();
 
         String sql = "SELECT c.cheque_id, c.batch_id, b.batch_no, cs.session_name, " +
-                     "c.cheque_no, (c.city_code || c.bank_code || c.branch_code) AS sort_code, " +
-                     "c.amount, c.status, c.is_eod_rollover, sbr.reason_name, c.checker_remarks, c.created_at " +
-                     "FROM outward_cheque c " +
-                     "JOIN outward_batch b ON c.batch_id = b.batch_id " +
-                     "LEFT JOIN clearing_session cs ON b.clearing_session_id = cs.session_id " +
-                     "LEFT JOIN send_back_reasons sbr ON c.send_back_reason_id = sbr.reason_id " +
-                     "WHERE c.is_eod_rollover = TRUE " +
-                     "AND c.status IN ('RAW', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY') " +
-                     "ORDER BY c.created_at ASC, c.cheque_id ASC";
+                "c.cheque_no, (c.city_code || c.bank_code || c.branch_code) AS sort_code, " +
+                "c.amount, c.status, sbr.reason_name, c.checker_remarks, c.created_at " +
+                "FROM outward_cheque c " +
+                "JOIN outward_batch b ON c.batch_id = b.batch_id " +
+                "LEFT JOIN clearing_session cs ON b.clearing_session_id = cs.session_id " +
+                "LEFT JOIN send_back_reasons sbr ON c.send_back_reason_id = sbr.reason_id " +
+                "WHERE c.status = 'UNPROCESSED' " +
+                "ORDER BY c.created_at ASC, c.cheque_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -55,7 +54,7 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
 
     @Override
     public long countPendingRolloverItems() {
-        String sql = "SELECT COUNT(*) FROM outward_cheque WHERE is_eod_rollover = TRUE AND status IN ('RAW', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY')";
+        String sql = "SELECT COUNT(*) FROM outward_cheque WHERE status = 'UNPROCESSED'";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

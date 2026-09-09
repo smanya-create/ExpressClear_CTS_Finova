@@ -13,105 +13,116 @@ import com.iispl.cts.dto.UnprocessedChequeDTO;
 
 public class CheckerUnprocessedChequeDAOImpl implements CheckerUnprocessedChequeDAO {
 
-	@Override
-	public List<UnprocessedChequeDTO> getCheckerUnprocessedCheques() {
-		// TODO Auto-generated method stub
-		List<UnprocessedChequeDTO> list = new ArrayList<>();
+    @Override
+    public List<UnprocessedChequeDTO> getCheckerUnprocessedCheques() {
+        List<UnprocessedChequeDTO> list = new ArrayList<>();
 
-		String sql = "SELECT c.cheque_id, c.outward_batch_id, b.batch_reference_id, cs.clearing_date, " +
-				"c.cheque_number, (c.city_code || c.bank_code || c.branch_code) AS sort_code, " +
-				"c.cheque_amount, c.cheque_status, c.is_eod_rollover, sbr.reason_name, c.checker_remarks, c.created_at " +
-				"FROM outward_cheque c " +
-				"JOIN outward_batch b ON c.outward_batch_id = b.outward_batch_id " +
-				"LEFT JOIN clearing_session cs ON b.clearing_date = cs.clearing_date " +
-				"LEFT JOIN send_back_reasons sbr ON c.send_back_reason_id = sbr.reason_id " +
-				"WHERE c.is_eod_rollover = TRUE " +
-				"AND c.cheque_status = 'PENDING_VERIFICATION' " +
-				"ORDER BY c.created_at ASC, c.cheque_id ASC";
+        String sql = "SELECT c.outward_cheque_id, c.outward_batch_id, b.batch_reference_id, " +
+                     "c.cheque_number, c.micr_code, c.cheque_amount, c.cheque_status, c.created_at " +
+                     "FROM outward_cheque c " +
+                     "JOIN outward_batch b ON c.outward_batch_id = b.outward_batch_id " +
+                     "WHERE c.cheque_status IN ('UNPROCESSED', 'PENDING_VERIFICATION') " +
+                     "ORDER BY c.created_at ASC, c.outward_cheque_id ASC";
 
-		try (Connection conn = DBConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql);
-				ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-			while (rs.next()) {
-				UnprocessedChequeDTO dto = new UnprocessedChequeDTO();
-				dto.setChequeId(rs.getLong("cheque_id"));
-				dto.setBatchId(rs.getLong("outward_batch_id"));
-				dto.setBatchNo(rs.getString("batch_reference_id"));
-				dto.setOriginalSessionName(rs.getString("clearing_date"));
-				dto.setChequeNo(rs.getString("cheque_number"));
-				dto.setSortCode(rs.getString("sort_code"));
-				dto.setAmount(rs.getBigDecimal("cheque_amount"));
-				dto.setStatus(rs.getString("cheque_status"));
-				dto.setForcedEodRollover(true);
-				dto.setSendBackReason(rs.getString("reason_name"));
-				dto.setRemarks(rs.getString("checker_remarks"));
-				list.add(dto);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
+            while (rs.next()) {
+                UnprocessedChequeDTO dto = new UnprocessedChequeDTO();
+                // Store outward_cheque_id (CH1001) as String or extract numeric suffix
+                String chqIdStr = rs.getString("outward_cheque_id");
+                try {
+                    dto.setChequeId(Long.parseLong(chqIdStr.replaceAll("\\D+", "")));
+                } catch (Exception e) {
+                    dto.setChequeId(0L);
+                }
+                
+                String batchIdStr = rs.getString("outward_batch_id");
+                try {
+                    dto.setBatchId(Long.parseLong(batchIdStr.replaceAll("\\D+", "")));
+                } catch (Exception e) {
+                    dto.setBatchId(0L);
+                }
 
-	@Override
-	public boolean verifyCheque(Long chequeId, String checkerUserId) {
-		// TODO Auto-generated method stub
-		String sql = "UPDATE outward_cheque " +
-				"SET cheque_status = 'VERIFIED', verified_by = ?, verified_at = CURRENT_TIMESTAMP " +
-				"WHERE cheque_id = ? AND cheque_status = 'PENDING_VERIFICATION'";
+                dto.setBatchNo(rs.getString("batch_reference_id"));
+                dto.setChequeNo(rs.getString("cheque_number"));
+                dto.setSortCode(rs.getString("micr_code"));
+                dto.setAmount(rs.getBigDecimal("cheque_amount"));
+                dto.setStatus(rs.getString("cheque_status"));
+                dto.setForcedEodRollover(true);
+                list.add(dto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
-		try (Connection conn = DBConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, checkerUserId);
-			ps.setLong(2, chequeId);
-			return ps.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    @Override
+    public boolean verifyCheque(Long chequeId, String checkerUserId) {
+        String chqIdFormatted = "CH" + chequeId;
+        String sql = "UPDATE outward_cheque " +
+                     "SET cheque_status = 'VERIFIED' " +
+                     "WHERE outward_cheque_id = ? AND cheque_status IN ('PENDING_VERIFICATION', 'UNPROCESSED')";
 
-	@Override
-	public boolean sendBackToMaker(Long chequeId, Long sendBackReasonId, String checkerRemarks, String checkerUserId) {
-		// TODO Auto-generated method stub
-		String sql = "UPDATE outward_cheque " +
-				"SET cheque_status = 'PENDING_DATA_ENTRY', send_back_reason_id = ?, checker_remarks = ?, " +
-				"verified_by = ?, verified_at = CURRENT_TIMESTAMP " +
-				"WHERE cheque_id = ? AND cheque_status = 'PENDING_VERIFICATION'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, chqIdFormatted);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-		try (Connection conn = DBConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setLong(1, sendBackReasonId);
-			ps.setString(2, checkerRemarks);
-			ps.setString(3, checkerUserId);
-			ps.setLong(4, chequeId);
-			return ps.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}	}
+    @Override
+    public boolean sendBackToMaker(Long chequeId, Long sendBackReasonId, String checkerRemarks, String checkerUserId) {
+        String chqIdFormatted = "CH" + chequeId;
+        String sql = "UPDATE outward_cheque " +
+                     "SET cheque_status = 'PENDING_DATA_ENTRY' " +
+                     "WHERE outward_cheque_id = ? AND cheque_status IN ('PENDING_VERIFICATION', 'UNPROCESSED')";
 
-	@Override
-	public boolean rejectCheque(Long chequeId, Long rejectReasonId, String rejectRemarks, String checkerUserId) {
-		// TODO Auto-generated method stub
-		String sql = "UPDATE outward_cheque " +
-				"SET cheque_status = 'REJECTED', reject_reason_id = ?, checker_remarks = ?, " +
-				"verified_by = ?, verified_at = CURRENT_TIMESTAMP " +
-				"WHERE cheque_id = ? AND cheque_status = 'PENDING_VERIFICATION'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, chqIdFormatted);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-		try (Connection conn = DBConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setLong(1, rejectReasonId);
-			ps.setString(2, rejectRemarks);
-			ps.setString(3, checkerUserId);
-			ps.setLong(4, chequeId);
-			return ps.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
+    @Override
+    public boolean rejectCheque(Long chequeId, Long rejectReasonId, String rejectRemarks, String checkerUserId) {
+        String chqIdFormatted = "CH" + chequeId;
+        
+        String insertRejectionSql = "INSERT INTO outward_rejected_cheques (outward_cheque_id, rejected_by, remarks) VALUES (?, ?, ?)";
+        String updateChequeSql = "UPDATE outward_cheque SET cheque_status = 'REJECTED' WHERE outward_cheque_id = ?";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement psReject = conn.prepareStatement(insertRejectionSql);
+                 PreparedStatement psUpdate = conn.prepareStatement(updateChequeSql)) {
+
+                psReject.setString(1, chqIdFormatted);
+                psReject.setString(2, checkerUserId);
+                psReject.setString(3, rejectRemarks != null ? rejectRemarks : "Rejected during rollover review");
+                psReject.executeUpdate();
+
+                psUpdate.setString(1, chqIdFormatted);
+                psUpdate.executeUpdate();
+
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
-
-
