@@ -1,4 +1,62 @@
-/* Card Container Styles */
+/* =========================================================
+   1. Listbox Header Customization (Dark Blue)
+   ========================================================= */
+/* Style the entire listhead container, all headers, and the trailing scrollbar filler bar */
+.z-listbox-header,
+.z-listhead,
+.z-listhead th.z-listheader,
+.z-listheader-content,
+.z-listhead-bar {
+    background-color: #0b192e !important; /* CTS Dark Navy Blue */
+    background-image: none !important;
+    border-color: #1a2c47 !important;
+}
+
+/* Ensure header text is fully visible, centered vertically, and never cut off */
+.z-listhead th.z-listheader {
+    height: 48px !important;
+    vertical-align: middle !important;
+}
+
+.z-listheader-content {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    line-height: normal !important;
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+/* Fix any hover overlay on header cells */
+.z-listheader-hover,
+.z-listheader-hover .z-listheader-content {
+    background-color: #132744 !important;
+}
+.z-listhead th.z-listheader,
+.z-listheader-content {
+    background-color: #0b192e !important; /* Deep navy / dark blue */
+    background-image: none !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    border-color: #1a2c47 !important;
+    height: 42px !important;
+}
+
+/* Optional: header hover and sort styles */
+.z-listheader-hover .z-listheader-content {
+    background-color: #132744 !important;
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   2. Card Container Styles
+   ========================================================= */
 .stat-card {
     background: #ffffff;
     border-radius: 8px;
@@ -26,12 +84,31 @@
 .text-purple { color: #805ad5; }
 .text-blue { color: #3182ce; }
 
-.icon-gray { color: #cbd5e0; font-size: 24px; }
-.icon-orange { color: #fbd38d; font-size: 24px; }
-.icon-purple { color: #d6bcfa; font-size: 24px; }
-.icon-blue { color: #bee3f8; font-size: 24px; }
+/* =========================================================
+   3. Card Icons & Fix for Broken Square Glyph Boxes
+   ========================================================= */
+/* The small square boxes appear when an icon element has an empty or unrendered character. 
+   If your project doesn't have the icon font loaded, setting display:none here hides the broken square completely. */
+.icon-gray, 
+.icon-orange, 
+.icon-purple, 
+.icon-blue {
+    display: none !important; /* Hide broken square box artifacts */
+    font-size: 24px;
+}
 
-/* Status Badges */
+/* If you are using FontAwesome classes (e.g., <i class="z-icon-... icon-gray"/>) 
+   and want to display them once icons are loaded, uncomment below: */
+/*
+.icon-gray { display: inline-block !important; color: #cbd5e0; }
+.icon-orange { display: inline-block !important; color: #fbd38d; }
+.icon-purple { display: inline-block !important; color: #d6bcfa; }
+.icon-blue { display: inline-block !important; color: #bee3f8; }
+*/
+
+/* =========================================================
+   4. Status Badges
+   ========================================================= */
 .badge-repair {
     background-color: #feebc8;
     color: #c05621;
@@ -52,14 +129,16 @@
     display: inline-block;
 }
 
+/* UPDATED: Warm Mustard Yellow / Amber for Pending Verification */
 .badge-verify {
-    background-color: #bee3f8;
-    color: #2b6cb0;
-    font-weight: 700;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    display: inline-block;
+    background-color: #fef3c7 !important; /* Soft warm mustard background */
+    color: #92400e !important;            /* Rich dark mustard / amber text */
+    border: 1px solid #fcd34d !important; /* Mustard border */
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+    display: inline-block !important;
 }
 
 .badge-eod {
@@ -72,7 +151,9 @@
     display: inline-block;
 }
 
-/* Filter Bar */
+/* =========================================================
+   5. Filter Bar
+   ========================================================= */
 .filter-bar {
     background: #f7fafc;
     padding: 10px 14px;
@@ -86,7 +167,9 @@
     color: #4a5568;
 }
 
-/* Header & Banner Styles */
+/* =========================================================
+   6. Header & Banner Styles
+   ========================================================= */
 .page-heading {
     font-size: 20px;
     font-weight: 700;
@@ -108,7 +191,9 @@
     padding: 6px 14px !important;
 }
 
-/* List Item Formatting */
+/* =========================================================
+   7. List Item Formatting
+   ========================================================= */
 .list-batch-title {
     font-weight: bold;
     font-size: 12px;
@@ -150,4 +235,43 @@
     border-radius: 4px !important;
     padding: 4px 10px !important;
     cursor: pointer;
+}
+.btn-icon-refresh {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #475569 !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.25s ease-in-out !important;
+}
+
+.btn-icon-refresh:hover {
+    background: #f1f5f9 !important;
+    color: #0b192e !important;
+    border-color: #94a3b8 !important;
+    transform: rotate(90deg);
+}
+
+.btn-icon-refresh .z-icon-refresh {
+    font-size: 15px !important;
+    line-height: 1 !important;
+}
+/* Allow header overflow and avoid hard clipping */
+.z-north,
+.z-north-body {
+    overflow: visible !important;
+}
+
+/* Ensure the included header container clears its vertical bounds */
+#incHeader {
+    display: block;
+    height: 100%;
 }

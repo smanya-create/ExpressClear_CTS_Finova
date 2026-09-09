@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Label;
@@ -27,9 +28,15 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
 
     private static final long serialVersionUID = 1L;
 
+    // Metric Summary Labels
     private Label lblTotalVerifyCount;
     private Label lblTotalVerifyAmount;
+
+    // Search and Table Controls
     private Textbox txtSearchBatch;
+    private Button btnSearch;
+    private Button btnReset;
+    private Button btnRefreshQueue;
     private Listbox lstCheckerUnprocessed;
 
     private final CheckerUnprocessedChequeDAO checkerDAO = new CheckerUnprocessedChequeDAOImpl();
@@ -73,7 +80,7 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
                 Listcell cellAmt = new Listcell(dto.getAmount() != null ? "₹ " + df.format(dto.getAmount()) : "₹ 0.00");
                 cellAmt.setSclass("list-amount");
 
-                // 5. Status Badge
+                // 5. Status Badge (Pending Verification)
                 Listcell cellStage = new Listcell();
                 Label lblStage = new Label("Pending Verification");
                 lblStage.setSclass("badge-verify");
@@ -127,8 +134,51 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
         if (lblTotalVerifyAmount != null) lblTotalVerifyAmount.setValue("₹ " + df.format(sum));
     }
 
+    /* =========================================================
+       SEARCH & RESET EVENT HANDLERS
+       ========================================================= */
+
+    // 1. Triggered on Search Button Click (ZK ID auto-wiring)
+    public void onClick$btnSearch(Event event) {
+        applyFilters();
+    }
+
+    // 2. Triggered on pressing ENTER in the search box
+    public void onOK$txtSearchBatch(Event event) {
+        applyFilters();
+    }
+
+    // 3. Triggered on Reset Button Click (ZK ID auto-wiring)
+    public void onClick$btnReset(Event event) {
+        onResetFilter();
+    }
+
+    // 4. Triggered on Refresh Verification Queue Button Click
+    public void onClick$btnRefreshQueue(Event event) {
+        if (txtSearchBatch != null) {
+            txtSearchBatch.setValue("");
+        }
+        loadCheckerUnprocessedCheques();
+    }
+
+    // Explicit helper methods (also support forward="..." or EL invocations)
     public void onFilterChanged() {
         applyFilters();
+    }
+
+    public void onResetFilter() {
+        if (txtSearchBatch != null) {
+            txtSearchBatch.setValue("");
+        }
+        applyFilters();
+    }
+
+    public void onSearchClick(Event event) {
+        applyFilters();
+    }
+
+    public void onResetClick(Event event) {
+        onResetFilter();
     }
 
     private void applyFilters() {
@@ -140,18 +190,18 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
             if (searchKeyword.isEmpty()) return true;
             boolean bMatch = item.getBatchNo() != null && item.getBatchNo().toLowerCase().contains(searchKeyword);
             boolean cMatch = item.getChequeNo() != null && item.getChequeNo().toLowerCase().contains(searchKeyword);
-            return bMatch || cMatch;
+            boolean micrMatch = item.getSortCode() != null && item.getSortCode().toLowerCase().contains(searchKeyword);
+            return bMatch || cMatch || micrMatch;
         }).collect(Collectors.toList());
 
         lstCheckerUnprocessed.setModel(new ListModelList<>(filtered));
     }
 
     private void routeToCheckerVerification(UnprocessedChequeDTO dto) {
-    	if (dto == null) {
+        if (dto == null) {
             return;
         }
 
-        // Format batch ID to match what the service expects (e.g., "BAT1001")
         String batchIdStr = (dto.getBatchId() != null && dto.getBatchId() > 0)
                 ? "BAT" + dto.getBatchId()
                 : dto.getBatchNo();
@@ -159,7 +209,7 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
         // 1. Set the batch ID required by OutwardCheckerQueueController
         Sessions.getCurrent().setAttribute("SELECTED_OUTWARD_BATCH_ID", batchIdStr);
 
-        // 2. Set the target cheque identifier
+        // 2. Set the target cheque identifiers
         Sessions.getCurrent().setAttribute("SELECTED_VERIFY_CHEQUE_NO", dto.getChequeNo());
         Sessions.getCurrent().setAttribute("SELECTED_VERIFY_CHEQUE_ID", "CH" + dto.getChequeId());
 
