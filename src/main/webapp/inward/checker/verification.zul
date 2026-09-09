@@ -72,6 +72,8 @@
 							</hlayout>
 
 						</hlayout>
+						
+						
 						<div id="batchInfoCard"
 							sclass="batch-info-card">
 							<hlayout width="100%" spacing="0"
