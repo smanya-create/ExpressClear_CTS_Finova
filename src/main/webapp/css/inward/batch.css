@@ -199,12 +199,20 @@
 	font-weight: 600;
 	white-space: nowrap;
 }
-
-.status-checker-pending {
-	background: #eee8ff;
-	color: #6950a8;
+.status-processing-pending {
+    display: inline-block;
+    min-width: 58px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-align: center;
+    background: #eee8ff;
+    color: #6950a8;
+    border: 1px solid #d8cef5;
+    font-size: 9px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-sizing: border-box;
 }
-
 .status-checker-processing {
 	background: #e6f4f0;
 	color: #16745c;
