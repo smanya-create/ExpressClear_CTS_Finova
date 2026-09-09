@@ -1,12 +1,14 @@
 package com.iispl.cts.controller.inward.checker;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
@@ -18,10 +20,13 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
+
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.dto.ReportSummaryRow;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
+
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -113,7 +118,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
         // ---- RRF button ----
         Listcell rrfCell = new Listcell();
         Button generateRrfButton = new Button("Generate RRF");
-
+        generateRrfButton.setIconSclass("z-icon-file-text");
         boolean hasRejected = summary != null && summary.getRejectedCheques() != 0;
 
         if (hasRejected) {
@@ -148,7 +153,8 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         // ---- Download button ----
         Listcell downloadCell = new Listcell();
-        Button downloadButton = new Button("download");
+        Button downloadButton = new Button("Download");
+        downloadButton.setIconSclass("z-icon-download");
         downloadButton.setStyle("background-color: green; color: white;");
 
         String downloadBatchId = (summary != null && summary.getBatchId() != null) ? summary.getBatchId() : "";
@@ -156,8 +162,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         downloadButton.addEventListener("onClick", event -> {
             String clickedBatchId = (String) downloadButton.getAttribute("batchId");
-            Messagebox.show("Download for Batch ID: " + clickedBatchId,
-                "Information", Messagebox.OK, Messagebox.INFORMATION);
+            generateBatchSummaryReport(clickedBatchId);
         });
 
         downloadCell.appendChild(downloadButton);
@@ -203,5 +208,68 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         String downloadFileName = "RRF_" + batchId + ".pdf";
         Filedownload.save(baos.toByteArray(), "application/pdf", downloadFileName);
+    }
+    public void generateBatchSummaryReport(String batchId) throws Exception {
+        List<InwardReportChequeDTO> batchCheques = service.getChequesByBatch().stream()
+                .filter(c -> batchId.equals(c.getInwardBatchId()))
+                .collect(Collectors.toList());
+
+        if (batchCheques.isEmpty()) {
+            Messagebox.show("No cheque data available for batch " + batchId, "Information", Messagebox.OK, Messagebox.INFORMATION);
+            return;
+        }
+
+        List<InwardReportChequeDTO> approvedCheques = batchCheques.stream()
+                .filter(c -> "ACCEPTED".equalsIgnoreCase(c.getChequeStatus()))
+                .collect(Collectors.toList());
+
+        List<InwardReportChequeDTO> rejectedCheques = batchCheques.stream()
+                .filter(c -> "REJECTED".equalsIgnoreCase(c.getChequeStatus()))
+                .collect(Collectors.toList());
+
+        BigDecimal totalAmount = batchCheques.stream()
+                .map(c -> c.getChequeAmount() != null ? c.getChequeAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal approvedAmount = approvedCheques.stream()
+                .map(c -> c.getChequeAmount() != null ? c.getChequeAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal rejectedAmount = rejectedCheques.stream()
+                .map(c -> c.getChequeAmount() != null ? c.getChequeAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String jrxmlPath = Executions.getCurrent().getDesktop().getWebApp()
+                .getRealPath("/ireports/inward/BatchSummaryReport.jrxml");
+
+        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlPath);
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        parameters.put("BATCH_ID", batchId);
+        parameters.put("GENERATED_AT", new java.util.Date());
+        parameters.put("GENERATED_BY", Sessions.getCurrent().getAttribute("LOGGED_USER"));
+        parameters.put("TOTAL_CHEQUES", batchCheques.size());
+        parameters.put("APPROVED_CHEQUES", approvedCheques.size());
+        parameters.put("REJECTED_CHEQUES", rejectedCheques.size());
+        parameters.put("TOTAL_AMOUNT", totalAmount);
+        parameters.put("APPROVED_AMOUNT", approvedAmount);
+        parameters.put("REJECTED_AMOUNT", rejectedAmount);
+        parameters.put("APPROVED_DATA_SOURCE", new JRBeanCollectionDataSource(approvedCheques));
+        parameters.put("REJECTED_DATA_SOURCE", new JRBeanCollectionDataSource(rejectedCheques));
+
+        JasperPrint jasperPrint = JasperFillManager.fillReport(
+                jasperReport,
+                parameters,
+                new JREmptyDataSource(1));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        JasperExportManager.exportReportToPdfStream(jasperPrint, baos);
+
+        Filedownload.save(
+                baos.toByteArray(),
+                "application/pdf",
+                "Batch_Summary_" + batchId + ".pdf");
     }
 }
