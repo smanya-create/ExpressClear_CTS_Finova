@@ -62,6 +62,19 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private Image chequeImage;
 	private Groupbox emptyImageState;
 
+	private Button btnZoom;
+	private Button btnZoomOut;
+	private Button btnZoomReset;
+	private Button btnRotate;
+	private Button btnImageToggle;
+
+	private Label lblChequeImageTitle;
+	private Label lblChequeNavigation;
+
+	private double zoomLevel = 1.0;
+	private int rotation = 0;
+	private boolean showingBackImage = false;
+
 	private Vlayout micrRepairCompletedState;
 	private Label lblCompletedBatchId;
 
@@ -361,6 +374,15 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			lblProgress.setValue((totalRecords == 0 ? 0 : currentRecord + 1) + " / " + totalRecords);
 		}
 
+		if (lblChequeNavigation != null) {
+
+			if (totalRecords == 0) {
+				lblChequeNavigation.setValue("");
+			} else {
+				lblChequeNavigation.setValue((currentRecord + 1) + " / " + totalRecords);
+			}
+		}
+
 		if (progressMeter != null) {
 
 			int progress = totalRecords == 0 ? 0 : ((currentRecord + 1) * 100) / totalRecords;
@@ -371,14 +393,29 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private void loadChequeImage(String inwardChequeId) {
 
+		zoomLevel = 1.0;
+		rotation = 0;
+		showingBackImage = false;
+
+		if (btnImageToggle != null) {
+			btnImageToggle.setLabel("View Back");
+		}
+
 		if (chequeImage != null) {
 			chequeImage.setVisible(false);
 			chequeImage.setSrc(null);
 		}
 
+		if (lblChequeImageTitle != null) {
+			lblChequeImageTitle.setValue("Cheque Front Image");
+		}
+
 		if (emptyImageState != null) {
 			emptyImageState.setVisible(true);
 		}
+
+		setImageControlsEnabled(false);
+		applyImageTransform();
 
 		if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
 			return;
@@ -408,6 +445,13 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				emptyImageState.setVisible(false);
 			}
 
+			if (lblChequeImageTitle != null) {
+				lblChequeImageTitle.setValue("Cheque Front Image");
+			}
+
+			setImageControlsEnabled(true);
+			applyImageTransform();
+
 		} catch (Exception e) {
 
 			System.err.println("MICR Repair: Failed to load image for cheque -> " + inwardChequeId);
@@ -421,7 +465,194 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			if (emptyImageState != null) {
 				emptyImageState.setVisible(true);
 			}
+
+			setImageControlsEnabled(false);
 		}
+	}
+
+	private void setImageControlsEnabled(boolean enabled) {
+
+		if (btnZoom != null) {
+			btnZoom.setDisabled(!enabled);
+		}
+
+		if (btnZoomOut != null) {
+			btnZoomOut.setDisabled(!enabled);
+		}
+
+		if (btnZoomReset != null) {
+			btnZoomReset.setDisabled(!enabled);
+		}
+
+		if (btnRotate != null) {
+			btnRotate.setDisabled(!enabled);
+		}
+
+		if (btnImageToggle != null) {
+			btnImageToggle.setDisabled(!enabled);
+		}
+	}
+
+	public void onClick$btnZoom() {
+
+		if (chequeImage == null || !chequeImage.isVisible()) {
+			return;
+		}
+
+		zoomLevel += 0.25;
+
+		if (zoomLevel > 3.0) {
+			zoomLevel = 3.0;
+		}
+
+		applyImageTransform();
+	}
+
+	public void onClick$btnZoomOut() {
+
+		if (chequeImage == null || !chequeImage.isVisible()) {
+			return;
+		}
+
+		zoomLevel -= 0.25;
+
+		if (zoomLevel < 1.0) {
+			zoomLevel = 1.0;
+		}
+
+		applyImageTransform();
+	}
+
+	public void onClick$btnZoomReset() {
+
+		if (chequeImage == null || !chequeImage.isVisible()) {
+			return;
+		}
+
+		zoomLevel = 1.0;
+		rotation = 0;
+
+		applyImageTransform();
+	}
+
+	public void onClick$btnRotate() {
+
+		if (chequeImage == null || !chequeImage.isVisible()) {
+			return;
+		}
+
+		rotation += 90;
+
+		if (rotation >= 360) {
+			rotation = 0;
+		}
+
+		applyImageTransform();
+	}
+
+	public void onClick$btnImageToggle() {
+
+		if (currentCheque == null) {
+			return;
+		}
+
+		zoomLevel = 1.0;
+		rotation = 0;
+
+		if (showingBackImage) {
+
+			showingBackImage = false;
+
+			if (btnImageToggle != null) {
+				btnImageToggle.setLabel("View Back");
+			}
+
+			loadChequeImageSide(currentCheque.getInwardChequeId(), false);
+
+		} else {
+
+			showingBackImage = true;
+
+			if (btnImageToggle != null) {
+				btnImageToggle.setLabel("View Front");
+			}
+
+			loadChequeImageSide(currentCheque.getInwardChequeId(), true);
+		}
+	}
+
+	private void loadChequeImageSide(String inwardChequeId, boolean back) {
+
+		if (chequeImage != null) {
+			chequeImage.setVisible(false);
+			chequeImage.setSrc(null);
+		}
+
+		try {
+
+			InwardChequeImage image;
+
+			if (back) {
+				image = inwardChequeService.getBackImage(inwardChequeId);
+			} else {
+				image = inwardChequeService.getFrontImage(inwardChequeId);
+			}
+
+			if (image == null || image.getImagePath() == null || image.getImagePath().trim().isEmpty()) {
+
+				if (lblChequeImageTitle != null) {
+					lblChequeImageTitle
+							.setValue(back ? "Cheque Back Image Not Available" : "Cheque Front Image Not Available");
+				}
+
+				if (emptyImageState != null) {
+					emptyImageState.setVisible(true);
+				}
+
+				return;
+			}
+
+			String imageSrc = "/Inward-data/" + image.getImagePath().trim();
+
+			chequeImage.setSrc(imageSrc);
+			chequeImage.setVisible(true);
+
+			if (emptyImageState != null) {
+				emptyImageState.setVisible(false);
+			}
+
+			if (lblChequeImageTitle != null) {
+				lblChequeImageTitle.setValue(back ? "Cheque Back Image" : "Cheque Front Image");
+			}
+
+			applyImageTransform();
+
+		} catch (Exception e) {
+
+			System.err.println("MICR Repair: Failed to load " + (back ? "back" : "front") + " image for cheque -> "
+					+ inwardChequeId);
+
+			e.printStackTrace();
+
+			if (chequeImage != null) {
+				chequeImage.setVisible(false);
+			}
+
+			if (emptyImageState != null) {
+				emptyImageState.setVisible(true);
+			}
+		}
+	}
+
+	private void applyImageTransform() {
+
+		if (chequeImage == null) {
+			return;
+		}
+
+		chequeImage.setStyle(
+				"transform: scale(" + zoomLevel + ") rotate(" + rotation + "deg);" + "transform-origin:center center;"
+						+ "transition:transform 0.15s ease;" + "user-select:none;" + "-webkit-user-select:none;");
 	}
 
 	public void onClick$btnPrevious() {
