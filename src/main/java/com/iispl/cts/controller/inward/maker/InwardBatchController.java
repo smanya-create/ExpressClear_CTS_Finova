@@ -194,39 +194,27 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		String status = getDisplayStatus(batch);
 
-		if ("Processing".equalsIgnoreCase(status)) {
-			Button viewButton = new Button("View");
-
-			viewButton.setSclass("view-button");
-			viewButton.setWidth("90px");
-
-			viewButton.addEventListener("onClick", event -> openBatchView(item));
-
-			actionCell.appendChild(viewButton);
-
+		if ("Received".equalsIgnoreCase(status)) {
+			Button parseButton = new Button("Parse");
+			parseButton.setSclass("parse-button");
+			parseButton.addEventListener("onClick", event -> parseBatch(event));
+			actionCell.appendChild(parseButton);
 			return;
 		}
 
 		if ("Parsing".equalsIgnoreCase(status)) {
 			Button parsingButton = new Button("Parsing...");
-
 			parsingButton.setDisabled(true);
 			parsingButton.setSclass("parsing-button");
-
 			actionCell.appendChild(parsingButton);
-
 			return;
 		}
-
-		Button parseButton = new Button("Parse");
-
-		parseButton.setSclass("parse-button");
-
-		parseButton.addEventListener("onClick", event -> parseBatch(event));
-
-		actionCell.appendChild(parseButton);
+		Button viewButton = new Button("View");
+		viewButton.setSclass("view-button");
+		viewButton.setWidth("90px");
+		viewButton.addEventListener("onClick", event -> openBatchView(item));
+		actionCell.appendChild(viewButton);
 	}
-
 	private String getDisplayStatus(InwardBatch batch) {
 		if (batch == null) {
 			return "Received";
@@ -762,7 +750,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		} else if ("Validation Failed".equalsIgnoreCase(status)) {
 			label.setSclass("status-validation-failed");
 		} else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
-			label.setSclass("status-processing-pending");
+			label.setSclass("status-badge status-processing-pending");
 		} else if ("Checker Processing".equalsIgnoreCase(status)) {
 			label.setSclass("status-checker-processing");
 		} else if ("In Verification".equalsIgnoreCase(status)) {
@@ -1521,6 +1509,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		String getStatus() {
 			return status;
 		}
+
 		String getMessage() {
 			return message;
 		}
