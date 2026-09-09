@@ -1,3 +1,4 @@
+
 package com.iispl.cts.controller.inward.maker;
 
 import java.sql.Connection;
@@ -138,101 +139,45 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     }
 
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
-
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-        String sql =
-                "SELECT "
-              + "    b.inward_batch_id, "
-              + "    b.actual_cheque_count, "
-              + "    b.actual_total_amount, "
-              + "    b.batch_status, "
-
-              + "    COUNT(CASE "
-              + "        WHEN c.cheque_status IN ( "
-              + "            'DATA_ENTRY_PENDING', "
-              + "            'DATA_ENTRY_IN_PROGRESS', "
-              + "            'SEND_BACK_TO_MAKER_DATA_ENTRY' "
-              + "        ) "
-              + "        THEN 1 "
-              + "    END) AS pending_cheques "
-
-              + "FROM inward_batch b "
-
-              + "LEFT JOIN inward_cheque c "
-              + "    ON b.inward_batch_id = c.inward_batch_id "
-
-              + "WHERE ( "
-              + "       b.batch_status = 'PROCESSING' "
-              + "       OR EXISTS ( "
-              + "           SELECT 1 "
-              + "           FROM inward_cheque ic "
-              + "           WHERE ic.inward_batch_id = b.inward_batch_id "
-              + "           AND ic.cheque_status = 'SEND_BACK_TO_MAKER_DATA_ENTRY' "
-              + "       ) "
-              + ") "
-
-              + "AND EXISTS ( "
-              + "    SELECT 1 "
-              + "    FROM inward_cheque ic "
-              + "    WHERE ic.inward_batch_id = b.inward_batch_id "
-              + "    AND ic.cheque_status IN ( "
-              + "        'DATA_ENTRY_PENDING', "
-              + "        'DATA_ENTRY_IN_PROGRESS', "
-              + "        'SEND_BACK_TO_MAKER_DATA_ENTRY' "
-              + "    ) "
-              + ") "
-
-              + "GROUP BY "
-              + "    b.inward_batch_id, "
-              + "    b.actual_cheque_count, "
-              + "    b.actual_total_amount, "
-              + "    b.batch_status "
-
-              + "ORDER BY b.inward_batch_id ASC";
+        String sql = "SELECT " +
+                     "    b.inward_batch_id, " +
+                     "    b.actual_cheque_count, " +
+                     "    b.actual_total_amount, " +
+                     "    b.batch_status, " +
+                     "    COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS') THEN 1 END) AS pending_cheques " +
+                     "FROM inward_batch b " +
+                     "LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
+                     "WHERE b.batch_status = 'PROCESSING' " +
+                     "  AND NOT EXISTS ( " +
+                     "      SELECT 1 FROM inward_cheque ic " +
+                     "      WHERE ic.inward_batch_id = b.inward_batch_id " +
+                     "        AND ic.cheque_status IN ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') " +
+                     "  ) " +
+                     "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status " +
+                     "ORDER BY b.inward_batch_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
-                DataEntryBatchItemDTO dto =
-                        new DataEntryBatchItemDTO();
-
-                dto.setBatchId(
-                        rs.getString("inward_batch_id"));
-
-                dto.setTotalCheques(
-                        rs.getInt("actual_cheque_count"));
-
-                dto.setTotalAmount(
-                        rs.getBigDecimal("actual_total_amount"));
-
-                dto.setBatchStatus(
-                        rs.getString("batch_status"));
-
-                dto.setPendingCheques(
-                        rs.getInt("pending_cheques"));
-
+                DataEntryBatchItemDTO dto = new DataEntryBatchItemDTO();
+                dto.setBatchId(rs.getString("inward_batch_id"));
+                dto.setTotalCheques(rs.getInt("actual_cheque_count"));
+                dto.setTotalAmount(rs.getBigDecimal("actual_total_amount"));
+                dto.setBatchStatus(rs.getString("batch_status"));
+                dto.setPendingCheques(rs.getInt("pending_cheques"));
                 batches.add(dto);
             }
-
         } catch (SQLException e) {
-
             e.printStackTrace();
-
-            Messagebox.show(
-                    "Database error: " + e.getMessage(),
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+            Messagebox.show("Database error: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
         }
-
         return batches;
     }
-    
-    
+
     private void processBatch(DataEntryBatchItemDTO batch) {
         if (batch.getPendingCheques() == 0) {
             submitBatchToChecker(batch.getBatchId());
@@ -273,7 +218,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     }
 
     private void submitBatchToChecker(String batchId) {
-        Messagebox.show("Submit batch " + batchId + " to Inward Checker?", 
+        Messagebox.show("Submit batch " + batchId + " to Inward Checker?",
             "Submit Confirmation", Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, evt -> {
                 if (Messagebox.ON_YES.equals(evt.getName())) {
                     String sql = "UPDATE inward_batch SET batch_status = 'CHECKER_PROCESSING_PENDING' WHERE inward_batch_id = ?";
