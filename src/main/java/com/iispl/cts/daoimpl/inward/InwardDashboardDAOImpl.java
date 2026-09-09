@@ -115,10 +115,12 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
                 // Display Status alignment
                 if (dto.getBackToMakerCheques() > 0 
                         || InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(bStatus)
-                        || InwardBatchStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(bStatus)) {
+                        || InwardBatchStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(bStatus)
+                        || bStatus.equalsIgnoreCase("SEND_BACK_TO_MAKER")) {
                     dto.setDisplayStatus("Sent Back");
                 } else if (InwardBatchStatus.COMPLETED.name().equalsIgnoreCase(bStatus)
-                        || InwardBatchStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(bStatus)) {
+                        || InwardBatchStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(bStatus)
+                        || InwardBatchStatus.CHECKER_PROCESSING.name().equalsIgnoreCase(bStatus)) {
                     dto.setDisplayStatus("Completed");
                 } else {
                     dto.setDisplayStatus("Partially Processed");
