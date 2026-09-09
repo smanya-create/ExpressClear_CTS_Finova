@@ -5,6 +5,7 @@ import java.util.List;
 import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
 public interface InwardChequeService {
 
@@ -24,6 +25,10 @@ public interface InwardChequeService {
 	InwardChequeImage getBackImage(String inwardChequeId);
 
 	boolean saveRejection(String inwardChequeId, String rejectedReasonId, String remarks, String rejectedBy);
+	
+	boolean saveRejectionRequest(InwardChequeRejectionRequest request);
+
+	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
 

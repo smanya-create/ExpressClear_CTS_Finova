@@ -12,6 +12,7 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
 public class InwardChequeDAOImpl implements InwardChequeDAO {
 
@@ -376,8 +377,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 			connection.setAutoCommit(false);
 
-	
-
 			try (PreparedStatement historyStatement = connection.prepareStatement(historySql)) {
 
 				historyStatement.setString(1, inwardChequeId.trim());
@@ -410,7 +409,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 				historyStatement.executeUpdate();
 			}
-
 
 			try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
 
@@ -575,6 +573,67 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 			System.err.println("Rejected By: " + rejectedBy);
 
 			System.err.println("SQL Error: " + e.getMessage());
+
+			e.printStackTrace();
+
+			return false;
+		}
+	}
+
+	@Override
+	public boolean saveRejectionRequest(InwardChequeRejectionRequest request) {
+
+		String sql = "INSERT INTO inward_cheque_rejection_request "
+				+ "(inward_cheque_id, inward_batch_id, rejected_reason_id, "
+				+ "remarks, requested_by, request_stage, request_status) " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, request.getInwardChequeId());
+			ps.setString(2, request.getInwardBatchId());
+			ps.setString(3, request.getRejectedReasonId());
+			ps.setString(4, request.getRemarks());
+			ps.setString(5, request.getRequestedBy());
+			ps.setString(6, request.getRequestStage());
+
+			ps.setString(7, request.getRequestStatus() != null ? request.getRequestStatus() : "PENDING");
+
+			int rowsInserted = ps.executeUpdate();
+
+			System.out.println("Rejection request inserted. Rows: " + rowsInserted);
+
+			return rowsInserted > 0;
+
+		} catch (SQLException e) {
+
+			System.err.println("Failed to save rejection request for cheque: " + request.getInwardChequeId());
+
+			e.printStackTrace();
+
+			return false;
+		}
+	}
+
+	@Override
+	public boolean updateChequeStatus(String inwardChequeId, String chequeStatus) {
+
+		String sql = "UPDATE inward_cheque " + "SET cheque_status = ? " + "WHERE inward_cheque_id = ?";
+
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, chequeStatus);
+			ps.setString(2, inwardChequeId);
+
+			int rowsUpdated = ps.executeUpdate();
+
+			System.out.println("Cheque status updated. Cheque: " + inwardChequeId + ", Status: " + chequeStatus
+					+ ", Rows: " + rowsUpdated);
+
+			return rowsUpdated > 0;
+
+		} catch (SQLException e) {
+
+			System.err.println("Failed to update cheque status for: " + inwardChequeId);
 
 			e.printStackTrace();
 

@@ -8,6 +8,7 @@ import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
 public class InwardChequeServiceImpl implements InwardChequeService {
 
@@ -59,6 +60,18 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	public boolean saveRejection(String inwardChequeId, String rejectedReasonId, String remarks, String rejectedBy) {
 
 		return inwardChequeDAO.saveRejection(inwardChequeId, rejectedReasonId, remarks, rejectedBy);
+	}
+
+	@Override
+	public boolean saveRejectionRequest(InwardChequeRejectionRequest request) {
+
+		return inwardChequeDAO.saveRejectionRequest(request);
+	}
+
+	@Override
+	public boolean updateChequeStatus(String inwardChequeId, String chequeStatus) {
+
+		return inwardChequeDAO.updateChequeStatus(inwardChequeId, chequeStatus);
 	}
 
 	@Override
