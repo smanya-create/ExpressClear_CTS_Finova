@@ -1,4 +1,3 @@
-
 package com.iispl.cts.controller.inward.maker;
 
 import java.sql.Connection;
@@ -27,6 +26,8 @@ import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dto.DataEntryBatchItemDTO;
+import com.iispl.cts.enums.inward.InwardBatchStatus;
+import com.iispl.cts.enums.inward.InwardChequeStatus;
 
 public class InwardDataEntryBatchesController extends GenericForwardComposer<Component> {
 
@@ -91,7 +92,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                 cellAmount.setStyle("font-family: monospace; font-size: 13px; font-weight: 600;");
                 cellAmount.setParent(item);
 
-                // 5. Dynamic Operational Status Badge (Replaces static "PROCESSING")
+                // 5. Dynamic Operational Status Badge
                 Listcell cellStatus = new Listcell();
                 Label lblStatus = new Label(batch.getDisplayStatus());
                 lblStatus.setStyle(batch.getStatusBadgeStyle());
@@ -141,19 +142,31 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
+        // Query: Includes PROCESSING, SEND_BACK_TO_MAKER_DATA_ENTRY, and legacy pending states.
+        // Pending cheques include any instrument in DATA_ENTRY_PENDING, DATA_ENTRY_IN_PROGRESS, or SEND_BACK_TO_MAKER_DATA_ENTRY.
+        // Blocks any batch where MICR repair items remain unresolved.
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +
                      "    b.actual_total_amount, " +
                      "    b.batch_status, " +
-                     "    COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS') THEN 1 END) AS pending_cheques " +
+                     "    COUNT(CASE WHEN c.cheque_status IN ('" 
+                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
+                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques " +
                      "FROM inward_batch b " +
                      "LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-                     "WHERE b.batch_status = 'PROCESSING' " +
+                     "WHERE b.batch_status IN ('" 
+                     + InwardBatchStatus.PROCESSING.name() + "', '" 
+                     + InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', 'DATA_ENTRY_PENDING', 'VALIDATED') " +
                      "  AND NOT EXISTS ( " +
                      "      SELECT 1 FROM inward_cheque ic " +
                      "      WHERE ic.inward_batch_id = b.inward_batch_id " +
-                     "        AND ic.cheque_status IN ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') " +
+                     "        AND ic.cheque_status IN ('" 
+                     + InwardChequeStatus.MICR_REPAIR_PENDING.name() + "', '" 
+                     + InwardChequeStatus.MICR_REPAIR_IN_PROGRESS.name() + "', '" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "') " +
                      "  ) " +
                      "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status " +
                      "ORDER BY b.inward_batch_id ASC";
@@ -173,8 +186,18 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            Messagebox.show("Database error: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+            Messagebox.show("Database error loading batches: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
         }
+
+        // Prioritize returned/sent-back batches to appear first
+        batches.sort((b1, b2) -> {
+            boolean b1Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b1.getBatchStatus());
+            boolean b2Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b2.getBatchStatus());
+            if (b1Sb && !b2Sb) return -1;
+            if (!b1Sb && b2Sb) return 1;
+            return 0;
+        });
+
         return batches;
     }
 
@@ -221,10 +244,11 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         Messagebox.show("Submit batch " + batchId + " to Inward Checker?",
             "Submit Confirmation", Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, evt -> {
                 if (Messagebox.ON_YES.equals(evt.getName())) {
-                    String sql = "UPDATE inward_batch SET batch_status = 'CHECKER_PROCESSING_PENDING' WHERE inward_batch_id = ?";
+                    String sql = "UPDATE inward_batch SET batch_status = ? WHERE inward_batch_id = ?";
                     try (Connection conn = DBConnection.getConnection();
                          PreparedStatement ps = conn.prepareStatement(sql)) {
-                        ps.setString(1, batchId);
+                        ps.setString(1, InwardBatchStatus.CHECKER_PROCESSING_PENDING.name());
+                        ps.setString(2, batchId);
                         ps.executeUpdate();
                         Messagebox.show("Batch submitted to checker successfully.", "Success", Messagebox.OK, Messagebox.INFORMATION);
                         loadBatches();
