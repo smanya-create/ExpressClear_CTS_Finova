@@ -206,7 +206,18 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardMakerReports() {
-		Executions.sendRedirect("/outward/maker/reports/maker-reports.zul");
+	    Component root = sidebarComponent.getPage().getFirstRoot();
+
+	    Component mainContentArea =
+	            root.getFellowIfAny("mainContentArea", true);
+
+	    if (mainContentArea instanceof Include) {
+	        Include include = (Include) mainContentArea;
+
+	        include.setSrc(
+	            "/outward/maker/reports/maker-reports.zul"
+	        );
+	    }
 	}
 
 	// Outward Checker Navigation Actions
