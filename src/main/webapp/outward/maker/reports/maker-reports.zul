@@ -1,77 +1,146 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
+
 <zk>
-<borderlayout apply="com.iispl.cts.controller.outward.maker.MakerReportController" hflex="1" vflex="1">
 
-    <!-- Shared Left Sidebar Navigation -->
-    <west width="240px" border="none" collapsible="false">
-        <include src="/components/sidebar.zul" role="OUTWARD_MAKER" activeTab="outward-maker-reports" />
-    </west>
+    <html>
+        <link rel="stylesheet"
+              type="text/css"
+              href="/ExpressClear_CTS_Finova/css/outward/maker-report.css?v=9" />
+    </html>
 
-    <!-- Main Workspace -->
-    <center border="none" autoscroll="true" style="background-color: #f8fafc;">
-        <vlayout spacing="0" hflex="1">
+    <vlayout
+        apply="com.iispl.cts.controller.outward.maker.MakerReportController"
+        spacing="20px"
+        style="padding:24px;"
+        hflex="1"
+        vflex="1"
+        sclass="role-content">
 
-            <!-- Shared Header -->
-            <include id="incHeader" src="/components/header.zul" 
-                     pageTitle="Maker Dashboard" 
-                     pageSubtitle="Operations &amp; Audit Reports" />
+        <!-- Page Title Header -->
 
-            <!-- Content Area Container matching Role/Audit style -->
-            <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
-                
-                <!-- Page Title Header -->
-                <vlayout spacing="4px">
-                    <label value="OPERATIONAL REPORTS" sclass="page-title"/>
-                    <label value="Generate and download maker daily balancing, exception handling, and audit logs." sclass="page-subtitle"/>
+        <vlayout spacing="4px">
+
+            <label value="OPERATIONAL REPORTS"
+                   sclass="page-title" />
+
+            <label value="Generate and download maker daily balancing, exception handling, and audit logs."
+                   sclass="page-subtitle" />
+
+        </vlayout>
+
+
+        <!-- Filter Controls Card -->
+
+        <vlayout sclass="card-panel"
+                 spacing="20px"
+                 hflex="1"
+                 style="padding:24px 28px;">
+
+            <!-- Date Inputs -->
+
+            <hlayout spacing="16px"
+                     valign="bottom"
+                     hflex="1">
+
+                <vlayout spacing="6px"
+                         width="220px">
+
+                    <label value="FROM DATE"
+                           sclass="field-label" />
+
+                    <datebox id="dtFromDate"
+                             format="yyyy-MM-dd"
+                             height="38px"
+                             width="100%" />
+
                 </vlayout>
 
-                <!-- Filter Controls Card matching the Audit Logs card style -->
-                <vlayout sclass="card-panel" spacing="20px" hflex="1" style="padding: 24px 28px;">
-                    
-                    <!-- Date Inputs -->
-                    <hlayout spacing="16px" valign="bottom" hflex="1">
-                        <vlayout spacing="6px" width="220px">
-                            <label value="FROM DATE" sclass="field-label"/>
-                            <datebox id="dtFromDate" format="yyyy-MM-dd" height="38px" width="100%"/>
-                        </vlayout>
 
-                        <vlayout spacing="6px" width="220px">
-                            <label value="TO DATE" sclass="field-label"/>
-                            <datebox id="dtToDate" format="yyyy-MM-dd" height="38px" width="100%"/>
-                        </vlayout>
-                    </hlayout>
+                <vlayout spacing="6px"
+                         width="220px">
 
-                    <separator bar="true" style="border-color: #e2e8f0; margin: 4px 0;" />
+                    <label value="TO DATE"
+                           sclass="field-label" />
 
-                    <!-- Report Details Description Section -->
-                    <vlayout spacing="8px" hflex="1">
-                        <label value="REPORT DETAILS" sclass="field-label"/>
-                        <label value="Select a clearing date range to generate the consolidated 4-part Maker audit report covering:" 
-                               sclass="page-subtitle"/>
-                        <vlayout spacing="4px" style="padding-left: 8px;">
-                            <label value="• Section 1: Batches with manual MICR repairs" sclass="page-subtitle" style="color: #334155;"/>
-                            <label value="• Section 2: Batches pending Courtesy / Legal Amount data entry" sclass="page-subtitle" style="color: #334155;"/>
-                            <label value="• Section 3: Cheques blocked due to scan defects or unread codelines" sclass="page-subtitle" style="color: #334155;"/>
-                            <label value="• Section 4: Balanced batches cleared and submitted to Checker" sclass="page-subtitle" style="color: #334155;"/>
-                        </vlayout>
-                    </vlayout>
+                    <datebox id="dtToDate"
+                             format="yyyy-MM-dd"
+                             height="38px"
+                             width="100%" />
 
-                    <!-- Button aligned to bottom-left matching your screenshot -->
-                   <hlayout spacing="12px" hflex="1" style="justify-content: flex-start; margin-top: 12px;">
-                        <button id="btnExportCsv" label="DOWNLOAD CSV" height="38px" 
-                                style="background-color: #0F766E; color: #FFFFFF; font-weight: 600; border-radius: 4px; padding: 0 18px;" 
-                                iconSclass="z-icon-file-text-o" />
-                        <button id="btnExportPdf" label="DOWNLOAD PDF REPORT" height="38px" 
-                                sclass="btn-primary" 
-                                iconSclass="z-icon-file-pdf-o" />
-                    </hlayout>
+                </vlayout>
+
+            </hlayout>
+
+
+            <separator bar="true"
+                       style="border-color:#e2e8f0;
+                              margin:4px 0;" />
+
+
+            <!-- Report Details Description Section -->
+
+            <vlayout spacing="8px"
+                     hflex="1">
+
+                <label value="REPORT DETAILS"
+                       sclass="field-label" />
+
+                <label value="Select a clearing date range to generate the consolidated 4-part Maker audit report covering:"
+                       sclass="page-subtitle" />
+
+                <vlayout spacing="4px"
+                         style="padding-left:8px;">
+
+                    <label value="• Section 1: Batches with manual MICR repairs"
+                           sclass="page-subtitle"
+                           style="color:#334155;" />
+
+                    <label value="• Section 2: Batches pending Courtesy / Legal Amount data entry"
+                           sclass="page-subtitle"
+                           style="color:#334155;" />
+
+                    <label value="• Section 3: Cheques blocked due to scan defects or unread codelines"
+                           sclass="page-subtitle"
+                           style="color:#334155;" />
+
+                    <label value="• Section 4: Balanced batches cleared and submitted to Checker"
+                           sclass="page-subtitle"
+                           style="color:#334155;" />
 
                 </vlayout>
 
             </vlayout>
 
+
+            <!-- Export Buttons -->
+
+            <hlayout spacing="12px"
+                     hflex="1"
+                     style="justify-content:flex-start;
+                            margin-top:12px;">
+
+                <button id="btnExportCsv"
+                        label="DOWNLOAD CSV"
+                        height="38px"
+                        style="background-color:#0F766E;
+                               color:#FFFFFF;
+                               font-weight:600;
+                               border-radius:4px;
+                               padding:0 18px;"
+                        iconSclass="z-icon-file-text-o" />
+
+                <button id="btnExportPdf"
+                        label="DOWNLOAD PDF REPORT"
+                        height="38px"
+                        sclass="btn-primary"
+                        iconSclass="z-icon-file-pdf-o" />
+
+            </hlayout>
+
         </vlayout>
-    </center>
-</borderlayout>
+
+    </vlayout>
+
 </zk>
