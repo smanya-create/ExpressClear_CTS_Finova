@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.inward.maker;
 
 import java.util.ArrayList;
+
 import java.io.InputStream;
 import org.zkoss.image.AImage;
 import java.util.HashMap;
@@ -8,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
+import com.iispl.cts.service.NotificationService;
+import com.iispl.cts.enums.inward.InwardChequeStatus;
+import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 import com.iispl.cts.entity.inward.InwardChequeImage;
@@ -27,7 +32,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import org.zkoss.zk.ui.event.InputEvent;
-
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zul.Button;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -93,6 +99,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private Combobox cmbRejectReason;
 
+	private NotificationService notificationService;
+
 	private InwardCheque currentCheque;
 
 	private String ocrSortCode = "";
@@ -112,9 +120,23 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 
+		notificationService = NotificationServiceImpl.getInstance();
+
 		micrValidator = new MICRValidatorImpl();
 
-		loadRejectedReasons();
+		if (rejectRequestWindow != null) {
+
+			cmbRejectReason = (Combobox) rejectRequestWindow.getFellow("cmbRejectReason");
+
+			Button confirmButton = (Button) rejectRequestWindow.getFellow("btnConfirmReject");
+
+			Button cancelButton = (Button) rejectRequestWindow.getFellow("btnCancelReject");
+
+			confirmButton.addEventListener(Events.ON_CLICK, event -> onClick$btnConfirmReject());
+
+			cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
+		}
+
 		loadRepairRecord();
 	}
 
@@ -182,11 +204,11 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 					String status = cheque.getChequeStatus();
 
 					if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status)
-					        || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
-					        || "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-					        || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
+							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
+							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
 
-					    repairCheques.add(cheque);
+						repairCheques.add(cheque);
 					}
 				}
 			}
@@ -488,12 +510,11 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				}
 
 				String status = cheque.getChequeStatus();
-				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status)
-				        || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
-				        || "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-				        || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
+				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status) || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
+						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
 
-				    repairCheques.add(cheque);
+					repairCheques.add(cheque);
 				}
 			}
 		}
@@ -550,17 +571,27 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	public void onClick$btnRejectRequest() {
+
 		if (currentCheque == null) {
+
 			Messagebox.show("No cheque is selected.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
+
 			return;
 		}
 
+		loadRejectedReasons();
+
+		if (cmbRejectReason != null) {
+			cmbRejectReason.setSelectedItem(null);
+		}
+
 		if (rejectRequestWindow != null) {
-			rejectRequestWindow.doModal();
+			rejectRequestWindow.setVisible(true);
 		}
 	}
 
 	public void onClick$btnCancelReject() {
+
 		if (rejectRequestWindow != null) {
 			rejectRequestWindow.setVisible(false);
 		}
@@ -569,30 +600,108 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	public void onClick$btnConfirmReject() {
 
 		if (currentCheque == null) {
+
+			Messagebox.show("No cheque is selected.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
+
 			return;
 		}
 
 		if (cmbRejectReason == null || cmbRejectReason.getSelectedItem() == null) {
+
 			Messagebox.show("Please select a rejection reason.", "Reject Request", Messagebox.OK,
 					Messagebox.EXCLAMATION);
+
 			return;
 		}
 
 		Comboitem selectedItem = cmbRejectReason.getSelectedItem();
 
-		String rejectedReasonId = String.valueOf(selectedItem.getValue());
+		Object reasonValue = selectedItem.getValue();
+
+		String rejectedReasonId = reasonValue != null ? reasonValue.toString() : null;
 
 		if (rejectedReasonId == null || rejectedReasonId.trim().isEmpty()) {
-			Messagebox.show("Invalid rejection reason.", "Reject Request", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			Messagebox.show("Invalid rejection reason.", "Reject Request", Messagebox.OK, Messagebox.ERROR);
+
 			return;
 		}
 
-		Messagebox.show("Reject request submitted successfully.", "Reject Request", Messagebox.OK,
-				Messagebox.INFORMATION);
+		String requestedBy = (String) Executions.getCurrent().getSession().getAttribute("USER_ID");
+
+		if (requestedBy == null || requestedBy.trim().isEmpty()) {
+
+			Messagebox.show("Unable to identify the logged-in Maker.", "Reject Request", Messagebox.OK,
+					Messagebox.ERROR);
+
+			return;
+		}
+
+		InwardChequeRejectionRequest request = new InwardChequeRejectionRequest();
+
+		request.setInwardChequeId(currentCheque.getInwardChequeId());
+
+		request.setInwardBatchId(currentCheque.getInwardBatchId());
+
+		request.setRejectedReasonId(rejectedReasonId);
+
+		request.setRemarks(txtRemarks != null ? txtRemarks.getValue() : "");
+
+		request.setRequestedBy(requestedBy);
+
+		request.setRequestStage("MICR_REPAIR");
+
+		request.setRequestStatus("PENDING");
+
+		boolean requestSaved = inwardChequeService.saveRejectionRequest(request);
+
+		if (!requestSaved) {
+
+			Messagebox.show("Unable to submit the rejection request. Please try again.", "Reject Request",
+					Messagebox.OK, Messagebox.ERROR);
+
+			return;
+		}
+
+		boolean statusUpdated = inwardChequeService.updateChequeStatus(currentCheque.getInwardChequeId(),
+				InwardChequeStatus.REJECTION_REQUESTED.name());
+
+		if (!statusUpdated) {
+
+			Messagebox.show("The rejection request was saved, but the cheque status could not be updated.",
+					"Reject Request", Messagebox.OK, Messagebox.ERROR);
+
+			return;
+		}
+
+		String chequeNumber = currentCheque.getChequeNumber();
+
+		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+
+			chequeNumber = currentCheque.getInwardChequeId();
+		}
+
+		String message = "Rejection request raised by Maker for cheque " + chequeNumber + " in batch "
+				+ currentCheque.getInwardBatchId() + ". Reason: " + selectedItem.getLabel() + ". Stage: MICR Repair.";
+
+		boolean notificationSent = notificationService.sendNotification("INWARD_CHECKER", null, message);
+
+		if (!notificationSent) {
+
+			System.err.println("MICR Repair: rejection request saved and status updated, "
+					+ "but Checker notification could not be created.");
+		}
+
+		if (cmbRejectReason != null) {
+			cmbRejectReason.setSelectedItem(null);
+		}
 
 		if (rejectRequestWindow != null) {
 			rejectRequestWindow.setVisible(false);
 		}
+
+		Messagebox.show("Reject request submitted successfully to the Checker.", "Reject Request", Messagebox.OK,
+				Messagebox.INFORMATION);
 	}
 
 	public void onClick$btnBackToList() {
