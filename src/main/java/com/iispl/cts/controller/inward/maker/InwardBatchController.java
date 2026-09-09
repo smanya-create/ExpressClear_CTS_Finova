@@ -215,6 +215,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		viewButton.addEventListener("onClick", event -> openBatchView(item));
 		actionCell.appendChild(viewButton);
 	}
+
 	private String getDisplayStatus(InwardBatch batch) {
 		if (batch == null) {
 			return "Received";
@@ -889,28 +890,24 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			String status = getDisplayStatus(batch);
 
-			if ("Processing".equalsIgnoreCase(status)) {
+			if ("Processing".equalsIgnoreCase(status) || "Checker Processing Pending".equalsIgnoreCase(status)
+					|| "Checker Processing".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status)
+					|| "In Verification".equalsIgnoreCase(status) || "Hold".equalsIgnoreCase(status)
+					|| "Rejected".equalsIgnoreCase(status)) {
 
 				parsingStatusLabel.setValue("SUCCESS");
-
 				parsingStatusLabel.setSclass("status-badge status-success");
 
 			} else if ("Parsing".equalsIgnoreCase(status)) {
 
 				parsingStatusLabel.setValue("PARSING");
-
 				parsingStatusLabel.setSclass("status-badge status-hold");
 
-			} else if ("Validation Failed".equalsIgnoreCase(status)) {
-
+			} else if ("Validation Failed".equalsIgnoreCase(status) || "Failed".equalsIgnoreCase(status)) {
 				parsingStatusLabel.setValue("FAILED");
-
 				parsingStatusLabel.setSclass("status-badge status-hold");
-
 			} else {
-
 				parsingStatusLabel.setValue("PENDING");
-
 				parsingStatusLabel.setSclass("status-badge status-hold");
 			}
 
