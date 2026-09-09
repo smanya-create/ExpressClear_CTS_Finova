@@ -6,9 +6,16 @@ public class DashboardSummaryDTO {
     private int totalCheques;
     private int rejectionRequestCheques;
     private int makerApprovedCheques;
+    private String batchStatus;
 
    
-    public String getBatchId()
+    public String getBatchStatus() {
+		return batchStatus;
+	}
+	public void setBatchStatus(String batchStatus) {
+		this.batchStatus = batchStatus;
+	}
+	public String getBatchId()
     { 
     	return batchId; 
     }

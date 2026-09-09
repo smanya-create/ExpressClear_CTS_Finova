@@ -1,11 +1,12 @@
 package com.iispl.cts.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.sql.Date;
+import java.sql.Timestamp;
 
-public class InwardReportChequeDTO {
+public class RejectedChequeDTO {
 
-    private String inwardChequeId;
+	private String inwardChequeId;
     private String inwardBatchId;
     private String chequeNumber;
     private String micrCode;
@@ -14,20 +15,25 @@ public class InwardReportChequeDTO {
     private String payeeName;
     private String payeeAccountNumber;
     private BigDecimal chequeAmount;
-    private LocalDateTime chequeDate;
+    private Date chequeDate;
     private String chequeStatus;
-    private String presentingBankCode;
-    private String presentingBank;
-    private String draweeBankCode;
-    private String draweeBank;
-    private String rejectionId;
+    private String accountId;
+    private String cityCode;
+    private String bankCode;
+    private String branchCode;
+    private String chequeImageFront;
+    private String chequeImageBack;
+
+    // Rejection details
     private String rejectedReasonId;
-    private String remarks;
-    private String rejectedBy;
-    private LocalDateTime rejectedAt;
     private String rejectedReasonCode;
     private String rejectedReasonName;
     private String rejectedReasonDescription;
+
+    private String remarks;
+    private String rejectedBy;
+    private Timestamp rejectedAt;
+
 
     public String getInwardChequeId() {
         return inwardChequeId;
@@ -37,6 +43,7 @@ public class InwardReportChequeDTO {
         this.inwardChequeId = inwardChequeId;
     }
 
+
     public String getInwardBatchId() {
         return inwardBatchId;
     }
@@ -44,6 +51,7 @@ public class InwardReportChequeDTO {
     public void setInwardBatchId(String inwardBatchId) {
         this.inwardBatchId = inwardBatchId;
     }
+
 
     public String getChequeNumber() {
         return chequeNumber;
@@ -53,6 +61,7 @@ public class InwardReportChequeDTO {
         this.chequeNumber = chequeNumber;
     }
 
+
     public String getMicrCode() {
         return micrCode;
     }
@@ -60,6 +69,7 @@ public class InwardReportChequeDTO {
     public void setMicrCode(String micrCode) {
         this.micrCode = micrCode;
     }
+
 
     public String getDraweeName() {
         return draweeName;
@@ -69,6 +79,7 @@ public class InwardReportChequeDTO {
         this.draweeName = draweeName;
     }
 
+
     public String getDraweeAccountNumber() {
         return draweeAccountNumber;
     }
@@ -76,6 +87,7 @@ public class InwardReportChequeDTO {
     public void setDraweeAccountNumber(String draweeAccountNumber) {
         this.draweeAccountNumber = draweeAccountNumber;
     }
+
 
     public String getPayeeName() {
         return payeeName;
@@ -85,6 +97,7 @@ public class InwardReportChequeDTO {
         this.payeeName = payeeName;
     }
 
+
     public String getPayeeAccountNumber() {
         return payeeAccountNumber;
     }
@@ -92,6 +105,7 @@ public class InwardReportChequeDTO {
     public void setPayeeAccountNumber(String payeeAccountNumber) {
         this.payeeAccountNumber = payeeAccountNumber;
     }
+
 
     public BigDecimal getChequeAmount() {
         return chequeAmount;
@@ -101,13 +115,15 @@ public class InwardReportChequeDTO {
         this.chequeAmount = chequeAmount;
     }
 
-    public LocalDateTime getChequeDate() {
+
+    public Date getChequeDate() {
         return chequeDate;
     }
 
-    public void setChequeDate(LocalDateTime chequeDate) {
+    public void setChequeDate(Date chequeDate) {
         this.chequeDate = chequeDate;
     }
+
 
     public String getChequeStatus() {
         return chequeStatus;
@@ -117,45 +133,60 @@ public class InwardReportChequeDTO {
         this.chequeStatus = chequeStatus;
     }
 
-    public String getPresentingBankCode() {
-        return presentingBankCode;
+
+    public String getAccountId() {
+        return accountId;
     }
 
-    public void setPresentingBankCode(String presentingBankCode) {
-        this.presentingBankCode = presentingBankCode;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
-    public String getPresentingBank() {
-        return presentingBank;
+
+    public String getCityCode() {
+        return cityCode;
     }
 
-    public void setPresentingBank(String presentingBank) {
-        this.presentingBank = presentingBank;
+    public void setCityCode(String cityCode) {
+        this.cityCode = cityCode;
     }
 
-    public String getDraweeBankCode() {
-        return draweeBankCode;
+
+    public String getBankCode() {
+        return bankCode;
     }
 
-    public void setDraweeBankCode(String draweeBankCode) {
-        this.draweeBankCode = draweeBankCode;
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
     }
 
-    public String getDraweeBank() {
-        return draweeBank;
+
+    public String getBranchCode() {
+        return branchCode;
     }
 
-    public void setDraweeBank(String draweeBank) {
-        this.draweeBank = draweeBank;
+    public void setBranchCode(String branchCode) {
+        this.branchCode = branchCode;
     }
 
-    public String getRejectionId() {
-        return rejectionId;
+
+    public String getChequeImageFront() {
+        return chequeImageFront;
     }
 
-    public void setRejectionId(String rejectionId) {
-        this.rejectionId = rejectionId;
+    public void setChequeImageFront(String chequeImageFront) {
+        this.chequeImageFront = chequeImageFront;
     }
+
+
+    public String getChequeImageBack() {
+        return chequeImageBack;
+    }
+
+    public void setChequeImageBack(String chequeImageBack) {
+        this.chequeImageBack = chequeImageBack;
+    }
+
 
     public String getRejectedReasonId() {
         return rejectedReasonId;
@@ -165,29 +196,6 @@ public class InwardReportChequeDTO {
         this.rejectedReasonId = rejectedReasonId;
     }
 
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
-    }
-
-    public String getRejectedBy() {
-        return rejectedBy;
-    }
-
-    public void setRejectedBy(String rejectedBy) {
-        this.rejectedBy = rejectedBy;
-    }
-
-    public LocalDateTime getRejectedAt() {
-        return rejectedAt;
-    }
-
-    public void setRejectedAt(LocalDateTime rejectedAt) {
-        this.rejectedAt = rejectedAt;
-    }
 
     public String getRejectedReasonCode() {
         return rejectedReasonCode;
@@ -197,6 +205,7 @@ public class InwardReportChequeDTO {
         this.rejectedReasonCode = rejectedReasonCode;
     }
 
+
     public String getRejectedReasonName() {
         return rejectedReasonName;
     }
@@ -205,11 +214,39 @@ public class InwardReportChequeDTO {
         this.rejectedReasonName = rejectedReasonName;
     }
 
+
     public String getRejectedReasonDescription() {
         return rejectedReasonDescription;
     }
 
     public void setRejectedReasonDescription(String rejectedReasonDescription) {
         this.rejectedReasonDescription = rejectedReasonDescription;
+    }
+
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
+
+    public String getRejectedBy() {
+        return rejectedBy;
+    }
+
+    public void setRejectedBy(String rejectedBy) {
+        this.rejectedBy = rejectedBy;
+    }
+
+
+    public Timestamp getRejectedAt() {
+        return rejectedAt;
+    }
+
+    public void setRejectedAt(Timestamp rejectedAt) {
+        this.rejectedAt = rejectedAt;
     }
 }

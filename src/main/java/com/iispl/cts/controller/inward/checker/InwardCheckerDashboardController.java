@@ -12,6 +12,7 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
+import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.dto.DashboardSummaryDTO;
@@ -20,23 +21,23 @@ import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
 public class InwardCheckerDashboardController extends GenericForwardComposer<Component> {
 
-    // Auto-wired components matching ZUL component IDs
+    
     private Listbox batchListbox;
     private Textbox txtSearchBatchId;
     private Button btnSearch;
     private Button btnClear;
 
-    // Service dependency
+   
     private final InwardBatchService batchService = new InwardBatchServiceImpl();
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        // Initial table load
+       
         loadSubmittedBatches();
 
-        // Attach event listeners explicitly
+       
         if (btnSearch != null) {
             btnSearch.addEventListener(Events.ON_CLICK, e -> performSearch());
         }
@@ -46,10 +47,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         }
     }
 
-    /**
-     * Loads all batches submitted to Inward Checker.
-     * Dashboard data is retrieved from the service layer.
-     */
+   
     private void loadSubmittedBatches() {
 
         batchListbox.getItems().clear();
@@ -65,42 +63,27 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         }
     }
 
-    /**
-     * Handles search by Batch ID.
-     */
+    
     private void performSearch() {
-
         String query = (txtSearchBatchId != null && txtSearchBatchId.getValue() != null)
-                ? txtSearchBatchId.getValue().trim()
-                : "";
+                ? txtSearchBatchId.getValue().trim() : "";
 
         if (query.isEmpty()) {
             loadSubmittedBatches();
             return;
         }
 
-        List<DashboardSummaryDTO> batches = batchService.getDashboardBatches();
-
-        if (batches == null || batches.isEmpty()) {
-            batchListbox.getItems().clear();
-            return;
-        }
-
-        List<DashboardSummaryDTO> filteredBatches = batches.stream()
-                .filter(b -> b.getBatchId() != null
-                        && b.getBatchId().equalsIgnoreCase(query))
-                .collect(Collectors.toList());
+        DashboardSummaryDTO batch = batchService.getDashboardBatches().stream()
+                .filter(b -> b.getBatchId() != null && b.getBatchId().equalsIgnoreCase(query))
+                .findFirst()
+                .orElse(null);
 
         batchListbox.getItems().clear();
 
-        for (DashboardSummaryDTO batch : filteredBatches) {
-            renderBatchRow(batch);
-        }
-    }
+        
 
-    /**
-     * Clears the search field and reloads all batches.
-     */
+        renderBatchRow(batch);
+    }
     private void performClear() {
 
         if (txtSearchBatchId != null) {
@@ -114,58 +97,45 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
      * Renders a single dashboard row.
      */
     private void renderBatchRow(DashboardSummaryDTO batch) {
-
         Listitem item = new Listitem();
-
         String batchId = batch.getBatchId();
         int totalCheques = batch.getTotalCheques();
         int normalCount = batch.getMakerApprovedCheques();
         int rejectionCount = batch.getRejectionRequestCheques();
+        String batchStatus = batch.getBatchStatus();
 
-        // 1. Batch ID
         Listcell cellBatchId = new Listcell(batchId);
         cellBatchId.setStyle("font-weight:bold; color:#1D2D46;");
         item.appendChild(cellBatchId);
 
-        // 2. Total Cheques
         Listcell cellTotal = new Listcell(String.valueOf(totalCheques));
         item.appendChild(cellTotal);
 
-        // 3. Normal Cheques
         Listcell cellNormal = new Listcell(String.valueOf(normalCount));
         item.appendChild(cellNormal);
 
-        // 4. Rejection Requests
         Listcell cellRejections = new Listcell();
-
         Label lblRejections = new Label(String.valueOf(rejectionCount));
-        lblRejections.setStyle(
-                "color:#E32C10; font-weight:bold; font-size:12px"
-        );
-
+        lblRejections.setStyle("color:#E32C10; font-weight:bold; font-size:12px");
         cellRejections.appendChild(lblRejections);
         item.appendChild(cellRejections);
 
-        // 5. Action Button
-        Listcell actionCell = new Listcell();
+        Listcell cellStatus = new Listcell(batchStatus);
+        item.appendChild(cellStatus);
 
+        Listcell actionCell = new Listcell();
         Button btnVerify = new Button("Proceed Verification");
 
-        btnVerify.setStyle(
-                "background:#242F82; " +
-                "color:white; " +
-                "border:0; " +
-                "border-radius:4px; " +
-                "cursor:pointer; " +
-                "font-size:10px; " +
-                "padding:3px 6px;"
-        );
+        btnVerify.setStyle("background:#242F82; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 3px;");
 
         btnVerify.addEventListener(Events.ON_CLICK, e -> {
+            boolean updated = batchService.updateProcessingBatchStatus(batchId, "IN_VERIFICATION");
 
-            Executions.getCurrent().sendRedirect(
-                    "/inward/checker/verification.zul?batchId=" + batchId
-            );
+            if (updated) {
+                Executions.getCurrent().sendRedirect("/inward/checker/verification.zul?batchId=" + batchId);
+            } else {
+                Messagebox.show("Unable to proceed");
+            }
         });
 
         actionCell.appendChild(btnVerify);

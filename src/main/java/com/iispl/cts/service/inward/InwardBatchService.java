@@ -32,4 +32,8 @@ public interface InwardBatchService {
 
 	List<DashboardSummaryDTO> getDashboardBatches();
 	List<InwardReportChequeDTO> getChequesByBatch();
+	
+	boolean updateProcessingBatchStatus(String batchId, String status);
+	
+	
 }

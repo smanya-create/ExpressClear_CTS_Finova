@@ -147,4 +147,10 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 		// TODO Auto-generated method stub
 		return inwardBatchDAO.getChequesByBatch();
 	}
+
+	@Override
+	public boolean updateProcessingBatchStatus(String batchId, String status) {
+		
+		return inwardBatchDAO.updateProcessingBatchStatus(batchId, status);
+	}
 }
