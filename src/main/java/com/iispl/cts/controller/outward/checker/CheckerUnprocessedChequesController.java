@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Label;
@@ -146,6 +147,23 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
     }
 
     private void routeToCheckerVerification(UnprocessedChequeDTO dto) {
-        Executions.sendRedirect("/WEB-INF/views/checker/verification.zul?chequeId=" + dto.getChequeId());
+    	if (dto == null) {
+            return;
+        }
+
+        // Format batch ID to match what the service expects (e.g., "BAT1001")
+        String batchIdStr = (dto.getBatchId() != null && dto.getBatchId() > 0)
+                ? "BAT" + dto.getBatchId()
+                : dto.getBatchNo();
+
+        // 1. Set the batch ID required by OutwardCheckerQueueController
+        Sessions.getCurrent().setAttribute("SELECTED_OUTWARD_BATCH_ID", batchIdStr);
+
+        // 2. Set the target cheque identifier
+        Sessions.getCurrent().setAttribute("SELECTED_VERIFY_CHEQUE_NO", dto.getChequeNo());
+        Sessions.getCurrent().setAttribute("SELECTED_VERIFY_CHEQUE_ID", "CH" + dto.getChequeId());
+
+        // 3. Redirect to the Checker Queue view
+        Executions.sendRedirect("/outward/checker/checker-queue.zul");
     }
 }
