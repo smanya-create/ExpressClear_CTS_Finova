@@ -196,12 +196,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		if (batchId == null || batchId.trim().isEmpty()) {
 
-		    Messagebox.show(
-		            "No batch selected for verification.",
-		            "Verification",
-		            Messagebox.OK,
-		            Messagebox.EXCLAMATION
-		    );
+		    showNoChequesToVerify();
 
 		    return;
 		}
