@@ -142,6 +142,15 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	@Wire
 	private Label lblNoCheques;
+	
+	@Wire
+	private Combobox cmbChequeStatus;
+
+	@Wire
+	private Button btnFilterCheque;
+
+	@Wire
+	private Button btnResetFilter;
 
 	private InwardChequeImageDAOImpl inwardChequeImageDAO;
 
@@ -155,6 +164,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		inwardChequeService = new InwardChequeServiceImpl();
 		
 		sendBackReasonService = new SendBackReasonServiceImpl();
+		
+		
 	
 
 		// Get reject popup
@@ -827,6 +838,47 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 					Messagebox.ERROR);
 		}
 	}
+	
+	private void loadChequeStatusFilter() {
+
+	    if (cmbChequeStatus == null) {
+	        return;
+	    }
+
+	    cmbChequeStatus.getItems().clear();
+
+	    Comboitem allItem = new Comboitem();
+	    allItem.setLabel("All Status");
+	    allItem.setValue("ALL");
+	    cmbChequeStatus.appendChild(allItem);
+
+	    Comboitem pendingItem = new Comboitem();
+	    pendingItem.setLabel("Pending");
+	    pendingItem.setValue("CHECKER_PROCESSING_PENDING");
+	    cmbChequeStatus.appendChild(pendingItem);
+
+	    Comboitem acceptedItem = new Comboitem();
+	    acceptedItem.setLabel("Accepted");
+	    acceptedItem.setValue("ACCEPTED");
+	    cmbChequeStatus.appendChild(acceptedItem);
+
+	    Comboitem rejectedItem = new Comboitem();
+	    rejectedItem.setLabel("Rejected");
+	    rejectedItem.setValue("REJECTED");
+	    cmbChequeStatus.appendChild(rejectedItem);
+
+	    Comboitem micrItem = new Comboitem();
+	    micrItem.setLabel("Sent Back - MICR");
+	    micrItem.setValue("SEND_BACK_TO_MAKER_MICR");
+	    cmbChequeStatus.appendChild(micrItem);
+
+	    Comboitem dataEntryItem = new Comboitem();
+	    dataEntryItem.setLabel("Sent Back - Data Entry");
+	    dataEntryItem.setValue("SEND_BACK_TO_MAKER_DATA_ENTRY");
+	    cmbChequeStatus.appendChild(dataEntryItem);
+
+	    cmbChequeStatus.setSelectedItem(allItem);
+	}
 
 	private void loadRejectedReasons(Combobox comboBox) {
 
@@ -848,32 +900,108 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	private void moveToNextCheque() {
 
-		// Refresh the batch data from database
-		currentBatchCheques = inwardChequeService.getChequesByBatchAndStatus(currentBatchId, null);
+	    List<InwardCheque> allCheques =
+	            inwardChequeService.getChequesByBatchAndStatus(
+	                    currentBatchId,
+	                    null);
 
-		// Move to next cheque
-		if (currentChequeIndex < currentBatchCheques.size() - 1) {
+	    if (allCheques == null || allCheques.isEmpty()) {
+	        return;
+	    }
 
-			currentChequeIndex++;
+	    int processedIndex = -1;
 
-			InwardCheque nextCheque = currentBatchCheques.get(currentChequeIndex);
+	    for (int i = 0; i < allCheques.size(); i++) {
 
-			currentChequeId = nextCheque.getInwardChequeId();
+	        InwardCheque cheque = allCheques.get(i);
 
-			loadChequeDetails(currentChequeId);
+	        if (cheque != null
+	                && cheque.getInwardChequeId() != null
+	                && cheque.getInwardChequeId()
+	                        .equalsIgnoreCase(currentChequeId)) {
 
-			updateChequePosition();
+	            processedIndex = i;
+	            break;
+	        }
+	    }
 
-		} else {
+	    if (processedIndex >= 0
+	            && processedIndex < allCheques.size() - 1) {
 
-			// Last cheque
-			updateChequePosition();
+	        currentBatchCheques = allCheques;
 
-			Messagebox.show("All cheques in this batch have been verified.", "Verification Completed", Messagebox.OK,
-					Messagebox.INFORMATION);
-		}
+	        currentChequeIndex = processedIndex + 1;
+
+	        InwardCheque nextCheque =
+	                currentBatchCheques.get(currentChequeIndex);
+
+	        currentChequeId =
+	                nextCheque.getInwardChequeId();
+
+	        loadChequeDetails(currentChequeId);
+
+	        updateChequePosition();
+
+	        return;
+	    }
+
+	    currentBatchCheques = allCheques;
+
+	    currentChequeIndex =
+	            allCheques.size() - 1;
+
+	    updateChequePosition();
+
+	    if (areAllChequesVerified()) {
+
+	        Messagebox.show(
+	                "All cheques in this batch have been verified.",
+	                "Verification Completed",
+	                Messagebox.OK,
+	                Messagebox.INFORMATION);
+	    }
+	}	
+	private boolean areAllChequesVerified() {
+
+	    if (currentBatchId == null ||
+	            currentBatchId.trim().isEmpty()) {
+
+	        return false;
+	    }
+
+	    List<InwardCheque> batchCheques =
+	            inwardChequeService.getChequesByBatchAndStatus(
+	                    currentBatchId,
+	                    null);
+
+	    if (batchCheques == null ||
+	            batchCheques.isEmpty()) {
+
+	        return false;
+	    }
+
+	    for (InwardCheque cheque : batchCheques) {
+
+	        if (cheque == null) {
+	            continue;
+	        }
+
+	        String status = cheque.getChequeStatus();
+
+	        // A cheque is verified only when it is
+	        // ACCEPTED or REJECTED.
+	        if (!"ACCEPTED".equalsIgnoreCase(status)
+	                && !"REJECTED".equalsIgnoreCase(status)) {
+
+	            return false;
+	        }
+	    }
+
+	    return true;
 	}
-
+	
+	
+	
 	private void updateChequePosition() {
 
 		if (lblChequePosition == null) {
