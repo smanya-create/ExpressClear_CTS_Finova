@@ -5,6 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import java.io.InputStream;
+
+import org.zkoss.image.AImage;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -118,6 +122,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	@Wire
 	private Combobox cmbSendBackReason;
+	@Wire
+	private Component noChequesContainer;
 
 	@Wire
 	private Textbox txtSendBackRemarks;
@@ -147,9 +153,9 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		pageRoot = comp.getPage().getFirstRoot();
 
 		inwardChequeService = new InwardChequeServiceImpl();
-		inwardChequeImageDAO = InwardChequeImageDAOImpl.getInstance();
+		
 		sendBackReasonService = new SendBackReasonServiceImpl();
-		inwardBatchService = new InwardBatchServiceImpl();
+	
 
 		// Get reject popup
 		Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
@@ -275,8 +281,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
-
-			loadChequeImage(inwardChequeId, "FRONT");
+			loadChequeImage(cheque, "FRONT");
 			currentChequeId = cheque.getInwardChequeId();
 			currentBatchId = cheque.getInwardBatchId();
 			currentBatchCheques = inwardChequeService.getChequesByBatchAndStatus(currentBatchId, null);
@@ -447,65 +452,230 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		}
 	}
 
-	private void loadChequeImage(String inwardChequeId, String imageType) {
-		zoomScale = 1.0;
-		rotationAngle = 0;
-		panX = 0;
-		panY = 0;
+	private void loadChequeImage(InwardCheque cheque, String imageType) {
 
-		if (chequeImage != null) {
-			chequeImage.setVisible(false);
-			chequeImage.setSrc(null);
-		}
+	    zoomScale = 1.0;
+	    rotationAngle = 0;
+	    panX = 0;
+	    panY = 0;
 
-		if (emptyImageState != null) {
-			emptyImageState.setVisible(true);
-		}
+	    if (chequeImage != null) {
+	        chequeImage.setVisible(false);
+	        chequeImage.setSrc(null);
+	        chequeImage.setContent((org.zkoss.image.Image)null);
+	    }
 
-		if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
-			return;
-		}
+	    if (emptyImageState != null) {
+	        emptyImageState.setVisible(true);
+	    }
 
-		InwardChequeImage image = null;
+	    if (cheque == null) {
+	        return;
+	    }
 
-		if ("FRONT".equalsIgnoreCase(imageType)) {
+	    String frontImg = cheque.getChequeImageFront();
+	    String backImg = cheque.getChequeImageBack();
 
-			image = inwardChequeService.getFrontImage(inwardChequeId);
+	    String rawPath;
 
-		} else if ("BACK".equalsIgnoreCase(imageType)) {
+	    if ("FRONT".equalsIgnoreCase(imageType)) {
+	        rawPath = frontImg;
+	    } else {
+	        rawPath = backImg;
+	    }
 
-			image = inwardChequeService.getBackImage(inwardChequeId);
-		}
+	    if (rawPath == null || rawPath.trim().isEmpty()) {
+	        System.err.println(
+	                "ERROR: No " + imageType
+	                + " image found for cheque: "
+	                + cheque.getChequeNumber());
 
-		if (image != null && image.getImagePath() != null && !image.getImagePath().trim().isEmpty()) {
+	        return;
+	    }
 
-			String imageSrc = "/" + image.getImagePath();
+	    rawPath = rawPath.trim();
 
-			chequeImage.setSrc(imageSrc);
-			chequeImage.setVisible(true);
+	    /*
+	     * Same logic as Data Entry.
+	     */
+	    if (rawPath.startsWith("/")) {
+	        rawPath = rawPath.substring(1);
+	    }
 
-			if (emptyImageState != null) {
-				emptyImageState.setVisible(false);
-			}
-		}
+	    /*
+	     * Images are stored under:
+	     *
+	     * src/main/resources/Inward-data/
+	     */
+	    String resourcePath = rawPath;
+
+	    if (!resourcePath.startsWith("Inward-data/")) {
+	        resourcePath = "Inward-data/" + resourcePath;
+	    }
+
+	    System.out.println(
+	            "DEBUG: Verification image loading");
+
+	    System.out.println(
+	            "DEBUG: Cheque = "
+	            + cheque.getChequeNumber());
+
+	    System.out.println(
+	            "DEBUG: Image type = "
+	            + imageType);
+
+	    System.out.println(
+	            "DEBUG: Raw image path = "
+	            + rawPath);
+
+	    System.out.println(
+	            "DEBUG: Resource path = "
+	            + resourcePath);
+
+	    /*
+	     * =====================================================
+	     * 1. TRY CLASSPATH
+	     * =====================================================
+	     */
+	    InputStream is =
+	            Thread.currentThread()
+	                    .getContextClassLoader()
+	                    .getResourceAsStream(resourcePath);
+
+	    if (is == null) {
+	        is = getClass()
+	                .getClassLoader()
+	                .getResourceAsStream(resourcePath);
+	    }
+
+	    if (is != null) {
+
+	        try {
+
+	            AImage aImage =
+	                    new AImage(rawPath, is);
+
+	            chequeImage.setContent(aImage);
+	            chequeImage.setVisible(true);
+
+	            if (emptyImageState != null) {
+	                emptyImageState.setVisible(false);
+	            }
+
+	            System.out.println(
+	                    "DEBUG: Verification image loaded "
+	                    + "successfully from classpath.");
+
+	        } catch (Exception e) {
+
+	            System.err.println(
+	                    "ERROR: Failed to construct AImage: "
+	                    + e.getMessage());
+
+	            chequeImage.setSrc(null);
+
+	        } finally {
+
+	            try {
+	                is.close();
+	            } catch (Exception ignored) {
+	            }
+	        }
+
+	    } else {
+
+	        /*
+	         * =================================================
+	         * 2. FALLBACK TO PHYSICAL FILE
+	         * =================================================
+	         */
+	    	String diskPath =
+	    	        "/home/administrator/snap/eclipse/common/git/"
+	    	        + "ExpressClear_CTS_Finova/"
+	    	        + "src/main/resources/"
+	    	        + resourcePath;
+	        File file = new File(diskPath);
+
+	        System.out.println(
+	                "DEBUG: Checking disk image: "
+	                + file.getAbsolutePath());
+
+	        if (file.exists()) {
+
+	            try {
+
+	                AImage aImage =
+	                        new AImage(file);
+
+	                chequeImage.setContent(aImage);
+	                chequeImage.setVisible(true);
+
+	                if (emptyImageState != null) {
+	                    emptyImageState.setVisible(false);
+	                }
+
+	                System.out.println(
+	                        "DEBUG: Verification image loaded "
+	                        + "successfully from disk.");
+
+	            } catch (Exception e) {
+
+	                e.printStackTrace();
+
+	                chequeImage.setSrc(null);
+	            }
+
+	        } else {
+
+	            System.err.println(
+	                    "ERROR: Verification image not found.");
+
+	            System.err.println(
+	                    "Cheque = "
+	                    + cheque.getChequeNumber());
+
+	            System.err.println(
+	                    "Image type = "
+	                    + imageType);
+
+	            System.err.println(
+	                    "Resource path = "
+	                    + resourcePath);
+
+	            System.err.println(
+	                    "Disk path = "
+	                    + file.getAbsolutePath());
+
+	            chequeImage.setSrc(null);
+	        }
+	    }
+
+	   
 	}
-
 	public void onClick$btnFront() {
 
-		if (currentChequeId != null) {
+	    if (currentChequeId != null) {
 
-			loadChequeImage(currentChequeId, "FRONT");
-		}
+	        InwardCheque cheque =
+	                inwardChequeService.findById(currentChequeId);
+
+	        if (cheque != null) {
+	            loadChequeImage(cheque, "FRONT");
+	        }
+	    }
 	}
-
 	public void onClick$btnBack() {
 
-		if (currentChequeId != null) {
+	    if (currentChequeId != null) {
 
-			loadChequeImage(currentChequeId, "BACK");
-		}
+	        InwardCheque cheque =
+	                inwardChequeService.findById(currentChequeId);
+
+	        if (cheque != null) {
+	            loadChequeImage(cheque, "BACK");
+	        }
+	    }
 	}
-
 	public void onClick$btnAccept() {
 
 		try {
@@ -1475,21 +1645,22 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	private void showNoChequesToVerify() {
 
-		if (batchInfoCard != null) {
-			batchInfoCard.setVisible(false);
-		}
+	    if (verificationNavigation != null) {
+	        verificationNavigation.setVisible(false);
+	    }
 
-		if (verificationContent != null) {
-			verificationContent.setVisible(false);
-		}
+	    if (batchInfoCard != null) {
+	        batchInfoCard.setVisible(false);
+	    }
 
-		if (verificationNavigation != null) {
-			verificationNavigation.setVisible(false);
-		}
+	    if (verificationContent != null) {
+	        verificationContent.setVisible(false);
+	    }
 
-		if (lblNoCheques != null) {
-			lblNoCheques.setVisible(true);
-		}
+	    if (noChequesContainer != null) {
+	        noChequesContainer.setVisible(true);
+	    }
 	}
+	
 
 }
