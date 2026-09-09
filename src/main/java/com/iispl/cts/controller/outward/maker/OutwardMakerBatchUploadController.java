@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.zkoss.util.media.Media;
@@ -23,6 +25,7 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Include;
 
 import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
@@ -32,596 +35,873 @@ import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
 public class OutwardMakerBatchUploadController implements Composer<Component> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	// =========================================================
-	// ZUL COMPONENTS
-	// =========================================================
+    // =========================================================
+    // ZUL COMPONENTS
+    // =========================================================
 
-	private Intbox txtExpectedTotalCheques;
-	private Decimalbox txtExpectedTotalChequeAmount;
+    private Intbox txtExpectedTotalCheques;
+    private Decimalbox txtExpectedTotalChequeAmount;
 
-	private Textbox txtChequeFolder;
-	private Textbox txtBatchNumber;
+    private Textbox txtChequeFolder;
+    private Textbox txtBatchNumber;
 
-	private Button btnBrowse;
-	private Button btnValidateBatch;
+    private Button btnBrowse;
+    private Button btnValidateBatch;
 
-	private Div divSuccessMessage;
-	private Label lblSuccessText;
+    private Div divSuccessMessage;
+    private Label lblSuccessText;
 
-	private Groupbox grpScannedChequesWindow;
-	private Listbox lstChequeList;
+    private Groupbox batchDetailsGroup;
+    private Listbox lstBatchDetails;
 
-	private Label lblScannedChequeTitle;
-	private Label lblNormalCount;
-	private Label lblMicrRepairCount;
+    // =========================================================
+    // SERVICE
+    // =========================================================
 
-	// =========================================================
-	// SERVICES
-	// =========================================================
+    private ScanService scanService;
 
-	private ScanService scanService;
+    // =========================================================
+    // UPLOADED ZIP
+    // =========================================================
 
-	// =========================================================
-	// UPLOADED ZIP
-	// =========================================================
+    private File uploadedZipFile;
 
-	private File uploadedZipFile;
+    // =========================================================
+    // BATCH ID
+    // =========================================================
 
-	// =========================================================
-	// BATCH ID
-	// =========================================================
+    private String batchId;
 
-	private String batchId;
+    // =========================================================
+    // COMPOSE
+    // =========================================================
 
-	// =========================================================
-	// COMPOSE
-	// =========================================================
+    @Override
+    public void doAfterCompose(Component component) throws Exception {
 
-	@Override
-	public void doAfterCompose(Component component) throws Exception {
+        // =====================================================
+        // GET ZUL COMPONENTS
+        // =====================================================
 
-		// =====================================================
-		// Get ZUL components
-		// =====================================================
+        txtExpectedTotalCheques =
+                (Intbox) component.getFellow(
+                        "txtExpectedTotalCheques");
 
-		txtExpectedTotalCheques = (Intbox) component.getFellow("txtExpectedTotalCheques");
+        txtExpectedTotalChequeAmount =
+                (Decimalbox) component.getFellow(
+                        "txtExpectedTotalChequeAmount");
 
-		txtExpectedTotalChequeAmount = (Decimalbox) component.getFellow("txtExpectedTotalChequeAmount");
+        txtChequeFolder =
+                (Textbox) component.getFellow(
+                        "txtChequeFolder");
 
-		txtChequeFolder = (Textbox) component.getFellow("txtChequeFolder");
+        txtBatchNumber =
+                (Textbox) component.getFellow(
+                        "txtBatchNumber");
 
-		txtBatchNumber = (Textbox) component.getFellow("txtBatchNumber");
+        btnBrowse =
+                (Button) component.getFellow(
+                        "btnBrowse");
 
-		btnBrowse = (Button) component.getFellow("btnBrowse");
+        btnValidateBatch =
+                (Button) component.getFellow(
+                        "btnValidateBatch");
 
-		btnValidateBatch = (Button) component.getFellow("btnValidateBatch");
+        divSuccessMessage =
+                (Div) component.getFellow(
+                        "divSuccessMessage");
 
-		divSuccessMessage = (Div) component.getFellow("divSuccessMessage");
+        lblSuccessText =
+                (Label) component.getFellow(
+                        "lblSuccessText");
 
-		lblSuccessText = (Label) component.getFellow("lblSuccessText");
+        batchDetailsGroup =
+                (Groupbox) component.getFellow(
+                        "batchDetailsGroup");
 
-		grpScannedChequesWindow = (Groupbox) component.getFellow("grpScannedChequesWindow");
+        lstBatchDetails =
+                (Listbox) component.getFellow(
+                        "lstBatchDetails");
 
-		lstChequeList = (Listbox) component.getFellow("lstChequeList");
+        // =====================================================
+        // CREATE SERVICE
+        // =====================================================
 
-		lblScannedChequeTitle = (Label) component.getFellow("lblScannedChequeTitle");
+        scanService = new ScanServiceImpl();
 
-		lblNormalCount = (Label) component.getFellow("lblNormalCount");
+        // =====================================================
+        // INITIAL PAGE STATE
+        // =====================================================
 
-		lblMicrRepairCount = (Label) component.getFellow("lblMicrRepairCount");
+        txtBatchNumber.setValue("");
 
-		// =====================================================
-		// Create service
-		// =====================================================
+        divSuccessMessage.setVisible(false);
 
-		scanService = new ScanServiceImpl();
+        batchDetailsGroup.setVisible(false);
 
-		// =====================================================
-		// Initial page state
-		// =====================================================
+        btnValidateBatch.setDisabled(true);
 
-		txtBatchNumber.setValue("");
+        // =====================================================
+        // BROWSE / ZIP UPLOAD
+        // =====================================================
 
-		divSuccessMessage.setVisible(false);
+        btnBrowse.addEventListener(
+                "onUpload",
+                new EventListener<Event>() {
 
-		grpScannedChequesWindow.setVisible(false);
+                    @Override
+                    public void onEvent(Event event) {
 
-		btnValidateBatch.setDisabled(true);
+                        handleZipUpload(
+                                (UploadEvent) event);
+                    }
+                });
 
-		lblNormalCount.setValue("0 NORMAL");
+        // =====================================================
+        // VALIDATE BATCH BUTTON
+        // =====================================================
 
-		lblMicrRepairCount.setValue("0 MICR REPAIR");
+        btnValidateBatch.addEventListener(
+                "onClick",
+                new EventListener<Event>() {
 
-		lblScannedChequeTitle.setValue("Scanned Cheques");
+                    @Override
+                    public void onEvent(Event event) {
 
-		// =====================================================
-		// Browse / ZIP upload
-		// =====================================================
+                        validateBatch();
+                    }
+                });
+    }
 
-		btnBrowse.addEventListener("onUpload", new EventListener<Event>() {
+    // =========================================================
+    // HANDLE ZIP UPLOAD
+    // =========================================================
 
-			@Override
-			public void onEvent(Event event) {
+    private void handleZipUpload(
+            UploadEvent uploadEvent) {
 
-				handleZipUpload((UploadEvent) event);
-			}
-		});
+        Media media = uploadEvent.getMedia();
 
-		// =====================================================
-		// Validate Batch button
-		// =====================================================
+        if (media == null) {
+            return;
+        }
 
-		btnValidateBatch.addEventListener("onClick", new EventListener<Event>() {
+        String fileName = media.getName();
 
-			@Override
-			public void onEvent(Event event) {
+        // =====================================================
+        // CHECK ZIP EXTENSION
+        // =====================================================
 
-				validateBatch();
-			}
-		});
-	}
+        if (fileName == null
+                || !fileName.toLowerCase().endsWith(".zip")) {
 
-	// =========================================================
-	// HANDLE ZIP UPLOAD
-	// =========================================================
+            return;
+        }
 
-	private void handleZipUpload(UploadEvent uploadEvent) {
+        // =====================================================
+        // GET WEBAPP / TEMPDATA PATH
+        // =====================================================
 
-		Media media = uploadEvent.getMedia();
+        String tempDataPath =
+                Executions.getCurrent()
+                        .getDesktop()
+                        .getWebApp()
+                        .getRealPath("/TempData");
 
-		if (media == null) {
-			return;
-		}
+        if (tempDataPath == null) {
+            return;
+        }
 
-		String fileName = media.getName();
+        File tempDataDirectory =
+                new File(tempDataPath);
 
-		// =====================================================
-		// Check ZIP extension
-		// =====================================================
+        // =====================================================
+        // CREATE TEMPDATA FOLDER
+        // =====================================================
 
-		if (fileName == null || !fileName.toLowerCase().endsWith(".zip")) {
+        if (!tempDataDirectory.exists()) {
 
-			return;
-		}
+            if (!tempDataDirectory.mkdirs()) {
+                return;
+            }
+        }
 
-		// =====================================================
-		// Get webapp/TempData path
-		// =====================================================
+        // =====================================================
+        // DESTINATION ZIP
+        // =====================================================
 
-		String tempDataPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath("/TempData");
+        File destinationFile =
+                new File(
+                        tempDataDirectory,
+                        fileName);
 
-		if (tempDataPath == null) {
-			return;
-		}
+        // =====================================================
+        // SAVE ZIP ONLY
+        // =====================================================
 
-		File tempDataDirectory = new File(tempDataPath);
+        try (
+                InputStream inputStream =
+                        media.getStreamData();
 
-		// =====================================================
-		// Create TempData folder if required
-		// =====================================================
+                FileOutputStream outputStream =
+                        new FileOutputStream(
+                                destinationFile)
+        ) {
 
-		if (!tempDataDirectory.exists()) {
+            byte[] buffer =
+                    new byte[8192];
 
-			if (!tempDataDirectory.mkdirs()) {
-				return;
-			}
-		}
+            int bytesRead;
 
-		// =====================================================
-		// Destination ZIP
-		// =====================================================
+            while (
+                    (bytesRead =
+                            inputStream.read(buffer))
+                            != -1
+            ) {
 
-		File destinationFile = new File(tempDataDirectory, fileName);
+                outputStream.write(
+                        buffer,
+                        0,
+                        bytesRead);
+            }
 
-		// =====================================================
-		// Save ZIP ONLY
-		// =====================================================
+            outputStream.flush();
 
-		try (InputStream inputStream = media.getStreamData();
+        } catch (Exception e) {
 
-				FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+            e.printStackTrace();
+            return;
+        }
 
-			byte[] buffer = new byte[8192];
+        // =====================================================
+        // STORE UPLOADED ZIP
+        // =====================================================
 
-			int bytesRead;
+        uploadedZipFile =
+                destinationFile;
 
-			while ((bytesRead = inputStream.read(buffer)) != -1) {
+        // =====================================================
+        // DISPLAY SELECTED FILE
+        // =====================================================
 
-				outputStream.write(buffer, 0, bytesRead);
-			}
+        txtChequeFolder.setValue(
+                fileName);
 
-			outputStream.flush();
+        // =====================================================
+        // RESET PREVIOUS RESULT
+        // =====================================================
 
-		} catch (Exception e) {
+        batchId = null;
 
-			e.printStackTrace();
-			return;
-		}
+        txtBatchNumber.setValue("");
 
-		// =====================================================
-		// Store uploaded ZIP
-		// =====================================================
+        divSuccessMessage.setVisible(false);
 
-		uploadedZipFile = destinationFile;
+        batchDetailsGroup.setVisible(false);
 
-		// =====================================================
-		// Display selected file
-		// =====================================================
+        lstBatchDetails
+                .getItems()
+                .clear();
 
-		txtChequeFolder.setValue(fileName);
+        // =====================================================
+        // ENABLE VALIDATE
+        // =====================================================
 
-		// =====================================================
-		// Reset previous validation result
-		// =====================================================
+        btnValidateBatch.setDisabled(false);
+    }
 
-		batchId = null;
+    // =========================================================
+    // VALIDATE BATCH
+    // =========================================================
 
-		txtBatchNumber.setValue("");
+    private void validateBatch() {
 
-		divSuccessMessage.setVisible(false);
+        // =====================================================
+        // CHECK ZIP
+        // =====================================================
 
-		grpScannedChequesWindow.setVisible(false);
+        if (uploadedZipFile == null
+                || !uploadedZipFile.exists()) {
 
-		lstChequeList.getItems().clear();
+            return;
+        }
 
-		lblNormalCount.setValue("0 NORMAL");
+        try {
 
-		lblMicrRepairCount.setValue("0 MICR REPAIR");
+            // =================================================
+            // STEP 1
+            // PARSE XML
+            // =================================================
 
-		lblScannedChequeTitle.setValue("Scanned Cheques");
+            BatchXmlParser parser =
+                    new BatchXmlParser(
+                            scanService);
 
-		// =====================================================
-		// Enable Validate Batch
-		// =====================================================
+            /*
+             * ZIP
+             *   ↓
+             * XML
+             *   ↓
+             * ScanBatch
+             *   ↓
+             * ScanCheque
+             *   ↓
+             * ScanService
+             *   ↓
+             * scan_batch / scan_cheque
+             *
+             * Parser returns batchId.
+             */
 
-		btnValidateBatch.setDisabled(false);
+            batchId =
+                    parser.parse(
+                            uploadedZipFile
+                                    .getAbsolutePath());
 
-		/*
-		 * IMPORTANT:
-		 *
-		 * Uploading the ZIP does NOT:
-		 *
-		 * - parse XML - save to database - validate batch
-		 *
-		 * Everything happens only after Validate Batch is clicked.
-		 */
-	}
+            // =================================================
+            // CHECK BATCH ID
+            // =================================================
 
-	// =========================================================
-	// VALIDATE BATCH
-	// =========================================================
+            if (batchId == null
+                    || batchId.trim().isEmpty()) {
 
-	private void validateBatch() {
+                throw new RuntimeException(
+                        "Batch ID was not returned.");
+            }
 
-		// =====================================================
-		// Check ZIP
-		// =====================================================
+            batchId = batchId.trim();
 
-		if (uploadedZipFile == null || !uploadedZipFile.exists()) {
+            // =================================================
+            // DISPLAY BATCH NUMBER
+            // =================================================
 
-			return;
-		}
+            txtBatchNumber.setValue(
+                    batchId);
 
-		try {
+            // =================================================
+            // STEP 2
+            // GET SCAN BATCH
+            // =================================================
 
-			// =================================================
-			// STEP 1
-			// Parse XML
-			// =================================================
+            ScanBatch scanBatch =
+                    scanService.getBatchById(
+                            batchId);
 
-			BatchXmlParser parser = new BatchXmlParser(scanService);
+            if (scanBatch == null) {
 
-			/*
-			 * Parser:
-			 *
-			 * ZIP ↓ XML ↓ ScanBatch ↓ ScanCheque ↓ ScanService ↓ scan_batch scan_cheque
-			 *
-			 * Parser returns ONLY batchId.
-			 */
+                throw new RuntimeException(
+                        "Batch not found in database: "
+                                + batchId);
+            }
 
-			batchId = parser.parse(uploadedZipFile.getAbsolutePath());
+            // =================================================
+            // STEP 3
+            // GET ACTUAL VALUES
+            // =================================================
 
-			// =================================================
-			// Check returned batch ID
-			// =================================================
+            int actualChequeCount =
+                    scanBatch
+                            .getActualChequeCount();
 
-			if (batchId == null || batchId.trim().isEmpty()) {
+            BigDecimal actualTotalAmount =
+                    scanBatch
+                            .getActualTotalAmount();
 
-				throw new RuntimeException("Batch ID was not returned.");
-			}
+            // =================================================
+            // STEP 4
+            // GET EXPECTED VALUES
+            // =================================================
 
-			// =================================================
-			// STEP 2
-			// Retrieve ScanBatch from database
-			// =================================================
+            Integer expectedChequeCount =
+                    txtExpectedTotalCheques
+                            .getValue();
 
-			ScanBatch scanBatch = scanService.getBatchById(batchId);
+            BigDecimal expectedTotalAmount =
+                    txtExpectedTotalChequeAmount
+                            .getValue();
 
-			if (scanBatch == null) {
+            if (expectedChequeCount == null) {
 
-				throw new RuntimeException("Batch not found in database: " + batchId);
-			}
+                throw new RuntimeException(
+                        "Expected cheque count is required.");
+            }
 
-			// =================================================
-			// STEP 3
-			// Get ACTUAL values from scan_batch
-			// =================================================
+            if (expectedTotalAmount == null) {
 
-			int actualChequeCount = scanBatch.getActualChequeCount();
+                throw new RuntimeException(
+                        "Expected total amount is required.");
+            }
 
-			BigDecimal actualTotalAmount = scanBatch.getActualTotalAmount();
+            // =================================================
+            // STEP 5
+            // VALIDATE COUNT
+            // =================================================
 
-			// =================================================
-			// STEP 4
-			// Get EXPECTED values entered by user
-			// =================================================
+            boolean chequeCountValid =
+                    expectedChequeCount.intValue()
+                            == actualChequeCount;
 
-			Integer expectedChequeCount = txtExpectedTotalCheques.getValue();
+            // =================================================
+            // STEP 6
+            // VALIDATE AMOUNT
+            // =================================================
 
-			BigDecimal expectedTotalAmount = txtExpectedTotalChequeAmount.getValue();
+            boolean amountValid =
+                    actualTotalAmount != null
+                            && expectedTotalAmount
+                                    .compareTo(
+                                            actualTotalAmount)
+                                    == 0;
 
-			if (expectedChequeCount == null) {
+            // =================================================
+            // STEP 7
+            // VALIDATION FAILED
+            // =================================================
 
-				throw new RuntimeException("Expected cheque count is required.");
-			}
+            if (!chequeCountValid
+                    || !amountValid) {
 
-			if (expectedTotalAmount == null) {
+                divSuccessMessage
+                        .setVisible(false);
 
-				throw new RuntimeException("Expected total amount is required.");
-			}
+                batchDetailsGroup
+                        .setVisible(false);
 
-			// =================================================
-			// STEP 5
-			// Compare expected vs actual
-			// =================================================
+                Executions.sendRedirect(
+                        "batch-validation.zul?batchId="
+                                + batchId);
 
-			boolean chequeCountValid = expectedChequeCount.intValue() == actualChequeCount;
+                return;
+            }
 
-			boolean amountValid = actualTotalAmount != null && expectedTotalAmount.compareTo(actualTotalAmount) == 0;
+            // =================================================
+            // STEP 8
+            // GET ALL CHEQUES
+            // =================================================
 
-			// =================================================
-			// STEP 6
-			// Validation FAILED
-			// =================================================
+            List<ScanCheque> scanCheques =
+                    scanService
+                            .getChequesByBatchId(
+                                    batchId);
 
-			if (!chequeCountValid || !amountValid) {
+            if (scanCheques == null) {
 
-				divSuccessMessage.setVisible(false);
+                throw new RuntimeException(
+                        "Unable to retrieve scan cheques.");
+            }
 
-				grpScannedChequesWindow.setVisible(false);
+            // =================================================
+            // STEP 9
+            // COUNT MICR REPAIR CHEQUES
+            // =================================================
 
-				/*
-				 * Redirect to validation page.
-				 *
-				 * Pass the scanned batch ID so that batch-validation.zul can retrieve the
-				 * required batch information from scan tables.
-				 */
+            int micrRepairCount = 0;
 
-				Executions.sendRedirect("batch-validation.zul?batchId=" + batchId);
+            for (ScanCheque cheque :
+                    scanCheques) {
 
-				return;
-			}
+                if (cheque == null) {
+                    continue;
+                }
 
-			// =================================================
-			// STEP 7
-			// Validation PASSED
-			// =================================================
+                String status =
+                        cheque.getChequeStatus();
 
-			/*
-			 * At this point:
-			 *
-			 * expected count == scan_batch actual count
-			 *
-			 * expected amount == scan_batch actual amount
-			 *
-			 * Now retrieve the cheques directly from scan_cheque.
-			 */
+                if ("MICR_REPAIR_REQUIRED"
+                        .equalsIgnoreCase(status)) {
 
-			List<ScanCheque> scanCheques = scanService.getChequesByBatchId(batchId);
+                    micrRepairCount++;
+                }
+            }
 
-			if (scanCheques == null) {
+            // =================================================
+            // STEP 10
+            // DISPLAY ONLY BATCH INFORMATION
+            // =================================================
 
-				throw new RuntimeException("Unable to retrieve scan cheques.");
-			}
+            displayBatchDetails(
+                    scanBatch,
+                    actualChequeCount,
+                    micrRepairCount);
 
-			// =================================================
-			// STEP 8
-			// Display scan cheques
-			// =================================================
+            // =================================================
+            // STEP 11
+            // SUCCESS MESSAGE
+            // =================================================
 
-			grpScannedChequesWindow.setVisible(true);
+            divSuccessMessage
+                    .setVisible(true);
 
-			displayScanCheques(scanCheques);
+            lblSuccessText.setValue(
+                    "Batch "
+                            + batchId
+                            + " has been validated successfully.");
 
-			// =================================================
-			// STEP 9
-			// SUCCESS
-			// =================================================
+            // =================================================
+            // STEP 12
+            // CLEAR INPUT FIELDS
+            //
+            // IMPORTANT:
+            //
+            // Batch Number is NOT cleared.
+            // =================================================
 
-			divSuccessMessage.setVisible(true);
+            txtExpectedTotalCheques
+                    .setValue(null);
 
-			lblSuccessText.setValue("Batch " + batchId + " has been validated successfully.");
+            txtExpectedTotalChequeAmount
+                    .setValue(BigDecimal.ZERO);
 
-		} catch (Exception e) {
+            txtChequeFolder
+                    .setValue("");
 
-			e.printStackTrace();
+            uploadedZipFile = null;
 
-			divSuccessMessage.setVisible(false);
+            btnValidateBatch
+                    .setDisabled(true);
 
-			grpScannedChequesWindow.setVisible(false);
+        } catch (Exception e) {
 
-			// Show user-friendly error message
-			lblSuccessText.setValue("Something went wrong while processing the batch. Please try again.");
+            e.printStackTrace();
 
-			batchId = null;
+            divSuccessMessage
+                    .setVisible(false);
 
-			txtBatchNumber.setValue("");
-		}
-	}
+            batchDetailsGroup
+                    .setVisible(false);
 
-	// =========================================================
-	// DISPLAY SCAN CHEQUES
-	// =========================================================
+            /*
+             * Do NOT clear Batch Number here if the
+             * batch ID was successfully returned.
+             */
 
-	private void displayScanCheques(List<ScanCheque> scanCheques) {
+            lblSuccessText.setValue(
+                    "Something went wrong while processing the batch. Please try again.");
+        }
+    }
 
-		System.out.println("Displaying scan cheques for batch: " + batchId);
+    // =========================================================
+    // DISPLAY BATCH DETAILS
+    // =========================================================
 
-		// =====================================================
-		// Clear previous rows
-		// =====================================================
+    private void displayBatchDetails(
+            ScanBatch scanBatch,
+            int actualChequeCount,
+            int micrRepairCount) {
 
-		lstChequeList.getItems().clear();
+        // =====================================================
+        // CLEAR OLD DATA
+        // =====================================================
 
-		int normal = 0;
-		int micrRepair = 0;
-		int itemNumber = 1;
+        lstBatchDetails
+                .getItems()
+                .clear();
 
-		// =====================================================
-		// Create rows
-		// =====================================================
+        // =====================================================
+        // SHOW SECTION
+        // =====================================================
 
-		for (ScanCheque cheque : scanCheques) {
+        batchDetailsGroup
+                .setVisible(true);
 
-			if (cheque == null) {
-				continue;
-			}
+        // =====================================================
+        // CREATE ROW
+        // =====================================================
 
-			String status = cheque.getChequeStatus();
+        Listitem item =
+                new Listitem();
 
-			// =================================================
-			// Count statuses
-			// =================================================
+        // =====================================================
+        // BATCH
+        // =====================================================
 
-			if ("MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)) {
+        String displayBatchId =
+                scanBatch.getScannedBatchId();
 
-				micrRepair++;
+        if (displayBatchId == null
+                || displayBatchId.trim().isEmpty()) {
 
-			} else {
+            displayBatchId = batchId;
+        }
 
-				normal++;
-			}
+        item.appendChild(
+                new Listcell(
+                        safe(displayBatchId)));
 
-			// =================================================
-			// Create row
-			// =================================================
+        // =====================================================
+        // SCAN DATE
+        // =====================================================
 
-			Listitem item = new Listitem();
+        item.appendChild(
+                new Listcell(
+                        formatDate(
+                                scanBatch.getUploadedAt())));
 
-			// =================================================
-			// ITEM NO.
-			// =================================================
+        // =====================================================
+        // TOTAL CHEQUES
+        // =====================================================
 
-			item.appendChild(new Listcell(String.valueOf(itemNumber++)));
+        item.appendChild(
+                new Listcell(
+                        String.valueOf(
+                                actualChequeCount)));
 
-			// =================================================
-			// PAYEE NAME
-			// =================================================
+        // =====================================================
+        // MICR ERRORS
+        // =====================================================
 
-			item.appendChild(new Listcell(cheque.getPayeeName()));
+        item.appendChild(
+                new Listcell(
+                        String.valueOf(
+                                micrRepairCount)));
 
-			// =================================================
-			// MICR CODE
-			// =================================================
+        // =====================================================
+        // STATUS
+        // =====================================================
 
-			item.appendChild(new Listcell(cheque.getMicrCode()));
+        String status =
+                scanBatch.getBatchStatus();
 
-			// =================================================
-			// STATUS
-			// =================================================
+        if (status == null
+                || status.trim().isEmpty()) {
 
-			item.appendChild(new Listcell(status));
+            status = "PROCESSING";
+        }
 
-			// =================================================
-			// ACTION
-			// =================================================
+        item.appendChild(
+                new Listcell(
+                        status));
 
-			Listcell actionCell = new Listcell();
+        // =====================================================
+        // ACTION
+        // =====================================================
 
-			// =================================================
-			// MICR REPAIR
-			// =================================================
+        Listcell actionCell =
+                new Listcell();
 
-			if ("MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)) {
+        // =====================================================
+        // MICR REPAIR REQUIRED
+        // =====================================================
 
-				Button micrRepairButton = new Button("MICR Repair");
+        if (micrRepairCount > 0) {
 
-				micrRepairButton.setSclass("btn-action-repair");
+            Button micrRepairButton =
+                    new Button(
+                            "MICR Repair");
 
-				micrRepairButton.setAttribute("scanCheque", cheque);
+            micrRepairButton.setSclass(
+                    "btn-batch-action");
 
-				micrRepairButton.addEventListener("onClick", new EventListener<Event>() {
+            final String selectedBatchId =
+                    displayBatchId;
 
-					@Override
-					public void onEvent(Event event) {
+            micrRepairButton
+                    .addEventListener(
+                            "onClick",
+                            new EventListener<Event>() {
 
-						/*
-						 * MICR repair functionality will be implemented later.
-						 */
+                                @Override
+                                public void onEvent(
+                                        Event event) {
 
-						System.out.println("MICR Repair clicked for cheque: " + cheque.getScannedChequeId());
-					}
-				});
+                                    openMicrRepair(
+                                            "SCAN",
+                                            selectedBatchId);
+                                }
+                            });
 
-				actionCell.appendChild(micrRepairButton);
+            actionCell.appendChild(
+                    micrRepairButton);
 
-			}
+        } else {
 
-			// =================================================
-			// NORMAL CHEQUE
-			// =================================================
+            // =================================================
+            // NO MICR REPAIR
+            // =================================================
 
-			else {
+            Button dataEntryButton =
+                    new Button(
+                            "Data Entry");
 
-				Button viewButton = new Button("View");
+            dataEntryButton.setSclass(
+                    "btn-batch-action");
 
-				viewButton.setSclass("btn-action");
+            final String selectedBatchId =
+                    displayBatchId;
 
-				viewButton.setAttribute("scanCheque", cheque);
+            dataEntryButton
+                    .addEventListener(
+                            "onClick",
+                            new EventListener<Event>() {
 
-				viewButton.addEventListener("onClick", new EventListener<Event>() {
+                                @Override
+                                public void onEvent(
+                                        Event event) {
 
-					@Override
-					public void onEvent(Event event) {
+                                    /*
+                                     * Data Entry navigation
+                                     * can be connected here once
+                                     * the exact Data Entry include
+                                     * path/attributes are finalized.
+                                     */
 
-						/*
-						 * View functionality will be implemented later.
-						 */
+                                    System.out.println(
+                                            "Data Entry clicked for batch: "
+                                                    + selectedBatchId);
+                                }
+                            });
 
-						System.out.println("View clicked for cheque: " + cheque.getScannedChequeId());
-					}
-				});
+            actionCell.appendChild(
+                    dataEntryButton);
+        }
 
-				actionCell.appendChild(viewButton);
-			}
+        // =====================================================
+        // ADD ACTION CELL
+        // =====================================================
 
-			// =================================================
-			// Add ACTION cell
-			// =================================================
+        item.appendChild(
+                actionCell);
 
-			item.appendChild(actionCell);
+        // =====================================================
+        // ADD ROW
+        // =====================================================
 
-			// =================================================
-			// Add row
-			// =================================================
+        lstBatchDetails
+                .appendChild(item);
+    }
 
-			lstChequeList.appendChild(item);
-		}
+    // =========================================================
+    // OPEN MICR REPAIR
+    // =========================================================
 
-		// =====================================================
-		// Update title
-		// =====================================================
+    private void openMicrRepair(
+            String source,
+            String batchId) {
 
-		lblScannedChequeTitle.setValue("Scanned Cheques (" + scanCheques.size() + ")");
+        // =====================================================
+        // CHECK SOURCE
+        // =====================================================
 
-		// =====================================================
-		// Update counters
-		// =====================================================
+        if (source == null
+                || source.trim().isEmpty()) {
 
-		lblNormalCount.setValue(normal + " NORMAL");
+            return;
+        }
 
-		lblMicrRepairCount.setValue(micrRepair + " MICR REPAIR");
-	}
+        // =====================================================
+        // CHECK BATCH ID
+        // =====================================================
+
+        if (batchId == null
+                || batchId.trim().isEmpty()) {
+
+            return;
+        }
+
+        // =====================================================
+        // GET ROOT
+        // =====================================================
+
+        Component root =
+                Executions.getCurrent()
+                        .getDesktop()
+                        .getFirstPage()
+                        .getFirstRoot();
+
+        // =====================================================
+        // GET MAIN CONTENT AREA
+        // =====================================================
+
+        Component mainContentArea =
+                root.getFellowIfAny(
+                        "mainContentArea",
+                        true);
+
+        // =====================================================
+        // LOAD MICR REPAIR THROUGH INCLUDE
+        // =====================================================
+
+        if (mainContentArea
+                instanceof Include) {
+
+            Include include =
+                    (Include) mainContentArea;
+
+            // =================================================
+            // PASS SOURCE
+            // =================================================
+
+            include.setAttribute(
+                    "MICR_REPAIR_SOURCE",
+                    source.trim());
+
+            // =================================================
+            // PASS BATCH ID
+            // =================================================
+
+            include.setAttribute(
+                    "MICR_REPAIR_BATCH_ID",
+                    batchId.trim());
+
+            // =================================================
+            // LOAD MICR REPAIR ZUL
+            // =================================================
+
+            include.setSrc(
+                    "/outward/maker/micr-repair/micr-repair.zul"
+            );
+
+            // =================================================
+            // DEBUG
+            // =================================================
+
+            System.out.println(
+                    "MICR REPAIR SOURCE = "
+                            + source);
+
+            System.out.println(
+                    "MICR REPAIR BATCH ID = "
+                            + batchId);
+
+            System.out.println(
+                    "MICR REPAIR ZUL = "
+                            + "/outward/maker/micr-repair/micr-repair.zul");
+        }
+    }
+
+    // =========================================================
+    // FORMAT DATE
+    // =========================================================
+
+    private String formatDate(
+            Date date) {
+
+        if (date == null) {
+            return "-";
+        }
+
+        SimpleDateFormat formatter =
+                new SimpleDateFormat(
+                        "dd-MM-yyyy");
+
+        return formatter.format(date);
+    }
+
+    // =========================================================
+    // SAFE VALUE
+    // =========================================================
+
+    private String safe(
+            String value) {
+
+        if (value == null
+                || value.trim().isEmpty()) {
+
+            return "-";
+        }
+
+        return value.trim();
+    }
 }

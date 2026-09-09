@@ -2,23 +2,23 @@
 
 <zk>
 
-    <style src="/css/outward/batch-upload.css" />
-
+ <html>
+        <link rel="stylesheet"
+              type="text/css"
+              href="/ExpressClear_CTS_Finova/css/outward/batch-upload.css?v=9" />
+    </html>
     <window id="uploadBatchWindow"
             apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchUploadController"
             border="none"
             width="100%"
             height="100%"
-            contentStyle="padding:0; margin:0;">
+            contentStyle="padding:0; margin:0; overflow:auto;">
 
-        <!-- =====================================================
-             MAIN PAGE CONTENT
-             ===================================================== -->
+        <div width="100%" sclass="upload-batch-page">
 
-        <div width="100%"
-             sclass="upload-batch-page">
-
-            <!-- ================= PAGE HEADER ================= -->
+            <!-- =========================================================
+                 PAGE HEADER
+                 ========================================================= -->
 
             <div sclass="page-header">
 
@@ -31,7 +31,9 @@
             </div>
 
 
-            <!-- ================= BATCH CONTROL ================= -->
+            <!-- =========================================================
+                 BATCH CONTROL INFORMATION
+                 ========================================================= -->
 
             <groupbox id="batchControlGroup"
                       width="100%"
@@ -45,13 +47,15 @@
                          sclass="batch-control-vlayout">
 
 
-                    <!-- ================= EXPECTED VALUES ================= -->
+                    <!-- =================================================
+                         EXPECTED COUNT + EXPECTED AMOUNT
+                         ================================================= -->
 
                     <hlayout width="100%"
                              spacing="16px"
                              sclass="batch-control-hlayout">
 
-                        <div class="form-group-wrapper">
+                        <div sclass="form-group-wrapper">
 
                             <label value="Expected Cheque Count *"
                                    sclass="form-label" />
@@ -64,7 +68,7 @@
                         </div>
 
 
-                        <div class="form-group-wrapper">
+                        <div sclass="form-group-wrapper">
 
                             <label value="Expected Total Amount *"
                                    sclass="form-label" />
@@ -79,9 +83,11 @@
                     </hlayout>
 
 
-                    <!-- ================= CHEQUE ZIP ================= -->
+                    <!-- =================================================
+                         CHEQUE ZIP
+                         ================================================= -->
 
-                    <div class="form-group-full folder-group">
+                    <div sclass="form-group-full folder-group">
 
                         <label value="Cheque Folder *"
                                sclass="form-label" />
@@ -109,7 +115,9 @@
                     </div>
 
 
-                    <!-- ================= BATCH NUMBER ================= -->
+                    <!-- =================================================
+                         BATCH NUMBER
+                         ================================================= -->
 
                     <div class="form-group-full">
 
@@ -128,9 +136,11 @@
                     </div>
 
 
-                    <!-- ================= VALIDATE ================= -->
+                    <!-- =================================================
+                         VALIDATE BUTTON
+                         ================================================= -->
 
-                    <div class="form-actions-inline">
+                    <div sclass="form-actions-inline">
 
                         <button id="btnValidateBatch"
                                 label="Validate Batch"
@@ -144,7 +154,11 @@
             </groupbox>
 
 
-            <!-- ================= SUCCESS MESSAGE ================= -->
+            <!-- =========================================================
+                 SUCCESS MESSAGE
+                 IMPORTANT:
+                 This is BEFORE Scanning Batches
+                 ========================================================= -->
 
             <div id="divSuccessMessage"
                  visible="false"
@@ -168,69 +182,50 @@
             </div>
 
 
-            <!-- ================= SCANNED CHEQUES ================= -->
+            <!-- =========================================================
+                 SCANNING BATCHES
+                 ONLY BATCH INFORMATION IS DISPLAYED
+                 ========================================================= -->
 
-            <groupbox id="grpScannedChequesWindow"
+            <groupbox id="batchDetailsGroup"
                       visible="false"
                       width="100%"
-                      sclass="scanned-cheques-section">
+                      sclass="batch-details-section">
 
-                <caption label="Scanned Cheques"
+                <caption label="Scanning Batches"
                          sclass="groupbox-caption" />
 
                 <div width="100%"
-                     sclass="scanned-cheques-content">
+                     sclass="batch-details-content">
 
-                    <hlayout width="100%"
-                             spacing="12px"
-                             sclass="section-header">
-
-                        <label id="lblScannedChequeTitle"
-                               value="Scanned Cheques"
-                               sclass="section-title" />
-
-                        <div sclass="stat-badge normal">
-
-                            <label id="lblNormalCount"
-                                   value="0 NORMAL" />
-
-                        </div>
-
-                        <div sclass="stat-badge micr-repair">
-
-                            <label id="lblMicrRepairCount"
-                                   value="0 MICR REPAIR" />
-
-                        </div>
-
-                    </hlayout>
+                    <label value="Batches from scanning that contain cheques requiring MICR repair."
+                           sclass="batch-details-description" />
 
 
-                    <!-- ================= CHEQUE LIST ================= -->
-
-                    <listbox id="lstChequeList"
+                    <listbox id="lstBatchDetails"
                              width="100%"
-                             sclass="scanned-cheques-table"
-                             mold="paging"
-                             pageSize="5"
-                             emptyMessage="No cheques found">
+                             sclass="batch-details-table"
+                             emptyMessage="No batch found">
 
                         <listhead sizable="false">
 
-                            <listheader label="ITEM NO."
-                                        width="15%" />
+                            <listheader label="BATCH"
+                                        width="18%" />
 
-                            <listheader label="PAYEE NAME"
-                                        width="25%" />
+                            <listheader label="SCAN DATE"
+                                        width="16%" />
 
-                            <listheader label="MICR CODE"
-                                        width="25%" />
+                            <listheader label="TOTAL CHEQUES"
+                                        width="18%" />
+
+                            <listheader label="MICR ERRORS"
+                                        width="16%" />
 
                             <listheader label="STATUS"
-                                        width="20%" />
+                                        width="16%" />
 
                             <listheader label="ACTION"
-                                        width="15%" />
+                                        width="16%" />
 
                         </listhead>
 
@@ -241,7 +236,9 @@
             </groupbox>
 
 
-            <!-- ================= FOOTER ================= -->
+            <!-- =========================================================
+                 FOOTER
+                 ========================================================= -->
 
             <div sclass="page-footer">
 
