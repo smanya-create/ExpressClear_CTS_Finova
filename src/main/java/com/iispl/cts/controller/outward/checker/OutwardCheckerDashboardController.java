@@ -1,11 +1,13 @@
 package com.iispl.cts.controller.outward.checker;
 
 import java.math.BigDecimal;
-
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -17,7 +19,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Paging;
+import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardBatchService;
@@ -91,12 +93,13 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 				@Override
 				public void render(Listitem item, OutwardBatch batch, int index) throws Exception {
-
+					item.setValue(batch);
 					item.appendChild(new Listcell(batch.getOutwardBatchId()));
 					item.appendChild(new Listcell(String.valueOf(batch.getActualChequeCount())));
 					BigDecimal amount = batch.getActualTotalAmount();
 					String amountText = amount == null ? "₹0.00" : "₹" + amount.toPlainString();
 					item.appendChild(new Listcell(amountText));
+					
 					String submittedBy = batch.getUploadedBy();
 					item.appendChild(new Listcell(submittedBy == null ? "-" : submittedBy));
 
@@ -127,17 +130,22 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 					queueButton.setSclass("queue-button");
 
-					queueButton.setAttribute("batch", batch);
-
 					queueButton.addEventListener(Events.ON_CLICK, event -> {
 
-						OutwardBatch selectedBatch = (OutwardBatch) queueButton.getAttribute("batch");
+					    OutwardBatch selectedBatch = item.getValue();
 
-						Messagebox.show(
-								"Batch " + selectedBatch.getOutwardBatchId() + " selected for Checker verification.",
-								"Checker Queue", Messagebox.OK, Messagebox.INFORMATION);
+					    Map<String, Object> args = new HashMap<>();
+
+					    args.put("batchId", selectedBatch.getOutwardBatchId());
+
+					    Window popup = (Window) Executions.createComponents(
+					            "/outward/checker/batch-proceed-popup.zul",
+					            null,
+					            args
+					    );
+
+					    popup.doModal();
 					});
-
 					actionCell.appendChild(queueButton);
 
 					item.appendChild(actionCell);

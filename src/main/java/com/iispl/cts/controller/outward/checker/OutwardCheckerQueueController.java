@@ -1,20 +1,22 @@
 package com.iispl.cts.controller.outward.checker;
 
 import java.text.SimpleDateFormat;
-
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
@@ -71,6 +73,10 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
     private Combobox cmbSendBackReason;    
     private Textbox txtReturnRemarks;
+    
+    private Vlayout noBatchMessage;
+    private Div checkerQueueContent;
+    
     
     private void createReturnMakerWindow() {
 
@@ -170,59 +176,58 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+         
 
         super.doAfterCompose(comp);
 
-        outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
-        
+        System.out.println("======================================");
+        System.out.println("CHECKER QUEUE CONTROLLER STARTED");
+        System.out.println("======================================");
+
+        Object sessionBatchId = Sessions.getCurrent()
+                .getAttribute("SELECTED_OUTWARD_BATCH_ID");
+
+        System.out.println("SESSION OBJECT = " + sessionBatchId);
+
+        if (sessionBatchId == null) {
+            System.out.println("ERROR: NO BATCH ID IN SESSION");
+        } else {
+            System.out.println("SESSION BATCH ID = [" + sessionBatchId + "]");
+        }
+
+        outwardCheckerQueueService =
+                new OutwardCheckerQueueServiceImpl();
+
+        if (sessionBatchId == null) {
+            noBatchMessage.setVisible(true);
+            checkerQueueContent.setVisible(false);
+            return;
+        }
+
+        batchId = sessionBatchId.toString().trim();
+        batchNo = batchId;
+
+        System.out.println("FINAL batchId = [" + batchId + "]");
+        System.out.println("FINAL batchNo = [" + batchNo + "]");
+
+        lblBatchNo.setValue(batchNo);
+
+        noBatchMessage.setVisible(false);
+        checkerQueueContent.setVisible(true);
+
+        System.out.println("noBatchMessage visible = "
+                + noBatchMessage.isVisible());
+
+        System.out.println("checkerQueueContent visible = "
+                + checkerQueueContent.isVisible());
+
         createReturnMakerWindow();
 
-
-        batchId = "BAT1003";
-        batchNo = "BAT1003";
-
-        String batchIdParam =
-                Executions.getCurrent().getParameter("batchId");
-
-        String batchNoParam =
-                Executions.getCurrent().getParameter("batchNo");
-
-        if (batchIdParam != null
-                && !batchIdParam.trim().isEmpty()) {
-
-            try {
-
-            	 batchId = batchIdParam.trim();
-            	 
-            } catch (NumberFormatException e) {
-
-                System.out.println(
-                        "Invalid batchId: " + batchIdParam
-                );
-            }
-        }
-
-        if (batchNoParam != null
-                && !batchNoParam.trim().isEmpty()) {
-
-            batchNo = batchNoParam.trim();
-        }
-
-        System.out.println("=================================");
-        System.out.println("Batch ID = " + batchId);
-        System.out.println("Batch No = " + batchNo);
-        System.out.println("=================================");
-
-        // DISPLAY BATCH
-
-        if (lblBatchNo != null) {
-
-            lblBatchNo.setValue(
-                    batchNo != null ? batchNo : "-"
-            );
-        }
-
         loadCheques();
+
+    }    public void onClick$btnBackToDashboard(Event event) {
+
+        Executions.sendRedirect("/outward/checker/dashboard.zul");
     }
 
     private void loadCheques() throws Exception {
@@ -237,8 +242,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
                     "Checker Queue",
                     Messagebox.OK,
                     Messagebox.INFORMATION
-            );
-
+            );	
             return;
         }
 

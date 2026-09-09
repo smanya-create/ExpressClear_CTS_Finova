@@ -88,12 +88,6 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 			        "/home/administrator/WS_IISPL0229082026_GKProjects/ExpressClear_CTS_Finova/src/main/resources/xml-output"; 
 
 			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
-			
-			System.out.println("======================================");
-			System.out.println("XML FILE PATH : " + xmlFile.toAbsolutePath());
-			System.out.println("FILE EXISTS   : " + Files.exists(xmlFile));
-			System.out.println("FILE SIZE     : " + Files.size(xmlFile));
-			System.out.println("======================================");
 			lblXmlFileName.setValue(
 			        xmlFile.getFileName().toString());
 
