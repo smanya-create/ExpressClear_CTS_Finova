@@ -261,6 +261,27 @@
 										value="Verify the captured details against the cheque image and maker request."
 										sclass="card-description" />
 
+									<!-- ================= MAKER REJECTION REQUEST ================= -->
+									<vlayout
+										id="makerRejectionRequestSection" spacing="3px"
+										style="margin:6px 0 6px 0;
+           padding:7px 9px;
+           background:#FFF8E7;
+           border-left:3px solid #F59E0B;
+           border-radius:3px;">
+
+										<label
+											value="MAKER REJECTION REQUEST"
+											style="font-size:10px;
+               font-weight:700;
+               color:#B45309;" />
+
+										<label value=""
+											id="lblMakerRejectionRemarks"
+											style="font-size:11px;
+               color:#475569;
+               white-space:normal;" />
+									</vlayout>
 									<!--  CBS VALIDATION  -->
 
 									<vlayout spacing="6px"

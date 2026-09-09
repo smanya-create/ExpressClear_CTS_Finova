@@ -1,10 +1,15 @@
 package com.iispl.cts.controller.inward.checker;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
@@ -14,15 +19,12 @@ import org.zkoss.zul.Groupbox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Listbox;
-import org.zkoss.zul.Listcell;
-import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
-import org.zkoss.zk.ui.select.Selectors;
-import org.zkoss.zk.ui.event.Events;
 
+import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.SendBackReason;
@@ -30,7 +32,6 @@ import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
-import com.iispl.cts.enums.inward.InwardChequeStatus;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.SendBackReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -39,7 +40,6 @@ import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
-import org.zkoss.zk.ui.select.annotation.Wire;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
 
@@ -48,6 +48,9 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private Label lblTotalCheques;
 	private Label lblChequeNumber;
 	private Label lblChequeStatus;
+	private Vlayout makerRejectionRequestSection;
+
+	private Label lblMakerRejectionRemarks;
 	private Label lblReceivedDate;
 	private Label lblVerification;
 	private SendBackReasonService sendBackReasonService;
@@ -187,7 +190,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		btnSubmitBatch.addEventListener(Events.ON_CLICK, event -> onClick$btnSubmitBatch());
 
 		System.out.println("INWARD CHECKER VERIFICATION CONTROLLER LOADED");
-		List<InwardCheque> cheques = inwardChequeService.getChequesByBatchAndStatus("BAT1111", null);
+		List<InwardCheque> cheques = inwardChequeService.getChequesByBatchAndStatus("INW260904003", null);
 
 		if (cheques != null && !cheques.isEmpty()) {
 
@@ -255,6 +258,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				lblChequeStatus.setValue(safeValue(cheque.getChequeStatus()));
 			}
+
+			loadMakerRejectionRemarks(cheque.getInwardChequeId());
 
 			if (lblReceivedDate != null && cheque.getCreatedAt() != null) {
 
@@ -328,6 +333,54 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			Messagebox.show("Unable to load cheque details.\n" + e.getMessage(), "Verification Error", Messagebox.OK,
 					Messagebox.ERROR);
+		}
+	}
+
+	private void loadMakerRejectionRemarks(String chequeId) {
+
+		if (makerRejectionRequestSection != null) {
+			makerRejectionRequestSection.setVisible(false);
+		}
+
+		if (lblMakerRejectionRemarks != null) {
+			lblMakerRejectionRemarks.setValue("");
+		}
+
+		if (chequeId == null || chequeId.trim().isEmpty()) {
+			return;
+		}
+
+		String sql = "SELECT remarks " + "FROM inward_cheque_rejection_request " + "WHERE inward_cheque_id = ? "
+				+ "AND request_status = 'PENDING' " + "ORDER BY request_id DESC " + "LIMIT 1";
+
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, chequeId);
+
+			try (ResultSet rs = ps.executeQuery()) {
+
+				if (rs.next()) {
+
+					String remarks = rs.getString("remarks");
+
+					if (remarks != null && !remarks.trim().isEmpty()) {
+
+						if (lblMakerRejectionRemarks != null) {
+							lblMakerRejectionRemarks.setValue(remarks.trim());
+						}
+
+						if (makerRejectionRequestSection != null) {
+							makerRejectionRequestSection.setVisible(true);
+						}
+					}
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			System.err.println("Unable to load Maker rejection remarks for cheque: " + chequeId);
 		}
 	}
 
@@ -988,6 +1041,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			// Update batch status to indicate that it has been sent back to Maker
 
 			window.setVisible(false);
 
