@@ -3,65 +3,62 @@
 <zk>
 <borderlayout apply="com.iispl.cts.controller.admin.AdminReportController" hflex="1" vflex="1">
 
-    <!-- Shared Left Sidebar Navigation -->
     <west width="240px" border="none" collapsible="false">
         <include src="/components/sidebar.zul" role="ADMIN" activeTab="reports" />
     </west>
 
-    <!-- Main Workspace -->
     <center border="none" autoscroll="true" style="background-color: #f8fafc;">
-        <vlayout spacing="0" hflex="1">
+        <vlayout spacing="0" hflex="1" vflex="1">
 
-            <!-- Shared Header -->
             <include id="incHeader" src="/components/header.zul" 
                      pageTitle="Admin Dashboard" 
-                     pageSubtitle="Reports" />
+                     pageSubtitle="Consolidated Reports" />
 
-            <!-- Content Area Container -->
-            <vlayout spacing="20px" style="padding: 24px;" hflex="1">
+            <vlayout spacing="24px" style="padding: 32px; max-width: 800px;" hflex="1">
                 
-                <!-- Page Title Header -->
-                <vlayout spacing="4px">
-                    <label value="REPORTS" sclass="page-title"/>
-                    <label value="Generate and download system reports." sclass="page-subtitle"/>
+                <vlayout spacing="6px">
+                    <label value="CONSOLIDATED SYSTEM &amp; AUDIT REPORT" style="font-size: 22px; font-weight: bold; color: #0B192E;"/>
+                    <label value="Select a date range to generate and download the full administrative report, covering outward clearing batches and complete user audit activity." 
+                           style="color: #64748B; font-size: 13px; line-height: 1.5;"/>
                 </vlayout>
 
-                <!-- Report Card Panel -->
-                <vlayout sclass="card-panel" spacing="24px" hflex="1">
-                    
-                    <!-- Date Inputs (Side by Side) -->
-                    <hlayout spacing="24px" hflex="1">
-                        <vlayout spacing="6px" hflex="1">
-                            <label value="FROM DATE" sclass="field-label"/>
-                            <datebox id="dtFromDate" format="yyyy-MM-dd" constraint="no empty: Select start date" 
-                                     height="40px" width="100%" sclass="input-box"/>
+                <!-- Export Control Card -->
+                <div style="background: #ffffff; padding: 28px; border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <vlayout spacing="20px">
+                        
+                        <label value="REPORT PARAMETERS" style="font-size: 13px; font-weight: bold; color: #1E293B; letter-spacing: 0.5px;"/>
+                        
+                        <!-- Date Pickers -->
+                        <hlayout spacing="20px">
+                            <vlayout spacing="6px">
+                                <label value="FROM DATE" style="font-size: 11px; font-weight: bold; color: #475569;"/>
+                                <datebox id="dtFromDate" format="yyyy-MM-dd" height="38px" width="180px"/>
+                            </vlayout>
+
+                            <vlayout spacing="6px">
+                                <label value="TO DATE" style="font-size: 11px; font-weight: bold; color: #475569;"/>
+                                <datebox id="dtToDate" format="yyyy-MM-dd" height="38px" width="180px"/>
+                            </vlayout>
+                        </hlayout>
+
+                        <separator bar="true" style="background-color: #F1F5F9; margin: 8px 0;"/>
+
+                        <!-- Action Buttons -->
+                        <vlayout spacing="8px">
+                            <label value="DOWNLOAD FORMAT" style="font-size: 11px; font-weight: bold; color: #475569;"/>
+                            <hlayout spacing="16px">
+                                <button id="btnExportCsv" label="DOWNLOAD CSV REPORT" height="40px" 
+                                        style="background-color: #0F766E; color: #FFFFFF; font-weight: bold; padding: 0 20px; border: none; border-radius: 6px; cursor: pointer;"/>
+                                
+                                <button id="btnExportPdf" label="DOWNLOAD PDF REPORT" height="40px" 
+                                        style="background-color: #991B1B; color: #FFFFFF; font-weight: bold; padding: 0 20px; border: none; border-radius: 6px; cursor: pointer;"/>
+                            </hlayout>
                         </vlayout>
 
-                        <vlayout spacing="6px" hflex="1">
-                            <label value="TO DATE" sclass="field-label"/>
-                            <datebox id="dtToDate" format="yyyy-MM-dd" constraint="no empty: Select end date" 
-                                     height="40px" width="100%" sclass="input-box"/>
-                        </vlayout>
-                    </hlayout>
-
-                    <separator bar="true" sclass="panel-separator"/>
-
-                    <!-- Report Details Description Section -->
-                    <vlayout spacing="8px" hflex="1">
-                        <label value="REPORT DETAILS" sclass="section-subtitle"/>
-                        <label value="Select a date range, then generate the consolidated PDF report containing batch metrics, dual-control audit trails, and clearing summaries." 
-                               sclass="section-desc"/>
                     </vlayout>
-
-                    <!-- Action Button Area -->
-                    <hlayout hflex="1" style="justify-content: flex-end; padding-top: 8px;">
-                        <button id="btnGenerate" label="GENERATE REPORT" height="42px" sclass="btn-primary" iconSclass="z-icon-file-pdf-o" onClick='org.zkoss.zk.ui.util.Clients.showNotification("Button Clicked!")'/>
-                    </hlayout>
-
-                </vlayout>
+                </div>
 
             </vlayout>
-
         </vlayout>
     </center>
 </borderlayout>

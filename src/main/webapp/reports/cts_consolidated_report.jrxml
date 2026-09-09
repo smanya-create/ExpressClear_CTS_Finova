@@ -6,295 +6,372 @@
               pageWidth="842"
               pageHeight="595"
               orientation="Landscape"
+              whenNoDataType="AllSectionsNoDetail"
               columnWidth="802"
               leftMargin="20"
               rightMargin="20"
               topMargin="20"
               bottomMargin="20"
-              uuid="81d22756-3bfa-4c4f-9e79-56385a4be460">
+              uuid="b61da28d-d249-4115-88db-b09e7d95bcf5">
 
-    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="CTS_Postgres"/>
+    <property name="net.sf.jasperreports.export.character.encoding" value="UTF-8"/>
 
-    <!-- Report Parameters -->
+    <!-- 1. Subdataset MUST come before main parameters -->
+    <subDataset name="AuditDataset" uuid="6243fb3c-c9d3-4903-8820-c83ec83a3028">
+        <parameter name="P_FROM_DATE" class="java.sql.Date"/>
+        <parameter name="P_TO_DATE" class="java.sql.Date"/>
+        <queryString language="SQL">
+            <![CDATA[
+                SELECT 
+                    al."timestamp" AS log_time,
+                    COALESCE(al.user_id, '-') AS user_id,
+                    COALESCE(al.username, 'SYSTEM') AS username,
+                    COALESCE(al.role_name, '-') AS role_name,
+                    COALESCE(al.module, 'GENERAL') AS module,
+                    COALESCE(al.action, '-') AS action,
+                    COALESCE(al.details, '-') AS details,
+                    COALESCE(al.ip_address, '-') AS ip_address,
+                    COALESCE(al.status, 'SUCCESS') AS status
+                FROM audit_logs al
+                WHERE al."timestamp"::date >= $P{P_FROM_DATE}
+                  AND al."timestamp"::date <= $P{P_TO_DATE}
+                ORDER BY al."timestamp" DESC, al.audit_id DESC
+            ]]>
+        </queryString>
+        <field name="log_time" class="java.sql.Timestamp"/>
+        <field name="user_id" class="java.lang.String"/>
+        <field name="username" class="java.lang.String"/>
+        <field name="role_name" class="java.lang.String"/>
+        <field name="module" class="java.lang.String"/>
+        <field name="action" class="java.lang.String"/>
+        <field name="details" class="java.lang.String"/>
+        <field name="ip_address" class="java.lang.String"/>
+        <field name="status" class="java.lang.String"/>
+    </subDataset>
+
+    <!-- 2. Main Parameters -->
     <parameter name="FROM_DATE" class="java.sql.Date"/>
     <parameter name="TO_DATE" class="java.sql.Date"/>
     <parameter name="GENERATED_BY" class="java.lang.String">
         <defaultValueExpression><![CDATA["ADMIN"]]></defaultValueExpression>
     </parameter>
 
-    <!-- Query Aligned Directly to outward_batch Schema -->
+    <!-- 3. Main Query -->
     <queryString language="SQL">
         <![CDATA[
             SELECT 
                 ob.outward_batch_id,
                 ob.batch_reference_id,
-                CAST(ob.uploaded_at AS DATE) AS batch_date,
-                ob.actual_cheque_count,
-                ob.actual_total_amount,
-                ob.uploaded_by,
                 ob.uploaded_at,
-                ob.batch_status
+                COALESCE(ob.actual_cheque_count, 0) AS cheque_count,
+                COALESCE(ob.actual_total_amount, 0.00) AS total_amount,
+                COALESCE(u.username, ob.uploaded_by) AS uploaded_by,
+                COALESCE(ob.batch_status, 'Pending') AS batch_status
             FROM outward_batch ob
-            WHERE CAST(ob.uploaded_at AS DATE) >= CAST($P{FROM_DATE} AS DATE)
-              AND CAST(ob.uploaded_at AS DATE) <= CAST($P{TO_DATE} AS DATE)
-            ORDER BY ob.uploaded_at DESC, ob.outward_batch_id DESC
+            LEFT JOIN users u ON ob.uploaded_by = u.user_id
+            WHERE ob.uploaded_at::date >= $P{FROM_DATE}
+              AND ob.uploaded_at::date <= $P{TO_DATE}
+            ORDER BY ob.uploaded_at DESC
         ]]>
     </queryString>
 
-    <!-- Field Bindings -->
+    <!-- 4. Main Fields -->
     <field name="outward_batch_id" class="java.lang.String"/>
     <field name="batch_reference_id" class="java.lang.String"/>
-    <field name="batch_date" class="java.sql.Date"/>
-    <field name="actual_cheque_count" class="java.lang.Integer"/>
-    <field name="actual_total_amount" class="java.math.BigDecimal"/>
-    <field name="uploaded_by" class="java.lang.String"/>
     <field name="uploaded_at" class="java.sql.Timestamp"/>
+    <field name="cheque_count" class="java.lang.Integer"/>
+    <field name="total_amount" class="java.lang.Double"/>
+    <field name="uploaded_by" class="java.lang.String"/>
     <field name="batch_status" class="java.lang.String"/>
 
-    <!-- Variables for Totals -->
-    <variable name="TOTAL_BATCH_COUNT" class="java.lang.Integer" calculation="Count">
-        <variableExpression><![CDATA[$F{outward_batch_id}]]></variableExpression>
-    </variable>
-    <variable name="GRAND_TOTAL_ITEMS" class="java.lang.Integer" calculation="Sum">
-        <variableExpression><![CDATA[$F{actual_cheque_count}]]></variableExpression>
-    </variable>
-    <variable name="GRAND_TOTAL_AMOUNT" class="java.math.BigDecimal" calculation="Sum">
-        <variableExpression><![CDATA[$F{actual_total_amount}]]></variableExpression>
-    </variable>
+    <!-- 5. Group for Empty Batch State -->
+    <group name="BatchGroup">
+        <groupExpression><![CDATA[1]]></groupExpression>
+        <groupHeader>
+            <band height="20">
+                <printWhenExpression><![CDATA[$V{REPORT_COUNT} == 0]]></printWhenExpression>
+                <staticText>
+                    <reportElement x="0" y="2" width="802" height="16" forecolor="#64748B" uuid="d914833d-c11f-4e00-8438-6cf4041e1799"/>
+                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                        <font fontName="SansSerif" size="8" isItalic="true"/>
+                    </textElement>
+                    <text><![CDATA[No outward clearing batches found for the selected date range.]]></text>
+                </staticText>
+            </band>
+        </groupHeader>
+    </group>
 
-    <!-- Title / Header -->
+    <!-- 6. Document Header -->
     <title>
-        <band height="75" splitType="Stretch">
+        <band height="62">
             <rectangle>
-                <reportElement x="0" y="0" width="802" height="65" backcolor="#1B4372" uuid="939fa421-df54-4530-84cf-81b241320db9"/>
+                <reportElement x="0" y="0" width="802" height="52" backcolor="#0B192E" uuid="ce1cb904-747f-4428-9844-326e5e8e8ba6"/>
                 <graphicElement><pen lineWidth="0.0"/></graphicElement>
             </rectangle>
             <staticText>
-                <reportElement x="16" y="10" width="380" height="24" forecolor="#FFFFFF" uuid="6246419a-9e19-4cb3-a5ff-e3801f948f9d"/>
+                <reportElement x="16" y="8" width="460" height="20" forecolor="#FFFFFF" uuid="9c8f9db4-b223-42e5-a0c3-bcfa9d06b4b4"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="16" isBold="true"/>
+                    <font fontName="SansSerif" size="14" isBold="true"/>
                 </textElement>
-                <text><![CDATA[EXPRESS CLEAR - CTS ADMIN PORTAL]]></text>
+                <text><![CDATA[EXPRESS CLEAR CTS - CONSOLIDATED ADMIN REPORT]]></text>
             </staticText>
             <staticText>
-                <reportElement x="16" y="36" width="380" height="16" forecolor="#E2E8F0" uuid="7cf7ad78-9e58-47bc-ba92-f04bf025537d"/>
+                <reportElement x="16" y="28" width="460" height="15" forecolor="#94A3B8" uuid="8a54d588-e219-482f-876f-1f0607d721eb"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="10"/>
+                    <font fontName="SansSerif" size="8"/>
                 </textElement>
-                <text><![CDATA[Consolidated Outward Clearing Operations Report]]></text>
+                <text><![CDATA[Section 1: Outward Batch Processing  |  Section 2: System Audit Logs & Authentication Trail]]></text>
             </staticText>
             <textField>
-                <reportElement x="480" y="12" width="306" height="16" forecolor="#FFFFFF" uuid="eef6412f-916c-4ec8-b391-9957790b1c03"/>
+                <reportElement x="490" y="8" width="296" height="15" forecolor="#FFFFFF" uuid="39f3796d-7cb8-48b4-9271-e9496a7593c1"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="9" isBold="true"/>
+                    <font fontName="SansSerif" size="8" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Clearing Period: " + new java.text.SimpleDateFormat("yyyy-MM-dd").format($P{FROM_DATE}) + " to " + new java.text.SimpleDateFormat("yyyy-MM-dd").format($P{TO_DATE})]]></textFieldExpression>
+                <textFieldExpression><![CDATA["Date Range: " + new java.text.SimpleDateFormat("yyyy-MM-dd").format($P{FROM_DATE}) + " to " + new java.text.SimpleDateFormat("yyyy-MM-dd").format($P{TO_DATE})]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="480" y="32" width="306" height="16" forecolor="#CBD5E1" uuid="bb3b7194-911e-450a-9d2a-4318357f8674"/>
+                <reportElement x="490" y="26" width="296" height="15" forecolor="#94A3B8" uuid="88574d71-55c3-4d43-85f2-95f745d0ba4e"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle">
                     <font fontName="SansSerif" size="8"/>
                 </textElement>
-                <textFieldExpression><![CDATA["Generated By: " + $P{GENERATED_BY} + " | Time: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date())]]></textFieldExpression>
+                <textFieldExpression><![CDATA["Generated By: " + $P{GENERATED_BY} + " | " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())]]></textFieldExpression>
             </textField>
         </band>
     </title>
 
-    <!-- Column Headers -->
+    <!-- 7. Section 1 Header (Batches) -->
     <columnHeader>
-        <band height="28" splitType="Stretch">
+        <band height="44">
+            <staticText>
+                <reportElement x="0" y="0" width="802" height="18" forecolor="#0F172A" uuid="e04c0048-cda6-46c5-af45-bc098c4adfa2"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[SECTION 1: OUTWARD CLEARING BATCH OPERATIONS]]></text>
+            </staticText>
             <rectangle>
-                <reportElement x="0" y="0" width="802" height="28" backcolor="#F1F5F9" uuid="2a0bb5f9-5f21-4f9e-a89e-2dc307eb8e42"/>
+                <reportElement x="0" y="20" width="802" height="24" backcolor="#F1F5F9" uuid="29fc0a5c-5645-429a-ae18-c2b64da3e9e3"/>
                 <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
             </rectangle>
             <staticText>
-                <reportElement x="10" y="5" width="90" height="18" forecolor="#334155" uuid="525fb843-030b-4835-94f7-34fa1b1bc270"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="8" y="24" width="90" height="16" uuid="e8184d0b-6ae9-42b7-83eb-568eaecad970"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[BATCH ID]]></text>
             </staticText>
             <staticText>
-                <reportElement x="110" y="5" width="160" height="18" forecolor="#334155" uuid="d6141a02-5360-4965-9a8c-ce499d63d6b0"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="105" y="24" width="160" height="16" uuid="53e6d2bc-681b-4f9e-9904-45377f525bfb"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[REFERENCE ID]]></text>
             </staticText>
             <staticText>
-                <reportElement x="280" y="5" width="80" height="18" forecolor="#334155" uuid="61f0088d-2947-4184-b0db-5509ba249f05"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
-                <text><![CDATA[BATCH DATE]]></text>
+                <reportElement x="270" y="24" width="120" height="16" uuid="c24cf16a-ff99-4cce-91ba-43d9b43aa698"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[UPLOADED AT]]></text>
             </staticText>
             <staticText>
-                <reportElement x="370" y="5" width="60" height="18" forecolor="#334155" uuid="096a6671-55c4-428a-aaef-e3ec920cfb2e"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="395" y="24" width="70" height="16" uuid="3ae30e70-cfcf-4da8-963d-4c3e387c9f65"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[CHEQUES]]></text>
             </staticText>
             <staticText>
-                <reportElement x="445" y="5" width="115" height="18" forecolor="#334155" uuid="454b1f60-ea79-4d2c-a2b1-5e5d3fa96a5f"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="475" y="24" width="130" height="16" uuid="d614833d-c11f-4e00-8438-6cf4041e17d2"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[TOTAL AMOUNT (INR)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="575" y="5" width="75" height="18" forecolor="#334155" uuid="885f67b5-22d2-4357-9d78-b3d5b0351785"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="620" y="24" width="100" height="16" uuid="e2646d6b-586b-4e67-93d3-fcf30f81d184"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[UPLOADED BY]]></text>
             </staticText>
             <staticText>
-                <reportElement x="660" y="5" width="75" height="18" forecolor="#334155" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486a"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="725" y="24" width="70" height="16" uuid="cfd01e14-d830-4e38-9276-87cfa3748281"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[STATUS]]></text>
             </staticText>
         </band>
     </columnHeader>
 
-    <!-- Detail Rows -->
+    <!-- 8. Main Detail Rows (Batches) -->
     <detail>
-        <band height="22" splitType="Stretch">
+        <band height="18">
             <rectangle>
-                <reportElement x="0" y="0" width="802" height="22" backcolor="#FFFFFF" uuid="d61d1912-70b1-4ee6-857c-87d3a036c0a7">
+                <reportElement x="0" y="0" width="802" height="18" backcolor="#F8FAFC" uuid="d433b95a-3f41-4770-b747-d5d4d38cbb29">
                     <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
                 </reportElement>
                 <graphicElement><pen lineWidth="0.0"/></graphicElement>
             </rectangle>
-            <textField textAdjust="StretchHeight">
-                <reportElement x="10" y="3" width="90" height="16" uuid="fc53ba92-56e6-4277-bc69-27adab14e41d"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+            <textField>
+                <reportElement x="8" y="1" width="90" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa691"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression>
             </textField>
-            <textField textAdjust="StretchHeight">
-                <reportElement x="110" y="3" width="160" height="16" uuid="ee2b21ca-43bc-42bc-9d32-90abacbebb29"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
+            <textField>
+                <reportElement x="105" y="1" width="160" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa692"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression>
             </textField>
-            <textField pattern="yyyy-MM-dd">
-                <reportElement x="280" y="3" width="80" height="16" uuid="bf8ea54c-1dcf-42bb-81d3-35f11ce97931"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{batch_date}]]></textFieldExpression>
+            <textField pattern="yyyy-MM-dd HH:mm">
+                <reportElement x="270" y="1" width="120" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa693"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="370" y="3" width="60" height="16" uuid="e0a4f5f5-cbe2-4da4-8b09-ba2a6a683e35"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{actual_cheque_count}]]></textFieldExpression>
+                <reportElement x="395" y="1" width="70" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa694"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{cheque_count}]]></textFieldExpression>
             </textField>
             <textField pattern="#,##0.00">
-                <reportElement x="445" y="3" width="115" height="16" uuid="2a56e01c-6d27-4638-b7ae-a9f8fba63c5d"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{actual_total_amount}]]></textFieldExpression>
+                <reportElement x="475" y="1" width="130" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa695"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{total_amount}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="575" y="3" width="75" height="16" uuid="da1e149a-7a56-4c75-8121-6a053c82736d"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
+                <reportElement x="620" y="1" width="100" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa696"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{uploaded_by}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="660" y="3" width="75" height="16" uuid="1c9f43f8-65f5-470a-afc3-98fe856a2973"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="8" isBold="true"/>
-                </textElement>
+                <reportElement x="725" y="1" width="70" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa697"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression>
             </textField>
-            <line>
-                <reportElement x="0" y="21" width="802" height="1" forecolor="#F1F5F9" uuid="2e382d5a-8b82-41f2-95e2-63b7235a9632"/>
-            </line>
         </band>
     </detail>
 
-    <!-- Page Footer -->
+    <!-- 9. Page Footer (Must come before Summary) -->
     <pageFooter>
-        <band height="25" splitType="Stretch">
-            <line>
-                <reportElement x="0" y="2" width="802" height="1" forecolor="#E2E8F0" uuid="0c474d2a-c2ba-42aa-bdae-4ba01f8d48a5"/>
-            </line>
+        <band height="20">
             <textField>
-                <reportElement x="640" y="5" width="120" height="16" forecolor="#64748B" uuid="fa8f8cfc-c820-4a84-b0a4-3759ad4ba70a"/>
-                <textElement textAlignment="Right">
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
+                <reportElement x="680" y="2" width="80" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea043"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " of "]]></textFieldExpression>
             </textField>
             <textField evaluationTime="Report">
-                <reportElement x="762" y="5" width="35" height="16" forecolor="#64748B" uuid="fbefbd5a-947b-4be8-bd5c-d7cfc35848bb"/>
-                <textElement>
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
+                <reportElement x="762" y="2" width="35" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea044"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
             </textField>
-            <staticText>
-                <reportElement x="8" y="5" width="350" height="16" forecolor="#94A3B8" uuid="885bb1cb-e7bc-493e-af4c-2234057ea043"/>
-                <textElement>
-                    <font fontName="SansSerif" size="8"/>
-                </textElement>
-                <text><![CDATA[CONFIDENTIAL - SYSTEM AUDIT LOG FOR INTERNAL BANK USE ONLY]]></text>
-            </staticText>
         </band>
     </pageFooter>
 
-    <!-- Summary (Grand Totals) -->
+    <!-- 10. Summary Band: Section 2 (System Audit Logs) -->
     <summary>
-        <band height="45" splitType="Stretch">
-            <rectangle>
-                <reportElement x="0" y="8" width="802" height="32" backcolor="#F8FAFC" uuid="d939e6a9-4081-422a-89aa-92f76800aa22"/>
-                <graphicElement><pen lineWidth="1.0" lineColor="#CBD5E1"/></graphicElement>
-            </rectangle>
+        <band height="100">
+            <!-- Section 2 Header -->
             <staticText>
-                <reportElement x="12" y="14" width="160" height="20" forecolor="#1E293B" uuid="8a0d4c82-36fb-401d-8ce4-d2e5bfba44e2"/>
+                <reportElement x="0" y="20" width="802" height="18" forecolor="#0F172A" uuid="3eb5bce1-383f-42ee-a4d3-fc7d4982635c"/>
                 <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="9" isBold="true"/>
-                </textElement>
-                <text><![CDATA[CONSOLIDATED SUMMARY:]]></text>
-            </staticText>
-            <textField>
-                <reportElement x="175" y="14" width="95" height="20" forecolor="#1E293B" uuid="6027a4d4-28b9-4d64-a690-349079aa68bb"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="9" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Batches: " + $V{TOTAL_BATCH_COUNT}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="280" y="14" width="110" height="20" forecolor="#1E293B" uuid="7cf424f1-da0c-4bc3-a912-32a76f2b4444"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="9" isBold="true"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Total Cheques: " + $V{GRAND_TOTAL_ITEMS}]]></textFieldExpression>
-            </textField>
-            <staticText>
-                <reportElement x="480" y="14" width="130" height="20" forecolor="#1E293B" uuid="2a56e01c-6d27-4638-b7ae-a9f8fba64444"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="9" isBold="true"/>
-                </textElement>
-                <text><![CDATA[Grand Total Amount:]]></text>
-            </staticText>
-            <textField pattern="INR #,##0.00">
-                <reportElement x="615" y="14" width="175" height="20" forecolor="#1B4372" uuid="9217fa42-c6d5-4a61-9c12-3687be31dd4c"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
                     <font fontName="SansSerif" size="10" isBold="true"/>
                 </textElement>
-                <textFieldExpression><![CDATA[$V{GRAND_TOTAL_AMOUNT}]]></textFieldExpression>
-            </textField>
+                <text><![CDATA[SECTION 2: SYSTEM AUDIT & USER ACCESS LOGS]]></text>
+            </staticText>
+
+            <!-- Table Header for Audit Logs -->
+            <rectangle>
+                <reportElement x="0" y="40" width="802" height="24" backcolor="#F1F5F9" uuid="2a0bb5f9-5f21-4f9e-a89e-2dc307eb8e42"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="8" y="44" width="115" height="16" uuid="525fb843-030b-4835-94f7-34fa1b1bc270"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[TIMESTAMP]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="128" y="44" width="85" height="16" uuid="d6141a02-5360-4965-9a8c-ce499d63d6b0"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[USER]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="218" y="44" width="75" height="16" uuid="61f0088d-2947-4184-b0db-5509ba249f05"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[ROLE]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="298" y="44" width="75" height="16" uuid="096a6671-55c4-428a-aaef-e3ec920cfb2e"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[MODULE]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="378" y="44" width="85" height="16" uuid="454b1f60-ea79-4d2c-a2b1-5e5d3fa96a5f"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[ACTION]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="468" y="44" width="195" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486a"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[DETAILS]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="668" y="44" width="75" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486b"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[IP ADDRESS]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="748" y="44" width="45" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486c"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[STATUS]]></text>
+            </staticText>
+
+            <!-- Audit Logs List Component -->
+            <componentElement>
+                <reportElement x="0" y="64" width="802" height="18" uuid="70a8d672-8356-4c4f-a720-7f28876c342b"/>
+                <jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                         xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
+                         printOrder="Vertical">
+                    <datasetRun subDataset="AuditDataset" uuid="69a19c53-bfa5-45d2-a7d2-7c91fa093c4f">
+                        <datasetParameter name="P_FROM_DATE">
+                            <datasetParameterExpression><![CDATA[$P{FROM_DATE}]]></datasetParameterExpression>
+                        </datasetParameter>
+                        <datasetParameter name="P_TO_DATE">
+                            <datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression>
+                        </datasetParameter>
+                        <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                    </datasetRun>
+                    <jr:listContents height="18">
+                        <textField pattern="yyyy-MM-dd HH:mm:ss">
+                            <reportElement x="8" y="1" width="115" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000001"/>
+                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                            <textFieldExpression><![CDATA[$F{log_time}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="128" y="1" width="85" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000002"/>
+                            <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                            <textFieldExpression><![CDATA[$F{username}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="218" y="1" width="75" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000003"/>
+                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                            <textFieldExpression><![CDATA[$F{role_name}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="298" y="1" width="75" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000004"/>
+                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                            <textFieldExpression><![CDATA[$F{module}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="378" y="1" width="85" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000005"/>
+                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                            <textFieldExpression><![CDATA[$F{action}]]></textFieldExpression>
+                        </textField>
+                        <textField textAdjust="StretchHeight">
+                            <reportElement x="468" y="1" width="195" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000006"/>
+                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                            <textFieldExpression><![CDATA[$F{details}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="668" y="1" width="75" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000007"/>
+                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                            <textFieldExpression><![CDATA[$F{ip_address}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="748" y="1" width="45" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000008"/>
+                            <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                            <textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
+                        </textField>
+                    </jr:listContents>
+                </jr:list>
+            </componentElement>
         </band>
     </summary>
+
 </jasperReport>
