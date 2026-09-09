@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -189,14 +190,81 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		btnSubmitBatch.addEventListener(Events.ON_CLICK, event -> onClick$btnSubmitBatch());
 
-		System.out.println("INWARD CHECKER VERIFICATION CONTROLLER LOADED");
-		List<InwardCheque> cheques = inwardChequeService.getChequesByBatchAndStatus("INW260904003", null);
+		String batchId =
+		        Executions.getCurrent()
+		                .getParameter("batchId");
 
-		if (cheques != null && !cheques.isEmpty()) {
+		if (batchId == null || batchId.trim().isEmpty()) {
 
-			loadChequeDetails(cheques.get(0).getInwardChequeId());
+		    Messagebox.show(
+		            "No batch selected for verification.",
+		            "Verification",
+		            Messagebox.OK,
+		            Messagebox.EXCLAMATION
+		    );
+
+		    return;
 		}
 
+		currentBatchId = batchId.trim();
+
+		System.out.println(
+		        "Selected Verification Batch: "
+		        + currentBatchId
+		);
+
+		loadSelectedBatch();
+
+	}
+	
+	private void loadSelectedBatch() {
+
+	    if (currentBatchId == null ||
+	            currentBatchId.trim().isEmpty()) {
+
+	        Messagebox.show(
+	                "No batch selected for verification.",
+	                "Verification",
+	                Messagebox.OK,
+	                Messagebox.EXCLAMATION
+	        );
+
+	        return;
+	    }
+
+	    currentBatchCheques =
+	            inwardChequeService
+	                    .getChequesByBatchAndStatus(
+	                            currentBatchId,
+	                            null
+	                    );
+
+	    if (currentBatchCheques == null ||
+	            currentBatchCheques.isEmpty()) {
+
+	        Messagebox.show(
+	                "No cheques found for batch: "
+	                        + currentBatchId,
+	                "Verification",
+	                Messagebox.OK,
+	                Messagebox.EXCLAMATION
+	        );
+
+	        return;
+	    }
+
+	    currentChequeIndex = 0;
+
+	    currentChequeId =
+	            currentBatchCheques
+	                    .get(currentChequeIndex)
+	                    .getInwardChequeId();
+
+	    loadChequeDetails(currentChequeId);
+
+	    updateChequePosition();
+
+	    updateVerificationCount();
 	}
 
 	private void loadChequeDetails(String inwardChequeId) {
