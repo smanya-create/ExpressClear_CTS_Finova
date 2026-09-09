@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?page title="CTS - MICR Repair" contentType="text/html;charset=UTF-8"?>
 
 <zk>
@@ -6,29 +7,31 @@
     <html>
         <link rel="stylesheet"
               type="text/css"
-              href="/ExpressClear_CTS_Finova/css/outward/micr-repair.css?v=7" />
+              href="/ExpressClear_CTS_Finova/css/outward/micr-repair.css?v=9" />
     </html>
 
     <window id="micrEntryWindow"
             border="none"
             width="100%"
-            height="auto"
+            height="100%"
             apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairController"
             style="margin:0 !important; padding:0 !important;">
 
         <vlayout width="100%"
-                 height="auto"
-                 spacing="18px"
+                 height="100%"
+                 spacing="0"
                  sclass="outward-cheque-data-entry-page">
 
-
-            <!-- PAGE HEADER -->
+            <!-- =====================================================
+                 PAGE HEADER
+                 ===================================================== -->
 
             <hlayout width="100%"
-                     valign="middle">
+                     valign="middle"
+                     sclass="micr-page-header">
 
                 <vlayout hflex="1"
-                         spacing="4px">
+                         spacing="3px">
 
                     <label value="MICR REPAIR"
                            sclass="outward-cheque-data-entry-title" />
@@ -40,12 +43,14 @@
 
                 <button id="btnBackToList"
                         label="Back to List"
-                        sclass="outward-cheque-image-button" />
+                        sclass="outward-cheque-back-button" />
 
             </hlayout>
 
 
-            <!-- BATCH SUMMARY -->
+            <!-- =====================================================
+                 BATCH SUMMARY
+                 ===================================================== -->
 
             <div width="100%"
                  sclass="outward-cheque-batch-summary">
@@ -55,7 +60,7 @@
                          spacing="0">
 
                     <vlayout hflex="1"
-                             spacing="4px">
+                             spacing="3px">
 
                         <label value="BATCH"
                                sclass="outward-cheque-summary-label" />
@@ -68,7 +73,7 @@
 
 
                     <vlayout width="220px"
-                             spacing="4px">
+                             spacing="3px">
 
                         <label value="MICR REPAIR REQUIRED"
                                sclass="outward-cheque-summary-label" />
@@ -81,7 +86,7 @@
 
 
                     <vlayout width="150px"
-                             spacing="4px">
+                             spacing="3px">
 
                         <label value="COMPLETED"
                                sclass="outward-cheque-summary-label" />
@@ -94,7 +99,7 @@
 
 
                     <vlayout width="150px"
-                             spacing="4px">
+                             spacing="3px">
 
                         <label value="REMAINING"
                                sclass="outward-cheque-summary-label" />
@@ -110,7 +115,11 @@
             </div>
 
 
-            <!-- MAIN AREA : 55% / 45% -->
+            <!-- =====================================================
+                 MAIN CONTENT
+                 LEFT = 55%
+                 RIGHT = 45%
+                 ===================================================== -->
 
             <hlayout width="100%"
                      spacing="14px"
@@ -118,15 +127,16 @@
                      sclass="outward-cheque-content-layout">
 
 
-                <!-- ================================================= -->
-                <!-- LEFT : CHEQUE IMAGE - 55% -->
-                <!-- ================================================= -->
+                <!-- =================================================
+                     LEFT SIDE - CHEQUE IMAGE
+                     ================================================= -->
 
                 <div id="micrRepairImageCard"
                      hflex="55"
                      sclass="outward-cheque-image-card">
 
                     <vlayout width="100%"
+                             height="100%"
                              spacing="10px">
 
 
@@ -135,13 +145,9 @@
                         <hlayout width="100%"
                                  valign="middle">
 
-                            <vlayout hflex="1"
-                                     spacing="2px">
-
-                                <label value="CHEQUE IMAGE"
-                                       sclass="outward-cheque-card-title" />
-
-                            </vlayout>
+                            <label value="CHEQUE IMAGE"
+                                   hflex="1"
+                                   sclass="outward-cheque-card-title" />
 
                             <label id="lblRecordPosition"
                                    value="Record 0 of 0"
@@ -150,17 +156,15 @@
                         </hlayout>
 
 
-                        <!-- FIXED IMAGE VIEWER -->
+                        <!-- IMAGE VIEWER -->
 
                         <div id="micrRepairImageContainer"
-                             width="90%"
-                                                          height="500px"
+                             width="100%"
+                             height="400px"
                              sclass="outward-cheque-image-container">
 
                             <image id="imgCheque"
                                    visible="false"
-                                   width="100%"
-                                   height="100%"
                                    sclass="outward-cheque-image" />
 
                             <label id="lblChequeImageTitle"
@@ -170,7 +174,9 @@
                         </div>
 
 
-                        <!-- IMAGE CONTROLS -->
+                        <!-- =================================================
+                             FIVE IMAGE BUTTONS
+                             ================================================= -->
 
                         <hlayout id="micrRepairImageButtons"
                                  width="100%"
@@ -180,28 +186,35 @@
 
                             <button id="btnZoom"
                                     label="Zoom In"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-image-control zoom-button" />
 
                             <button id="btnZoomOut"
                                     label="Zoom Out"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-image-control zoom-button" />
 
                             <button id="btnZoomReset"
                                     label="Reset"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-image-control reset-button" />
 
                             <button id="btnRotate"
                                     label="Rotate"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-image-control zoom-button" />
 
                             <button id="btnImageToggle"
                                     label="View Back"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-image-control zoom-button" />
 
                         </hlayout>
 
 
-                        <!-- IMAGE NAVIGATION -->
+                        <!-- =================================================
+                             PREVIOUS / 1 OF N / NEXT
+                             ================================================= -->
 
                         <hlayout width="100%"
                                  spacing="8px"
@@ -210,17 +223,18 @@
 
                             <button id="btnPrevious"
                                     label="Previous"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-navigation-button" />
 
                             <label id="lblChequeNavigation"
                                    value=""
                                    hflex="1"
-                                   style="text-align:center;"
-                                   sclass="outward-cheque-record-label" />
+                                   sclass="outward-cheque-navigation-label" />
 
                             <button id="btnNext"
                                     label="Next"
-                                    sclass="outward-cheque-image-button" />
+                                    hflex="1"
+                                    sclass="outward-cheque-navigation-button" />
 
                         </hlayout>
 
@@ -229,15 +243,16 @@
                 </div>
 
 
-                <!-- ================================================= -->
-                <!-- RIGHT : MICR DATA ENTRY - 45% -->
-                <!-- ================================================= -->
+                <!-- =================================================
+                     RIGHT SIDE - MICR DATA ENTRY
+                     ================================================= -->
 
                 <div id="micrRepairDetailsCard"
                      hflex="45"
                      sclass="outward-cheque-details-card">
 
                     <vlayout width="100%"
+                             height="100%"
                              spacing="10px">
 
 
@@ -246,13 +261,9 @@
                         <hlayout width="100%"
                                  valign="middle">
 
-                            <vlayout hflex="1"
-                                     spacing="2px">
-
-                                <label value="MICR DATA ENTRY"
-                                       sclass="outward-cheque-card-title" />
-
-                            </vlayout>
+                            <label value="MICR DATA ENTRY"
+                                   hflex="1"
+                                   sclass="outward-cheque-card-title" />
 
                         </hlayout>
 
@@ -260,7 +271,9 @@
                         <separator />
 
 
-                        <!-- MICR FIELDS -->
+                        <!-- =================================================
+                             MICR FIELDS
+                             ================================================= -->
 
                         <grid width="100%"
                               sclass="outward-cheque-form-grid">
@@ -268,11 +281,9 @@
                             <columns>
 
                                 <column width="50%" />
-
                                 <column width="50%" />
 
                             </columns>
-
 
                             <rows>
 
@@ -345,7 +356,7 @@
                                 </row>
 
 
-                                <!-- CURRENT MICR / CORRECTED MICR -->
+                                <!-- CURRENT / CORRECTED MICR -->
 
                                 <row>
 
@@ -391,25 +402,31 @@
                                sclass="outward-cheque-account-validation invalid" />
 
 
-                        <!-- ACTION BUTTONS -->
+                        <!-- =================================================
+                             REJECT / SAVE NEXT
+                             ================================================= -->
 
                         <hlayout width="100%"
-                                 spacing="8px"
+                                 spacing="10px"
                                  valign="middle"
                                  sclass="outward-cheque-action-buttons">
 
                             <button id="btnRejectRequest"
                                     label="Request Reject"
+                                    hflex="1"
                                     sclass="outward-cheque-reject-button" />
 
                             <button id="btnSaveNext"
                                     label="Save &amp; Next"
+                                    hflex="1"
                                     sclass="outward-cheque-save-button" />
 
                         </hlayout>
 
 
-                        <!-- PROGRESS -->
+                        <!-- =================================================
+                             PROGRESS
+                             ================================================= -->
 
                         <vlayout width="100%"
                                  spacing="5px"
@@ -430,15 +447,11 @@
 
 
                             <div width="100%"
-                                 style="height:8px;
-                                        background:#e2e8f0;
-                                        border-radius:6px;
-                                        overflow:hidden;">
+                                 sclass="outward-cheque-progress-track">
 
                                 <div id="divProgressFill"
                                      width="0%"
-                                     style="height:100%;
-                                            border-radius:6px;" />
+                                     sclass="outward-cheque-progress-fill" />
 
                             </div>
 
