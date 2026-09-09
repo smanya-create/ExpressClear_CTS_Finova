@@ -740,31 +740,43 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void setStatusStyle(Label label, String status) {
-		if ("Processing".equalsIgnoreCase(status)) {
-			label.setSclass("status-processing");
-		} else if ("Received".equalsIgnoreCase(status)) {
-			label.setSclass("status-received");
-		} else if ("Parsing".equalsIgnoreCase(status)) {
-			label.setSclass("status-parsing");
-		} else if ("Completed".equalsIgnoreCase(status)) {
-			label.setSclass("status-completed");
-		} else if ("Validation Failed".equalsIgnoreCase(status)) {
-			label.setSclass("status-validation-failed");
-		} else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
-			label.setSclass("status-badge status-processing-pending");
-		} else if ("Checker Processing".equalsIgnoreCase(status)) {
-			label.setSclass("status-checker-processing");
-		} else if ("In Verification".equalsIgnoreCase(status)) {
-			label.setSclass("status-in-verification");
-		} else if ("Hold".equalsIgnoreCase(status)) {
-			label.setSclass("status-hold");
-		} else if ("Rejected".equalsIgnoreCase(status)) {
-			label.setSclass("status-rejected");
-		} else if ("Failed".equalsIgnoreCase(status)) {
-			label.setSclass("status-failed");
-		} else {
-			label.setSclass("status-received");
-		}
+
+	    if ("Processing".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-processing");
+
+	    } else if ("Received".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-received");
+
+	    } else if ("Parsing".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-parsing");
+
+	    } else if ("Completed".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-completed");
+
+	    } else if ("Validation Failed".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-validation-failed");
+
+	    } else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-processing-pending");
+
+	    } else if ("Checker Processing".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-checker-processing");
+
+	    } else if ("In Verification".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-in-verification");
+
+	    } else if ("Hold".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-hold");
+
+	    } else if ("Rejected".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-rejected");
+
+	    } else if ("Failed".equalsIgnoreCase(status)) {
+	        label.setSclass("batch-status-badge status-failed");
+
+	    } else {
+	        label.setSclass("batch-status-badge status-received");
+	    }
 	}
 
 	private String getBatchFolderName(String batchId) {
@@ -1266,13 +1278,10 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 		try {
-
 			inputStream = getResourceStream(resourcePath);
-
 			if (inputStream == null) {
 				return null;
 			}
-
 			byte[] buffer = new byte[8192];
 
 			int length;
@@ -1300,7 +1309,6 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			} catch (Exception e) {
 			}
-
 			try {
 				outputStream.close();
 			} catch (Exception e) {
@@ -1315,13 +1323,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		if (normalizedPath == null) {
 			return null;
 		}
-
 		normalizedPath = normalizedPath.trim();
 
 		while (normalizedPath.startsWith("/")) {
 			normalizedPath = normalizedPath.substring(1);
 		}
-
 		try {
 
 			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -1389,7 +1395,6 @@ public class InwardBatchController extends SelectorComposer<Window> {
 					return java.nio.file.Files.newInputStream(file.toPath());
 				}
 			}
-
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -1418,15 +1423,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		if (number.isEmpty()) {
 			return null;
 		}
-
 		for (int i = 0; i < number.length(); i++) {
-
 			if (!Character.isDigit(number.charAt(i))) {
-
 				return null;
 			}
 		}
-
 		return String.format("%03d", Integer.parseInt(number));
 	}
 
@@ -1460,53 +1461,38 @@ public class InwardBatchController extends SelectorComposer<Window> {
 				filteredCheques.add(cheque);
 			}
 		}
-
 		displayCheques(filteredCheques);
 	}
-
 	private void updateChequeCount(int count) {
-
 		if (count == 0) {
-
 			chequeCountLabel.setValue("No cheque records found");
-
 			return;
 		}
-
 		chequeCountLabel.setValue("Showing 1 to " + count + " of " + count + " cheques");
 	}
-
 	private String valueOrEmpty(String value) {
-
 		return value == null ? "" : value;
 	}
-
 	private static class ParseResult {
-
 		private final String batchId;
 		private final ParsedBatchData parsedBatchData;
 		private final String status;
 		private final String message;
-
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
 			this.parsedBatchData = parsedBatchData;
 			this.status = status;
 			this.message = message;
 		}
-
 		String getBatchId() {
 			return batchId;
 		}
-
 		ParsedBatchData getParsedBatchData() {
 			return parsedBatchData;
 		}
-
 		String getStatus() {
 			return status;
 		}
-
 		String getMessage() {
 			return message;
 		}

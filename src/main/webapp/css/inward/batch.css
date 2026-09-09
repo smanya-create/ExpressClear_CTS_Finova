@@ -163,69 +163,74 @@
 }
 
 /* STATUS */
-.status-badge {
+
+.batch-status-badge {
 	display: inline-block;
-	padding: 5px 13px;
-	border-radius: 14px;
-	font-size: 11px;
+	min-width: 58px;
+	padding: 4px 10px;
+	border-radius: 12px;
+	text-align: center;
+	font-size: 9px;
 	font-weight: 600;
 	white-space: nowrap;
+	box-sizing: border-box;
 }
 
-.status-received {
+.batch-status-badge.status-received {
 	background: #e7f1fb;
 	color: #185587;
 }
 
-.status-parsing {
+.batch-status-badge.status-parsing {
 	background: #e8efff;
 	color: #315eb7;
 }
 
-.status-validation-failed {
+.batch-status-badge.status-validation-failed {
 	background: #fde8e7;
 	color: #c33a32;
 }
-.status-processing {
-	display: inline-block;
-	min-width: 58px;
-	padding: 4px 10px;
-	border-radius: 4px;
-	text-align: center;
+
+.batch-status-badge.status-processing {
 	background: #fff0d1;
 	color: #b56a00;
 	border: 1px solid #f3dbab;
-	font-size: 9px;
-	font-weight: 600;
-	white-space: nowrap;
 }
-.status-processing-pending {
-    display: inline-block;
-    min-width: 58px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-align: center;
-    background: #eee8ff;
-    color: #6950a8;
-    border: 1px solid #d8cef5;
-    font-size: 9px;
-    font-weight: 600;
-    white-space: nowrap;
-    box-sizing: border-box;
+
+.batch-status-badge.status-processing-pending {
+	background: #eee8ff;
+	color: #6950a8;
+	border: 1px solid #d8cef5;
 }
-.status-checker-processing {
+
+.batch-status-badge.status-checker-processing {
 	background: #e6f4f0;
 	color: #16745c;
 }
 
-.status-completed {
+.batch-status-badge.status-completed {
 	background: #e4f5e9;
 	color: #18723b;
 }
 
-.status-hold {
+.batch-status-badge.status-hold {
 	background: #f2e6e6;
 	color: #8b3434;
+}
+
+.batch-status-badge.status-in-verification {
+	background: #e8efff;
+	color: #315eb7;
+}
+
+.batch-status-badge.status-rejected {
+	background: #fde8e7;
+	color: #c33a32;
+}
+
+.batch-status-badge.status-failed {
+	background: #fde8e7;
+	color: #c33a32;
 }
 
 /* BATCH VIEW */
