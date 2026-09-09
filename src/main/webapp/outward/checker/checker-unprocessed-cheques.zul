@@ -14,7 +14,7 @@
             <borderlayout vflex="1" hflex="1">
                 
                 <!-- Inner North: Header pinned on top -->
-                <north size="65px" border="none">
+                <north size="80px" border="none">
                     <include id="incHeader" src="/components/header.zul" 
                              pageTitle="Outward Checker" 
                              pageSubtitle="Unprocessed Cheques" />
@@ -29,42 +29,64 @@
                         <vlayout spacing="16px" vflex="1">
                             <!-- Page Title Banner -->
                             <vlayout spacing="4px">
-                                <hlayout valign="middle" style="display: flex; justify-content: space-between; width: 100%;">
-                                    <vlayout spacing="2px">
-                                        <label value="Checker Forced EOD Rollover Cheques" sclass="page-heading"/>
-                                        <label value="Rollover instruments requiring Checker verification before inclusion in the outward clearing session." sclass="page-subheading"/>
-                                    </vlayout>
-                                    <button id="btnRefresh" label="Refresh Verification Queue" iconSclass="z-icon-refresh"
-                                            sclass="btn-refresh"
-                                            onClick="$composer.loadCheckerUnprocessedCheques()"/>
-                                </hlayout>
-                            </vlayout>
+    <hlayout valign="middle" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <vlayout spacing="2px">
+            <label value="Checker Forced EOD Rollover Cheques" sclass="page-heading"/>
+            <label value="Rollover instruments requiring Checker verification before inclusion in the outward clearing session." sclass="page-subheading"/>
+        </vlayout>
+        
+        <!-- Compact Circular Refresh Button -->
+        <button id="btnRefreshQueue" 
+                iconSclass="z-icon-refresh" 
+                tooltiptext="Refresh Verification Queue" 
+                sclass="btn-icon-refresh"
+                onClick="$composer.loadCheckerUnprocessedCheques()"/>
+    </hlayout>
+</vlayout>
 
                             <!-- Summary Metrics Cards -->
                             <hlayout spacing="16px" width="100%">
-                                <hlayout sclass="stat-card" hflex="1" valign="middle" style="justify-content: space-between;">
+                                <hlayout sclass="stat-card" hflex="1" valign="middle" >
                                     <vlayout spacing="2px">
                                         <label value="PENDING VERIFICATIONS" sclass="stat-card-title text-blue"/>
                                         <label id="lblTotalVerifyCount" value="0" sclass="stat-card-value text-blue"/>
                                     </vlayout>
-                                    <label sclass="z-icon-check-square-o icon-blue"/>
+                                    
                                 </hlayout>
 
-                                <hlayout sclass="stat-card" hflex="1" valign="middle" style="justify-content: space-between;">
+                                <hlayout sclass="stat-card" hflex="1" valign="middle" >
                                     <vlayout spacing="2px">
                                         <label value="TOTAL AMOUNT TO VERIFY" sclass="stat-card-title text-dark"/>
                                         <label id="lblTotalVerifyAmount" value="₹ 0.00" sclass="stat-card-value text-dark"/>
                                     </vlayout>
-                                    <label sclass="z-icon-inr icon-gray"/>
+                                    
                                 </hlayout>
                             </hlayout>
 
-                            <!-- Search Bar -->
-                            <hlayout spacing="12px" valign="middle" sclass="filter-bar">
-                                <label value="Search Cheque / Batch:" sclass="filter-label"/>
-                                <textbox id="txtSearchBatch" placeholder="Search Batch Reference / Cheque No..." width="280px"
-                                         onOK="$composer.onFilterChanged()" instant="true"/>
-                            </hlayout>
+                            
+                           <!-- Search Bar with Search & Reset Buttons -->
+                           <!-- Search Bar -->
+<hlayout spacing="10px" valign="middle" sclass="filter-bar">
+    <label value="Search Cheque / Batch:" sclass="filter-label"/>
+    <textbox id="txtSearchBatch" 
+             placeholder="Search Batch Reference / Cheque No..." 
+             width="280px"
+             forward="onOK=onSearchClick"/>
+    
+    <button id="btnSearch" 
+            label="Search" 
+            iconSclass="z-icon-search" 
+            sclass="btn-process" 
+            forward="onClick=onSearchClick"
+            style="padding: 4px 12px; font-size: 11px; height: 32px;"/>
+            
+    <button id="btnReset" 
+            label="Reset" 
+            iconSclass="z-icon-undo" 
+            sclass="btn-refresh" 
+            forward="onClick=onResetClick"
+            style="padding: 4px 12px; font-size: 11px; height: 32px;"/>
+</hlayout>
 
                             <!-- Checker Cheque Verification Grid -->
                             <listbox id="lstCheckerUnprocessed" vflex="1" mold="paging" pageSize="12"
