@@ -33,9 +33,11 @@ import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.enums.inward.InwardChequeStatus;
+import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
@@ -48,7 +50,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
     private final InwardBatchService batchService = new InwardBatchServiceImpl();
     private final InwardChequeService chequeService = new InwardChequeServiceImpl();
     private final RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
-
+    private final NotificationService notificationService = NotificationServiceImpl.getInstance();
+    
     // Top Metadata Card Labels
     private Label lblBatchId;
     private Label lblSource;
@@ -557,6 +560,14 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
         // Persist to inward_cheque_rejection_request
         saveRejectionRequestRecord(current.getInwardChequeId(), this.currentBatchId, reasonId, remarks, userId, "DATA_ENTRY");
 
+        // Send notification to INWARD_CHECKER
+        String reasonLabel = cmbModalRejectionReason.getSelectedItem().getLabel();
+        String notifMsg = "Rejection requested for Cheque #" + current.getChequeNumber() 
+                        + " in Batch " + this.currentBatchId 
+                        + " (" + reasonLabel + ") by Maker " + userId;
+
+        notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
+        
         ensureBatchWorkingState();
 
         if (winRejectionModal != null) {
