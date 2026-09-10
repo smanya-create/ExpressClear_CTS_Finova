@@ -21,28 +21,52 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
     public InwardDashboardKpiDTO getKpiMetrics() {
         InwardDashboardKpiDTO kpi = new InwardDashboardKpiDTO();
 
-        // 1. Partially Processed Batches: Inward working batches not yet finalized or sent back
-        String sqlPartially = "SELECT COUNT(DISTINCT inward_batch_id) FROM inward_batch " +
-                              "WHERE batch_status IN ('" 
-                              + InwardBatchStatus.PROCESSING.name() + "', 'Pending', 'DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS', 'VALIDATED')";
+        // 1. Partially Processed Batches: Maker batches not sent back, not completed, needing work
+        String sqlPartially = 
+            "SELECT COUNT(DISTINCT b.inward_batch_id) FROM inward_batch b " +
+            "WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
+            "  AND b.batch_status != 'CHECKER_PROCESSING_PENDING' " +
+            "  AND NOT EXISTS ( " +
+            "      SELECT 1 FROM inward_cheque sc WHERE sc.inward_batch_id = b.inward_batch_id " +
+            "      AND sc.cheque_status IN ('" 
+            + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+            + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
+            "  ) " +
+            "  AND EXISTS ( " +
+            "      SELECT 1 FROM inward_cheque ic WHERE ic.inward_batch_id = b.inward_batch_id " +
+            "      AND ic.cheque_status IN ('" 
+            + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
+            + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
+            + InwardChequeStatus.MICR_REPAIR_PENDING.name() + "', '" 
+            + InwardChequeStatus.MICR_REPAIR_IN_PROGRESS.name() + "') " +
+            "  )";
 
-        // 2. Sent Back Batches: Count distinct batches having sent-back status OR containing sent-back items
-        String sqlSentBack = "SELECT COUNT(DISTINCT b.inward_batch_id) " +
-                             "FROM inward_batch b " +
-                             "LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-                             "WHERE b.batch_status IN ('" 
-                             + InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                             + InwardBatchStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
-                             "   OR c.cheque_status IN ('" 
-                             + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                             + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER')";
-        // 3. Return Requests: Cheques where Maker requested rejection or items finalized as returns
-        String sqlReturns = "SELECT COUNT(*) FROM inward_cheque " +
-                            "WHERE cheque_status IN ('" 
-                            + InwardChequeStatus.REJECTION_REQUESTED.name() + "', '" 
-                            + InwardChequeStatus.REJECTED.name() + "', '" 
-                            + InwardChequeStatus.RRF_PENDING.name() + "', '" 
-                            + InwardChequeStatus.RETURNED.name() + "')";
+        // 2. Sent Back Batches: ANY batch with at least one cheque sent back to maker
+        String sqlSentBack = 
+            "SELECT COUNT(DISTINCT b.inward_batch_id) FROM inward_batch b " +
+            "WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
+            "  AND (b.batch_status IN ('" 
+            + InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+            + InwardBatchStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
+            "       OR EXISTS ( " +
+            "           SELECT 1 FROM inward_cheque sc WHERE sc.inward_batch_id = b.inward_batch_id " +
+            "           AND sc.cheque_status IN ('" 
+            + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+            + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
+            "       ))";
+
+        // 3. Return Requests: Rejections requested by Maker in actionable batches
+        String sqlReturns = 
+            "SELECT COUNT(*) FROM inward_cheque c " +
+            "JOIN inward_batch b ON c.inward_batch_id = b.inward_batch_id " +
+            "WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
+            "  AND (b.batch_status != 'CHECKER_PROCESSING_PENDING' OR EXISTS ( " +
+            "      SELECT 1 FROM inward_cheque sc WHERE sc.inward_batch_id = b.inward_batch_id " +
+            "      AND sc.cheque_status IN ('" 
+            + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+            + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
+            "  )) " +
+            "  AND c.cheque_status = '" + InwardChequeStatus.REJECTION_REQUESTED.name() + "'";
 
         try (Connection conn = DBConnection.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(sqlPartially);
@@ -66,30 +90,26 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
     @Override
     public List<InwardDashboardBatchDTO> getRecentBatches() {
         List<InwardDashboardBatchDTO> batches = new ArrayList<>();
-        
-        // Accurate aggregation matching current instrument lifecycle enums
-        String sql = "SELECT " +
-                     "    b.inward_batch_id, " +
-                     "    b.batch_status, " +
-                     "    b.uploaded_at, " +
-                     "    COALESCE(b.actual_cheque_count, 0) AS total_count, " +
-                     "    COUNT(CASE WHEN c.cheque_status IN ('" 
-                     + InwardChequeStatus.CHECKER_PROCESSING_PENDING.name() + "', '" 
-                     + InwardChequeStatus.COMPLETED.name() + "', '" 
-                     + InwardChequeStatus.CLEARED.name() + "', 'ACCEPTED', 'DATA_ENTRY_COMPLETED') THEN 1 END) AS accepted_count, " +
-                     "    COUNT(CASE WHEN c.cheque_status IN ('" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS back_to_maker_count, " +
-                     "    COUNT(CASE WHEN c.cheque_status IN ('" 
-                     + InwardChequeStatus.REJECTION_REQUESTED.name() + "', '" 
-                     + InwardChequeStatus.REJECTED.name() + "', '" 
-                     + InwardChequeStatus.RRF_PENDING.name() + "', '" 
-                     + InwardChequeStatus.RETURNED.name() + "') THEN 1 END) AS return_request_count " +
-                     "FROM inward_batch b " +
-                     "LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-                     "GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count " +
-                     "ORDER BY b.uploaded_at DESC";
+
+        String sql = 
+            "SELECT * FROM ( " +
+            "    SELECT " +
+            "        b.inward_batch_id, " +
+            "        b.batch_status, " +
+            "        b.uploaded_at, " +
+            "        COALESCE(b.actual_cheque_count, 0) AS total_count, " +
+            "        COUNT(CASE WHEN c.cheque_status IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'CLEARED', 'ACCEPTED', 'DATA_ENTRY_COMPLETED') THEN 1 END) AS accepted_count, " +
+            "        COUNT(CASE WHEN c.cheque_status IN ('SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') THEN 1 END) AS back_to_maker_count, " +
+            "        COUNT(CASE WHEN c.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS return_request_count, " +
+            "        COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS', 'MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') THEN 1 END) AS maker_work_count " +
+            "    FROM inward_batch b " +
+            "    LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
+            "    WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
+            "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count " +
+            ") sub " +
+            "WHERE sub.back_to_maker_count > 0 " +
+            "   OR (sub.batch_status != 'CHECKER_PROCESSING_PENDING' AND sub.maker_work_count > 0) " +
+            "ORDER BY sub.uploaded_at DESC";
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -111,17 +131,12 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
                 dto.setReturnRequestCheques(rs.getInt("return_request_count"));
 
                 String bStatus = rs.getString("batch_status");
-                
-                // Display Status alignment
+
                 if (dto.getBackToMakerCheques() > 0 
-                        || InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(bStatus)
-                        || InwardBatchStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(bStatus)
-                        || bStatus.equalsIgnoreCase("SEND_BACK_TO_MAKER")) {
+                        || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(bStatus)
+                        || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(bStatus)
+                        || "SEND_BACK_TO_MAKER".equalsIgnoreCase(bStatus)) {
                     dto.setDisplayStatus("Sent Back");
-                } else if (InwardBatchStatus.COMPLETED.name().equalsIgnoreCase(bStatus)
-                        || InwardBatchStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(bStatus)
-                        || InwardBatchStatus.CHECKER_PROCESSING.name().equalsIgnoreCase(bStatus)) {
-                    dto.setDisplayStatus("Completed");
                 } else {
                     dto.setDisplayStatus("Partially Processed");
                 }
@@ -133,7 +148,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
         }
         return batches;
     }
-
+    
     @Override
     public String determineNextWorkspace(String batchId) {
         String sql = "SELECT " +
