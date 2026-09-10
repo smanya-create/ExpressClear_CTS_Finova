@@ -10,46 +10,72 @@
 		apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairQueueController"
 		sclass="micr-repair-queue-page" width="100%" spacing="0">
 
-		<!-- Page Heading -->
 		<hlayout sclass="page-heading-row" width="100%"
 			valign="middle">
 
-			<vlayout spacing="2px" hflex="1">
+			<vlayout spacing="3px" hflex="1">
+
 				<label value="MICR Repair Queue" sclass="page-title" />
 
-				<label
-					value="Inward — Select a batch containing cheques that require MICR repair."
+				<label value="Inward • Batches requiring MICR attention"
 					sclass="page-subtitle" />
+
 			</vlayout>
 
 		</hlayout>
-
 
 		<div sclass="queue-card">
 
 			<hlayout sclass="queue-card-header" width="100%"
 				valign="middle">
 
-				<vlayout spacing="2px" hflex="1">
+				<vlayout spacing="3px" hflex="1">
+
 					<label value="Batches Requiring MICR Repair"
 						sclass="card-title" />
 
-					<label
+					<!-- <label
 						value="Open a batch to view and repair its flagged cheques."
-						sclass="card-subtitle" />
+						sclass="card-subtitle" /> -->
+
 				</vlayout>
+
+				<label id="batchResultCount" value="0 Batches"
+					sclass="batch-result-count" />
 
 			</hlayout>
 
 
+			
+			<div sclass="filter-section"
+				style="height:90px; padding:0 18px; box-sizing:border-box;">
+
+				<hlayout width="100%" height="100%" valign="middle"
+					spacing="18px" style="padding-top:18px; padding-bottom:18px; box-sizing:border-box;">
+
+					<label value="Search Batch ID"
+						sclass="filter-label" />
+
+					<textbox id="batchIdFilter"
+						placeholder="Enter full or partial Batch ID" width="400px"
+						maxlength="100" sclass="batch-filter-input"
+						onChanging="$composer.onChanging$batchIdFilter(event)" />
+
+					<button label="Clear" sclass="clear-filter-button"
+						style="background:#24588d !important; background-image:none !important; color:#ffffff !important; border:1px solid #24588d !important;"
+						onClick="$composer.clearBatchFilter()" />
+
+				</hlayout>
+
+			</div>
 
 			<listbox id="batchQueueList" sclass="batch-queue-list"
 				width="100%" mold="paging" pageSize="10"
-				emptyMessage="No batches are currently pending MICR repair.">
+				emptyMessage="No batches match your search.">
 
 				<listhead sizable="true">
 
-					<listheader label="Batch ID" width="18%" />
+					<listheader label="Batch ID" width="20%" />
 
 					<listheader label="Received" width="18%" />
 
@@ -59,10 +85,10 @@
 					<listheader label="MICR Repair Pending" width="18%"
 						align="center" />
 
-					<listheader label="Status" width="16%"
+					<listheader label="Status" width="15%"
 						align="center" />
 
-					<listheader label="Action" width="16%"
+					<listheader label="Action" width="15%"
 						align="center" />
 
 				</listhead>
@@ -73,40 +99,61 @@
 					<listitem value="${each.inwardBatchId}">
 
 						<listcell>
-							<label value="${each.inwardBatchId}"
-								sclass="batch-id" />
+
+							<hlayout valign="middle" spacing="6px">
+
+								<div sclass="batch-id-marker" />
+
+								<label value="${each.inwardBatchId}"
+									sclass="batch-id" />
+
+							</hlayout>
+
 						</listcell>
 
+
 						<listcell>
+
 							<label value="${each.uploadedAt}"
 								sclass="table-text" />
+
 						</listcell>
 
+
 						<listcell>
+
 							<label value="${each.actualChequeCount}"
 								sclass="count-text" />
+
 						</listcell>
 
+
 						<listcell>
+
 							<label
-								value="${each.micrRepairPendingCount}"
-								sclass="status-badge pending-status" />
+								value="${each.micrRepairPendingCount}" sclass="pending-count" />
+
 						</listcell>
 
+
 						<listcell>
+
 							<label value="${each.batchStatus}"
 								sclass="status-badge pending-status" />
+
 						</listcell>
 
+
 						<listcell>
+
 							<button label="Open" sclass="open-button"
 								onClick="$composer.openBatch(self.getParent().getParent().getValue())" />
+
 						</listcell>
 
 					</listitem>
 
 				</template>
-
 
 			</listbox>
 

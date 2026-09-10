@@ -1,190 +1,235 @@
 @charset "UTF-8";
 
-/* Main Queue Page */
 .micr-repair-queue-page {
-    padding: 8px 12px 16px 12px;
-    box-sizing: border-box;
-    background: #f8fafc;
+	padding: 14px 18px 20px 18px;
+	box-sizing: border-box;
+	background: #f8fafc;
 }
 
-/* Page Heading */
 .page-heading-row {
-    padding: 0;
-    margin-bottom: 10px;
+	padding: 2px 2px 12px 2px;
+	margin-bottom: 2px;
 }
 
 .page-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1e293b;
+	font-size: 20px;
+	font-weight: 700;
+	color: #173f63;
 }
 
 .page-subtitle {
-    font-size: 11px;
-    color: #64748b;
+	font-size: 11px;
+	color: #64748b;
 }
 
-
-/* Summary Cards */
-.summary-row {
-    margin-bottom: 12px;
-}
-
-.summary-card {
-    flex: 1;
-    min-height: 62px;
-    padding: 10px 14px;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 7px;
-}
-
-.summary-label {
-    font-size: 10px;
-    color: #64748b;
-    font-weight: 500;
-}
-
-.summary-value {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.warning-value {
-    color: #d97706;
-}
-
-
-/* Queue Card */
 .queue-card {
-    width: 100%;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 7px;
-    box-sizing: border-box;
+	width: 100%;
+	background: #ffffff;
+	border: 1px solid #dbe4ee;
+	border-radius: 9px;
+	box-sizing: border-box;
+	overflow: hidden;
 }
 
 .queue-card-header {
-    padding: 10px 14px;
-    box-sizing: border-box;
-    border-bottom: 1px solid #e2e8f0;
+	padding: 13px 18px;
+	box-sizing: border-box;
+	border-bottom: 1px solid #e2e8f0;
+	background: #ffffff;
 }
 
 .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1e293b;
+	font-size: 14px;
+	font-weight: 700;
+	color: #173f63;
 }
 
 .card-subtitle {
-    font-size: 10px;
-    color: #64748b;
+	font-size: 10px;
+	color: #64748b;
 }
 
+.batch-result-count {
+	padding: 5px 10px;
+	border-radius: 14px;
+	background: #eaf2fb;
+	color: #24588d;
+	font-size: 10px;
+	font-weight: 700;
+}
 
-/* Batch Queue */
+.filter-section {
+	width: 100%;
+	height: 90px;
+	box-sizing: border-box;
+	background: #f8fafc;
+	border-bottom: 1px solid #e2e8f0;
+}
+
+.filter-label {
+	width: 105px;
+	margin-right: 18px;
+	font-size: 11px !important;
+	font-weight: 600 !important;
+	color: #334155 !important;
+}
+
+.batch-filter-input {
+	height: 36px;
+	padding: 0 12px;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #b8c7d9;
+	border-radius: 6px;
+	color: #1e293b;
+	font-size: 11px;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.batch-filter-input:hover {
+	border-color: #7d9dbc;
+}
+
+.batch-filter-input:focus {
+	border-color: #24588d;
+	box-shadow: 0 0 0 2px rgba(36, 88, 141, 0.12);
+	outline: none;
+}
+
+.batch-filter-input::placeholder {
+	color: #94a3b8;
+	font-size: 11px;
+}
+
+.clear-filter-button.z-button {
+	height: 36px;
+	min-width: 70px;
+	margin-left: 14px;
+	padding: 0 15px;
+	background: #24588d !important;
+	background-image: none !important;
+	border: 1px solid #24588d !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+	font-size: 10px !important;
+	font-weight: 600 !important;
+	cursor: pointer;
+	box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+}
+
+.clear-filter-button.z-button:hover {
+	background: #1d4d7c !important;
+	background-image: none !important;
+	border-color: #1d4d7c !important;
+	color: #ffffff !important;
+}
+
+.clear-filter-button:hover {
+	background: #1d4d7c !important;
+}
+
 .batch-queue-list {
-    border: none;
-    background: #ffffff;
+	width: 100%;
+	border: none;
+	background: #ffffff;
 }
 
 .batch-queue-list .z-listhead {
-    background: #f8fafc;
+	background: #f8fafc;
 }
 
 .batch-queue-list .z-listheader {
-    background: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0;
-    color: #475569 !important;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 9px 10px;
+	background: #f8fafc !important;
+	border-bottom: 1px solid #dbe4ee;
+	color: #475569 !important;
+	font-size: 10px;
+	font-weight: 700;
+	padding: 9px 12px;
 }
 
 .batch-queue-list .z-listheader-content {
-    color: #475569 !important;
-    font-size: 10px;
-    font-weight: 700;
+	color: #475569 !important;
+	font-size: 10px;
+	font-weight: 700;
 }
 
 .batch-queue-list .z-listitem {
-    background: #ffffff;
+	background: #ffffff;
 }
 
 .batch-queue-list .z-listitem:hover {
-    background: #f8fafc;
+	background: #f5f9fd;
 }
 
 .batch-queue-list .z-listcell {
-    border-bottom: 1px solid #eef2f7;
-    padding: 9px 10px;
-    vertical-align: middle;
+	padding: 11px 12px;
+	border-bottom: 1px solid #edf2f7;
+	vertical-align: middle;
 }
 
+.batch-id-marker {
+	width: 4px;
+	height: 22px;
+	border-radius: 3px;
+	background: #24588d;
+}
 
-/* Table Text */
 .batch-id {
-    font-size: 11px;
-    font-weight: 600;
-    color: #24588d;
+	font-size: 11px;
+	font-weight: 700;
+	color: #24588d;
 }
 
 .table-text {
-    font-size: 11px;
-    color: #475569;
+	font-size: 11px;
+	color: #475569;
 }
 
 .count-text {
-    font-size: 11px;
-    font-weight: 600;
-    color: #334155;
+	font-size: 11px;
+	font-weight: 600;
+	color: #334155;
 }
 
 .pending-count {
-    display: inline-block;
-    min-width: 24px;
-    padding: 3px 7px;
-    box-sizing: border-box;
-    border-radius: 12px;
-    background: #fff7ed;
-    color: #d97706;
-    font-size: 10px;
-    font-weight: 700;
-    text-align: center;
+	display: inline-block;
+	min-width: 28px;
+	padding: 4px 8px;
+	box-sizing: border-box;
+	border-radius: 12px;
+	background: #fff7ed;
+	color: #d97706;
+	font-size: 10px;
+	font-weight: 700;
+	text-align: center;
 }
 
-
-/* Status */
 .status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 9px;
-    font-weight: 700;
+	display: inline-block;
+	padding: 4px 9px;
+	border-radius: 12px;
+	font-size: 9px;
+	font-weight: 700;
 }
 
 .pending-status {
-    background: #fff7ed;
-    color: #d97706;
+	background: #fff7ed;
+	color: #d97706;
 }
 
-
-/* Open Button */
 .open-button {
-    min-width: 58px;
-    height: 28px;
-    padding: 0 12px;
-    border: none;
-    border-radius: 5px;
-    background: #24588d;
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
+	min-width: 62px;
+	height: 29px;
+	padding: 0 13px;
+	border: none;
+	border-radius: 6px;
+	background: #24588d;
+	color: #ffffff;
+	font-size: 10px;
+	font-weight: 600;
+	cursor: pointer;
 }
 
 .open-button:hover {
-    background: #1d4d7c;
+	background: #1d4d7c;
 }

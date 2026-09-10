@@ -1,15 +1,18 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Include;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Textbox;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.InputEvent;
 
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -20,8 +23,12 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 	private static final long serialVersionUID = 1L;
 
 	private Listbox batchQueueList;
+	private Textbox batchIdFilter;
+	private Label batchResultCount;
 
 	private InwardBatchService inwardBatchService;
+
+	private List<InwardBatch> allBatches = new ArrayList<>();
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -37,7 +44,64 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 
 		List<InwardBatch> batches = inwardBatchService.getBatchesForMicrRepair();
 
+		if (batches == null) {
+			allBatches = new ArrayList<>();
+		} else {
+			allBatches = new ArrayList<>(batches);
+		}
+
+		displayBatches(allBatches);
+	}
+
+	private void displayBatches(List<InwardBatch> batches) {
+
 		batchQueueList.setModel(new ListModelList<>(batches));
+
+		if (batchResultCount != null) {
+			batchResultCount.setValue(batches.size() + (batches.size() == 1 ? " Batch" : " Batches"));
+		}
+	}
+
+	public void onChanging$batchIdFilter(InputEvent event) {
+
+		String searchText = event.getValue();
+
+		if (searchText == null) {
+			searchText = "";
+		}
+
+		searchText = searchText.trim().toLowerCase();
+
+		if (searchText.isEmpty()) {
+			displayBatches(allBatches);
+			return;
+		}
+
+		List<InwardBatch> filteredBatches = new ArrayList<>();
+
+		for (InwardBatch batch : allBatches) {
+
+			if (batch == null || batch.getInwardBatchId() == null) {
+				continue;
+			}
+
+			String batchId = batch.getInwardBatchId().trim().toLowerCase();
+
+			if (batchId.contains(searchText)) {
+				filteredBatches.add(batch);
+			}
+		}
+
+		displayBatches(filteredBatches);
+	}
+
+	public void clearBatchFilter() {
+
+		if (batchIdFilter != null) {
+			batchIdFilter.setValue("");
+		}
+
+		displayBatches(allBatches);
 	}
 
 	public void openBatch(Object batchId) {
@@ -52,9 +116,8 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 			return;
 		}
 
-		
 		Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", batchIdValue);
-		
+
 		Include mainInclude = null;
 
 		try {
@@ -62,7 +125,6 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 		} catch (Exception ignored) {
 		}
 
-		
 		if (mainInclude == null && self != null && self.getDesktop() != null) {
 
 			for (org.zkoss.zk.ui.Page page : self.getDesktop().getPages()) {
@@ -76,11 +138,9 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 			}
 		}
 
-		
 		if (mainInclude != null) {
 
 			mainInclude.setSrc(null);
-
 			mainInclude.setSrc("/inward/maker/micr-repair/micr-repair.zul");
 
 		} else {
