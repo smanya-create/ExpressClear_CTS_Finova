@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk>
-	
-	<style src="/css/inward/reports.css"/>
+
+    <style src="/css/inward/reports.css"/>
+
     <zscript>
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
     </zscript>
 
-    <borderlayout width="100%" height="100%" apply="com.iispl.cts.controller.inward.checker.InwardCheckerReportsController" >
+    <borderlayout width="100%"
+                  height="100%"
+                  apply="com.iispl.cts.controller.inward.checker.InwardCheckerReportsController">
 
         <west width="220px" border="0">
+
             <include src="/components/sidebar.zul?role=INWARD_CHECKER&amp;activeTab=rrf"/>
+
         </west>
 
         <center border="0">
@@ -19,37 +24,57 @@
             <borderlayout width="100%" height="100%">
 
                 <north height="80px" border="0">
+
                     <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=rrf"/>
+
                 </north>
 
-                <center border="none">
+                <center border="none"
+                        sclass="checker-reports-center">
 
-                    <div width="100%" height="100%" sclass="reports-page">
+                    <div style="padding:10px"
+                         sclass="checker-reports-content">
 
-                        <div sclass="report-card" >
+                        <div sclass="report-card">
 
-                            <label value="Generate Reports" style="font-size:25px;font-weight:bold;"/>
-							<separator height="8px"/>
+                            <label value="Generate Reports"
+                                   style="font-size:25px;font-weight:bold;"/>
+
+                            <separator height="8px"/>
+
                             <listbox id="reportListbox"
-         	width="100%"
-         mold="paging"
-         pageSize="10"
-         nonselectableTags="*"
-         emptyMessage="No report data available"
-         sclass="compact-report-listbox">
+                                     width="100%"
+                                     nonselectableTags="*"
+                                     emptyMessage="No report data available"
+                                     sclass="compact-report-listbox">
 
                                 <listhead sclass="listbox-header">
 
-                                    <listheader label="Batch ID" width="18%"/>
-                                    <listheader label="Total Cheques" width="15%"/>
-                                    <listheader label="Approved" width="15%"/>
-                                    <listheader label="Rejected" width="15%"/>
-                                    <listheader label="RRF" width="20%"/>
-                                    <listheader label="Batch Summary" width="20%"/>
+                                    <listheader label="Batch ID"
+                                                align="center"
+                                                width="18%"/>
+
+                                    <listheader label="Total Cheques"
+                                                align="center"
+                                                width="15%"/>
+
+                                    <listheader label="Approved"
+                                                align="center"
+                                                width="15%"/>
+
+                                    <listheader label="Rejected"
+                                                align="center"
+                                                width="15%"/>
+
+                                    <listheader label="RRF"
+                                                align="center"
+                                                width="20%"/>
+
+                                    <listheader label="Batch Summary"
+                                                align="center"
+                                                width="20%"/>
 
                                 </listhead>
-
-                               
 
                             </listbox>
 
