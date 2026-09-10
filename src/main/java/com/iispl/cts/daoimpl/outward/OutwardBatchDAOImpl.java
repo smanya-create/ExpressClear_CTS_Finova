@@ -372,25 +372,29 @@ public List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize) {
 	@Override
 	public int getPendingBatchCount() {
 
-		String sql = "SELECT COUNT(*) " + "FROM outward_batch " + "WHERE UPPER(TRIM(batch_status)) = ?";
+	    String sql = "SELECT COUNT(*) "
+	            + "FROM outward_batch "
+	            + "WHERE UPPER(TRIM(batch_status)) IN (?, ?)";
 
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+	    try (Connection connection = DBConnection.getConnection();
+	            PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-			preparedStatement.setString(1, "PENDING_CHECKER_PROCESS");
+	        preparedStatement.setString(1, "PENDING_CHECKER_PROCESS");
+	        preparedStatement.setString(2, "ON_HOLD");
 
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+	        try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-				if (resultSet.next()) {
-					return resultSet.getInt(1);
-				}
-			}
+	            if (resultSet.next()) {
+	                return resultSet.getInt(1);
+	            }
+	        }
 
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to count pending checker batches", exception);
-		}
+	    } catch (SQLException exception) {
+	        throw new RuntimeException(
+	                "Unable to count pending checker batches", exception);
+	    }
 
-		return 0;
+	    return 0;
 	}
 
 	@Override
