@@ -27,4 +27,8 @@ public interface OutwardBatchDAO {
 	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 
 	String getScannedBatchIdByOutwardBatchId(String outwardBatchId);
+	
+    void updateBatchStatus(String batchId, String status);
+	
+	
 }

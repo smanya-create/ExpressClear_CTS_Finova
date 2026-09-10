@@ -91,8 +91,11 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 			        "/home/administrator/WS_IISPL0229082026_GKProjects/ExpressClear_CTS_Finova/src/main/resources/xml-output"; 
 
 			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
-			lblXmlFileName.setValue(
-			        xmlFile.getFileName().toString());
+
+			outwardBatchService.updateBatchStatus(batchId, "COMPLETED");
+			loadVerifiedBatches();
+
+			lblXmlFileName.setValue(xmlFile.getFileName().toString());
 
 			lblXmlFileDescription.setValue(
 			        "XML generated successfully - Ready to send to NPCI.");
