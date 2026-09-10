@@ -2,10 +2,7 @@
 
 <zk>
 
-	<html>
-		<link rel="stylesheet" type="text/css"
-			href="/ExpressClear_CTS_Finova/css/outward/batch-upload.css?v=9" />
-	</html>
+	<style src="/css/outward/batch-upload.css"/>
 	<window id="uploadBatchWindow"
 		apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchUploadController"
 		border="none" width="100%" height="100%"

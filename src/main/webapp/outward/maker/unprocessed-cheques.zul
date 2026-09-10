@@ -3,12 +3,7 @@
 
 <zk xmlns="http://www.zkoss.org/2005/zul">
 
-<html>
-        <link rel="stylesheet"
-              type="text/css"
-              href="/ExpressClear_CTS_Finova/css/cts-unprocessed.css?v=1"/>
-    </html>
-
+<style src="/css/cts-unprocessed.css"/>
 
     <window id="winUnprocessedCheques"
             border="none"
