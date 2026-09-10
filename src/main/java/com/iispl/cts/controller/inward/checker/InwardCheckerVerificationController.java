@@ -211,24 +211,34 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		        Executions.getCurrent()
 		                .getParameter("batchId");
 
-		if (batchId == null || batchId.trim().isEmpty()) {
+		if (batchId != null && !batchId.trim().isEmpty()) {
 
-		    showNoChequesToVerify();
+		    currentBatchId = batchId.trim();
 
-		    return;
+		    Sessions.getCurrent().setAttribute(
+		            "ACTIVE_VERIFICATION_BATCH_ID",
+		            currentBatchId);
+		} else {
+		    String sessionBatch =
+		            (String) Sessions.getCurrent()
+		                    .getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
+
+		    if (sessionBatch != null &&
+		            !sessionBatch.trim().isEmpty()) {
+
+		        currentBatchId = sessionBatch.trim();
+
+		    } else {
+		        showNoChequesToVerify();
+		        return;
+		    }
 		}
-
-		currentBatchId = batchId.trim();
-
 		System.out.println(
 		        "Selected Verification Batch: "
 		        + currentBatchId
 		);
-
 		loadSelectedBatch();
-
-	}
-	
+	}	
 	private void loadSelectedBatch() {
 
 	    if (currentBatchId == null ||
@@ -282,6 +292,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private void loadChequeDetails(String inwardChequeId) {
 
 		try {
+			
+			clearCbsFieldHighlights();
 
 			InwardCheque cheque = inwardChequeService.findById(inwardChequeId);
 
@@ -292,6 +304,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			
+			
 			loadChequeImage(cheque, "FRONT");
 			currentChequeId = cheque.getInwardChequeId();
 			currentBatchId = cheque.getInwardBatchId();
@@ -506,18 +520,11 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	    rawPath = rawPath.trim();
 
-	    /*
-	     * Same logic as Data Entry.
-	     */
 	    if (rawPath.startsWith("/")) {
 	        rawPath = rawPath.substring(1);
 	    }
 
-	    /*
-	     * Images are stored under:
-	     *
-	     * src/main/resources/Inward-data/
-	     */
+	  
 	    String resourcePath = rawPath;
 
 	    if (!resourcePath.startsWith("Inward-data/")) {
@@ -543,11 +550,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            "DEBUG: Resource path = "
 	            + resourcePath);
 
-	    /*
-	     * =====================================================
-	     * 1. TRY CLASSPATH
-	     * =====================================================
-	     */
 	    InputStream is =
 	            Thread.currentThread()
 	                    .getContextClassLoader()
@@ -595,11 +597,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	    } else {
 
-	        /*
-	         * =================================================
-	         * 2. FALLBACK TO PHYSICAL FILE
-	         * =================================================
-	         */
 	    	String diskPath =
 	    	        "/home/administrator/snap/eclipse/common/git/"
 	    	        + "ExpressClear_CTS_Finova/"
@@ -689,109 +686,355 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	}
 	public void onClick$btnAccept() {
 
-		try {
+	    try {
 
-			InwardCheque cheque = inwardChequeService.findById(currentChequeId);
+	        clearCbsFieldHighlights();
 
-			if (cheque == null) {
+	        InwardCheque cheque =
+	                inwardChequeService.findById(currentChequeId);
 
-				Messagebox.show("Cheque not found.", "Verification", Messagebox.OK, Messagebox.ERROR);
+	        if (cheque == null) {
 
-				return;
-			}
+	            Messagebox.show(
+	                    "Cheque not found.",
+	                    "Verification",
+	                    Messagebox.OK,
+	                    Messagebox.ERROR);
 
-			String currentStatus = cheque.getChequeStatus();
+	            return;
+	        }
 
-			if ("ACCEPTED".equalsIgnoreCase(currentStatus) || "REJECTED".equalsIgnoreCase(currentStatus)) {
+	        String currentStatus =
+	                cheque.getChequeStatus();
 
-				Messagebox.show("This cheque is already verified.", "Verification", Messagebox.OK,
-						Messagebox.EXCLAMATION);
+	        // Already verified
+	        if ("ACCEPTED".equalsIgnoreCase(currentStatus)
+	                || "REJECTED".equalsIgnoreCase(currentStatus)) {
 
-				return;
-			}
-			CbsValidationResult cbsResult = runCbsValidation(cheque);
+	            Messagebox.show(
+	                    "This cheque is already verified.",
+	                    "Verification",
+	                    Messagebox.OK,
+	                    Messagebox.EXCLAMATION);
 
-			if (!cbsResult.isPassed()) {
-				cheque.setChequeStatus("REJECTED");
+	            return;
+	        }
 
-				boolean updated = inwardChequeService.updateChequeDetails(cheque);
+	        /*
+	         * CBS VALIDATION
+	         */
+	        CbsValidationResult cbsResult =
+	                runCbsValidation(cheque);
+	        
+	        if (!cbsResult.isPassed()) {
 
-				if (!updated) {
+	            String failureReason =
+	                    cbsResult.getReason();
 
-					Messagebox.show("CBS validation failed and " + "cheque status could not be updated.",
-							"CBS Validation", Messagebox.OK, Messagebox.ERROR);
+	            highlightFailedCbsField(failureReason);
 
-					return;
-				}
+	            String cbsReasonId =
+	                    getCbsRejectedReasonId();
 
-				// Cheque Status = REJECTED
-				if (lblChequeStatus != null) {
+	            if (cbsReasonId == null) {
 
-					lblChequeStatus.setValue("REJECTED");
+	                Messagebox.show(
+	                        "CBS validation failed, but "
+	                        + "CBS rejection reason is not configured "
+	                        + "in rejected_reasons.",
+	                        "CBS Validation",
+	                        Messagebox.OK,
+	                        Messagebox.ERROR);
 
-					lblChequeStatus.setSclass("status-badge mismatch");
-				}
+	                return;
+	            }
 
-				// Verification = VERIFIED
-				if (lblVerificationStatus != null) {
+	            Object userObject =
+	                    Sessions.getCurrent()
+	                            .getAttribute("CTS_USERNAME");
 
-					lblVerificationStatus.setValue("VERIFIED");
+	            String rejectedBy;
 
-					lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;"
-							+ "border:1px solid #198754;" + "border-radius:12px;" + "padding:3px 10px;"
-							+ "font-size:11px;" + "font-weight:600;");
-				}
+	            if (userObject != null) {
+	                rejectedBy = userObject.toString();
+	            } else {
+	                rejectedBy = "SYSTEM";
+	            }
 
-				updateVerificationCount();
+	            boolean rejectionSaved =
+	                    inwardChequeService.saveRejection(
+	                            cheque.getInwardChequeId(),
+	                            cbsReasonId,
+	                            failureReason,
+	                            rejectedBy);
 
-				Messagebox.show("CBS validation failed.\n" + "Cheque has been rejected.", "CBS Validation Failed",
-						Messagebox.OK, Messagebox.ERROR, event -> moveToNextCheque());
+	            if (!rejectionSaved) {
 
-				return;
-			}
+	                Messagebox.show(
+	                        "CBS validation failed, but "
+	                        + "rejection details could not be saved.",
+	                        "CBS Validation",
+	                        Messagebox.OK,
+	                        Messagebox.ERROR);
 
-			cheque.setChequeStatus("ACCEPTED");
+	                return;
+	            }
 
-			boolean updated = inwardChequeService.updateChequeDetails(cheque);
+	            cheque.setChequeStatus("REJECTED");
 
-			if (!updated) {
+	            boolean updated =
+	                    inwardChequeService.updateChequeDetails(
+	                            cheque);
 
-				Messagebox.show("CBS validation passed, " + "but cheque status could not be updated.", "Verification",
-						Messagebox.OK, Messagebox.ERROR);
+	            if (!updated) {
 
-				return;
-			}
+	                Messagebox.show(
+	                        "CBS validation failed and "
+	                        + "cheque status could not be updated.",
+	                        "CBS Validation",
+	                        Messagebox.OK,
+	                        Messagebox.ERROR);
 
-			// Cheque Status = ACCEPTED
-			if (lblChequeStatus != null) {
+	                return;
+	            }
 
-				lblChequeStatus.setValue("ACCEPTED");
+	          
+	            if (lblChequeStatus != null) {
 
-				lblChequeStatus.setSclass("status-badge");
-			}
+	                lblChequeStatus.setValue("REJECTED");
 
-			// Verification = VERIFIED
-			if (lblVerificationStatus != null) {
+	                lblChequeStatus.setSclass(
+	                        "status-badge mismatch");
+	            }
 
-				lblVerificationStatus.setValue("VERIFIED");
+	            if (lblVerificationStatus != null) {
 
-				lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;" + "border:1px solid #198754;"
-						+ "border-radius:12px;" + "padding:3px 10px;" + "font-size:11px;" + "font-weight:600;");
-			}
+	                lblVerificationStatus.setValue("VERIFIED");
 
-			// Update 1/4, 2/4, 3/4, 4/4
-			updateVerificationCount();
+	                lblVerificationStatus.setStyle(
+	                        "background:#E8F5E9;"
+	                        + "color:#198754;"
+	                        + "border:1px solid #198754;"
+	                        + "border-radius:12px;"
+	                        + "padding:3px 10px;"
+	                        + "font-size:11px;"
+	                        + "font-weight:600;"
+	                );
+	            }
 
-			Messagebox.show("Cheque accepted successfully.", "Verification", Messagebox.OK, Messagebox.INFORMATION,
-					event -> moveToNextCheque());
+	            updateVerificationCount();
 
-		} catch (Exception e) {
+	            Messagebox.show(
+	                    "CBS validation failed.\n\n"
+	                    + "Cheque has been rejected.\n\n"
+	                    + "Reason: "
+	                    + failureReason,
+	                    "CBS Validation Failed",
+	                    Messagebox.OK,
+	                    Messagebox.ERROR);
 
-			e.printStackTrace();
+	            return;
+	        }
 
-			Messagebox.show("Unable to complete verification.\n" + e.getMessage(), "Verification Error", Messagebox.OK,
-					Messagebox.ERROR);
-		}
+	      
+	        cheque.setChequeStatus("ACCEPTED");
+
+	        boolean updated =
+	                inwardChequeService.updateChequeDetails(
+	                        cheque);
+
+	        if (!updated) {
+
+	            Messagebox.show(
+	                    "CBS validation passed, "
+	                    + "but cheque status could not be updated.",
+	                    "Verification",
+	                    Messagebox.OK,
+	                    Messagebox.ERROR);
+
+	            return;
+	        }
+
+	       
+	        if (lblChequeStatus != null) {
+
+	            lblChequeStatus.setValue("ACCEPTED");
+
+	            lblChequeStatus.setSclass(
+	                    "status-badge");
+	        }
+
+	        if (lblVerificationStatus != null) {
+
+	            lblVerificationStatus.setValue("VERIFIED");
+
+	            lblVerificationStatus.setStyle(
+	                    "background:#E8F5E9;"
+	                    + "color:#198754;"
+	                    + "border:1px solid #198754;"
+	                    + "border-radius:12px;"
+	                    + "padding:3px 10px;"
+	                    + "font-size:11px;"
+	                    + "font-weight:600;"
+	            );
+	        }
+
+	        updateVerificationCount();
+
+	        Messagebox.show(
+	                "Cheque accepted successfully.",
+	                "Verification",
+	                Messagebox.OK,
+	                Messagebox.INFORMATION,
+	                event -> moveToNextCheque());
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        Messagebox.show(
+	                "Unable to complete verification.\n"
+	                + e.getMessage(),
+	                "Verification Error",
+	                Messagebox.OK,
+	                Messagebox.ERROR);
+	    }
+	}	
+	private void highlightCbsField(Label field) {
+
+	    if (field == null) {
+	        return;
+	    }
+
+	    field.setStyle(
+	        "background:#FFE5E5;"
+	        + "border:1px solid #DC3545;"
+	        + "color:#B02A37;"
+	        + "padding:2px 5px;"
+	        + "border-radius:4px;"
+	        + "font-weight:700;"
+	    );
+	}
+	
+	private String getCbsRejectedReasonId() {
+
+	    List<RejectedReason> reasons =
+	            rejectedReasonService.getAllRejectedReasons();
+
+	    if (reasons == null) {
+	        return null;
+	    }
+
+	    for (RejectedReason reason : reasons) {
+
+	        if (reason == null) {
+	            continue;
+	        }
+
+	        if ("CBS_VALIDATION_FAILED".equalsIgnoreCase(
+	                reason.getRejectedReasonCode())) {
+
+	            return reason.getRejectedReasonId();
+	        }
+	    }
+
+	    return null;
+	}
+	
+	private void highlightFailedCbsField(String reason) {
+
+	    clearCbsFieldHighlights();
+
+	    if (reason == null) {
+	        return;
+	    }
+
+	    String r = reason.toLowerCase();
+
+	    if (r.contains("micr")) {
+
+	        highlightCbsField(lblMicrCode);
+
+	    } else if (r.contains("bank code")) {
+
+	        highlightCbsField(lblBankCode);
+
+	    } else if (r.contains("branch code")) {
+
+	        highlightCbsField(lblBranchCode);
+
+	    } else if (r.contains("transaction code")) {
+
+	        highlightCbsField(lblTransactionCode);
+
+	    } else if (r.contains("account holder")
+	            || r.contains("name mismatch")) {
+
+	        highlightCbsField(lblDraweeName);
+
+	    } else if (r.contains("account not found")
+	            || r.contains("account is")) {
+
+	        highlightCbsField(lblDraweeAccountNumber);
+
+	    } else if (r.contains("cheque number")) {
+
+	        highlightCbsField(lblVerificationChequeNumber);
+
+	    } else if (r.contains("cheque date")
+	            || r.contains("postdated")) {
+
+	        highlightCbsField(lblChequeDate);
+
+	    } else if (r.contains("balance")
+	            || r.contains("insufficient")) {
+
+	        highlightCbsField(lblAccountBalance);
+
+	    }
+	}
+	
+	private void clearCbsFieldHighlights() {
+
+	    if (lblMicrCode != null) {
+	        lblMicrCode.setStyle("");
+	    }
+
+	    if (lblBankCode != null) {
+	        lblBankCode.setStyle("");
+	    }
+
+	    if (lblBranchCode != null) {
+	        lblBranchCode.setStyle("");
+	    }
+
+	    if (lblTransactionCode != null) {
+	        lblTransactionCode.setStyle("");
+	    }
+
+	    if (lblVerificationChequeNumber != null) {
+	        lblVerificationChequeNumber.setStyle("");
+	    }
+
+	    if (lblChequeDate != null) {
+	        lblChequeDate.setStyle("");
+	    }
+
+	    if (lblAmount != null) {
+	        lblAmount.setStyle("");
+	    }
+
+	    if (lblDraweeName != null) {
+	        lblDraweeName.setStyle("");
+	    }
+
+	    if (lblDraweeAccountNumber != null) {
+	        lblDraweeAccountNumber.setStyle("");
+	    }
+
+	    if (lblAccountBalance != null) {
+	        lblAccountBalance.setStyle("");
+	    }
 	}
 
 	public void onClick$btnReturn() {
@@ -1402,8 +1645,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
-			// Update batch status to indicate that it has been sent back to Maker
-
+			
 			window.setVisible(false);
 
 			Messagebox.show("Cheque has been sent back to Maker successfully.", "Send Back", Messagebox.OK,
@@ -1481,7 +1723,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		zoomScale += 0.1;
 
-		// Maximum zoom
 		if (zoomScale > 3.0) {
 			zoomScale = 3.0;
 		}
