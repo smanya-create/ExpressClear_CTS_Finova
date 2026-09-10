@@ -28,14 +28,15 @@
 
                         <div sclass="report-card" >
 
-                            <label value="Generate Reports" style="font-size:20px;font-weight:bold;"/>
-
+                            <label value="Generate Reports" style="font-size:25px;font-weight:bold;"/>
+							<separator height="8px"/>
                             <listbox id="reportListbox"
-                                     width="100%"
-                                     mold="paging"
-                                     pageSize="10"
-                                      nonselectableTags="*" 
-                                     emptyMessage="No report data available">
+         	width="100%"
+         mold="paging"
+         pageSize="10"
+         nonselectableTags="*"
+         emptyMessage="No report data available"
+         sclass="compact-report-listbox">
 
                                 <listhead sclass="listbox-header">
 
