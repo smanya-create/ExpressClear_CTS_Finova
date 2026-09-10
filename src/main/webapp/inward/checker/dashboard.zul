@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <zk>
+
     <style src="/css/inward/checker-dashboard.css"/>
 
     <zscript>
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
-    </zscript> 
+    </zscript>
 
     <borderlayout width="100%" height="100%" apply="com.iispl.cts.controller.inward.checker.InwardCheckerDashboardController">
 
@@ -14,62 +16,99 @@
         </west>
 
         <center border="0">
+
             <borderlayout width="100%" height="100%">
 
                 <north height="70px" border="0">
                     <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash"/>
                 </north>
 
-                <center border="none" autoscroll="true">
-                    <vlayout spacing="6px" style="padding:10px">
- 
+                <center border="none"
+        sclass="checker-dashboard-center">
+
+    <vlayout spacing="6px"
+             width="100%"
+             height="100%"
+             style="padding:10px;box-sizing:border-box;"
+             sclass="checker-dashboard-content">
                         <vlayout spacing="0px">
-                            <label value="Checker Dashboard" style="font-size:24px;font-weight:bold;color:#1D2D46"/>                            
+
+                            <label value="Checker Dashboard"
+                                   style="font-size:24px;font-weight:bold;color:#1D2D46"/>
+
                         </vlayout>
-						<separator style="border-top: 2px solid black;" />
-                        <!-- Batch Search Card (Compact) -->
-                       
-                            <label value="Batch Search" style="font-weight:bold;font-size:16px"/>
-                            <hlayout spacing="6px" style="align-items:center">
-                                <textbox id="txtSearchBatchId" 
-                                         hflex="1" 
-                                         height="30px" 
-                                         placeholder="Enter Batch ID" 
-                                         style="font-size:13px; padding:2px 8px"/>
-                                <button id="btnClear" 
-                                        label="Clear" 
-                                        height="30px" 
-                                        style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
-                                <button id="btnSearch" 
-                                        label="Search" 
-                                        height="30px" 
-                                        style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
-                            </hlayout>
-                  
 
-                        <!-- Batch Details Table (Listbox) -->
-                       		<separator style="height: 2px;" />
-                           	<label value="All Batches" style="font-weight:bold;font-size:16px"/>
-                            <listbox id="batchListbox" 
-                            		sclass="listbox-header"
-                                     nonselectableTags="*" 
-                                     emptyMessage="No batch details found">
-                                <listhead>
-                                    <listheader label="BATCH ID"/>
-                                    <listheader label="TOTAL CHEQUES" align="center"/>
-                                    <listheader label="NORMAL CHEQUES" align="center"/>
-                                    <listheader label="REJECTION REQUESTS" align="center"/>
-                                    <listheader label="BATCH STATUS" align="center"/>
-                                    <listheader label="ACTION" align="center" width="180px"/>
-                                </listhead>
-                            </listbox>
-                       
+                        <separator style="border-top:2px solid black;"/>
 
+                        <label value="Batch Search"
+                               style="font-weight:bold;font-size:16px"/>
+
+                        <hlayout spacing="6px" style="align-items:center">
+
+                            <textbox id="txtSearchBatchId"
+                                     hflex="1"
+                                     height="30px"
+                                     placeholder="Enter Batch ID"
+                                     style="font-size:13px;padding:2px 8px"/>
+
+                            <button id="btnClear"
+                                    label="Clear"
+                                    height="30px"
+                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+
+                            <button id="btnSearch"
+                                    label="Search"
+                                    height="30px"
+                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+
+                        </hlayout>
+
+                        <separator style="height:2px;"/>
+
+                        <label value="All Batches"
+                               style="font-weight:bold;font-size:16px"/>
+
+                        <listbox id="batchListbox"
+         sclass="listbox-header"
+         mold="paging"
+         pageSize="1"
+         width="100%"
+         nonselectableTags="*"
+         emptyMessage="No batch details found">
+
+                            <listhead>
+
+                                <listheader label="BATCH ID"/>
+
+                                <listheader label="TOTAL CHEQUES"
+                                            align="center"/>
+
+                                <listheader label="NORMAL CHEQUES"
+                                            align="center"/>
+
+                                <listheader label="REJECTION REQUESTS"
+                                            align="center"/>
+
+                                <listheader label="BATCH STATUS"
+                                            align="center"/>
+
+                                <listheader label="ACTION"
+                                            align="center"
+                                            width="180px"/>
+
+                            </listhead>
+
+                        </listbox>
+
+                      
                     </vlayout>
+
                 </center>
 
             </borderlayout>
+
         </center>
 
     </borderlayout>
+
 </zk>

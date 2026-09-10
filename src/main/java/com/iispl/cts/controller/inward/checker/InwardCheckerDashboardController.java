@@ -82,7 +82,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         batchListbox.getItems().clear();
 
         
-
+        if(batch!=null)
         renderBatchRow(batch);
     }
     private void performClear() {
@@ -121,8 +121,20 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         cellRejections.appendChild(lblRejections);
         item.appendChild(cellRejections);
 
-        Listcell cellStatus = new Listcell(batchStatus);
-        item.appendChild(cellStatus);
+        Listcell statusCell = new Listcell();
+        Label statusLabel = new Label(batchStatus);
+
+        statusLabel.setSclass("batch-status");
+
+        if (InwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(batchStatus)) {
+            statusLabel.setSclass("batch-status batch-status-completed");
+        } else {
+            statusLabel.setSclass("batch-status batch-status-pending");
+        }
+
+        statusCell.setStyle("text-align:center;vertical-align:middle;");
+        statusCell.appendChild(statusLabel);
+        item.appendChild(statusCell);
 
         Listcell actionCell = new Listcell();
         Button btnVerify = new Button("Proceed Verification");

@@ -1,27 +1,146 @@
+body {
+    background-color: #EAF4FB !important;
+}
 
-.cheque-verification-listbox .z-listhead th {
-    background: #1B4A8F !important;
-    color: white !important;
-    font-weight: bold !important;
-    border-bottom: 1px solid #163D73 !important;
+.checker-dashboard-center {
+    background-color: #EAF4FB !important;
+    --zk-paging-background-color: transparent !important;
+}
+
+.checker-dashboard-center .z-center-body {
+    background-color: #EAF4FB !important;
+}
+
+.checker-dashboard-content {
+    background-color: #EAF4FB !important;
+    min-height: 100% !important;
 }
 
 .listbox-header .z-listheader {
-            background: #1C3673 !important;
-            border-bottom: 1px solid #E0E6ED !important;
-        }
-        .listbox-header .z-listheader-content {
-            color:white  !important;
-            font-weight: bold !important;
-            font-size: 12px !important;
-        }
-        .listbox-header .z-listcell-content {
-            font-size: 12px !important;
-            color: black !important;
-        }
-        .listbox-header .z-listitem:hover{
-            background: transparent !important;
-            color: inherit !important;
-        }
-        
-    
+    background: #1C3673 !important;
+    border-bottom: 1px solid #E0E6ED !important;
+}
+
+.listbox-header .z-listheader-content {
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
+}
+
+.listbox-header .z-listcell-content {
+    font-size: 12px !important;
+    color: black !important;
+}
+
+.listbox-header .z-listitem:hover {
+    background: transparent !important;
+}
+
+.batch-status {
+    display: inline-block !important;
+    padding: 2px 4px !important;
+    border-radius: 12px !important;
+    font-weight: bold !important;
+    font-size: 7px !important;
+    text-align: center !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.batch-status-completed {
+    background: #28A745 !important;
+    color: white !important;
+    border: 1px solid #28A745 !important;
+}
+
+.batch-status-pending {
+    background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
+    border: 1px solid #F5A900 !important;
+    color: #7A4500 !important;
+}
+.z-listbox-paging {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.z-listbox-paging .z-paging {
+    background: transparent !important;
+    background-color: #EAF4FB !important;
+    border: none !important;
+}
+
+.z-listbox-paging .z-paging-button {
+    background: transparent !important;
+    background-color: #EAF4FB !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.z-listbox-paging .z-paging-button:hover {
+    background: #EAF4FB !important;
+    background-color: #EAF4FB !important;
+}
+
+.z-listbox-paging .z-paging-input {
+    background: #EAF4FB !important;
+    border: 1px solid #D0D7DE !important;
+}
+
+.z-paging {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 6px !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    background: #EAF4FB !important;
+}
+
+.z-paging-button {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    padding: 0 !important;
+    margin: 1px 1px !important;
+    line-height: 20px !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+    background: #EAF4FB !important;
+    border: none !important;
+}
+
+.z-paging-input {
+    width: 30px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 3px !important;
+    margin: 1px 3px !important;
+    line-height: 20px !important;
+    font-size: 11px !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+}
+
+.z-paging-text {
+    height: 22px !important;
+    line-height: 22px !important;
+    font-size: 11px !important;
+    vertical-align: middle !important;
+    margin: 1px 2px !important;
+}
+
+.z-paging-info {
+    position: absolute !important;
+    right: 6px !important;
+    top: 0 !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    font-size: 11px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    display: block !important;
+}
