@@ -33,5 +33,7 @@ public enum InwardChequeStatus {
 	    
 	    SEND_BACK_TO_MAKER_MICR,
 	    
-	    SEND_BACK_TO_MAKER_DATA_ENTRY
+	    SEND_BACK_TO_MAKER_DATA_ENTRY,
+	    
+	    MAKER_RETURNED
 }
