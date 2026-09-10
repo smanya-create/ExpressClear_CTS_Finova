@@ -139,7 +139,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 		String sql = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, "
 				+ "actual_total_amount, batch_status, uploaded_by, uploaded_at " + "FROM outward_batch "
-				+ "WHERE UPPER(TRIM(batch_status)) = ? " + "ORDER BY uploaded_at DESC " + "LIMIT ? OFFSET ?";
+				+ "WHERE UPPER(TRIM(batch_status)) IN (?, ?) " + "ORDER BY uploaded_at DESC " + "LIMIT ? OFFSET ?";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement prepStmt = connection.prepareStatement(sql)) {
@@ -147,8 +147,9 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			int offset = (pageNumber - 1) * pageSize;
 
 			prepStmt.setString(1, "PENDING_CHECKER_PROCESS");
-			prepStmt.setInt(2, pageSize);
-			prepStmt.setInt(3, offset);
+			prepStmt.setString(2, "ON_HOLD");
+			prepStmt.setInt(3, pageSize);
+			prepStmt.setInt(4, offset);
 
 			try (ResultSet resultSet = prepStmt.executeQuery()) {
 
@@ -320,21 +321,19 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 	@Override
 	public void updateBatchStatus(String batchId, String status) {
 
-	    String sql = "UPDATE outward_batch "
-	               + "SET batch_status = ? "
-	               + "WHERE outward_batch_id = ?";
+		String sql = "UPDATE outward_batch " + "SET batch_status = ? " + "WHERE outward_batch_id = ?";
 
-	    try (Connection connection = DBConnection.getConnection();
-	         PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-	        preparedStatement.setString(1, status);
-	        preparedStatement.setString(2, batchId);
+			preparedStatement.setString(1, status);
+			preparedStatement.setString(2, batchId);
 
-	        preparedStatement.executeUpdate();
+			preparedStatement.executeUpdate();
 
-	    } catch (Exception exception) {
-	        throw new RuntimeException("Unable to update batch status", exception);
-	    }
+		} catch (Exception exception) {
+			throw new RuntimeException("Unable to update batch status", exception);
+		}
 	}
 
 }
