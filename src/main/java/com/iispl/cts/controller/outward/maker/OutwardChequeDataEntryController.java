@@ -1301,6 +1301,10 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		try {
+			
+			if (!imagePath.startsWith("/")) {
+			    imagePath = "/" + imagePath;
+			}
 
 			outwardChequeDataEntryChequeImage.setSrc(imagePath);
 
