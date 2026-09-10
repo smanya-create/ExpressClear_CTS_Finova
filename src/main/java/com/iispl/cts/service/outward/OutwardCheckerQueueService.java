@@ -9,67 +9,51 @@ import com.iispl.cts.entity.outward.SendBackReason;
 
 public interface OutwardCheckerQueueService {
 
-    // ============================================================
-    // CHEQUES
-    // ============================================================
+	// ============================================================
+	// CHEQUES
+	// ============================================================
 
-    List<OutwardCheque> getChequesByBatchId(
-            String batchId)
-            throws SQLException;
+	List<OutwardCheque> getChequesByBatchId(String batchId) throws SQLException;
 
-    // ============================================================
-    // BATCH STATUS
-    // ============================================================
+	// ============================================================
+	// BATCH STATUS
+	// ============================================================
 
-    String getBatchStatus(
-            String batchId)
-            throws SQLException;
+	String getBatchStatus(String batchId) throws SQLException;
 
-    // ============================================================
-    // IMAGES
-    // ============================================================
+	// ============================================================
+	// IMAGES
+	// ============================================================
 
-    List<OutwardChequeImage> getImagesByChequeId(
-            String outwardChequeId)
-            throws Exception;
+	List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId) throws Exception;
 
-    // ============================================================
-    // CHEQUE ACTIONS
-    // ============================================================
+	// ============================================================
+	// CHEQUE ACTIONS
+	// ============================================================
 
-    void verifyCheque(
-            String chequeNo)
-            throws SQLException;
+	void verifyCheque(String chequeNo) throws SQLException;
 
-    void returnChequeToMaker(
-            String chequeNo)
-            throws SQLException;
+	void returnChequeToMaker(String chequeNo) throws SQLException;
 
-    void rejectCheque(
-            String chequeNo)
-            throws SQLException;
+	void rejectCheque(String chequeNo) throws SQLException;
 
-    // ============================================================
-    // SEND BACK REASONS
-    // ============================================================
+	// ============================================================
+	// SEND BACK REASONS
+	// ============================================================
 
-    List<SendBackReason> getSendBackReasons()
-            throws SQLException;
+	List<SendBackReason> getSendBackReasons() throws SQLException;
 
-    // ============================================================
-    // ACCOUNT VALIDATION
-    // ============================================================
+	// ============================================================
+	// ACCOUNT VALIDATION
+	// ============================================================
 
-    boolean isPayeeAccountExists(
-            String accountNumber)
-            throws SQLException;
+	boolean isPayeeAccountExists(String accountNumber) throws SQLException;
 
-    // ============================================================
-    // UPDATE BATCH STATUS
-    // ============================================================
+	// ============================================================
+	// UPDATE BATCH STATUS
+	// ============================================================
 
-    void updateBatchStatus(
-            String batchId,
-            String status)
-            throws SQLException;
+	void updateBatchStatus(String batchId, String status) throws SQLException;
+	
+	void updateChequeStatus(String chequeNo, String status) throws SQLException;
 }
