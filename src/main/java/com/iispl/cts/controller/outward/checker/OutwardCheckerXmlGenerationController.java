@@ -31,6 +31,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 	private Label lblXmlFileName;
 	private Label lblXmlFileDescription;
 	private Button btnSendToNPCI;
+	private Label lblVerifiedBatches;
 	private OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
 	private OutwardChequeService outwardChequeService = new OutwardChequeServiceImpl();
 
@@ -44,6 +45,8 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 		List<OutwardBatch> verifiedBatches = outwardBatchService.getVerifiedBatches();
 		System.out.println("Verified batches: " + verifiedBatches);
 		System.out.println("Verified batch count: " + verifiedBatches.size());
+		 lblVerifiedBatches.setValue(
+		            String.valueOf(verifiedBatches.size()));
 		ListModelList<OutwardBatch> model = new ListModelList<>(verifiedBatches);
 		lstVerifiedBatches.setModel(model);
 		lstVerifiedBatches.setItemRenderer(new ListitemRenderer<OutwardBatch>() {
