@@ -26,14 +26,13 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 		}
 
 		if (scanBatch.getScannedBatchId() == null || scanBatch.getScannedBatchId().trim().isEmpty()) {
-
 			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
 		}
 
-		String selectSql = "SELECT staging_status " + "FROM scan_batch " + "WHERE scanned_batch_id = ?";
+		String selectSql = "SELECT staging_status FROM scan_batch WHERE scanned_batch_id = ?";
 
-		String insertSql = "INSERT INTO scan_batch " + "(scanned_batch_id, batch_reference_id, "
-				+ "actual_cheque_count, actual_total_amount, "
+		String insertSql = "INSERT INTO scan_batch "
+				+ "(scanned_batch_id, batch_reference_id, actual_cheque_count, actual_total_amount, "
 				+ "staging_status, batch_status, uploaded_by, uploaded_at) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 		String updateSql = "UPDATE scan_batch SET " + "batch_reference_id = ?, " + "actual_cheque_count = ?, "
@@ -42,46 +41,34 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 
 		try {
 
-			/*
-			 * ===================================================== Check whether batch
-			 * already exists =====================================================
-			 */
-
 			try (PreparedStatement selectStatement = connection.prepareStatement(selectSql)) {
 
 				selectStatement.setString(1, scanBatch.getScannedBatchId());
 
 				try (ResultSet resultSet = selectStatement.executeQuery()) {
 
-					/*
-					 * ================================================= CASE 1: Batch does not
-					 * exist =================================================
-					 */
-
 					if (!resultSet.next()) {
 
 						try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
 
 							insertStatement.setString(1, scanBatch.getScannedBatchId());
-
 							insertStatement.setString(2, scanBatch.getBatchReferenceId());
-
 							insertStatement.setInt(3, scanBatch.getActualChequeCount());
-
 							insertStatement.setBigDecimal(4, scanBatch.getActualTotalAmount());
-
 							insertStatement.setString(5, scanBatch.getStagingStatus());
 
-							insertStatement.setString(6, scanBatch.getBatchStatus());
+							String batchStatus = scanBatch.getBatchStatus();
 
+							if (batchStatus == null || batchStatus.trim().isEmpty()) {
+								batchStatus = "PENDING_MAKER_PROCESS";
+							}
+
+							insertStatement.setString(6, batchStatus);
 							insertStatement.setString(7, scanBatch.getUploadedBy());
 
 							if (scanBatch.getUploadedAt() != null) {
-
 								insertStatement.setTimestamp(8, scanBatch.getUploadedAt());
-
 							} else {
-
 								insertStatement.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
 							}
 
@@ -91,53 +78,34 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 						return scanBatch.getScannedBatchId();
 					}
 
-					/*
-					 * ================================================= CASE 2: Batch already
-					 * exists =================================================
-					 */
-
 					String existingStagingStatus = resultSet.getString("staging_status");
 
-					/*
-					 * Existing batch can only be updated when staging status is RAW.
-					 */
-
 					if (!"RAW".equalsIgnoreCase(existingStagingStatus)) {
-
 						throw new IllegalStateException("Batch " + scanBatch.getScannedBatchId()
-								+ " is already validated or processed " + "and cannot be uploaded again.");
+								+ " is already validated or processed and cannot be uploaded again.");
 					}
 				}
 			}
 
-			/*
-			 * ===================================================== CASE 3: Existing batch
-			 * with RAW status
-			 *
-			 * Update current batch information.
-			 * =====================================================
-			 */
-
 			try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
 
 				updateStatement.setString(1, scanBatch.getBatchReferenceId());
-
 				updateStatement.setInt(2, scanBatch.getActualChequeCount());
-
 				updateStatement.setBigDecimal(3, scanBatch.getActualTotalAmount());
-
 				updateStatement.setString(4, scanBatch.getStagingStatus());
 
-				updateStatement.setString(5, scanBatch.getBatchStatus());
+				String batchStatus = scanBatch.getBatchStatus();
 
+				if (batchStatus == null || batchStatus.trim().isEmpty()) {
+					batchStatus = "PENDING_MAKER_PROCESS";
+				}
+
+				updateStatement.setString(5, batchStatus);
 				updateStatement.setString(6, scanBatch.getUploadedBy());
 
 				if (scanBatch.getUploadedAt() != null) {
-
 					updateStatement.setTimestamp(7, scanBatch.getUploadedAt());
-
 				} else {
-
 					updateStatement.setTimestamp(7, new java.sql.Timestamp(System.currentTimeMillis()));
 				}
 
@@ -149,7 +117,6 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 			return scanBatch.getScannedBatchId();
 
 		} catch (SQLException e) {
-
 			throw new RuntimeException("Error while saving scan batch: " + scanBatch.getScannedBatchId(), e);
 		}
 	}
@@ -158,7 +125,6 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 	public ScanBatch getBatchById(String scannedBatchId) {
 
 		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
 			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
 		}
 
@@ -166,8 +132,7 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 				+ "actual_total_amount, " + "staging_status, " + "batch_status, " + "uploaded_by, " + "uploaded_at "
 				+ "FROM scan_batch " + "WHERE scanned_batch_id = ?";
 
-		try (Connection connection = com.iispl.cts.common.config.DBConnection.getConnection();
-
+		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, scannedBatchId);
@@ -200,7 +165,6 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 			}
 
 		} catch (SQLException e) {
-
 			throw new RuntimeException("Error while retrieving scan batch: " + scannedBatchId, e);
 		}
 	}
@@ -210,9 +174,11 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 
 		List<ScanBatch> batchList = new ArrayList<>();
 
-		String sql = "SELECT scanned_batch_id, batch_reference_id, actual_cheque_count, "
-				+ "actual_total_amount, staging_status, batch_status, uploaded_by, uploaded_at " + "FROM scan_batch "
-				+ "WHERE UPPER(TRIM(batch_status)) = 'PROCESSING' " + "ORDER BY uploaded_at DESC";
+		String sql = "SELECT " + "scanned_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+				+ "actual_total_amount, " + "staging_status, " + "batch_status, " + "uploaded_by, " + "uploaded_at "
+				+ "FROM scan_batch " + "WHERE UPPER(TRIM(batch_status)) = 'PENDING_MAKER_PROCESS' " + "AND NOT EXISTS ("
+				+ "SELECT 1 " + "FROM outward_batch ob " + "WHERE ob.outward_batch_id = scan_batch.scanned_batch_id"
+				+ ") " + "ORDER BY uploaded_at ASC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -242,7 +208,6 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 			}
 
 		} catch (Exception exception) {
-
 			throw new RuntimeException("Unable to fetch Maker Dashboard batches from scan_batch", exception);
 		}
 
@@ -280,7 +245,6 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 		} catch (SQLException e) {
 			throw new RuntimeException("Failed to update scan batch status for batch ID: " + batchId, e);
 		}
-
 	}
 
 	@Override
@@ -295,9 +259,7 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 				+ "sb.uploaded_at, " + "sb.actual_cheque_count, " + "sb.batch_status " + "ORDER BY sb.uploaded_at DESC";
 
 		try (Connection connection = DBConnection.getConnection();
-
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);
-
 				ResultSet resultSet = preparedStatement.executeQuery()) {
 
 			while (resultSet.next()) {
@@ -318,7 +280,6 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 			}
 
 		} catch (SQLException e) {
-
 			throw new RuntimeException("Error while retrieving scan MICR repair batches", e);
 		}
 

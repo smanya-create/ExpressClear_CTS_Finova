@@ -1,7 +1,7 @@
 package com.iispl.cts.dao.outward;
 
-import java.util.List;
 import java.sql.Connection;
+import java.util.List;
 
 import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.OutwardBatch;
@@ -16,15 +16,23 @@ public interface OutwardBatchDAO {
 
 	OutwardBatch getBatchById(String outwardBatchId);
 
-	String transferBatchFromScanToOutward(Connection connection, String scannedBatchId);
-
 	List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize);
 
 	int getPendingBatchCount();
 
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 
+	List<OutwardBatch> getScanBatchesReadyForDataEntry();
+
 	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 
 	String getScannedBatchIdByOutwardBatchId(String outwardBatchId);
+
+	String getOutwardBatchIdByScannedBatchId(String scannedBatchId);
+
+	boolean updateBatchStatus(String outwardBatchId, String batchStatus);
+
+	boolean updateBatchStatus(Connection connection, String outwardBatchId, String batchStatus);
+
+	String createOutwardBatchFromScan(Connection connection, String scannedBatchId);
 }

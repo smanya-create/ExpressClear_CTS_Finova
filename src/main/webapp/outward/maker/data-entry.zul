@@ -6,25 +6,26 @@
 
 	<style src="/css/outward/data-entry.css" />
 
-	<div id="outwardDataEntryMain" width="100%"
-		apply="com.iispl.cts.controller.outward.maker.OutwardDataEntryController"
-		sclass="outward-data-entry-page">
+	<window id="outwardDataEntryMain" border="none" width="100%"
+		apply="com.iispl.cts.controller.outward.maker.OutwardDataEntryController">
 
-		<vlayout width="100%" spacing="0px">
+		<vlayout id="outwardDataEntryPage"
+			sclass="outward-data-entry-page" width="100%" spacing="0">
 
-			<vlayout spacing="3px"
-				sclass="outward-data-entry-heading">
+			<vlayout id="outwardDataEntryHeading"
+				sclass="outward-data-entry-heading" width="100%" spacing="3px">
 
-				<label value="DATA ENTRY"
+				<label id="outwardDataEntryLblTitle" value="DATA ENTRY"
 					sclass="outward-data-entry-title" />
 
-				<label
+				<label id="outwardDataEntryLblSubtitle"
 					value="Select a batch ready for cheque data entry"
 					sclass="outward-data-entry-subtitle" />
 
 			</vlayout>
 
-			<div sclass="outward-data-entry-table-card" width="100%">
+			<groupbox id="outwardDataEntryTableCard"
+				sclass="outward-data-entry-table-card" width="100%" mold="3d">
 
 				<grid id="outwardDataEntryGridBatch" width="100%"
 					sclass="outward-data-entry-grid">
@@ -49,21 +50,24 @@
 
 				</grid>
 
-				<div id="outwardDataEntryEmptyState" visible="false"
-					sclass="outward-data-entry-empty-state">
+				<vlayout id="outwardDataEntryEmptyState" visible="false"
+					sclass="outward-data-entry-empty-state" width="100%"
+					spacing="5px">
 
-					<label value="No batches ready for data entry"
+					<label id="outwardDataEntryLblEmptyTitle"
+						value="No batches ready for data entry"
 						sclass="outward-data-entry-empty-title" />
 
-					<label
+					<label id="outwardDataEntryLblEmptySubtitle"
 						value="There are currently no batches available for data entry."
 						sclass="outward-data-entry-empty-subtitle" />
 
-				</div>
+				</vlayout>
 
-			</div>
+			</groupbox>
 
-			<div sclass="outward-maker-pagination">
+			<hlayout id="outwardDataEntryPagination"
+				sclass="outward-maker-pagination" width="100%" spacing="6px">
 
 				<button id="outwardDataEntryBtnFirst" label="&lt;&lt;"
 					sclass="outward-maker-pagination-button" />
@@ -80,10 +84,10 @@
 				<button id="outwardDataEntryBtnLast" label="&gt;&gt;"
 					sclass="outward-maker-pagination-button" />
 
-			</div>
+			</hlayout>
 
 		</vlayout>
 
-	</div>
+	</window>
 
 </zk>
