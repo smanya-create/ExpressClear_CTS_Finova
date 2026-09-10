@@ -68,15 +68,15 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 	}
 
 	@Override
-	public boolean updateBatchStatus(String outwardBatchId, String batchStatus) {
+	public boolean updateOutWardBatchStatus(String outwardBatchId, String batchStatus) {
 
-		return outwardBatchDAO.updateBatchStatus(outwardBatchId, batchStatus);
+		return outwardBatchDAO.updateOutWardBatchStatus(outwardBatchId, batchStatus);
 	}
 
 	@Override
-	public boolean updateBatchStatus(Connection connection, String outwardBatchId, String batchStatus) {
+	public boolean updateOutWardBatchStatus(Connection connection, String outwardBatchId, String batchStatus) {
 
-		return outwardBatchDAO.updateBatchStatus(connection, outwardBatchId, batchStatus);
+		return outwardBatchDAO.updateOutWardBatchStatus(connection, outwardBatchId, batchStatus);
 	}
 
 	@Override

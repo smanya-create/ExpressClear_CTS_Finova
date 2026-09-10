@@ -266,7 +266,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 	}
 
 	@Override
-	public boolean updateBatchStatus(String outwardBatchId, String batchStatus) {
+	public boolean updateOutWardBatchStatus(String outwardBatchId, String batchStatus) {
 
 		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
 
@@ -295,7 +295,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 	}
 
 	@Override
-	public boolean updateBatchStatus(Connection connection, String outwardBatchId, String batchStatus) {
+	public boolean updateOutWardBatchStatus(Connection connection, String outwardBatchId, String batchStatus) {
 
 		if (connection == null) {
 			throw new IllegalArgumentException("Connection cannot be null");
@@ -352,7 +352,6 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 			preparedStatement.setInt(2, pageSize);
 
-
 			preparedStatement.setInt(3, offset);
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -380,7 +379,6 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			preparedStatement.setString(1, "PENDING_CHECKER_PROCESS");
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
 
 				if (resultSet.next()) {
 					return resultSet.getInt(1);
@@ -531,21 +529,19 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 	@Override
 	public void updateBatchStatus(String batchId, String status) {
 
-	    String sql = "UPDATE outward_batch "
-	               + "SET batch_status = ? "
-	               + "WHERE outward_batch_id = ?";
+		String sql = "UPDATE outward_batch " + "SET batch_status = ? " + "WHERE outward_batch_id = ?";
 
-	    try (Connection connection = DBConnection.getConnection();
-	         PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-	        preparedStatement.setString(1, status);
-	        preparedStatement.setString(2, batchId);
+			preparedStatement.setString(1, status);
+			preparedStatement.setString(2, batchId);
 
-	        preparedStatement.executeUpdate();
+			preparedStatement.executeUpdate();
 
-	    } catch (Exception exception) {
-	        throw new RuntimeException("Unable to update batch status", exception);
-	    }
+		} catch (Exception exception) {
+			throw new RuntimeException("Unable to update batch status", exception);
+		}
 	}
 
 }
