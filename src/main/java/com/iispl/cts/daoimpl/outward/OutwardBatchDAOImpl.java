@@ -327,47 +327,48 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 	}
 
 	@Override
-	public List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize) {
+public List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize) {
 
-		List<OutwardBatch> batches = new ArrayList<>();
+    List<OutwardBatch> batches = new ArrayList<>();
 
-		if (pageNumber < 1) {
-			pageNumber = 1;
-		}
+    if (pageNumber < 1) {
+        pageNumber = 1;
+    }
 
-		if (pageSize < 1) {
-			pageSize = 20;
-		}
+    if (pageSize < 1) {
+        pageSize = 5;
+    }
 
-		String sql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
-				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
-				+ "WHERE UPPER(TRIM(batch_status)) = ? " + "ORDER BY uploaded_at DESC " + "LIMIT ? OFFSET ?";
+    String sql = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, "
+            + "actual_total_amount, batch_status, uploaded_by, uploaded_at "
+            + "FROM outward_batch "
+            + "WHERE UPPER(TRIM(batch_status)) IN (?, ?) "
+            + "ORDER BY uploaded_at DESC "
+            + "LIMIT ? OFFSET ?";
 
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+    try (Connection connection = DBConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-			int offset = (pageNumber - 1) * pageSize;
+        int offset = (pageNumber - 1) * pageSize;
 
-			preparedStatement.setString(1, "PENDING_CHECKER_PROCESS");
+        preparedStatement.setString(1, "PENDING_CHECKER_PROCESS");
+        preparedStatement.setString(2, "ON_HOLD");
+        preparedStatement.setInt(3, pageSize);
+        preparedStatement.setInt(4, offset);
 
-			preparedStatement.setInt(2, pageSize);
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
-			preparedStatement.setInt(3, offset);
+            while (resultSet.next()) {
+                batches.add(mapOutwardBatch(resultSet));
+            }
+        }
 
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+    } catch (SQLException exception) {
+        throw new RuntimeException("Unable to fetch pending checker batches", exception);
+    }
 
-				while (resultSet.next()) {
-					batches.add(mapOutwardBatch(resultSet));
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch pending checker batches", exception);
-		}
-
-		return batches;
-	}
-
+    return batches;
+}
 	@Override
 	public int getPendingBatchCount() {
 

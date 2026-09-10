@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><ChequeBatchTransmission xmlns="urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing">
+    <BatchHeader>
+        <ScannedBatchId>BAT2003</ScannedBatchId>
+        <BatchReferenceId>REF-BATCH-2026-002</BatchReferenceId>
+        <ActualChequeCount>2</ActualChequeCount>
+        <ActualTotalAmount currency="INR">245000.00</ActualTotalAmount>
+        <BatchStatus>VERIFIED</BatchStatus>
+        <UploadedBy>USR1001</UploadedBy>
+        <UploadedAt>2026-09-10T04:37:42</UploadedAt>
+    </BatchHeader>
+<Cheques>
+    <ChequeItem>
+        <ScannedChequeId>CH2007</ScannedChequeId>
+        <ChequeNumber>204512</ChequeNumber>
+        <ChequeDate>2026-06-30</ChequeDate>
+        <Amount currency="INR">185000.00</Amount>
+        <ChequeStatus>VERIFIED</ChequeStatus>
+        <MICRDetails>
+            <FullMICR>560229005</FullMICR>
+            <CityCode>560</CityCode>
+            <BankCode>229</BankCode>
+            <BranchCode>005</BranchCode>
+        </MICRDetails>
+        <Drawee>
+            <Name>Rajesh Sharma</Name>
+            <AccountNumber>000201589632</AccountNumber>
+        </Drawee>
+        <Payee>
+            <Name>Vikram Solar Systems</Name>
+            <AccountNumber>995498236410235</AccountNumber>
+        </Payee>
+        <ScannedImages>
+            <FrontImagePath></FrontImagePath>
+            <BackImagePath></BackImagePath>
+        </ScannedImages>
+    </ChequeItem>
+    <ChequeItem>
+        <ScannedChequeId>OC011</ScannedChequeId>
+        <ChequeNumber>CHQ20001</ChequeNumber>
+        <ChequeDate>2026-09-10</ChequeDate>
+        <Amount currency="INR">60000.00</Amount>
+        <ChequeStatus>PENDING</ChequeStatus>
+        <MICRDetails>
+            <FullMICR>MICR200001</FullMICR>
+            <CityCode></CityCode>
+            <BankCode></BankCode>
+            <BranchCode></BranchCode>
+        </MICRDetails>
+        <Drawee>
+            <Name>ABC Bank</Name>
+            <AccountNumber>DRAW200001</AccountNumber>
+        </Drawee>
+        <Payee>
+            <Name>Test Company</Name>
+            <AccountNumber>789653216495680</AccountNumber>
+        </Payee>
+        <ScannedImages>
+            <FrontImagePath></FrontImagePath>
+            <BackImagePath></BackImagePath>
+        </ScannedImages>
+    </ChequeItem>
+</Cheques>
+</ChequeBatchTransmission>

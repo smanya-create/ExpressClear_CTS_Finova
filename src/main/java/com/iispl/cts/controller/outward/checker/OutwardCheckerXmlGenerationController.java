@@ -88,7 +88,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 			}
 
 			String outputDirectory =
-			        "/home/administrator/WS_IISPL0229082026_GKProjects/ExpressClear_CTS_Finova/src/main/resources/xml-output"; 
+					"/home/administrator/snap/eclipse/common/git/ExpressClear_CTS_Finova/src/main/resources/xml-output";
 
 			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
 
