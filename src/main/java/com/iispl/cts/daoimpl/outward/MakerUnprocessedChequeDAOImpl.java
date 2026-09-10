@@ -17,15 +17,15 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
     public List<UnprocessedChequeDTO> getUnprocessedCheques(String userRole) {
         List<UnprocessedChequeDTO> list = new ArrayList<>();
 
-        String sql = "SELECT c.cheque_id, c.batch_id, b.batch_no, cs.session_name, " +
-                "c.cheque_no, (c.city_code || c.bank_code || c.branch_code) AS sort_code, " +
-                "c.amount, c.status, sbr.reason_name, c.checker_remarks, c.created_at " +
-                "FROM outward_cheque c " +
-                "JOIN outward_batch b ON c.batch_id = b.batch_id " +
-                "LEFT JOIN clearing_session cs ON b.clearing_session_id = cs.session_id " +
-                "LEFT JOIN send_back_reasons sbr ON c.send_back_reason_id = sbr.reason_id " +
-                "WHERE c.status = 'UNPROCESSED' " +
-                "ORDER BY c.created_at ASC, c.cheque_id ASC";
+        // Match UNPROCESSED, Processing, or any pending scan cheques
+        String sql = "SELECT sc.scanned_cheque_id, sc.scanned_batch_id, " +
+                     "       COALESCE(sb.batch_reference_id, sc.scanned_batch_id) AS batch_ref, " +
+                     "       sc.cheque_number, sc.micr_code, sc.cheque_amount, sc.cheque_status, " +
+                     "       sc.drawee_name, sc.drawee_account_number, sc.created_at " +
+                     "FROM scan_cheque sc " +
+                     "LEFT JOIN scan_batch sb ON TRIM(sc.scanned_batch_id) = TRIM(sb.scanned_batch_id) " +
+                     "WHERE UPPER(sc.cheque_status) IN ('UNPROCESSED', 'PROCESSING', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY', 'RAW', 'PENDING') " +
+                     "ORDER BY sc.created_at ASC, sc.scanned_cheque_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -33,20 +33,49 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
 
             while (rs.next()) {
                 UnprocessedChequeDTO dto = new UnprocessedChequeDTO();
-                dto.setChequeId(rs.getLong("cheque_id"));
-                dto.setBatchId(rs.getLong("batch_id"));
-                dto.setBatchNo(rs.getString("batch_no"));
-                dto.setOriginalSessionName(rs.getString("session_name"));
-                dto.setChequeNo(rs.getString("cheque_no"));
-                dto.setSortCode(rs.getString("sort_code"));
-                dto.setAmount(rs.getBigDecimal("amount"));
-                dto.setStatus(rs.getString("status"));
+
+                String chqIdStr = rs.getString("scanned_cheque_id");
+                try {
+                    dto.setChequeId(Long.parseLong(chqIdStr.replaceAll("\\D+", "")));
+                } catch (Exception e) {
+                    dto.setChequeId(0L);
+                }
+
+                String batchIdStr = rs.getString("scanned_batch_id");
+                try {
+                    dto.setBatchId(Long.parseLong(batchIdStr.replaceAll("\\D+", "")));
+                } catch (Exception e) {
+                    dto.setBatchId(0L);
+                }
+
+                dto.setBatchNo(rs.getString("batch_ref"));
+                dto.setOriginalSessionName("Scan Staging");
+                dto.setChequeNo(rs.getString("cheque_number"));
+
+                String micr = rs.getString("micr_code");
+                dto.setSortCode(micr != null && !micr.trim().isEmpty() ? micr : "------");
+                dto.setAmount(rs.getBigDecimal("cheque_amount"));
+
+                // CRITICAL: Set status to either PENDING_REPAIR or PENDING_DATA_ENTRY
+                // so the controller's counters and badges light up!
+                if (micr == null || micr.trim().isEmpty() || micr.contains("?") || "UNREADABLE".equalsIgnoreCase(micr)) {
+                    dto.setStatus("PENDING_REPAIR");
+                    dto.setSendBackReason("Defective / Unread MICR Codeline");
+                } else if (dto.getAmount() == null || dto.getAmount().doubleValue() <= 0.0) {
+                    dto.setStatus("PENDING_DATA_ENTRY");
+                    dto.setSendBackReason("Missing Cheque Amount (CAR/LAR)");
+                } else {
+                    dto.setStatus("PENDING_REPAIR");
+                    dto.setSendBackReason("EOD Rollover Instrument");
+                }
+
+                dto.setRemarks(chqIdStr + " (" + batchIdStr + ")");
                 dto.setForcedEodRollover(true);
-                dto.setSendBackReason(rs.getString("reason_name"));
-                dto.setRemarks(rs.getString("checker_remarks"));
                 list.add(dto);
             }
+            System.out.println(">>> [MakerUnprocessedDAO] Fetched total items: " + list.size());
         } catch (SQLException e) {
+            System.err.println(">>> [MakerUnprocessedDAO] SQL ERROR: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
@@ -54,7 +83,8 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
 
     @Override
     public long countPendingRolloverItems() {
-        String sql = "SELECT COUNT(*) FROM outward_cheque WHERE status = 'UNPROCESSED'";
+        String sql = "SELECT COUNT(*) FROM scan_cheque " +
+                     "WHERE UPPER(cheque_status) IN ('UNPROCESSED', 'PROCESSING', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY', 'RAW', 'PENDING')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
