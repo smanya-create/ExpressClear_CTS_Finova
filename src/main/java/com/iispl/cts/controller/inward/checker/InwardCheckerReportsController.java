@@ -120,13 +120,13 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         // ---- RRF button ----
         Listcell rrfCell = new Listcell();
-        Button generateRrfButton = new Button("Generate RRF");
-        generateRrfButton.setIconSclass("z-icon-file-text");
+        Button generateRrfButton = new Button("Export RRF(XML)");
+        generateRrfButton.setIconSclass("z-icon-reply");
         boolean hasRejected = summary != null && summary.getRejectedCheques() != 0;
 
         if (hasRejected) {
             generateRrfButton.setStyle(
-                "background-color: red; color: white; border-radius: 4px; cursor: pointer;");
+                "background-color: #D94825; color: white; border-radius: 4px; cursor: pointer;");
         } else {
             generateRrfButton.setStyle(
                 "background-color: #ABA2A1; color: white; cursor: not-allowed;");
@@ -154,22 +154,23 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
         rrfCell.appendChild(generateRrfButton);
         item.appendChild(rrfCell);
 
-        // ---- Download button ----
-        Listcell downloadCell = new Listcell();
-        Button downloadButton = new Button("Download");
-        downloadButton.setIconSclass("z-icon-download");
-        downloadButton.setStyle("background-color: green; color: white;");
+        // ---- Export button ----
+        Listcell exportBSFCell = new Listcell();
+        Button bsfButton = new Button("Export BSF(XML)");
+        bsfButton.setIconSclass("z-icon-file-text");
+        
+        bsfButton.setStyle("background-color: green; color: white;");
 
-        String downloadBatchId = (summary != null && summary.getBatchId() != null) ? summary.getBatchId() : "";
-        downloadButton.setAttribute("batchId", downloadBatchId);
+        String exportBatchId = (summary != null && summary.getBatchId() != null) ? summary.getBatchId() : "";
+        bsfButton.setAttribute("batchId", exportBatchId);
 
-        downloadButton.addEventListener("onClick", event -> {
-            String clickedBatchId = (String) downloadButton.getAttribute("batchId");
+        bsfButton.addEventListener("onClick", event -> {
+            String clickedBatchId = (String) bsfButton.getAttribute("batchId");
             generateBatchSummaryXml(clickedBatchId);
         });
 
-        downloadCell.appendChild(downloadButton);
-        item.appendChild(downloadCell);
+        exportBSFCell.appendChild(bsfButton);
+        item.appendChild(exportBSFCell);
 
         reportListbox.appendChild(item);
     }
