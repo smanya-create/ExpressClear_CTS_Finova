@@ -9,92 +9,96 @@
     </west>
 
     <!-- Main Workspace -->
-    <center border="none" autoscroll="true" style="background-color: #f8fafc;">
-        <vlayout spacing="0" hflex="1">
+    <center border="none">
+        <!-- Nested Borderlayout to pin header and scroll only the audit logs -->
+        <borderlayout hflex="1" vflex="1">
 
-            <!-- Shared Header -->
-            <include id="incHeader" src="/components/header.zul" 
-                     pageTitle="Admin Dashboard" 
-                     pageSubtitle="Audit Logs"
-                     showNotifications="false" />
+            <!-- Fixed Header (Does NOT scroll) -->
+            <north size="auto" border="none">
+                <include id="incHeader" src="/components/header.zul" 
+                         pageTitle="Admin Dashboard" 
+                         pageSubtitle="Audit Logs"
+                         showNotifications="false" />
+            </north>
 
-            <!-- Content Area Container -->
-            <vlayout sclass="role-content" spacing="20px" style="padding: 24px;">
-                
-                <!-- Page Title Header -->
-                <vlayout spacing="4px">
-                    <label value="System Audit Logs" sclass="page-title"/>
-                    <label value="Track all security events, user logins, batch submissions, and operational activities." sclass="page-subtitle"/>
-                </vlayout>
+            <!-- Scrollable Content Workspace -->
+            <center border="none" autoscroll="true" style="background-color: #f8fafc;">
+                <vlayout sclass="role-content" spacing="20px" style="padding: 24px;">
+                    
+                    <!-- Page Title Header -->
+                    <vlayout spacing="4px">
+                        <label value="System Audit Logs" sclass="page-title"/>
+                        <label value="Track all security events, user logins, batch submissions, and operational activities." sclass="page-subtitle"/>
+                    </vlayout>
 
-                <!-- Filter Controls Card -->
-                <vlayout sclass="card-panel" hflex="1" spacing="0" style="padding: 24px 28px; box-sizing: border-box;">
-                    <hlayout spacing="16px" valign="bottom" hflex="1">
-                        <vlayout spacing="6px" width="150px">
-                            <label value="FROM DATE" sclass="field-label"/>
-                            <datebox id="dtFrom" format="yyyy-MM-dd" height="38px" width="100%"/>
-                        </vlayout>
-                        <vlayout spacing="6px" width="150px">
-                            <label value="TO DATE" sclass="field-label"/>
-                            <datebox id="dtTo" format="yyyy-MM-dd" height="38px" width="100%"/>
-                        </vlayout>
-                        <vlayout spacing="6px" width="170px">
-                            <label value="MODULE" sclass="field-label"/>
-                            <combobox id="cmbModuleFilter" readonly="true" width="100%" height="38px">
-                                <comboitem label="All Modules" value="ALL"/>
-                                <comboitem label="AUTH" value="AUTH"/>
-                                <comboitem label="ROLE_MGMT" value="ROLE_MGMT"/>
-                                <comboitem label="USER_MGMT" value="USER_MGMT"/>
-                                <comboitem label="OUTWARD_BATCH" value="OUTWARD_BATCH"/>
-                                <comboitem label="INWARD_CLEARING" value="INWARD_CLEARING"/>
-                            </combobox>
-                        </vlayout>
-                        <vlayout spacing="6px" hflex="1">
-                            <label value="SEARCH USER / DETAILS" sclass="field-label"/>
-                            <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="38px" sclass="input-box"/>
-                        </vlayout>
-                        <button id="btnSearch" label="SEARCH" height="38px" sclass="btn-primary"/>
-                        <button id="btnReset" label="RESET" height="38px" sclass="btn-secondary"/>
-                    </hlayout>
-                </vlayout>
-
-                <!-- Audit Log Table Card -->
-                <vlayout sclass="card-panel" spacing="16px">
-                    <hlayout valign="middle" hflex="1" style="justify-content: space-between;">
-                        <label value="Audit Trail" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
-                        <label id="lblAuditCount" value="Loading logs..." style="color: #64748b; font-size: 12px;"/>
-                    </hlayout>
-
-                    <grid sclass="role-grid" hflex="1">
-                        <columns sizable="true">
-                            <column label="TIMESTAMP" width="160px"/>
-                            <column label="USER / ROLE" width="200px"/>
-                            <column label="MODULE" width="140px"/>
-                            <column label="ACTION" width="150px"/>
-                            <column label="DETAILS" hflex="1"/>
-                            <column label="IP ADDRESS" width="130px"/>
-                            <column label="STATUS" width="110px" align="center" style="text-align: center;"/>
-                        </columns>
-                        <rows id="rowsAudit">
-                            <!-- Populated dynamically by AuditLogsController -->
-                        </rows>
-                    </grid>
-                    <hlayout valign="middle" style="margin-top: 14px;">
-                        <space hflex="1" />
-                        <hlayout spacing="4px" valign="middle" sclass="cts-pagination-wrapper">
-                            <button id="btnFirstPage" label="«" sclass="pg-nav-btn" tooltiptext="First Page" />
-                            <button id="btnPrevPage" label="‹" sclass="pg-nav-btn" tooltiptext="Previous Page" />
-                            <intbox id="ibCurrentPage" value="1" sclass="pg-current-input" />
-                            <label id="lblTotalPages" value="/ 1" sclass="pg-total-label" />
-                            <button id="btnNextPage" label="›" sclass="pg-nav-btn" tooltiptext="Next Page" />
-                            <button id="btnLastPage" label="»" sclass="pg-nav-btn" tooltiptext="Last Page" />
+                    <!-- Filter Controls Card -->
+                    <vlayout sclass="card-panel" hflex="1" spacing="0" style="padding: 24px 28px; box-sizing: border-box;">
+                        <hlayout spacing="16px" valign="bottom" hflex="1">
+                            <vlayout spacing="6px" width="150px">
+                                <label value="FROM DATE" sclass="field-label"/>
+                                <datebox id="dtFrom" format="yyyy-MM-dd" height="38px" width="100%"/>
+                            </vlayout>
+                            <vlayout spacing="6px" width="150px">
+                                <label value="TO DATE" sclass="field-label"/>
+                                <datebox id="dtTo" format="yyyy-MM-dd" height="38px" width="100%"/>
+                            </vlayout>
+                            <vlayout spacing="6px" width="170px">
+                                <label value="MODULE" sclass="field-label"/>
+                                <combobox id="cmbModuleFilter" readonly="true" width="100%" height="38px">
+                                    <comboitem label="All Modules" value="ALL"/>
+                                    <comboitem label="AUTH" value="AUTH"/>
+                                    <comboitem label="ROLE_MGMT" value="ROLE_MGMT"/>
+                                    <comboitem label="USER_MGMT" value="USER_MGMT"/>
+                                    <comboitem label="OUTWARD_BATCH" value="OUTWARD_BATCH"/>
+                                    <comboitem label="INWARD_CLEARING" value="INWARD_CLEARING"/>
+                                </combobox>
+                            </vlayout>
+                            <vlayout spacing="6px" hflex="1">
+                                <label value="SEARCH USER / DETAILS" sclass="field-label"/>
+                                <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="38px" sclass="input-box"/>
+                            </vlayout>
+                            <button id="btnSearch" label="SEARCH" height="38px" sclass="btn-primary"/>
+                            <button id="btnReset" label="RESET" height="38px" sclass="btn-secondary"/>
                         </hlayout>
-                    </hlayout>
+                    </vlayout>
+
+                    <!-- Audit Log Table Card -->
+                    <vlayout sclass="card-panel" spacing="16px">
+                        <hlayout valign="middle" hflex="1" style="justify-content: space-between;">
+                            <label value="Audit Trail" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
+                            <label id="lblAuditCount" value="Loading logs..." style="color: #64748b; font-size: 12px;"/>
+                        </hlayout>
+
+                        <grid sclass="role-grid" hflex="1">
+                            <columns sizable="true">
+                                <column label="TIMESTAMP" width="160px"/>
+                                <column label="USER / ROLE" width="200px"/>
+                                <column label="MODULE" width="140px"/>
+                                <column label="ACTION" width="150px"/>
+                                <column label="DETAILS" hflex="1"/>
+                                <column label="IP ADDRESS" width="130px"/>
+                                <column label="STATUS" width="110px" align="center" style="text-align: center;"/>
+                            </columns>
+                            <rows id="rowsAudit">
+                                <!-- Populated dynamically by AuditLogsController -->
+                            </rows>
+                        </grid>
+                        <hlayout valign="middle" style="margin-top: 14px;">
+                            <space hflex="1" />
+                            <hlayout spacing="4px" valign="middle" sclass="cts-pagination-wrapper">
+                                <button id="btnFirstPage" label="«" sclass="pg-nav-btn" tooltiptext="First Page" />
+                                <button id="btnPrevPage" label="‹" sclass="pg-nav-btn" tooltiptext="Previous Page" />
+                                <intbox id="ibCurrentPage" value="1" sclass="pg-current-input" />
+                                <label id="lblTotalPages" value="/ 1" sclass="pg-total-label" />
+                                <button id="btnNextPage" label="›" sclass="pg-nav-btn" tooltiptext="Next Page" />
+                                <button id="btnLastPage" label="»" sclass="pg-nav-btn" tooltiptext="Last Page" />
+                            </hlayout>
+                        </hlayout>
+                    </vlayout>
+
                 </vlayout>
-
-            </vlayout>
-
-        </vlayout>
+            </center>
+        </borderlayout>
     </center>
 </borderlayout>
 </zk>
