@@ -674,21 +674,19 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		currentRecord++;
 		loadRepairRecord();
 	}
-	
+
 	private String getNextDataEntryStatus() {
-	    if (currentCheque != null
-	            && InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name()
-	                    .equalsIgnoreCase(currentCheque.getChequeStatus())) {
+		if (currentCheque != null && InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name()
+				.equalsIgnoreCase(currentCheque.getChequeStatus())) {
 
-	        return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name();
-	    }
+			return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name();
+		}
 
-	    return InwardChequeStatus.DATA_ENTRY_PENDING.name();
+		return InwardChequeStatus.DATA_ENTRY_PENDING.name();
 	}
 
-
 	public void onClick$btnSaveAndNext() {
-		
+
 		String nextDataEntryStatus = getNextDataEntryStatus();
 
 		if (totalRecords == 0 || currentCheque == null) {
@@ -721,6 +719,19 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
+		String expectedMicr = safe(currentCheque.getCityCode()) + safe(currentCheque.getBankCode())
+				+ safe(currentCheque.getBranchCode());
+
+		expectedMicr = expectedMicr.replaceAll("\\s+", "");
+
+		if (!correctedMicr.equals(expectedMicr)) {
+			if (txtCorrectedMicr != null) {
+				txtCorrectedMicr
+						.setErrorMessage("Incorrect MICR code. Please enter the MICR exactly as shown on the cheque.");
+			}
+			return;
+		}
+
 		String originalMicr = ocrSortCode;
 
 		String repairedBy = (String) Executions.getCurrent().getSession().getAttribute("USER_ID");
@@ -728,7 +739,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		String remarks = txtRemarks != null ? txtRemarks.getValue() : "";
 
 		boolean updated = inwardChequeService.updateMicrRepair(currentCheque.getInwardChequeId(),
-				currentCheque.getInwardBatchId(), originalMicr, correctedMicr, nextDataEntryStatus , repairedBy,
+				currentCheque.getInwardBatchId(), originalMicr, correctedMicr, nextDataEntryStatus, repairedBy,
 				remarks);
 
 		if (!updated) {
