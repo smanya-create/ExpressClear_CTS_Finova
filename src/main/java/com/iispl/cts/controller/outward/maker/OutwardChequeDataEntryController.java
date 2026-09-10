@@ -1562,7 +1562,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
-		boolean updated = outwardBatchService.updateBatchStatus(outwardBatchId, STATUS_PENDING_CHECKER_PROCESS);
+		boolean updated = outwardBatchService.updateOutWardBatchStatus(outwardBatchId, STATUS_PENDING_CHECKER_PROCESS);
 
 		if (!updated) {
 
