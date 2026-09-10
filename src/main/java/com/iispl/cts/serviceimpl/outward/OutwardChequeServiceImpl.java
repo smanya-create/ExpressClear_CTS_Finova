@@ -57,6 +57,11 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 	}
 
 	@Override
+	public List<OutwardCheque> getOnHoldCheques(String outwardBatchId) {
+		return outwardChequeDAO.getOnHoldCheques(outwardBatchId);
+	}
+
+	@Override
 	public BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId) {
 		return outwardChequeDAO.getTotalChequeAmountByBatchId(outwardBatchId);
 	}
@@ -207,4 +212,5 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			}
 		}
 	}
+
 }
