@@ -21,4 +21,6 @@ public interface OutwardBatchService {
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 
 	String getScannedBatchIdByOutwardBatchId(String outwardBatchId);
+	
+	void updateBatchStatus(String batchId, String status);
 }

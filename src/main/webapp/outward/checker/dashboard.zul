@@ -69,19 +69,6 @@
                                     sclass="outward-checker-summary-item">
 
                                     <label
-                                        value="CURRENT SESSION"
-                                        sclass="outward-checker-summary-label" />
-
-                                    <label
-                                        value="BOD"
-                                        sclass="outward-checker-summary-value" />
-
-                                </div>
-
-                                <div
-                                    sclass="outward-checker-summary-item">
-
-                                    <label
                                         value="BATCHES AWAITING CHECKER"
                                         sclass="outward-checker-summary-label" />
 
