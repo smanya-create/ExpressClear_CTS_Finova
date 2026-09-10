@@ -63,3 +63,87 @@
 .compact-report-listbox .z-listitem:hover {
     background: transparent !important;
 }
+.z-listbox-paging {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.z-listbox-paging .z-paging {
+    background: transparent !important;
+    background-color: #EAF4FB !important;
+    border: none !important;
+}
+
+.z-listbox-paging .z-paging-button {
+    background: transparent !important;
+    background-color: #EAF4FB !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.z-listbox-paging .z-paging-button:hover {
+    background: #EAF4FB !important;
+    background-color: #EAF4FB !important;
+}
+
+.z-listbox-paging .z-paging-input {
+    background: #EAF4FB !important;
+    border: 1px solid #D0D7DE !important;
+}
+
+.z-paging {
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 6px !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    background: #EAF4FB !important;
+}
+
+.z-paging-button {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    padding: 0 !important;
+    margin: 1px 1px !important;
+    line-height: 20px !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+    background: #EAF4FB !important;
+    border: none !important;
+}
+
+.z-paging-input {
+    width: 30px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 3px !important;
+    margin: 1px 3px !important;
+    line-height: 20px !important;
+    font-size: 11px !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+}
+
+.z-paging-text {
+    height: 22px !important;
+    line-height: 22px !important;
+    font-size: 11px !important;
+    vertical-align: middle !important;
+    margin: 1px 2px !important;
+}
+
+.z-paging-info {
+    position: absolute !important;
+    right: 6px !important;
+    top: 0 !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    font-size: 11px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    display: block !important;
+}

@@ -44,6 +44,8 @@
 
                             <listbox id="reportListbox"
                                      width="100%"
+                                     mold="paging"
+         							 pageSize="1"
                                      nonselectableTags="*"
                                      emptyMessage="No report data available"
                                      sclass="compact-report-listbox">
@@ -70,7 +72,7 @@
                                                 align="center"
                                                 width="20%"/>
 
-                                    <listheader label="Batch Summary"
+                                    <listheader label="BSF"
                                                 align="center"
                                                 width="20%"/>
 
