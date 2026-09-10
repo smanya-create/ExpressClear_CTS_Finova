@@ -42,7 +42,9 @@ public class InwardDashboardBatchDTO implements Serializable {
     public void setDisplayStatus(String displayStatus) { this.displayStatus = displayStatus; }
 
     public String getStatusBadgeStyle() {
-        if ("Partially Processed".equalsIgnoreCase(displayStatus)) {
+        if ("Sent Back".equalsIgnoreCase(displayStatus)) {
+            return "background-color: #fff7ed; color: #c2410c; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #fdba74; display: inline-block;";
+        } else if ("Partially Processed".equalsIgnoreCase(displayStatus)) {
             return "background-color: #fef3c7; color: #d97706; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #fde68a; display: inline-block;";
         } else if ("Completed".equalsIgnoreCase(displayStatus)) {
             return "background-color: #dcfce7; color: #15803d; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #bbf7d0; display: inline-block;";

@@ -61,6 +61,7 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 	}
 
 	@Override
+
 	public String getOutwardBatchIdByScannedBatchId(String scannedBatchId) {
 
 		return outwardBatchDAO.getOutwardBatchIdByScannedBatchId(scannedBatchId);
@@ -92,4 +93,11 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 		return outwardBatchDAO.createOutwardBatchFromScan(connection, scannedBatchId.trim());
 	}
+
+	public void updateBatchStatus(String batchId, String status) {
+		 outwardBatchDAO.updateBatchStatus(batchId, status);
+		
+	}
+
+
 }

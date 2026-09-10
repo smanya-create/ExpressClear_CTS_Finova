@@ -84,11 +84,21 @@ public class DataEntryBatchItemDTO implements Serializable {
         }
     }
     
- // Computed Operational Status for Maker UI
+    // Computed Operational Status for Maker UI
     public String getDisplayStatus() {
         if (totalCheques == 0) {
             return "EMPTY";
         }
+
+        // Priority 1: Check if sent back by Checker
+        if (batchStatus != null && (
+                batchStatus.equalsIgnoreCase("SEND_BACK_TO_MAKER_DATA_ENTRY")
+                || batchStatus.equalsIgnoreCase("SEND_BACK_TO_MAKER")
+                || batchStatus.equalsIgnoreCase("SEND_BACK_TO_MAKER_MICR"))) {
+            return "SENT BACK";
+        }
+
+        // Priority 2: Progression counts
         if (pendingCheques == 0) {
             return "RESOLVED";
         }
@@ -101,6 +111,8 @@ public class DataEntryBatchItemDTO implements Serializable {
     // Styling badge for the computed status
     public String getStatusBadgeStyle() {
         switch (getDisplayStatus()) {
+            case "SENT BACK":
+                return "background-color: #fff7ed; color: #c2410c; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 11px; display: inline-block; border: 1px solid #fdba74;";
             case "PENDING":
                 return "background-color: #fef3c7; color: #d97706; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 11px; display: inline-block; border: 1px solid #fde68a;";
             case "IN PROGRESS":

@@ -13,6 +13,8 @@ public enum InwardChequeStatus {
 	    DATA_ENTRY_IN_PROGRESS,
 
 	    CHECKER_PROCESSING_PENDING,
+	    
+	    ACCEPTED,
 
 	    CHECKER_VERIFICATION_IN_PROGRESS,
 

@@ -6,6 +6,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zul.A;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
@@ -29,6 +30,13 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	private Div divCheckerMenu;
 	private Div divInwardMakerMenu;
 	private Div divInwardCheckerMenu;
+	
+	// Inward Maker Nav Links (wired automatically by ID from sidebar.zul)
+	private A navInwardDashboard;
+	private A navBatchIntake;
+	private A navInwardMicr;
+	private A navInwardDataEntry;
+	private A navInwardUnprocessed;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -247,74 +255,25 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	// Inward Maker Navigation Actions
 	public void navToInwardDashboard() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-
-			Include include = (Include) mainContentArea;
-
-			include.setSrc("/inward/maker/dashboard.zul");
-		}
+		navigateTo("/inward/maker/dashboard.zul", "Maker Dashboard", navInwardDashboard);
 	}
 
 	public void navToBatchIntake() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-
-			Include include = (Include) mainContentArea;
-
-			include.setSrc("/inward/maker/intake/batch-intake.zul");
-		}
+		navigateTo("/inward/maker/intake/batch-intake.zul", "Batch Intake", navBatchIntake);
 	}
 
 	public void navToInwardMicrRepair() {
-
-		Component root = sidebarComponent.getPage().getFirstRoot();
-
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-
-			Include include = (Include) mainContentArea;
-
-			include.setSrc("//inward/maker/micr-repair/micr-repair-queue.zul");
-		}
-
+		navigateTo("/inward/maker/micr-repair/micr-repair-queue.zul", "MICR Repair", navInwardMicr);
 	}
 
 	public void navToInwardDataEntry() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			// Reset src first to force a clean re-render, then route to the batch queue
-			include.setSrc(null);
-			include.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
-		}
-	}
-
-	public void navToMakerCompletion() {
-		Component root = sidebarComponent.getPage().getFirstRoot();
-		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
-
-		if (mainContentArea instanceof Include) {
-			Include include = (Include) mainContentArea;
-			include.setSrc("/inward/maker/submission/batch-submission.zul");
-		} else {
-			Executions.sendRedirect("/inward/maker/submission/batch-submission.zul");
-		}
+		navigateTo("/inward/maker/data-entry/data-entry-batches.zul", "Data Entry", navInwardDataEntry);
 	}
 
 	public void navToInwardUnprocessedQueue() {
-		Executions.sendRedirect("/inward-maker/unprocessed.zul");
+		navigateTo("/inward-maker/unprocessed.zul", "Unprocessed Cheques", navInwardUnprocessed);
 	}
-
+		
 	// Inward Checker Navigation Actions
 	public void navToInwardCheckerDashboard() {
 		Executions.sendRedirect("/inward/checker/dashboard.zul");
@@ -351,6 +310,68 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 		// Redirect back to login page
 		Executions.sendRedirect("/common/login.zul");
+	}
+	
+	public void navigateTo(String zulPath, String pageSubtitle, A activeNavLink) {
+		Component root = sidebarComponent.getPage().getFirstRoot();
+		if (root == null) return;
+
+		// 1. Swap the SPA content area
+		Component mainContent = root.getFellowIfAny("mainContentArea", true);
+		if (mainContent instanceof Include) {
+			Include include = (Include) mainContent;
+			include.setSrc(null);
+			include.setSrc(zulPath);
+		}
+
+		// 2. Find and update Header Subtitle (checks ID spaces across desktop pages)
+		Label lblSubtitle = findSubtitleLabel(root);
+		if (lblSubtitle != null) {
+			lblSubtitle.setValue(pageSubtitle);
+		}
+
+		// 3. Update sidebar active tab highlight
+		clearInwardActiveTabs();
+		if (activeNavLink != null) {
+			activeNavLink.setSclass("nav-item active");
+		}
+	}
+
+	// Helper to reliably locate lblPageSubtitle across nested includes/pages
+	private Label findSubtitleLabel(Component root) {
+		// Attempt 1: Direct fellow lookup
+		Component comp = root.getFellowIfAny("lblPageSubtitle", true);
+		if (comp instanceof Label) return (Label) comp;
+
+		// Attempt 2: Search across all desktop pages (handles isolated include spaces)
+		if (sidebarComponent.getDesktop() != null) {
+			for (org.zkoss.zk.ui.Page page : sidebarComponent.getDesktop().getPages()) {
+				comp = page.getFellowIfAny("lblPageSubtitle", true);
+				if (comp instanceof Label) return (Label) comp;
+			}
+		}
+
+		// Attempt 3: Recursive depth search down the component tree
+		return findLabelRecursively(root, "lblPageSubtitle");
+	}
+
+	private Label findLabelRecursively(Component parent, String id) {
+		if (id.equals(parent.getId()) && parent instanceof Label) {
+			return (Label) parent;
+		}
+		for (Component child : parent.getChildren()) {
+			Label found = findLabelRecursively(child, id);
+			if (found != null) return found;
+		}
+		return null;
+	}
+	
+	private void clearInwardActiveTabs() {
+		if (navInwardDashboard != null) navInwardDashboard.setSclass("nav-item");
+		if (navBatchIntake != null) navBatchIntake.setSclass("nav-item");
+		if (navInwardMicr != null) navInwardMicr.setSclass("nav-item");
+		if (navInwardDataEntry != null) navInwardDataEntry.setSclass("nav-item");
+		if (navInwardUnprocessed != null) navInwardUnprocessed.setSclass("nav-item");
 	}
 
 }

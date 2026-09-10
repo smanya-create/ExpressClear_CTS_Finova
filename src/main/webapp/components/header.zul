@@ -23,7 +23,7 @@
 				<label value="/"
 					style="font-size:14px; color:#94a3b8; font-weight:400;" />
 
-				<label value="${arg.pageSubtitle}"
+				<label id="lblPageSubtitle" value="${arg.pageSubtitle}"
 					style="font-size:14px; color:#64748b; font-weight:400;" />
 
 			</hlayout>

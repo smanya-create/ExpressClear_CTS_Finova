@@ -22,7 +22,6 @@
 				sclass="micr-back-button" />
 		</hlayout>
 
-
 		<div width="100%" sclass="micr-batch-summary">
 			<hlayout width="100%" spacing="0">
 

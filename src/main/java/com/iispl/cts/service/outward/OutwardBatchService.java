@@ -31,4 +31,6 @@ public interface OutwardBatchService {
 	boolean updateBatchStatus(Connection connection, String outwardBatchId, String batchStatus);
 
 	String createOutwardBatchFromScan(Connection connection, String scannedBatchId);
+	
+	void updateBatchStatus(String batchId, String status);
 }

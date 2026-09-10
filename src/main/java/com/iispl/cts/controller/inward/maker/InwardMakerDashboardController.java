@@ -5,6 +5,7 @@ import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.*;
 
@@ -17,10 +18,8 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
     private static final long serialVersionUID = 1L;
 
-    // Injected Service Layer
     private InwardDashboardService dashboardService;
 
-    // UI Bindings
     private Label lblPartiallyProcessedCount;
     private Label lblSentBackCount;
     private Label lblSentToRrfCount;
@@ -44,24 +43,33 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         refreshAllDashboardData();
     }
 
+    // Instant keystroke search
+    public void onChanging$txtSearchBatchId(InputEvent event) {
+        loadBatchData(event.getValue());
+    }
+
+    public void onChange$txtSearchBatchId() {
+        loadBatchData(txtSearchBatchId != null ? txtSearchBatchId.getValue() : "");
+    }
+
     public void onClick$btnSearchBatch() {
-        loadBatchData();
+        loadBatchData(txtSearchBatchId != null ? txtSearchBatchId.getValue() : "");
     }
 
     public void onOK$txtSearchBatchId() {
-        loadBatchData();
+        loadBatchData(txtSearchBatchId != null ? txtSearchBatchId.getValue() : "");
     }
 
     public void onClick$btnClearSearch() {
         if (txtSearchBatchId != null) {
             txtSearchBatchId.setValue("");
         }
-        loadBatchData();
+        loadBatchData("");
     }
 
     private void refreshAllDashboardData() {
         loadKpiCounters();
-        loadBatchData();
+        loadBatchData(txtSearchBatchId != null ? txtSearchBatchId.getValue() : "");
     }
 
     private void loadKpiCounters() {
@@ -77,11 +85,8 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         }
     }
 
-    private void loadBatchData() {
+    private void loadBatchData(String query) {
         if (lbxBatchStatus == null) return;
-        String query = (txtSearchBatchId != null && txtSearchBatchId.getValue() != null)
-                ? txtSearchBatchId.getValue() : "";
-
         List<InwardDashboardBatchDTO> batches = dashboardService.getRecentBatches(query);
         lbxBatchStatus.setModel(new ListModelList<>(batches));
     }
@@ -91,22 +96,29 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
         lbxBatchStatus.setItemRenderer((Listitem item, InwardDashboardBatchDTO batch, int index) -> {
             item.setValue(batch);
-            item.setStyle("cursor: pointer;");
+            item.setStyle("cursor: pointer; height: 50px;");
+
+            // Row click redirects directly to the appropriate workspace
+            item.addEventListener("onClick", e -> {
+                Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());
+                String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
+                navigateToSpaPage(targetZul);
+            });
 
             // 1. Batch ID
             Listcell cellId = new Listcell(batch.getBatchId());
-            cellId.setStyle("color: #2563eb; font-weight: 700; font-size: 12px; white-space: nowrap;");
+            cellId.setStyle("color: #1d4ed8; font-weight: 700; font-size: 12px; white-space: nowrap;");
             cellId.setParent(item);
 
             // 2. Date
             Listcell cellDate = new Listcell(batch.getBatchDate());
-            cellDate.setStyle("color: #475569; font-weight: 500; font-size: 11.5px; white-space: nowrap;");
+            cellDate.setStyle("color: #475569; font-weight: 500; font-size: 12px; white-space: nowrap;");
             cellDate.setParent(item);
 
             // 3. Source
-            Listcell cellSource = new Listcell(batch.getSource());
-            cellSource.setStyle("color: #475569; font-weight: 600; font-size: 11.5px;");
-            cellSource.setParent(item);
+//            Listcell cellSource = new Listcell(batch.getSource());
+//            cellSource.setStyle("color: #475569; font-weight: 600; font-size: 12px;");
+//            cellSource.setParent(item);
 
             // 4. Cheques Total
             Listcell cellCheques = new Listcell(String.valueOf(batch.getTotalCheques()));
@@ -118,14 +130,14 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             cellAccepted.setStyle("color: #16a34a; font-weight: 700; font-size: 12px;");
             cellAccepted.setParent(item);
 
-            // 6. Back to Maker
+            // 6. Back to Maker (Amber)
             Listcell cellBack = new Listcell(String.valueOf(batch.getBackToMakerCheques()));
             cellBack.setStyle(batch.getBackToMakerCheques() > 0 
                 ? "color: #ea580c; font-weight: 800; font-size: 12px;" 
                 : "color: #94a3b8; font-size: 12px;");
             cellBack.setParent(item);
 
-            // 7. Returns
+            // 7. Returns (Red)
             Listcell cellRrf = new Listcell(String.valueOf(batch.getReturnRequestCheques()));
             cellRrf.setStyle(batch.getReturnRequestCheques() > 0 
                 ? "color: #dc2626; font-weight: 800; font-size: 12px;" 

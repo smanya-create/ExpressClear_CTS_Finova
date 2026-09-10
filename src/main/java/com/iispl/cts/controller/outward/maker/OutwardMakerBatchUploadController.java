@@ -13,19 +13,22 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.UploadEvent;
 import org.zkoss.zk.ui.util.Composer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Decimalbox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Groupbox;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Include;
+import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
@@ -33,7 +36,8 @@ import com.iispl.cts.parser.BatchXmlParser;
 import com.iispl.cts.service.outward.ScanService;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
-public class OutwardMakerBatchUploadController implements Composer<Component> {
+public class OutwardMakerBatchUploadController
+        implements Composer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,6 +59,13 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     private Groupbox batchDetailsGroup;
     private Listbox lstBatchDetails;
+
+    // =========================================================
+    // ROOT COMPONENT
+    // Used for attaching custom popup
+    // =========================================================
+
+    private Component pageRoot;
 
     // =========================================================
     // SERVICE
@@ -79,7 +90,16 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
     // =========================================================
 
     @Override
-    public void doAfterCompose(Component component) throws Exception {
+    public void doAfterCompose(Component component)
+            throws Exception {
+
+        // =====================================================
+        // STORE PAGE ROOT
+        // =====================================================
+
+        pageRoot =
+                component.getPage()
+                        .getFirstRoot();
 
         // =====================================================
         // GET ZUL COMPONENTS
@@ -129,7 +149,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         // CREATE SERVICE
         // =====================================================
 
-        scanService = new ScanServiceImpl();
+        scanService =
+                new ScanServiceImpl();
 
         // =====================================================
         // INITIAL PAGE STATE
@@ -177,25 +198,34 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     // =========================================================
     // HANDLE ZIP UPLOAD
+    //
+    // IMPORTANT:
+    // No popup is shown here.
+    //
+    // User requested that failure popup should be related
+    // to VALIDATE BATCH processing.
     // =========================================================
 
     private void handleZipUpload(
             UploadEvent uploadEvent) {
 
-        Media media = uploadEvent.getMedia();
+        Media media =
+                uploadEvent.getMedia();
 
         if (media == null) {
             return;
         }
 
-        String fileName = media.getName();
+        String fileName =
+                media.getName();
 
         // =====================================================
         // CHECK ZIP EXTENSION
         // =====================================================
 
         if (fileName == null
-                || !fileName.toLowerCase().endsWith(".zip")) {
+                || !fileName.toLowerCase()
+                        .endsWith(".zip")) {
 
             return;
         }
@@ -325,6 +355,9 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         if (uploadedZipFile == null
                 || !uploadedZipFile.exists()) {
 
+            showErrorMessage(
+                    "Please upload a ZIP file before validating the batch.");
+
             return;
         }
 
@@ -371,7 +404,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                         "Batch ID was not returned.");
             }
 
-            batchId = batchId.trim();
+            batchId =
+                    batchId.trim();
 
             // =================================================
             // DISPLAY BATCH NUMBER
@@ -463,15 +497,41 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             if (!chequeCountValid
                     || !amountValid) {
 
-                divSuccessMessage
-                        .setVisible(false);
-
                 batchDetailsGroup
                         .setVisible(false);
 
-                Executions.sendRedirect(
-                        "batch-validation.zul?batchId="
-                                + batchId);
+                StringBuilder errorMessage =
+                        new StringBuilder();
+
+                errorMessage.append(
+                        "Batch validation failed.");
+
+                if (!chequeCountValid) {
+
+                    errorMessage.append(
+                            "\nExpected cheque count: ")
+                            .append(
+                                    expectedChequeCount)
+                            .append(
+                                    "\nActual cheque count: ")
+                            .append(
+                                    actualChequeCount);
+                }
+
+                if (!amountValid) {
+
+                    errorMessage.append(
+                            "\nExpected total amount: ")
+                            .append(
+                                    expectedTotalAmount)
+                            .append(
+                                    "\nActual total amount: ")
+                            .append(
+                                    actualTotalAmount);
+                }
+
+                showErrorMessage(
+                        errorMessage.toString());
 
                 return;
             }
@@ -509,7 +569,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                 String status =
                         cheque.getChequeStatus();
 
-                if ("MICR_REPAIR_REQUIRED"
+                if ("PENDING_MICR_REPAIR"
                         .equalsIgnoreCase(status)) {
 
                     micrRepairCount++;
@@ -564,10 +624,15 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
         } catch (Exception e) {
 
+            // =================================================
+            // LOG ACTUAL TECHNICAL ERROR
+            // =================================================
+
             e.printStackTrace();
 
-            divSuccessMessage
-                    .setVisible(false);
+            // =================================================
+            // HIDE BATCH DETAILS
+            // =================================================
 
             batchDetailsGroup
                     .setVisible(false);
@@ -577,9 +642,165 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
              * batch ID was successfully returned.
              */
 
-            lblSuccessText.setValue(
-                    "Something went wrong while processing the batch. Please try again.");
+            // =================================================
+            // SHOW POPUP
+            // =================================================
+
+            String errorMessage =
+                    e.getMessage();
+
+            if (errorMessage == null
+                    || errorMessage.trim().isEmpty()) {
+
+                errorMessage =
+                        "Something went wrong while processing the batch.";
+            }
+
+            showErrorMessage(
+                    errorMessage);
         }
+    }
+
+    // =========================================================
+    // ERROR MESSAGE POPUP
+    // =========================================================
+    //
+    // This is the reusable popup method.
+    //
+    // Popup ID:
+    //     batchValidationErrorPopup
+    //
+    // CSS class:
+    //     batch-validation-error-popup
+    //
+    // You can style it from CSS later.
+    // =========================================================
+
+    private void showErrorMessage(
+            String message) {
+
+        // =====================================================
+        // CREATE WINDOW
+        // =====================================================
+
+        final Window errorWindow =
+                new Window();
+
+        // =====================================================
+        // POPUP ID
+        // =====================================================
+
+        errorWindow.setId(
+                "batchValidationErrorPopup");
+
+        // =====================================================
+        // CSS CLASS
+        // =====================================================
+
+        errorWindow.setSclass(
+                "batch-validation-error-popup");
+
+        // =====================================================
+        // WINDOW SETTINGS
+        // =====================================================
+
+        errorWindow.setTitle(
+                "Batch Validation Failed");
+
+        errorWindow.setBorder(
+                "normal");
+
+        errorWindow.setClosable(
+                false);
+
+        errorWindow.setWidth(
+                "450px");
+
+        errorWindow.setHeight(
+                "auto");
+
+        // =====================================================
+        // CONTENT
+        // =====================================================
+
+        Vlayout content =
+                new Vlayout();
+
+        content.setSpacing(
+                "15px");
+
+        content.setSclass(
+                "batch-validation-error-content");
+
+        content.setStyle(
+                "padding:20px;");
+
+        // =====================================================
+        // ERROR MESSAGE
+        // =====================================================
+
+        Label messageLabel =
+                new Label();
+
+        messageLabel.setValue(
+                message);
+
+        messageLabel.setMultiline(
+                true);
+
+        messageLabel.setSclass(
+                "batch-validation-error-message");
+
+        content.appendChild(
+                messageLabel);
+
+        // =====================================================
+        // OK BUTTON
+        // =====================================================
+
+        Button okButton =
+                new Button("OK");
+
+        okButton.setId(
+                "batchValidationErrorOk");
+
+        okButton.setSclass(
+                "batch-validation-error-ok");
+
+        okButton.addEventListener(
+                Events.ON_CLICK,
+                new EventListener<Event>() {
+
+                    @Override
+                    public void onEvent(
+                            Event event) {
+
+                        errorWindow.detach();
+                    }
+                });
+
+        content.appendChild(
+                okButton);
+
+        // =====================================================
+        // ADD CONTENT TO WINDOW
+        // =====================================================
+
+        errorWindow.appendChild(
+                content);
+
+        // =====================================================
+        // ATTACH POPUP TO PAGE ROOT
+        // =====================================================
+
+        pageRoot.appendChild(
+                errorWindow);
+
+        // =====================================================
+        // SHOW AS MODAL POPUP
+        // =====================================================
+
+        errorWindow.doModal();
     }
 
     // =========================================================
@@ -623,7 +844,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         if (displayBatchId == null
                 || displayBatchId.trim().isEmpty()) {
 
-            displayBatchId = batchId;
+            displayBatchId =
+                    batchId;
         }
 
         item.appendChild(
@@ -637,7 +859,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         item.appendChild(
                 new Listcell(
                         formatDate(
-                                scanBatch.getUploadedAt())));
+                                scanBatch
+                                        .getUploadedAt())));
 
         // =====================================================
         // TOTAL CHEQUES
@@ -850,8 +1073,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             // =================================================
 
             include.setSrc(
-                    "/outward/maker/micr-repair/micr-repair.zul"
-            );
+                    "/outward/maker/micr-repair/micr-repair.zul");
 
             // =================================================
             // DEBUG

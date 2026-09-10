@@ -555,7 +555,40 @@ body {
 }
 
 .account-validation-container .valid-badge,
-.account-validation-container .invalid-badge {
+.account-validation-container .invalid-badge,
+.account-validation-container .validation-pending-badge {
+    flex-shrink: 0;
+}
+
+
+   
+   /* =========================================================
+   NOT VALIDATED BADGE
+   ========================================================= */
+
+.validation-pending-badge {
+
+    min-width: 130px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    font-size: 9px;
+    font-weight: bold;
+
+    color: #6b7280;
+    background: #f3f4f6;
+
+    border: 1px solid #cfd5dc;
+
+    padding: 7px 15px;
+
+    border-radius: 18px;
+
     flex-shrink: 0;
 }
 
@@ -857,4 +890,35 @@ body {
     .reject-button {
         width: 100%;
     }
+    
+    /* =========================================================
+   XML GENERATION BUTTON
+   ========================================================= */
+
+.xml-generation-button {
+    width: 196px;
+    height: 48px;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+    border: 1px solid #2563eb;
+
+    color: #ffffff;
+
+    font-size: 9px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.xml-generation-button:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.xml-generation-button:active {
+    background: #1e40af;
+    border-color: #1e40af;
+}
 }

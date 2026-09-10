@@ -132,52 +132,78 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
     	
     
 
-    private void loadPendingCheques() {
-        pendingTransactionsList.clear();
-
-        String sql = "SELECT c.outward_batch_id, b.batch_reference_id, c.cheque_number, c.cheque_status, c.cheque_amount " +
-                     "FROM outward_cheque c " +
-                     "LEFT JOIN outward_batch b ON c.outward_batch_id = b.outward_batch_id " +
-                     "WHERE c.cheque_status IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_VERIFICATION', 'Pending', 'PENDING') " +
-                     "ORDER BY c.created_at ASC";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                String batchId = rs.getString("outward_batch_id");
-                String batchRef = rs.getString("batch_reference_id");
-                String displayBatch = (batchRef != null && !batchRef.isEmpty()) ? batchId + " (" + batchRef + ")" : batchId;
-                
-                String chqNo = rs.getString("cheque_number");
-                String status = rs.getString("cheque_status");
-                double amount = rs.getDouble("cheque_amount");
-
-                String assignedQueue;
-                if ("PENDING_DATA_ENTRY".equalsIgnoreCase(status)) {
-                    assignedQueue = "Outward Maker Queue";
-                } else if ("PENDING_REPAIR".equalsIgnoreCase(status)) {
-                    assignedQueue = "MICR Repair Queue";
-                } else if ("PENDING_VERIFICATION".equalsIgnoreCase(status)) {
-                    assignedQueue = "Outward Checker Queue";
-                } else {
-                    assignedQueue = "Outward Processing Queue";
-                }
-
-                pendingTransactionsList.add(new PendingChequeDTO(
-                    displayBatch,
-                    chqNo,
-                    "OUTWARD",
-                    status,
-                    assignedQueue,
-                    "Amount: " + String.format("%.2f", amount)
-                ));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    
+    	private void loadPendingCheques() {
             pendingTransactionsList.clear();
-        }
-        this.pendingChequesCount = pendingTransactionsList.size();
+
+            // Combined query: checks pending scan items (Maker) and pending outward items (Checker)
+            String sql = 
+                "SELECT sc.scanned_batch_id AS batch_id, " +
+                "       sb.batch_reference_id, " +
+                "       sc.cheque_number, " +
+                "       sc.cheque_status, " +
+                "       sc.cheque_amount, " +
+                "       sc.created_at, " +
+                "       'SCAN_STAGE' AS pipeline_source " +
+                "FROM scan_cheque sc " +
+                "LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+                "WHERE UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'RAW', 'PENDING', 'Pending') " +
+                
+                "UNION ALL " +
+                
+                "SELECT oc.outward_batch_id AS batch_id, " +
+                "       ob.batch_reference_id, " +
+                "       oc.cheque_number, " +
+                "       oc.cheque_status, " +
+                "       oc.cheque_amount, " +
+                "       oc.created_at, " +
+                "       'OUTWARD_STAGE' AS pipeline_source " +
+                "FROM outward_cheque oc " +
+                "LEFT JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id " +
+                "WHERE UPPER(oc.cheque_status) IN ('PENDING_VERIFICATION', 'PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING', 'Pending') " +
+                
+                "ORDER BY created_at ASC";
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    String batchId = rs.getString("batch_id");
+                    String batchRef = rs.getString("batch_reference_id");
+                    String displayBatch = (batchRef != null && !batchRef.isEmpty()) ? batchId + " (" + batchRef + ")" : batchId;
+                    
+                    String chqNo = rs.getString("cheque_number");
+                    String status = rs.getString("cheque_status");
+                    double amount = rs.getDouble("cheque_amount");
+                    String source = rs.getString("pipeline_source");
+
+                    String assignedQueue;
+                    if ("PENDING_DATA_ENTRY".equalsIgnoreCase(status)) {
+                        assignedQueue = "Outward Maker (Data Entry)";
+                    } else if ("PENDING_REPAIR".equalsIgnoreCase(status) || "RAW".equalsIgnoreCase(status)) {
+                        assignedQueue = "Outward Maker (MICR Repair)";
+                    } else if ("PENDING_VERIFICATION".equalsIgnoreCase(status)) {
+                        assignedQueue = "Outward Checker Queue";
+                    } else {
+                        assignedQueue = "SCAN_STAGE".equals(source) ? "Maker Staging Queue" : "Outward Processing Queue";
+                    }
+
+                    pendingTransactionsList.add(new PendingChequeDTO(
+                        displayBatch,
+                        chqNo != null ? chqNo : "------",
+                        "OUTWARD",
+                        status,
+                        assignedQueue,
+                        "Amount: " + String.format("%.2f", amount)
+                    ));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                pendingTransactionsList.clear();
+            }
+            this.pendingChequesCount = pendingTransactionsList.size();
+        
     }
 
     private void refreshUI() {
@@ -503,15 +529,27 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
         String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
         
-        // Solution 1: Transition incomplete items directly to UNPROCESSED for the new clearing cycle
-        String updateToUnprocessedSql = "UPDATE outward_cheque " +
-                                        "SET cheque_status = 'UNPROCESSED' " +
-                                        "WHERE cheque_status IN ('RAW', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY', 'PENDING_VERIFICATION', 'Pending', 'PENDING')";
+        // 1. Rollover scan_cheque pending items to UNPROCESSED
+        String updateScanChequesToUnprocessedSql = 
+                "UPDATE scan_cheque " +
+                "SET cheque_status = 'UNPROCESSED' " +
+                "WHERE UPPER(cheque_status) IN ('RAW', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY', 'PENDING', 'Pending')";
+
+        // 2. Rollover scan_batch pending items to UNPROCESSED
+        String updateScanBatchesToUnprocessedSql = 
+                "UPDATE scan_batch " +
+                "SET batch_status = 'UNPROCESSED' " +
+                "WHERE UPPER(batch_status) IN ('PENDING', 'Pending', 'RAW')";
+     // 2. Move outward pending items to UNPROCESSED (for checker)
+        String updateOutwardChequesToUnprocessedSql =
+                "UPDATE outward_cheque " +
+                "SET cheque_status = 'UNPROCESSED' " +
+                "WHERE UPPER(cheque_status) IN ('PENDING_VERIFICATION', 'PENDING', 'Pending')";
 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
 
-            // 1. Open new clearing session
+            // Step 1: Open new clearing session
             try (PreparedStatement psSession = conn.prepareStatement(insertBodSql)) {
                 psSession.setDate(1, Date.valueOf(nextDate));
                 psSession.setString(2, adminUserId);
@@ -519,19 +557,43 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
                 psSession.executeUpdate();
             }
 
-            // 2. Mark remaining cheques as UNPROCESSED
-            int rolledOverCount = 0;
-            try (PreparedStatement psRollover = conn.prepareStatement(updateToUnprocessedSql)) {
-                rolledOverCount = psRollover.executeUpdate();
+            // Step 2: Transition pending scan_cheques to UNPROCESSED
+            int rolledOverScanCheques = 0;
+            try (PreparedStatement ps = conn.prepareStatement(updateScanChequesToUnprocessedSql)) {
+                rolledOverScanCheques = ps.executeUpdate();
+            }
+            try (PreparedStatement ps = conn.prepareStatement(updateScanBatchesToUnprocessedSql)) {
+                ps.executeUpdate();
+            }
+
+            // Step 3: Transition pending scan_batches to UNPROCESSED
+            int rolledOverCheckerCheques = 0;
+            try (PreparedStatement ps = conn.prepareStatement(updateOutwardChequesToUnprocessedSql)) {
+                rolledOverCheckerCheques = ps.executeUpdate();
             }
 
             conn.commit();
+         // Step 4: Dispatch role-targeted notifications
+            String clearingDateStr = nextDate.format(dateFormatter);
 
-            // 3. Log Audit
+            // 4a. Notify Outward Maker
+            String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
+                            + rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
+            com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+                    .sendNotification("OUTWARD_MAKER", null, makerMsg);
+
+            // 4b. Notify Outward Checker
+            String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
+                            + rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
+            com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+                    .sendNotification("OUTWARD_CHECKER", null, checkerMsg);
+
+            // Step 4: Audit Trail
             AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
-                    "BOD initialized for date: " + nextDate + " | Transitioned " + rolledOverCount + " cheques to UNPROCESSED", "SUCCESS");
+                    "BOD initialized for date: " + nextDate + " | Rolled over scan: " + rolledOverScanCheques 
+                    + ", outward: " + rolledOverCheckerCheques, "SUCCESS");
 
-            // 4. Update UI State
+            // Step 5: Update UI State
             this.currentClearingDate = nextDate;
             this.isSessionOpen = true;
             this.selectedAction = "EOD";
@@ -543,11 +605,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
             refreshUI();
 
-            String successMsg = "BOD Completed. Clearing date: " + currentClearingDate.format(dateFormatter);
-            if (rolledOverCount > 0) {
-                successMsg += " (" + rolledOverCount + " cheques moved to Unprocessed Queue)";
-            }
-            Clients.showNotification(successMsg, "info", null, "top_center", 3500);
+            
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -555,7 +613,6 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Clients.showNotification("Database error starting BOD: " + ex.getMessage(), "error", null, "top_center", 3000);
         }
     }
-
     private String resolveLoggedInUserId() {
         String adminUserId = (String) Sessions.getCurrent().getAttribute("USER_ID");
         if (adminUserId == null) adminUserId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");

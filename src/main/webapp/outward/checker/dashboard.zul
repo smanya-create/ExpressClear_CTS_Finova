@@ -1,138 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?page title="Checker Dashboard" contentType="text/html;charset=UTF-8"?>
 
-<zk xmlns:h="xhtml" title="CTS - Checker Dashboard">
+<zk title="CTS - Checker Dashboard">
 
-	<style src="/css/outward/checker-dashboard.css" />
+    <style src="/css/outward/checker-dashboard.css" />
 
-	<borderlayout hflex="1" vflex="1"
-		apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
+    <borderlayout
+        hflex="1"
+        vflex="1"
+        apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
 
-		<west width="265px" splittable="false" collapsible="false">
+        <west
+            width="265px"
+            splittable="false"
+            collapsible="false">
 
-			<include src="/components/sidebar.zul"
-				role="OUTWARD_CHECKER" activeTab="checker-dashboard" />
+            <include
+                src="/components/sidebar.zul"
+                role="OUTWARD_CHECKER"
+                activeTab="checker-dashboard" />
 
-		</west>
+        </west>
 
-		<center>
+        <center>
 
-			<borderlayout hflex="1" vflex="1">
+            <borderlayout
+                hflex="1"
+                vflex="1">
 
-				<north height="75px" splittable="false"
-					collapsible="false">
+                <north
+                    height="75px"
+                    splittable="false"
+                    collapsible="false">
 
-					<include src="/components/header.zul"
-						pageTitle="Checker Dashboard" />
+                    <include
+                        src="/components/header.zul"
+                        pageTitle="Checker Dashboard" />
 
-				</north>
+                </north>
 
-				<center>
+                <center>
 
-					<div sclass="dashboard-content">
+                    <div
+                        sclass="outward-checker-dashboard"
+                        hflex="1"
+                        vflex="1">
 
-						<label value="Dashboard" sclass="page-title" />
+                        <div
+                            sclass="outward-checker-dashboard-scroll">
 
-						<label
-							value="Batches received from Maker and awaiting Checker action."
-							sclass="page-description" />
+                            <div
+                                sclass="outward-checker-welcome-section">
 
-						<div sclass="summary-card">
+                                <label
+                                    value="Dashboard"
+                                    sclass="outward-checker-welcome-title" />
 
-							<div sclass="summary-item">
+                                <label
+                                    value="Batches received from Maker and awaiting Checker action."
+                                    sclass="outward-checker-welcome-subtitle" />
 
-								<label value="CURRENT SESSION"
-									sclass="summary-label" />
+                            </div>
 
-								<label value="BOD"
-									sclass="summary-value" />
+                            <div
+                                sclass="outward-checker-summary-card">
 
-							</div>
+                                <div
+                                    sclass="outward-checker-summary-item">
 
-							<div sclass="summary-item">
+                                    <label
+                                        value="BATCHES AWAITING CHECKER"
+                                        sclass="outward-checker-summary-label" />
 
-								<label value="BATCHES AWAITING CHECKER"
-									sclass="summary-label" />
+                                    <label
+                                        id="lblTotalBatches"
+                                        sclass="outward-checker-summary-value" />
 
-								<label id="lblTotalBatches"
-									sclass="summary-value" />
+                                </div>
 
-							</div>
+                                <div
+                                    sclass="outward-checker-summary-item">
 
-							<div sclass="summary-item">
+                                    <label
+                                        value="CHEQUES"
+                                        sclass="outward-checker-summary-label" />
 
-								<label value="CHEQUES"
-									sclass="summary-label" />
+                                    <label
+                                        id="lblTotalCheques"
+                                        sclass="outward-checker-summary-value" />
 
-								<label id="lblTotalCheques"
-									sclass="summary-value" />
+                                </div>
 
-							</div>
+                            </div>
 
-						</div>
+                            <div
+                                sclass="outward-checker-section-header">
 
-						<div sclass="section-header">
+                                <label
+                                    value="Batches Received from Maker"
+                                    sclass="outward-checker-section-title" />
 
-							<label value="Batches Received from Maker"
-								sclass="section-title" />
+                                <label
+                                    value="Completed Maker processing and submitted for Checker verification."
+                                    sclass="outward-checker-section-subtitle" />
 
-							<label
-								value="Completed Maker processing and submitted for Checker verification."
-								sclass="section-description" />
+                            </div>
 
-						</div>
-						<listbox id="lstBatches" sclass="batch-table"
-							height="270px">
+                            <div
+                                sclass="outward-checker-table-card">
 
-							<listhead>
-								<listheader label="BATCH" width="12%"
-									style="background:#1d5689; color:white;" />
+                                <listbox
+                                    id="lstBatches"
+                                    sclass="outward-checker-batch-table"
+                                    height="270px"
+                                    mold="paging"
+                                    autopaging="false">
 
-								<listheader label="NO. OF CHEQUES"
-									width="14%" style="background:#1d5689; color:white;" />
+                                    <listhead>
 
-								<listheader label="TOTAL AMOUNT"
-									width="19%" style="background:#1d5689; color:white;" />
+                                        <listheader
+                                            label="BATCH"
+                                            width="12%" />
 
-								<listheader label="SUBMITTED BY"
-									width="14%" style="background:#1d5689; color:white;" />
+                                        <listheader
+                                            label="NO. OF CHEQUES"
+                                            width="14%" />
 
-								<listheader label="SUBMITTED AT"
-									width="16%" style="background:#1d5689; color:white;" />
+                                        <listheader
+                                            label="TOTAL AMOUNT"
+                                            width="19%" />
 
-								<listheader label="STATUS" width="13%"
-									style="background:#1d5689; color:white;" />
+                                        <listheader
+                                            label="SUBMITTED BY"
+                                            width="14%" />
 
-								<listheader label="Action" width="90px"
-									style="background:#1d5689; color:white;" />
-							</listhead>
+                                        <listheader
+                                            label="SUBMITTED AT"
+                                            width="16%" />
 
-						</listbox>
-						<vlayout hflex="1" style="margin-top:10px;">
+                                        <listheader
+                                            label="STATUS"
+                                            width="13%" />
 
-							<hbox hflex="1" pack="center"
-								spacing="10px">
+                                        <listheader
+                                            label="Action"
+                                            width="90px" />
 
-								<button id="btnPrevious"
-									label="Previous" disabled="true" sclass="pagination-button" />
+                                    </listhead>
 
-								<label id="lblPage" value="1/5"
-									sclass="page-number" />
+                                </listbox>
 
-								<button id="btnNext" label="Next"
-									sclass="pagination-button" />
+                            </div>
 
-							</hbox>
+                            <div
+                                sclass="outward-checker-pagination">
 
-						</vlayout>
+                                <button
+                                    id="btnPrevious"
+                                    label="‹"
+                                    disabled="true"
+                                    sclass="outward-checker-pagination-button" />
 
-					</div>
+                                <label
+                                    id="lblPage"
+                                    value="1/1"
+                                    sclass="outward-checker-pagination-label" />
 
-				</center>
+                                <button
+                                    id="btnNext"
+                                    label="›"
+                                    disabled="true"
+                                    sclass="outward-checker-pagination-button" />
 
-			</borderlayout>
+                            </div>
 
-		</center>
+                        </div>
 
-	</borderlayout>
+                    </div>
+
+                </center>
+
+            </borderlayout>
+
+        </center>
+
+    </borderlayout>
 
 </zk>

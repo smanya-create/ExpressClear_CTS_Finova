@@ -15,20 +15,15 @@
 				LEFT SIDEBAR
 				DO NOT CHANGE sidebar.zul
 				===================================================== -->
-
 			<west size="220px" border="none" splittable="false"
 				collapsible="false">
 
 				<include src="/components/sidebar.zul">
-
 					<custom-attributes role="OUTWARD_CHECKER"
 						activeTab="checker-queue" />
-
 				</include>
 
 			</west>
-
-
 			<!-- =====================================================
 				RIGHT SIDE
 				===================================================== -->
@@ -145,16 +140,15 @@
 										</div>
 
 
-										<div sclass="summary-item">
+									<div sclass="summary-item">
 
-											<label value="QUEUE STATUS"
-												sclass="summary-label" />
+    <label value="BATCH STATUS"
+        sclass="summary-label" />
 
-											<label id="lblQueueStatus"
-												value="" sclass="status-pending" />
+    <label id="lblQueueStatus"
+        value="-" sclass="status-pending" />
 
-										</div>
-
+</div>
 
 										<div sclass="summary-item">
 
@@ -303,24 +297,28 @@
 
 											<!-- ACCOUNT NUMBER + VALIDATION -->
 
-											<div sclass="field-group">
+<div sclass="field-group">
 
-												<label
-													value="ACCOUNT NUMBER" sclass="field-label" />
+    <label
+        value="PAYEE ACCOUNT NUMBER"
+        sclass="field-label" />
 
-												<div
-													sclass="account-validation-container">
+    <div sclass="account-validation-container">
 
-													<textbox
-														id="txtAccountNo" readonly="true" width="100%"
-														sclass="readonly-field account-field" />
+        <textbox
+            id="txtAccountNo"
+            readonly="true"
+            width="100%"
+            sclass="readonly-field account-field" />
 
-													<label
-														id="lblAccountValidation" value="-" sclass="valid-badge" />
+        <label
+            id="lblAccountValidation"
+            value="NOT VALIDATED"
+            sclass="account-not-validated" />
 
-												</div>
+    </div>
 
-											</div>
+</div>
 
 
 											<!-- AMOUNT + DATE -->
@@ -382,10 +380,6 @@
 									</div>
 
 
-									<!-- =================================================
-										ACTION CARD
-										================================================= -->
-
 									<div sclass="action-card">
 
 										<label value="CHECKER ACTION"
@@ -396,6 +390,10 @@
 											<button id="btnVerified"
 												label="VERIFIED" sclass="verified-button" />
 
+											<button
+												id="btnXmlGeneration" label="XML GENERATION" visible="true"
+												disabled="true" sclass="xml-generation-button" />
+
 											<button id="btnReturn"
 												label="RETURN TO MAKER" sclass="return-button" />
 
@@ -405,8 +403,6 @@
 										</div>
 
 									</div>
-
-
 									<!-- =================================================
 										FOOTER
 										================================================= -->
