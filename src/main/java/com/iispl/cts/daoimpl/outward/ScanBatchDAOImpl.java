@@ -291,7 +291,7 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 		String sql = "SELECT " + "sb.scanned_batch_id, " + "sb.uploaded_at, " + "sb.actual_cheque_count, "
 				+ "sb.batch_status, " + "COUNT(sc.scanned_cheque_id) AS micr_errors " + "FROM scan_batch sb "
 				+ "JOIN scan_cheque sc " + "ON sc.scanned_batch_id = sb.scanned_batch_id "
-				+ "WHERE sc.cheque_status = 'MICR_REPAIR_REQUIRED' " + "GROUP BY " + "sb.scanned_batch_id, "
+				+ "WHERE sc.cheque_status = 'PENDING_MICR_REPAIR' " + "GROUP BY " + "sb.scanned_batch_id, "
 				+ "sb.uploaded_at, " + "sb.actual_cheque_count, " + "sb.batch_status " + "ORDER BY sb.uploaded_at DESC";
 
 		try (Connection connection = DBConnection.getConnection();
