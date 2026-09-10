@@ -509,7 +509,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                 String status =
                         cheque.getChequeStatus();
 
-                if ("MICR_REPAIR_REQUIRED"
+                if ("PENDING_MICR_REPAIR"
                         .equalsIgnoreCase(status)) {
 
                     micrRepairCount++;

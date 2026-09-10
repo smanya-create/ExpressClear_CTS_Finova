@@ -533,7 +533,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
                 "FROM scan_cheque " +
                 "WHERE scanned_batch_id = ? " +
                 "AND UPPER(TRIM(cheque_status)) = " +
-                "'MICR_REPAIR_REQUIRED' " +
+                "'PENDING_MICR_REPAIR' " +
                 "ORDER BY scanned_cheque_id";
 
         List<ScanCheque> chequeList =
