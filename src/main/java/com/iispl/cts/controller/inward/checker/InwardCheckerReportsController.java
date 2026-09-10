@@ -94,7 +94,8 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
     private void renderBatchRow(ReportSummaryRow summary) {
         Listitem item = new Listitem();
-
+       
+        
         Listcell batchIdCell = new Listcell();
         Label batchIdLabel = new Label(String.valueOf(summary.getBatchId()));
         batchIdCell.appendChild(batchIdLabel);
