@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -88,13 +91,87 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void loadBatches() {
+
 		allBatches.clear();
 
-		addBatchToQueue("INW260904001", "BATCH-2026-09-04-001");
-		addBatchToQueue("INW260904002", "BATCH-2026-09-04-002");
-		addBatchToQueue("INW260904003", "BATCH-2026-09-04-003");
+		try {
 
-		displayBatches(allBatches);
+			String inwardDataPath = currentWindow.getDesktop().getWebApp().getRealPath("/Inward-data");
+
+			if (inwardDataPath == null) {
+
+				Messagebox.show("Unable to locate Inward-data folder.", "Batch Intake", Messagebox.OK,
+						Messagebox.ERROR);
+
+				displayBatches(allBatches);
+				return;
+			}
+
+			File inwardDataDirectory = new File(inwardDataPath);
+
+			if (!inwardDataDirectory.isDirectory()) {
+
+				Messagebox.show("Inward-data folder not found.", "Batch Intake", Messagebox.OK, Messagebox.ERROR);
+
+				displayBatches(allBatches);
+				return;
+			}
+
+			File[] batchFolders = inwardDataDirectory.listFiles(File::isDirectory);
+
+			if (batchFolders == null) {
+
+				displayBatches(allBatches);
+				return;
+			}
+
+			for (File batchFolder : batchFolders) {
+
+				File npciXmlFile = new File(batchFolder, "NPCI_Inward.xml");
+
+				if (!npciXmlFile.isFile()) {
+					continue;
+				}
+
+				BatchHeaderInfo header = readBatchHeader(npciXmlFile);
+
+				if (header == null) {
+					continue;
+				}
+
+				if (header.batchId == null || header.batchId.trim().isEmpty()) {
+					continue;
+				}
+
+				InwardBatch dbBatch = inwardBatchService.getBatchById(header.batchId);
+
+				if (dbBatch != null) {
+
+					allBatches.add(dbBatch);
+
+				} else {
+
+					InwardBatch batch = new InwardBatch();
+
+					batch.setInwardBatchId(header.batchId);
+					batch.setBatchReferenceId(header.batchReferenceId);
+					batch.setBatchStatus("Received");
+					batch.setActualChequeCount(0);
+					batch.setActualTotalAmount(java.math.BigDecimal.ZERO);
+
+					allBatches.add(batch);
+				}
+			}
+
+			displayBatches(allBatches);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to load inward batches: " + e.getMessage(), "Batch Intake", Messagebox.OK,
+					Messagebox.ERROR);
+		}
 	}
 
 	private void addBatchToQueue(String batchId, String folderName) {
@@ -741,59 +818,167 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 	private void setStatusStyle(Label label, String status) {
 
-	    if ("Processing".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-processing");
+		if ("Processing".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-processing");
 
-	    } else if ("Received".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-received");
+		} else if ("Received".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-received");
 
-	    } else if ("Parsing".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-parsing");
+		} else if ("Parsing".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-parsing");
 
-	    } else if ("Completed".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-completed");
+		} else if ("Completed".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-completed");
 
-	    } else if ("Validation Failed".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-validation-failed");
+		} else if ("Validation Failed".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-validation-failed");
 
-	    } else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-processing-pending");
+		} else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-processing-pending");
 
-	    } else if ("Checker Processing".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-checker-processing");
+		} else if ("Checker Processing".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-checker-processing");
 
-	    } else if ("In Verification".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-in-verification");
+		} else if ("In Verification".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-in-verification");
 
-	    } else if ("Hold".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-hold");
+		} else if ("Hold".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-hold");
 
-	    } else if ("Rejected".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-rejected");
+		} else if ("Rejected".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-rejected");
 
-	    } else if ("Failed".equalsIgnoreCase(status)) {
-	        label.setSclass("batch-status-badge status-failed");
+		} else if ("Failed".equalsIgnoreCase(status)) {
+			label.setSclass("batch-status-badge status-failed");
 
-	    } else {
-	        label.setSclass("batch-status-badge status-received");
-	    }
+		} else {
+			label.setSclass("batch-status-badge status-received");
+		}
+	}
+
+	private static class BatchHeaderInfo {
+
+		private String batchId;
+		private String batchReferenceId;
+
+		private BatchHeaderInfo(String batchId, String batchReferenceId) {
+			this.batchId = batchId;
+			this.batchReferenceId = batchReferenceId;
+		}
+	}
+
+	private BatchHeaderInfo readBatchHeader(File npciXmlFile) {
+
+		try {
+
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+			factory.setNamespaceAware(true);
+
+			Document document = factory.newDocumentBuilder().parse(npciXmlFile);
+
+			Element root = document.getDocumentElement();
+
+			if (root == null) {
+				return null;
+			}
+
+			NodeList batchHeaders = root.getElementsByTagNameNS("*", "BatchHeader");
+
+			if (batchHeaders.getLength() == 0) {
+				return null;
+			}
+
+			Element batchHeader = (Element) batchHeaders.item(0);
+
+			String batchId = getXmlChildValue(batchHeader, "ScannedBatchId");
+
+			String batchReferenceId = getXmlChildValue(batchHeader, "BatchReferenceId");
+
+			if (batchId == null || batchId.trim().isEmpty()) {
+
+				return null;
+			}
+
+			if (batchReferenceId == null || batchReferenceId.trim().isEmpty()) {
+
+				batchReferenceId = npciXmlFile.getParentFile().getName();
+			}
+
+			return new BatchHeaderInfo(batchId.trim(), batchReferenceId.trim());
+
+		} catch (Exception e) {
+
+			System.err.println("Unable to read batch header from: " + npciXmlFile.getAbsolutePath());
+
+			e.printStackTrace();
+
+			return null;
+		}
+	}
+
+	private String getXmlChildValue(Element parent, String childName) {
+
+		NodeList nodes = parent.getElementsByTagNameNS("*", childName);
+
+		if (nodes.getLength() == 0) {
+			return null;
+		}
+
+		String value = nodes.item(0).getTextContent();
+
+		return value == null ? null : value.trim();
 	}
 
 	private String getBatchFolderName(String batchId) {
 
-		if ("INW260904001".equalsIgnoreCase(batchId)) {
-
-			return "BATCH-2026-09-04-001";
+		if (batchId == null || batchId.trim().isEmpty()) {
+			return null;
 		}
 
-		if ("INW260904002".equalsIgnoreCase(batchId)) {
+		try {
 
-			return "BATCH-2026-09-04-002";
-		}
+			String inwardDataPath = currentWindow.getDesktop().getWebApp().getRealPath("/Inward-data");
 
-		if ("INW260904003".equalsIgnoreCase(batchId)) {
+			if (inwardDataPath == null) {
+				return null;
+			}
 
-			return "BATCH-2026-09-04-003";
+			File inwardDataDirectory = new File(inwardDataPath);
+
+			if (!inwardDataDirectory.isDirectory()) {
+				return null;
+			}
+
+			File[] batchFolders = inwardDataDirectory.listFiles(File::isDirectory);
+
+			if (batchFolders == null) {
+				return null;
+			}
+
+			for (File batchFolder : batchFolders) {
+
+				File npciXmlFile = new File(batchFolder, "NPCI_Inward.xml");
+
+				if (!npciXmlFile.isFile()) {
+					continue;
+				}
+
+				BatchHeaderInfo header = readBatchHeader(npciXmlFile);
+
+				if (header == null || header.batchId == null) {
+					continue;
+				}
+
+				if (batchId.equalsIgnoreCase(header.batchId)) {
+
+					return batchFolder.getName();
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
 		}
 
 		return null;
@@ -1463,6 +1648,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 		displayCheques(filteredCheques);
 	}
+
 	private void updateChequeCount(int count) {
 		if (count == 0) {
 			chequeCountLabel.setValue("No cheque records found");
@@ -1470,29 +1656,36 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 		chequeCountLabel.setValue("Showing 1 to " + count + " of " + count + " cheques");
 	}
+
 	private String valueOrEmpty(String value) {
 		return value == null ? "" : value;
 	}
+
 	private static class ParseResult {
 		private final String batchId;
 		private final ParsedBatchData parsedBatchData;
 		private final String status;
 		private final String message;
+
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
 			this.parsedBatchData = parsedBatchData;
 			this.status = status;
 			this.message = message;
 		}
+
 		String getBatchId() {
 			return batchId;
 		}
+
 		ParsedBatchData getParsedBatchData() {
 			return parsedBatchData;
 		}
+
 		String getStatus() {
 			return status;
 		}
+
 		String getMessage() {
 			return message;
 		}
