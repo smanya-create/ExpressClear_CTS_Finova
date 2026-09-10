@@ -142,9 +142,9 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-        // Query: Includes PROCESSING, SEND_BACK_TO_MAKER_DATA_ENTRY, and legacy pending states.
-        // Pending cheques include any instrument in DATA_ENTRY_PENDING, DATA_ENTRY_IN_PROGRESS, or SEND_BACK_TO_MAKER_DATA_ENTRY.
-        // Blocks any batch where MICR repair items remain unresolved.
+        // 1. Discovery driven by Cheque Status:
+        //    Surfaces any batch containing cheques that need Data Entry or were Sent Back by Checker.
+        // 2. Blocks batches that still have unresolved MICR repair cheques.
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +
@@ -154,16 +154,25 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                      + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
                      + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
                      + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques " +
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques, " +
+                     "    COUNT(CASE WHEN c.cheque_status IN ('" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS sent_back_cheques " +
                      "FROM inward_batch b " +
-                     "LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-                     "WHERE b.batch_status IN ('" 
-                     + InwardBatchStatus.PROCESSING.name() + "', '" 
-                     + InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', 'DATA_ENTRY_PENDING', 'VALIDATED') " +
+                     "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
+                     "WHERE EXISTS ( " +
+                     "    SELECT 1 FROM inward_cheque ic_need " +
+                     "    WHERE ic_need.inward_batch_id = b.inward_batch_id " +
+                     "      AND ic_need.cheque_status IN ('" 
+                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
+                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') " +
+                     ") " +
                      "  AND NOT EXISTS ( " +
-                     "      SELECT 1 FROM inward_cheque ic " +
-                     "      WHERE ic.inward_batch_id = b.inward_batch_id " +
-                     "        AND ic.cheque_status IN ('" 
+                     "      SELECT 1 FROM inward_cheque ic_micr " +
+                     "      WHERE ic_micr.inward_batch_id = b.inward_batch_id " +
+                     "        AND ic_micr.cheque_status IN ('" 
                      + InwardChequeStatus.MICR_REPAIR_PENDING.name() + "', '" 
                      + InwardChequeStatus.MICR_REPAIR_IN_PROGRESS.name() + "', '" 
                      + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "') " +
@@ -180,7 +189,17 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                 dto.setBatchId(rs.getString("inward_batch_id"));
                 dto.setTotalCheques(rs.getInt("actual_cheque_count"));
                 dto.setTotalAmount(rs.getBigDecimal("actual_total_amount"));
-                dto.setBatchStatus(rs.getString("batch_status"));
+                
+                int sentBackCount = rs.getInt("sent_back_cheques");
+                String bStatus = rs.getString("batch_status");
+                
+                // If any cheque in this batch was sent back, reflect it in the badge
+                if (sentBackCount > 0) {
+                    dto.setBatchStatus(InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name());
+                } else {
+                    dto.setBatchStatus(bStatus);
+                }
+
                 dto.setPendingCheques(rs.getInt("pending_cheques"));
                 batches.add(dto);
             }
@@ -200,7 +219,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
         return batches;
     }
-
+    
     private void processBatch(DataEntryBatchItemDTO batch) {
         if (batch.getPendingCheques() == 0) {
             submitBatchToChecker(batch.getBatchId());
