@@ -120,11 +120,15 @@
 	padding: 12px 10px;
 	border-right: 1px solid rgba(255, 255, 255, 0.25);
 }
+.batch-table .z-listbox-header th {
+	text-align: center !important;
+}
 
 .batch-table .z-listcell-content {
 	color: #173b5e;
 	font-size: 13px;
 	padding: 15px 12px;
+	text-align: center !important;
 }
 
 .batch-table .z-listitem {
@@ -595,10 +599,14 @@
 	border-right: 1px solid rgba(255, 255, 255, 0.25);
 }
 
+.cheque-listbox .z-listbox-header th {
+	text-align: center !important;
+}
 .cheque-listbox .z-listcell-content {
 	font-size: 9px;
 	color: #173b5e;
 	padding: 9px 6px;
+	text-align: center;
 }
 
 .cheque-listbox .z-listitem {
