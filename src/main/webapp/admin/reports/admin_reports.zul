@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?page title="Express Clear - CTS Admin Reports"?>
 <?link rel="stylesheet" type="text/css" href="/css/admin/admin-report.css"?>
 <zk>
 <borderlayout apply="com.iispl.cts.controller.admin.AdminReportController" hflex="1" vflex="1">

@@ -7,7 +7,16 @@ import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
-import org.zkoss.zul.*;
+import org.zkoss.zul.A;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Include;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.ListModelList;
+import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listcell;
+import org.zkoss.zul.Listitem;
+import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardDashboardKpiDTO;
@@ -103,6 +112,24 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
                 Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());
                 String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
                 navigateToSpaPage(targetZul);
+
+                // Update breadcrumbs and active sidebar navigation item
+                Component root = (self.getPage() != null) ? self.getPage().getFirstRoot() : null;
+                if (root != null) {
+                    boolean isMicr = targetZul != null && targetZul.contains("micr");
+                    String title = isMicr ? "MICR Repair" : "Data Entry";
+
+                    Label lblSubtitle = (Label) root.getFellowIfAny("lblPageSubtitle", true);
+                    if (lblSubtitle != null) {
+                        lblSubtitle.setValue(title);
+                    }
+
+                    // Align sidebar highlighting
+                    Component navDash = root.getFellowIfAny("navInwardDashboard", true);
+                    Component navTarget = root.getFellowIfAny(isMicr ? "navInwardMicr" : "navInwardDataEntry", true);
+                    if (navDash instanceof A) ((A) navDash).setSclass("nav-item");
+                    if (navTarget instanceof A) ((A) navTarget).setSclass("nav-item active");
+                }
             });
 
             // 1. Batch ID
@@ -115,36 +142,31 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             cellDate.setStyle("color: #475569; font-weight: 500; font-size: 12px; white-space: nowrap;");
             cellDate.setParent(item);
 
-            // 3. Source
-//            Listcell cellSource = new Listcell(batch.getSource());
-//            cellSource.setStyle("color: #475569; font-weight: 600; font-size: 12px;");
-//            cellSource.setParent(item);
-
-            // 4. Cheques Total
+            // 3. Cheques Total
             Listcell cellCheques = new Listcell(String.valueOf(batch.getTotalCheques()));
             cellCheques.setStyle("font-weight: 700; font-size: 12px; color: #0f172a;");
             cellCheques.setParent(item);
 
-            // 5. Accepted (Green)
+            // 4. Accepted (Green)
             Listcell cellAccepted = new Listcell(String.valueOf(batch.getAcceptedCheques()));
             cellAccepted.setStyle("color: #16a34a; font-weight: 700; font-size: 12px;");
             cellAccepted.setParent(item);
 
-            // 6. Back to Maker (Amber)
+            // 5. Back to Maker (Amber)
             Listcell cellBack = new Listcell(String.valueOf(batch.getBackToMakerCheques()));
             cellBack.setStyle(batch.getBackToMakerCheques() > 0 
                 ? "color: #ea580c; font-weight: 800; font-size: 12px;" 
                 : "color: #94a3b8; font-size: 12px;");
             cellBack.setParent(item);
 
-            // 7. Returns (Red)
+            // 6. Returns (Red)
             Listcell cellRrf = new Listcell(String.valueOf(batch.getReturnRequestCheques()));
             cellRrf.setStyle(batch.getReturnRequestCheques() > 0 
                 ? "color: #dc2626; font-weight: 800; font-size: 12px;" 
                 : "color: #94a3b8; font-size: 12px;");
             cellRrf.setParent(item);
 
-            // 8. Status Badge
+            // 7. Status Badge
             Listcell cellStatus = new Listcell();
             Label lblBadge = new Label(batch.getDisplayStatus());
             lblBadge.setStyle(batch.getStatusBadgeStyle());

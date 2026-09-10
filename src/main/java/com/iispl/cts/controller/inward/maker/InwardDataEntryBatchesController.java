@@ -257,7 +257,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
             if (root != null) {
                 Label lblSubtitle = (Label) root.getFellowIfAny("lblPageSubtitle", true);
                 if (lblSubtitle != null) {
-                    lblSubtitle.setValue("Data Entry Workspace");
+                    lblSubtitle.setValue("Data Entry");
                 }
             }
         } else {

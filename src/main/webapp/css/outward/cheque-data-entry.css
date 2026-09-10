@@ -1,310 +1,341 @@
 .outward-cheque-data-entry-page {
 	width: 100%;
-	min-height: 100%;
 	box-sizing: border-box;
-	padding: 24px 30px 30px;
+	padding: 18px 24px 28px 24px;
 	background: #f5f7fa;
 }
 
 .outward-cheque-data-entry-top-bar {
-	width: 100%;
-	margin-bottom: 12px;
+	height: 32px;
+	margin-bottom: 10px;
 }
 
 .outward-cheque-data-entry-back-button {
-	background: linear-gradient(135deg, #0b1d3a, #1d3557) !important;
+	width: 160px !important;
+	height: 32px !important;
+	padding: 0 14px !important;
+	box-sizing: border-box;
+	border: 1px solid #0b1d3a !important;
+	border-radius: 5px !important;
+	background: #0b1d3a !important;
 	color: #ffffff !important;
-	border: none !important;
-	border-radius: 6px !important;
-	padding: 9px 18px !important;
-	font-size: 11px !important;
+	font-size: 10px !important;
 	font-weight: 700 !important;
-	letter-spacing: 0.3px;
-	box-shadow: 0 2px 6px rgba(11, 29, 58, 0.25);
-	cursor: pointer;
-}
-
-.outward-cheque-data-entry-back-button:hover {
-	background: linear-gradient(135deg, #07152b, #16304f) !important;
 }
 
 .outward-cheque-data-entry-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	width: 100%;
-	margin-bottom: 18px;
+	min-height: 52px;
+	margin-bottom: 12px;
 }
 
 .outward-cheque-data-entry-title-section {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
+	min-width: 0;
 }
 
 .outward-cheque-data-entry-title {
 	color: #17375e;
 	font-size: 21px;
 	font-weight: 700;
-	letter-spacing: 0.2px;
+	line-height: 25px;
 }
 
 .outward-cheque-data-entry-subtitle {
-	color: #64748b;
-	font-size: 12px;
-	font-weight: 400;
+	color: #718096;
+	font-size: 11px;
+	line-height: 15px;
 }
 
 .outward-cheque-data-entry-record-section {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 100px;
 	height: 30px;
 	padding: 0 16px;
+	box-sizing: border-box;
 	border-radius: 18px;
 	background: #eaf0f8;
-	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-record-label {
 	color: #17375e;
 	font-size: 10px;
 	font-weight: 700;
-	letter-spacing: 0.3px;
+	white-space: nowrap;
 }
 
 .outward-cheque-data-entry-summary {
-	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 12px;
-	width: 100%;
-	margin-bottom: 18px;
+	height: 58px;
+	margin-bottom: 14px;
 }
 
 .outward-cheque-data-entry-summary-item {
-	min-height: 62px;
-	padding: 12px 15px;
-	background: #ffffff;
-	border: 1px solid #dce3ec;
-	border-radius: 7px;
+	height: 58px;
+	min-width: 0;
+	padding: 9px 14px;
 	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	gap: 6px;
-	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+	border: 1px solid #d2dce8;
+	border-radius: 6px;
+	background: #ffffff;
 }
 
 .outward-cheque-data-entry-summary-label {
-	color: #718096;
+	display: block;
+	color: #52657d;
 	font-size: 9px;
 	font-weight: 700;
-	letter-spacing: 0.8px;
+	line-height: 12px;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
 }
 
 .outward-cheque-data-entry-summary-value {
-	color: #132f50;
+	display: block;
+	margin-top: 3px;
+	color: #17375e;
 	font-size: 14px;
 	font-weight: 700;
+	line-height: 18px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .outward-cheque-data-entry-main-area {
-	display: flex;
 	width: 100%;
-	gap: 20px;
-	align-items: stretch;
 	box-sizing: border-box;
+	align-items: stretch;
 }
 
 .outward-cheque-data-entry-card {
-	background: #ffffff;
-	border: 1px solid #dce3ec;
-	border-radius: 8px;
+	min-width: 0 !important;
+	height: 570px !important;
+	padding: 0 12px 12px 12px;
 	box-sizing: border-box;
-	box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+	border: 1px solid #d2dce8 !important;
+	border-radius: 7px !important;
+	background: #ffffff !important;
 	overflow: hidden;
 }
 
-.outward-cheque-data-entry-image-card {
-	width: 50%;
-	padding: 16px;
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
+.outward-cheque-data-entry-image-card,
+	.outward-cheque-data-entry-details-card {
+	min-width: 0 !important;
 }
 
-.outward-cheque-data-entry-details-card {
-	width: 50%;
-	padding: 16px;
-	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	min-height: 100%;
+.outward-cheque-data-entry-card .z-groupbox-content {
+	padding: 0 !important;
+	border: none !important;
+	background: #ffffff !important;
 }
 
 .outward-cheque-data-entry-card-header {
+	display: block;
 	width: 100%;
-	min-height: 34px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 12px;
+	height: 46px;
+	margin: 0 0 10px 0;
+	padding: 0 14px !important;
+	box-sizing: border-box;
+	border: 1px solid #d2dce8;
+	background: #ffffff !important;
+	color: #52657d;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 44px;
+}
+
+.outward-cheque-data-entry-image-content {
+	width: 100%;
 	box-sizing: border-box;
 }
 
-.outward-cheque-data-entry-card-title {
-	color: #17375e;
-	font-size: 13px;
-	font-weight: 700;
-	letter-spacing: 0.3px;
+.outward-cheque-data-entry-image-toggle-area {
+	height: 30px;
+	margin-bottom: 8px;
 }
 
 .outward-cheque-data-entry-image-toggle-button {
-	min-width: 96px;
-	height: 32px;
+	width: 82px !important;
+	height: 30px !important;
+	padding: 0 10px !important;
+	box-sizing: border-box;
+	border: 1px solid #174f87 !important;
+	border-radius: 5px !important;
 	background: #ffffff !important;
-	color: #285b91 !important;
-	border: 1px solid #285b91 !important;
-	border-radius: 6px !important;
+	color: #174f87 !important;
 	font-size: 10px !important;
 	font-weight: 700 !important;
-	letter-spacing: 0.2px;
-	cursor: pointer;
-}
-
-.outward-cheque-data-entry-image-toggle-button:hover {
-	background: #edf4fb !important;
 }
 
 .outward-cheque-data-entry-image-container {
 	width: 100%;
-	height: 392px;
-	background: #eef2f7;
-	border: 1px solid #dce3ec;
-	border-radius: 7px;
+	height: 360px !important;
 	box-sizing: border-box;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	margin: 0;
+	border: 1px solid #d2dce8;
+	border-radius: 6px;
+	background: #edf2f7;
 	overflow: hidden;
-	position: relative;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
 }
 
 .outward-cheque-data-entry-cheque-image {
-	max-width: 100%;
-	max-height: 100%;
+	max-width: 96% !important;
+	max-height: 96% !important;
+	width: auto !important;
+	height: auto !important;
 	object-fit: contain;
+	display: block;
 	transform-origin: center center;
-	transition: transform 0.2s ease;
 }
 
 .outward-cheque-data-entry-image-message {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
 	color: #718096;
-	font-size: 12px;
-	font-weight: 500;
-	white-space: nowrap;
+	font-size: 11px;
+}
+
+.outward-cheque-data-entry-image-navigation {
+	width: 100%;
+	height: 42px;
+	margin-top: 10px;
+	box-sizing: border-box;
+	align-items: center;
+}
+
+.outward-cheque-data-entry-navigation-button {
+	height: 34px !important;
+	min-width: 0 !important;
+	padding: 0 10px !important;
+	box-sizing: border-box;
+	border: 1px solid #c8d4e2 !important;
+	border-radius: 5px !important;
+	background: #ffffff !important;
+	color: #174f87 !important;
+	font-size: 10px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-data-entry-navigation-button:hover {
+	background: #f4f7fa !important;
+}
+
+.outward-cheque-data-entry-navigation-button:disabled {
+	background: #f4f6f8 !important;
+	border-color: #dce3eb !important;
+	color: #9aa6b4 !important;
 }
 
 .outward-cheque-data-entry-image-controls {
-	width: 100%;
-	display: flex;
+	height: 34px;
+	min-width: 0;
+	box-sizing: border-box;
 	justify-content: center;
 	align-items: center;
-	gap: 8px;
-	margin-top: 12px;
 }
 
 .outward-cheque-data-entry-image-control-button {
-	min-width: 38px;
-	height: 32px;
-	padding: 0 10px !important;
-	background: #ffffff !important;
-	color: #17375e !important;
-	border: 1px solid #d1dae5 !important;
+	height: 32px !important;
+	min-width: 38px !important;
+	padding: 0 8px !important;
+	box-sizing: border-box;
+	border: 1px solid #c8d4e2 !important;
 	border-radius: 5px !important;
+	background: #ffffff !important;
+	color: #174f87 !important;
 	font-size: 10px !important;
 	font-weight: 700 !important;
-	cursor: pointer;
-	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .outward-cheque-data-entry-image-control-button:hover {
-	background: #f3f6fa !important;
+	background: #f4f7fa !important;
 }
 
 .outward-cheque-data-entry-image-control-wide {
-	min-width: 66px;
+	min-width: 58px !important;
+}
+
+.outward-cheque-data-entry-details-content {
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-fields {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	column-gap: 16px;
-	row-gap: 13px;
 	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.outward-cheque-data-entry-field-column {
+	min-width: 0;
 	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-field {
-	width: 100%;
+	min-width: 0;
 	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-field-label {
 	display: block;
 	width: 100%;
-	margin-bottom: 5px;
 	color: #52657d;
 	font-size: 9px;
 	font-weight: 700;
-	letter-spacing: 0.55px;
+	line-height: 12px;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .outward-cheque-data-entry-textbox {
-	width: 100%;
+	width: 100% !important;
 	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-textbox .z-textbox,
-	.outward-cheque-data-entry-textbox {
-	width: 100%;
-	min-height: 34px;
+	.outward-cheque-data-entry-textbox input {
+	width: 100% !important;
+	height: 34px !important;
+	padding: 7px 9px !important;
 	box-sizing: border-box;
-}
-
-.outward-cheque-data-entry-textbox input {
-	width: 100%;
-	height: 34px;
-	padding: 7px 10px;
-	border: 1px solid #cbd5e1;
-	border-radius: 5px;
-	background: #ffffff;
-	color: #17375e;
-	font-size: 11px;
-	box-sizing: border-box;
-	outline: none;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	background: #ffffff !important;
+	color: #17375e !important;
+	font-size: 11px !important;
 }
 
 .outward-cheque-data-entry-textbox input:focus {
-	border-color: #376a9f;
-	box-shadow: 0 0 0 2px rgba(55, 106, 159, 0.10);
+	border-color: #376a9f !important;
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(55, 106, 159, 0.08);
+}
+
+.outward-cheque-data-entry-datebox {
+	width: 100% !important;
+	box-sizing: border-box;
+}
+
+.outward-cheque-data-entry-datebox .z-datebox-input {
+	height: 34px !important;
+	box-sizing: border-box;
+	font-size: 11px !important;
+}
+
+.outward-cheque-data-entry-datebox .z-datebox-button {
+	height: 34px !important;
+	width: 34px !important;
 }
 
 .outward-cheque-data-entry-status-area {
 	width: 100%;
-	min-height: 25px;
-	margin-top: 10px;
+	min-height: 0;
 	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-status-label {
 	display: block;
 	width: 100%;
+	min-height: 30px;
 	padding: 7px 10px;
 	box-sizing: border-box;
 	border-radius: 5px;
@@ -315,81 +346,99 @@
 }
 
 .outward-cheque-data-entry-actions {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 10px;
 	width: 100%;
-	margin-top: 10px;
+	height: 36px;
 	box-sizing: border-box;
 }
 
-.outward-cheque-data-entry-save-button {
-	grid-column: 1;
-	grid-row: 1;
-	width: 100%;
-	height: 38px;
-	background: #32679f !important;
-	color: #ffffff !important;
-	border: 1px solid #32679f !important;
+.outward-cheque-data-entry-reject-button,
+	.outward-cheque-data-entry-save-button {
+	height: 36px !important;
+	min-width: 0 !important;
+	box-sizing: border-box;
 	border-radius: 5px !important;
 	font-size: 10px !important;
 	font-weight: 700 !important;
-	letter-spacing: 0.2px;
-	cursor: pointer;
-}
-
-.outward-cheque-data-entry-save-button:hover {
-	background: #285a8d !important;
 }
 
 .outward-cheque-data-entry-reject-button {
-	grid-column: 2;
-	grid-row: 1;
-	width: 100%;
-	height: 38px;
+	border: 1px solid #e53935 !important;
 	background: #ffffff !important;
 	color: #d32f2f !important;
-	border: 1px solid #e53935 !important;
-	border-radius: 5px !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
-	letter-spacing: 0.2px;
-	cursor: pointer;
 }
 
 .outward-cheque-data-entry-reject-button:hover {
 	background: #fff5f5 !important;
 }
 
-.outward-cheque-data-entry-submit-button {
-	grid-column: 1/3;
-	grid-row: 2;
-	width: 100%;
-	height: 38px;
+.outward-cheque-data-entry-reject-button:disabled {
+	border-color: #d6d6d6 !important;
+	background: #f5f5f5 !important;
+	color: #a0a0a0 !important;
+}
+
+.outward-cheque-data-entry-save-button {
+	border: 1px solid #32679f !important;
+	background: #32679f !important;
+	color: #ffffff !important;
+}
+
+.outward-cheque-data-entry-save-button:hover {
+	background: #285a8d !important;
+}
+
+.outward-cheque-data-entry-save-button:disabled {
+	border-color: #d1d8e0 !important;
 	background: #dce2e9 !important;
 	color: #8793a2 !important;
+}
+
+.outward-cheque-data-entry-submit-area {
+	width: 100%;
+	height: 36px;
+	box-sizing: border-box;
+}
+
+.outward-cheque-data-entry-submit-button {
+	width: 100% !important;
+	height: 36px !important;
+	box-sizing: border-box;
 	border: 1px solid #d1d8e0 !important;
 	border-radius: 5px !important;
+	background: #dce2e9 !important;
+	color: #8793a2 !important;
 	font-size: 10px !important;
 	font-weight: 700 !important;
-	letter-spacing: 0.2px;
-	cursor: not-allowed;
 }
 
-.outward-cheque-data-entry-submit-button:not([disabled]) {
-	background: linear-gradient(135deg, #0b1d3a, #1d3557) !important;
-	color: #ffffff !important;
+.outward-cheque-data-entry-submit-button:not(:disabled) {
 	border-color: #0b1d3a !important;
-	cursor: pointer;
+	background: #0b1d3a !important;
+	color: #ffffff !important;
 }
 
-.outward-cheque-data-entry-submit-button:not([disabled]):hover {
-	background: linear-gradient(135deg, #07152b, #16304f) !important;
+.outward-cheque-data-entry-submit-button:not(:disabled):hover {
+	background: #17375e !important;
 }
 
 .outward-cheque-data-entry-reject-window {
-	border-radius: 8px !important;
+	border-radius: 7px !important;
 	overflow: hidden;
+}
+
+.outward-cheque-data-entry-reject-window .z-window-header {
+	padding: 14px 18px !important;
+	box-sizing: border-box;
+	border-bottom: 1px solid #d2dce8;
+	background: #ffffff !important;
+	color: #17375e;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.outward-cheque-data-entry-reject-window .z-window-content {
+	padding: 0 !important;
+	background: #ffffff !important;
 }
 
 .outward-cheque-data-entry-reject-content {
@@ -397,14 +446,7 @@
 	box-sizing: border-box;
 }
 
-.outward-cheque-data-entry-modal-field {
-	width: 100%;
-	margin-bottom: 16px;
-}
-
 .outward-cheque-data-entry-modal-label {
-	display: block;
-	margin-bottom: 6px;
 	color: #52657d;
 	font-size: 10px;
 	font-weight: 700;
@@ -412,105 +454,78 @@
 }
 
 .outward-cheque-data-entry-reason-combobox {
-	width: 100%;
-	box-sizing: border-box;
-}
-
-.outward-cheque-data-entry-reason-combobox .z-combobox-input {
-	width: 100%;
-	height: 36px;
-	box-sizing: border-box;
-	border: 1px solid #cbd5e1;
-	border-radius: 5px;
-	padding: 7px 10px;
-	font-size: 11px;
+	width: 100% !important;
 }
 
 .outward-cheque-data-entry-remarks-textbox {
-	width: 100%;
-	box-sizing: border-box;
-}
-
-.outward-cheque-data-entry-remarks-textbox textarea {
-	width: 100%;
-	min-height: 100px;
-	box-sizing: border-box;
-	border: 1px solid #cbd5e1;
-	border-radius: 5px;
-	padding: 9px 10px;
-	resize: vertical;
-	font-size: 11px;
+	width: 100% !important;
 }
 
 .outward-cheque-data-entry-modal-actions {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 10px;
 	width: 100%;
-	margin-top: 8px;
+	height: 36px;
+}
+
+.outward-cheque-data-entry-confirm-reject-button,
+	.outward-cheque-data-entry-close-button {
+	height: 36px !important;
+	min-width: 0 !important;
+	border-radius: 5px !important;
+	font-size: 10px !important;
+	font-weight: 700 !important;
 }
 
 .outward-cheque-data-entry-confirm-reject-button {
-	width: 100%;
-	height: 36px;
+	border: 1px solid #d32f2f !important;
 	background: #d32f2f !important;
 	color: #ffffff !important;
-	border: 1px solid #d32f2f !important;
-	border-radius: 5px !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
 }
 
 .outward-cheque-data-entry-close-button {
-	width: 100%;
-	height: 36px;
+	border: 1px solid #cbd5e1 !important;
 	background: #ffffff !important;
 	color: #52657d !important;
-	border: 1px solid #cbd5e1 !important;
-	border-radius: 5px !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
 }
 
-.outward-cheque-data-entry-close-button:hover {
-	background: #f5f7fa !important;
-}
-
-@media ( max-width : 1100px) {
+@media screen and (max-width: 1100px) {
 	.outward-cheque-data-entry-main-area {
-		flex-direction: column;
-		align-items: stretch;
+		display: block;
 	}
-	.outward-cheque-data-entry-image-card,
-		.outward-cheque-data-entry-details-card {
-		width: 100%;
-	}
-	.outward-cheque-data-entry-summary {
-		grid-template-columns: 1fr 1fr;
+	.outward-cheque-data-entry-card {
+		width: 100% !important;
+		height: auto !important;
+		min-height: 570px;
+		margin-bottom: 16px;
 	}
 }
 
-@media ( max-width : 700px) {
-	.outward-cheque-data-entry-page {
-		padding: 16px;
+@media screen and (max-width: 800px) {
+	.outward-cheque-data-entry-fields {
+		display: block;
 	}
-	.outward-cheque-data-entry-header {
-		align-items: flex-start;
+	.outward-cheque-data-entry-field-column {
+		width: 100% !important;
+		margin-bottom: 12px;
 	}
 	.outward-cheque-data-entry-summary {
-		grid-template-columns: 1fr;
+		height: auto;
+		display: block;
 	}
-	.outward-cheque-data-entry-fields {
-		grid-template-columns: 1fr;
+	.outward-cheque-data-entry-summary-item {
+		width: 100% !important;
+		margin-bottom: 8px;
 	}
-	.outward-cheque-data-entry-actions {
-		grid-template-columns: 1fr;
-	}
-	.outward-cheque-data-entry-submit-button {
-		grid-column: 1;
-		grid-row: 2;
+}
+
+@media screen and (max-width: 600px) {
+	.outward-cheque-data-entry-page {
+		padding: 12px;
 	}
 	.outward-cheque-data-entry-image-container {
-		height: 320px;
+		height: 300px !important;
+	}
+	.outward-cheque-data-entry-image-navigation {
+		height: auto;
+		flex-wrap: wrap;
 	}
 }

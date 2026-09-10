@@ -1,3 +1,16 @@
+.checker-reports-center {
+    background-color: #EAF4FB !important;
+}
+
+.checker-reports-center .z-center-body {
+    background-color: #EAF4FB !important;
+}
+
+.checker-reports-content {
+    background-color: #EAF4FB !important;
+    min-height: 100% !important;
+}
+
 .listbox-header .z-listheader {
     background: #1B4A8F !important;
     border-bottom: 1px solid #163D73 !important;

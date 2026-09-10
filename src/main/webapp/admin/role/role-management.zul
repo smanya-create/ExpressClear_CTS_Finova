@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?page title="Express Clear - CTS Admin Role Management"?>
 <?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
 <zk>
 <borderlayout apply="com.iispl.cts.controller.admin.RoleManagementController" hflex="1" vflex="1">
@@ -9,53 +10,57 @@
     </west>
 
     <!-- Main Workspace -->
-    <center border="none" autoscroll="true">
-        <vlayout spacing="0" hflex="1">
+    <center border="none">
+        <!-- Nested Borderlayout to pin header and scroll only the content -->
+        <borderlayout hflex="1" vflex="1">
             
-            <!-- Global Shared Header -->
-            <include id="incHeader" src="/components/header.zul" 
-                     pageTitle="Admin Dashboard" 
-                     pageSubtitle="Role Management"  />
+            <!-- Fixed Header (Does NOT scroll) -->
+            <north size="auto" border="none">
+                <include id="incHeader" src="/components/header.zul" 
+                         pageTitle="Admin Dashboard" 
+                         pageSubtitle="Role Management" />
+            </north>
 
-            <!-- Content Workspace -->
-            <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
-                
-                <!-- Page Title -->
-                <vlayout spacing="4px">
-                    <label value="Role Management" sclass="page-title"/>
-                    <label value="Manage system access levels, operational permissions, and CTS queue assignments." sclass="page-subtitle"/>
-                </vlayout>
+            <!-- Scrollable Content Workspace -->
+            <center border="none" autoscroll="true">
+                <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
+                    
+                    <!-- Page Title -->
+                    <vlayout spacing="4px">
+                        <label value="Role Management" sclass="page-title"/>
+                        <label value="Manage system access levels, operational permissions, and CTS queue assignments." sclass="page-subtitle"/>
+                    </vlayout>
 
-                <!-- Roles Table Card -->
-                <vlayout sclass="card-panel" spacing="16px" style="padding: 24px 28px; margin-top: 16px;" hflex="1">
-                    <hlayout valign="middle" spacing="10px" hflex="1" >
-                        <hlayout valign="middle" spacing="10px">
-                            <label value="System Roles" style="font-size: 16px; font-weight: 800; color: #1e293b;"/>
-                            <label id="lblRoleCount" value="Loading..." 
-                                   style="color: #64748b; font-size: 11.5px; font-weight: 600; background: #f1f5f9; padding: 3px 10px; border-radius: 12px;"/>
+                    <!-- Roles Table Card -->
+                    <vlayout sclass="card-panel" spacing="16px" style="padding: 24px 28px; margin-top: 16px;" hflex="1">
+                        <hlayout valign="middle" spacing="10px" hflex="1">
+                            <hlayout valign="middle" spacing="10px" hflex="1">
+                                <label value="System Roles" style="font-size: 16px; font-weight: 800; color: #1e293b;"/>
+                                <label id="lblRoleCount" value="Loading..." 
+                                       style="color: #64748b; font-size: 11.5px; font-weight: 600; background: #f1f5f9; padding: 3px 10px; border-radius: 12px;"/>
+                            </hlayout>
+
+                            <!-- Primary Action Button -->
+                            <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="38px"/>
                         </hlayout>
 
-                        <!-- Primary Action Button -->
-                        <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="38px"/>
-                    </hlayout>
+                        <grid sclass="role-grid" hflex="1">
+                            <columns sizable="true">
+                                <column label="ROLE ID" width="120px"/>
+                                <column label="ROLE NAME" width="200px"/>
+                                <column label="DESCRIPTION" hflex="1"/>
+                                <column label="STATUS" width="120px" align="center"/>
+                                <column label="ACTIONS" width="120px" align="center"/>
+                            </columns>
+                            <rows id="rowsRoles">
+                                <!-- Populated dynamically by RoleManagementController -->
+                            </rows>
+                        </grid>
+                    </vlayout>
 
-                    <grid sclass="role-grid" hflex="1">
-                        <columns sizable="true">
-                            <column label="ROLE ID" width="120px"/>
-                            <column label="ROLE NAME" width="200px"/>
-                            <column label="DESCRIPTION" hflex="1"/>
-                            <column label="STATUS" width="120px" align="center"/>
-                            <column label="ACTIONS" width="120px" align="center"/>
-                        </columns>
-                        <rows id="rowsRoles">
-                            <!-- Populated dynamically by RoleManagementController -->
-                        </rows>
-                    </grid>
                 </vlayout>
-
-            </vlayout>
-
-        </vlayout>
+            </center>
+        </borderlayout>
     </center>
 </borderlayout>
 </zk>

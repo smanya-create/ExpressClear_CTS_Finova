@@ -4,21 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Div;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
+import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
-import com.iispl.cts.service.outward.OutwardBatchService;
-import com.iispl.cts.service.outward.OutwardChequeService;
-import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
-import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.service.outward.ScanService;
+import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
 public class OutwardDataEntryController extends GenericForwardComposer<Component> {
 
@@ -26,25 +24,31 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private static final int PAGE_SIZE = 5;
 
+	private static final String STATUS_PENDING_MAKER_PROCESS = "PENDING_MAKER_PROCESS";
+	private static final String MODE_DATA_ENTRY = "DATA_ENTRY";
+
 	private Rows outwardDataEntryRowsBatch;
-	private Div outwardDataEntryEmptyState;
+
+	private Vlayout outwardDataEntryEmptyState;
+
 	private Label outwardDataEntryLblCurrentPage;
+
 	private Button outwardDataEntryBtnFirst;
+
 	private Button outwardDataEntryBtnPrevious;
+
 	private Button outwardDataEntryBtnNext;
+
 	private Button outwardDataEntryBtnLast;
 
-	private final OutwardBatchService outwardBatchService;
-	private final OutwardChequeService outwardChequeService;
+	private final ScanService scanService;
 
 	private List<OutwardBatch> outwardDataEntryBatchList;
+
 	private int outwardDataEntryCurrentPage = 1;
 
 	public OutwardDataEntryController() {
-
-		outwardBatchService = new OutwardBatchServiceImpl();
-		outwardChequeService = new OutwardChequeServiceImpl();
-
+		scanService = new ScanServiceImpl();
 		outwardDataEntryBatchList = new ArrayList<>();
 	}
 
@@ -53,11 +57,9 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		super.doAfterCompose(comp);
 
-		updateDataEntryNavigation(comp);
-
 		outwardDataEntryRowsBatch = (Rows) comp.getFellow("outwardDataEntryRowsBatch");
 
-		outwardDataEntryEmptyState = (Div) comp.getFellow("outwardDataEntryEmptyState");
+		outwardDataEntryEmptyState = (Vlayout) comp.getFellow("outwardDataEntryEmptyState");
 
 		outwardDataEntryLblCurrentPage = (Label) comp.getFellow("outwardDataEntryLblCurrentPage");
 
@@ -68,6 +70,8 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		outwardDataEntryBtnNext = (Button) comp.getFellow("outwardDataEntryBtnNext");
 
 		outwardDataEntryBtnLast = (Button) comp.getFellow("outwardDataEntryBtnLast");
+
+		updateDataEntryNavigation(comp);
 
 		bindPaginationEvents();
 
@@ -162,22 +166,55 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		try {
 
-			List<OutwardBatch> batches = outwardBatchService.getBatchesReadyForDataEntry();
+			List<ScanBatch> scanBatches = scanService.getMakerDashboardBatches();
 
-			if (batches == null) {
+			outwardDataEntryBatchList = new ArrayList<>();
 
-				outwardDataEntryBatchList = new ArrayList<>();
+			if (scanBatches != null) {
 
-			} else {
+				for (ScanBatch scanBatch : scanBatches) {
 
-				outwardDataEntryBatchList = new ArrayList<>(batches);
+					if (scanBatch == null) {
+						continue;
+					}
+
+					String scannedBatchId = scanBatch.getScannedBatchId();
+
+					if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+						continue;
+					}
+
+					String batchStatus = scanBatch.getBatchStatus();
+
+					if (batchStatus == null || !STATUS_PENDING_MAKER_PROCESS.equalsIgnoreCase(batchStatus.trim())) {
+						continue;
+					}
+
+					OutwardBatch outwardBatch = new OutwardBatch();
+
+					outwardBatch.setOutwardBatchId(scannedBatchId.trim());
+
+					outwardBatch.setBatchReferenceId(scanBatch.getBatchReferenceId());
+
+					outwardBatch.setActualChequeCount(scanBatch.getActualChequeCount());
+
+					outwardBatch.setActualTotalAmount(scanBatch.getActualTotalAmount());
+
+					outwardBatch.setBatchStatus(STATUS_PENDING_MAKER_PROCESS);
+
+					outwardBatch.setUploadedBy(scanBatch.getUploadedBy());
+
+					outwardBatch.setUploadedAt(scanBatch.getUploadedAt());
+
+					outwardDataEntryBatchList.add(outwardBatch);
+				}
 			}
 
 			outwardDataEntryCurrentPage = 1;
 
 			renderCurrentPage();
 
-		} catch (Exception e) {
+		} catch (Exception exception) {
 
 			outwardDataEntryBatchList = new ArrayList<>();
 
@@ -185,7 +222,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 			renderCurrentPage();
 
-			e.printStackTrace();
+			exception.printStackTrace();
 		}
 	}
 
@@ -215,9 +252,9 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		int endIndex = Math.min(startIndex + PAGE_SIZE, outwardDataEntryBatchList.size());
 
-		for (int i = startIndex; i < endIndex; i++) {
+		for (int index = startIndex; index < endIndex; index++) {
 
-			OutwardBatch batch = outwardDataEntryBatchList.get(i);
+			OutwardBatch batch = outwardDataEntryBatchList.get(index);
 
 			if (batch != null) {
 
@@ -246,7 +283,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		outwardDataEntryLblTotal.setSclass("outward-data-entry-cell outward-data-entry-number");
 
-		int dataEntered = getDataEnteredCount(batch.getOutwardBatchId());
+		int dataEntered = getDataEnteredCount(batch);
 
 		Label outwardDataEntryLblDataEntered = new Label(dataEntered + " / " + totalCheques);
 
@@ -278,20 +315,26 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		outwardDataEntryRowsBatch.appendChild(outwardDataEntryRow);
 	}
 
-	private int getDataEnteredCount(String outwardBatchId) {
+	private int getDataEnteredCount(OutwardBatch batch) {
 
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+		if (batch == null) {
+			return 0;
+		}
+
+		String scannedBatchId = batch.getOutwardBatchId();
+
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 
 			return 0;
 		}
 
 		try {
 
-			return outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
+			return scanService.getDataEnteredCountByBatchId(scannedBatchId.trim());
 
-		} catch (Exception e) {
+		} catch (Exception exception) {
 
-			e.printStackTrace();
+			exception.printStackTrace();
 
 			return 0;
 		}
@@ -299,14 +342,53 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private void openChequeDataEntry(OutwardBatch batch) {
 
-		if (batch == null || batch.getOutwardBatchId() == null || batch.getOutwardBatchId().trim().isEmpty()) {
+		if (batch == null) {
+			return;
+		}
+
+		String scannedBatchId = batch.getOutwardBatchId();
+
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 
 			return;
 		}
 
-		String batchId = batch.getOutwardBatchId().trim();
+		Include mainContentArea = findMainContentArea(outwardDataEntryRowsBatch);
 
-		Executions.sendRedirect("/outward/maker/cheque-data-entry.zul?batchId=" + batchId);
+		if (mainContentArea == null) {
+			return;
+		}
+
+		String batchId = scannedBatchId.trim();
+
+		mainContentArea.clearDynamicProperties();
+
+		mainContentArea.setDynamicProperty("batchId", batchId);
+
+		mainContentArea.setDynamicProperty("mode", MODE_DATA_ENTRY);
+
+		mainContentArea.setAttribute("batchId", batchId);
+
+		mainContentArea.setAttribute("mode", MODE_DATA_ENTRY);
+
+		mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
+	}
+
+	private Include findMainContentArea(Component component) {
+
+		Component current = component;
+
+		while (current != null) {
+
+			if (current instanceof Include && "mainContentArea".equals(current.getId())) {
+
+				return (Include) current;
+			}
+
+			current = current.getParent();
+		}
+
+		return null;
 	}
 
 	private void goToFirstPage() {
@@ -391,6 +473,14 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		String normalizedStatus = status.trim().toLowerCase().replace(" ", "-").replace("_", "-");
 
+		if ("pending-maker-process".equals(normalizedStatus)) {
+			return "pending";
+		}
+
+		if ("pending-data-entry".equals(normalizedStatus)) {
+			return "pending";
+		}
+
 		if ("processing".equals(normalizedStatus)) {
 			return "processing";
 		}
@@ -405,6 +495,15 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		if ("pending".equals(normalizedStatus)) {
 			return "pending";
+		}
+
+		if ("send-back-maker".equals(normalizedStatus) || "send-back".equals(normalizedStatus)) {
+
+			return "send-back";
+		}
+
+		if ("rejection-request".equals(normalizedStatus)) {
+			return "rejection-request";
 		}
 
 		return "pending";

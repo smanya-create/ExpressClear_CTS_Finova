@@ -7,19 +7,47 @@ import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
 import com.iispl.cts.entity.outward.SendBackReason;
 
-
-
 public interface OutwardCheckerQueueDAO {
-	
-	  List<OutwardCheque> getChequesByBatchId(String batchId)
-	            throws SQLException;
 
-	    void updateChequeStatus(String chequeNo, String status)
-	            throws SQLException;
-	    
-	    List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId)
-	            throws SQLException;
-	    
-	    List<SendBackReason> getSendBackReasons() throws SQLException;
+	// ============================================================
+	// GET CHEQUES BY SELECTED BATCH
+	// ============================================================
 
+	List<OutwardCheque> getChequesByBatchId(String batchId) throws SQLException;
+
+	// ============================================================
+	// GET BATCH STATUS
+	// ============================================================
+
+	String getBatchStatus(String batchId) throws SQLException;
+
+	// ============================================================
+	// UPDATE CHEQUE STATUS
+	// ============================================================
+
+	void updateChequeStatus(String chequeNo, String status) throws SQLException;
+
+	// ============================================================
+	// GET CHEQUE IMAGES
+	// ============================================================
+
+	List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId) throws SQLException;
+
+	// ============================================================
+	// GET SEND BACK REASONS
+	// ============================================================
+
+	List<SendBackReason> getSendBackReasons() throws SQLException;
+
+	// ============================================================
+	// CHECK PAYEE ACCOUNT
+	// ============================================================
+
+	boolean isPayeeAccountExists(String accountNumber) throws SQLException;
+
+	// ============================================================
+	// UPDATE BATCH STATUS
+	// ============================================================
+
+	void updateBatchStatus(String batchId, String status) throws SQLException;
 }

@@ -1,5 +1,7 @@
+
 package com.iispl.cts.service.outward;
 
+import java.sql.Connection;
 import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
@@ -21,6 +23,14 @@ public interface OutwardBatchService {
 	List<OutwardBatch> getBatchesReadyForDataEntry();
 
 	String getScannedBatchIdByOutwardBatchId(String outwardBatchId);
+
+	String getOutwardBatchIdByScannedBatchId(String scannedBatchId);
+
+	boolean updateOutWardBatchStatus(String outwardBatchId, String batchStatus);
+
+	boolean updateOutWardBatchStatus(Connection connection, String outwardBatchId, String batchStatus);
+
+	String createOutwardBatchFromScan(Connection connection, String scannedBatchId);
 	
 	void updateBatchStatus(String batchId, String status);
 }

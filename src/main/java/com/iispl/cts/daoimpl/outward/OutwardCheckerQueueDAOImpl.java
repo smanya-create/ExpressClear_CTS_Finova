@@ -15,237 +15,304 @@ import com.iispl.cts.entity.outward.SendBackReason;
 
 public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
-    // ============================================================
-    // GET CHEQUES BY BATCH ID
-    // ============================================================
+	// ============================================================
+	// GET CHEQUES BY SELECTED BATCH
+	// ============================================================
+
 	@Override
-	public List<OutwardCheque> getChequesByBatchId(String batchId)
-	        throws SQLException {
+	public List<OutwardCheque> getChequesByBatchId(String batchId) throws SQLException {
 
-	    List<OutwardCheque> cheques = new ArrayList<>();
+		List<OutwardCheque> cheques = new ArrayList<>();
 
-	    String sql =
-	        "SELECT outward_cheque_id, " +
-	        "       outward_batch_id, " +
-	        "       cheque_number, " +
-	        "       micr_code, " +
-	        "       drawee_name, " +
-	        "       drawee_account_number, " +
-	        "       payee_name, " +
-	        "       payee_account_number, " +
-	        "       cheque_amount, " +
-	        "       cheque_date, " +
-	        "       cheque_status, " +
-	        "       account_id, " +
-	        "       created_at " +
-	        "FROM outward_cheque " +
-	        "WHERE outward_batch_id = ? " +
-	        "ORDER BY outward_cheque_id";
+		String sql = "SELECT outward_cheque_id, "
+		        + "       outward_batch_id, "
+		        + "       cheque_number, "
+		        + "       micr_code, "
+		        + "       drawee_name, "
+		        + "       drawee_account_number, "
+		        + "       payee_name, "
+		        + "       payee_account_number, "
+		        + "       cheque_amount, "
+		        + "       cheque_date, "
+		        + "       cheque_status, "
+		        + "       account_id, "
+		        + "       created_at "
+		        + "FROM outward_cheque "
+		        + "WHERE outward_batch_id = ? "
+		        + "AND cheque_status = 'PENDING_CHECKER_PROCESS' "
+		        + "ORDER BY outward_cheque_id";
 
-	    try (Connection con = DBConnection.getConnection();
-	         PreparedStatement ps = con.prepareStatement(sql)) {
+		try (Connection con = DBConnection.getConnection();
 
-	        ps.setString(1, batchId);
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-	        System.out.println("Searching cheque for batch = [" + batchId + "]");
+			ps.setString(1, batchId);
 
-	        try (ResultSet rs = ps.executeQuery()) {
+			System.out.println("=================================");
 
-	            while (rs.next()) {
+			System.out.println("GET CHEQUES BY BATCH");
 
-	                OutwardCheque cheque = new OutwardCheque();
+			System.out.println("Batch ID = [" + batchId + "]");
 
-	                cheque.setOutwardChequeId(
-	                    rs.getString("outward_cheque_id")
-	                );
+			try (ResultSet rs = ps.executeQuery()) {
 
-	                cheque.setOutwardBatchId(
-	                    rs.getString("outward_batch_id")
-	                );
+				while (rs.next()) {
 
-	                cheque.setChequeNumber(
-	                    rs.getString("cheque_number")
-	                );
+					OutwardCheque cheque = new OutwardCheque();
 
-	                cheque.setMicrCode(
-	                    rs.getString("micr_code")
-	                );
+					cheque.setOutwardChequeId(rs.getString("outward_cheque_id"));
 
-	                cheque.setDraweeName(
-	                    rs.getString("drawee_name")
-	                );
+					cheque.setOutwardBatchId(rs.getString("outward_batch_id"));
 
-	                cheque.setDraweeAccountNumber(
-	                    rs.getString("drawee_account_number")
-	                );
+					cheque.setChequeNumber(rs.getString("cheque_number"));
 
-	                cheque.setPayeeName(
-	                    rs.getString("payee_name")
-	                );
+					cheque.setMicrCode(rs.getString("micr_code"));
 
-	                cheque.setPayeeAccountNumber(
-	                    rs.getString("payee_account_number")
-	                );
+					cheque.setDraweeName(rs.getString("drawee_name"));
 
-	                cheque.setChequeAmount(
-	                    rs.getBigDecimal("cheque_amount")
-	                );
+					cheque.setDraweeAccountNumber(rs.getString("drawee_account_number"));
 
-	                cheque.setChequeDate(
-	                    rs.getDate("cheque_date")
-	                );
+					cheque.setPayeeName(rs.getString("payee_name"));
 
-	                cheque.setChequeStatus(
-	                    rs.getString("cheque_status")
-	                );
+					cheque.setPayeeAccountNumber(rs.getString("payee_account_number"));
 
-	                cheque.setAccountId(
-	                    rs.getString("account_id")
-	                );
+					cheque.setChequeAmount(rs.getBigDecimal("cheque_amount"));
 
-	                cheque.setCreatedAt(
-	                    rs.getTimestamp("created_at")
-	                );
+					cheque.setChequeDate(rs.getDate("cheque_date"));
 
-	                cheques.add(cheque);
-	            }
-	        }
-	    }
+					cheque.setChequeStatus(rs.getString("cheque_status"));
 
-	    System.out.println("=================================");
-	    System.out.println("DATABASE CHEQUE DATA");
-	    System.out.println("Batch ID    = " + batchId);
-	    System.out.println("Cheque Count = " + cheques.size());
-	    System.out.println("=================================");
+					cheque.setAccountId(rs.getString("account_id"));
 
-	    return cheques;
+					cheque.setCreatedAt(rs.getTimestamp("created_at"));
+
+					cheques.add(cheque);
+				}
+			}
+		}
+
+		System.out.println("Cheque Count for selected batch = " + cheques.size());
+
+		System.out.println("=================================");
+
+		return cheques;
 	}
-    // ============================================================
-    // UPDATE CHEQUE STATUS
-    // ============================================================
 
-    @Override
-    public void updateChequeStatus(String chequeNo, String status)
-            throws SQLException {
+	// ============================================================
+	// GET BATCH STATUS
+	// ============================================================
 
-        String sql =
-                "UPDATE outward_cheque " +
-                "SET cheque_status = ? " +
-                "WHERE cheque_number = ?";
+	@Override
+	public String getBatchStatus(String batchId) throws SQLException {
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+		String sql = "SELECT batch_status " + "FROM outward_batch " + "WHERE outward_batch_id = ?";
 
-            ps.setString(1, status);
-            ps.setString(2, chequeNo);
+		try (Connection con = DBConnection.getConnection();
 
-            int rowsUpdated = ps.executeUpdate();
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-            System.out.println("=================================");
-            System.out.println("CHEQUE STATUS UPDATE");
-            System.out.println("Cheque No = " + chequeNo);
-            System.out.println("New Status = " + status);
-            System.out.println("Rows Updated = " + rowsUpdated);
-            System.out.println("=================================");
-        }
-    }
+			ps.setString(1, batchId);
 
+			try (ResultSet rs = ps.executeQuery()) {
 
-    // ============================================================
-    // GET FRONT / BACK IMAGES
-    // ============================================================
+				if (rs.next()) {
 
-    @Override
-    public List<OutwardChequeImage> getImagesByChequeId(
-            String outwardChequeId) throws SQLException {
+					String status = rs.getString("batch_status");
 
-        List<OutwardChequeImage> images = new ArrayList<>();
+					System.out.println("=================================");
 
-        String sql =
-                "SELECT " +
-                "outward_image_id, " +
-                "outward_cheque_id, " +
-                "image_type, " +
-                "image_path, " +
-                "created_at " +
-                "FROM outward_cheque_image " +
-                "WHERE outward_cheque_id = ? " +
-                "ORDER BY image_type";
+					System.out.println("BATCH STATUS");
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+					System.out.println("Batch ID = " + batchId);
 
-            ps.setString(1, outwardChequeId);
+					System.out.println("Batch Status = [" + status + "]");
 
-            try (ResultSet rs = ps.executeQuery()) {
+					System.out.println("=================================");
 
-                while (rs.next()) {
+					return status;
+				}
+			}
+		}
 
-                    OutwardChequeImage image =
-                            new OutwardChequeImage();
+		System.out.println("No batch found for Batch ID = " + batchId);
 
-                    image.setOutwardImageId(
-                            rs.getString("outward_image_id"));
+		return null;
+	}
 
-                    image.setOutwardChequeId(
-                            rs.getString("outward_cheque_id"));
+	// ============================================================
+	// UPDATE CHEQUE STATUS
+	// ============================================================
 
-                    image.setImageType(
-                            rs.getString("image_type"));
+	@Override
+	public void updateChequeStatus(String chequeNo, String status) throws SQLException {
 
-                    image.setImagePath(
-                            rs.getString("image_path"));
+		String sql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE cheque_number = ?";
 
-                    image.setCreatedAt(
-                            rs.getTimestamp("created_at"));
+		try (Connection connection = DBConnection.getConnection();
 
-                    images.add(image);
-                }
-            }
-        }
+				PreparedStatement ps = connection.prepareStatement(sql)) {
 
-        System.out.println("=================================");
-        System.out.println("DATABASE IMAGE DATA");
-        System.out.println("Cheque ID = " + outwardChequeId);
-        System.out.println("Image Count = " + images.size());
-        System.out.println("=================================");
+			ps.setString(1, status);
+			ps.setString(2, chequeNo);
 
-        return images;
-    }
-    
-    @Override
-    public List<SendBackReason> getSendBackReasons() throws SQLException {
+			int rowsUpdated = ps.executeUpdate();
 
-        List<SendBackReason> reasons = new ArrayList<>();
+			System.out.println("=================================");
 
-        String sql =
-                "SELECT reason_id, reason_code, reason_name, reason_description "
-              + "FROM send_back_reason "
-              + "ORDER BY reason_id";
+			System.out.println("CHEQUE STATUS UPDATE");
 
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()
-        ) {
+			System.out.println("Cheque No = " + chequeNo);
 
-            while (rs.next()) {
+			System.out.println("New Status = " + status);
 
-                SendBackReason reason = new SendBackReason();
+			System.out.println("Rows Updated = " + rowsUpdated);
 
-                reason.setReasonId(rs.getString("reason_id"));
-                reason.setReasonCode(rs.getString("reason_code"));
-                reason.setReasonName(rs.getString("reason_name"));
-                reason.setReasonDescription(
-                        rs.getString("reason_description")
-                );
+			System.out.println("=================================");
+		}
+	}
 
-                reasons.add(reason);
-            }
-        }
+	// ============================================================
+	// GET FRONT / BACK IMAGES
+	// ============================================================
 
-        System.out.println("Send Back Reasons Loaded = " + reasons.size());
+	@Override
+	public List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId) throws SQLException {
 
-        return reasons;
-    }
+		List<OutwardChequeImage> images = new ArrayList<>();
+
+		String sql = "SELECT " + "outward_image_id, " + "outward_cheque_id, " + "image_type, " + "image_path, "
+				+ "created_at " + "FROM outward_cheque_image " + "WHERE outward_cheque_id = ? " + "ORDER BY image_type";
+
+		try (Connection connection = DBConnection.getConnection();
+
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setString(1, outwardChequeId);
+
+			try (ResultSet rs = ps.executeQuery()) {
+
+				while (rs.next()) {
+
+					OutwardChequeImage image = new OutwardChequeImage();
+
+					image.setOutwardImageId(rs.getString("outward_image_id"));
+
+					image.setOutwardChequeId(rs.getString("outward_cheque_id"));
+
+					image.setImageType(rs.getString("image_type"));
+
+					image.setImagePath(rs.getString("image_path"));
+
+					image.setCreatedAt(rs.getTimestamp("created_at"));
+
+					images.add(image);
+				}
+			}
+		}
+
+		System.out.println("=================================");
+
+		System.out.println("DATABASE IMAGE DATA");
+
+		System.out.println("Cheque ID = " + outwardChequeId);
+
+		System.out.println("Image Count = " + images.size());
+
+		System.out.println("=================================");
+
+		return images;
+	}
+
+	// ============================================================
+	// GET SEND BACK REASONS
+	// ============================================================
+
+	@Override
+	public List<SendBackReason> getSendBackReasons() throws SQLException {
+
+		List<SendBackReason> reasons = new ArrayList<>();
+
+		String sql = "SELECT reason_id, " + "       reason_code, " + "       reason_name, "
+				+ "       reason_description " + "FROM send_back_reason " + "ORDER BY reason_id";
+
+		try (Connection con = DBConnection.getConnection();
+
+				PreparedStatement ps = con.prepareStatement(sql);
+
+				ResultSet rs = ps.executeQuery()) {
+
+			while (rs.next()) {
+
+				SendBackReason reason = new SendBackReason();
+
+				reason.setReasonId(rs.getString("reason_id"));
+
+				reason.setReasonCode(rs.getString("reason_code"));
+
+				reason.setReasonName(rs.getString("reason_name"));
+
+				reason.setReasonDescription(rs.getString("reason_description"));
+
+				reasons.add(reason);
+			}
+		}
+
+		System.out.println("Send Back Reasons Loaded = " + reasons.size());
+
+		return reasons;
+	}
+
+	// ============================================================
+	// CHECK PAYEE ACCOUNT
+	// ============================================================
+
+	@Override
+	public boolean isPayeeAccountExists(String accountNumber) throws SQLException {
+
+		String sql = "SELECT 1 " + "FROM master_account " + "WHERE account_number = ? " + "LIMIT 1";
+
+		try (Connection con = DBConnection.getConnection();
+
+				PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setString(1, accountNumber);
+
+			try (ResultSet rs = ps.executeQuery()) {
+
+				return rs.next();
+			}
+		}
+	}
+
+	// ============================================================
+	// UPDATE BATCH STATUS
+	// ============================================================
+
+	@Override
+	public void updateBatchStatus(String batchId, String status) throws SQLException {
+
+		String sql = "UPDATE outward_batch " + "SET batch_status = ? " + "WHERE outward_batch_id = ?";
+
+		try (Connection connection = DBConnection.getConnection();
+
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setString(1, status);
+			ps.setString(2, batchId);
+
+			int rowsUpdated = ps.executeUpdate();
+
+			System.out.println("=================================");
+
+			System.out.println("BATCH STATUS UPDATE");
+
+			System.out.println("Batch ID = " + batchId);
+
+			System.out.println("New Status = " + status);
+
+			System.out.println("Rows Updated = " + rowsUpdated);
+
+			System.out.println("=================================");
+		}
+	}
 }

@@ -41,33 +41,32 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             + InwardChequeStatus.MICR_REPAIR_IN_PROGRESS.name() + "') " +
             "  )";
 
-        // 2. Sent Back Batches: ANY batch with at least one cheque sent back to maker
+        // 2. Sent Back Batches: ONLY batches that currently have active sent-back cheques needing Maker work
         String sqlSentBack = 
             "SELECT COUNT(DISTINCT b.inward_batch_id) FROM inward_batch b " +
             "WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
-            "  AND (b.batch_status IN ('" 
-            + InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-            + InwardBatchStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
-            "       OR EXISTS ( " +
-            "           SELECT 1 FROM inward_cheque sc WHERE sc.inward_batch_id = b.inward_batch_id " +
-            "           AND sc.cheque_status IN ('" 
-            + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-            + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
-            "       ))";
-
-        // 3. Return Requests: Rejections requested by Maker in actionable batches
-        String sqlReturns = 
-            "SELECT COUNT(*) FROM inward_cheque c " +
-            "JOIN inward_batch b ON c.inward_batch_id = b.inward_batch_id " +
-            "WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
-            "  AND (b.batch_status != 'CHECKER_PROCESSING_PENDING' OR EXISTS ( " +
+            "  AND EXISTS ( " +
             "      SELECT 1 FROM inward_cheque sc WHERE sc.inward_batch_id = b.inward_batch_id " +
             "      AND sc.cheque_status IN ('" 
             + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
             + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "', 'SEND_BACK_TO_MAKER') " +
-            "  )) " +
-            "  AND c.cheque_status = '" + InwardChequeStatus.REJECTION_REQUESTED.name() + "'";
+            "  )";
 
+        // 3. Return Requests: ONLY cheques requested for rejection in Maker-actionable batches
+        String sqlReturns = 
+            "SELECT COUNT(*) FROM inward_cheque c " +
+            "JOIN (" +
+            "    SELECT b.inward_batch_id " +
+            "    FROM inward_batch b " +
+            "    LEFT JOIN inward_cheque sc ON b.inward_batch_id = sc.inward_batch_id " +
+            "    WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
+            "    GROUP BY b.inward_batch_id, b.batch_status " +
+            "    HAVING COUNT(CASE WHEN sc.cheque_status IN ('SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') THEN 1 END) > 0 " +
+            "        OR (b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') " +
+            "            AND COUNT(CASE WHEN sc.cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS', 'MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') THEN 1 END) > 0) " +
+            ") maker_batches ON c.inward_batch_id = maker_batches.inward_batch_id " +
+            "WHERE c.cheque_status = '" + InwardChequeStatus.REJECTION_REQUESTED.name() + "'";
+        
         try (Connection conn = DBConnection.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(sqlPartially);
                  ResultSet rs = ps.executeQuery()) {
@@ -98,7 +97,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             "        b.batch_status, " +
             "        b.uploaded_at, " +
             "        COALESCE(b.actual_cheque_count, 0) AS total_count, " +
-            "        COUNT(CASE WHEN c.cheque_status IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'CLEARED', 'ACCEPTED', 'DATA_ENTRY_COMPLETED') THEN 1 END) AS accepted_count, " +
+            "        COUNT(CASE WHEN c.cheque_status IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'CLEARED', 'ACCEPTED', 'DATA_ENTRY_COMPLETED', 'MAKER_RETURNED') THEN 1 END) AS accepted_count, " +
             "        COUNT(CASE WHEN c.cheque_status IN ('SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') THEN 1 END) AS back_to_maker_count, " +
             "        COUNT(CASE WHEN c.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS return_request_count, " +
             "        COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS', 'MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') THEN 1 END) AS maker_work_count " +
@@ -108,7 +107,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count " +
             ") sub " +
             "WHERE sub.back_to_maker_count > 0 " +
-            "   OR (sub.batch_status != 'CHECKER_PROCESSING_PENDING' AND sub.maker_work_count > 0) " +
+            "   OR (sub.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') AND sub.maker_work_count > 0) " +
             "ORDER BY sub.uploaded_at DESC";
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
@@ -130,12 +129,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
                 dto.setBackToMakerCheques(rs.getInt("back_to_maker_count"));
                 dto.setReturnRequestCheques(rs.getInt("return_request_count"));
 
-                String bStatus = rs.getString("batch_status");
-
-                if (dto.getBackToMakerCheques() > 0 
-                        || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(bStatus)
-                        || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(bStatus)
-                        || "SEND_BACK_TO_MAKER".equalsIgnoreCase(bStatus)) {
+                if (dto.getBackToMakerCheques() > 0) {
                     dto.setDisplayStatus("Sent Back");
                 } else {
                     dto.setDisplayStatus("Partially Processed");
@@ -148,7 +142,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
         }
         return batches;
     }
-    
+
     @Override
     public String determineNextWorkspace(String batchId) {
         String sql = "SELECT " +
