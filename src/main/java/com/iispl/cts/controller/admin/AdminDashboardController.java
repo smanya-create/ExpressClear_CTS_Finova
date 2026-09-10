@@ -540,6 +540,11 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
                 "UPDATE scan_batch " +
                 "SET batch_status = 'UNPROCESSED' " +
                 "WHERE UPPER(batch_status) IN ('PENDING', 'Pending', 'RAW')";
+     // 2. Move outward pending items to UNPROCESSED (for checker)
+        String updateOutwardChequesToUnprocessedSql =
+                "UPDATE outward_cheque " +
+                "SET cheque_status = 'UNPROCESSED' " +
+                "WHERE UPPER(cheque_status) IN ('PENDING_VERIFICATION', 'PENDING', 'Pending')";
 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -553,23 +558,40 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             }
 
             // Step 2: Transition pending scan_cheques to UNPROCESSED
-            int rolledOverCheques = 0;
-            try (PreparedStatement psCheques = conn.prepareStatement(updateScanChequesToUnprocessedSql)) {
-                rolledOverCheques = psCheques.executeUpdate();
+            int rolledOverScanCheques = 0;
+            try (PreparedStatement ps = conn.prepareStatement(updateScanChequesToUnprocessedSql)) {
+                rolledOverScanCheques = ps.executeUpdate();
+            }
+            try (PreparedStatement ps = conn.prepareStatement(updateScanBatchesToUnprocessedSql)) {
+                ps.executeUpdate();
             }
 
             // Step 3: Transition pending scan_batches to UNPROCESSED
-            int rolledOverBatches = 0;
-            try (PreparedStatement psBatches = conn.prepareStatement(updateScanBatchesToUnprocessedSql)) {
-                rolledOverBatches = psBatches.executeUpdate();
+            int rolledOverCheckerCheques = 0;
+            try (PreparedStatement ps = conn.prepareStatement(updateOutwardChequesToUnprocessedSql)) {
+                rolledOverCheckerCheques = ps.executeUpdate();
             }
 
             conn.commit();
+         // Step 4: Dispatch role-targeted notifications
+            String clearingDateStr = nextDate.format(dateFormatter);
+
+            // 4a. Notify Outward Maker
+            String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
+                            + rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
+            com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+                    .sendNotification("OUTWARD_MAKER", null, makerMsg);
+
+            // 4b. Notify Outward Checker
+            String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
+                            + rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
+            com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+                    .sendNotification("OUTWARD_CHECKER", null, checkerMsg);
 
             // Step 4: Audit Trail
             AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
-                    "BOD initialized for date: " + nextDate + " | Rolled over " + rolledOverCheques 
-                    + " scan cheques and " + rolledOverBatches + " scan batches to UNPROCESSED", "SUCCESS");
+                    "BOD initialized for date: " + nextDate + " | Rolled over scan: " + rolledOverScanCheques 
+                    + ", outward: " + rolledOverCheckerCheques, "SUCCESS");
 
             // Step 5: Update UI State
             this.currentClearingDate = nextDate;
@@ -583,11 +605,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
             refreshUI();
 
-            String successMsg = "BOD Completed. Clearing date: " + currentClearingDate.format(dateFormatter);
-            if (rolledOverCheques > 0) {
-                successMsg += " (" + rolledOverCheques + " scan cheques moved to Maker Unprocessed Queue)";
-            }
-            Clients.showNotification(successMsg, "info", null, "top_center", 3500);
+            
 
         } catch (SQLException ex) {
             ex.printStackTrace();
