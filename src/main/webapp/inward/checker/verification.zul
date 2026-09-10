@@ -265,7 +265,8 @@
 
 									<!-- ================= MAKER REJECTION REQUEST ================= -->
 									<vlayout
-										id="makerRejectionRequestSection" spacing="3px"
+										id="makerRejectionRequestSection" 
+										visible="false" spacing="3px"
 										style="margin:6px 0 6px 0;
            padding:7px 9px;
            background:#FFF8E7;
