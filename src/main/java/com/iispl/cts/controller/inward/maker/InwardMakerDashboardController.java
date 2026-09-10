@@ -116,9 +116,9 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             cellDate.setParent(item);
 
             // 3. Source
-            Listcell cellSource = new Listcell(batch.getSource());
-            cellSource.setStyle("color: #475569; font-weight: 600; font-size: 12px;");
-            cellSource.setParent(item);
+//            Listcell cellSource = new Listcell(batch.getSource());
+//            cellSource.setStyle("color: #475569; font-weight: 600; font-size: 12px;");
+//            cellSource.setParent(item);
 
             // 4. Cheques Total
             Listcell cellCheques = new Listcell(String.valueOf(batch.getTotalCheques()));

@@ -111,7 +111,6 @@
           <listhead sizable="false">
             <listheader label="BATCH ID" width="150px" />
             <listheader label="DATE" width="105px" align="center" />
-            <listheader label="SOURCE" width="75px" align="center" />
             <listheader label="CHEQUES" width="80px" align="center" />
             <listheader label="ACCEPTED" width="85px" align="center" />
             <listheader label="BACK TO MAKER" width="120px" align="center" />
