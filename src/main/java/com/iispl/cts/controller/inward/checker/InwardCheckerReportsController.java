@@ -2,6 +2,7 @@ package com.iispl.cts.controller.inward.checker;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,6 +26,7 @@ import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.dto.ReportSummaryRow;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
+import com.iispl.cts.utility.inward.ReportXmlGenerator;
 
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -137,7 +139,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
             String clickedBatchId = (String) generateRrfButton.getAttribute("batchId");
             if (hasRejected && clickedBatchId != null && !clickedBatchId.isEmpty()) {
                 try {
-                    generateRrfReport(clickedBatchId);
+                    generateRrfXml(clickedBatchId);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Messagebox.show("Failed to generate RRF report: " + e.getMessage(),
@@ -163,7 +165,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         downloadButton.addEventListener("onClick", event -> {
             String clickedBatchId = (String) downloadButton.getAttribute("batchId");
-            generateBatchSummaryReport(clickedBatchId);
+            generateBatchSummaryXml(clickedBatchId);
         });
 
         downloadCell.appendChild(downloadButton);
@@ -179,7 +181,32 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
                         && cheque.getRejectionId() != null)
                 .collect(Collectors.toList());
     }
+    public void generateRrfXml(String batchId) throws Exception {
 
+        List<InwardReportChequeDTO> rejectedCheques = getRejectedCheques(batchId);
+
+        if (rejectedCheques.isEmpty()) {
+            Messagebox.show(
+                    "No rejected cheques found for batch " + batchId,
+                    "Information",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION);
+            return;
+        }
+
+        String generatedBy = String.valueOf(
+                Sessions.getCurrent().getAttribute("LOGGED_USER"));
+
+        String xml = ReportXmlGenerator.generateRrfXml(
+                batchId,
+                rejectedCheques,
+                generatedBy);
+
+        Filedownload.save(
+                xml.getBytes(StandardCharsets.UTF_8),
+                "application/xml",
+                "RRF_" + batchId + ".xml");
+    }
     public void generateRrfReport(String batchId) throws Exception {
         List<InwardReportChequeDTO> rejectedCheques = getRejectedCheques(batchId);
         System.out.println("Rejected cheques found for RRF (batch " + batchId + "): " + rejectedCheques.size());
@@ -209,6 +236,34 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         String downloadFileName = "RRF_" + batchId + ".pdf";
         Filedownload.save(baos.toByteArray(), "application/pdf", downloadFileName);
+    }
+    public void generateBatchSummaryXml(String batchId) throws Exception {
+
+        List<InwardReportChequeDTO> batchCheques = service.getChequesByBatch().stream()
+                .filter(c -> c != null && batchId.equals(c.getInwardBatchId()))
+                .collect(Collectors.toList());
+
+        if (batchCheques.isEmpty()) {
+            Messagebox.show(
+                    "No cheque data available for batch " + batchId,
+                    "Information",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION);
+            return;
+        }
+
+        String generatedBy = String.valueOf(
+                Sessions.getCurrent().getAttribute("LOGGED_USER"));
+
+        String xml = ReportXmlGenerator.generateBatchSummaryXml(
+                batchId,
+                batchCheques,
+                generatedBy);
+
+        Filedownload.save(
+                xml.getBytes(StandardCharsets.UTF_8),
+                "application/xml",
+                "Batch_Summary_" + batchId + ".xml");
     }
     public void generateBatchSummaryReport(String batchId) throws Exception {
         List<InwardReportChequeDTO> batchCheques = service.getChequesByBatch().stream()
