@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
@@ -30,8 +33,10 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     private Label lblTotalCount;
     private Label lblRepairCount;
     private Label lblDataEntryCount;
+
     private Combobox cmbStatusFilter;
     private Textbox txtSearchBatch;
+    private Button btnRefresh;
     private Listbox lstUnprocessed;
 
     private final MakerUnprocessedChequeDAO unprocessedDAO = new MakerUnprocessedChequeDAOImpl();
@@ -42,7 +47,7 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        if (cmbStatusFilter != null) {
+        if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
             cmbStatusFilter.setSelectedIndex(0);
         }
 
@@ -56,13 +61,13 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
             public void render(Listitem item, UnprocessedChequeDTO dto, int index) {
                 item.setValue(dto);
 
-                // 1. Batch & Session Info
+                // 1. Batch & Reference
                 Listcell cellBatch = new Listcell();
                 Vlayout vBatch = new Vlayout();
                 vBatch.setSpacing("2px");
                 Label lblBNo = new Label(dto.getBatchNo());
                 lblBNo.setSclass("list-batch-title");
-                Label lblSName = new Label("Rollover: " + (dto.getOriginalSessionName() != null ? dto.getOriginalSessionName() : "Prior EOD"));
+                Label lblSName = new Label(dto.getOriginalSessionName() != null ? dto.getOriginalSessionName() : "Scan Staging");
                 lblSName.setSclass("list-batch-sub");
                 vBatch.appendChild(lblBNo);
                 vBatch.appendChild(lblSName);
@@ -72,7 +77,7 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
                 Listcell cellChq = new Listcell(dto.getChequeNo() != null ? dto.getChequeNo() : "------");
                 cellChq.setSclass("list-monospace");
 
-                // 3. Sort Code
+                // 3. MICR Sort Code
                 Listcell cellSort = new Listcell(dto.getSortCode() != null ? dto.getSortCode() : "------");
                 cellSort.setSclass("list-monospace");
 
@@ -80,35 +85,44 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
                 Listcell cellAmt = new Listcell(dto.getAmount() != null ? "₹ " + df.format(dto.getAmount()) : "₹ 0.00");
                 cellAmt.setSclass("list-amount");
 
-                // 5. Maker Task Stage (MICR Repair vs Data Entry)
+                // 5. Action Stage Badge
                 Listcell cellStage = new Listcell();
                 Label lblStage = new Label();
-                if ("PENDING_REPAIR".equals(dto.getStatus()) || "RAW".equals(dto.getStatus())) {
-                    lblStage.setValue("MICR Repair Pending");
-                    lblStage.setSclass("badge-repair");
-                } else if ("PENDING_DATA_ENTRY".equals(dto.getStatus())) {
+                if ("PENDING_DATA_ENTRY".equals(dto.getStatus())) {
                     lblStage.setValue("Data Entry Pending");
                     lblStage.setSclass("badge-entry");
+                } else {
+                    lblStage.setValue("MICR Repair Pending");
+                    lblStage.setSclass("badge-repair");
                 }
                 cellStage.appendChild(lblStage);
 
                 // 6. Reason / Remarks
                 Listcell cellRemarks = new Listcell();
-                if (dto.getSendBackReason() != null) {
-                    Label lblReason = new Label(dto.getSendBackReason() + (dto.getRemarks() != null ? " (" + dto.getRemarks() + ")" : ""));
-                    lblReason.setSclass("list-remarks");
-                    cellRemarks.appendChild(lblReason);
+                String reasonText = dto.getSendBackReason() != null ? dto.getSendBackReason() : "Scan Review";
+                if (dto.getRemarks() != null && !dto.getRemarks().isEmpty()) {
+                    reasonText += " (" + dto.getRemarks() + ")";
+                }
+                Label lblReason = new Label(reasonText);
+                lblReason.setSclass("list-remarks");
+                cellRemarks.appendChild(lblReason);
+
+             // 7. Dynamic Action Button (MICR Repair -> vs Data Entry ->) in Dark Blue
+                Listcell cellAction = new Listcell();
+                Button btnAction = new Button();
+
+                // Dark blue styling
+                String darkBlueBtnStyle = "background: #1e3a8a; color: #ffffff; border: 1px solid #1e3a8a; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.1);";
+
+                if ("PENDING_DATA_ENTRY".equals(dto.getStatus())) {
+                    btnAction.setLabel("Data Entry \u2192");
+                    btnAction.setIconSclass("z-icon-pencil");
                 } else {
-                    Label lblAuto = new Label("EOD Cutoff Rollover");
-                    lblAuto.setStyle("font-size: 11px; color: #718096; font-style: italic;");
-                    cellRemarks.appendChild(lblAuto);
+                    btnAction.setLabel("MICR Repair \u2192");
+                    btnAction.setIconSclass("z-icon-wrench");
                 }
 
-                // 7. Action Button
-                Listcell cellAction = new Listcell();
-                Button btnAction = new Button("Process");
-                btnAction.setIconSclass("z-icon-pencil");
-                btnAction.setSclass("btn-process");
+                btnAction.setStyle(darkBlueBtnStyle);
                 btnAction.addEventListener("onClick", event -> routeToMakerModule(dto));
                 cellAction.appendChild(btnAction);
 
@@ -126,12 +140,12 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     public void loadUnprocessedCheques() {
         this.masterList = unprocessedDAO.getUnprocessedCheques("MAKER");
         updateCounters();
-        applyFilters();
+        applyFilters(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
     }
 
     private void updateCounters() {
         long total = masterList.size();
-        long repair = masterList.stream().filter(c -> "PENDING_REPAIR".equals(c.getStatus()) || "RAW".equals(c.getStatus())).count();
+        long repair = masterList.stream().filter(c -> "PENDING_REPAIR".equals(c.getStatus())).count();
         long dataEntry = masterList.stream().filter(c -> "PENDING_DATA_ENTRY".equals(c.getStatus())).count();
 
         if (lblTotalCount != null) lblTotalCount.setValue(String.valueOf(total));
@@ -139,33 +153,69 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         if (lblDataEntryCount != null) lblDataEntryCount.setValue(String.valueOf(dataEntry));
     }
 
+    // Triggered on dropdown select
     public void onFilterChanged() {
-        applyFilters();
+        applyFilters(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
     }
 
-    private void applyFilters() {
+    // Triggered on Enter key in search box
+    public void onOK$txtSearchBatch(Event event) {
+        applyFilters(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
+    }
+
+    // Triggered on live typing inside the search box
+    public void onChanging$txtSearchBatch(InputEvent event) {
+        applyFilters(event.getValue());
+    }
+
+    // Triggered on Refresh click
+    public void onClick$btnRefresh(Event event) {
+        handleRefresh();
+    }
+ // Overload in case ZK dispatches without Event parameter
+    public void onClick$btnRefresh() {
+        handleRefresh();
+    }
+
+    private void handleRefresh() {
+	// TODO Auto-generated method stub
+    	if (txtSearchBatch != null) {
+            txtSearchBatch.setValue("");
+        }
+        if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
+            cmbStatusFilter.setSelectedIndex(0);
+        }
+        loadUnprocessedCheques();
+        org.zkoss.zk.ui.util.Clients.showNotification("Queue refreshed", "info", null, "top_center", 1500);
+	
+}
+
+	private void applyFilters(String searchKeywordInput) {
         String stageFilter = (cmbStatusFilter != null && cmbStatusFilter.getSelectedItem() != null)
                 ? cmbStatusFilter.getSelectedItem().getValue().toString()
                 : "ALL";
-        String searchKeyword = (txtSearchBatch != null && txtSearchBatch.getValue() != null)
-                ? txtSearchBatch.getValue().trim().toLowerCase()
-                : "";
+
+        final String searchKeyword = (searchKeywordInput != null) ? searchKeywordInput.trim().toLowerCase() : "";
 
         List<UnprocessedChequeDTO> filtered = masterList.stream().filter(item -> {
+            // Stage match
             boolean matchesStage = true;
             if (!"ALL".equalsIgnoreCase(stageFilter)) {
                 if ("PENDING_REPAIR".equalsIgnoreCase(stageFilter)) {
-                    matchesStage = "PENDING_REPAIR".equals(item.getStatus()) || "RAW".equals(item.getStatus());
+                    matchesStage = "PENDING_REPAIR".equals(item.getStatus());
                 } else if ("PENDING_DATA_ENTRY".equalsIgnoreCase(stageFilter)) {
                     matchesStage = "PENDING_DATA_ENTRY".equals(item.getStatus());
                 }
             }
 
+            // Keyword match across Batch Ref, Cheque No, MICR Code, and Remarks
             boolean matchesSearch = true;
             if (!searchKeyword.isEmpty()) {
                 boolean bMatch = item.getBatchNo() != null && item.getBatchNo().toLowerCase().contains(searchKeyword);
                 boolean cMatch = item.getChequeNo() != null && item.getChequeNo().toLowerCase().contains(searchKeyword);
-                matchesSearch = bMatch || cMatch;
+                boolean micrMatch = item.getSortCode() != null && item.getSortCode().toLowerCase().contains(searchKeyword);
+                boolean rMatch = item.getRemarks() != null && item.getRemarks().toLowerCase().contains(searchKeyword);
+                matchesSearch = bMatch || cMatch || micrMatch || rMatch;
             }
 
             return matchesStage && matchesSearch;
@@ -175,11 +225,22 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     }
 
     private void routeToMakerModule(UnprocessedChequeDTO dto) {
+        if (dto == null) return;
+
+        String batchIdStr = "BAT" + dto.getBatchId();
+        String chqIdStr = "CH" + dto.getChequeId();
+
+        Sessions.getCurrent().setAttribute("SELECTED_SCAN_BATCH_ID", batchIdStr);
+        Sessions.getCurrent().setAttribute("SELECTED_SCAN_CHEQUE_ID", chqIdStr);
+        Sessions.getCurrent().setAttribute("SELECTED_CHEQUE_NO", dto.getChequeNo());
+        Sessions.getCurrent().setAttribute("SELECTED_OUTWARD_BATCH_ID", batchIdStr);
+        Sessions.getCurrent().setAttribute("SELECTED_CHEQUE_ID", chqIdStr);
+
         String targetUrl;
         if ("PENDING_DATA_ENTRY".equals(dto.getStatus())) {
-            targetUrl = "/WEB-INF/views/maker/data-entry.zul?chequeId=" + dto.getChequeId();
+            targetUrl = "/outward/maker/data-entry.zul";
         } else {
-            targetUrl = "/WEB-INF/views/maker/micr-repair.zul?chequeId=" + dto.getChequeId();
+            targetUrl = "/outward/maker/micr-repair/micr-repair.zul";
         }
         Executions.sendRedirect(targetUrl);
     }

@@ -30,9 +30,10 @@
                                         <label value="Forced EOD Unprocessed Cheques" sclass="page-heading"/>
                                         <label value="Rollover instruments requiring Maker MICR Repair or Data Entry to re-enter outward clearing." sclass="page-subheading"/>
                                     </vlayout>
-                                    <button id="btnRefresh" label="Refresh List" iconSclass="z-icon-refresh"
-                                            sclass="btn-refresh"
-                                            onClick="$composer.loadUnprocessedCheques()"/>
+                                    <button id="btnRefresh" 
+        iconSclass="z-icon-refresh"
+        tooltiptext="Refresh Queue"
+        style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" />
                                 </hlayout>
                             </vlayout>
 
@@ -72,8 +73,10 @@
                                     <comboitem label="Needs Data Entry" value="PENDING_DATA_ENTRY"/>
                                 </combobox>
 
-                                <textbox id="txtSearchBatch" placeholder="Search Batch / Cheque No..." width="240px"
-                                         onOK="$composer.onFilterChanged()" instant="true"/>
+                               <textbox id="txtSearchBatch" placeholder="Search Batch / Cheque No / MICR..." width="260px"
+         instant="true"
+         onChanging="$composer.onChanging$txtSearchBatch(event)"
+         onOK="$composer.onOK$txtSearchBatch(event)"/>
                             </hlayout>
 
                             <!-- Listbox -->
@@ -86,7 +89,7 @@
                                     <listheader label="Amount" width="140px" align="right"/>
                                     <listheader label="Required Task" width="180px"/>
                                     <listheader label="Reason / Remarks" hflex="1"/>
-                                    <listheader label="Action" width="120px" align="center"/>
+                                    <listheader label="Action" width="145px" align="center"/>
                                 </listhead>
                             </listbox>
                         </vlayout>
