@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.text.SimpleDateFormat;
 
 import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
@@ -254,10 +255,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	        return;
 	    }
 
-	    /*
-	     * Always load a fresh list when opening
-	     * a batch for verification.
-	     */
 	    verificationOrderInitialized = false;
 
 	    currentBatchCheques =
@@ -278,22 +275,12 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	        return;
 	    }
 
-	    /*
-	     * Put Maker rejection-request cheques first.
-	     */
 	    currentBatchCheques =
 	            prioritizeRejectionRequests(
 	                    currentBatchCheques
 	            );
 
-	    /*
-	     * Lock this ordering for navigation.
-	     */
 	    verificationOrderInitialized = true;
-
-	    /*
-	     * Start from first cheque.
-	     */
 	    currentChequeIndex = 0;
 
 	    currentChequeId =
@@ -372,13 +359,15 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				lblChequeStatus.setValue(safeValue(cheque.getChequeStatus()));
 			}
 
-			loadMakerRejectionRemarks(cheque.getInwardChequeId());
-
+			loadMakerRejectionRemarks(cheque);
+			
 			if (lblReceivedDate != null && cheque.getCreatedAt() != null) {
+			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-				lblReceivedDate.setValue(cheque.getCreatedAt().toString());
+			    lblReceivedDate.setValue(
+			            dateFormat.format(cheque.getCreatedAt())
+			    );
 			}
-
 			updateVerificationCount();
 
 			if (lblMicrCode != null) {
@@ -449,16 +438,31 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		}
 	}
 
-	private void loadMakerRejectionRemarks(String inwardChequeId) {
+	private void loadMakerRejectionRemarks(InwardCheque cheque) {
 
-	    if (lblMakerRejectionRemarks == null) {
+	    // Always hide first
+	    if (makerRejectionRequestSection != null) {
+	        makerRejectionRequestSection.setVisible(false);
+	    }
+
+	    if (lblMakerRejectionRemarks != null) {
+	        lblMakerRejectionRemarks.setValue("");
+	    }
+
+	    if (cheque == null) {
 	        return;
 	    }
 
-	    // Clear old value first
-	    lblMakerRejectionRemarks.setValue("");
+	    String status = cheque.getChequeStatus();
 
-	    if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
+	    // Show ONLY for rejection-requested cheques
+	    if (!"REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+	        return;
+	    }
+
+	    String chequeId = cheque.getInwardChequeId();
+
+	    if (chequeId == null || chequeId.trim().isEmpty()) {
 	        return;
 	    }
 
@@ -473,11 +477,16 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	    try (Connection conn = DBConnection.getConnection();
 	         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	        ps.setString(1, inwardChequeId.trim());
+	        ps.setString(1, chequeId.trim());
 
 	        try (ResultSet rs = ps.executeQuery()) {
 
 	            if (rs.next()) {
+
+	                // Request exists → SHOW the section
+	                if (makerRejectionRequestSection != null) {
+	                    makerRejectionRequestSection.setVisible(true);
+	                }
 
 	                String rejectedReasonId =
 	                        rs.getString("rejected_reason_id");
@@ -485,17 +494,19 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                String remarks =
 	                        rs.getString("remarks");
 
-	               	                RejectedReason reason = null;
+	                RejectedReason reason = null;
 
 	                List<RejectedReason> reasons =
 	                        rejectedReasonService.getAllRejectedReasons();
 
 	                if (reasons != null) {
+
 	                    for (RejectedReason r : reasons) {
 
 	                        if (r != null
 	                                && r.getRejectedReasonId() != null
-	                                && r.getRejectedReasonId().equals(rejectedReasonId)) {
+	                                && r.getRejectedReasonId()
+	                                   .equals(rejectedReasonId)) {
 
 	                            reason = r;
 	                            break;
@@ -503,7 +514,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                    }
 	                }
 
-	                StringBuilder displayText = new StringBuilder();
+	                StringBuilder displayText =
+	                        new StringBuilder();
 
 	                // REASON
 	                displayText.append("Reason: ");
@@ -526,7 +538,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                // REMARKS
 	                displayText.append("\nRemarks: ");
 
-	                if (remarks != null && !remarks.trim().isEmpty()) {
+	                if (remarks != null
+	                        && !remarks.trim().isEmpty()) {
 
 	                    displayText.append(remarks.trim());
 
@@ -535,12 +548,15 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                    displayText.append("No remarks provided");
 	                }
 
-	                lblMakerRejectionRemarks.setValue(
-	                        displayText.toString());
+	                if (lblMakerRejectionRemarks != null) {
+
+	                    lblMakerRejectionRemarks.setValue(
+	                            displayText.toString());
+	                }
 
 	                System.out.println(
 	                        "DEBUG: Maker rejection request loaded for cheque: "
-	                        + inwardChequeId);
+	                        + chequeId);
 
 	                System.out.println(
 	                        "DEBUG: Rejected Reason ID: "
@@ -549,14 +565,25 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                System.out.println(
 	                        "DEBUG: Rejected Reason: "
 	                        + (reason != null
-	                                ? reason.getRejectedReasonCode()
-	                                  + " - "
-	                                  + reason.getRejectedReasonName()
-	                                : "NOT FOUND"));
+	                            ? reason.getRejectedReasonCode()
+	                              + " - "
+	                              + reason.getRejectedReasonName()
+	                            : "NOT FOUND"));
 
 	                System.out.println(
 	                        "DEBUG: Maker Remarks: "
 	                        + remarks);
+
+	            } else {
+
+	                // No pending request → keep section hidden
+	                if (makerRejectionRequestSection != null) {
+	                    makerRejectionRequestSection.setVisible(false);
+	                }
+
+	                System.out.println(
+	                        "DEBUG: No pending Maker rejection request for cheque: "
+	                        + chequeId);
 	            }
 	        }
 
@@ -564,11 +591,15 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        e.printStackTrace();
 
-	        lblMakerRejectionRemarks.setValue(
-	                "Unable to load Maker rejection request.");
+	        if (makerRejectionRequestSection != null) {
+	            makerRejectionRequestSection.setVisible(false);
+	        }
+
+	        if (lblMakerRejectionRemarks != null) {
+	            lblMakerRejectionRemarks.setValue("");
+	        }
 	    }
-	}
-	
+	}	
 	private void loadChequeImage(InwardCheque cheque, String imageType) {
 
 	    zoomScale = 1.0;
@@ -752,7 +783,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	   
 	}
-	
 	private List<InwardCheque> prioritizeRejectionRequests(
 	        List<InwardCheque> cheques) {
 
@@ -760,8 +790,17 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	        return cheques;
 	    }
 
-	    List<InwardCheque> rejectionRequests = new ArrayList<>();
-	    List<InwardCheque> normalCheques = new ArrayList<>();
+	    // 1. Maker Returned
+	    List<InwardCheque> makerReturnedCheques =
+	            new ArrayList<>();
+
+	    // 2. Rejection Requested
+	    List<InwardCheque> rejectionRequests =
+	            new ArrayList<>();
+
+	    // 3. Remaining cheques
+	    List<InwardCheque> normalCheques =
+	            new ArrayList<>();
 
 	    for (InwardCheque cheque : cheques) {
 
@@ -771,31 +810,57 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        String status = cheque.getChequeStatus();
 
-	        if ("REJECTION_REQUESTED".equalsIgnoreCase(status)
+	        // FIRST PRIORITY - Maker Returned
+	        if ("MAKER_RETURNED".equalsIgnoreCase(status)) {
+
+	            makerReturnedCheques.add(cheque);
+
+	        }
+	        // SECOND PRIORITY - Rejection Request
+	        else if ("REJECTION_REQUESTED".equalsIgnoreCase(status)
 	                || "REJECTED_REQUESTED".equalsIgnoreCase(status)) {
 
 	            rejectionRequests.add(cheque);
 
-	        } else {
+	        }
+	        // THIRD PRIORITY - Remaining
+	        else {
 
 	            normalCheques.add(cheque);
 	        }
 	    }
 
-	    // Put rejection-request cheques first
-	    rejectionRequests.addAll(normalCheques);
+	    // Final order:
+	    // Maker Returned
+	    // Rejection Requested
+	    // Remaining
+	    List<InwardCheque> finalOrder =
+	            new ArrayList<>();
 
-	    System.out.println("DEBUG: Rejection-request count = "
-	            + (rejectionRequests.size() - normalCheques.size()));
+	    finalOrder.addAll(makerReturnedCheques);
+	    finalOrder.addAll(rejectionRequests);
+	    finalOrder.addAll(normalCheques);
 
-	    System.out.println("DEBUG: Normal cheque count = "
+	    // Debug
+	    System.out.println(
+	            "DEBUG: Maker Returned count = "
+	            + makerReturnedCheques.size());
+
+	    System.out.println(
+	            "DEBUG: Rejection Request count = "
+	            + rejectionRequests.size());
+
+	    System.out.println(
+	            "DEBUG: Remaining cheque count = "
 	            + normalCheques.size());
 
-	    System.out.println("DEBUG: Final verification order:");
+	    System.out.println(
+	            "DEBUG: Final verification order:");
 
-	    for (int i = 0; i < rejectionRequests.size(); i++) {
+	    for (int i = 0; i < finalOrder.size(); i++) {
 
-	        InwardCheque cheque = rejectionRequests.get(i);
+	        InwardCheque cheque =
+	                finalOrder.get(i);
 
 	        System.out.println(
 	                (i + 1)
@@ -807,11 +872,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                + cheque.getChequeStatus());
 	    }
 
-	    return rejectionRequests;
-	}
-	
-	
-	
+	    return finalOrder;
+	}	
 	
 	public void onClick$btnFront() {
 
