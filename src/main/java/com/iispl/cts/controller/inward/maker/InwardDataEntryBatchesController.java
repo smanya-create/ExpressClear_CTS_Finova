@@ -12,6 +12,7 @@ import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Include;
@@ -38,7 +39,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private Textbox txtSearchBatch;
     private Button btnClearSearch;
 
-    // Cache the full batch list for instant search/filtering
+    // Cache full batch list for rapid client-side filtering
     private List<DataEntryBatchItemDTO> allBatches = new ArrayList<>();
 
     @Override
@@ -52,15 +53,21 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         loadBatches();
     }
 
+    // Live filtering as user types
+    public void onChanging$txtSearchBatch(InputEvent event) {
+        applyFilter(event.getValue());
+    }
+
+    // Fallback for Enter key or manual blur
     public void onChange$txtSearchBatch() {
-        applyFilter();
+        applyFilter(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
     }
 
     public void onClick$btnClearSearch() {
         if (txtSearchBatch != null) {
             txtSearchBatch.setValue("");
         }
-        applyFilter();
+        applyFilter("");
     }
 
     private void initListRenderer() {
@@ -70,30 +77,30 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
             @Override
             public void render(Listitem item, DataEntryBatchItemDTO batch, int index) throws Exception {
                 item.setValue(batch);
-                item.setStyle("border-bottom: 1px solid #f1f5f9;");
 
-                // 1. Batch ID
+                // 1. Batch ID (Outward Deep Blue Link Color)
                 Listcell cellBatchId = new Listcell(batch.getBatchId());
-                cellBatchId.setStyle("font-weight: 700; color: #1e293b;");
+                cellBatchId.setStyle("font-weight: 700; color: #1d4ed8; text-align: center;");
                 cellBatchId.setParent(item);
 
                 // 2. Total Items
                 Listcell cellTotal = new Listcell(String.valueOf(batch.getTotalCheques()));
-                cellTotal.setStyle("font-weight: 500;");
+                cellTotal.setStyle("font-weight: 600; color: #334155; text-align: center;");
                 cellTotal.setParent(item);
 
                 // 3. Pending Items
                 Listcell cellPending = new Listcell(String.valueOf(batch.getPendingCheques()));
-                cellPending.setStyle("color: #0284c7; font-weight: 600;");
+                cellPending.setStyle("font-weight: 700; color: #0284c7; text-align: center;");
                 cellPending.setParent(item);
 
                 // 4. Batch Total Amount
                 Listcell cellAmount = new Listcell(batch.getFormattedAmount());
-                cellAmount.setStyle("font-family: monospace; font-size: 13px; font-weight: 600;");
+                cellAmount.setStyle("font-family: monospace; font-size: 13px; font-weight: 600; color: #1e293b; text-align: center;");
                 cellAmount.setParent(item);
 
-                // 5. Dynamic Operational Status Badge
+                // 5. Dynamic Status Badge
                 Listcell cellStatus = new Listcell();
+                cellStatus.setStyle("text-align: center;");
                 Label lblStatus = new Label(batch.getDisplayStatus());
                 lblStatus.setStyle(batch.getStatusBadgeStyle());
                 lblStatus.setParent(cellStatus);
@@ -101,6 +108,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
                 // 6. Action Button
                 Listcell cellAction = new Listcell();
+                cellAction.setStyle("text-align: center;");
                 Button btnAction = new Button(batch.getActionLabel());
                 btnAction.setSclass(batch.getActionButtonClass());
                 btnAction.addEventListener(Events.ON_CLICK, (Event e) -> processBatch(batch));
@@ -112,15 +120,13 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
     private void loadBatches() {
         this.allBatches = fetchEligibleBatches();
-        applyFilter();
+        applyFilter(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
     }
 
-    private void applyFilter() {
+    private void applyFilter(String rawQuery) {
         if (lbxDataEntryBatches == null) return;
 
-        String query = (txtSearchBatch != null && txtSearchBatch.getValue() != null)
-                ? txtSearchBatch.getValue().trim().toLowerCase()
-                : "";
+        String query = (rawQuery != null) ? rawQuery.trim().toLowerCase() : "";
 
         if (query.isEmpty()) {
             lbxDataEntryBatches.setModel(new ListModelList<>(allBatches));
@@ -142,9 +148,9 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-        // 1. Discovery driven by Cheque Status:
-        //    Surfaces any batch containing cheques that need Data Entry or were Sent Back by Checker.
-        // 2. Blocks batches that still have unresolved MICR repair cheques.
+        // Query discovers batches based on cheque status:
+        // 1. Checks for DATA_ENTRY_PENDING, DATA_ENTRY_IN_PROGRESS, or SEND_BACK_TO_MAKER_DATA_ENTRY
+        // 2. Filters out batches with unresolved MICR repair items
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +
@@ -193,7 +199,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                 int sentBackCount = rs.getInt("sent_back_cheques");
                 String bStatus = rs.getString("batch_status");
                 
-                // If any cheque in this batch was sent back, reflect it in the badge
+                // Prioritize Sent Back status label when instruments are returned
                 if (sentBackCount > 0) {
                     dto.setBatchStatus(InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name());
                 } else {
@@ -208,7 +214,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
             Messagebox.show("Database error loading batches: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
         }
 
-        // Prioritize returned/sent-back batches to appear first
+        // Keep Sent Back items ordered at the top
         batches.sort((b1, b2) -> {
             boolean b1Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b1.getBatchStatus());
             boolean b2Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b2.getBatchStatus());
@@ -219,7 +225,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
         return batches;
     }
-    
+
     private void processBatch(DataEntryBatchItemDTO batch) {
         if (batch.getPendingCheques() == 0) {
             submitBatchToChecker(batch.getBatchId());
