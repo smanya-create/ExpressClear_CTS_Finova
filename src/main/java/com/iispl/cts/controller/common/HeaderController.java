@@ -263,6 +263,8 @@ public class HeaderController extends GenericForwardComposer<Component> {
             lblUnreadBadge.setVisible(true);
         }
 
+        final String activeRole = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "";
+
         for (NotificationItem item : notificationQueue) {
             Div notifRow = new Div();
             notifRow.setStyle("padding: 10px 14px; border-bottom: 1px solid #edf2f7; cursor: pointer; transition: background 0.2s;");
@@ -282,10 +284,52 @@ public class HeaderController extends GenericForwardComposer<Component> {
             itemLayout.appendChild(timeLabel);
             notifRow.appendChild(itemLayout);
 
+            // Click action: Close popup and redirect to Unprocessed Queue
+            notifRow.addEventListener("onClick", (Event event) -> {
+                if (popupNotifications != null) {
+                    popupNotifications.close();
+                }
+                handleNotificationClick(activeRole, item.message);
+            });
+
             containerNotificationList.appendChild(notifRow);
         }
     }
 
+    /**
+     * Inspects the target role and message intent, routing the user to the appropriate screen.
+     */
+    private void handleNotificationClick(String role, String message) {
+        if (role == null) return;
+
+        String normalizedRole = role.trim().toUpperCase();
+
+        // 1. If it's a Maker or relates to scan/repair queues
+        if ("OUTWARD_MAKER".equals(normalizedRole)) {
+            Executions.sendRedirect("/outward/maker/unprocessed-cheques.zul");
+            return;
+        }
+
+        // 2. If it's a Checker
+        if ("OUTWARD_CHECKER".equals(normalizedRole)) {
+            Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
+            return;
+        }
+
+        // 3. Fallback routing based on message keywords if role is generic or ADMIN
+        if (message != null) {
+            String lowerMsg = message.toLowerCase();
+            if (lowerMsg.contains("checker") || lowerMsg.contains("verification")) {
+                Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
+            } else if (lowerMsg.contains("maker") || lowerMsg.contains("repair") || lowerMsg.contains("data entry") || lowerMsg.contains("unprocessed")) {
+                Executions.sendRedirect("/outward/maker/unprocessed-cheques.zul");
+            }
+        }
+    }
+
+	/**
+     * Inspects the target role and message intent, routing the user to the appropriate screen.
+     */
     public void onClickMarkAllRead() {
         String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
         String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
