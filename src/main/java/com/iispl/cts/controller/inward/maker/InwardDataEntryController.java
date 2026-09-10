@@ -194,16 +194,15 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			for (InwardCheque c : allCheques) {
 				String st = c.getChequeStatus();
 				if (hasSentBack) {
-					// Sent-back batch: ONLY load cheques that require Maker rework
-					if (isSentBackStatus(st) || InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st)) {
+					// ONLY load active sent-back items needing Maker rework
+					if (isSentBackStatus(st)) {
 						this.activeQueue.add(c);
 					}
 				} else {
-					// Normal batch: only load pending or in-progress data entry cheques
+					// Normal batch: only load pending/in-progress items
 					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
 							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-							|| "DATA_ENTRY_REQUIRED".equalsIgnoreCase(st)
-							|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st)) {
+							|| "DATA_ENTRY_REQUIRED".equalsIgnoreCase(st)) {
 						this.activeQueue.add(c);
 					}
 				}
