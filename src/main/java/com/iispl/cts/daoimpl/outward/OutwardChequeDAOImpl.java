@@ -600,4 +600,42 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 
 		return outwardCheque;
 	}
+
+	@Override
+	public List<OutwardCheque> getOnHoldCheques(String outwardBatchId) {
+
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
+		}
+
+		List<OutwardCheque> chequeList = new ArrayList<>();
+
+		String sql = "SELECT " + "outward_cheque_id, " + "outward_batch_id, " + "cheque_number, " + "micr_code, "
+				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
+				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
+				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
+				+ "FROM outward_cheque " + "WHERE outward_batch_id = ? " + "AND UPPER(TRIM(cheque_status)) IN (?, ?) "
+				+ "ORDER BY outward_cheque_id";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, outwardBatchId.trim());
+			preparedStatement.setString(2, "PENDING_DATA_ENTRY");
+			preparedStatement.setString(3, "PENDING_MICR_REPAIR");
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
+				while (resultSet.next()) {
+					chequeList.add(mapOutwardCheque(resultSet));
+				}
+			}
+
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch returned cheques for outward batch: " + outwardBatchId,
+					exception);
+		}
+
+		return chequeList;
+	}
 }

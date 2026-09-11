@@ -34,4 +34,6 @@ public interface OutwardChequeDAO {
 	List<OutwardCheque> getOutwardMicrRepairCheques(String outwardBatchId);
 
 	void saveOutwardMicrRepair(OutwardCheque cheque);
+
+	List<OutwardCheque> getOnHoldCheques(String outwardBatchId);
 }

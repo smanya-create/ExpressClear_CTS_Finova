@@ -9,24 +9,21 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Datebox;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
-import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
-import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.outward.OutwardBatchService;
 import com.iispl.cts.service.outward.OutwardChequeService;
 import com.iispl.cts.service.outward.ScanService;
-import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
@@ -35,12 +32,8 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String MODE_NEW = "PENDING_DATA_ENTRY";
-	private static final String MODE_SEND_BACK = "SEND_BACK_MAKER";
-
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
-	private static final String STATUS_SEND_BACK_MAKER = "SEND_BACK_MAKER";
 	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
 	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
 
@@ -79,35 +72,28 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	private Textbox outwardChequeDataEntryTxtPayeeAccount;
 	private Textbox outwardChequeDataEntryTxtPayeeName;
 	private Textbox outwardChequeDataEntryTxtDraweeName;
-
 	private Textbox outwardChequeDataEntryTxtRejectRemarks;
-	private Combobox outwardChequeDataEntryCmbRejectReason;
 
 	private Window outwardChequeDataEntryRejectWindow;
 
 	private OutwardBatchService outwardBatchService;
 	private OutwardChequeService outwardChequeService;
 	private ScanService scanService;
-	private RejectedReasonService rejectedReasonService;
 
 	private String outwardBatchId;
 	private String scannedBatchId;
-	private String mode;
 
 	private OutwardBatch outwardBatch;
-	private List<OutwardCheque> outwardChequeList;
-	private List<ScanCheque> scanChequeList;
+	private List<OutwardCheque> outwardChequeList = new ArrayList<>();
+	private List<ScanCheque> scanChequeList = new ArrayList<>();
 
 	private int currentChequeIndex = -1;
-
 	private boolean showingFrontImage = true;
-
 	private double imageZoom = 1.0;
 	private int imageRotation = 0;
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
-
 		super.doAfterCompose(component);
 
 		outwardChequeDataEntryWin = (Window) component.getFellow("outwardChequeDataEntryWin");
@@ -178,121 +164,60 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		outwardChequeDataEntryTxtDraweeName = (Textbox) component.getFellow("outwardChequeDataEntryTxtDraweeName");
 
-		outwardChequeDataEntryCmbRejectReason = (Combobox) outwardChequeDataEntryRejectWindow
-				.getFellow("outwardChequeDataEntryCmbRejectReason");
-
 		outwardChequeDataEntryTxtRejectRemarks = (Textbox) outwardChequeDataEntryRejectWindow
 				.getFellow("outwardChequeDataEntryTxtRejectRemarks");
 
 		outwardBatchService = new OutwardBatchServiceImpl();
 		outwardChequeService = new OutwardChequeServiceImpl();
 		scanService = new ScanServiceImpl();
-		rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 
 		outwardChequeDataEntryRejectWindow.setVisible(false);
 		outwardChequeDataEntryBtnSubmit.setDisabled(true);
 
 		resolveBatchContext();
 		registerEvents();
-		loadRejectedReasons();
 		loadDataEntryData();
 	}
 
 	private void resolveBatchContext() {
-
-		Object dynamicMode = Executions.getCurrent().getAttribute("mode");
-
-		if (dynamicMode != null && !dynamicMode.toString().trim().isEmpty()) {
-
-			mode = dynamicMode.toString().trim();
-		}
-
 		Object dynamicBatchId = Executions.getCurrent().getAttribute("batchId");
 
 		if (dynamicBatchId != null && !dynamicBatchId.toString().trim().isEmpty()) {
-
-			if (MODE_SEND_BACK.equalsIgnoreCase(mode)) {
-
-				outwardBatchId = dynamicBatchId.toString().trim();
-
-			} else {
-
-				scannedBatchId = dynamicBatchId.toString().trim();
-			}
+			scannedBatchId = dynamicBatchId.toString().trim();
 		}
 
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
+		if (scannedBatchId == null || scannedBatchId.isEmpty()) {
 			String requestBatchId = Executions.getCurrent().getParameter("batchId");
 
 			if (requestBatchId != null && !requestBatchId.trim().isEmpty()) {
-
-				if (MODE_SEND_BACK.equalsIgnoreCase(mode)) {
-
-					outwardBatchId = requestBatchId.trim();
-
-				} else {
-
-					scannedBatchId = requestBatchId.trim();
-				}
+				scannedBatchId = requestBatchId.trim();
 			}
 		}
 
-		if (mode == null || mode.trim().isEmpty()) {
-
-			String requestMode = Executions.getCurrent().getParameter("mode");
-
-			if (requestMode != null && !requestMode.trim().isEmpty()) {
-
-				mode = requestMode.trim();
-			}
-		}
-
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
+		if (scannedBatchId == null || scannedBatchId.isEmpty()) {
 			Object argumentBatchId = Executions.getCurrent().getArg().get("batchId");
 
 			if (argumentBatchId != null && !argumentBatchId.toString().trim().isEmpty()) {
-
-				if (MODE_SEND_BACK.equalsIgnoreCase(mode)) {
-
-					outwardBatchId = argumentBatchId.toString().trim();
-
-				} else {
-
-					scannedBatchId = argumentBatchId.toString().trim();
-				}
+				scannedBatchId = argumentBatchId.toString().trim();
 			}
 		}
 
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
+		if (scannedBatchId == null || scannedBatchId.isEmpty()) {
 			Object sessionBatchId = Executions.getCurrent().getSession().getAttribute("OUTWARD_DATA_ENTRY_BATCH_ID");
 
 			if (sessionBatchId != null && !sessionBatchId.toString().trim().isEmpty()) {
-
 				scannedBatchId = sessionBatchId.toString().trim();
 			}
 		}
 
-		if (MODE_SEND_BACK.equalsIgnoreCase(mode)) {
-
-			if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-
-				throw new IllegalArgumentException("Outward batch ID is required");
-			}
-
-		} else {
-
-			if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
-				throw new IllegalArgumentException("Scanned batch ID is required");
-			}
+		if (scannedBatchId == null || scannedBatchId.isEmpty()) {
+			throw new IllegalArgumentException("Scanned batch ID is required");
 		}
+
+		scannedBatchId = scannedBatchId.trim();
 	}
 
 	private void registerEvents() {
-
 		outwardChequeDataEntryBtnBack.addEventListener("onClick", event -> backToDataEntryList());
 
 		outwardChequeDataEntryBtnImageToggle.addEventListener("onClick", event -> toggleChequeImage());
@@ -321,16 +246,52 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void loadDataEntryData() {
-
 		try {
+			ScanBatch scanBatch = scanService.getBatchById(scannedBatchId);
 
-			if (MODE_SEND_BACK.equalsIgnoreCase(mode)) {
+			if (scanBatch == null) {
+				throw new IllegalStateException("Scan batch not found: " + scannedBatchId);
+			}
 
-				loadSendBackData();
+			scanChequeList = scanService.getChequesByBatchId(scannedBatchId);
 
-			} else {
+			if (scanChequeList == null) {
+				scanChequeList = new ArrayList<>();
+			}
 
-				loadFreshScanData();
+			outwardBatchId = outwardBatchService.getOutwardBatchIdByScannedBatchId(scannedBatchId);
+
+			outwardChequeList = new ArrayList<>();
+
+			if (outwardBatchId != null && !outwardBatchId.trim().isEmpty()) {
+
+				outwardBatchId = outwardBatchId.trim();
+
+				outwardBatch = outwardBatchService.getBatchById(outwardBatchId);
+
+				List<OutwardCheque> existing = outwardChequeService.getChequesByBatchId(outwardBatchId);
+
+				if (existing != null) {
+					outwardChequeList.addAll(existing);
+				}
+			}
+
+			List<OutwardCheque> ordered = new ArrayList<>();
+
+			for (ScanCheque scanCheque : scanChequeList) {
+				OutwardCheque existing = findExistingOutwardCheque(scanCheque, outwardChequeList);
+
+				if (existing != null) {
+					ordered.add(existing);
+				} else {
+					ordered.add(buildOutwardChequeFromScan(scanCheque));
+				}
+			}
+
+			outwardChequeList = ordered;
+
+			if (outwardBatch == null) {
+				outwardBatch = createDisplayBatch(scanBatch);
 			}
 
 			updateBatchSummary();
@@ -338,106 +299,25 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			currentChequeIndex = findFirstPendingCheque();
 
 			if (currentChequeIndex >= 0) {
-
 				loadCurrentCheque();
 
 				outwardChequeDataEntryBtnSaveNext.setDisabled(false);
 
-				outwardChequeDataEntryBtnReject.setDisabled(MODE_SEND_BACK.equalsIgnoreCase(mode));
-
+				outwardChequeDataEntryBtnReject.setDisabled(false);
 			} else {
-
-				clearChequeFields();
-
-				outwardChequeDataEntryBtnSaveNext.setDisabled(true);
-
-				outwardChequeDataEntryBtnReject.setDisabled(true);
-
-				outwardChequeDataEntryLblRecord.setValue("ALL CHEQUES COMPLETED");
-
-				outwardChequeDataEntryLblSummaryChequeNumber.setValue("-");
-
-				updateNavigationButtons();
+				showAllCompleted();
 			}
 
 			updateSubmitButton();
 
 		} catch (Exception exception) {
-
 			clearPage();
 
 			showStatus("Unable to load cheque data: " + safeExceptionMessage(exception));
 		}
 	}
 
-	private void loadFreshScanData() {
-
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
-			throw new IllegalStateException("Scanned batch ID is required");
-		}
-
-		scannedBatchId = scannedBatchId.trim();
-
-		ScanBatch scanBatch = scanService.getBatchById(scannedBatchId);
-
-		if (scanBatch == null) {
-
-			throw new IllegalStateException("Scan batch not found: " + scannedBatchId);
-		}
-
-		scanChequeList = scanService.getChequesByBatchId(scannedBatchId);
-
-		if (scanChequeList == null) {
-
-			scanChequeList = new ArrayList<>();
-		}
-
-		outwardBatchId = null;
-		outwardBatch = null;
-
-		String existingOutwardBatchId = outwardBatchService.getOutwardBatchIdByScannedBatchId(scannedBatchId);
-
-		if (existingOutwardBatchId != null && !existingOutwardBatchId.trim().isEmpty()) {
-
-			outwardBatchId = existingOutwardBatchId.trim();
-
-			outwardBatch = outwardBatchService.getBatchById(outwardBatchId);
-		}
-
-		List<OutwardCheque> existingCheques = new ArrayList<>();
-
-		if (outwardBatchId != null && !outwardBatchId.trim().isEmpty()) {
-
-			List<OutwardCheque> loadedCheques = outwardChequeService.getChequesByBatchId(outwardBatchId);
-
-			if (loadedCheques != null) {
-
-				existingCheques.addAll(loadedCheques);
-			}
-		}
-
-		outwardChequeList = new ArrayList<>();
-
-		for (ScanCheque scanCheque : scanChequeList) {
-
-			OutwardCheque existing = findExistingOutwardCheque(scanCheque, existingCheques);
-
-			if (existing != null) {
-
-				outwardChequeList.add(existing);
-
-			} else {
-
-				outwardChequeList.add(buildOutwardChequeFromScan(scanCheque));
-			}
-		}
-
-		outwardBatch = createDisplayBatch(scanBatch);
-	}
-
 	private OutwardBatch createDisplayBatch(ScanBatch scanBatch) {
-
 		if (scanBatch == null) {
 			return null;
 		}
@@ -448,109 +328,172 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 				: scannedBatchId.trim();
 
 		batch.setOutwardBatchId(batchId);
-
 		batch.setBatchReferenceId(scanBatch.getBatchReferenceId());
-
 		batch.setActualChequeCount(scanBatch.getActualChequeCount());
-
 		batch.setActualTotalAmount(scanBatch.getActualTotalAmount());
-
 		batch.setBatchStatus(scanBatch.getBatchStatus());
-
 		batch.setUploadedBy(scanBatch.getUploadedBy());
-
 		batch.setUploadedAt(scanBatch.getUploadedAt());
 
 		return batch;
 	}
 
-	private void loadSendBackData() {
+	private OutwardCheque buildOutwardChequeFromScan(ScanCheque scanCheque) {
 
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+		OutwardCheque cheque = new OutwardCheque();
 
-			throw new IllegalStateException("Outward batch ID is required");
-		}
+		cheque.setOutwardBatchId(outwardBatchId);
+		cheque.setChequeNumber(scanCheque.getChequeNumber());
+		cheque.setMicrCode(scanCheque.getMicrCode());
+		cheque.setDraweeName(scanCheque.getDraweeName());
+		cheque.setDraweeAccountNumber(scanCheque.getDraweeAccountNumber());
+		cheque.setPayeeName(scanCheque.getPayeeName());
+		cheque.setPayeeAccountNumber(scanCheque.getPayeeAccountNumber());
+		cheque.setChequeAmount(scanCheque.getChequeAmount());
+		cheque.setChequeDate(scanCheque.getChequeDate());
+		cheque.setAccountId(scanCheque.getAccountId());
+		cheque.setCreatedAt(scanCheque.getCreatedAt());
+		cheque.setCityCode(scanCheque.getCityCode());
+		cheque.setBankCode(scanCheque.getBankCode());
+		cheque.setBranchCode(scanCheque.getBranchCode());
+		cheque.setChequeImageFront(scanCheque.getChequeImageFront());
+		cheque.setChequeImageBack(scanCheque.getChequeImageBack());
+		cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
 
-		outwardBatchId = outwardBatchId.trim();
-
-		outwardBatch = outwardBatchService.getBatchById(outwardBatchId);
-
-		if (outwardBatch == null) {
-
-			throw new IllegalStateException("Outward batch not found: " + outwardBatchId);
-		}
-
-		scannedBatchId = outwardBatchService.getScannedBatchIdByOutwardBatchId(outwardBatchId);
-
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
-			throw new IllegalStateException("Scanned batch not found for outward batch: " + outwardBatchId);
-		}
-
-		scannedBatchId = scannedBatchId.trim();
-
-		outwardChequeList = outwardChequeService.getChequesByBatchId(outwardBatchId);
-
-		if (outwardChequeList == null) {
-
-			outwardChequeList = new ArrayList<>();
-		}
-
-		scanChequeList = scanService.getChequesByBatchId(scannedBatchId);
-
-		if (scanChequeList == null) {
-
-			scanChequeList = new ArrayList<>();
-		}
+		return cheque;
 	}
 
-	private int findFirstPendingCheque() {
+	private OutwardCheque findExistingOutwardCheque(ScanCheque scanCheque, List<OutwardCheque> existingCheques) {
 
-		if (outwardChequeList == null) {
-			return -1;
+		if (scanCheque == null || existingCheques == null) {
+			return null;
 		}
 
-		for (int index = 0; index < outwardChequeList.size(); index++) {
+		String number = safeValue(scanCheque.getChequeNumber()).trim();
 
-			OutwardCheque cheque = outwardChequeList.get(index);
+		String front = safeValue(scanCheque.getChequeImageFront()).trim();
 
+		String back = safeValue(scanCheque.getChequeImageBack()).trim();
+
+		for (OutwardCheque cheque : existingCheques) {
 			if (cheque == null) {
 				continue;
 			}
 
-			String status = safeValue(cheque.getChequeStatus()).trim();
+			if (!front.isEmpty() && front.equalsIgnoreCase(safeValue(cheque.getChequeImageFront()).trim())) {
+				return cheque;
+			}
 
-			if (STATUS_PENDING_VERIFICATION.equalsIgnoreCase(status)
-					|| STATUS_REJECTION_REQUEST.equalsIgnoreCase(status)) {
+			if (!back.isEmpty() && back.equalsIgnoreCase(safeValue(cheque.getChequeImageBack()).trim())) {
+				return cheque;
+			}
 
+			if (!number.isEmpty() && number.equalsIgnoreCase(safeValue(cheque.getChequeNumber()).trim())) {
+				return cheque;
+			}
+		}
+
+		return null;
+	}
+
+	private ScanCheque findMatchingScanCheque(OutwardCheque cheque) {
+
+		if (cheque == null || scanChequeList == null) {
+			return null;
+		}
+
+		String number = safeValue(cheque.getChequeNumber()).trim();
+
+		String front = safeValue(cheque.getChequeImageFront()).trim();
+
+		String back = safeValue(cheque.getChequeImageBack()).trim();
+
+		for (ScanCheque scanCheque : scanChequeList) {
+			if (scanCheque == null) {
 				continue;
 			}
 
-			if (STATUS_PENDING_CHECKER_PROCESS.equalsIgnoreCase(status)) {
-				continue;
+			if (!front.isEmpty() && front.equalsIgnoreCase(safeValue(scanCheque.getChequeImageFront()).trim())) {
+				return scanCheque;
 			}
 
-			return index;
+			if (!back.isEmpty() && back.equalsIgnoreCase(safeValue(scanCheque.getChequeImageBack()).trim())) {
+				return scanCheque;
+			}
+
+			if (!number.isEmpty() && number.equalsIgnoreCase(safeValue(scanCheque.getChequeNumber()).trim())) {
+				return scanCheque;
+			}
+		}
+
+		if (currentChequeIndex >= 0 && currentChequeIndex < scanChequeList.size()) {
+			return scanChequeList.get(currentChequeIndex);
+		}
+
+		return null;
+	}
+
+	private boolean isEditableCheque(OutwardCheque cheque) {
+		return cheque != null && STATUS_PENDING_DATA_ENTRY.equalsIgnoreCase(safeValue(cheque.getChequeStatus()).trim());
+	}
+
+	private int findFirstPendingCheque() {
+		return findNextPendingCheque(0);
+	}
+
+	private int findNextPendingCheque(int startIndex) {
+		if (outwardChequeList == null) {
+			return -1;
+		}
+
+		for (int index = Math.max(0, startIndex); index < outwardChequeList.size(); index++) {
+
+			if (isEditableCheque(outwardChequeList.get(index))) {
+				return index;
+			}
+		}
+
+		return -1;
+	}
+
+	private int findPreviousNavigableCheque(int startIndex) {
+		if (outwardChequeList == null) {
+			return -1;
+		}
+
+		for (int index = startIndex; index >= 0; index--) {
+
+			if (outwardChequeList.get(index) != null) {
+				return index;
+			}
+		}
+
+		return -1;
+	}
+
+	private int findNextNavigableCheque(int startIndex) {
+		if (outwardChequeList == null) {
+			return -1;
+		}
+
+		for (int index = Math.max(0, startIndex); index < outwardChequeList.size(); index++) {
+
+			if (outwardChequeList.get(index) != null) {
+				return index;
+			}
 		}
 
 		return -1;
 	}
 
 	private void loadCurrentCheque() {
-
-		if (outwardChequeList == null || currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
-
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
 
 		OutwardCheque cheque = outwardChequeList.get(currentChequeIndex);
 
-		if (cheque == null) {
-			return;
-		}
-
-		ScanCheque scanCheque = currentChequeIndex < scanChequeList.size() ? scanChequeList.get(currentChequeIndex)
-				: findMatchingScanCheque(cheque);
+		ScanCheque scanCheque = findMatchingScanCheque(cheque);
 
 		if (cheque.getOutwardChequeId() != null && !cheque.getOutwardChequeId().trim().isEmpty()) {
 
@@ -568,133 +511,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		resetImageState();
 
 		if (scanCheque != null) {
-
 			loadFrontImage(scanCheque);
-
 		} else {
-
 			loadImageFromOutwardCheque(cheque);
 		}
 
 		updateSummary();
 		updateSaveButton();
 		updateNavigationButtons();
-	}
-
-	private ScanCheque findMatchingScanCheque(OutwardCheque outwardCheque) {
-
-		if (outwardCheque == null || scanChequeList == null) {
-
-			return null;
-		}
-
-		String frontImage = outwardCheque.getChequeImageFront();
-
-		String backImage = outwardCheque.getChequeImageBack();
-
-		if (frontImage != null && !frontImage.trim().isEmpty()) {
-
-			for (ScanCheque scanCheque : scanChequeList) {
-
-				if (scanCheque == null) {
-					continue;
-				}
-
-				String scanFrontImage = safeValue(scanCheque.getChequeImageFront()).trim();
-
-				if (frontImage.trim().equalsIgnoreCase(scanFrontImage)) {
-
-					return scanCheque;
-				}
-			}
-		}
-
-		if (backImage != null && !backImage.trim().isEmpty()) {
-
-			for (ScanCheque scanCheque : scanChequeList) {
-
-				if (scanCheque == null) {
-					continue;
-				}
-
-				String scanBackImage = safeValue(scanCheque.getChequeImageBack()).trim();
-
-				if (backImage.trim().equalsIgnoreCase(scanBackImage)) {
-
-					return scanCheque;
-				}
-			}
-		}
-
-		String chequeNumber = outwardCheque.getChequeNumber();
-
-		if (chequeNumber != null && !chequeNumber.trim().isEmpty()) {
-
-			for (ScanCheque scanCheque : scanChequeList) {
-
-				if (scanCheque == null) {
-					continue;
-				}
-
-				String scanChequeNumber = scanCheque.getChequeNumber();
-
-				if (scanChequeNumber != null && chequeNumber.trim().equalsIgnoreCase(scanChequeNumber.trim())) {
-
-					return scanCheque;
-				}
-			}
-		}
-
-		if (currentChequeIndex >= 0 && currentChequeIndex < scanChequeList.size()) {
-
-			return scanChequeList.get(currentChequeIndex);
-		}
-
-		return null;
-	}
-
-	private OutwardCheque findExistingOutwardCheque(ScanCheque scanCheque, List<OutwardCheque> existingCheques) {
-
-		if (scanCheque == null || existingCheques == null || existingCheques.isEmpty()) {
-
-			return null;
-		}
-
-		String chequeNumber = safeValue(scanCheque.getChequeNumber()).trim();
-
-		String frontImage = safeValue(scanCheque.getChequeImageFront()).trim();
-
-		String backImage = safeValue(scanCheque.getChequeImageBack()).trim();
-
-		for (OutwardCheque cheque : existingCheques) {
-
-			if (cheque == null) {
-				continue;
-			}
-
-			String existingChequeNumber = safeValue(cheque.getChequeNumber()).trim();
-
-			String existingFront = safeValue(cheque.getChequeImageFront()).trim();
-
-			String existingBack = safeValue(cheque.getChequeImageBack()).trim();
-
-			if (!frontImage.isEmpty() && frontImage.equalsIgnoreCase(existingFront)) {
-
-				return cheque;
-			}
-
-			if (!backImage.isEmpty() && backImage.equalsIgnoreCase(existingBack)) {
-
-				return cheque;
-			}
-
-			if (!chequeNumber.isEmpty() && chequeNumber.equalsIgnoreCase(existingChequeNumber)) {
-
-				return cheque;
-			}
-		}
-
-		return null;
 	}
 
 	private void populateChequeFields(OutwardCheque cheque) {
@@ -717,13 +541,6 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 	private void populateChequeFieldsFromScan(ScanCheque scanCheque) {
 
-		if (scanCheque == null) {
-
-			clearChequeFields();
-
-			return;
-		}
-
 		outwardChequeDataEntryTxtChequeNumber.setValue(safeValue(scanCheque.getChequeNumber()));
 
 		outwardChequeDataEntryTxtAmount
@@ -740,164 +557,83 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		outwardChequeDataEntryTxtDraweeName.setValue(safeValue(scanCheque.getDraweeName()));
 	}
 
-	private OutwardCheque buildOutwardChequeFromScan(ScanCheque scanCheque) {
-
-		if (scanCheque == null) {
-
-			throw new IllegalArgumentException("Scan cheque cannot be null");
-		}
-
-		OutwardCheque cheque = new OutwardCheque();
-
-		cheque.setOutwardBatchId(outwardBatchId);
-
-		cheque.setChequeNumber(scanCheque.getChequeNumber());
-
-		cheque.setMicrCode(scanCheque.getMicrCode());
-
-		cheque.setDraweeName(scanCheque.getDraweeName());
-
-		cheque.setDraweeAccountNumber(scanCheque.getDraweeAccountNumber());
-
-		cheque.setPayeeName(scanCheque.getPayeeName());
-
-		cheque.setPayeeAccountNumber(scanCheque.getPayeeAccountNumber());
-
-		cheque.setChequeAmount(scanCheque.getChequeAmount());
-
-		cheque.setChequeDate(scanCheque.getChequeDate());
-
-		cheque.setAccountId(scanCheque.getAccountId());
-
-		cheque.setCreatedAt(scanCheque.getCreatedAt());
-
-		cheque.setCityCode(scanCheque.getCityCode());
-
-		cheque.setBankCode(scanCheque.getBankCode());
-
-		cheque.setBranchCode(scanCheque.getBranchCode());
-
-		cheque.setChequeImageFront(scanCheque.getChequeImageFront());
-
-		cheque.setChequeImageBack(scanCheque.getChequeImageBack());
-
-		cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
-
-		return cheque;
-	}
-
-	private String safeValue(String value) {
-
-		return value == null ? "" : value;
-	}
-
-	private String safeExceptionMessage(Exception exception) {
-
-		if (exception == null || exception.getMessage() == null || exception.getMessage().trim().isEmpty()) {
-
-			return "Unexpected error";
-		}
-
-		return exception.getMessage();
-	}
-
-	private void updateBatchSummary() {
-
-		int totalCheques = scanChequeList == null ? 0 : scanChequeList.size();
-
-		int completedCheques = 0;
-
-		if (outwardBatchId != null && !outwardBatchId.trim().isEmpty()) {
-
-			completedCheques = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
-		}
-
-		int remainingCheques = Math.max(totalCheques - completedCheques, 0);
-
-		String displayBatchId = outwardBatchId != null && !outwardBatchId.trim().isEmpty() ? outwardBatchId
-				: scannedBatchId;
-
-		outwardChequeDataEntryLblBatchId.setValue(safeValue(displayBatchId));
-
-		outwardChequeDataEntryLblTotal.setValue(String.valueOf(totalCheques));
-
-		outwardChequeDataEntryLblRemaining.setValue(String.valueOf(remainingCheques));
-	}
-
 	private void updateSummary() {
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 
-		if (outwardChequeList == null || currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
-
-			outwardChequeDataEntryLblRecord.setValue("CHEQUE COMPLETED");
-
-			outwardChequeDataEntryLblSummaryChequeNumber.setValue("-");
-
+			showAllCompleted();
 			return;
 		}
 
 		OutwardCheque cheque = outwardChequeList.get(currentChequeIndex);
 
-		outwardChequeDataEntryLblRecord.setValue("CHEQUE " + (currentChequeIndex + 1));
+		String number = safeValue(cheque.getChequeNumber());
 
-		String chequeNumber = safeValue(cheque.getChequeNumber());
+		if (number.isEmpty()) {
+			ScanCheque scanCheque = findMatchingScanCheque(cheque);
 
-		if (chequeNumber.isEmpty() && scanChequeList != null && currentChequeIndex < scanChequeList.size()) {
-
-			chequeNumber = safeValue(scanChequeList.get(currentChequeIndex).getChequeNumber());
+			if (scanCheque != null) {
+				number = safeValue(scanCheque.getChequeNumber());
+			}
 		}
 
-		outwardChequeDataEntryLblSummaryChequeNumber.setValue(chequeNumber);
+		int total = scanChequeList == null ? 0 : scanChequeList.size();
+
+		outwardChequeDataEntryLblRecord.setValue("CHEQUE " + (currentChequeIndex + 1) + " OF " + total);
+
+		outwardChequeDataEntryLblSummaryChequeNumber.setValue(number);
 	}
 
-	private void updateSubmitButton() {
+	private void updateBatchSummary() {
+		int total = scanChequeList == null ? 0 : scanChequeList.size();
 
-		if (scanChequeList == null || scanChequeList.isEmpty()) {
+		int completed = 0;
 
-			outwardChequeDataEntryBtnSubmit.setDisabled(true);
+		if (outwardBatchId != null && !outwardBatchId.trim().isEmpty()) {
 
-			return;
+			completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
 		}
 
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+		int remaining = Math.max(total - completed, 0);
 
-			outwardChequeDataEntryBtnSubmit.setDisabled(true);
+		outwardChequeDataEntryLblBatchId
+				.setValue(outwardBatchId != null && !outwardBatchId.trim().isEmpty() ? outwardBatchId : scannedBatchId);
 
-			return;
-		}
+		outwardChequeDataEntryLblTotal.setValue(String.valueOf(total));
 
-		int totalCheques = scanChequeList.size();
-
-		int completedCheques = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
-
-		boolean allCompleted = totalCheques > 0 && completedCheques == totalCheques;
-
-		outwardChequeDataEntryBtnSubmit.setDisabled(!allCompleted);
+		outwardChequeDataEntryLblRemaining.setValue(String.valueOf(remaining));
 	}
 
 	private void updateSaveButton() {
-
-		if (currentChequeIndex < 0 || outwardChequeList == null || currentChequeIndex >= outwardChequeList.size()) {
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 
 			outwardChequeDataEntryBtnSaveNext.setDisabled(true);
 
 			return;
 		}
 
-		boolean lastCheque = currentChequeIndex == outwardChequeList.size() - 1;
+		int next = findNextPendingCheque(currentChequeIndex + 1);
 
-		if (lastCheque) {
+		outwardChequeDataEntryBtnSaveNext.setLabel(next >= 0 ? "SAVE & NEXT" : "SAVE");
 
-			outwardChequeDataEntryBtnSaveNext.setLabel("SAVE");
+		outwardChequeDataEntryBtnSaveNext.setDisabled(false);
+	}
 
-		} else {
+	private void updateSubmitButton() {
+		if (scanChequeList == null || scanChequeList.isEmpty() || outwardBatchId == null
+				|| outwardBatchId.trim().isEmpty()) {
 
-			outwardChequeDataEntryBtnSaveNext.setLabel("SAVE & NEXT");
+			outwardChequeDataEntryBtnSubmit.setDisabled(true);
+
+			return;
 		}
+
+		int completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
+
+		outwardChequeDataEntryBtnSubmit.setDisabled(completed != scanChequeList.size());
 	}
 
 	private void updateNavigationButtons() {
-
-		if (outwardChequeList == null || outwardChequeList.isEmpty() || currentChequeIndex < 0) {
+		if (currentChequeIndex < 0 || outwardChequeList == null || outwardChequeList.isEmpty()) {
 
 			outwardChequeDataEntryBtnPrevious.setDisabled(true);
 
@@ -906,43 +642,37 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
-		outwardChequeDataEntryBtnPrevious.setDisabled(currentChequeIndex <= 0);
+		outwardChequeDataEntryBtnPrevious.setDisabled(findPreviousNavigableCheque(currentChequeIndex - 1) < 0);
 
-		outwardChequeDataEntryBtnNext.setDisabled(currentChequeIndex >= outwardChequeList.size() - 1);
+		outwardChequeDataEntryBtnNext.setDisabled(findNextNavigableCheque(currentChequeIndex + 1) < 0);
 	}
 
 	private void previousCheque() {
+		int index = findPreviousNavigableCheque(currentChequeIndex - 1);
 
-		if (currentChequeIndex <= 0 || outwardChequeList == null) {
-
+		if (index < 0) {
 			return;
 		}
 
-		currentChequeIndex--;
-
+		currentChequeIndex = index;
 		loadCurrentCheque();
-
 		hideStatus();
 	}
 
 	private void nextCheque() {
+		int index = findNextNavigableCheque(currentChequeIndex + 1);
 
-		if (outwardChequeList == null || currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size() - 1) {
-
+		if (index < 0) {
 			return;
 		}
 
-		currentChequeIndex++;
-
+		currentChequeIndex = index;
 		loadCurrentCheque();
-
 		hideStatus();
 	}
 
 	private void saveAndNext() {
-
-		if (currentChequeIndex < 0 || outwardChequeList == null || currentChequeIndex >= outwardChequeList.size()) {
-
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
 
@@ -951,38 +681,27 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		try {
-
 			OutwardCheque cheque = outwardChequeList.get(currentChequeIndex);
 
 			if (cheque == null) {
-
 				cheque = new OutwardCheque();
-
 				outwardChequeList.set(currentChequeIndex, cheque);
 			}
 
 			populateOutwardChequeFromFields(cheque);
 
+			cheque.setOutwardBatchId(outwardBatchId);
 			cheque.setChequeStatus(STATUS_PENDING_VERIFICATION);
 
-			ScanCheque scanCheque = currentChequeIndex < scanChequeList.size() ? scanChequeList.get(currentChequeIndex)
-					: findMatchingScanCheque(cheque);
+			OutwardCheque saved = outwardChequeService.saveMakerCheque(scannedBatchId, cheque);
 
-			if (scanCheque == null) {
-
-				throw new IllegalStateException("Scan cheque not found");
-			}
-
-			OutwardCheque savedCheque = outwardChequeService.saveMakerCheque(scannedBatchId, cheque);
-
-			if (savedCheque == null) {
-
+			if (saved == null) {
 				throw new IllegalStateException("Unable to save cheque data");
 			}
 
-			outwardChequeList.set(currentChequeIndex, savedCheque);
+			outwardChequeList.set(currentChequeIndex, saved);
 
-			outwardBatchId = savedCheque.getOutwardBatchId();
+			outwardBatchId = saved.getOutwardBatchId();
 
 			if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
 
@@ -995,50 +714,18 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 			updateBatchSummary();
 
-			boolean lastCheque = currentChequeIndex == outwardChequeList.size() - 1;
+			int next = findNextPendingCheque(currentChequeIndex + 1);
 
-			if (!lastCheque) {
+			if (next >= 0) {
 
-				int nextIndex = findNextPendingCheque(currentChequeIndex + 1);
+				currentChequeIndex = next;
+				loadCurrentCheque();
 
-				if (nextIndex >= 0) {
-
-					currentChequeIndex = nextIndex;
-
-					loadCurrentCheque();
-
-				} else {
-
-					currentChequeIndex = -1;
-
-					clearChequeFields();
-
-					outwardChequeDataEntryBtnSaveNext.setDisabled(true);
-
-					outwardChequeDataEntryBtnReject.setDisabled(true);
-
-					outwardChequeDataEntryLblRecord.setValue("ALL CHEQUES COMPLETED");
-
-					outwardChequeDataEntryLblSummaryChequeNumber.setValue("-");
-
-					updateNavigationButtons();
-
-					showStatus("All cheque data has been completed.");
-				}
+				showStatus("Cheque saved successfully.");
 
 			} else {
 
-				clearChequeFields();
-
-				outwardChequeDataEntryBtnSaveNext.setDisabled(true);
-
-				outwardChequeDataEntryBtnReject.setDisabled(true);
-
-				outwardChequeDataEntryLblRecord.setValue("ALL CHEQUES COMPLETED");
-
-				outwardChequeDataEntryLblSummaryChequeNumber.setValue("-");
-
-				updateNavigationButtons();
+				showAllCompleted();
 
 				showStatus("All cheque data has been completed.");
 			}
@@ -1049,35 +736,6 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 			showStatus("Unable to save cheque data: " + safeExceptionMessage(exception));
 		}
-	}
-
-	private int findNextPendingCheque(int startIndex) {
-
-		if (outwardChequeList == null) {
-			return -1;
-		}
-
-		for (int index = startIndex; index < outwardChequeList.size(); index++) {
-
-			OutwardCheque cheque = outwardChequeList.get(index);
-
-			if (cheque == null) {
-				continue;
-			}
-
-			String status = safeValue(cheque.getChequeStatus()).trim();
-
-			if (STATUS_PENDING_VERIFICATION.equalsIgnoreCase(status)
-					|| STATUS_REJECTION_REQUEST.equalsIgnoreCase(status)
-					|| STATUS_PENDING_CHECKER_PROCESS.equalsIgnoreCase(status)) {
-
-				continue;
-			}
-
-			return index;
-		}
-
-		return -1;
 	}
 
 	private void populateOutwardChequeFromFields(OutwardCheque cheque) {
@@ -1092,27 +750,20 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		cheque.setDraweeName(outwardChequeDataEntryTxtDraweeName.getValue().trim());
 
-		String amount = outwardChequeDataEntryTxtAmount.getValue().trim();
-
-		cheque.setChequeAmount(new BigDecimal(amount));
+		cheque.setChequeAmount(new BigDecimal(outwardChequeDataEntryTxtAmount.getValue().trim()));
 
 		if (outwardChequeDataEntryDtChequeDate.getValue() != null) {
 
 			cheque.setChequeDate(new Date(outwardChequeDataEntryDtChequeDate.getValue().getTime()));
-
-		} else {
-
-			cheque.setChequeDate(null);
 		}
 	}
 
 	private boolean validateFields() {
-
 		String chequeNumber = outwardChequeDataEntryTxtChequeNumber.getValue().trim();
 
 		String amount = outwardChequeDataEntryTxtAmount.getValue().trim();
 
-		String micrCode = outwardChequeDataEntryTxtMicrCode.getValue().trim();
+		String micr = outwardChequeDataEntryTxtMicrCode.getValue().trim();
 
 		String payeeAccount = outwardChequeDataEntryTxtPayeeAccount.getValue().trim();
 
@@ -1121,24 +772,17 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		String draweeName = outwardChequeDataEntryTxtDraweeName.getValue().trim();
 
 		if (chequeNumber.isEmpty()) {
-
 			showStatus("Cheque number is required.");
-
 			return false;
 		}
 
 		if (amount.isEmpty()) {
-
 			showStatus("Cheque amount is required.");
-
 			return false;
 		}
 
 		try {
-
-			BigDecimal parsedAmount = new BigDecimal(amount);
-
-			if (parsedAmount.compareTo(BigDecimal.ZERO) < 0) {
+			if (new BigDecimal(amount).compareTo(BigDecimal.ZERO) < 0) {
 
 				showStatus("Cheque amount cannot be negative.");
 
@@ -1159,31 +803,24 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return false;
 		}
 
-		if (micrCode.isEmpty()) {
-
+		if (micr.isEmpty()) {
 			showStatus("MICR code is required.");
-
 			return false;
 		}
 
 		if (payeeAccount.isEmpty()) {
-
 			showStatus("Payee account number is required.");
 
 			return false;
 		}
 
 		if (payeeName.isEmpty()) {
-
 			showStatus("Payee name is required.");
-
 			return false;
 		}
 
 		if (draweeName.isEmpty()) {
-
 			showStatus("Drawee name is required.");
-
 			return false;
 		}
 
@@ -1193,34 +830,13 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void toggleChequeImage() {
-
-		if (currentChequeIndex < 0 || scanChequeList == null || currentChequeIndex >= scanChequeList.size()) {
-
-			return;
-		}
-
-		ScanCheque scanCheque = scanChequeList.get(currentChequeIndex);
-
-		if (scanCheque != null) {
-
-			if (showingFrontImage) {
-
-				loadBackImage(scanCheque);
-
-			} else {
-
-				loadFrontImage(scanCheque);
-			}
-
-			return;
-		}
-
-		if (outwardChequeList == null || currentChequeIndex >= outwardChequeList.size()) {
-
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
 
 		OutwardCheque cheque = outwardChequeList.get(currentChequeIndex);
+
+		ScanCheque scanCheque = findMatchingScanCheque(cheque);
 
 		if (showingFrontImage) {
 
@@ -1228,7 +844,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 			outwardChequeDataEntryBtnImageToggle.setLabel("FRONT VIEW");
 
-			loadImage(cheque.getChequeImageBack());
+			loadImage(scanCheque != null ? scanCheque.getChequeImageBack() : cheque.getChequeImageBack());
 
 		} else {
 
@@ -1236,77 +852,40 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 			outwardChequeDataEntryBtnImageToggle.setLabel("BACK VIEW");
 
-			loadImage(cheque.getChequeImageFront());
+			loadImage(scanCheque != null ? scanCheque.getChequeImageFront() : cheque.getChequeImageFront());
 		}
 	}
 
 	private void loadFrontImage(ScanCheque scanCheque) {
 
-		if (scanCheque == null) {
-
-			showImageUnavailable();
-
-			return;
-		}
-
 		showingFrontImage = true;
 
 		outwardChequeDataEntryBtnImageToggle.setLabel("BACK VIEW");
 
-		loadImage(scanCheque.getChequeImageFront());
-	}
-
-	private void loadBackImage(ScanCheque scanCheque) {
-
-		if (scanCheque == null) {
-
-			showImageUnavailable();
-
-			return;
-		}
-
-		showingFrontImage = false;
-
-		outwardChequeDataEntryBtnImageToggle.setLabel("FRONT VIEW");
-
-		loadImage(scanCheque.getChequeImageBack());
+		loadImage(scanCheque == null ? null : scanCheque.getChequeImageFront());
 	}
 
 	private void loadImageFromOutwardCheque(OutwardCheque cheque) {
 
-		if (cheque == null) {
-
-			showImageUnavailable();
-
-			return;
-		}
-
-		if (showingFrontImage) {
-
-			loadImage(cheque.getChequeImageFront());
-
-		} else {
-
-			loadImage(cheque.getChequeImageBack());
-		}
+		loadImage(showingFrontImage ? cheque.getChequeImageFront() : cheque.getChequeImageBack());
 	}
 
 	private void loadImage(String imagePath) {
-
 		if (imagePath == null || imagePath.trim().isEmpty()) {
 
 			showImageUnavailable();
-
 			return;
 		}
 
 		try {
-			
-			if (!imagePath.startsWith("/")) {
-			    imagePath = "/" + imagePath;
+			String path = imagePath.trim();
+
+			if (!path.startsWith("/") && !path.startsWith("http://") && !path.startsWith("https://")) {
+
+				path = "/" + path;
 			}
 
-			outwardChequeDataEntryChequeImage.setSrc(imagePath);
+			outwardChequeDataEntryChequeImage.setSrc(path);
 
 			outwardChequeDataEntryChequeImage.setVisible(true);
 
@@ -1321,55 +900,37 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void showImageUnavailable() {
-
 		outwardChequeDataEntryChequeImage.setVisible(false);
 
 		outwardChequeDataEntryLblImageMessage.setVisible(true);
 	}
 
 	private void resetImageState() {
-
 		showingFrontImage = true;
-
 		imageZoom = 1.0;
-
 		imageRotation = 0;
 
 		outwardChequeDataEntryBtnImageToggle.setLabel("BACK VIEW");
 
-		outwardChequeDataEntryChequeImage.setStyle("transform: scale(1.0) rotate(0deg);");
+		outwardChequeDataEntryChequeImage.setStyle("transform:scale(1) rotate(0deg);");
 	}
 
 	private void zoomIn() {
-
-		imageZoom += 0.1;
-
-		if (imageZoom > 3.0) {
-
-			imageZoom = 3.0;
-		}
+		imageZoom = Math.min(imageZoom + 0.1, 3.0);
 
 		applyImageTransform();
 	}
 
 	private void zoomOut() {
-
-		imageZoom -= 0.1;
-
-		if (imageZoom < 0.5) {
-
-			imageZoom = 0.5;
-		}
+		imageZoom = Math.max(imageZoom - 0.1, 0.5);
 
 		applyImageTransform();
 	}
 
 	private void rotateImage() {
-
 		imageRotation += 90;
 
 		if (imageRotation >= 360) {
-
 			imageRotation = 0;
 		}
 
@@ -1377,28 +938,19 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void resetImage() {
-
 		imageZoom = 1.0;
-
 		imageRotation = 0;
 
 		applyImageTransform();
 	}
 
 	private void applyImageTransform() {
-
 		outwardChequeDataEntryChequeImage
-				.setStyle("transform: scale(" + imageZoom + ") rotate(" + imageRotation + "deg);");
+				.setStyle("transform:scale(" + imageZoom + ") rotate(" + imageRotation + "deg);");
 	}
 
 	private void openRejectWindow() {
-
-		if (currentChequeIndex < 0 || outwardChequeList == null || currentChequeIndex >= outwardChequeList.size()) {
-
-			return;
-		}
-
-		if (MODE_SEND_BACK.equalsIgnoreCase(mode)) {
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
 
@@ -1411,37 +963,26 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
-		outwardChequeDataEntryCmbRejectReason.setSelectedItem(null);
-
 		outwardChequeDataEntryTxtRejectRemarks.setValue("");
 
 		outwardChequeDataEntryRejectWindow.setVisible(true);
+
+		outwardChequeDataEntryTxtRejectRemarks.setFocus(true);
 	}
 
 	private void closeRejectWindow() {
-
 		outwardChequeDataEntryRejectWindow.setVisible(false);
 	}
 
 	private void requestReject() {
-
-		if (currentChequeIndex < 0 || outwardChequeList == null || currentChequeIndex >= outwardChequeList.size()) {
-
-			return;
-		}
-
-		if (outwardChequeDataEntryCmbRejectReason.getSelectedItem() == null) {
-
-			showStatus("Please select a rejection reason.");
-
+		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
 
 		String remarks = outwardChequeDataEntryTxtRejectRemarks.getValue().trim();
 
 		if (remarks.isEmpty()) {
-
-			showStatus("Please enter remarks for rejection.");
+			showStatus("Please enter rejection remarks.");
 
 			return;
 		}
@@ -1449,6 +990,8 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		OutwardCheque cheque = outwardChequeList.get(currentChequeIndex);
 
 		if (cheque == null || cheque.getOutwardChequeId() == null || cheque.getOutwardChequeId().trim().isEmpty()) {
+
+			closeRejectWindow();
 
 			showStatus("Save the cheque before creating a rejection request.");
 
@@ -1459,7 +1002,6 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 				STATUS_REJECTION_REQUEST);
 
 		if (!updated) {
-
 			showStatus("Unable to create rejection request.");
 
 			return;
@@ -1469,77 +1011,26 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		closeRejectWindow();
 
-		showStatus("Rejection request created for cheque " + safeValue(cheque.getChequeNumber()) + ".");
+		int next = findNextPendingCheque(currentChequeIndex + 1);
 
-		int nextIndex = findNextPendingCheque(currentChequeIndex + 1);
+		if (next >= 0) {
 
-		if (nextIndex >= 0) {
-
-			currentChequeIndex = nextIndex;
-
+			currentChequeIndex = next;
 			loadCurrentCheque();
-
-			outwardChequeDataEntryBtnSaveNext.setDisabled(false);
-
-			outwardChequeDataEntryBtnReject.setDisabled(false);
 
 		} else {
 
-			currentChequeIndex = -1;
-
-			clearChequeFields();
-
-			outwardChequeDataEntryBtnSaveNext.setDisabled(true);
-
-			outwardChequeDataEntryBtnReject.setDisabled(true);
-
-			outwardChequeDataEntryLblRecord.setValue("ALL CHEQUES COMPLETED");
-
-			outwardChequeDataEntryLblSummaryChequeNumber.setValue("-");
-
-			updateNavigationButtons();
+			showAllCompleted();
 		}
 
 		updateBatchSummary();
 		updateSubmitButton();
-	}
 
-	private void loadRejectedReasons() {
-
-		try {
-
-			List<RejectedReason> reasons = rejectedReasonService.getAllRejectedReasons();
-
-			outwardChequeDataEntryCmbRejectReason.getItems().clear();
-
-			if (reasons == null) {
-				return;
-			}
-
-			for (RejectedReason reason : reasons) {
-
-				if (reason == null) {
-					continue;
-				}
-
-				Comboitem item = new Comboitem();
-
-				item.setLabel(safeValue(reason.getRejectedReasonName()));
-
-				item.setValue(reason.getRejectedReasonId());
-
-				outwardChequeDataEntryCmbRejectReason.appendChild(item);
-			}
-
-		} catch (Exception exception) {
-
-			showStatus("Unable to load rejection reasons.");
-		}
+		showStatus("Rejection request created for cheque " + safeValue(cheque.getChequeNumber()) + ".");
 	}
 
 	private void submitToChecker() {
-
-		if (outwardChequeList == null || outwardChequeList.isEmpty()) {
+		if (scanChequeList == null || scanChequeList.isEmpty()) {
 
 			showStatus("There are no cheques to submit.");
 
@@ -1548,16 +1039,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
 
-			showStatus("Save at least one cheque before submission.");
+			showStatus("Save the cheques before submission.");
 
 			return;
 		}
 
-		int totalCheques = scanChequeList == null ? 0 : scanChequeList.size();
+		int completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
 
-		int completedCheques = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
-
-		if (completedCheques != totalCheques) {
+		if (completed != scanChequeList.size()) {
 
 			showStatus("All cheques must be completed before submission.");
 
@@ -1566,42 +1055,241 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
-		boolean updated = outwardBatchService.updateOutWardBatchStatus(outwardBatchId, STATUS_PENDING_CHECKER_PROCESS);
+		showSubmitConfirmation(scanChequeList.size(), completed);
+	}
 
-		if (!updated) {
+	private void showSubmitConfirmation(int total, int completed) {
 
-			showStatus("Unable to submit batch to Checker.");
+		Window confirmation = new Window();
 
-			return;
+		confirmation.setTitle("SUBMIT TO CHECKER");
+
+		confirmation.setBorder("normal");
+		confirmation.setClosable(false);
+		confirmation.setMode("modal");
+		confirmation.setWidth("460px");
+		confirmation.setPosition("center");
+
+		confirmation.setStyle("border-radius:8px;");
+
+		Vlayout content = new Vlayout();
+
+		content.setWidth("100%");
+		content.setSpacing("14px");
+
+		content.setStyle("padding:24px;box-sizing:border-box;");
+
+		Label title = new Label("READY FOR CHECKER VERIFICATION");
+
+		title.setStyle("font-size:17px;" + "font-weight:700;" + "color:#17375e;");
+
+		content.appendChild(title);
+
+		Label message = new Label("Batch " + outwardBatchId + " has completed all cheque data entry.");
+
+		message.setStyle("font-size:13px;" + "color:#52657d;");
+
+		content.appendChild(message);
+
+		Label completedLabel = new Label("Completed Cheques: " + completed + " / " + total);
+
+		completedLabel.setStyle("font-size:13px;" + "font-weight:600;" + "color:#34445c;");
+
+		content.appendChild(completedLabel);
+
+		Label status = new Label("After submission: " + STATUS_PENDING_CHECKER_PROCESS);
+
+		status.setStyle("font-size:12px;" + "font-weight:700;" + "color:#52657d;" + "background:#eef3f8;"
+				+ "padding:9px 12px;" + "border-radius:5px;");
+
+		content.appendChild(status);
+
+		Hlayout actions = new Hlayout();
+
+		actions.setWidth("100%");
+		actions.setSpacing("10px");
+
+		Button cancel = new Button("CANCEL");
+
+		cancel.setHflex("1");
+		cancel.setHeight("36px");
+
+		cancel.setStyle("background:#fff;" + "border:1px solid #cbd5e1;" + "border-radius:5px;" + "color:#52657d;"
+				+ "font-size:11px;" + "font-weight:700;");
+
+		Button submit = new Button("SUBMIT TO CHECKER");
+
+		submit.setHflex("1");
+		submit.setHeight("36px");
+
+		submit.setStyle("background:#0b1d3a;" + "border:1px solid #0b1d3a;" + "border-radius:5px;" + "color:#fff;"
+				+ "font-size:11px;" + "font-weight:700;");
+
+		cancel.addEventListener("onClick", event -> confirmation.detach());
+
+		submit.addEventListener("onClick", event -> {
+			confirmation.detach();
+			completeBatchSubmission();
+		});
+
+		actions.appendChild(cancel);
+		actions.appendChild(submit);
+
+		content.appendChild(actions);
+
+		confirmation.appendChild(content);
+
+		outwardChequeDataEntryWin.appendChild(confirmation);
+
+		confirmation.doModal();
+	}
+
+	private void completeBatchSubmission() {
+		try {
+
+			boolean updated = outwardBatchService.updateOutWardBatchStatus(outwardBatchId,
+					STATUS_PENDING_CHECKER_PROCESS);
+
+			if (!updated) {
+				showStatus("Unable to submit batch to Checker.");
+
+				return;
+			}
+
+			showSubmissionSuccess();
+
+		} catch (Exception exception) {
+
+			showStatus("Unable to submit batch to Checker: " + safeExceptionMessage(exception));
 		}
+	}
 
-		backToDataEntryList();
+	private void showSubmissionSuccess() {
+		Window success = new Window();
+
+		success.setTitle("BATCH SUBMITTED");
+
+		success.setBorder("normal");
+		success.setClosable(false);
+		success.setMode("modal");
+		success.setWidth("480px");
+		success.setPosition("center");
+
+		success.setStyle("border-radius:8px;");
+
+		Vlayout content = new Vlayout();
+
+		content.setWidth("100%");
+		content.setSpacing("14px");
+
+		content.setStyle("padding:26px;box-sizing:border-box;");
+
+		Label title = new Label("BATCH SUBMITTED SUCCESSFULLY");
+
+		title.setStyle("font-size:18px;" + "font-weight:700;" + "color:#17375e;");
+
+		content.appendChild(title);
+
+		Label batch = new Label("Batch: " + outwardBatchId);
+
+		batch.setStyle("font-size:14px;" + "font-weight:700;" + "color:#34445c;");
+
+		content.appendChild(batch);
+
+		int total = scanChequeList == null ? 0 : scanChequeList.size();
+
+		Label completed = new Label("Completed: " + total + " / " + total + " cheques");
+
+		completed.setStyle("font-size:13px;" + "color:#52657d;");
+
+		content.appendChild(completed);
+
+		Label status = new Label("Status: " + STATUS_PENDING_CHECKER_PROCESS);
+
+		status.setStyle("font-size:12px;" + "font-weight:700;" + "color:#52657d;" + "background:#eef3f8;"
+				+ "padding:10px 12px;" + "border-radius:5px;");
+
+		content.appendChild(status);
+
+		Hlayout actions = new Hlayout();
+
+		actions.setWidth("100%");
+		actions.setSpacing("10px");
+
+		Button nextBatch = new Button("NEXT BATCH");
+
+		nextBatch.setHflex("1");
+		nextBatch.setHeight("38px");
+
+		nextBatch.setStyle("background:#2f6da5;" + "border:1px solid #2f6da5;" + "border-radius:5px;" + "color:#fff;"
+				+ "font-size:11px;" + "font-weight:700;");
+
+		Button dashboard = new Button("GO TO DASHBOARD");
+
+		dashboard.setHflex("1");
+		dashboard.setHeight("38px");
+
+		dashboard.setStyle("background:#0b1d3a;" + "border:1px solid #0b1d3a;" + "border-radius:5px;" + "color:#fff;"
+				+ "font-size:11px;" + "font-weight:700;");
+
+		nextBatch.addEventListener("onClick", event -> {
+			success.detach();
+			backToDataEntryList();
+		});
+
+		dashboard.addEventListener("onClick", event -> {
+			success.detach();
+			goToDashboard();
+		});
+
+		actions.appendChild(nextBatch);
+		actions.appendChild(dashboard);
+
+		content.appendChild(actions);
+
+		success.appendChild(content);
+
+		outwardChequeDataEntryWin.appendChild(success);
+
+		success.doModal();
+	}
+
+	private void showAllCompleted() {
+		currentChequeIndex = -1;
+
+		clearChequeFields();
+
+		outwardChequeDataEntryBtnSaveNext.setDisabled(true);
+
+		outwardChequeDataEntryBtnReject.setDisabled(true);
+
+		outwardChequeDataEntryBtnPrevious.setDisabled(true);
+
+		outwardChequeDataEntryBtnNext.setDisabled(true);
+
+		outwardChequeDataEntryLblRecord.setValue("ALL CHEQUES COMPLETED");
+
+		outwardChequeDataEntryLblSummaryChequeNumber.setValue("-");
+
+		outwardChequeDataEntryLblRemaining.setValue("0");
 	}
 
 	private void backToDataEntryList() {
-
 		Component component = outwardChequeDataEntryWin;
 
 		while (component != null) {
 
-			if ("mainContentArea".equals(component.getId())) {
+			if ("mainContentArea".equals(component.getId()) && component instanceof org.zkoss.zul.Include) {
 
-				component.setAttribute("batchId", null);
+				org.zkoss.zul.Include include = (org.zkoss.zul.Include) component;
 
-				component.setAttribute("mode", null);
+				include.setDynamicProperty("batchId", null);
 
-				if (component instanceof org.zkoss.zul.Include) {
+				include.setDynamicProperty("mode", null);
 
-					org.zkoss.zul.Include include = (org.zkoss.zul.Include) component;
+				include.setSrc("/outward/maker/data-entry.zul");
 
-					include.setDynamicProperty("batchId", null);
-
-					include.setDynamicProperty("mode", null);
-
-					include.setSrc("/outward/maker/data-entry.zul");
-
-					return;
-				}
+				return;
 			}
 
 			component = component.getParent();
@@ -1610,8 +1298,31 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		Executions.sendRedirect("/outward/maker/data-entry.zul");
 	}
 
-	private void clearChequeFields() {
+	private void goToDashboard() {
+		Component component = outwardChequeDataEntryWin;
 
+		while (component != null) {
+
+			if ("mainContentArea".equals(component.getId()) && component instanceof org.zkoss.zul.Include) {
+
+				org.zkoss.zul.Include include = (org.zkoss.zul.Include) component;
+
+				include.setDynamicProperty("batchId", null);
+
+				include.setDynamicProperty("mode", null);
+
+				include.setSrc("/outward/maker/dashboard.zul");
+
+				return;
+			}
+
+			component = component.getParent();
+		}
+
+		Executions.sendRedirect("/outward/maker/dashboard.zul");
+	}
+
+	private void clearChequeFields() {
 		outwardChequeDataEntryTxtChequeNumber.setValue("");
 
 		outwardChequeDataEntryTxtAmount.setValue("");
@@ -1628,7 +1339,6 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void clearPage() {
-
 		clearChequeFields();
 
 		outwardChequeDataEntryLblBatchId.setValue("-");
@@ -1657,11 +1367,9 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void showStatus(String message) {
-
 		if (message == null || message.trim().isEmpty()) {
 
 			hideStatus();
-
 			return;
 		}
 
@@ -1671,9 +1379,22 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void hideStatus() {
-
 		outwardChequeDataEntryLblValidationStatus.setValue("");
 
 		outwardChequeDataEntryLblValidationStatus.setVisible(false);
+	}
+
+	private String safeValue(String value) {
+		return value == null ? "" : value;
+	}
+
+	private String safeExceptionMessage(Exception exception) {
+
+		if (exception == null || exception.getMessage() == null || exception.getMessage().trim().isEmpty()) {
+
+			return "Unexpected error";
+		}
+
+		return exception.getMessage();
 	}
 }
