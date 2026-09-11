@@ -471,21 +471,56 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
                                   "SET session_status = 'CLOSED', closed_at = ?, closed_by = ?, remarks = ? " +
                                   "WHERE clearing_date = ? AND session_status = 'OPEN'";
 
+        // Preserves the stage inside cheque_status itself without needing a remarks column
+        String updateScanChequesSql = 
+                "UPDATE scan_cheque SET cheque_status = CASE " +
+                "    WHEN UPPER(cheque_status) LIKE '%DATA_ENTRY%' THEN 'UNPROCESSED_DATA_ENTRY' " +
+                "    ELSE 'UNPROCESSED_MICR' " +
+                "END " +
+                "WHERE UPPER(cheque_status) IN ('PENDING_MICR_REPAIR', 'PENDING_DATA_ENTRY', 'RAW', 'PENDING', 'Pending')";
+
+        String updateScanBatchesSql = 
+                "UPDATE scan_batch SET batch_status = 'UNPROCESSED' " +
+                "WHERE UPPER(batch_status) IN ('PENDING_MAKER_PROCESS', 'PENDING', 'Pending', 'RAW')";
+
+        String updateOutwardChequesSql = 
+                "UPDATE outward_cheque SET cheque_status = 'UNPROCESSED_VERIFY' " +
+                "WHERE UPPER(cheque_status) IN ('PENDING_CHECKER_VERIFICATION', 'PENDING_VERIFICATION', 'PENDING', 'Pending')";
+
+        String updateOutwardBatchesSql = 
+                "UPDATE outward_batch SET batch_status = 'UNPROCESSED' " +
+                "WHERE UPPER(batch_status) IN ('PENDING_CHECKER_PROCESS', 'PENDING', 'Pending')";
+
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
 
-            // Close the clearing session
             try (PreparedStatement ps = conn.prepareStatement(updateSessionSql)) {
                 ps.setTimestamp(1, now);
                 ps.setString(2, adminUserId);
                 ps.setString(3, remarks != null ? remarks : "Normal EOD closed");
                 ps.setDate(4, Date.valueOf(this.currentClearingDate));
                 int rowsUpdated = ps.executeUpdate();
-
                 if (rowsUpdated == 0) {
                     conn.rollback();
                     Clients.showNotification("No OPEN session found for current date.", "error", null, "top_center", 3000);
                     return;
+                }
+            }
+
+            int rolledOverScan = 0;
+            int rolledOverOutward = 0;
+            if (isForced) {
+                try (PreparedStatement ps1 = conn.prepareStatement(updateScanChequesSql)) {
+                    rolledOverScan = ps1.executeUpdate();
+                }
+                try (PreparedStatement ps2 = conn.prepareStatement(updateScanBatchesSql)) {
+                    ps2.executeUpdate();
+                }
+                try (PreparedStatement ps3 = conn.prepareStatement(updateOutwardChequesSql)) {
+                    rolledOverOutward = ps3.executeUpdate();
+                }
+                try (PreparedStatement ps4 = conn.prepareStatement(updateOutwardBatchesSql)) {
+                    ps4.executeUpdate();
                 }
             }
 
@@ -507,7 +542,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), false));
             refreshUI();
 
-            String msg = isForced ? "Forced EOD Completed. Pending items will move to Unprocessed on next BOD." : "EOD completed successfully.";
+            String msg = isForced ? "Forced EOD completed. " + (rolledOverScan + rolledOverOutward) + " items marked UNPROCESSED." : "EOD completed successfully.";
             Clients.showNotification(msg, "info", null, "top_center", 3000);
 
         } catch (SQLException ex) {
@@ -529,22 +564,9 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
         String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
         
-        // 1. Rollover scan_cheque pending items to UNPROCESSED
-        String updateScanChequesToUnprocessedSql = 
-                "UPDATE scan_cheque " +
-                "SET cheque_status = 'UNPROCESSED' " +
-                "WHERE UPPER(cheque_status) IN ('RAW', 'PENDING_REPAIR', 'PENDING_DATA_ENTRY', 'PENDING', 'Pending')";
-
-        // 2. Rollover scan_batch pending items to UNPROCESSED
-        String updateScanBatchesToUnprocessedSql = 
-                "UPDATE scan_batch " +
-                "SET batch_status = 'UNPROCESSED' " +
-                "WHERE UPPER(batch_status) IN ('PENDING', 'Pending', 'RAW')";
-     // 2. Move outward pending items to UNPROCESSED (for checker)
-        String updateOutwardChequesToUnprocessedSql =
-                "UPDATE outward_cheque " +
-                "SET cheque_status = 'UNPROCESSED' " +
-                "WHERE UPPER(cheque_status) IN ('PENDING_VERIFICATION', 'PENDING', 'Pending')";
+        // Count unprocessed items to notify users
+        String countScanUnprocessed = "SELECT COUNT(*) FROM scan_cheque WHERE UPPER(cheque_status) = 'UNPROCESSED'";
+        String countOutwardUnprocessed = "SELECT COUNT(*) FROM outward_cheque WHERE UPPER(cheque_status) = 'UNPROCESSED'";
 
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -557,43 +579,42 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
                 psSession.executeUpdate();
             }
 
-            // Step 2: Transition pending scan_cheques to UNPROCESSED
             int rolledOverScanCheques = 0;
-            try (PreparedStatement ps = conn.prepareStatement(updateScanChequesToUnprocessedSql)) {
-                rolledOverScanCheques = ps.executeUpdate();
-            }
-            try (PreparedStatement ps = conn.prepareStatement(updateScanBatchesToUnprocessedSql)) {
-                ps.executeUpdate();
+            int rolledOverCheckerCheques = 0;
+
+            try (PreparedStatement ps = conn.prepareStatement(countScanUnprocessed);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) rolledOverScanCheques = rs.getInt(1);
             }
 
-            // Step 3: Transition pending scan_batches to UNPROCESSED
-            int rolledOverCheckerCheques = 0;
-            try (PreparedStatement ps = conn.prepareStatement(updateOutwardChequesToUnprocessedSql)) {
-                rolledOverCheckerCheques = ps.executeUpdate();
+            try (PreparedStatement ps = conn.prepareStatement(countOutwardUnprocessed);
+                 ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) rolledOverCheckerCheques = rs.getInt(1);
             }
 
             conn.commit();
-         // Step 4: Dispatch role-targeted notifications
+
+            // Step 2: Dispatch role-targeted notifications
             String clearingDateStr = nextDate.format(dateFormatter);
 
-            // 4a. Notify Outward Maker
-            String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
-                            + rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
-            com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-                    .sendNotification("OUTWARD_MAKER", null, makerMsg);
+            if (rolledOverScanCheques > 0) {
+                String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
+                                + rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
+                com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+                        .sendNotification("OUTWARD_MAKER", null, makerMsg);
+            }
 
-            // 4b. Notify Outward Checker
-            String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
-                            + rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
-            com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-                    .sendNotification("OUTWARD_CHECKER", null, checkerMsg);
+            if (rolledOverCheckerCheques > 0) {
+                String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
+                                + rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
+                com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+                        .sendNotification("OUTWARD_CHECKER", null, checkerMsg);
+            }
 
-            // Step 4: Audit Trail
             AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
-                    "BOD initialized for date: " + nextDate + " | Rolled over scan: " + rolledOverScanCheques 
+                    "BOD initialized for date: " + nextDate + " | Unprocessed scan: " + rolledOverScanCheques 
                     + ", outward: " + rolledOverCheckerCheques, "SUCCESS");
 
-            // Step 5: Update UI State
             this.currentClearingDate = nextDate;
             this.isSessionOpen = true;
             this.selectedAction = "EOD";
@@ -604,8 +625,6 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
             Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
             refreshUI();
-
-            
 
         } catch (SQLException ex) {
             ex.printStackTrace();
