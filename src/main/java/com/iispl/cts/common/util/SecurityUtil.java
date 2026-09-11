@@ -1,8 +1,12 @@
 package com.iispl.cts.common.util;
 
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.impl.InputElement;
 
 public class SecurityUtil {
 
@@ -59,5 +63,46 @@ public class SecurityUtil {
         }
 
         return true;
+    }
+    public static void applySessionLockdown(Page page) {
+        Session session = Sessions.getCurrent();
+        if (session == null || page == null) {
+            return;
+        }
+
+        // 1. Admin users bypass lockdown
+        String role = (String) session.getAttribute("USER_ROLE");
+        if (role == null) role = (String) session.getAttribute("CTS_USER_ROLE");
+        if (role != null && role.toUpperCase().contains("ADMIN")) {
+            return;
+        }
+
+        // 2. If clearing session is OPEN, operations remain enabled
+        Boolean isOpen = (Boolean) session.getAttribute("CTS_SESSION_OPEN");
+        if (Boolean.TRUE.equals(isOpen)) {
+            return;
+        }
+
+        // 3. Session is CLOSED: walk entire page tree and disable mutative elements
+        for (Component root : page.getRoots()) {
+            disableActionControls(root);
+        }
+    }
+
+    private static void disableActionControls(Component comp) {
+        if (comp instanceof Button) {
+            Button btn = (Button) comp;
+            String id = (btn.getId() != null) ? btn.getId().toLowerCase() : "";
+            // Keep navigational and view actions accessible
+            if (!id.contains("logout") && !id.contains("search") && !id.contains("view") && !id.contains("refresh")) {
+                btn.setDisabled(true);
+            }
+        } else if (comp instanceof InputElement) {
+            ((InputElement) comp).setReadonly(true);
+        }
+
+        for (Component child : comp.getChildren()) {
+            disableActionControls(child);
+        }
     }
 }

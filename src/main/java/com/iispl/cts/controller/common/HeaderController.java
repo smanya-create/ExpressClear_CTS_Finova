@@ -73,6 +73,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
         if (divNotificationBell != null && divNotificationBell.isVisible()) {
             loadDatabaseNotifications();
         }
+        com.iispl.cts.common.util.SecurityUtil.applySessionLockdown(comp.getPage());
         
 
         // Attach listener to first root element of the page
@@ -125,7 +126,10 @@ public class HeaderController extends GenericForwardComposer<Component> {
         LocalDate clearingDate = null;
 
         // 1. Fetch from Database
-        String sql = "SELECT clearing_date, session_status FROM clearing_session ORDER BY session_id DESC LIMIT 1";
+        String sql = "SELECT clearing_date, session_status "
+                + "FROM clearing_session "
+                + "ORDER BY clearing_date DESC, opened_at DESC "
+                + "LIMIT 1";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
