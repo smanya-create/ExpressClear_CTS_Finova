@@ -5,7 +5,8 @@ import com.iispl.cts.entity.User;
 
 public interface UserDAO {
 
-	User findByUsername(String username);
+    User findByUsername(String username);
+    User findByEmail(String email);
     User findByEmployeeId(String employeeId);
     List<User> getAllUsers();
     List<User> searchUsers(String query, String roleId, String status);

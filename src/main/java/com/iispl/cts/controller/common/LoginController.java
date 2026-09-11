@@ -2,7 +2,6 @@ package com.iispl.cts.controller.common;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -11,12 +10,10 @@ import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Comboitem;
-import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
 
-import com.iispl.cts.common.util.ActiveUserManager;
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.RoleService;
@@ -30,11 +27,14 @@ public class LoginController extends GenericForwardComposer<Component> {
     private static final long serialVersionUID = 1L;
 
     // Component wires
-    private Textbox txtUsername;
+    private Textbox txtIdentifier;
     private Textbox txtPassword;
-    private Combobox cmbRole;
     private Button btnSignIn;
     private Button btnTogglePassword;
+
+    // Inline Error Components
+    private Div divErrorBox;
+    private Label lblErrorMessage;
 
     private boolean isPasswordVisible = false;
 
@@ -44,34 +44,16 @@ public class LoginController extends GenericForwardComposer<Component> {
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        populateRolesDropdown();
+        clearErrorMessage();
+    }
+    public void onOKIdentifier() {
+        if (txtPassword != null) {
+            txtPassword.setFocus(true);
+        }
     }
 
-    /**
-     * Loads roles from DB or loads standard defaults if empty
-     */
-    private void populateRolesDropdown() {
-        if (cmbRole == null) return;
-        cmbRole.getChildren().clear();
-
-        try {
-            List<Role> roles = roleService.getAllRoles();
-            if (roles != null && !roles.isEmpty()) {
-                for (Role r : roles) {
-                    Comboitem item = new Comboitem(r.getRoleName());
-                    item.setValue(r.getRoleId());
-                    cmbRole.appendChild(item);
-                }
-            } else {
-                Comboitem itm1 = new Comboitem("Admin"); itm1.setValue("ROL1001"); cmbRole.appendChild(itm1);
-                Comboitem itm2 = new Comboitem("Maker Outward"); itm2.setValue("ROL1002"); cmbRole.appendChild(itm2);
-                Comboitem itm3 = new Comboitem("Checker Outward"); itm3.setValue("ROL1003"); cmbRole.appendChild(itm3);
-                Comboitem itm4 = new Comboitem("Maker Inward"); itm4.setValue("ROL1004"); cmbRole.appendChild(itm4);
-                Comboitem itm5 = new Comboitem("Checker Inward"); itm5.setValue("ROL1005"); cmbRole.appendChild(itm5);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void onOKPassword() {
+        processLogin();
     }
 
     public void onClick$btnSignIn(Event event) {
@@ -94,7 +76,7 @@ public class LoginController extends GenericForwardComposer<Component> {
         }
     }
 
-    public void onOK$txtUsername(Event event) {
+    public void onOK$txtIdentifier(Event event) {
         if (txtPassword != null) {
             txtPassword.setFocus(true);
         }
@@ -104,40 +86,62 @@ public class LoginController extends GenericForwardComposer<Component> {
         processLogin();
     }
 
-    private void processLogin() {
-        final String username = (txtUsername != null && txtUsername.getValue() != null) ? txtUsername.getValue().trim() : "";
-        final String password = (txtPassword != null && txtPassword.getValue() != null) ? txtPassword.getValue().trim() : "";
-        Comboitem selectedItem = (cmbRole != null) ? cmbRole.getSelectedItem() : null;
+    public void onChanging$txtIdentifier(Event event) {
+        clearErrorMessage();
+    }
 
-        if (username.isEmpty() || password.isEmpty() || selectedItem == null) {
-            Messagebox.show("Please enter username, password, and select a role.",
-                            "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
+    public void onChanging$txtPassword(Event event) {
+        clearErrorMessage();
+    }
+
+    private void showErrorMessage(String message) {
+        if (lblErrorMessage != null) {
+            lblErrorMessage.setValue(message);
+        }
+        if (divErrorBox != null) {
+            divErrorBox.setVisible(true);
+        }
+    }
+
+    private void clearErrorMessage() {
+        if (divErrorBox != null) {
+            divErrorBox.setVisible(false);
+        }
+        if (lblErrorMessage != null) {
+            lblErrorMessage.setValue("");
+        }
+    }
+
+    private void processLogin() {
+        clearErrorMessage();
+
+        final String identifier = (txtIdentifier != null && txtIdentifier.getValue() != null) ? txtIdentifier.getValue().trim() : "";
+        final String password = (txtPassword != null && txtPassword.getValue() != null) ? txtPassword.getValue().trim() : "";
+
+        if (identifier.isEmpty() || password.isEmpty()) {
+            showErrorMessage("Please enter your username or email and password.");
             return;
         }
 
-        final String selectedRoleId = selectedItem.getValue() != null ? selectedItem.getValue().toString().trim() : "";
-        final String selectedRoleName = selectedItem.getLabel() != null ? selectedItem.getLabel().trim() : "";
-
         // 1. Authenticate user credentials
-        User authenticatedUser = userService.authenticate(username, password);
+        User authenticatedUser = userService.authenticate(identifier, password);
 
         if (authenticatedUser == null) {
             AuditServiceImpl.getInstance().log("AUTH", "LOGIN_FAILED",
-                    "Invalid username or password attempt for username: " + username, "FAILED");
-            Messagebox.show("Invalid username or password.", "Authentication Failed", Messagebox.OK, Messagebox.ERROR);
+                    "Invalid login attempt for: " + identifier, "FAILED");
+            showErrorMessage("Invalid username/email or password.");
             return;
         }
 
         // 2. Block inactive user accounts
         if ("INACTIVE".equalsIgnoreCase(authenticatedUser.getStatus())) {
             AuditServiceImpl.getInstance().log("AUTH", "LOGIN_BLOCKED",
-                    "Login denied for user " + username + ": Account inactivated by Admin.", "FAILED");
-            Messagebox.show("User inactivated by respected admin. Please contact your administrator.",
-                            "Account Inactive", Messagebox.OK, Messagebox.EXCLAMATION);
+                    "Login denied for user " + authenticatedUser.getUsername() + ": Account inactivated by Admin.", "FAILED");
+            showErrorMessage("Your account is deactivated. Please contact your administrator.");
             return;
         }
 
-        // 3. Fetch assigned role & permissions
+        // 3. Fetch assigned role & permissions from DB
         String userRoleId = authenticatedUser.getRoleId() != null ? authenticatedUser.getRoleId().trim() : "";
         Role userRole = roleService.getRoleById(userRoleId);
         String userPermissions = (userRole != null && userRole.getPermissions() != null) ? userRole.getPermissions().trim() : "";
@@ -151,26 +155,10 @@ public class LoginController extends GenericForwardComposer<Component> {
             else if ("ROL1003".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Checker Outward";
             else if ("ROL1004".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Maker Inward";
             else if ("ROL1005".equalsIgnoreCase(userRoleId)) computedDbRoleName = "Checker Inward";
-            else computedDbRoleName = selectedRoleName;
+            else computedDbRoleName = "Unknown";
         }
 
-        // 4. Verify selected role against database role
-        boolean isRoleMatch = userRoleId.equalsIgnoreCase(selectedRoleId) ||
-                              computedDbRoleName.equalsIgnoreCase(selectedRoleName) ||
-                              computedDbRoleName.replace(" ", "_").equalsIgnoreCase(selectedRoleId) ||
-                              selectedRoleName.equalsIgnoreCase(computedDbRoleName);
-
-        if (!isRoleMatch) {
-            AuditServiceImpl.getInstance().log("AUTH", "LOGIN_ROLE_MISMATCH",
-                    "Access denied for user " + username + ": Assigned role (" + computedDbRoleName 
-                    + ") does not match selected role (" + selectedRoleName + ")", "FAILED");
-            Messagebox.show("Access Denied: Assigned role (" + computedDbRoleName +
-                            ") does not match selected role (" + selectedRoleName + ").",
-                            "Role Mismatch", Messagebox.OK, Messagebox.EXCLAMATION);
-            return;
-        }
-
-        // 5. Bind Session Attributes
+        // 4. Bind Session Attributes
         Session session = Sessions.getCurrent();
         String normalizedRole = computedDbRoleName.toUpperCase().replace(" ", "_");
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
@@ -187,24 +175,27 @@ public class LoginController extends GenericForwardComposer<Component> {
         session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
         session.setAttribute("USER_PERMISSIONS", userPermissions);
 
-        // Audit success log (Single entry)
+        // Audit success log
         AuditServiceImpl.getInstance().log("AUTH", "LOGIN",
                 "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName, "SUCCESS");
 
-        // 6. Navigate user to their respective dashboard
-        if ("ROL1001".equalsIgnoreCase(userRoleId) || normalizedRole.contains("ADMIN")) {
+        // 5. Navigate user directly to their assigned role dashboard
+        redirectToRoleDashboard(userRoleId, normalizedRole, computedDbRoleName);
+    }
+
+    private void redirectToRoleDashboard(String roleId, String normalizedRole, String roleName) {
+        if ("ROL1001".equalsIgnoreCase(roleId) || normalizedRole.contains("ADMIN")) {
             Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
-        } else if ("ROL1002".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {
+        } else if ("ROL1002".equalsIgnoreCase(roleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {
             Executions.sendRedirect("/outward/maker/maker-module.zul");
-        } else if ("ROL1003".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
+        } else if ("ROL1003".equalsIgnoreCase(roleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
             Executions.sendRedirect("/outward/checker/dashboard.zul");
-        } else if ("ROL1004".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {
+        } else if ("ROL1004".equalsIgnoreCase(roleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {
             Executions.sendRedirect("/inward/maker/index.zul");
-        } else if ("ROL1005".equalsIgnoreCase(userRoleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
+        } else if ("ROL1005".equalsIgnoreCase(roleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
             Executions.sendRedirect("/inward/checker/dashboard.zul");
         } else {
-            Messagebox.show("No dashboard mapped for role: " + computedDbRoleName + " (ID: " + userRoleId + ")",
-                            "Navigation Error", Messagebox.OK, Messagebox.ERROR);
+            showErrorMessage("No dashboard mapped for role: " + roleName + " (ID: " + roleId + ")");
         }
     }
 }
