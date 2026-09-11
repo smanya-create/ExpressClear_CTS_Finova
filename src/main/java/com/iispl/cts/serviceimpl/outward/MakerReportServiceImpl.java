@@ -63,21 +63,18 @@ public class MakerReportServiceImpl implements MakerReportService {
             sb.append("========================================================================================\n");
             sb.append("Batch ID,Batch Reference,Total Cheques,Repaired Count,Total Amount (INR),Uploaded Time\n");
 
-            String sql1 = "SELECT ob.outward_batch_id, ob.batch_reference_id, "
-                        + "       COUNT(oc.outward_cheque_id) AS total_cheques, "
-                        + "       COUNT(CASE WHEN UPPER(oc.cheque_status) LIKE '%REPAIR%' "
-                        + "                    OR UPPER(oc.cheque_status) LIKE '%MICR%' THEN 1 END) AS repaired_count, "
-                        + "       COALESCE(SUM(oc.cheque_amount), 0.00) AS total_amount, "
-                        + "       ob.uploaded_at "
-                        + "FROM outward_batch ob "
-                        + "JOIN outward_cheque oc ON ob.outward_batch_id = oc.outward_batch_id "
-                        + "WHERE ob.uploaded_by = ? "
-                        + "  AND CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ? "
-                        + "GROUP BY ob.outward_batch_id, ob.batch_reference_id, ob.uploaded_at "
-                        + "HAVING COUNT(CASE WHEN UPPER(oc.cheque_status) LIKE '%REPAIR%' "
-                        + "                    OR UPPER(oc.cheque_status) LIKE '%MICR%' THEN 1 END) > 0 "
-                        + "ORDER BY ob.uploaded_at DESC";
-
+            String sql1 = "SELECT sb.scanned_batch_id, sb.batch_reference_id, "
+                    + "       COUNT(sc.scanned_cheque_id) AS total_cheques, "
+                    + "       COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) AS repaired_count, "
+                    + "       COALESCE(SUM(sc.cheque_amount), 0.00) AS total_amount, "
+                    + "       sb.uploaded_at "
+                    + "FROM scan_batch sb "
+                    + "JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id "
+                    + "WHERE sb.uploaded_by = ? "
+                    + "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? "
+                    + "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.uploaded_at "
+                    + "HAVING COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) > 0 "
+                    + "ORDER BY sb.uploaded_at DESC";
             try (PreparedStatement ps = conn.prepareStatement(sql1)) {
                 ps.setString(1, makerId);
                 ps.setDate(2, new java.sql.Date(fromDate.getTime()));
@@ -107,16 +104,17 @@ public class MakerReportServiceImpl implements MakerReportService {
             sb.append("========================================================================================\n");
             sb.append("Batch ID,Batch Reference,Pending Cheques,Status,Uploaded Time\n");
 
-            String sql2 = "SELECT ob.outward_batch_id, ob.batch_reference_id, "
-                        + "       COUNT(oc.outward_cheque_id) AS pending_items, "
-                        + "       ob.batch_status, ob.uploaded_at "
-                        + "FROM outward_batch ob "
-                        + "JOIN outward_cheque oc ON ob.outward_batch_id = oc.outward_batch_id "
-                        + "WHERE ob.uploaded_by = ? "
-                        + "  AND UPPER(oc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'KEYING_PENDING') "
-                        + "  AND CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ? "
-                        + "GROUP BY ob.outward_batch_id, ob.batch_reference_id, ob.batch_status, ob.uploaded_at "
-                        + "ORDER BY ob.uploaded_at DESC";
+            String sql2 = "SELECT sb.scanned_batch_id, sb.batch_reference_id, "
+                    + "       COUNT(sc.scanned_cheque_id) AS pending_items, "
+                    + "       sb.batch_status, sb.uploaded_at "
+                    + "FROM scan_batch sb "
+                    + "JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id "
+                    + "WHERE sb.uploaded_by = ? "
+                    + "  AND UPPER(sb.batch_status) = 'PENDING_MAKER_PROCESS' "
+                    + "  AND UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'REJECTED_MICR') "
+                    + "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? "
+                    + "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.batch_status, sb.uploaded_at "
+                    + "ORDER BY sb.uploaded_at DESC";
 
             try (PreparedStatement ps = conn.prepareStatement(sql2)) {
                 ps.setString(1, makerId);
@@ -146,17 +144,17 @@ public class MakerReportServiceImpl implements MakerReportService {
             sb.append("========================================================================================\n");
             sb.append("Batch ID,Cheque ID,Cheque No,MICR Code,Drawee Acc No,Amount (INR),Status\n");
 
-            String sql3 = "SELECT oc.outward_batch_id, oc.outward_cheque_id, "
-                        + "       COALESCE(oc.cheque_number, 'UNREADABLE') AS cheque_number, "
-                        + "       COALESCE(oc.micr_code, 'UNREADABLE') AS micr_code, "
-                        + "       COALESCE(oc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, "
-                        + "       oc.cheque_amount, oc.cheque_status "
-                        + "FROM outward_cheque oc "
-                        + "JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id "
-                        + "WHERE ob.uploaded_by = ? "
-                        + "  AND UPPER(oc.cheque_status) IN ('UNPROCESSED', 'PENDING', 'OCR_FAILED', 'IMAGE_REJECTED', 'FAILED') "
-                        + "  AND CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ? "
-                        + "ORDER BY oc.outward_batch_id, oc.outward_cheque_id";
+            String sql3 = "SELECT sc.scanned_batch_id, sc.scanned_cheque_id, "
+                    + "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, "
+                    + "       COALESCE(sc.micR_code, 'UNREADABLE') AS micr_code, "
+                    + "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, "
+                    + "       sc.cheque_amount, sc.cheque_status "
+                    + "FROM scan_cheque sc "
+                    + "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id "
+                    + "WHERE sb.uploaded_by = ? "
+                    + "  AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED') "
+                    + "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? "
+                    + "ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id";
 
             try (PreparedStatement ps = conn.prepareStatement(sql3)) {
                 ps.setString(1, makerId);
@@ -187,12 +185,12 @@ public class MakerReportServiceImpl implements MakerReportService {
             sb.append("Batch ID,Batch Reference,Total Cheques,Total Amount (INR),Status,Submitted Time\n");
 
             String sql4 = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, "
-                        + "       actual_total_amount, uploaded_at, batch_status "
-                        + "FROM outward_batch "
-                        + "WHERE uploaded_by = ? "
-                        + "  AND UPPER(batch_status) IN ('SUBMITTED_TO_CHECKER', 'PENDING_VERIFICATION', 'SUBMITTED', 'PENDING') "
-                        + "  AND CAST(uploaded_at AS DATE) BETWEEN ? AND ? "
-                        + "ORDER BY uploaded_at DESC";
+                    + "       actual_total_amount, uploaded_at, batch_status "
+                    + "FROM outward_batch "
+                    + "WHERE uploaded_by = ? "
+                    + "  AND UPPER(batch_status) = 'PENDING_CHECKER_PROCESS' "
+                    + "  AND CAST(uploaded_at AS DATE) BETWEEN ? AND ? "
+                    + "ORDER BY uploaded_at DESC";
 
             try (PreparedStatement ps = conn.prepareStatement(sql4)) {
                 ps.setString(1, makerId);
