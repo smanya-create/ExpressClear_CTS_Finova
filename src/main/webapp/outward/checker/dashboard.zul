@@ -140,7 +140,7 @@
 
                                         <listheader
                                             label="STATUS"
-                                            width="13%" />
+                                            width="17%" />
 
                                         <listheader
                                             label="Action"
