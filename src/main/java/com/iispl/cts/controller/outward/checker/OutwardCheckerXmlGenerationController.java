@@ -1,9 +1,10 @@
 package com.iispl.cts.controller.outward.checker;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -87,9 +88,10 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 				return;
 			}
 
-			String outputDirectory =
-					"/home/administrator/snap/eclipse/common/git/ExpressClear_CTS_Finova/src/main/resources/xml-output";
-
+			String outputDirectory = Paths.get(
+			        System.getProperty("user.home"),
+			        "Downloads/xml-output"
+			).toString();
 			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
 
 			outwardBatchService.updateBatchStatus(batchId, "COMPLETED");

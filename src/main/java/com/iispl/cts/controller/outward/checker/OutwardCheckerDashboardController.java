@@ -99,7 +99,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 					BigDecimal amount = batch.getActualTotalAmount();
 					String amountText = amount == null ? "₹0.00" : "₹" + amount.toPlainString();
 					item.appendChild(new Listcell(amountText));
-					
+
 					String submittedBy = batch.getUploadedBy();
 					item.appendChild(new Listcell(submittedBy == null ? "-" : submittedBy));
 
@@ -115,10 +115,23 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 					item.appendChild(new Listcell(submittedAt));
 
 					Listcell statusCell = new Listcell();
+					statusCell.setStyle("text-align:center;"
+							+"vertical-align:middle;");
 
 					Label statusLabel = new Label(batch.getBatchStatus());
 
 					statusLabel.setSclass("status-pending");
+					statusLabel.setStyle(
+					        "display:inline-block;"
+					        + "background:#fff7ed;"
+					        + "color:#b45309;"
+					        + "border:1px solid #f59e0b;"
+					        + "border-radius:16px;"
+					        + "font-size:8px;"
+					        + "font-weight:800;"
+					        + "text-align:center;"
+					        + "white-space:nowrap;"
+					);
 
 					statusCell.appendChild(statusLabel);
 
@@ -132,19 +145,16 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 					queueButton.addEventListener(Events.ON_CLICK, event -> {
 
-					    OutwardBatch selectedBatch = item.getValue();
+						OutwardBatch selectedBatch = item.getValue();
 
-					    Map<String, Object> args = new HashMap<>();
+						Map<String, Object> args = new HashMap<>();
 
-					    args.put("batchId", selectedBatch.getOutwardBatchId());
+						args.put("batchId", selectedBatch.getOutwardBatchId());
 
-					    Window popup = (Window) Executions.createComponents(
-					            "/outward/checker/batch-proceed-popup.zul",
-					            null,
-					            args
-					    );
+						Window popup = (Window) Executions.createComponents("/outward/checker/batch-proceed-popup.zul",
+								null, args);
 
-					    popup.doModal();
+						popup.doModal();
 					});
 					actionCell.appendChild(queueButton);
 

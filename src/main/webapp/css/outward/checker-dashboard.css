@@ -221,30 +221,40 @@
 }
 
 .outward-checker-dashboard .status-pending {
-    display: inline-block;
-    width: 100px;
-    min-width: 100px;
-    max-width: 100px;
+   display: inline-block;
+
+    width: 145px;
+    min-width: 145px;
+    max-width: 145px;
+
     height: 28px;
+
     box-sizing: border-box;
+
     padding: 6px 8px;
+
     border-radius: 16px;
-    background: linear-gradient(
-        135deg,
-        #fffbeb 0%,
-        #fde68a 35%,
-        #fbbf24 70%,
-        #d97706 100%
-    );
-    color: #78350f;
+
+    background: #fff7ed;
+
+    color: #b45309;
+
     border: 1px solid #f59e0b;
-    font-size: 10px;
+
+    font-size: 9px;
+
     font-weight: 800;
+
     line-height: 14px;
+
     text-align: center;
+
     white-space: nowrap;
+
     vertical-align: middle;
+
 }
+
 
 .outward-checker-dashboard .queue-button {
     width: 80px;
