@@ -41,5 +41,9 @@ public interface InwardChequeDAO {
 	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
+	
+	String getRejectedReasonDetails(String inwardChequeId);
+	
+	String getMakerRejectionRequestDetails(String inwardChequeId);
 
 }

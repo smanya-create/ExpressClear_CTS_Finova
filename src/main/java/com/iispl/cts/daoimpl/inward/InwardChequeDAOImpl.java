@@ -213,6 +213,67 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	}
 	
 	@Override
+	public String getRejectedReasonDetails(String inwardChequeId) {
+
+	    String sql =
+	            "SELECT rr.rejected_reason_code, " +
+	            "       rr.rejected_reason_name, " +
+	            "       r.remarks " +
+	            "FROM inward_cheque_rejection r " +
+	            "LEFT JOIN rejected_reasons rr " +
+	            "       ON rr.rejected_reason_id = r.rejected_reason_id " +
+	            "WHERE r.inward_cheque_id = ? " +
+	            "ORDER BY r.rejected_at DESC NULLS LAST " +
+	            "LIMIT 1";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, inwardChequeId);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+
+	                String reasonCode =
+	                        rs.getString("rejected_reason_code");
+
+	                String reasonName =
+	                        rs.getString("rejected_reason_name");
+
+	                String remarks =
+	                        rs.getString("remarks");
+
+	                StringBuilder result =
+	                        new StringBuilder();
+
+	                result.append("Reason: ")
+	                      .append(reasonCode)
+	                      .append(" - ")
+	                      .append(reasonName);
+
+	                if (remarks != null &&
+	                    !remarks.trim().isEmpty()) {
+
+	                    result.append("\nRemarks: ")
+	                          .append(remarks.trim());
+	                }
+
+	                return result.toString();
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
+	
+	
+	
+	
+	@Override
 	public BigDecimal getAccountBalance(String accountNumber) {
 
 	    if (accountNumber == null || accountNumber.trim().isEmpty()) {
@@ -243,6 +304,44 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	                "Failed to fetch account balance for account: "
 	                + accountNumber);
 
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
+	
+	@Override
+	public String getMakerRejectionRequestDetails(String inwardChequeId) {
+
+	    String sql =
+	            "SELECT rejected_reason_id, remarks " +
+	            "FROM inward_cheque_rejection_request " +
+	            "WHERE inward_cheque_id = ? " +
+	            "AND request_status = 'PENDING' " +
+	            "ORDER BY requested_at DESC " +
+	            "LIMIT 1";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, inwardChequeId);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+
+	                String rejectedReasonId =
+	                        rs.getString("rejected_reason_id");
+
+	                String remarks =
+	                        rs.getString("remarks");
+
+	                return rejectedReasonId + "||" +
+	                       (remarks != null ? remarks : "");
+	            }
+	        }
+
+	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
 

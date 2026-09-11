@@ -89,5 +89,15 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	public String getBankNameByCode(String bankCode) {
 	    return inwardChequeDAO.getBankNameByCode(bankCode);
 	}
+	
+	@Override
+	public String getRejectedReasonDetails(String inwardChequeId) {
+	    return inwardChequeDAO.getRejectedReasonDetails(inwardChequeId);
+	}
+	
+	@Override
+	public String getMakerRejectionRequestDetails(String inwardChequeId) {
+	    return inwardChequeDAO.getMakerRejectionRequestDetails(inwardChequeId);
+	}
 
 }
