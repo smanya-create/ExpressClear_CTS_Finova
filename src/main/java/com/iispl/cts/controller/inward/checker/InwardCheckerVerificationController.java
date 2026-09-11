@@ -40,6 +40,7 @@ import com.iispl.cts.entity.SendBackReason;
 import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
+import com.iispl.cts.entity.inward.InwardChequeImage;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.SendBackReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -624,149 +625,96 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	
 	private void loadChequeImage(InwardCheque cheque, String imageType) {
 
-		zoomScale = 1.0;
-		rotationAngle = 0;
-		panX = 0;
-		panY = 0;
+	    zoomScale = 1.0;
+	    rotationAngle = 0;
+	    panX = 0;
+	    panY = 0;
 
-		if (chequeImage != null) {
-			chequeImage.setVisible(false);
-			chequeImage.setSrc(null);
-			chequeImage.setContent((org.zkoss.image.Image) null);
-		}
+	    if (chequeImage == null || cheque == null) {
+	        return;
+	    }
 
-		if (emptyImageState != null) {
-			emptyImageState.setVisible(true);
-		}
+	    try {
 
-		applyImageTransform();
+	        String chequeId = cheque.getInwardChequeId();
 
-		if (cheque == null) {
-			return;
-		}
+	        if (chequeId == null || chequeId.trim().isEmpty()) {
 
-		String frontImg = cheque.getChequeImageFront();
-		String backImg = cheque.getChequeImageBack();
+	            chequeImage.setSrc(null);
+	            chequeImage.setContent((org.zkoss.image.Image) null);
 
-		String rawPath;
+	            if (emptyImageState != null) {
+	                emptyImageState.setVisible(true);
+	            }
 
-		if ("FRONT".equalsIgnoreCase(imageType)) {
-			rawPath = frontImg;
-		} else {
-			rawPath = backImg;
-		}
+	            return;
+	        }
 
-		if (rawPath == null || rawPath.trim().isEmpty()) {
-			System.err.println("ERROR: No " + imageType + " image found for cheque: " + cheque.getChequeNumber());
+	        InwardChequeImage image;
 
-			return;
-		}
+	        if ("FRONT".equalsIgnoreCase(imageType)) {
 
-		rawPath = rawPath.trim();
+	            image = inwardChequeService.getFrontImage(chequeId);
 
-		if (rawPath.startsWith("/")) {
-			rawPath = rawPath.substring(1);
-		}
+	        } else {
 
-		String resourcePath = rawPath;
+	            image = inwardChequeService.getBackImage(chequeId);
+	        }
 
-		if (!resourcePath.startsWith("Inward-data/")) {
-			resourcePath = "Inward-data/" + resourcePath;
-		}
+	        if (image == null
+	                || image.getImagePath() == null
+	                || image.getImagePath().trim().isEmpty()) {
 
-		System.out.println("DEBUG: Verification image loading");
+	            System.out.println(
+	                    "Verification: No "
+	                    + imageType
+	                    + " image found for cheque -> "
+	                    + chequeId);
 
-		System.out.println("DEBUG: Cheque = " + cheque.getChequeNumber());
+	            chequeImage.setSrc(null);
+	            chequeImage.setContent((org.zkoss.image.Image) null);
 
-		System.out.println("DEBUG: Image type = " + imageType);
+	            if (emptyImageState != null) {
+	                emptyImageState.setVisible(true);
+	            }
 
-		System.out.println("DEBUG: Raw image path = " + rawPath);
+	            return;
+	        }
 
-		System.out.println("DEBUG: Resource path = " + resourcePath);
+	        String imagePath = image.getImagePath().trim();
 
-		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath);
+	        String imageSrc = "/Inward-data/" + imagePath;
 
-		if (is == null) {
-			is = getClass().getClassLoader().getResourceAsStream(resourcePath);
-		}
+	        System.out.println(
+	                "Verification: Loading image URL -> "
+	                + imageSrc);
 
-		if (is != null) {
+	        chequeImage.setContent((org.zkoss.image.Image) null);
+	        chequeImage.setSrc(imageSrc);
+	        chequeImage.setVisible(true);
 
-			try {
+	        if (emptyImageState != null) {
+	            emptyImageState.setVisible(false);
+	        }
 
-				AImage aImage = new AImage(rawPath, is);
+	    } catch (Exception e) {
 
-				chequeImage.setContent(aImage);
-				chequeImage.setVisible(true);
+	        System.err.println(
+	                "Verification: Failed to load image for cheque -> "
+	                + cheque.getInwardChequeId());
 
-				if (emptyImageState != null) {
-					emptyImageState.setVisible(false);
-				}
+	        e.printStackTrace();
 
-				System.out.println("DEBUG: Verification image loaded " + "successfully from classpath.");
+	        chequeImage.setSrc(null);
+	        chequeImage.setContent((org.zkoss.image.Image) null);
 
-			} catch (Exception e) {
+	        if (emptyImageState != null) {
+	            emptyImageState.setVisible(true);
+	        }
+	    }
 
-				System.err.println("ERROR: Failed to construct AImage: " + e.getMessage());
-
-				chequeImage.setSrc(null);
-
-			} finally {
-
-				try {
-					is.close();
-				} catch (Exception ignored) {
-				}
-			}
-
-		} else {
-
-			String diskPath = "/home/administrator/snap/eclipse/common/git/" + "ExpressClear_CTS_Finova/"
-					+ "src/main/resources/" + resourcePath;
-			File file = new File(diskPath);
-
-			System.out.println("DEBUG: Checking disk image: " + file.getAbsolutePath());
-
-			if (file.exists()) {
-
-				try {
-
-					AImage aImage = new AImage(file);
-
-					chequeImage.setContent(aImage);
-					chequeImage.setVisible(true);
-
-					if (emptyImageState != null) {
-						emptyImageState.setVisible(false);
-					}
-
-					System.out.println("DEBUG: Verification image loaded " + "successfully from disk.");
-
-				} catch (Exception e) {
-
-					e.printStackTrace();
-
-					chequeImage.setSrc(null);
-				}
-
-			} else {
-
-				System.err.println("ERROR: Verification image not found.");
-
-				System.err.println("Cheque = " + cheque.getChequeNumber());
-
-				System.err.println("Image type = " + imageType);
-
-				System.err.println("Resource path = " + resourcePath);
-
-				System.err.println("Disk path = " + file.getAbsolutePath());
-
-				chequeImage.setSrc(null);
-			}
-		}
-
+	    applyImageTransform();
 	}
-
 	private List<InwardCheque> prioritizeRejectionRequests(List<InwardCheque> cheques) {
 
 		if (cheques == null || cheques.isEmpty()) {
