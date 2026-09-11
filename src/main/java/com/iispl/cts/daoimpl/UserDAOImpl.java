@@ -222,4 +222,38 @@ public class UserDAOImpl implements UserDAO {
         }
         return userList;
     }
+    @Override
+    public User findByEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return null;
+        }
+
+        String sql = "SELECT user_id, username, password, full_name, email, role_id, status, employee_id " +
+                     "FROM users " +
+                     "WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) LIMIT 1";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email.trim());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUserId(rs.getString("user_id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setPassword(rs.getString("password"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setRoleId(rs.getString("role_id"));
+                    user.setStatus(rs.getString("status"));
+                    user.setEmployeeId(rs.getString("employee_id"));
+                    return user;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

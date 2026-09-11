@@ -4,7 +4,7 @@ import com.iispl.cts.dao.UserDAO;
 import com.iispl.cts.daoimpl.UserDAOImpl;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.service.UserService;
-import org.mindrot.jbcrypt.BCrypt; // Import BCrypt
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.List;
 
@@ -19,12 +19,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User authenticate(String username, String rawPassword) {
-        if (username == null || rawPassword == null) {
+    public User authenticate(String identifier, String rawPassword) {
+        if (identifier == null || rawPassword == null) {
             return null;
         }
 
-        User user = userDAO.findByUsername(username.trim());
+        String trimmedId = identifier.trim();
+
+        // 1. Look up user by username first, fallback to email if not found
+        User user = userDAO.findByUsername(trimmedId);
+        if (user == null && trimmedId.contains("@")) {
+            user = userDAO.findByEmail(trimmedId);
+        }
+
         if (user == null || user.getPassword() == null) {
             return null;
         }
@@ -32,7 +39,7 @@ public class UserServiceImpl implements UserService {
         String dbPassword = user.getPassword().trim();
         boolean passwordMatches = false;
 
-        // 1. Check if DB password is a BCrypt hash (starts with $2a$, $2b$, or $2y$)
+        // 2. Check if DB password is a BCrypt hash (starts with $2a$, $2b$, or $2y$)
         if (dbPassword.startsWith("$2a$") || dbPassword.startsWith("$2b$") || dbPassword.startsWith("$2y$")) {
             try {
                 passwordMatches = BCrypt.checkpw(rawPassword, dbPassword);
@@ -40,7 +47,7 @@ public class UserServiceImpl implements UserService {
                 e.printStackTrace();
             }
         } 
-        // 2. Fallback to direct comparison if stored as plain text
+        // 3. Fallback to direct comparison if stored as plain text
         else if (dbPassword.equals(rawPassword)) {
             passwordMatches = true;
         }
@@ -49,7 +56,6 @@ public class UserServiceImpl implements UserService {
             return null; // Password mismatch
         }
 
-        // Return user record; status inspection is handled in the controller
         return user;
     }
 
@@ -98,6 +104,7 @@ public class UserServiceImpl implements UserService {
     public String generateNextEmployeeId() {
         return userDAO.generateNextEmployeeId();
     }
+
     @Override
     public List<User> findUsersByRoleId(String roleId) {
         if (roleId == null || roleId.trim().isEmpty()) {
@@ -105,11 +112,7 @@ public class UserServiceImpl implements UserService {
         }
         
         String trimmedRoleId = roleId.trim();
-        System.out.println("Fetching users for roleId: [" + trimmedRoleId + "]");
-        
         List<User> users = userDAO.findUsersByRoleId(trimmedRoleId);
-        System.out.println("Found users count: " + (users != null ? users.size() : 0));
-        
         return users != null ? users : java.util.Collections.emptyList();
     }
 }
