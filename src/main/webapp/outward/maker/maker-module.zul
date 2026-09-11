@@ -6,7 +6,7 @@
 
 	<zscript>
 	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "OUTWARD_MAKER");
-	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Alex");
+	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "omaker");
 </zscript>
 
 	<window id="outwardMakerRootWin" border="none" width="100%"
