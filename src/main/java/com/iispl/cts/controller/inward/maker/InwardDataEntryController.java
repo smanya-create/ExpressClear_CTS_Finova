@@ -517,6 +517,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		applyImageStyle();
 	}
 
+	
 	public void onClick$btnApproveCheque() {
 		if (activeQueue == null || activeQueue.isEmpty())
 			return;
