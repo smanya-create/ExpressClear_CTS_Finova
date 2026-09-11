@@ -132,10 +132,9 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 		String sql = "SELECT " + "ob.outward_batch_id, " + "ob.batch_reference_id, " + "ob.actual_cheque_count, "
 				+ "ob.actual_total_amount, " + "ob.batch_status, " + "ob.uploaded_by, " + "ob.uploaded_at "
-				+ "FROM outward_batch ob " + "WHERE EXISTS (" + "SELECT 1 " + "FROM outward_cheque send_back "
-				+ "WHERE send_back.outward_batch_id = ob.outward_batch_id "
-				+ "AND UPPER(TRIM(send_back.cheque_status)) = " + "'SEND_BACK_MAKER'" + ") "
-				+ "ORDER BY ob.uploaded_at ASC";
+				+ "FROM outward_batch ob " + "WHERE UPPER(TRIM(ob.batch_status)) = 'ON_HOLD' " + "AND EXISTS ("
+				+ "SELECT 1 " + "FROM outward_cheque oc " + "WHERE oc.outward_batch_id = ob.outward_batch_id "
+				+ "AND UPPER(TRIM(oc.cheque_status)) = 'PENDING_DATA_ENTRY'" + ") " + "ORDER BY ob.uploaded_at ASC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -146,7 +145,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			}
 
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch outward batches ready for data entry", exception);
+			throw new RuntimeException("Unable to fetch outward batches returned for data entry", exception);
 		}
 
 		return batches;

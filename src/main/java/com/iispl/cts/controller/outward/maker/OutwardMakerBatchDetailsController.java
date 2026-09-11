@@ -692,7 +692,7 @@ public class OutwardMakerBatchDetailsController extends SelectorComposer<Compone
 
 		mainContentArea.setDynamicProperty("returnFromChecker", false);
 
-		mainContentArea.setSrc("/outward/maker/data-entry.zul");
+		mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
 	}
 
 	private void openMicrRepair(ScanCheque cheque) {

@@ -35,4 +35,6 @@ public interface OutwardBatchService {
 	void updateBatchStatus(String batchId, String status);
 
 	List<OutwardBatch> getOnHoldBatches();
+	
+	List<OutwardBatch> getScanBatchesReadyForDataEntry();
 }

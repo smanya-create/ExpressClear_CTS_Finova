@@ -104,4 +104,9 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 		return outwardBatchDAO.getOnHoldBatches();
 	}
 
+	@Override
+	public List<OutwardBatch> getScanBatchesReadyForDataEntry() {
+		return outwardBatchDAO.getScanBatchesReadyForDataEntry();
+	}
+
 }

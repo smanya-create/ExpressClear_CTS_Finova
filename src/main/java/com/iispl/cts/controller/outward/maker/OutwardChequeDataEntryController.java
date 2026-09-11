@@ -33,9 +33,11 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	private static final long serialVersionUID = 1L;
 
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
+	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
 	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
 	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
 	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
+	private static final String STATUS_ON_HOLD = "ON_HOLD";
 
 	private Window outwardChequeDataEntryWin;
 
@@ -91,6 +93,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	private boolean showingFrontImage = true;
 	private double imageZoom = 1.0;
 	private int imageRotation = 0;
+	private boolean returnedFromChecker = false;
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
@@ -215,6 +218,16 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		scannedBatchId = scannedBatchId.trim();
+
+		Object returnFlag = Executions.getCurrent().getAttribute("RETURN_FROM_CHECKER");
+
+		if (returnFlag == null) {
+			returnFlag = Executions.getCurrent().getSession().getAttribute("RETURN_FROM_CHECKER");
+		}
+
+		if (returnFlag != null && "true".equalsIgnoreCase(returnFlag.toString())) {
+			returnedFromChecker = true;
+		}
 	}
 
 	private void registerEvents() {
@@ -253,12 +266,6 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 				throw new IllegalStateException("Scan batch not found: " + scannedBatchId);
 			}
 
-			scanChequeList = scanService.getChequesByBatchId(scannedBatchId);
-
-			if (scanChequeList == null) {
-				scanChequeList = new ArrayList<>();
-			}
-
 			outwardBatchId = outwardBatchService.getOutwardBatchIdByScannedBatchId(scannedBatchId);
 
 			outwardChequeList = new ArrayList<>();
@@ -269,26 +276,19 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 				outwardBatch = outwardBatchService.getBatchById(outwardBatchId);
 
-				List<OutwardCheque> existing = outwardChequeService.getChequesByBatchId(outwardBatchId);
+				if (returnedFromChecker || isBatchOnHold(outwardBatch)) {
 
-				if (existing != null) {
-					outwardChequeList.addAll(existing);
-				}
-			}
+					loadReturnedCheques();
 
-			List<OutwardCheque> ordered = new ArrayList<>();
-
-			for (ScanCheque scanCheque : scanChequeList) {
-				OutwardCheque existing = findExistingOutwardCheque(scanCheque, outwardChequeList);
-
-				if (existing != null) {
-					ordered.add(existing);
 				} else {
-					ordered.add(buildOutwardChequeFromScan(scanCheque));
-				}
-			}
 
-			outwardChequeList = ordered;
+					loadNormalCheques();
+				}
+
+			} else {
+
+				loadNormalCheques();
+			}
 
 			if (outwardBatch == null) {
 				outwardBatch = createDisplayBatch(scanBatch);
@@ -299,25 +299,107 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			currentChequeIndex = findFirstPendingCheque();
 
 			if (currentChequeIndex >= 0) {
+
 				loadCurrentCheque();
 
 				outwardChequeDataEntryBtnSaveNext.setDisabled(false);
-
 				outwardChequeDataEntryBtnReject.setDisabled(false);
+
 			} else {
+
 				showAllCompleted();
 			}
 
 			updateSubmitButton();
 
 		} catch (Exception exception) {
+
 			clearPage();
 
 			showStatus("Unable to load cheque data: " + safeExceptionMessage(exception));
 		}
 	}
 
+	private void loadNormalCheques() {
+		scanChequeList = scanService.getChequesByBatchId(scannedBatchId);
+
+		if (scanChequeList == null) {
+			scanChequeList = new ArrayList<>();
+		}
+
+		List<OutwardCheque> existing = new ArrayList<>();
+
+		if (outwardBatchId != null && !outwardBatchId.trim().isEmpty()) {
+
+			existing = outwardChequeService.getChequesByBatchId(outwardBatchId);
+
+			if (existing == null) {
+				existing = new ArrayList<>();
+			}
+		}
+
+		List<OutwardCheque> ordered = new ArrayList<>();
+
+		for (ScanCheque scanCheque : scanChequeList) {
+
+			OutwardCheque existingCheque = findExistingOutwardCheque(scanCheque, existing);
+
+			if (existingCheque != null) {
+
+				ordered.add(existingCheque);
+
+			} else {
+
+				ordered.add(buildOutwardChequeFromScan(scanCheque));
+			}
+		}
+
+		outwardChequeList = ordered;
+	}
+
+	private void loadReturnedCheques() {
+		List<OutwardCheque> returned = outwardChequeService.getOnHoldCheques(outwardBatchId);
+
+		if (returned == null) {
+			returned = new ArrayList<>();
+		}
+
+		outwardChequeList = new ArrayList<>(returned);
+
+		scanChequeList = scanService.getChequesByBatchId(scannedBatchId);
+
+		if (scanChequeList == null) {
+			scanChequeList = new ArrayList<>();
+		}
+
+		List<ScanCheque> returnedScanCheques = new ArrayList<>();
+
+		for (OutwardCheque cheque : outwardChequeList) {
+
+			ScanCheque scanCheque = findMatchingScanChequeByOutwardCheque(cheque);
+
+			if (scanCheque != null) {
+				returnedScanCheques.add(scanCheque);
+			}
+		}
+
+		if (!returnedScanCheques.isEmpty()) {
+			scanChequeList = returnedScanCheques;
+		}
+
+		returnedFromChecker = true;
+	}
+
+	private boolean isBatchOnHold(OutwardBatch batch) {
+		if (batch == null) {
+			return false;
+		}
+
+		return STATUS_ON_HOLD.equalsIgnoreCase(safeValue(batch.getBatchStatus()).trim());
+	}
+
 	private OutwardBatch createDisplayBatch(ScanBatch scanBatch) {
+
 		if (scanBatch == null) {
 			return null;
 		}
@@ -376,6 +458,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		String back = safeValue(scanCheque.getChequeImageBack()).trim();
 
 		for (OutwardCheque cheque : existingCheques) {
+
 			if (cheque == null) {
 				continue;
 			}
@@ -409,6 +492,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		String back = safeValue(cheque.getChequeImageBack()).trim();
 
 		for (ScanCheque scanCheque : scanChequeList) {
+
 			if (scanCheque == null) {
 				continue;
 			}
@@ -433,7 +517,48 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		return null;
 	}
 
+	private ScanCheque findMatchingScanChequeByOutwardCheque(OutwardCheque cheque) {
+
+		if (cheque == null) {
+			return null;
+		}
+
+		String number = safeValue(cheque.getChequeNumber()).trim();
+
+		String front = safeValue(cheque.getChequeImageFront()).trim();
+
+		String back = safeValue(cheque.getChequeImageBack()).trim();
+
+		for (ScanCheque scanCheque : scanChequeList) {
+
+			if (scanCheque == null) {
+				continue;
+			}
+
+			String scanNumber = safeValue(scanCheque.getChequeNumber()).trim();
+
+			String scanFront = safeValue(scanCheque.getChequeImageFront()).trim();
+
+			String scanBack = safeValue(scanCheque.getChequeImageBack()).trim();
+
+			if (!front.isEmpty() && front.equalsIgnoreCase(scanFront)) {
+				return scanCheque;
+			}
+
+			if (!back.isEmpty() && back.equalsIgnoreCase(scanBack)) {
+				return scanCheque;
+			}
+
+			if (!number.isEmpty() && number.equalsIgnoreCase(scanNumber)) {
+				return scanCheque;
+			}
+		}
+
+		return null;
+	}
+
 	private boolean isEditableCheque(OutwardCheque cheque) {
+
 		return cheque != null && STATUS_PENDING_DATA_ENTRY.equalsIgnoreCase(safeValue(cheque.getChequeStatus()).trim());
 	}
 
@@ -442,6 +567,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private int findNextPendingCheque(int startIndex) {
+
 		if (outwardChequeList == null) {
 			return -1;
 		}
@@ -457,6 +583,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private int findPreviousNavigableCheque(int startIndex) {
+
 		if (outwardChequeList == null) {
 			return -1;
 		}
@@ -472,6 +599,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private int findNextNavigableCheque(int startIndex) {
+
 		if (outwardChequeList == null) {
 			return -1;
 		}
@@ -558,6 +686,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void updateSummary() {
+
 		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 
 			showAllCompleted();
@@ -569,6 +698,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		String number = safeValue(cheque.getChequeNumber());
 
 		if (number.isEmpty()) {
+
 			ScanCheque scanCheque = findMatchingScanCheque(cheque);
 
 			if (scanCheque != null) {
@@ -576,7 +706,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			}
 		}
 
-		int total = scanChequeList == null ? 0 : scanChequeList.size();
+		int total = outwardChequeList == null ? 0 : outwardChequeList.size();
 
 		outwardChequeDataEntryLblRecord.setValue("CHEQUE " + (currentChequeIndex + 1) + " OF " + total);
 
@@ -584,13 +714,28 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void updateBatchSummary() {
-		int total = scanChequeList == null ? 0 : scanChequeList.size();
+
+		int total = outwardChequeList == null ? 0 : outwardChequeList.size();
 
 		int completed = 0;
 
 		if (outwardBatchId != null && !outwardBatchId.trim().isEmpty()) {
 
 			completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
+		}
+
+		if (returnedFromChecker) {
+
+			int pending = 0;
+
+			for (OutwardCheque cheque : outwardChequeList) {
+
+				if (isEditableCheque(cheque)) {
+					pending++;
+				}
+			}
+
+			completed = Math.max(total - pending, 0);
 		}
 
 		int remaining = Math.max(total - completed, 0);
@@ -604,6 +749,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void updateSaveButton() {
+
 		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 
 			outwardChequeDataEntryBtnSaveNext.setDisabled(true);
@@ -619,7 +765,8 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void updateSubmitButton() {
-		if (scanChequeList == null || scanChequeList.isEmpty() || outwardBatchId == null
+
+		if (outwardChequeList == null || outwardChequeList.isEmpty() || outwardBatchId == null
 				|| outwardBatchId.trim().isEmpty()) {
 
 			outwardChequeDataEntryBtnSubmit.setDisabled(true);
@@ -627,12 +774,32 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
+		if (returnedFromChecker) {
+
+			for (OutwardCheque cheque : outwardChequeList) {
+
+				if (isEditableCheque(cheque)) {
+
+					outwardChequeDataEntryBtnSubmit.setDisabled(true);
+
+					return;
+				}
+			}
+
+			outwardChequeDataEntryBtnSubmit.setDisabled(false);
+
+			return;
+		}
+
 		int completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
 
-		outwardChequeDataEntryBtnSubmit.setDisabled(completed != scanChequeList.size());
+		int total = scanChequeList == null ? 0 : scanChequeList.size();
+
+		outwardChequeDataEntryBtnSubmit.setDisabled(completed != total);
 	}
 
 	private void updateNavigationButtons() {
+
 		if (currentChequeIndex < 0 || outwardChequeList == null || outwardChequeList.isEmpty()) {
 
 			outwardChequeDataEntryBtnPrevious.setDisabled(true);
@@ -648,6 +815,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void previousCheque() {
+
 		int index = findPreviousNavigableCheque(currentChequeIndex - 1);
 
 		if (index < 0) {
@@ -655,11 +823,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		currentChequeIndex = index;
+
 		loadCurrentCheque();
+
 		hideStatus();
 	}
 
 	private void nextCheque() {
+
 		int index = findNextNavigableCheque(currentChequeIndex + 1);
 
 		if (index < 0) {
@@ -667,11 +838,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		currentChequeIndex = index;
+
 		loadCurrentCheque();
+
 		hideStatus();
 	}
 
 	private void saveAndNext() {
+
 		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
@@ -681,16 +855,20 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		try {
+
 			OutwardCheque cheque = outwardChequeList.get(currentChequeIndex);
 
 			if (cheque == null) {
+
 				cheque = new OutwardCheque();
+
 				outwardChequeList.set(currentChequeIndex, cheque);
 			}
 
 			populateOutwardChequeFromFields(cheque);
 
 			cheque.setOutwardBatchId(outwardBatchId);
+
 			cheque.setChequeStatus(STATUS_PENDING_VERIFICATION);
 
 			OutwardCheque saved = outwardChequeService.saveMakerCheque(scannedBatchId, cheque);
@@ -719,6 +897,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			if (next >= 0) {
 
 				currentChequeIndex = next;
+
 				loadCurrentCheque();
 
 				showStatus("Cheque saved successfully.");
@@ -727,7 +906,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 				showAllCompleted();
 
-				showStatus("All cheque data has been completed.");
+				if (returnedFromChecker) {
+
+					showStatus("Returned cheque correction completed successfully.");
+
+				} else {
+
+					showStatus("All cheque data has been completed.");
+				}
 			}
 
 			updateSubmitButton();
@@ -759,6 +945,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private boolean validateFields() {
+
 		String chequeNumber = outwardChequeDataEntryTxtChequeNumber.getValue().trim();
 
 		String amount = outwardChequeDataEntryTxtAmount.getValue().trim();
@@ -772,16 +959,21 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		String draweeName = outwardChequeDataEntryTxtDraweeName.getValue().trim();
 
 		if (chequeNumber.isEmpty()) {
+
 			showStatus("Cheque number is required.");
+
 			return false;
 		}
 
 		if (amount.isEmpty()) {
+
 			showStatus("Cheque amount is required.");
+
 			return false;
 		}
 
 		try {
+
 			if (new BigDecimal(amount).compareTo(BigDecimal.ZERO) < 0) {
 
 				showStatus("Cheque amount cannot be negative.");
@@ -804,23 +996,30 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		}
 
 		if (micr.isEmpty()) {
+
 			showStatus("MICR code is required.");
+
 			return false;
 		}
 
 		if (payeeAccount.isEmpty()) {
+
 			showStatus("Payee account number is required.");
 
 			return false;
 		}
 
 		if (payeeName.isEmpty()) {
+
 			showStatus("Payee name is required.");
+
 			return false;
 		}
 
 		if (draweeName.isEmpty()) {
+
 			showStatus("Drawee name is required.");
+
 			return false;
 		}
 
@@ -830,6 +1029,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void toggleChequeImage() {
+
 		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
@@ -871,13 +1071,16 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void loadImage(String imagePath) {
+
 		if (imagePath == null || imagePath.trim().isEmpty()) {
 
 			showImageUnavailable();
+
 			return;
 		}
 
 		try {
+
 			String path = imagePath.trim();
 
 			if (!path.startsWith("/") && !path.startsWith("http://") && !path.startsWith("https://")) {
@@ -900,12 +1103,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void showImageUnavailable() {
+
 		outwardChequeDataEntryChequeImage.setVisible(false);
 
 		outwardChequeDataEntryLblImageMessage.setVisible(true);
 	}
 
 	private void resetImageState() {
+
 		showingFrontImage = true;
 		imageZoom = 1.0;
 		imageRotation = 0;
@@ -916,18 +1121,21 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void zoomIn() {
+
 		imageZoom = Math.min(imageZoom + 0.1, 3.0);
 
 		applyImageTransform();
 	}
 
 	private void zoomOut() {
+
 		imageZoom = Math.max(imageZoom - 0.1, 0.5);
 
 		applyImageTransform();
 	}
 
 	private void rotateImage() {
+
 		imageRotation += 90;
 
 		if (imageRotation >= 360) {
@@ -938,6 +1146,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void resetImage() {
+
 		imageZoom = 1.0;
 		imageRotation = 0;
 
@@ -945,11 +1154,13 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void applyImageTransform() {
+
 		outwardChequeDataEntryChequeImage
 				.setStyle("transform:scale(" + imageZoom + ") rotate(" + imageRotation + "deg);");
 	}
 
 	private void openRejectWindow() {
+
 		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
@@ -971,10 +1182,12 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void closeRejectWindow() {
+
 		outwardChequeDataEntryRejectWindow.setVisible(false);
 	}
 
 	private void requestReject() {
+
 		if (currentChequeIndex < 0 || currentChequeIndex >= outwardChequeList.size()) {
 			return;
 		}
@@ -982,6 +1195,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		String remarks = outwardChequeDataEntryTxtRejectRemarks.getValue().trim();
 
 		if (remarks.isEmpty()) {
+
 			showStatus("Please enter rejection remarks.");
 
 			return;
@@ -1002,6 +1216,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 				STATUS_REJECTION_REQUEST);
 
 		if (!updated) {
+
 			showStatus("Unable to create rejection request.");
 
 			return;
@@ -1016,6 +1231,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		if (next >= 0) {
 
 			currentChequeIndex = next;
+
 			loadCurrentCheque();
 
 		} else {
@@ -1030,7 +1246,8 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void submitToChecker() {
-		if (scanChequeList == null || scanChequeList.isEmpty()) {
+
+		if (outwardChequeList == null || outwardChequeList.isEmpty()) {
 
 			showStatus("There are no cheques to submit.");
 
@@ -1044,18 +1261,35 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			return;
 		}
 
-		int completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
+		for (OutwardCheque cheque : outwardChequeList) {
 
-		if (completed != scanChequeList.size()) {
+			if (isEditableCheque(cheque)) {
 
-			showStatus("All cheques must be completed before submission.");
+				showStatus("All returned cheque corrections must be completed before submission.");
 
-			updateSubmitButton();
+				updateSubmitButton();
 
-			return;
+				return;
+			}
 		}
 
-		showSubmitConfirmation(scanChequeList.size(), completed);
+		if (!returnedFromChecker) {
+
+			int completed = outwardChequeService.getDataEnteredCountByBatchId(outwardBatchId);
+
+			int total = scanChequeList == null ? 0 : scanChequeList.size();
+
+			if (completed != total) {
+
+				showStatus("All cheques must be completed before submission.");
+
+				updateSubmitButton();
+
+				return;
+			}
+		}
+
+		showSubmitConfirmation(outwardChequeList.size(), outwardChequeList.size());
 	}
 
 	private void showSubmitConfirmation(int total, int completed) {
@@ -1069,14 +1303,12 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		confirmation.setMode("modal");
 		confirmation.setWidth("460px");
 		confirmation.setPosition("center");
-
 		confirmation.setStyle("border-radius:8px;");
 
 		Vlayout content = new Vlayout();
 
 		content.setWidth("100%");
 		content.setSpacing("14px");
-
 		content.setStyle("padding:24px;box-sizing:border-box;");
 
 		Label title = new Label("READY FOR CHECKER VERIFICATION");
@@ -1085,7 +1317,9 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		content.appendChild(title);
 
-		Label message = new Label("Batch " + outwardBatchId + " has completed all cheque data entry.");
+		Label message = new Label(
+				"Batch " + outwardBatchId + (returnedFromChecker ? " has completed the returned cheque correction."
+						: " has completed all cheque data entry."));
 
 		message.setStyle("font-size:13px;" + "color:#52657d;");
 
@@ -1145,12 +1379,14 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void completeBatchSubmission() {
+
 		try {
 
 			boolean updated = outwardBatchService.updateOutWardBatchStatus(outwardBatchId,
 					STATUS_PENDING_CHECKER_PROCESS);
 
 			if (!updated) {
+
 				showStatus("Unable to submit batch to Checker.");
 
 				return;
@@ -1165,6 +1401,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void showSubmissionSuccess() {
+
 		Window success = new Window();
 
 		success.setTitle("BATCH SUBMITTED");
@@ -1174,14 +1411,12 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		success.setMode("modal");
 		success.setWidth("480px");
 		success.setPosition("center");
-
 		success.setStyle("border-radius:8px;");
 
 		Vlayout content = new Vlayout();
 
 		content.setWidth("100%");
 		content.setSpacing("14px");
-
 		content.setStyle("padding:26px;box-sizing:border-box;");
 
 		Label title = new Label("BATCH SUBMITTED SUCCESSFULLY");
@@ -1196,7 +1431,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		content.appendChild(batch);
 
-		int total = scanChequeList == null ? 0 : scanChequeList.size();
+		int total = outwardChequeList == null ? 0 : outwardChequeList.size();
 
 		Label completed = new Label("Completed: " + total + " / " + total + " cheques");
 
@@ -1255,6 +1490,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void showAllCompleted() {
+
 		currentChequeIndex = -1;
 
 		clearChequeFields();
@@ -1275,54 +1511,25 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void backToDataEntryList() {
-		Component component = outwardChequeDataEntryWin;
 
-		while (component != null) {
+		Executions.getCurrent().getSession().removeAttribute("RETURN_FROM_CHECKER");
 
-			if ("mainContentArea".equals(component.getId()) && component instanceof org.zkoss.zul.Include) {
-
-				org.zkoss.zul.Include include = (org.zkoss.zul.Include) component;
-
-				include.setDynamicProperty("batchId", null);
-
-				include.setDynamicProperty("mode", null);
-
-				include.setSrc("/outward/maker/data-entry.zul");
-
-				return;
-			}
-
-			component = component.getParent();
-		}
+		Executions.getCurrent().getSession().setAttribute("OUTWARD_DATA_ENTRY_BATCH_ID", null);
 
 		Executions.sendRedirect("/outward/maker/data-entry.zul");
 	}
 
 	private void goToDashboard() {
-		Component component = outwardChequeDataEntryWin;
 
-		while (component != null) {
+		Executions.getCurrent().getSession().removeAttribute("RETURN_FROM_CHECKER");
 
-			if ("mainContentArea".equals(component.getId()) && component instanceof org.zkoss.zul.Include) {
-
-				org.zkoss.zul.Include include = (org.zkoss.zul.Include) component;
-
-				include.setDynamicProperty("batchId", null);
-
-				include.setDynamicProperty("mode", null);
-
-				include.setSrc("/outward/maker/dashboard.zul");
-
-				return;
-			}
-
-			component = component.getParent();
-		}
+		Executions.getCurrent().getSession().removeAttribute("OUTWARD_DATA_ENTRY_BATCH_ID");
 
 		Executions.sendRedirect("/outward/maker/dashboard.zul");
 	}
 
 	private void clearChequeFields() {
+
 		outwardChequeDataEntryTxtChequeNumber.setValue("");
 
 		outwardChequeDataEntryTxtAmount.setValue("");
@@ -1339,6 +1546,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void clearPage() {
+
 		clearChequeFields();
 
 		outwardChequeDataEntryLblBatchId.setValue("-");
@@ -1367,9 +1575,11 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void showStatus(String message) {
+
 		if (message == null || message.trim().isEmpty()) {
 
 			hideStatus();
+
 			return;
 		}
 
@@ -1379,6 +1589,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	private void hideStatus() {
+
 		outwardChequeDataEntryLblValidationStatus.setValue("");
 
 		outwardChequeDataEntryLblValidationStatus.setVisible(false);
