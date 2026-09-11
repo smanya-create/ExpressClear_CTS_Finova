@@ -958,22 +958,11 @@ public class OutwardMakerBatchUploadController
                     .addEventListener(
                             "onClick",
                             new EventListener<Event>() {
-
                                 @Override
-                                public void onEvent(
-                                        Event event) {
-
-                                    /*
-                                     * Data Entry navigation
-                                     * can be connected here once
-                                     * the exact Data Entry include
-                                     * path/attributes are finalized.
-                                     */
-
-                                    System.out.println(
-                                            "Data Entry clicked for batch: "
-                                                    + selectedBatchId);
+                                public void onEvent(Event event) {
+                                    openDataEntry(selectedBatchId);
                                 }
+
                             });
 
             actionCell.appendChild(
@@ -995,7 +984,34 @@ public class OutwardMakerBatchUploadController
                 .appendChild(item);
     }
 
-    // =========================================================
+    private void openDataEntry(String batchId) {
+
+        if (batchId == null || batchId.trim().isEmpty()) {
+            return;
+        }
+
+        Component root = Executions.getCurrent()
+                .getDesktop()
+                .getFirstPage()
+                .getFirstRoot();
+
+        Component mainContentArea =
+                root.getFellowIfAny("mainContentArea", true);
+
+        if (mainContentArea instanceof Include) {
+
+            Include include = (Include) mainContentArea;
+
+            include.setDynamicProperty(
+                    "batchId",
+                    batchId.trim());
+
+            include.setSrc(
+                    "/outward/maker/cheque-data-entry.zul");
+        }
+    }
+
+	// =========================================================
     // OPEN MICR REPAIR
     // =========================================================
 
