@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.outward.checker;
 
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.OutwardRejectedCheques;
+import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 import com.iispl.cts.serviceimpl.outward.OutwardCheckerQueueServiceImpl;
@@ -171,6 +174,25 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	private Button btnAccountValidationOk;
 
+	
+	
+	// ============================================================
+	// REJECT CHEQUE POPUP
+	// ============================================================
+
+	private Window rejectWindow;
+
+	private Label lblRejectBatch;
+
+	private Label lblRejectCheque;
+
+	private Combobox cmbRejectReason;
+
+	private Textbox txtRejectRemarks;
+
+	private Button btnRejectConfirm;
+
+	private Button btnRejectCancel;
 	/*
 	 * ============================================================ ACCOUNT
 	 * VALIDATION ============================================================
@@ -397,6 +419,59 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		 * Update XML button.
 		 */
 		updateXmlGenerationButton();
+		createReturnMakerWindow();
+		createRejectWindow();
+	}
+	
+	// ============================================================
+	// LOAD REJECTED REASONS
+	// ============================================================
+
+	private void loadRejectedReasons() {
+
+	    try {
+
+	        List<RejectedReason> reasons =
+	                outwardCheckerQueueService
+	                        .getRejectedReasons();
+
+	        cmbRejectReason.getItems().clear();
+
+	        for (RejectedReason reason : reasons) {
+
+	            Comboitem item =
+	                    new Comboitem();
+
+	            item.setLabel(
+	                    nullSafe(
+	                            reason.getRejectedReasonName()
+	                    )
+	            );
+
+	            /*
+	             * Store rejected reason ID.
+	             */
+	            item.setValue(
+	                    reason.getRejectedReasonId()
+	            );
+
+	            cmbRejectReason.appendChild(item);
+	        }
+
+	        System.out.println(
+	                "Rejected reasons loaded = "
+	                + reasons.size()
+	        );
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        showError(
+	                "Unable to load rejection reasons.",
+	                e
+	        );
+	    }
 	}
 
 	/*
@@ -750,36 +825,9 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			 * ====================================================
 			 */
 
-			frontImagePath = null;
+			frontImagePath = convertImagePath(cheque.getChequeImageFront());
 
-			backImagePath = null;
-
-			List<OutwardChequeImage> images = outwardCheckerQueueService
-					.getImagesByChequeId(cheque.getOutwardChequeId());
-
-			if (images != null) {
-
-				for (OutwardChequeImage image : images) {
-
-					if (image == null) {
-
-						continue;
-					}
-
-					String imageType = nullSafe(image.getImageType()).toUpperCase();
-
-					String imagePath = image.getImagePath();
-
-					if ("FRONT".equals(imageType)) {
-
-						frontImagePath = convertImagePath(imagePath);
-
-					} else if ("BACK".equals(imageType)) {
-
-						backImagePath = convertImagePath(imagePath);
-					}
-				}
-			}
+			backImagePath = convertImagePath(cheque.getChequeImageBack());
 
 			/*
 			 * ==================================================== SHOW FRONT IMAGE
@@ -1478,17 +1526,24 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		path = path.trim();
 
+		// Convert Windows path separators to URL path separators.
+		path = path.replace("\\", "/");
+
+		// Keep external image URLs unchanged.
 		if (path.startsWith("http://") || path.startsWith("https://")) {
 
 			return path;
 		}
 
-		if (path.startsWith("/")) {
+		// ZK image src should start from the web application root.
+		if (!path.startsWith("/")) {
 
-			return path;
+			path = "/" + path;
 		}
 
-		return "/" + path;
+		System.out.println("Converted cheque image path = " + path);
+
+		return path;
 	}
 
 	/*
@@ -1924,46 +1979,415 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	 * ============================================================
 	 */
 
+	// ============================================================
+	// REJECT BUTTON
+	// ============================================================
+
 	public void onClick$btnReject(Event event) {
 
-		if (cheques == null || cheques.isEmpty() || currentIndex < 0 || currentIndex >= cheques.size()) {
+	    if (cheques == null
+	            || cheques.isEmpty()
+	            || currentIndex < 0
+	            || currentIndex >= cheques.size()) {
 
-			return;
-		}
+	        return;
+	    }
 
-		OutwardCheque cheque = cheques.get(currentIndex);
+	    try {
 
-		Messagebox.show("Reject cheque " + cheque.getChequeNumber() + "?", "Reject Cheque",
-				Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, confirmEvent -> {
+	        OutwardCheque cheque =
+	                cheques.get(currentIndex);
 
-					if (Messagebox.ON_YES.equals(confirmEvent.getName())) {
+	        // --------------------------------------------------------
+	        // SET BATCH ID
+	        // --------------------------------------------------------
 
-						try {
+	        lblRejectBatch.setValue(
+	                nullSafe(batchId)
+	        );
 
-							outwardCheckerQueueService.rejectCheque(cheque.getChequeNumber());
+	        // --------------------------------------------------------
+	        // SET CHEQUE NUMBER
+	        // --------------------------------------------------------
 
-							cheque.setChequeStatus("REJECTED");
+	        lblRejectCheque.setValue(
+	                nullSafe(
+	                        cheque.getChequeNumber()
+	                )
+	        );
 
-							/*
-							 * Rejected cheque cannot make the batch VERIFIED.
-							 */
-							accountValidationResults.remove(nullSafe(cheque.getOutwardChequeId()));
+	        // --------------------------------------------------------
+	        // CLEAR OLD VALUES
+	        // --------------------------------------------------------
 
-							loadBatchStatus();
+	        cmbRejectReason.setSelectedItem(null);
 
-							updateXmlGenerationButton();
+	        if (txtRejectRemarks != null) {
+	            txtRejectRemarks.setValue("");
+	        }
 
-							Messagebox.show("Cheque rejected successfully.", "Reject Cheque", Messagebox.OK,
-									Messagebox.INFORMATION);
+	        // --------------------------------------------------------
+	        // SHOW POPUP
+	        // --------------------------------------------------------
 
-						} catch (Exception e) {
+	        rejectWindow.setVisible(true);
 
-							e.printStackTrace();
+	    } catch (Exception e) {
 
-							showError("Unable to reject cheque.", e);
-						}
-					}
-				});
+	        e.printStackTrace();
+
+	        showError(
+	                "Unable to open Reject Cheque popup.",
+	                e
+	        );
+	    }
+	}
+	
+	// ============================================================
+	// CREATE REJECT WINDOW
+	// ============================================================
+
+	private void createRejectWindow() {
+
+	    try {
+
+	        rejectWindow =
+	                (Window) Executions.createComponents(
+	                        "/outward/checker/reject-cheque.zul",
+	                        self,
+	                        null
+	                );
+
+	        lblRejectBatch =
+	                (Label) rejectWindow.getFellow(
+	                        "lblRejectBatch"
+	                );
+
+	        lblRejectCheque =
+	                (Label) rejectWindow.getFellow(
+	                        "lblRejectCheque"
+	                );
+
+	        cmbRejectReason =
+	                (Combobox) rejectWindow.getFellow(
+	                        "cmbRejectReason"
+	                );
+
+	        txtRejectRemarks =
+	                (Textbox) rejectWindow.getFellow(
+	                        "txtRejectRemarks"
+	                );
+
+	        btnRejectConfirm =
+	                (Button) rejectWindow.getFellow(
+	                        "btnRejectConfirm"
+	                );
+
+	        btnRejectCancel =
+	                (Button) rejectWindow.getFellow(
+	                        "btnRejectCancel"
+	                );
+
+	        btnRejectConfirm.addEventListener(
+	                "onClick",
+	                event -> confirmRejectCheque()
+	        );
+
+	        btnRejectCancel.addEventListener(
+	                "onClick",
+	                event -> closeRejectWindow()
+	        );
+
+	        rejectWindow.addEventListener(
+	                "onCancel",
+	                event -> closeRejectWindow()
+	        );
+
+	        rejectWindow.setVisible(false);
+
+	        loadRejectedReasons();
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        showError(
+	                "Unable to create Reject Cheque popup.",
+	                e
+	        );
+	    }
+	}
+	
+	// ============================================================
+	// CONFIRM REJECT CHEQUE
+	// ============================================================
+
+	private void confirmRejectCheque() {
+
+	    if (cheques == null
+	            || cheques.isEmpty()
+	            || currentIndex < 0
+	            || currentIndex >= cheques.size()) {
+
+	        return;
+	    }
+
+	    try {
+
+	        // --------------------------------------------------------
+	        // CHECK REASON
+	        // --------------------------------------------------------
+
+	        if (cmbRejectReason == null
+	                || cmbRejectReason.getSelectedItem() == null) {
+
+	            Messagebox.show(
+	                    "Please select a rejection reason.",
+	                    "Reject Cheque",
+	                    Messagebox.OK,
+	                    Messagebox.EXCLAMATION
+	            );
+
+	            return;
+	        }
+
+	        // --------------------------------------------------------
+	        // CURRENT CHEQUE
+	        // --------------------------------------------------------
+
+	        OutwardCheque cheque =
+	                cheques.get(currentIndex);
+
+	        Comboitem selectedReason =
+	                cmbRejectReason.getSelectedItem();
+
+	        // --------------------------------------------------------
+	        // GET REASON ID
+	        // --------------------------------------------------------
+
+	        Object reasonValue =
+	                selectedReason.getValue();
+
+	        String reasonId =
+	                reasonValue == null
+	                        ? ""
+	                        : reasonValue.toString().trim();
+
+	        String reasonName =
+	                selectedReason.getLabel();
+
+	        // --------------------------------------------------------
+	        // GET REMARKS
+	        // --------------------------------------------------------
+
+	        String remarks = "";
+
+	        if (txtRejectRemarks != null) {
+
+	            remarks =
+	                    txtRejectRemarks.getValue();
+
+	            if (remarks == null) {
+	                remarks = "";
+	            }
+
+	            remarks =
+	                    remarks.trim();
+	        }
+	        final String finalRemarks = remarks;
+
+
+	        // --------------------------------------------------------
+	        // CONFIRMATION POPUP
+	        // --------------------------------------------------------
+
+	        Messagebox.show(
+	                "Reject cheque "
+	                        + cheque.getChequeNumber()
+	                        + "?",
+	                "Confirm Reject",
+	                Messagebox.YES | Messagebox.NO,
+	                Messagebox.QUESTION,
+	                confirmEvent -> {
+
+	                    if (!Messagebox.ON_YES.equals(
+	                            confirmEvent.getName())) {
+
+	                        return;
+	                    }
+
+	                    try {
+
+	                        // ------------------------------------------------
+	                        // CREATE YOUR EXISTING ENTITY
+	                        // ------------------------------------------------
+
+	                        OutwardRejectedCheques rejectedCheque =
+	                                new OutwardRejectedCheques();
+
+	                        rejectedCheque.setOutwardChequeId(
+	                                cheque.getOutwardChequeId()
+	                        );
+
+	                        rejectedCheque.setRejectedBy(
+	                                getCurrentUsername()
+	                        );
+
+	                        rejectedCheque.setRejectedDate(
+	                                new Timestamp(
+	                                        System.currentTimeMillis()
+	                                )
+	                        );
+
+	                        /*
+	                         * Your entity contains "remarks"
+	                         * but does not contain reasonId/reasonName.
+	                         *
+	                         * So store the selected reason in remarks.
+	                         */
+	                      
+	                        // ------------------------------------------------
+	                        // SAVE REJECTED CHEQUE
+	                        // ------------------------------------------------
+
+	                        outwardCheckerQueueService
+	                                .saveRejectedCheque(
+	                                        rejectedCheque
+	                                );
+
+	                        // ------------------------------------------------
+	                        // UPDATE CHEQUE STATUS
+	                        // ------------------------------------------------
+
+	                        outwardCheckerQueueService
+	                                .updateChequeStatus(
+	                                        cheque.getChequeNumber(),
+	                                        "REJECTED"
+	                                );
+
+	                        // ------------------------------------------------
+	                        // UPDATE LOCAL OBJECT
+	                        // ------------------------------------------------
+
+	                        cheque.setChequeStatus(
+	                                "REJECTED"
+	                        );
+
+	                        // ------------------------------------------------
+	                        // REMOVE ACCOUNT VALIDATION
+	                        // ------------------------------------------------
+
+	                        accountValidationResults.remove(
+	                                nullSafe(
+	                                        cheque.getOutwardChequeId()
+	                                )
+	                        );
+
+	                        // ------------------------------------------------
+	                        // CLOSE POPUP
+	                        // ------------------------------------------------
+
+	                        closeRejectWindow();
+
+	                        // ------------------------------------------------
+	                        // REMOVE CHEQUE FROM CURRENT QUEUE
+	                        // ------------------------------------------------
+
+	                        cheques.remove(currentIndex);
+
+	                        // ------------------------------------------------
+	                        // SHOW NEXT CHEQUE
+	                        // ------------------------------------------------
+
+	                        if (cheques.isEmpty()) {
+
+	                            currentIndex = 0;
+
+	                            if (lblCurrentCheque != null) {
+	                                lblCurrentCheque.setValue("0");
+	                            }
+
+	                            if (lblRemaining != null) {
+	                                lblRemaining.setValue("0");
+	                            }
+
+	                            updateXmlGenerationButton();
+
+	                        } else {
+
+	                            if (currentIndex >= cheques.size()) {
+
+	                                currentIndex =
+	                                        cheques.size() - 1;
+	                            }
+	                            displayCheque();
+	                        }
+
+	                        // ------------------------------------------------
+	                        // SUCCESS
+	                        // ------------------------------------------------
+
+	                        Messagebox.show(
+	                                "Cheque rejected successfully.\n\n"
+	                                        + "Cheque Number: "
+	                                        + cheque.getChequeNumber()
+	                                        + "\n"
+	                                        + "Reason: "
+	                                        + reasonName,
+	                                "Reject Cheque",
+	                                Messagebox.OK,
+	                                Messagebox.INFORMATION
+	                        );
+
+	                    } catch (Exception e) {
+
+	                        e.printStackTrace();
+
+	                        showError(
+	                                "Unable to reject cheque.",
+	                                e
+	                        );
+	                    }
+	                }
+	        );
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        showError(
+	                "Unable to reject cheque.",
+	                e
+	        );
+	    }
+	}
+	
+	// ============================================================
+	// GET CURRENT USERNAME
+	// ============================================================
+
+	private String getCurrentUsername() {
+
+	    Object username =
+	            Sessions.getCurrent()
+	                    .getAttribute("CTS_USERNAME");
+
+	    if (username == null) {
+	        return "UNKNOWN";
+	    }
+
+	    return username.toString();
+	}
+	
+	// ============================================================
+	// CLOSE REJECT WINDOW
+	// ============================================================
+
+	private void closeRejectWindow() {
+
+	    if (rejectWindow != null) {
+	        rejectWindow.setVisible(false);
+	    }
 	}
 
 	/*

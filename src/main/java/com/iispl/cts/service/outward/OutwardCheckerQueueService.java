@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.OutwardRejectedCheques;
+import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
 
 public interface OutwardCheckerQueueService {
@@ -56,4 +58,11 @@ public interface OutwardCheckerQueueService {
 	void updateBatchStatus(String batchId, String status) throws SQLException;
 	
 	void updateChequeStatus(String chequeNo, String status) throws SQLException;
+	
+	List<RejectedReason> getRejectedReasons()
+	        throws SQLException;
+
+	void saveRejectedCheque(
+	        OutwardRejectedCheques rejectedCheque)
+	        throws SQLException;
 }

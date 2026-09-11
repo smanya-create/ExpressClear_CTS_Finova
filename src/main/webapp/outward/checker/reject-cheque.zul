@@ -1,0 +1,114 @@
+<?page title="Reject Cheque" contentType="text/html;charset=UTF-8"?>
+
+<?link rel="stylesheet"
+        type="text/css"
+        href="/css/outward/reject-cheque.css"?>
+
+<zk>
+
+    <window
+        id="rejectWindow"
+        title="Reject Cheque"
+        border="normal"
+        width="520px"
+        closable="true"
+        sizable="false"
+        mode="modal"
+        visible="false"
+        sclass="reject-cheque-window">
+
+        <div sclass="reject-content">
+
+            <label
+                value="Please select the reason for rejecting this cheque."
+                sclass="reject-description"/>
+
+
+            <!-- BATCH ID -->
+
+            <div sclass="form-group">
+
+                <label
+                    value="BATCH ID"
+                    sclass="form-label"/>
+
+                <label
+                    id="lblRejectBatch"
+                    value=""
+                    sclass="form-value"/>
+
+            </div>
+
+
+            <!-- CHEQUE NUMBER -->
+
+            <div sclass="form-group">
+
+                <label
+                    value="CHEQUE NUMBER"
+                    sclass="form-label"/>
+
+                <label
+                    id="lblRejectCheque"
+                    value=""
+                    sclass="form-value"/>
+
+            </div>
+
+
+            <!-- REJECTION REASON -->
+
+            <div sclass="form-group">
+
+                <label
+                    value="REJECTION REASON"
+                    sclass="form-label"/>
+
+                <combobox
+                    id="cmbRejectReason"
+                    width="100%"
+                    readonly="true"
+                    placeholder="Select rejection reason"/>
+
+            </div>
+
+
+            <!-- REMARKS -->
+
+            <div class="form-group">
+
+                <label
+                    value="REMARKS"
+                    sclass="form-label"/>
+
+                <textbox
+                    id="txtRejectRemarks"
+                    width="100%"
+                    rows="3"
+                    multiline="true"
+                    placeholder="Enter remarks..."/>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div sclass="reject-actions">
+
+                <button
+                    id="btnRejectCancel"
+                    label="CANCEL"
+                    sclass="reject-cancel-button"/>
+
+                <button
+                    id="btnRejectConfirm"
+                    label="REJECT"
+                    sclass="reject-confirm-button"/>
+
+            </div>
+
+        </div>
+
+    </window>
+
+</zk>
