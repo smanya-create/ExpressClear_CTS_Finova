@@ -1,5 +1,6 @@
 package com.iispl.cts.service.inward;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.iispl.cts.entity.inward.CbsValidationResult;
@@ -31,5 +32,9 @@ public interface InwardChequeService {
 	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
+	
+	BigDecimal getAccountBalance(String accountNumber);
+	
+	String getBankNameByCode(String bankCode);
 
 }

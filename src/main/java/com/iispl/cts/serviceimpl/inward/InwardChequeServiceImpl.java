@@ -1,5 +1,6 @@
 package com.iispl.cts.serviceimpl.inward;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.iispl.cts.dao.inward.InwardChequeDAO;
 import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
@@ -77,6 +78,16 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	@Override
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
 		return inwardChequeDAO.validateCbs(cheque);
+	}
+	
+	@Override
+	public BigDecimal getAccountBalance(String accountNumber) {
+	    return inwardChequeDAO.getAccountBalance(accountNumber);
+	}
+	
+	@Override
+	public String getBankNameByCode(String bankCode) {
+	    return inwardChequeDAO.getBankNameByCode(bankCode);
 	}
 
 }

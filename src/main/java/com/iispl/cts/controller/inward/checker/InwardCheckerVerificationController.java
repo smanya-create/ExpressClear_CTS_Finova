@@ -2,6 +2,7 @@ package com.iispl.cts.controller.inward.checker;
 
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -374,13 +375,28 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				lblMicrCode.setValue(safeValue(cheque.getMicrCode()));
 			}
+			if (lblBankCode !=null) {
 
 			lblBankCode.setValue(cheque.getBankCode());
+			}
+			if (lblBranchCode !=null) {
 			lblBranchCode.setValue(cheque.getBranchCode());
+			}
+			if (lblTransactionCode !=null) {
 			lblTransactionCode.setValue(cheque.getTransactionCode());
+			}
 
 			if (lblPresentingBank != null) {
-				lblPresentingBank.setValue("NPCI");
+
+			    String bankName =
+			            inwardChequeService.getBankNameByCode(
+			                    cheque.getBankCode());
+
+			    if (bankName != null && !bankName.trim().isEmpty()) {
+			        lblPresentingBank.setValue(bankName);
+			    } else {
+			        lblPresentingBank.setValue("-");
+			    }
 			}
 
 			if (lblChequeDate != null && cheque.getChequeDate() != null) {
@@ -403,9 +419,22 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				lblDraweeAccountNumber.setValue(safeValue(cheque.getDraweeAccountNumber()));
 			}
 
-			// Temporary
+			
 			if (lblAccountBalance != null) {
-				lblAccountBalance.setValue("₹50,000.00");
+
+			    BigDecimal accountBalance =
+			            inwardChequeService.getAccountBalance(
+			                    cheque.getDraweeAccountNumber());
+
+			    if (accountBalance != null) {
+
+			        lblAccountBalance.setValue(
+			                "₹" + accountBalance.toString());
+
+			    } else {
+
+			        lblAccountBalance.setValue("₹0.00");
+			    }
 			}
 
 			if (lblVerificationStatus != null) {
