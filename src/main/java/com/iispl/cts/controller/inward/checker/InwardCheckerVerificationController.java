@@ -636,40 +636,21 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	    try {
 
-	        String chequeId = cheque.getInwardChequeId();
-
-	        if (chequeId == null || chequeId.trim().isEmpty()) {
-
-	            chequeImage.setSrc(null);
-	            chequeImage.setContent((org.zkoss.image.Image) null);
-
-	            if (emptyImageState != null) {
-	                emptyImageState.setVisible(true);
-	            }
-
-	            return;
-	        }
-
-	        InwardChequeImage image;
+	        String imagePath;
 
 	        if ("FRONT".equalsIgnoreCase(imageType)) {
-
-	            image = inwardChequeService.getFrontImage(chequeId);
-
+	            imagePath = cheque.getChequeImageFront();
 	        } else {
-
-	            image = inwardChequeService.getBackImage(chequeId);
+	            imagePath = cheque.getChequeImageBack();
 	        }
 
-	        if (image == null
-	                || image.getImagePath() == null
-	                || image.getImagePath().trim().isEmpty()) {
+	        if (imagePath == null || imagePath.trim().isEmpty()) {
 
 	            System.out.println(
 	                    "Verification: No "
 	                    + imageType
-	                    + " image found for cheque -> "
-	                    + chequeId);
+	                    + " image path found for cheque -> "
+	                    + cheque.getInwardChequeId());
 
 	            chequeImage.setSrc(null);
 	            chequeImage.setContent((org.zkoss.image.Image) null);
@@ -681,21 +662,58 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        String imagePath = image.getImagePath().trim();
+	        imagePath = imagePath.trim();
 
-	        String imageSrc = "/Inward-data/" + imagePath;
+	        // Remove leading slash if present
+	        while (imagePath.startsWith("/")) {
+	            imagePath = imagePath.substring(1);
+	        }
+
+	        // Build classpath resource path
+	        String resourcePath = "Inward-data/" + imagePath;
 
 	        System.out.println(
-	                "Verification: Loading image URL -> "
-	                + imageSrc);
+	                "Verification: Loading classpath image -> "
+	                + resourcePath);
 
-	        chequeImage.setContent((org.zkoss.image.Image) null);
-	        chequeImage.setSrc(imageSrc);
+	        InputStream inputStream =
+	                getClass()
+	                        .getClassLoader()
+	                        .getResourceAsStream(resourcePath);
+
+	        if (inputStream == null) {
+
+	            System.err.println(
+	                    "Verification: Image NOT FOUND in classpath -> "
+	                    + resourcePath);
+
+	            chequeImage.setSrc(null);
+	            chequeImage.setContent((org.zkoss.image.Image) null);
+
+	            if (emptyImageState != null) {
+	                emptyImageState.setVisible(true);
+	            }
+
+	            return;
+	        }
+
+	        org.zkoss.image.AImage aImage =
+	                new org.zkoss.image.AImage(
+	                        imagePath,
+	                        inputStream);
+
+	        chequeImage.setSrc(null);
+	        chequeImage.setContent(aImage);
 	        chequeImage.setVisible(true);
 
 	        if (emptyImageState != null) {
 	            emptyImageState.setVisible(false);
 	        }
+
+	        System.out.println(
+	                "Verification: Image loaded successfully from classpath.");
+
+	        inputStream.close();
 
 	    } catch (Exception e) {
 
@@ -715,6 +733,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	    applyImageTransform();
 	}
+	
 	private List<InwardCheque> prioritizeRejectionRequests(List<InwardCheque> cheques) {
 
 		if (cheques == null || cheques.isEmpty()) {
