@@ -6,11 +6,15 @@
 
 <zk>
 
+    <!-- ============================================================
+         REJECT CHEQUE WINDOW
+         ============================================================ -->
+
     <window
         id="rejectWindow"
         title="Reject Cheque"
         border="normal"
-        width="520px"
+        width="545px"
         closable="true"
         sizable="false"
         mode="modal"
@@ -19,12 +23,18 @@
 
         <div sclass="reject-content">
 
+            <!-- ====================================================
+                 DESCRIPTION
+                 ==================================================== -->
+
             <label
                 value="Please select the reason for rejecting this cheque."
                 sclass="reject-description"/>
 
 
-            <!-- BATCH ID -->
+            <!-- ====================================================
+                 BATCH ID
+                 ==================================================== -->
 
             <div sclass="form-group">
 
@@ -40,7 +50,9 @@
             </div>
 
 
-            <!-- CHEQUE NUMBER -->
+            <!-- ====================================================
+                 CHEQUE NUMBER
+                 ==================================================== -->
 
             <div sclass="form-group">
 
@@ -56,7 +68,9 @@
             </div>
 
 
-            <!-- REJECTION REASON -->
+            <!-- ====================================================
+                 REJECTION REASON
+                 ==================================================== -->
 
             <div sclass="form-group">
 
@@ -73,12 +87,14 @@
             </div>
 
 
-            <!-- REMARKS -->
+            <!-- ====================================================
+                 REMARKS
+                 ==================================================== -->
 
-            <div class="form-group">
+            <div sclass="form-group">
 
                 <label
-                    value="REMARKS"
+                    value="REMARKS *"
                     sclass="form-label"/>
 
                 <textbox
@@ -86,12 +102,15 @@
                     width="100%"
                     rows="3"
                     multiline="true"
+                    maxlength="255"
                     placeholder="Enter remarks..."/>
 
             </div>
 
 
-            <!-- BUTTONS -->
+            <!-- ====================================================
+                 BUTTONS
+                 ==================================================== -->
 
             <div sclass="reject-actions">
 
