@@ -7,6 +7,8 @@ import com.iispl.cts.dao.outward.OutwardCheckerQueueDAO;
 import com.iispl.cts.daoimpl.outward.OutwardCheckerQueueDAOImpl;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
+import com.iispl.cts.entity.outward.OutwardRejectedCheques;
+import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 
@@ -112,5 +114,22 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 	@Override
 	public void updateChequeStatus(String chequeNo, String status) throws SQLException {
 	    outwardCheckerQueueDAO.updateChequeStatus(chequeNo, status);
+	}
+	
+	@Override
+	public List<RejectedReason> getRejectedReasons()
+	        throws SQLException {
+
+	    return outwardCheckerQueueDAO.getRejectedReasons();
+	}
+
+	@Override
+	public void saveRejectedCheque(
+	        OutwardRejectedCheques rejectedCheque)
+	        throws SQLException {
+
+	    outwardCheckerQueueDAO.saveRejectedCheque(
+	            rejectedCheque
+	    );
 	}
 }

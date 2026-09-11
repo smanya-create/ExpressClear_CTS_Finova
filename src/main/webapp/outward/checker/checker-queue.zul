@@ -235,8 +235,7 @@
 												sclass="cheque-image-container">
 
 												<image id="imgCheque"
-													visible="false" sclass="cheque-image" />
-
+                                                 sclass="cheque-image" />
 											</div>
 
 										</div>
