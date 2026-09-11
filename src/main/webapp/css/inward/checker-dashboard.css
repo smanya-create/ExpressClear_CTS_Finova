@@ -102,17 +102,16 @@ body {
     background: #28A745 !important;
     color: white !important;
     border: 1px solid #28A745 !important;
-    padding: 5px 12px !important;
-    border-radius: 18px !important;
-    font-size: 11px !important;
+    padding: 2px 8px !important;
+    border-radius: 15px !important;
+    font-size: 9px !important;
     font-weight: bold !important;
-    line-height: 20px !important;
-    min-width: 70px !important;
+    line-height: 18px !important;
+    min-width: 65px !important;
     text-align: center !important;
     display: inline-block !important;
     box-sizing: border-box !important;
 }
-
 .batch-status-pending {
     background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
     border: 1px solid #F5A900 !important;
