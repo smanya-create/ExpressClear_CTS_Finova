@@ -31,10 +31,10 @@
 
 					<include id="headerInclude"
 						src="/components/header.zul" pageTitle="Inward Processing"
-						pageSubtitle="${param.page == 'batch-intake' ? 'Batch Intake' : 'Maker Dashboard'}" />
+						pageSubtitle="${param.page == 'batch-intake' ? 'Batch Intake' : (param.page == 'batch-details' ? 'Batch Details' : (param.page == 'micr-repair' ? 'MICR Repair' : (param.page == 'data-entry' ? 'Data Entry' : 'Maker Dashboard')))}" />
 
 					<include id="mainContentArea" mode="instant"
-						src="${param.page == 'batch-intake' ? '/inward/maker/batch/batch-list.zul' : '/inward/maker/dashboard.zul'}"
+						src="${param.page == 'batch-intake' ? '/inward/maker/batch/batch-list.zul' : (param.page == 'batch-details' ? '/inward/maker/batch-details.zul' : (param.page == 'micr-repair' ? '/inward/maker/micr-repair/micr-repair.zul' : (param.page == 'data-entry' ? '/inward/maker/data-entry/data-entry.zul' : '/inward/maker/dashboard.zul')))}"
 						hflex="1" />
 
 				</vlayout>

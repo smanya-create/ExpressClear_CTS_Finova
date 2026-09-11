@@ -4,6 +4,7 @@
 	<style src="/css/inward/maker-batch-details.css" />
 
 	<div id="inwardMakerBatchDetailsDiv" width="100%"
+		style="min-height: calc(100vh - 80px); padding-bottom: 40px; box-sizing: border-box;"
 		sclass="inward-maker-batch-details"
 		apply="com.iispl.cts.controller.inward.maker.InwardMakerBatchDetailsController">
 
@@ -64,13 +65,13 @@
 						width="100%" sclass="inward-maker-cheque-grid">
 
 						<columns sizable="true">
-							<column label="Cheque No." width="14%" />
+							<column label="Cheque No." width="12%" />
 							<column label="Drawee Account No." width="17%" />
 							<column label="Cheque Date" width="12%" />
-							<column label="MICR Code" width="14%" />
-							<column label="Cheque Status" width="19%" />
-							<column label="Cheque Amount" width="12%" />
-							<column label="Action" width="12%" />
+							<column label="MICR Code" width="13%" />
+							<column label="Cheque Status" width="18%" />
+							<column label="Cheque Amount" width="13%" />
+							<column label="Action" width="15%" />
 						</columns>
 
 						<rows id="inwardMakerRowsChequeDetails" />
