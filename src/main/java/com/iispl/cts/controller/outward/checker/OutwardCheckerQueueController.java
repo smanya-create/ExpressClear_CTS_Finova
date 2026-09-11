@@ -1915,31 +1915,115 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	                                    "Batch Status = ON_HOLD"
 	                            );
 
-	                            // ====================================================
-	                            // CLOSE RETURN WINDOW
-	                            // ====================================================
+	                         // ====================================================
+	                         // CLOSE RETURN WINDOW
+	                         // ============================================================
 
-	                            if (returnMakerWindow != null) {
+	                         if (returnMakerWindow != null) {
 
-	                                returnMakerWindow.setVisible(false);
+	                             returnMakerWindow.setVisible(false);
+	                             returnMakerWindow.detach();
+	                             returnMakerWindow = null;
+	                         }
 
-	                                returnMakerWindow.detach();
+	                         // ============================================================
+	                         // REMOVE RETURNED CHEQUE FROM CURRENT QUEUE
+	                         // ============================================================
 
-	                                returnMakerWindow = null;
-	                            }
+	                         cheques.remove(currentIndex);
 
-	                            // ====================================================
-	                            // REFRESH BATCH STATUS
-	                            // ====================================================
+	                         // ============================================================
+	                         // CHECK IF ANY CHEQUE IS REMAINING
+	                         // ============================================================
 
-	                            loadBatchStatus();
+	                         if (cheques.isEmpty()) {
 
-	                            updateXmlGenerationButton();
+	                             // --------------------------------------------------------
+	                             // NO CHEQUE REMAINING
+	                             // --------------------------------------------------------
 
-	                            // ====================================================
-	                            // SUCCESS MESSAGE
-	                            // ====================================================
+	                             currentIndex = 0;
 
+	                             if (lblCurrentCheque != null) {
+	                                 lblCurrentCheque.setValue("0");
+	                             }
+
+	                             if (lblRemaining != null) {
+	                                 lblRemaining.setValue("0");
+	                             }
+
+	                             if (lblCurrentChequeNavigation != null) {
+	                                 lblCurrentChequeNavigation.setValue(
+	                                         "Cheque 0 of 0 · 0 remaining"
+	                                 );
+	                             }
+
+	                             updateXmlGenerationButton();
+
+	                             // --------------------------------------------------------
+	                             // REFRESH BATCH STATUS
+	                             // --------------------------------------------------------
+
+	                             loadBatchStatus();
+
+	                             // --------------------------------------------------------
+	                             // GO TO CHECKER DASHBOARD
+	                             // --------------------------------------------------------
+
+	                             Executions.sendRedirect(
+	                                     "/outward/checker/dashboard.zul"
+	                             );
+
+	                             return;
+	                         }
+
+	                         // ============================================================
+	                         // CHEQUE(S) ARE STILL REMAINING
+	                         // ============================================================
+
+	                         /*
+	                          * The returned cheque was removed from the list.
+	                          *
+	                          * Example:
+	                          *
+	                          * Before:
+	                          * CH001
+	                          * CH002  <-- currentIndex = 1
+	                          * CH003
+	                          *
+	                          * After removing CH002:
+	                          *
+	                          * CH001
+	                          * CH003  <-- currentIndex is still 1
+	                          *
+	                          * Therefore CH003 becomes the next cheque automatically.
+	                          */
+
+	                         // If the removed cheque was the last cheque,
+	                         // move the index to the new last cheque.
+
+	                         if (currentIndex >= cheques.size()) {
+
+	                             currentIndex = cheques.size() - 1;
+	                         }
+
+	                         // ============================================================
+	                         // DISPLAY NEXT CHEQUE
+	                         // ============================================================
+
+	                         displayCheque();
+
+	                         // ============================================================
+	                         // REFRESH BATCH STATUS
+	                         // ============================================================
+
+	                         loadBatchStatus();
+
+	                         // ============================================================
+	                         // UPDATE XML BUTTON
+	                         // ============================================================
+
+	                         updateXmlGenerationButton();
 	                            Messagebox.show(
 	                                    "Cheque returned to Maker.\n\n"
 	                                            + "Cheque Status: "
@@ -2180,22 +2264,48 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	        // GET REMARKS
 	        // --------------------------------------------------------
 
-	        String remarks = "";
+	     // --------------------------------------------------------
+	     // GET REMARKS
+	     // --------------------------------------------------------
 
-	        if (txtRejectRemarks != null) {
+	     String remarks = "";
 
-	            remarks =
-	                    txtRejectRemarks.getValue();
+	     if (txtRejectRemarks != null) {
 
-	            if (remarks == null) {
-	                remarks = "";
-	            }
+	         remarks = txtRejectRemarks.getValue();
 
-	            remarks =
-	                    remarks.trim();
-	        }
-	        final String finalRemarks = remarks;
+	         if (remarks == null) {
+	             remarks = "";
+	         }
 
+	         remarks = remarks.trim();
+	     }
+
+	     // --------------------------------------------------------
+	     // CHECK REMARKS - MANDATORY
+	     // --------------------------------------------------------
+	  // --------------------------------------------------------
+	  // CHECK REMARKS - MANDATORY
+	  // --------------------------------------------------------
+
+	  if (remarks.isEmpty()) {
+
+	      Messagebox.show(
+	              "Please enter remarks before rejecting the cheque.",
+	              "Reject Cheque",
+	              Messagebox.OK,
+	              Messagebox.EXCLAMATION
+	      );
+
+	      if (txtRejectRemarks != null) {
+	          txtRejectRemarks.focus();
+	      }
+
+	      return;
+	  
+	     }
+
+	     final String finalRemarks = remarks;
 
 	        // --------------------------------------------------------
 	        // CONFIRMATION POPUP
@@ -2218,20 +2328,37 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	                    try {
 
-	                        // ------------------------------------------------
-	                        // CREATE YOUR EXISTING ENTITY
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // CREATE REJECTED CHEQUE ENTITY
+	                        // ========================================================
 
 	                        OutwardRejectedCheques rejectedCheque =
 	                                new OutwardRejectedCheques();
+
+	                        // --------------------------------------------------------
+	                        // OUTWARD CHEQUE ID
+	                        // --------------------------------------------------------
 
 	                        rejectedCheque.setOutwardChequeId(
 	                                cheque.getOutwardChequeId()
 	                        );
 
+	                        // --------------------------------------------------------
+	                        // REJECTED BY
+	                        //
+	                        // This is the USERNAME.
+	                        // DAO will convert username -> user_id.
+	                        //
+	                        // ochecker -> USR1003
+	                        // --------------------------------------------------------
+
 	                        rejectedCheque.setRejectedBy(
 	                                getCurrentUsername()
 	                        );
+
+	                        // --------------------------------------------------------
+	                        // REJECTED DATE
+	                        // --------------------------------------------------------
 
 	                        rejectedCheque.setRejectedDate(
 	                                new Timestamp(
@@ -2239,25 +2366,100 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	                                )
 	                        );
 
-	                        /*
-	                         * Your entity contains "remarks"
-	                         * but does not contain reasonId/reasonName.
-	                         *
-	                         * So store the selected reason in remarks.
-	                         */
-	                      
-	                        // ------------------------------------------------
-	                        // SAVE REJECTED CHEQUE
-	                        // ------------------------------------------------
+	                        // --------------------------------------------------------
+	                        // BATCH ID
+	                        // --------------------------------------------------------
+
+	                        rejectedCheque.setOutwardBatchId(
+	                                cheque.getOutwardBatchId()
+	                        );
+
+	                        // --------------------------------------------------------
+	                        // CHEQUE AMOUNT
+	                        // --------------------------------------------------------
+
+	                        rejectedCheque.setChequeAmount(
+	                                cheque.getChequeAmount()
+	                        );
+
+	                        // --------------------------------------------------------
+	                        // REMARKS
+	                        //
+	                        // Store rejection reason + checker remarks.
+	                        // --------------------------------------------------------
+
+	                        String rejectionRemarks =
+	                                "Rejection Reason: "
+	                                + reasonName
+	                                + " | Remarks: "
+	                                + finalRemarks;
+	                        rejectedCheque.setRemarks(
+	                                rejectionRemarks
+	                        );
+
+	                        // ========================================================
+	                        // DEBUG
+	                        // ========================================================
+
+	                        System.out.println(
+	                                "================================="
+	                        );
+
+	                        System.out.println(
+	                                "REJECT CHEQUE"
+	                        );
+
+	                        System.out.println(
+	                                "Cheque ID = "
+	                                + rejectedCheque.getOutwardChequeId()
+	                        );
+
+	                        System.out.println(
+	                                "Cheque Number = "
+	                                + cheque.getChequeNumber()
+	                        );
+
+	                        System.out.println(
+	                                "Username = "
+	                                + rejectedCheque.getRejectedBy()
+	                        );
+
+	                        System.out.println(
+	                                "Batch ID = "
+	                                + rejectedCheque.getOutwardBatchId()
+	                        );
+
+	                        System.out.println(
+	                                "Amount = "
+	                                + rejectedCheque.getChequeAmount()
+	                        );
+
+	                        System.out.println(
+	                                "Reason = "
+	                                + reasonName
+	                        );
+
+	                        System.out.println(
+	                                "Remarks = "
+	                                + rejectionRemarks
+	                        );
+
+	                        System.out.println(
+	                                "================================="
+	                        );
+
+	                        // ========================================================
+	                        // 1. SAVE INTO OUTWARD REJECTED CHEQUES
+	                        // ========================================================
 
 	                        outwardCheckerQueueService
 	                                .saveRejectedCheque(
 	                                        rejectedCheque
 	                                );
 
-	                        // ------------------------------------------------
-	                        // UPDATE CHEQUE STATUS
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // 2. CHANGE OUTWARD CHEQUE STATUS
+	                        // ========================================================
 
 	                        outwardCheckerQueueService
 	                                .updateChequeStatus(
@@ -2265,17 +2467,17 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	                                        "REJECTED"
 	                                );
 
-	                        // ------------------------------------------------
-	                        // UPDATE LOCAL OBJECT
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // 3. UPDATE LOCAL OBJECT
+	                        // ========================================================
 
 	                        cheque.setChequeStatus(
 	                                "REJECTED"
 	                        );
 
-	                        // ------------------------------------------------
-	                        // REMOVE ACCOUNT VALIDATION
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // 4. REMOVE ACCOUNT VALIDATION
+	                        // ========================================================
 
 	                        accountValidationResults.remove(
 	                                nullSafe(
@@ -2283,21 +2485,21 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	                                )
 	                        );
 
-	                        // ------------------------------------------------
-	                        // CLOSE POPUP
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // 5. CLOSE REJECT POPUP
+	                        // ========================================================
 
 	                        closeRejectWindow();
 
-	                        // ------------------------------------------------
-	                        // REMOVE CHEQUE FROM CURRENT QUEUE
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // 6. REMOVE CHEQUE FROM CURRENT QUEUE
+	                        // ========================================================
 
 	                        cheques.remove(currentIndex);
 
-	                        // ------------------------------------------------
-	                        // SHOW NEXT CHEQUE
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // 7. SHOW NEXT CHEQUE
+	                        // ========================================================
 
 	                        if (cheques.isEmpty()) {
 
@@ -2311,6 +2513,13 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	                                lblRemaining.setValue("0");
 	                            }
 
+	                            if (lblCurrentChequeNavigation != null) {
+
+	                                lblCurrentChequeNavigation.setValue(
+	                                        "Cheque 0 of 0 · 0 remaining"
+	                                );
+	                            }
+
 	                            updateXmlGenerationButton();
 
 	                        } else {
@@ -2320,20 +2529,21 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	                                currentIndex =
 	                                        cheques.size() - 1;
 	                            }
+
 	                            displayCheque();
 	                        }
 
-	                        // ------------------------------------------------
-	                        // SUCCESS
-	                        // ------------------------------------------------
+	                        // ========================================================
+	                        // SUCCESS MESSAGE
+	                        // ========================================================
 
 	                        Messagebox.show(
 	                                "Cheque rejected successfully.\n\n"
-	                                        + "Cheque Number: "
-	                                        + cheque.getChequeNumber()
-	                                        + "\n"
-	                                        + "Reason: "
-	                                        + reasonName,
+	                                + "Cheque Number: "
+	                                + cheque.getChequeNumber()
+	                                + "\n"
+	                                + "Reason: "
+	                                + reasonName,
 	                                "Reject Cheque",
 	                                Messagebox.OK,
 	                                Messagebox.INFORMATION

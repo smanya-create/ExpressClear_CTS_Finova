@@ -37,8 +37,11 @@ public interface OutwardCheckerQueueService {
 
 	void returnChequeToMaker(String chequeNo) throws SQLException;
 
-	void rejectCheque(String chequeNo) throws SQLException;
-
+	void rejectCheque(
+	        String chequeNo,
+	        String username,
+	        String remarks)
+	        throws SQLException;
 	// ============================================================
 	// SEND BACK REASONS
 	// ============================================================

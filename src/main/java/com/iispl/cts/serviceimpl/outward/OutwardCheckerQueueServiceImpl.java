@@ -66,9 +66,16 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 	// ============================================================
 
 	@Override
-	public void rejectCheque(String chequeNo) throws SQLException {
+	public void rejectCheque(
+	        String chequeNo,
+	        String username,
+	        String remarks)
+	        throws SQLException {
 
-		outwardCheckerQueueDAO.updateChequeStatus(chequeNo, "REJECTED");
+	    outwardCheckerQueueDAO.rejectCheque(
+	            chequeNo,
+	            username,
+	            remarks);
 	}
 
 	// ============================================================
