@@ -537,20 +537,37 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		current.setChequeAmount(new BigDecimal(rawAmount));
 		current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
 
-		// Transition to MAKER_RETURNED if rework, else to standard CHECKER_PROCESSING_PENDING
-		if (isSentBackStatus(current.getChequeStatus())) {
+		boolean wasSentBack = isSentBackStatus(current.getChequeStatus());
+
+		// Transition to MAKER_RETURNED if rework, else standard CHECKER_PROCESSING_PENDING
+		if (wasSentBack) {
 			current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
 		} else {
 			current.setChequeStatus(InwardChequeStatus.CHECKER_PROCESSING_PENDING.name());
 		}
 		chequeService.updateChequeDetails(current);
 
+		// Dispatch notification immediately if sent-back item was resolved
+		if (wasSentBack) {
+			try {
+				User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
+				String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
+				String notifMsg = "Cheque #" + current.getChequeNumber() + " in Batch " 
+						+ this.currentBatchId + " has been corrected and returned by Maker (" + userId + "). Stage: DATA_ENTRY.";
+				
+				notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
+				System.out.println("DEBUG: Resend notification sent to INWARD_CHECKER for Cheque #" + current.getChequeNumber());
+			} catch (Exception e) {
+				System.err.println("WARN: Failed to dispatch resend notification to INWARD_CHECKER: " + e.getMessage());
+			}
+		}
+
 		if (currentIndex < activeQueue.size() - 1) {
 			currentIndex++;
 		}
 		displayCurrentCheque();
 	}
-
+	
 	public void onClick$btnCancel() {
 		if (activeQueue != null && currentIndex < activeQueue.size()) {
 			displayCurrentCheque();
@@ -611,7 +628,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		// Send notification to INWARD_CHECKER
 		String reasonLabel = cmbModalRejectionReason.getSelectedItem().getLabel();
 		String notifMsg = "Rejection requested for Cheque #" + current.getChequeNumber() + " in Batch "
-				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId;
+				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId + ". Stage: DATA_ENTRY.";
 
 		notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
 
