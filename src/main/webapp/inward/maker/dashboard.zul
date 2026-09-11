@@ -1,125 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<zk xmlns:n="native">
+<zk>
 
-  <style>
-    .cts-modern-grid .z-listhead,
-    .cts-modern-grid .z-listhead-bar,
-    .cts-modern-grid .z-listheader,
-    .cts-modern-grid .z-listheader-content {
-        background-color: #15284f !important;
-        background-image: none !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-weight: 700 !important;
-        font-size: 11px !important;
-        letter-spacing: 0.8px !important;
-        text-transform: uppercase !important;
-        height: 44px !important;
-        line-height: 20px !important;
-    }
-    .cts-modern-grid .z-listheader {
-        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }
-    .cts-modern-grid .z-listheader:last-child {
-        border-right: none !important;
-    }
-    .cts-modern-grid .z-listitem {
-        height: 50px !important;
-        transition: background-color 0.15s ease;
-    }
-    .cts-modern-grid .z-listitem:hover {
-        background-color: #f8fafc !important;
-    }
-    .cts-modern-grid .z-listcell {
-        border-bottom: 1px solid #f1f5f9 !important;
-        padding: 8px 12px !important;
-    }
+	<style src="/css/inward/maker-dashboard.css" />
 
-    /* Centered Paging Bar */
-    .cts-modern-grid .z-paging {
-        border: none !important;
-        border-top: 1px solid #f1f5f9 !important;
-        background: #ffffff !important;
-        padding: 10px 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-    .cts-modern-grid .z-paging-info {
-        display: none !important;
-    }
-    .cts-modern-grid .z-paging-btn {
-        border: 1px solid #e2e8f0 !important;
-        background: #ffffff !important;
-        border-radius: 6px !important;
-        margin: 0 4px !important;
-        min-width: 30px !important;
-        height: 30px !important;
-        cursor: pointer;
-    }
-  </style>
-  <style src="/css/inward/maker-dashboard.css" />
-  
-  <div class="cts-dash-container" apply="com.iispl.cts.controller.inward.maker.InwardMakerDashboardController">
-    
-    <!-- Title & Refresh -->
-    <div class="cts-dash-header">
-      <label value="Inward Dashboard" class="cts-dash-title" />
-      <button id="btnRefreshDashboard" label="Refresh" iconSclass="z-icon-refresh" class="cts-btn-refresh" />
-    </div>
+	<div id="inwardMakerDivDashboard" width="100%" height="100%"
+		apply="com.iispl.cts.controller.inward.maker.InwardMakerDashboardController"
+		sclass="inward-maker-dashboard">
 
-    <!-- 3 Summary KPI Cards -->
-    <hlayout spacing="16px" style="margin-bottom: 16px;">
-      <div class="cts-kpi-card" hflex="1">
-        <label value="Partially Processed" class="cts-kpi-label" />
-        <label id="lblPartiallyProcessedCount" value="0" class="cts-kpi-val" />
-        <label value="Batches" class="cts-kpi-sub" />
-      </div>
+		<div sclass="inward-maker-dashboard-scroll" width="100%"
+			height="100%">
 
-      <div class="cts-kpi-card" hflex="1">
-        <label value="Sent Back to Maker" class="cts-kpi-label" />
-        <label id="lblSentBackCount" value="0" class="cts-kpi-val orange" />
-        <label value="Batches" class="cts-kpi-sub" />
-      </div>
+			<!-- Welcome Banner -->
+			<div sclass="inward-maker-welcome-section">
+				<label value="Welcome, Maker"
+					sclass="inward-maker-welcome-title" />
+				<label
+					value="Manage and process inward cheque batches."
+					sclass="inward-maker-welcome-subtitle" />
+			</div>
 
-      <div class="cts-kpi-card" hflex="1">
-        <label value="Return Requests" class="cts-kpi-label" />
-        <label id="lblSentToRrfCount" value="0" class="cts-kpi-val red" />
-        <label value="Cheques" class="cts-kpi-sub" />
-      </div>
-    </hlayout>
+			<!-- Section 1: Return From Checker -->
+			<div sclass="inward-maker-return-section">
+				<div sclass="inward-maker-section-header">
+					<div>
+						<label value="Return From Checker"
+							sclass="inward-maker-section-title" />
+						<label
+							value="Cheques returned by Checker that require Maker action."
+							sclass="inward-maker-section-subtitle" />
+					</div>
+				</div>
 
-    <!-- Table Section -->
-    <div class="cts-section-card">
-      <div class="cts-table-toolbar">
-        <label value="Recent Batches" class="cts-section-title" />
-        
-        <hlayout spacing="8px" valign="middle">
-          <textbox id="txtSearchBatchId" placeholder="Filter by Batch ID..." instant="true" width="210px" height="32px" class="cts-search-input" />
-          <button id="btnSearchBatch" label="Search" class="cts-btn-search" />
-          <button id="btnClearSearch" label="Clear" class="cts-btn-clear" />
-        </hlayout>
-      </div>
-      
-      <div style="border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
-        <listbox id="lbxBatchStatus" 
-                 sclass="cts-modern-grid" 
-                 emptyMessage="No batches pending maker processing." 
-                 mold="paging" 
-                 pageSize="5" 
-                 width="100%">
-          <listhead sizable="false">
-            <listheader label="BATCH ID" width="150px" />
-            <listheader label="DATE" width="105px" align="center" />
-            <listheader label="CHEQUES" width="80px" align="center" />
-            <listheader label="ACCEPTED" width="85px" align="center" />
-            <listheader label="BACK TO MAKER" width="120px" align="center" />
-            <listheader label="RETURNS" width="85px" align="center" />
-            <listheader label="STATUS" align="center" />
-          </listhead>
-        </listbox>
-      </div>
-    </div>
+				<div sclass="inward-maker-table-card">
+					<grid id="inwardMakerGridReturnedBatches"
+						width="100%" sclass="inward-maker-batch-grid">
+						<columns sizable="true">
+							<column label="Batch ID" width="20%" />
+							<column label="Cheque Number" width="20%" />
+							<column label="Status" width="25%" />
+							<column label="Reason / Remarks" width="20%" />
+							<column label="Action" width="15%" />
+						</columns>
+						<rows id="inwardMakerRowsReturnedBatches" />
+					</grid>
 
-  </div>
+					<vlayout id="inwardMakerVlayoutReturnedEmptyState"
+						visible="false" sclass="inward-maker-empty-state">
+						<label value="No returned cheques found"
+							sclass="inward-maker-empty-title" />
+						<label
+							value="There are currently no cheques returned by Checker."
+							sclass="inward-maker-empty-subtitle" />
+					</vlayout>
+				</div>
+			</div>
+
+			<space height="38px" />
+
+			<!-- Section 2: Batches Processing -->
+			<div sclass="inward-maker-processing-section">
+				<div sclass="inward-maker-section-header">
+					<div>
+						<label value="Batches Processing"
+							sclass="inward-maker-section-title" />
+						<label
+							value="Batches available for inward processing."
+							sclass="inward-maker-section-subtitle" />
+					</div>
+				</div>
+
+				<div sclass="inward-maker-table-card">
+					<grid id="inwardMakerGridBatchDetails" width="100%"
+						sclass="inward-maker-batch-grid">
+						<columns sizable="true">
+							<column label="Batch ID" width="20%" />
+							<column label="No. of Cheques" width="20%" />
+							<column label="Total Amount" width="20%" />
+							<column label="Status" width="20%" />
+							<column label="Action" width="20%" />
+						</columns>
+						<rows id="inwardMakerRowsBatchDetails" />
+					</grid>
+
+					<vlayout id="inwardMakerVlayoutEmptyState"
+						visible="false" sclass="inward-maker-empty-state">
+						<label value="No new processing batches found"
+							sclass="inward-maker-empty-title" />
+						<label
+							value="There are currently no batches available for inward processing."
+							sclass="inward-maker-empty-subtitle" />
+					</vlayout>
+				</div>
+
+				<!-- Centered Pagination Bar -->
+				<div sclass="inward-maker-pagination">
+					<button id="inwardMakerBtnFirst" label="&lt;&lt;"
+						sclass="inward-maker-pagination-button" />
+					<button id="inwardMakerBtnPrevious" label="&lt;"
+						sclass="inward-maker-pagination-button" />
+					<label id="inwardMakerLblCurrentPage" value="1 / 1"
+						sclass="inward-maker-pagination-label" />
+					<button id="inwardMakerBtnNext" label="&gt;"
+						sclass="inward-maker-pagination-button" />
+					<button id="inwardMakerBtnLast" label="&gt;&gt;"
+						sclass="inward-maker-pagination-button" />
+				</div>
+			</div>
+
+		</div>
+	</div>
 </zk>
