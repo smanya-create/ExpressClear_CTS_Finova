@@ -36,5 +36,9 @@ public interface InwardChequeService {
 	BigDecimal getAccountBalance(String accountNumber);
 	
 	String getBankNameByCode(String bankCode);
+	
+	String getRejectedReasonDetails(String inwardChequeId);
+	
+	String getMakerRejectionRequestDetails(String inwardChequeId);
 
 }
