@@ -98,13 +98,20 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
      * Renders a single dashboard row.
      */
     private void renderBatchRow(DashboardSummaryDTO batch) {
+
+        String batchStatus = batch.getBatchStatus();
+
+        if (InwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(batchStatus)) {
+            return;
+        }
+
         Listitem item = new Listitem();
+
         String batchId = batch.getBatchId();
         int totalCheques = batch.getTotalCheques();
         int normalCount = batch.getMakerApprovedCheques();
         int rejectionCount = batch.getRejectionRequestCheques();
         int returnedCount = batch.getMakerReturned();
-        String batchStatus = batch.getBatchStatus();
 
         Listcell cellBatchId = new Listcell(batchId);
         cellBatchId.setStyle("font-weight:bold; color:#1D2D46;");
@@ -121,7 +128,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         lblRejections.setStyle("color:#E32C10; font-weight:bold; font-size:12px");
         cellRejections.appendChild(lblRejections);
         item.appendChild(cellRejections);
-        
+
         Listcell cellReturned = new Listcell();
         Label lblReturned = new Label(String.valueOf(returnedCount));
         lblReturned.setStyle("color:#A68026; font-weight:bold; font-size:12px");
@@ -130,8 +137,6 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
 
         Listcell statusCell = new Listcell();
         Label statusLabel = new Label(batchStatus);
-
-        statusLabel.setSclass("batch-status");
 
         if (InwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(batchStatus)) {
             statusLabel.setSclass("batch-status batch-status-completed");
@@ -144,20 +149,44 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         item.appendChild(statusCell);
 
         Listcell actionCell = new Listcell();
-        Button btnVerify = new Button("Proceed Verification");
 
-        btnVerify.setStyle("background:#242F82; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 3px;");
+        String actionLabel;
+        String buttonStyle;
+
+        if (InwardBatchStatus.CHECKER_PROCESSING.toString().equalsIgnoreCase(batchStatus)) {
+
+            actionLabel = "Process";
+            buttonStyle = "background:#F5A900; color:#7A4500; border:1px solid #F5A900; border-radius:15px; cursor:pointer; font-size:9px; font-weight:bold; padding:2px 10px; line-height:16px;";
+        } else if (InwardBatchStatus.CHECKER_PROCESSING_PENDING.toString().equalsIgnoreCase(batchStatus)) {
+
+            actionLabel = "Proceed Verification";
+            buttonStyle = "background:#242F82; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 8px;";
+
+        } else {
+
+            return;
+        }
+
+        Button btnVerify = new Button(actionLabel);
+        btnVerify.setStyle(buttonStyle);
 
         btnVerify.addEventListener(Events.ON_CLICK, e -> {
-            boolean updated = batchService.updateProcessingBatchStatus(batchId, InwardBatchStatus.CHECKER_PROCESSING);
+
+            boolean updated = batchService.updateProcessingBatchStatus(
+                    batchId,
+                    InwardBatchStatus.CHECKER_PROCESSING
+            );
 
             if (updated) {
-                Executions.getCurrent().sendRedirect("/inward/checker/verification.zul?batchId=" + batchId);
+                Executions.getCurrent().sendRedirect(
+                        "/inward/checker/verification.zul?batchId=" + batchId
+                );
             } else {
                 Messagebox.show("Unable to proceed");
             }
         });
 
+        actionCell.setStyle("text-align:center;vertical-align:middle;");
         actionCell.appendChild(btnVerify);
         item.appendChild(actionCell);
 
