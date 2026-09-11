@@ -76,27 +76,15 @@
          nonselectableTags="*"
          emptyMessage="No batch details found">
 
-                            <listhead>
-
-                                <listheader label="BATCH ID"/>
-
-                                <listheader label="TOTAL CHEQUES"
-                                            align="center"/>
-
-                                <listheader label="NORMAL CHEQUES"
-                                            align="center"/>
-
-                                <listheader label="REJECTION REQUESTS"
-                                            align="center"/>
-
-                                <listheader label="BATCH STATUS"
-                                            align="center"/>
-
-                                <listheader label="ACTION"
-                                            align="center"
-                                            width="180px"/>
-
-                            </listhead>
+                           <listhead>
+    <listheader label="BATCH ID" align="center" width="13%"/>
+    <listheader label="TOTAL CHEQUES" align="center" width="13%"/>
+    <listheader label="NORMAL CHEQUES" align="center" width="14%"/>
+    <listheader label="REJECTION REQUESTS" align="center" width="17%"/>
+    <listheader label="MAKER RETURNED" align="center" width="14%"/>
+    <listheader label="BATCH STATUS" align="center" width="14%"/>
+    <listheader label="ACTION" align="center" width="15%"/>
+</listhead>
 
                         </listbox>
 

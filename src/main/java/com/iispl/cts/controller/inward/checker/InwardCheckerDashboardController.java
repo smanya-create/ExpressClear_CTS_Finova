@@ -103,6 +103,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         int totalCheques = batch.getTotalCheques();
         int normalCount = batch.getMakerApprovedCheques();
         int rejectionCount = batch.getRejectionRequestCheques();
+        int returnedCount = batch.getMakerReturned();
         String batchStatus = batch.getBatchStatus();
 
         Listcell cellBatchId = new Listcell(batchId);
@@ -120,6 +121,12 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         lblRejections.setStyle("color:#E32C10; font-weight:bold; font-size:12px");
         cellRejections.appendChild(lblRejections);
         item.appendChild(cellRejections);
+        
+        Listcell cellReturned = new Listcell();
+        Label lblReturned = new Label(String.valueOf(returnedCount));
+        lblReturned.setStyle("color:#A68026; font-weight:bold; font-size:12px");
+        cellReturned.appendChild(lblReturned);
+        item.appendChild(cellReturned);
 
         Listcell statusCell = new Listcell();
         Label statusLabel = new Label(batchStatus);
