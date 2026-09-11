@@ -11,23 +11,23 @@
 
         <!-- Main Body Area -->
         <center border="none">
-            <!-- Nested Borderlayout to freeze the header and scroll only the dashboard body -->
+            <!-- Nested Borderlayout to freeze the header and prevent scrolling -->
             <borderlayout vflex="1" hflex="1">
                 
-                <!-- Fixed Header (Does NOT scroll) -->
+                <!-- Fixed Header -->
                 <north size="auto" border="none">
                     <div>
                         <timer id="timerActiveUsers" delay="3000" repeats="true" onTimer="$composer.refreshActiveUsers()" />
                         <include src="/components/header.zul" 
                                  pageTitle="Admin Dashboard" 
-                                 pageSubtitle="Session Management"
+                                 pageSubtitle=""
                                  showNotifications="false" />
                     </div>
                 </north>
 
-                <!-- Scrollable Main Content Area -->
-                <center border="none" autoscroll="true" style="background: #eef3f8;">
-                    <vlayout sclass="cts-content-wrapper" spacing="16px" hflex="1">
+                <!-- Non-Scrollable Main Content Area -->
+                <center border="none" autoscroll="false" style="background: #eef3f8; overflow: hidden;">
+                    <vlayout sclass="cts-content-wrapper" spacing="12px" hflex="1" vflex="1" style="overflow: hidden; padding: 14px 20px;">
                         
                         <!-- Top Heading -->
                         <vlayout sclass="cts-section-header" spacing="2px">
@@ -39,13 +39,13 @@
                         <hlayout sclass="cts-stats-card" hflex="1" spacing="0">
                             
                             <!-- Col 1: CURRENT CLEARING DATE (No left border) -->
-                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="padding: 12px 20px 12px 16px;">
+                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="padding: 10px 16px;">
                                 <label value="CURRENT CLEARING DATE" sclass="cts-stat-header" />
                                 <label id="lblClearingDate" sclass="cts-stat-num" />
                             </vlayout>
                             
                             <!-- Col 2: SESSION STATUS -->
-                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 12px 20px 12px 28px;">
+                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
                                 <label value="SESSION STATUS" sclass="cts-stat-header" />
                                 <hlayout sclass="cts-status-container" valign="middle" spacing="6px">
                                     <div id="dotSessionStatus" sclass="cts-status-dot-open" />
@@ -54,13 +54,13 @@
                             </vlayout>
                             
                             <!-- Col 3: LOGGED-IN USERS -->
-                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 12px 20px 12px 28px;">
+                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
                                 <label value="LOGGED-IN USERS" sclass="cts-stat-header" />
                                 <label id="lblLoggedInUsers" value="0" sclass="cts-stat-num" />
                             </vlayout>
                             
                             <!-- Col 4: PENDING CHEQUES -->
-                            <vlayout sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 12px 20px 12px 28px;">
+                            <vlayout sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
                                 <label value="PENDING CHEQUES" sclass="cts-stat-header" />
                                 <hlayout sclass="cts-pending-flex" valign="middle" spacing="8px">
                                     <label id="lblPendingCount" value="0" sclass="cts-stat-num cts-pending-num" />
@@ -71,7 +71,7 @@
                         </hlayout>
 
                         <!-- Session Action Selection Card -->
-                        <vlayout sclass="cts-action-card" spacing="14px">
+                        <vlayout sclass="cts-action-card" spacing="10px">
                             <vlayout spacing="2px">
                                 <label value="Session Action" sclass="cts-card-title" />
                                 <label value="Choose the session operation you want to perform." sclass="cts-card-subtitle" />
@@ -113,13 +113,6 @@
                             <button id="btnStartSession" label="START SESSION" sclass="cts-btn-primary" />
                         </vlayout>
 
-                        <!-- Informational Process Text -->
-                        <vlayout sclass="cts-info-text-block" spacing="4px">
-                            <label value="Select EOD to close the current clearing date or select BOD to begin the next clearing date." sclass="cts-info-line" />
-                            <label value="For EOD, pending transactions may trigger the forced-EOD confirmation flow." sclass="cts-info-line" style="margin-top: 8px;" />
-                            <label value="For BOD, the previous clearing day's EOD and required pending checks are validated." sclass="cts-info-line" />
-                        </vlayout>
-
                         <!-- Pending Cheques Warning Callout Banner -->
                         <hlayout id="boxWarningBanner" sclass="cts-warning-banner" visible="false" valign="middle" hflex="1">
                             <hlayout sclass="cts-warn-left" hflex="1" valign="middle" spacing="12px">
@@ -137,7 +130,7 @@
                         </hlayout>
 
                         <!-- Portal Footer -->
-                        <hlayout sclass="cts-portal-footer" hflex="1" style="justify-content: space-between; margin-top: 16px;">
+                        <hlayout sclass="cts-portal-footer" hflex="1" style="justify-content: space-between; margin-top: auto; padding-top: 8px;">
                             <label value="Express Clear CTS · Admin Portal" sclass="cts-footer-left" />
                             <label value="Secure Session Management" sclass="cts-footer-right" />
                         </hlayout>

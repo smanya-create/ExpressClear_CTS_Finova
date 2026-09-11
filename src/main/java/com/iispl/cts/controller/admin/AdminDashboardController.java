@@ -119,11 +119,13 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
     }
 
     private void fetchActiveUsersCount() {
-        this.loggedInUsersCount = ActiveUserManager.getActiveUserCount();
+    	String currentAdminId = resolveLoggedInUserId();
+        this.loggedInUsersCount = ActiveUserManager.getActiveUserCount(currentAdminId);
     }
 
     public void refreshActiveUsers() {
-        this.loggedInUsersCount = ActiveUserManager.getActiveUserCount();
+    	String currentAdminId = resolveLoggedInUserId();
+        this.loggedInUsersCount = ActiveUserManager.getActiveUserCount(currentAdminId);
         if (lblLoggedInUsers != null) {
             lblLoggedInUsers.setValue(String.valueOf(this.loggedInUsersCount));
         }
