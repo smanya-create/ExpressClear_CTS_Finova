@@ -1,4 +1,4 @@
-<?page title="Rejected Cheques" contentType="text/html;charset=UTF-8"?>
+<?page title="ExpressClear CTS - Rejected Cheques" contentType="text/html;charset=UTF-8"?>
 <?link rel="stylesheet" type="text/css" href="/css/outward/rejected-cheques.css"?>
 
 <zk>

@@ -1,4 +1,4 @@
-<?page title="Checker Reports" contentType="text/html;charset=UTF-8"?>
+<?page title="ExpressClear CTS - Checker Reports" contentType="text/html;charset=UTF-8"?>
 
 <?link rel="stylesheet"type="text/css"href="/css/outward/cheque-reports.css"?>
 
@@ -11,7 +11,7 @@
 	<zscript>
 	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
 
-	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Alex");
+	org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "ochecker");
 </zscript>
 
 
