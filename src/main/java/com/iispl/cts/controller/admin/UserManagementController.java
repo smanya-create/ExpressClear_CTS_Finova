@@ -24,6 +24,7 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.Role;
@@ -39,9 +40,9 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     private static final long serialVersionUID = 1L;
 
     // View Containers & Shared Header
-    private Div viewUserList;
-    private Div viewAddUser;
-    private Div viewModifyUser;
+    private Vlayout viewUserList;
+    private Vlayout viewAddUser;
+    private Vlayout viewModifyUser;
     private Include incHeader;
 
     // View 1 (List) Controls
