@@ -151,6 +151,32 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 		return cheques;
 	}
+	
+	@Override
+	public String getBankNameByCode(String bankCode) {
+
+	    String sql = "SELECT bank_name "
+	               + "FROM master_bank "
+	               + "WHERE bank_code = ?";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, bankCode);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+	                return rs.getString("bank_name");
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
 
 	@Override
 	public List<InwardCheque> getAllCheques() {
@@ -184,6 +210,43 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	public InwardCheque getChequeById(String inwardChequeId) {
 
 		return findById(inwardChequeId);
+	}
+	
+	@Override
+	public BigDecimal getAccountBalance(String accountNumber) {
+
+	    if (accountNumber == null || accountNumber.trim().isEmpty()) {
+	        return null;
+	    }
+
+	    String sql =
+	            "SELECT account_balance " +
+	            "FROM master_account_new " +
+	            "WHERE account_number = ?";
+
+	    try (Connection connection = DBConnection.getConnection();
+	         PreparedStatement statement =
+	                 connection.prepareStatement(sql)) {
+
+	        statement.setString(1, accountNumber.trim());
+
+	        try (ResultSet resultSet = statement.executeQuery()) {
+
+	            if (resultSet.next()) {
+	                return resultSet.getBigDecimal("account_balance");
+	            }
+	        }
+
+	    } catch (SQLException e) {
+
+	        System.err.println(
+	                "Failed to fetch account balance for account: "
+	                + accountNumber);
+
+	        e.printStackTrace();
+	    }
+
+	    return null;
 	}
 
 	@Override

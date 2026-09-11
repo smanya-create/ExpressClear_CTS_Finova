@@ -1,5 +1,6 @@
 package com.iispl.cts.dao.inward;
 
+import java.math.BigDecimal;
 import java.util.List;
 import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
@@ -15,6 +16,10 @@ public interface InwardChequeDAO {
 	List<InwardCheque> findByBatchAndStatus(String batchId, String status);
 
 	List<InwardCheque> getAllCheques();
+	
+	BigDecimal getAccountBalance(String accountNumber);
+	
+	String getBankNameByCode(String bankCode);
 
 	InwardCheque getChequeById(String inwardChequeId);
 
