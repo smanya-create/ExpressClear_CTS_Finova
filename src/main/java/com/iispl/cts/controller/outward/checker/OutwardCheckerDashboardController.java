@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.outward.checker;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,385 +28,340 @@ import org.zkoss.zul.Window;
 import com.iispl.cts.dao.outward.OutwardBatchDashboardDAO;
 import com.iispl.cts.daoimpl.outward.OutwardBatchDashboardDAOImpl;
 import com.iispl.cts.entity.outward.OutwardBatch;
+import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.service.outward.OutwardBatchService;
+import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
+import com.iispl.cts.serviceimpl.outward.OutwardCheckerQueueServiceImpl;
 
-public class OutwardCheckerDashboardController
-        extends GenericForwardComposer<Component> {
+public class OutwardCheckerDashboardController extends GenericForwardComposer<Component> {
 
-    private Textbox txtBatchId;
-    private Datebox fromDate;
-    private Datebox toDate;
+	private Textbox txtBatchId;
+	private Datebox fromDate;
+	private Datebox toDate;
 
-    private Button btnSearch;
-    private Button btnClear;
+	private Button btnSearch;
+	private Button btnClear;
 
-    private Listbox lstBatches;
+	private Listbox lstBatches;
 
-    private Button btnPrevious;
-    private Button btnNext;
-    private Button btnFirst;
-    private Button btnLast;
+	private Button btnPrevious;
+	private Button btnNext;
+	private Button btnFirst;
+	private Button btnLast;
 
-    private Label lblPage;
+	private Label lblPage;
 
-    private OutwardBatchService outwardBatchService =
-            new OutwardBatchServiceImpl();
+	private OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
+	private OutwardCheckerQueueService outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
 
-    private OutwardBatchDashboardDAO outwardBatchDashboardDAO =
-            new OutwardBatchDashboardDAOImpl();
+	private OutwardBatchDashboardDAO outwardBatchDashboardDAO = new OutwardBatchDashboardDAOImpl();
 
-    int pageNumber = 1;
-    int pageSize = 5;
+	int pageNumber = 1;
+	int pageSize = 5;
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-        super.doAfterCompose(comp);
+		super.doAfterCompose(comp);
 
-        String role =
-                (String) Sessions.getCurrent()
-                        .getAttribute("CTS_USER_ROLE");
+		String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
 
-        btnPrevious.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+		btnPrevious.addEventListener(Events.ON_CLICK, event -> {
 
-                    if (pageNumber > 1) {
-                        pageNumber--;
-                        loadDashboard();
-                    }
-                });
+			if (pageNumber > 1) {
+				pageNumber--;
+				loadDashboard();
+			}
+		});
 
-        btnNext.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+		btnNext.addEventListener(Events.ON_CLICK, event -> {
 
-                    int totalBatches =
-                            getTotalBatchCount();
+			int totalBatches = getTotalBatchCount();
 
-                    int totalPages =
-                            (int) Math.ceil(
-                                    (double) totalBatches / pageSize);
+			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
 
-                    if (pageNumber < totalPages) {
-                        pageNumber++;
-                        loadDashboard();
-                    }
-                });
+			if (pageNumber < totalPages) {
+				pageNumber++;
+				loadDashboard();
+			}
+		});
 
-        btnFirst.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+		btnFirst.addEventListener(Events.ON_CLICK, event -> {
 
-                    if (pageNumber > 1) {
-                        pageNumber = 1;
-                        loadDashboard();
-                    }
-                });
+			if (pageNumber > 1) {
+				pageNumber = 1;
+				loadDashboard();
+			}
+		});
 
-        btnLast.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+		btnLast.addEventListener(Events.ON_CLICK, event -> {
 
-                    int totalBatches =
-                            getTotalBatchCount();
+			int totalBatches = getTotalBatchCount();
 
-                    int totalPages =
-                            (int) Math.ceil(
-                                    (double) totalBatches / pageSize);
+			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
 
-                    if (totalPages > 0
-                            && pageNumber < totalPages) {
+			if (totalPages > 0 && pageNumber < totalPages) {
 
-                        pageNumber = totalPages;
-                        loadDashboard();
-                    }
-                });
+				pageNumber = totalPages;
+				loadDashboard();
+			}
+		});
 
-        btnSearch.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+		btnSearch.addEventListener(Events.ON_CLICK, event -> {
 
-                    pageNumber = 1;
-                    loadDashboard();
-                });
+			pageNumber = 1;
+			loadDashboard();
+		});
 
-        btnClear.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+		btnClear.addEventListener(Events.ON_CLICK, event -> {
 
-                    txtBatchId.setValue("");
-                    fromDate.setValue(null);
-                    toDate.setValue(null);
+			txtBatchId.setValue("");
+			fromDate.setValue(null);
+			toDate.setValue(null);
 
-                    pageNumber = 1;
+			pageNumber = 1;
 
-                    loadDashboard();
-                });
+			loadDashboard();
+		});
 
-        loadDashboard();
-    }
+		loadDashboard();
+	}
 
-    private boolean isSearchActive() {
+	private boolean isSearchActive() {
 
-        String batchId = txtBatchId.getValue();
+		String batchId = txtBatchId.getValue();
 
-        return (batchId != null
-                && !batchId.trim().isEmpty())
-                || fromDate.getValue() != null
-                || toDate.getValue() != null;
-    }
+		return (batchId != null && !batchId.trim().isEmpty()) || fromDate.getValue() != null
+				|| toDate.getValue() != null;
+	}
 
-    private int getTotalBatchCount() {
+	private int getTotalBatchCount() {
 
-        if (isSearchActive()) {
+		if (isSearchActive()) {
 
-            return outwardBatchDashboardDAO
-                    .getSearchPendingBatchCount(
-                            txtBatchId.getValue(),
-                            fromDate.getValue(),
-                            toDate.getValue());
-        }
+			return outwardBatchDashboardDAO.getSearchPendingBatchCount(txtBatchId.getValue(), fromDate.getValue(),
+					toDate.getValue());
+		}
 
-        return outwardBatchService
-                .getPendingBatchCount();
-    }
+		return outwardBatchService.getPendingBatchCount();
+	}
 
-    private void loadDashboard() {
+	private void loadDashboard() {
 
-        try {
+		try {
 
-            List<OutwardBatch> pendingBatches;
-            int totalBatches;
+			List<OutwardBatch> pendingBatches;
+			int totalBatches;
 
-            if (isSearchActive()) {
+			if (isSearchActive()) {
 
-                String batchId =
-                        txtBatchId.getValue();
+				String batchId = txtBatchId.getValue();
 
-                Date searchFromDate =
-                        fromDate.getValue();
+				Date searchFromDate = fromDate.getValue();
 
-                Date searchToDate =
-                        toDate.getValue();
+				Date searchToDate = toDate.getValue();
 
-                pendingBatches =
-                        outwardBatchDashboardDAO
-                                .searchPendingBatches(
-                                        pageNumber,
-                                        pageSize,
-                                        batchId,
-                                        searchFromDate,
-                                        searchToDate);
+				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId,
+						searchFromDate, searchToDate);
 
-                totalBatches =
-                        outwardBatchDashboardDAO
-                                .getSearchPendingBatchCount(
-                                        batchId,
-                                        searchFromDate,
-                                        searchToDate);
+				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId, searchFromDate,
+						searchToDate);
 
-            } else {
+			} else {
 
-                pendingBatches =
-                        outwardBatchService
-                                .getPendingBatches(
-                                        pageNumber,
-                                        pageSize);
+				pendingBatches = outwardBatchService.getPendingBatches(pageNumber, pageSize);
 
-                totalBatches =
-                        outwardBatchService
-                                .getPendingBatchCount();
-            }
+				totalBatches = outwardBatchService.getPendingBatchCount();
+			}
 
-            int totalPages =
-                    (int) Math.ceil(
-                            (double) totalBatches / pageSize);
+			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
 
-            if (totalPages == 0) {
+			if (totalPages == 0) {
 
-                pageNumber = 0;
+				pageNumber = 0;
 
-                lblPage.setValue("0/0");
+				lblPage.setValue("0/0");
 
-                btnFirst.setDisabled(true);
-                btnPrevious.setDisabled(true);
-                btnNext.setDisabled(true);
-                btnLast.setDisabled(true);
+				btnFirst.setDisabled(true);
+				btnPrevious.setDisabled(true);
+				btnNext.setDisabled(true);
+				btnLast.setDisabled(true);
 
-            } else {
+			} else {
 
-                if (pageNumber < 1) {
-                    pageNumber = 1;
-                }
+				if (pageNumber < 1) {
+					pageNumber = 1;
+				}
 
-                if (pageNumber > totalPages) {
-                    pageNumber = totalPages;
-                }
+				if (pageNumber > totalPages) {
+					pageNumber = totalPages;
+				}
 
-                lblPage.setValue(
-                        pageNumber + "/" + totalPages);
+				lblPage.setValue(pageNumber + "/" + totalPages);
 
-                btnFirst.setDisabled(
-                        pageNumber == 1);
+				btnFirst.setDisabled(pageNumber == 1);
 
-                btnPrevious.setDisabled(
-                        pageNumber == 1);
+				btnPrevious.setDisabled(pageNumber == 1);
 
-                btnNext.setDisabled(
-                        pageNumber == totalPages);
+				btnNext.setDisabled(pageNumber == totalPages);
 
-                btnLast.setDisabled(
-                        pageNumber == totalPages);
-            }
+				btnLast.setDisabled(pageNumber == totalPages);
+			}
 
-            ListModelList<OutwardBatch> model =
-                    new ListModelList<>(pendingBatches);
+			ListModelList<OutwardBatch> model = new ListModelList<>(pendingBatches);
 
-            lstBatches.setModel(model);
+			lstBatches.setModel(model);
 
-            lstBatches.setItemRenderer(
-                    new ListitemRenderer<OutwardBatch>() {
+			lstBatches.setItemRenderer(new ListitemRenderer<OutwardBatch>() {
 
-                @Override
-                public void render(
-                        Listitem item,
-                        OutwardBatch batch,
-                        int index)
-                        throws Exception {
+				@Override
+				public void render(Listitem item, OutwardBatch batch, int index) throws Exception {
 
-                    item.setValue(batch);
+					item.setValue(batch);
 
-                    item.appendChild(
-                            new Listcell(
-                                    batch.getOutwardBatchId()));
+					item.appendChild(new Listcell(batch.getOutwardBatchId()));
 
-                    item.appendChild(
-                            new Listcell(
-                                    String.valueOf(
-                                            batch.getActualChequeCount())));
+					Map<String, Integer> chequeCounts = getChequeCounts(batch.getOutwardBatchId());
 
-                    BigDecimal amount =
-                            batch.getActualTotalAmount();
+					int totalCheques = chequeCounts.get("total");
 
-                    String amountText =
-                            amount == null
-                                    ? "₹0.00"
-                                    : "₹"
-                                      + amount.toPlainString();
+					int normalCheques = chequeCounts.get("normal");
+					int makerReturned = chequeCounts.get("makerReturned");
 
-                    item.appendChild(
-                            new Listcell(amountText));
+					int rejectionRequests = chequeCounts.get("rejection");
 
-                    String submittedBy =
-                            batch.getUploadedBy();
+					
 
-                    item.appendChild(
-                            new Listcell(
-                                    submittedBy == null
-                                            ? "-"
-                                            : submittedBy));
+					item.appendChild(new Listcell(String.valueOf(totalCheques)));
 
-                    String submittedAt = "-";
+					item.appendChild(new Listcell(String.valueOf(normalCheques)));
+					Listcell makerReturnedCell =
+					        new Listcell(
+					                String.valueOf(makerReturned));
 
-                    if (batch.getUploadedAt() != null) {
+					makerReturnedCell.setSclass(
+					        "maker-returned-count");
 
-                        SimpleDateFormat formatter =
-                                new SimpleDateFormat(
-                                        "dd-MMM-yyyy HH:mm a");
+					item.appendChild(makerReturnedCell);
 
-                        submittedAt =
-                                formatter.format(
-                                        batch.getUploadedAt());
-                    }
+					Listcell rejectionCell =
+					        new Listcell(
+					                String.valueOf(rejectionRequests));
 
-                    item.appendChild(
-                            new Listcell(submittedAt));
+					rejectionCell.setSclass(
+					        "rejection-request-count");
 
-                    Listcell statusCell =
-                            new Listcell();
+					item.appendChild(rejectionCell);
 
-                    statusCell.setStyle(
-                            "text-align:center;"
-                            + "vertical-align:middle;");
+					
+					
 
-                    Label statusLabel =
-                            new Label(
-                                    batch.getBatchStatus());
+					String submittedAt = "-";
 
-                    statusLabel.setSclass(
-                            "status-pending");
+					if (batch.getUploadedAt() != null) {
 
-                    statusLabel.setStyle(
-                            "display:inline-block;"
-                            + "background:#fff7ed;"
-                            + "color:#b45309;"
-                            + "border:1px solid #f59e0b;"
-                            + "border-radius:16px;"
-                            + "font-size:8px;"
-                            + "font-weight:800;"
-                            + "text-align:center;"
-                            + "white-space:nowrap;");
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-                    statusCell.appendChild(
-                            statusLabel);
+						submittedAt = formatter.format(batch.getUploadedAt());
+					}
 
-                    item.appendChild(
-                            statusCell);
+					item.appendChild(new Listcell(submittedAt));
 
-                    Listcell actionCell =
-                            new Listcell();
+					Listcell statusCell = new Listcell();
 
-                    Button queueButton =
-                            new Button("QUEUE");
+					statusCell.setStyle("text-align:center;" + "vertical-align:middle;");
 
-                    queueButton.setSclass(
-                            "queue-button");
+					Label statusLabel = new Label(batch.getBatchStatus());
 
-                    queueButton.addEventListener(
-                            Events.ON_CLICK,
-                            event -> {
+					statusLabel.setSclass("status-pending");
 
-                        OutwardBatch selectedBatch =
-                                item.getValue();
+					statusLabel.setStyle("display:inline-block;" + "background:#fff7ed;" + "color:#b45309;"
+							+ "border:1px solid #f59e0b;" + "border-radius:16px;" + "font-size:8px;"
+							+ "font-weight:800;" + "text-align:center;" + "white-space:nowrap;");
 
-                        Map<String, Object> args =
-                                new HashMap<>();
+					statusCell.appendChild(statusLabel);
 
-                        args.put(
-                                "batchId",
-                                selectedBatch
-                                        .getOutwardBatchId());
+					item.appendChild(statusCell);
 
-                        Window popup =
-                                (Window) Executions
-                                        .createComponents(
-                                                "/outward/checker/batch-proceed-popup.zul",
-                                                null,
-                                                args);
+					Listcell actionCell = new Listcell();
 
-                        popup.doModal();
-                    });
+					Button queueButton = new Button("QUEUE");
 
-                    actionCell.appendChild(
-                            queueButton);
+					queueButton.setSclass("queue-button");
 
-                    item.appendChild(
-                            actionCell);
-                }
-            });
+					queueButton.addEventListener(Events.ON_CLICK, event -> {
 
-        } catch (Exception e) {
+						OutwardBatch selectedBatch = item.getValue();
 
-            e.printStackTrace();
+						Map<String, Object> args = new HashMap<>();
 
-            Messagebox.show(
-                    "Unable to load Checker Dashboard.\n\n"
-                            + e.getMessage(),
-                    "Dashboard Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
+						args.put("batchId", selectedBatch.getOutwardBatchId());
+
+						Window popup = (Window) Executions.createComponents("/outward/checker/batch-proceed-popup.zul",
+								null, args);
+
+						popup.doModal();
+					});
+
+					actionCell.appendChild(queueButton);
+
+					item.appendChild(actionCell);
+				}
+			});
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to load Checker Dashboard.\n\n" + e.getMessage(), "Dashboard Error", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
+
+	private Map<String, Integer> getChequeCounts(String batchId) throws SQLException {
+
+		Map<String, Integer> countedCheques = new HashMap<>();
+
+		int totalCheques = 0;
+		int normalCheques = 0;
+		int rejectionRequests = 0;
+		int makerReturned = 0;
+
+		List<OutwardCheque> cheques = outwardCheckerQueueService.getChequesByBatchId(batchId);
+
+		if (cheques != null) {
+
+			totalCheques = cheques.size();
+
+			for (OutwardCheque cheque : cheques) {
+
+				if (cheque == null) {
+					continue;
+				}
+
+				String status = cheque.getChequeStatus();
+
+				if ("MAKER_RETURNED".equalsIgnoreCase(status)) {
+
+					makerReturned++;
+
+				} else if ("REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+
+					rejectionRequests++;
+
+				} else {
+
+					normalCheques++;
+				}
+			}
+		}
+
+		countedCheques.put("total", totalCheques);
+		countedCheques.put("normal", normalCheques);
+		countedCheques.put("rejection", rejectionRequests);
+		countedCheques.put("makerReturned", makerReturned);
+
+		return countedCheques;
+	}
 }

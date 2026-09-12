@@ -10,10 +10,19 @@
 
     padding: 0;
 
-    background: #eaf2f8;
-
     overflow: hidden;
 
+}
+.outward-checker-dashboard .rejection-request-count {
+    color: #dc2626;
+    font-weight: 700;
+    text-align: center;
+}
+
+.outward-checker-dashboard .maker-returned-count {
+    color: #f59e0b;
+    font-weight: 700;
+    text-align: center;
 }
 
 .outward-checker-dashboard .outward-checker-dashboard-scroll {

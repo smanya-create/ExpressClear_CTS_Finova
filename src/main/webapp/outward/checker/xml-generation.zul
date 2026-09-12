@@ -1,40 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?page title="ExpressClear CTS-XML Generation"?>
 
 <zk xmlns:h="xhtml">
 
     <style src="/css/outward/checker-xmlGeneration.css" />
 
-    <borderlayout hflex="1" vflex="1">
+    <borderlayout
+        hflex="1"
+        vflex="1">
 
-        <west width="265px"
-              splittable="false"
-              collapsible="false">
+        <west
+            width="265px"
+            splittable="false"
+            collapsible="false">
 
-            <include src="/components/sidebar.zul"
-                     role="OUTWARD_CHECKER"
-                     activeTab="xml-gen" />
+            <include
+                src="/components/sidebar.zul"
+                role="OUTWARD_CHECKER"
+                activeTab="xml-gen" />
 
         </west>
 
+
         <center>
 
-            <borderlayout hflex="1"
-                        vflex="1">
+            <borderlayout
+                hflex="1"
+                vflex="1">
 
-                <north height="75px"
-                       splittable="false"
-                       collapsible="false">
+                <north
+                    height="75px"
+                    splittable="false"
+                    collapsible="false">
 
-                    <include src="/components/header.zul"
-                             pageTitle="Xml Generation" />
+                    <include
+                        src="/components/header.zul"
+                        pageTitle="Xml Generation" />
 
                 </north>
 
+
                 <center>
 
-                    <include id="MainXmlContentArea"
-                             src="/outward/checker/xml-generation-content.zul" />
+                    <include
+                        id="MainXmlContentArea"
+                        src="/outward/checker/xml-generation-content.zul" />
 
                 </center>
 
