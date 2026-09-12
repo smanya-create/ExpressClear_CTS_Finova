@@ -4,13 +4,13 @@
 	<style src="/css/inward/maker-batch-details.css" />
 
 	<div id="inwardMakerBatchDetailsDiv" width="100%"
-		style="min-height: calc(100vh - 80px); padding-bottom: 40px; box-sizing: border-box;"
 		sclass="inward-maker-batch-details"
 		apply="com.iispl.cts.controller.inward.maker.InwardMakerBatchDetailsController">
 
-		<div sclass="inward-maker-batch-details-scroll">
+		<div sclass="inward-maker-batch-details-container">
 
-			<div sclass="inward-maker-batch-details-card">
+			<!-- 1. Pinned Top Section (Static) -->
+			<div sclass="inward-maker-batch-pinned-header">
 
 				<div sclass="inward-maker-batch-details-heading">
 					<div>
@@ -26,13 +26,14 @@
 						sclass="inward-maker-batch-back-button" />
 				</div>
 
+				<!-- 3-Column Summary Cards -->
 				<div sclass="inward-maker-batch-summary">
 
 					<div sclass="inward-maker-batch-summary-item">
 						<label value="BATCH ID"
 							sclass="inward-maker-batch-summary-label" />
 						<label id="inwardMakerLblBatchId" value="-"
-							sclass="inward-maker-batch-summary-value" />
+							sclass="inward-maker-batch-summary-value inward-maker-batch-id-highlight" />
 					</div>
 
 					<div sclass="inward-maker-batch-summary-item">
@@ -51,6 +52,10 @@
 
 				</div>
 
+				<!-- Visual separation between Cards & Table Header -->
+				<space height="22px" />
+
+				<!-- Table Subheading -->
 				<div sclass="inward-maker-cheque-section">
 					<label value="Cheque Details"
 						sclass="inward-maker-cheque-section-title" />
@@ -59,36 +64,40 @@
 						sclass="inward-maker-cheque-section-subtitle" />
 				</div>
 
-				<div sclass="inward-maker-cheque-table-card">
+			</div>
 
-					<grid id="inwardMakerGridChequeDetails"
-						width="100%" sclass="inward-maker-cheque-grid">
+			<!-- 2. Scrollable Table Card (Internal scrollbar for 10 cheques) -->
+			<div sclass="inward-maker-cheque-table-card">
 
-						<columns sizable="true">
-							<column label="Cheque No." width="12%" />
-							<column label="Drawee Account No." width="17%" />
-							<column label="Cheque Date" width="12%" />
-							<column label="MICR Code" width="13%" />
-							<column label="Cheque Status" width="18%" />
-							<column label="Cheque Amount" width="13%" />
-							<column label="Action" width="15%" />
-						</columns>
+				<grid id="inwardMakerGridChequeDetails"
+					width="100%"
+					height="280px"
+					sclass="inward-maker-cheque-grid">
 
-						<rows id="inwardMakerRowsChequeDetails" />
+					<columns sizable="true">
+						<column label="Cheque No." width="11%" align="center" />
+						<column label="Drawee Account No." width="16%" align="center" />
+						<column label="Cheque Date" width="12%" align="center" />
+						<column label="MICR Code" width="12%" align="center" />
+						<column label="Cheque Status" width="18%" align="center" />
+						<column label="Cheque Amount" width="14%" align="center" />
+						<column label="Action" width="17%" align="center" />
+					</columns>
 
-					</grid>
+					<rows id="inwardMakerRowsChequeDetails" />
 
-					<vlayout id="inwardMakerVlayoutEmptyState"
-						visible="false" sclass="inward-maker-batch-empty-state">
-						<label value="No cheques found"
-							sclass="inward-maker-batch-empty-title" />
-						<label
-							value="There are currently no cheques available in this batch."
-							sclass="inward-maker-batch-empty-subtitle" />
-					</vlayout>
+				</grid>
 
-				</div>
+				<vlayout id="inwardMakerVlayoutEmptyState"
+					visible="false" sclass="inward-maker-batch-empty-state">
+					<label value="No cheques found"
+						sclass="inward-maker-batch-empty-title" />
+					<label
+						value="There are currently no cheques available in this batch."
+						sclass="inward-maker-batch-empty-subtitle" />
+				</vlayout>
 
+				<!-- Pinned Pagination Bar at the bottom of the card -->
 				<div sclass="inward-maker-batch-pagination">
 					<button id="inwardMakerBtnFirst" label="&lt;&lt;"
 						sclass="inward-maker-pagination-button" />

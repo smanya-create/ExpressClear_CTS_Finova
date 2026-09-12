@@ -11,6 +11,9 @@ import java.util.Locale;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
@@ -68,12 +71,29 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		if (inwardMakerBtnLast != null) inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
 		if (inwardMakerBtnBack != null) inwardMakerBtnBack.addEventListener("onClick", event -> goBackToDashboard());
 
-		loadBatchDetails();
+		// Guarantees post-DOM render execution
+		comp.addEventListener("onInitialDataLoad", new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				renderCurrentPage();
+			}
+		});
+
+		loadBatchDetails(comp);
 	}
 
-	private void loadBatchDetails() {
+	private void loadBatchDetails(Component comp) {
 		try {
 			this.currentBatchId = Executions.getCurrent().getParameter("batchId");
+
+			if (this.currentBatchId == null || this.currentBatchId.trim().isEmpty()) {
+				this.currentBatchId = Executions.getCurrent().getParameter("amp;batchId");
+			}
+
+			if ((this.currentBatchId == null || this.currentBatchId.trim().isEmpty()) && comp != null) {
+				Object compAttr = comp.getAttribute("batchId");
+				if (compAttr != null) this.currentBatchId = compAttr.toString();
+			}
 
 			if (this.currentBatchId == null || this.currentBatchId.trim().isEmpty()) {
 				Object attr = Executions.getCurrent().getAttribute("batchId");
@@ -107,7 +127,14 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 			populateBatchSummary();
 			this.currentPage = 1;
+
+			// Direct render
 			renderCurrentPage();
+
+			// Echo render ensures rows are injected even if ZK lifecycle wasn't ready
+			if (comp != null) {
+				Events.echoEvent("onInitialDataLoad", comp, null);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -122,6 +149,12 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 	}
 
 	private void renderCurrentPage() {
+		if (inwardMakerGridChequeDetails == null) return;
+
+		if (inwardMakerRowsChequeDetails == null) {
+			inwardMakerRowsChequeDetails = inwardMakerGridChequeDetails.getRows();
+		}
+
 		if (inwardMakerRowsChequeDetails == null) return;
 		inwardMakerRowsChequeDetails.getChildren().clear();
 
@@ -131,7 +164,7 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 			return;
 		}
 
-		if (inwardMakerGridChequeDetails != null) inwardMakerGridChequeDetails.setVisible(true);
+		inwardMakerGridChequeDetails.setVisible(true);
 		if (inwardMakerVlayoutEmptyState != null) inwardMakerVlayoutEmptyState.setVisible(false);
 
 		int totalPages = getTotalPages();
