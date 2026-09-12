@@ -422,12 +422,13 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 		String sql = "SELECT outward_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
 				+ "actual_total_amount, " + "batch_status, " + "uploaded_by, " + "uploaded_at " + "FROM outward_batch "
-				+ "WHERE UPPER(TRIM(batch_status)) = ? " + "ORDER BY uploaded_at DESC";
+				+ "WHERE UPPER(TRIM(batch_status)) IN (?, ?) " + "ORDER BY uploaded_at DESC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 			preparedStatement.setString(1, "VERIFIED");
+			preparedStatement.setString(2, "COMPLETED");
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -437,7 +438,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			}
 
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch verified outward batches", exception);
+			throw new RuntimeException("Unable to fetch  outward batches", exception);
 		}
 
 		return batches;

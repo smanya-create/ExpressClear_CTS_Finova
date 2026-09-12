@@ -1,133 +1,239 @@
 .outward-checker-dashboard {
+
     width: 100%;
+
     height: 100%;
+
     box-sizing: border-box;
+
     margin: 0;
+
     padding: 0;
+
     background: #eaf2f8;
+
     overflow: hidden;
+
 }
 
 .outward-checker-dashboard .outward-checker-dashboard-scroll {
+
     width: 100%;
+
     height: 100%;
+
     box-sizing: border-box;
+
     margin: 0;
+
     padding: 30px;
+
     background: #eaf2f8;
+
     overflow-y: auto;
+
     overflow-x: hidden;
+
 }
 
 .outward-checker-dashboard .outward-checker-welcome-section {
+
     width: 100%;
+
     box-sizing: border-box;
+
     padding-top: 0;
+
     padding-bottom: 20px;
+
 }
 
 .outward-checker-dashboard .outward-checker-welcome-title {
+
     display: block;
+
     font-size: 20px;
+
     font-weight: 800;
+
     color: #0f172a;
+
 }
 
 .outward-checker-dashboard .outward-checker-welcome-subtitle {
+
     display: block;
+
     margin-top: 7px;
+
     font-size: 9px;
+
     color: #8fa6ba;
+
 }
 
 .outward-checker-dashboard .outward-checker-summary-card {
+
     display: flex;
+
     width: 100%;
+
     box-sizing: border-box;
+
     margin-top: 2px;
+
     padding: 15px 20px;
+
     min-height: 75px;
+
     background: #ffffff;
+
     border: 1px solid #d6e2ec;
+
     border-radius: 12px;
+
 }
 
 .outward-checker-dashboard .outward-checker-summary-item {
+
     flex: 1;
+
     min-width: 0;
+
     box-sizing: border-box;
+
     padding: 5px 20px;
+
     border-right: 1px solid #e0e7ee;
+
 }
 
 .outward-checker-dashboard .outward-checker-summary-item:last-child {
+
     border-right: none;
+
 }
 
 .outward-checker-dashboard .outward-checker-summary-label {
+
     display: block;
+
     font-size: 8px;
+
     color: #8da3b8;
+
     font-weight: 700;
+
 }
 
 .outward-checker-dashboard .outward-checker-summary-value {
+
     display: block;
+
     margin-top: 8px;
+
     font-size: 13px;
+
     color: #294762;
+
     font-weight: 800;
+
 }
 
 .outward-checker-dashboard .outward-checker-section-header {
+
     width: 100%;
+
     box-sizing: border-box;
+
     margin-top: 22px;
+
     margin-bottom: 15px;
+
 }
 
 .outward-checker-dashboard .outward-checker-section-title {
+
     display: block;
+
     font-size: 15px;
+
     font-weight: 800;
+
     color: #284560;
+
 }
 
 .outward-checker-dashboard .outward-checker-section-subtitle {
+
     display: block;
+
     margin-top: 5px;
+
     font-size: 9px;
+
     color: #8fa6ba;
+
 }
 
 .outward-checker-dashboard .outward-checker-table-card {
+
     width: 100%;
+
     box-sizing: border-box;
+
     background: #f8fafc;
+
     border: 1px solid #cbd5e1;
+
     border-radius: 10px;
+
     overflow: hidden;
+
     padding: 0;
+
+    height: auto;
+
+    min-height: 0;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table {
+
     width: 100%;
+
     box-sizing: border-box;
+
     background: #f8fafc;
+
     border: none;
+
     margin: 0;
+
     padding: 0;
+
+    height: auto;
+
+    min-height: 0;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listbox-header {
+
     background: #172554;
+
     background-image: none;
+
     border: none;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listbox-header-bg {
+
     background: #172554;
+
     background-image: none;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listbox-header table {
@@ -135,96 +241,185 @@
     background: #172554;
     border-spacing: 0;
     border-collapse: collapse;
+    border: none;
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listhead {
+
     background: #172554;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listheader {
+
     margin: 0;
+
     padding: 0;
+
     background: #172554;
+
     background-image: none;
+
     color: #ffffff;
-    border-right: 1px solid #2563eb;
-    border-bottom: 1px solid #2563eb;
-    text-align: center;
-}
 
-.outward-checker-dashboard .outward-checker-batch-table .z-listheader:last-child {
     border-right: none;
-}
+    border-bottom: none; 
 
-.outward-checker-dashboard .outward-checker-batch-table .z-listheader-content {
+    text-align: center;
+
+}
+.outward-checker-dashboard .outward-checker-batch-table .z-listbox-header .z-listhead .z-listheader-content {
     margin: 0;
     padding: 15px 12px;
     box-sizing: border-box;
     background: #172554;
+    background-image: none;
     color: #ffffff;
+    border: none;
+    box-shadow: none;
+    outline: none;
     font-size: 10px;
     font-weight: 800;
     text-align: center;
     white-space: nowrap;
 }
 
+.outward-checker-dashboard .outward-checker-batch-table .z-listheader:last-child {
+
+    border-right: none;
+
+}
+
+.outward-checker-dashboard .outward-checker-batch-table .z-listheader-content {
+
+    margin: 0;
+
+    padding: 15px 12px;
+
+    box-sizing: border-box;
+
+    background: #172554;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
 .outward-checker-dashboard .outward-checker-batch-table .z-listbox-body {
+
+    height: auto;
+
+    min-height: 0;
+
+    max-height: none;
+
+    overflow: visible;
+
     border: none;
+
     background: #f8fafc;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listbox-body table {
+
     width: 100%;
+
+    height: auto;
+
     border-spacing: 0;
+
     border-collapse: collapse;
+
     background: #f8fafc;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listitem {
+
     height: 62px;
+
     min-height: 62px;
+
     margin: 0;
+
     padding: 0;
+
     background: #f8fafc;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listitem:hover {
+
     background: #eef2f7;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listitem:hover .z-listcell {
+
     background: #eef2f7;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listcell {
+
     height: 62px;
+
     min-height: 62px;
+
     margin: 0;
+
     padding: 0;
+
     box-sizing: border-box;
+
     background: #f8fafc;
+
     color: #334155;
+
     border-bottom: 1px solid #e2e8f0;
+
     text-align: center;
+
     vertical-align: middle;
+
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listcell-content {
+
     padding: 17px 12px;
+
     box-sizing: border-box;
+
     color: #334155;
+
     font-size: 10px;
+
     font-weight: 600;
+
     line-height: 20px;
+
     text-align: center;
+
     vertical-align: middle;
+
 }
 
 .outward-checker-dashboard .status-pending {
-   display: inline-block;
+
+    display: inline-block;
 
     width: 145px;
+
     min-width: 145px;
+
     max-width: 145px;
 
     height: 28px;
@@ -255,15 +450,268 @@
 
 }
 
-
 .outward-checker-dashboard .queue-button {
+
+    width: 80px;
+
+    min-width: 80px;
+
+    max-width: 80px;
+
+    height: 34px;
+
+    box-sizing: border-box;
+
+    padding: 0 6px;
+
+    margin: 0 auto;
+
+    background: #172554;
+
+    background-image: none;
+
+    border: 1px solid #172554;
+
+    border-radius: 6px;
+
+    color: #ffffff;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    text-align: center;
+
+}
+
+.outward-checker-dashboard .queue-button:hover {
+
+    background: #0f1b3d;
+
+    background-image: none;
+
+    border-color: #0f1b3d;
+
+}
+
+.outward-checker-dashboard .queue-button .z-button-content {
+
+    background: transparent;
+
+    color: #ffffff;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 14px 0 16px 0;
+
+    margin: 0;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination-button {
+
+    min-width: 34px;
+
+    width: 34px;
+
+    height: 32px;
+
+    box-sizing: border-box;
+
+    padding: 0;
+
+    background: #ffffff;
+
+    background-image: none;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 6px;
+
+    color: #334155;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    text-align: center;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination-button:hover {
+
+    background: #f1f5f9;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination-button .z-button-content {
+
+    background: transparent;
+
+    color: #334155;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    text-align: center;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination-button.z-button-disabled {
+
+    background: #ffffff;
+
+    color: #94a3b8;
+
+    opacity: 0.45;
+
+    cursor: not-allowed;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination-button.z-button-disabled .z-button-content {
+
+    background: transparent;
+
+    color: #94a3b8;
+
+}
+
+.outward-checker-dashboard .outward-checker-pagination-label {
+
+    min-width: 58px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    color: #334155;
+
+    line-height: 32px;
+
+}
+
+.z-borderlayout {
+
+    border: none;
+
+}
+
+.z-west {
+
+    border: none;
+
+}
+
+.z-center {
+
+    border: none;
+
+    padding: 0;
+
+    margin: 0;
+
+}
+
+.z-center-body {
+
+    border: none;
+
+    padding: 0;
+
+    margin: 0;
+
+    background: #eaf2f8;
+
+}
+
+.z-north {
+
+    border: none;
+
+}
+
+.z-south {
+
+    border: none;
+
+}
+
+.z-east {
+
+    border: none;
+
+}
+
+@media (max-width: 1000px) {
+
+    .outward-checker-dashboard .outward-checker-dashboard-scroll {
+
+        padding: 20px 16px;
+
+    }
+
+    .outward-checker-dashboard .outward-checker-batch-table {
+
+        overflow-x: auto;
+
+    }
+
+    .outward-checker-dashboard .outward-checker-batch-table .z-listbox-body {
+
+        min-width: 900px;
+
+    }
+
+    .outward-checker-dashboard .outward-checker-summary-item {
+
+        padding-left: 10px;
+
+        padding-right: 10px;
+
+    }
+
+    .outward-checker-dashboard .queue-button {
+
+        width: 100px;
+
+        min-width: 100px;
+
+    }
+
+}
+
+.outward-checker-dashboard .outward-checker-clear-button,
+.outward-checker-dashboard .outward-checker-search-button {
     width: 80px;
     min-width: 80px;
-    max-width: 80px;
     height: 34px;
     box-sizing: border-box;
     padding: 0 6px;
-    margin: 0 auto;
+    margin: 0;
     background: #172554;
     background-image: none;
     border: 1px solid #172554;
@@ -275,132 +723,17 @@
     text-align: center;
 }
 
-.outward-checker-dashboard .queue-button:hover {
+.outward-checker-dashboard .outward-checker-clear-button:hover,
+.outward-checker-dashboard .outward-checker-search-button:hover {
     background: #0f1b3d;
     background-image: none;
     border-color: #0f1b3d;
 }
 
-.outward-checker-dashboard .queue-button .z-button-content {
+.outward-checker-dashboard .outward-checker-clear-button .z-button-content,
+.outward-checker-dashboard .outward-checker-search-button .z-button-content {
     background: transparent;
     color: #ffffff;
     font-size: 9px;
     font-weight: 800;
-}
-
-.outward-checker-dashboard .outward-checker-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 18px 0 16px 0;
-    margin: 0;
-}
-
-.outward-checker-dashboard .outward-checker-pagination-button {
-    min-width: 34px;
-    width: 34px;
-    height: 32px;
-    box-sizing: border-box;
-    padding: 0 9px;
-    background: #ffffff;
-    background-image: none;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    color: #334155;
-    font-size: 16px;
-    font-weight: 700;
-    text-align: center;
-}
-
-.outward-checker-dashboard .outward-checker-pagination-button:hover {
-    background: #f1f5f9;
-}
-
-.outward-checker-dashboard .outward-checker-pagination-button .z-button-content {
-    background: transparent;
-    color: #334155;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.outward-checker-dashboard .outward-checker-pagination-button.z-button-disabled {
-    background: #ffffff;
-    color: #94a3b8;
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.outward-checker-dashboard .outward-checker-pagination-button.z-button-disabled .z-button-content {
-    background: transparent;
-    color: #94a3b8;
-}
-
-.outward-checker-dashboard .outward-checker-pagination-label {
-    min-width: 58px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 800;
-    color: #334155;
-    line-height: 32px;
-}
-
-.z-borderlayout {
-    border: none;
-}
-
-.z-west {
-    border: none;
-}
-
-.z-center {
-    border: none;
-    padding: 0;
-    margin: 0;
-}
-
-.z-center-body {
-    border: none;
-    padding: 0;
-    margin: 0;
-    background: #eaf2f8;
-}
-
-.z-north {
-    border: none;
-}
-
-.z-south {
-    border: none;
-}
-
-.z-east {
-    border: none;
-}
-
-@media (max-width: 1000px) {
-
-    .outward-checker-dashboard .outward-checker-dashboard-scroll {
-        padding: 20px 16px;
-    }
-
-    .outward-checker-dashboard .outward-checker-batch-table {
-        overflow-x: auto;
-    }
-
-    .outward-checker-dashboard .outward-checker-batch-table .z-listbox-body {
-        min-width: 900px;
-    }
-
-    .outward-checker-dashboard .outward-checker-summary-item {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .outward-checker-dashboard .queue-button {
-        width: 100px;
-        min-width: 100px;
-    }
 }
