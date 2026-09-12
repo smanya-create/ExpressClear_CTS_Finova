@@ -1,179 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?page title="CTS - Inward Data Entry" contentType="text/html;charset=UTF-8"?>
+
 <zk>
-<style>
-    /* 1. Outward Deep Navy Table Header */
-    .outward-card .z-listhead,
-    .outward-card .z-listhead-bar,
-    .outward-card .z-listheader,
-    .outward-card .z-listheader-content {
-        background-color: #15284f !important;
-        background-image: none !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-weight: 700 !important;
-        font-size: 11px !important;
-        letter-spacing: 0.8px !important;
-        text-transform: uppercase !important;
-        height: 44px !important;
-        line-height: 20px !important;
-    }
-    .outward-card .z-listheader {
-        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }
-    .outward-card .z-listheader:last-child {
-        border-right: none !important;
-    }
+    <!-- Use the exact same stylesheet as MICR Repair -->
+    <style src="/css/inward/micr-repair-queue.css" />
 
-    /* 2. Rounded Container Card */
-    .outward-table-wrapper {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-    }
+    <div id="dataEntryBatchesRoot"
+         width="100%"
+         height="100%"
+         apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController"
+         sclass="micr-repair-view-page"
+         style="overflow-y: auto; overflow-x: hidden;">
 
-    /* 3. Empty State Styling */
-    .outward-card .z-listbox-emptybody td {
-        padding: 50px 20px !important;
-        text-align: center !important;
-        color: #64748b !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        background: #ffffff !important;
-    }
+        <vlayout width="100%" spacing="16px">
 
-    /* 4. Table Row Heights and Hover Effects */
-    .outward-card .z-listitem {
-        height: 54px !important;
-        transition: background-color 0.15s ease;
-    }
-    .outward-card .z-listitem:hover {
-        background-color: #f8fafc !important;
-    }
-    .outward-card .z-listcell {
-        border-bottom: 1px solid #f1f5f9 !important;
-        padding: 8px 12px !important;
-    }
+            <!-- ================================================= -->
+            <!-- 1. PAGE TITLE (Identical to MICR Repair)          -->
+            <!-- ================================================= -->
+            <vlayout spacing="4px" sclass="micr-repair-view-title-section">
+                <label value="DATA ENTRY" sclass="micr-repair-view-title" />
+            </vlayout>
 
-    /* 5. Centered Clean Paging Bar */
-    .outward-card .z-paging {
-        border: none !important;
-        border-top: 1px solid #f1f5f9 !important;
-        background: #ffffff !important;
-        padding: 12px 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        position: relative !important;
-    }
-    
-    /* Hide the right-side [ 1 - 1 / 1 ] text */
-    .outward-card .z-paging-info {
-        display: none !important;
-    }
+            <!-- ================================================= -->
+            <!-- 2. MAIN SECTION CARD                             -->
+            <!-- ================================================= -->
+            <div sclass="micr-repair-section-card" width="100%">
 
-    .outward-card .z-paging-btn {
-        border: 1px solid #e2e8f0 !important;
-        background: #ffffff !important;
-        border-radius: 6px !important;
-        margin: 0 4px !important;
-        min-width: 30px !important;
-        height: 30px !important;
-        cursor: pointer;
-        color: #64748b !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    .outward-card .z-paging-btn:hover {
-        background: #f8fafc !important;
-        border-color: #cbd5e1 !important;
-        color: #1e293b !important;
-    }
+                <vlayout width="100%" spacing="12px">
 
-    .outward-card .z-paging-text {
-        font-size: 13px !important;
-        font-weight: 700 !important;
-        color: #334155 !important;
-        margin: 0 6px !important;
-    }
+                    <!-- Section Header & Count -->
+                    <hlayout width="100%" valign="middle" style="display: flex; justify-content: space-between; align-items: center;">
+                        <vlayout spacing="3px">
+                            <label value="Batches Ready for Data Entry" sclass="micr-repair-section-title" />
+                        </vlayout>
+                        <label id="lblBatchResultCount" value="0 Batches" sclass="batch-result-count" />
+                    </hlayout>
 
-    .outward-card .z-paging-input {
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 4px !important;
-        width: 32px !important;
-        height: 24px !important;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        color: #1e293b !important;
-        text-align: center;
-    }
+                    <!-- Filter Toolbar (Matches MICR Repair filter layout) -->
+                    <div sclass="micr-repair-filter-bar">
+                        <hlayout valign="middle" spacing="12px">
+                            <label value="Search Batch ID" sclass="filter-label" />
+                            <textbox id="txtSearchBatch"
+                                     placeholder="Enter full or partial Batch ID"
+                                     width="360px"
+                                     sclass="batch-filter-input"
+                                     onChanging="$composer.onChanging$txtSearchBatch(event)" />
+                            <button id="btnClearSearch"
+                                    label="Clear"
+                                    sclass="clear-filter-button"
+                                    onClick="$composer.onClick$btnClearSearch()" />
+                        </hlayout>
+                    </div>
 
-    /* 6. Action Buttons */
-    .btn-action-resume {
-        background: #d97706 !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
-        border-radius: 4px !important;
-        border: none !important;
-        padding: 5px 14px !important;
-        cursor: pointer;
-    }
-    .btn-action-start {
-        background: #15284f !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
-        border-radius: 4px !important;
-        border: none !important;
-        padding: 5px 14px !important;
-        cursor: pointer;
-    }
-    .btn-action-submit {
-        background: #16a34a !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
-        border-radius: 4px !important;
-        border: none !important;
-        padding: 5px 14px !important;
-        cursor: pointer;
-    }
-</style>
+                    <!-- Single Grid identical to MICR Repair -->
+                    <grid id="grdDataEntryBatches" width="100%" sclass="micr-repair-grid">
+                        <columns sizable="false">
+                            <column label="BATCH" width="18%" align="center" />
+                            <column label="TOTAL ITEMS" width="15%" align="center" />
+                            <column label="PENDING ITEMS" width="15%" align="center" />
+                            <column label="TOTAL AMOUNT (INR)" width="20%" align="center" />
+                            <column label="STATUS" width="16%" align="center" />
+                            <column label="ACTION" width="16%" align="center" />
+                        </columns>
+                        <rows id="rowsDataEntryBatches" />
+                    </grid>
 
-<vlayout style="padding: 24px 32px; background-color: #f8fafc; min-height: 100vh;" apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController">
-    <!-- Top Header -->
-    <vlayout spacing="4px" style="margin-bottom: 20px;">
-        <label value="DATA ENTRY" style="font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;" />
-        <label value="Select a batch ready for cheque data entry" style="font-size: 13px; color: #64748b;" />
-    </vlayout>
+                    <!-- Outward / MICR Repair Pagination -->
+                    <paging id="pagingDataEntry"
+                            pageSize="10"
+                            detailed="true"
+                            sclass="micr-repair-paging" />
 
-    <!-- Search & Refresh Toolbar -->
-    <hlayout style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 14px;" spacing="8px">
-        <textbox id="txtSearchBatch" placeholder="Filter by Batch ID or Status..." 
-        		instant="true"
-                 width="280px" style="border-radius: 6px; border: 1px solid #cbd5e1; padding: 7px 12px; font-size: 12px;" />
-        <button id="btnClearSearch" label="Clear" style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; font-weight: 600; padding: 6px 16px; cursor: pointer;" />
-        <button id="btnRefresh" label="Refresh" iconSclass="z-icon-refresh" style="background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; font-weight: 600; padding: 6px 16px; cursor: pointer;" />
-    </hlayout>
+                    <!-- Empty Message Card -->
+                    <div id="divDataEntryEmpty" width="100%" visible="false" sclass="micr-repair-empty-card">
+                        <vlayout width="100%" spacing="6px">
+                            <label value="No Data Entry Required" sclass="micr-repair-empty-title" />
+                            <label value="There are currently no batches requiring data entry." sclass="micr-repair-empty-message" />
+                        </vlayout>
+                    </div>
 
-    <!-- Table Wrapped in Card -->
-    <div sclass="outward-table-wrapper">
-        <listbox id="lbxDataEntryBatches" sclass="outward-card" 
-                 mold="paging" pageSize="5"
-                 style="border: none; background: transparent;"
-                 emptyMessage="No batches ready for data entry">
-            <listhead>
-                <listheader label="BATCH NO." width="20%" align="center" />
-                <listheader label="TOTAL ITEMS" width="15%" align="center" />
-                <listheader label="PENDING ITEMS" width="15%" align="center" />
-                <listheader label="TOTAL AMOUNT (INR)" width="20%" align="center" />
-                <listheader label="STATUS" width="15%" align="center" />
-                <listheader label="ACTION" width="15%" align="center" />
-            </listhead>
-        </listbox>
+                </vlayout>
+
+            </div>
+
+        </vlayout>
+
     </div>
-</vlayout>
 </zk>
