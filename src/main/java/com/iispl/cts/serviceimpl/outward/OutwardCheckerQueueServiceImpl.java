@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.iispl.cts.dao.outward.OutwardCheckerQueueDAO;
 import com.iispl.cts.daoimpl.outward.OutwardCheckerQueueDAOImpl;
+import com.iispl.cts.dto.RejectRequestDTO;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
@@ -139,4 +140,14 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 	            rejectedCheque
 	    );
 	}
+	
+	
+
+    @Override
+    public RejectRequestDTO getRejectRequestByChequeId(
+            String chequeId) throws SQLException {
+
+        return outwardCheckerQueueDAO
+                .getRejectRequestByChequeId(chequeId);
+    }
 }
