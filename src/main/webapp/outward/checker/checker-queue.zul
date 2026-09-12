@@ -504,8 +504,7 @@
                                                            white-space:normal;" />
 
                                             </vlayout>
-                                            
-                                            <vlayout
+                                          <vlayout
     id="rejectionDetailsSection"
     visible="false"
     spacing="3px"
@@ -543,8 +542,6 @@
                white-space:normal;" />
 
 </vlayout>
-
-
                                           
                                         </div>
 
