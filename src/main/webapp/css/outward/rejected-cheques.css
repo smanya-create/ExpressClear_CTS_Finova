@@ -1,10 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   BASE & TYPOGRAPHY
+   BASE & TYPOGRAPHY (Target specific inputs, never wildcard *)
    ========================================================= */
-body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+.section-title,
+.section-description,
+.summary-card,
+.summary-card .z-label,
+.search-card .z-label,
+.search-card .z-textbox,
+.search-card .z-datebox-input,
+.search-card .z-button,
+.table-card .z-label,
+.table-card .z-listcell,
+.table-card .z-button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .section-title {
@@ -16,68 +26,46 @@ body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
 
 .section-description {
     font-size: 13px !important;
-    color: #475569 !important;
+    color: #64748b !important;
     display: block !important;
 }
 
 /* =========================================================
-   CARDS & CONTAINERS
+   SUMMARY METRIC CARD
    ========================================================= */
-.summary-card,
-.search-card,
-.table-card {
+.summary-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    padding: 20px 24px !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
-    box-sizing: border-box !important;
-}
-
-/* 1. Summary Card */
-.summary-card {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 32px !important;
-}
-
-.summary-item {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 4px !important;
+    padding: 14px 20px !important;
+    height: auto !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 
 .summary-label {
     font-size: 11px !important;
     font-weight: 700 !important;
-    color: #475569 !important;
+    color: #64748b !important;
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
 }
 
 .summary-number {
-    font-size: 20px !important;
-    font-weight: 700 !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
     color: #0f172a !important;
+    line-height: 1.1 !important;
 }
 
-.summary-value {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #0f172a !important;
-}
-
-.summary-divider {
-    width: 1px !important;
-    height: 36px !important;
-    background-color: #e2e8f0 !important;
-}
-
-/* 2. Search Card */
+/* =========================================================
+   SEARCH BAR & DATEBOX
+   ========================================================= */
 .search-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 12px 20px !important;
     display: flex !important;
-    flex-direction: row !important;
     align-items: flex-end !important;
     gap: 16px !important;
 }
@@ -85,12 +73,7 @@ body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
 .search-field {
     display: flex !important;
     flex-direction: column !important;
-    gap: 6px !important;
-    flex: 1 !important;
-}
-
-.search-field.date-field {
-    flex: 0 0 200px !important;
+    margin: 0 !important;
 }
 
 .field-label {
@@ -99,80 +82,131 @@ body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
     color: #475569 !important;
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
+    line-height: 14px !important;
 }
 
-.search-input {
+/* Unified 38px Textbox */
+.search-input.z-textbox {
     height: 38px !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 6px !important;
-    padding: 6px 12px !important;
+    padding: 0 12px !important;
     font-size: 13px !important;
+    color: #1e293b !important;
+    box-sizing: border-box !important;
 }
 
-/* Datebox overrides */
-.z-datebox-input {
+.search-input.z-textbox:focus {
+    border-color: #173B61 !important;
+    box-shadow: 0 0 0 2px rgba(23, 59, 97, 0.12) !important;
+}
+
+/* Unified 38px Datebox Container */
+.search-card .z-datebox {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 38px !important;
+}
+
+.search-card .z-datebox-input {
     height: 38px !important;
     border: 1px solid #cbd5e1 !important;
+    border-right: none !important;
     border-radius: 6px 0 0 6px !important;
-    padding: 6px 12px !important;
+    padding: 0 12px !important;
     font-size: 13px !important;
+    color: #1e293b !important;
+    box-sizing: border-box !important;
 }
 
-.z-datebox-button {
+/* Standard Classic ZK Calendar Icon Button */
+.search-card .z-datebox-button {
     height: 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
     border: 1px solid #cbd5e1 !important;
-    border-left: none !important;
     border-radius: 0 6px 6px 0 !important;
-    background: #f8fafc !important;
+    background-color: #ffffff !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
 }
 
-/* Buttons */
-.search-button,
-.clear-button {
+.search-card .z-datebox-button:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* Calendar Glyph Restoration */
+.search-card .z-datebox-button [class*="z-icon-"],
+.search-card .z-datebox-button i {
+    font-family: FontAwesome, "Font Awesome 5 Free", z-icons !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    color: #0f172a !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+}
+
+/* Fallback: Ensure icon appears if pseudo-element is used */
+.search-card .z-datebox-button [class*="z-icon-"]:before {
+    color: #0f172a !important;
+}
+
+/* Action Buttons */
+.search-button.z-button {
+    background-color: #173B61 !important;
+    color: #ffffff !important;
+    height: 38px !important;
+    padding: 0 22px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+}
+
+.search-button.z-button:hover {
+    background-color: #0f2847 !important;
+}
+
+.clear-button.z-button {
+    background-color: #334155 !important;
+    color: #ffffff !important;
     height: 38px !important;
     padding: 0 20px !important;
     font-size: 12px !important;
     font-weight: 700 !important;
-    border-radius: 6px !important;
-    border: none !important;
-    cursor: pointer !important;
-}
-
-.search-button {
-    background-color: #173b69 !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
     border: none !important;
     border-radius: 6px !important;
-    height: 38px !important;
-    padding: 0 20px !important;
     cursor: pointer !important;
-    transition: background-color 0.2s ease !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
 }
 
-.search-button:hover {
-    background-color: #0f2847 !important;
-}
-
-.clear-button {
-    background-color: #334155 !important; /* Slate neutral */
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    border: none !important;
-    border-radius: 6px !important;
-    height: 38px !important;
-    padding: 0 20px !important;
-    cursor: pointer !important;
-    transition: background-color 0.2s ease !important;
-}
-
-.clear-button:hover {
+.clear-button.z-button:hover {
     background-color: #1e293b !important;
 }
 
-/* 3. Table Header Titles */
+/* =========================================================
+   TABLE SECTION
+   ========================================================= */
+.table-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    box-sizing: border-box !important;
+}
+
 .list-title-section {
-    margin-bottom: 16px !important;
+    margin-bottom: 10px !important;
 }
 
 .list-title {
@@ -186,29 +220,30 @@ body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
     font-size: 12px !important;
     color: #64748b !important;
     display: block !important;
+    margin-top: 2px !important;
 }
 
-/* =========================================================
-   FORCE LISTBOX HEADER TO DARK BLUE
-   ========================================================= */
+/* Deep Navy Listbox Header */
+.rejected-listbox.z-listbox {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+}
+
 .rejected-listbox.z-listbox .z-listbox-header,
-.rejected-listbox.z-listbox .z-listhead,
-.rejected-listbox.z-listbox .z-listbox-header-border,
-.rejected-listbox.z-listbox .z-listhead-bar {
-    background: #173b69 !important;
-    background-color: #173b69 !important;
-    background-image: none !important;
+.rejected-listbox.z-listbox .z-listhead {
+    background: #173B61 !important;
+    background-color: #173B61 !important;
     border: none !important;
 }
 
 .rejected-listbox.z-listbox th.z-listheader {
-    background: #173b69 !important;
-    background-color: #173b69 !important;
-    background-image: none !important;
-    border-top: none !important;
-    border-bottom: 2px solid #0f2847 !important;
-    border-right: 1px solid #234d7d !important;
-    border-left: none !important;
+    background: #173B61 !important;
+    background-color: #173B61 !important;
+    border: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+    padding: 12px 10px !important;
+    text-align: center !important;
 }
 
 .rejected-listbox.z-listbox th.z-listheader:last-child {
@@ -217,116 +252,139 @@ body, .z-label, .z-button, .z-textbox, .z-datebox, .z-datebox-input {
 
 .rejected-listbox.z-listbox th.z-listheader .z-listheader-content {
     background: transparent !important;
-    background-color: transparent !important;
-    background-image: none !important;
     color: #FFFFFF !important;
     font-weight: 700 !important;
     font-size: 11px !important;
-    letter-spacing: 0.5px !important;
+    letter-spacing: 0.04em !important;
+    text-align: center !important;
+    justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0 !important;
 }
 
-.rejected-listbox.z-listbox th.z-listheader:hover,
-.rejected-listbox.z-listbox th.z-listheader.z-listheader-hover {
-    background: #102f50 !important;
-    background-color: #102f50 !important;
-    background-image: none !important;
+/* Remove stray checkable/aux elements */
+.rejected-listbox .z-listbox-header-bg,
+.rejected-listbox .z-listheader-checkable,
+.rejected-listbox .z-listitem-checkable,
+.rejected-listbox .z-listhead-bar {
+    display: none !important;
+    width: 0 !important;
 }
 
-/* =========================================================
-   TABLE ROWS, PAGINATION & NOTE
-   ========================================================= */
+/* Internal Body Scrolling (Keeps Page Unscrollable) */
+.rejected-listbox.z-listbox .z-listbox-body {
+    min-height: 240px !important;
+    max-height: 250px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: #ffffff !important;
+}
+
+.rejected-listbox.z-listbox .z-listbox-header {
+    overflow: hidden !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+}
+
+/* Table Rows & Cells */
 .rejected-listbox .z-listitem {
+    background: #ffffff !important;
     border-bottom: 1px solid #f1f5f9 !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.rejected-listbox .z-listitem:hover {
+    background: #f8fafc !important;
 }
 
 .rejected-listbox .z-listcell-content {
     font-size: 13px !important;
     color: #1e293b !important;
     padding: 10px 12px !important;
+    vertical-align: middle !important;
 }
 
+.rejected-listbox .z-listbox-emptybody td {
+    height: 200px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 13px !important;
+    color: #94a3b8 !important;
+}
+
+/* =========================================================
+   PAGINATION BAR (« ‹ [ 1 ] / 1 › »)
+   ========================================================= */
 .pagination-bar {
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 6px !important;
-    margin-top: 14px !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+    height: 36px !important;
 }
 
-.pagination-button {
-    background: #f8fafc !important;
+.pagination-button.z-button {
+    height: 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    padding: 0 !important;
+    background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
-    border-radius: 4px !important;
-    color: #475569 !important;
-    padding: 4px 10px !important;
-    cursor: pointer !important;
-}
-
-.page-info {
-    font-size: 12px !important;
-    color: #64748b !important;
-    margin: 0 4px !important;
-}
-
-.important-box {
-    margin-top: 16px !important;
-    background: #f8fafc !important;
-    border-left: 3px solid #0284c7 !important;
-    padding: 10px 14px !important;
-}
-
-.important-title {
-    font-size: 11px !important;
+    border-radius: 8px !important;
+    color: #0369a1 !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.pagination-button.z-button:hover {
+    background: #f0f9ff !important;
+    border-color: #7dd3fc !important;
     color: #0284c7 !important;
-    margin-right: 6px !important;
 }
 
-.important-text {
-    font-size: 12px !important;
-    color: #475569 !important;
+.pagination-button.z-button[disabled] {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+    color: #cbd5e1 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
 }
 
-.hardcoded-footer {
-    display: flex !important;
-    justify-content: space-between !important;
-    color: #94a3b8 !important;
-    font-size: 12px !important;
-    margin-top: 10px !important;
-}
-/* =========================================================
-   GRID VIEW ACTION BUTTONS (NAVY BLUE)
-   ========================================================= */
-.rejected-listbox .z-button,
-.rejected-listbox button {
-    background: #173b69 !important;
-    background-color: #173b69 !important;
-    border: none !important;
-    color: #ffffff !important;
-    font-size: 11px !important;
+.pagination-input.z-intbox {
+    height: 36px !important;
+    width: 44px !important;
+    text-align: center !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    color: #0f172a !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.5px !important;
-    padding: 5px 16px !important;
-    border-radius: 4px !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15) !important;
-    cursor: pointer !important;
-    transition: background-color 0.2s ease !important;
+    outline: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    padding: 0 !important;
 }
 
-.rejected-listbox .z-button:hover,
-.rejected-listbox button:hover {
-    background: #0f2847 !important;
-    background-color: #0f2847 !important;
-}
-/* Hide rogue selection mark / stray header bar under listheader */
-.rejected-listbox .z-listbox-header-bg,
-.rejected-listbox .z-listheader-checkable,
-.rejected-listbox .z-listitem-checkable {
-    display: none !important;
+.pagination-input.z-intbox:focus {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15) !important;
 }
 
-/* Ensure header border doesn't bleed into the first row */
-.rejected-listbox.z-listbox .z-listbox-header {
-    border-bottom: none !important;
-    overflow: hidden !important;
+.pagination-total.z-label {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0369a1 !important;
+    padding: 0 4px !important;
+    display: inline-block !important;
+    line-height: 36px !important;
 }
