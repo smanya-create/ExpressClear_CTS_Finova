@@ -16,9 +16,9 @@ public interface InwardChequeDAO {
 	List<InwardCheque> findByBatchAndStatus(String batchId, String status);
 
 	List<InwardCheque> getAllCheques();
-	
+
 	BigDecimal getAccountBalance(String accountNumber);
-	
+
 	String getBankNameByCode(String bankCode);
 
 	InwardCheque getChequeById(String inwardChequeId);
@@ -35,15 +35,18 @@ public interface InwardChequeDAO {
 	boolean deleteCheque(String inwardChequeId);
 
 	boolean saveRejection(String inwardChequeId, String rejectedReasonId, String remarks, String rejectedBy);
-	
+
 	boolean saveRejectionRequest(InwardChequeRejectionRequest request);
 
 	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
-	
+
 	String getRejectedReasonDetails(String inwardChequeId);
-	
+
 	String getMakerRejectionRequestDetails(String inwardChequeId);
+
+	boolean saveSendBackRequest(String inwardChequeId, String inwardBatchId, String reasonId, String remarks,
+			String sentBackBy);
 
 }
