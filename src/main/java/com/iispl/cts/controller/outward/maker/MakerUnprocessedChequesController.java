@@ -14,6 +14,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Include;
+import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
@@ -42,6 +43,18 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     private Textbox txtSearchBatch;
     private Button btnRefresh;
     private Listbox lstUnprocessed;
+    
+    private Button btnFirstPage;
+    private Button btnPrevPage;
+    private Intbox ibCurrentPage;
+    private Label lblTotalPages;
+    private Button btnNextPage;
+    private Button btnLastPage;
+    
+    private static final int PAGE_SIZE = 12;
+    private int activePageIndex = 0;
+    private int totalPages = 1;
+    private List<UnprocessedChequeDTO> currentFilteredList = new ArrayList<>();
 
     // =========================================================
     // DAO & DATA
@@ -65,74 +78,94 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     // =========================================================
     // LISTBOX RENDERER
     // =========================================================
+ // =========================================================
+    // LISTBOX RENDERER (Strict CTS Alignment System)
+    // =========================================================
     private void initListboxRenderer() {
         lstUnprocessed.setItemRenderer(new ListitemRenderer<UnprocessedChequeDTO>() {
             @Override
             public void render(Listitem item, UnprocessedChequeDTO dto, int index) {
                 item.setValue(dto);
 
-                // 1. Batch & Reference
+                // 1. Original Batch / Session (Text -> LEFT)
                 Listcell cellBatch = new Listcell();
+                cellBatch.setStyle("text-align: left; vertical-align: middle; padding-left: 14px;");
                 Vlayout vBatch = new Vlayout();
                 vBatch.setSpacing("2px");
+
                 Label lblBNo = new Label(dto.getBatchNo());
-                lblBNo.setSclass("list-batch-title");
+                lblBNo.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block;");
+                
                 Label lblSName = new Label(dto.getOriginalSessionName() != null ? dto.getOriginalSessionName() : "Scan Staging");
-                lblSName.setSclass("list-batch-sub");
+                lblSName.setStyle("font-size: 11px; color: #64748b; display: block;");
+                
                 vBatch.appendChild(lblBNo);
                 vBatch.appendChild(lblSName);
                 cellBatch.appendChild(vBatch);
 
-                // 2. Cheque No
-                Listcell cellChq = new Listcell(dto.getChequeNo() != null ? dto.getChequeNo() : "------");
-                cellChq.setSclass("list-monospace");
+                // 2. Cheque No (Number -> CENTER)
+                Listcell cellChq = new Listcell();
+                cellChq.setStyle("text-align: center; vertical-align: middle;");
+                Label lblChq = new Label(dto.getChequeNo() != null ? dto.getChequeNo() : "------");
+                lblChq.setStyle("font-family: monospace; font-size: 13px; font-weight: 600; color: #334155; display: block; text-align: center;");
+                cellChq.appendChild(lblChq);
 
-                // 3. MICR Sort Code
-                Listcell cellSort = new Listcell(dto.getSortCode() != null ? dto.getSortCode() : "------");
-                cellSort.setSclass("list-monospace");
+                // 3. MICR Sort Code (Number -> CENTER)
+                Listcell cellSort = new Listcell();
+                cellSort.setStyle("text-align: center; vertical-align: middle;");
+                Label lblSort = new Label(dto.getSortCode() != null ? dto.getSortCode() : "------");
+                lblSort.setStyle("font-family: monospace; font-size: 13px; font-weight: 500; color: #334155; display: block; text-align: center;");
+                cellSort.appendChild(lblSort);
 
-                // 4. Amount
-                Listcell cellAmt = new Listcell(dto.getAmount() != null ? "₹ " + df.format(dto.getAmount()) : "₹ 0.00");
-                cellAmt.setSclass("list-amount");
+                // 4. Amount (Number / Currency -> CENTER)
+                Listcell cellAmt = new Listcell();
+                cellAmt.setStyle("text-align: center; vertical-align: middle;");
+                Label lblAmt = new Label(dto.getAmount() != null ? "₹ " + df.format(dto.getAmount()) : "₹ 0.00");
+                lblAmt.setStyle("font-size: 13px; font-weight: 700; color: #0f172a; display: block; text-align: center;");
+                cellAmt.appendChild(lblAmt);
 
-                // 5. Action Stage Badge (Reads from preserved stage in remarks or active status)
+             // 5. Required Task Badge (Same Orange for Both)
                 Listcell cellStage = new Listcell();
+                cellStage.setStyle("text-align: center; vertical-align: middle;");
                 Label lblStage = new Label();
                 boolean wasDataEntry = isItemDataEntry(dto);
 
+                String orangeBadgeStyle = "display: table; margin: 0 auto; padding: 4px 12px; border-radius: 12px; "
+                        + "font-size: 11px; font-weight: 700; white-space: nowrap; "
+                        + "background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa;";
+
                 if (wasDataEntry) {
                     lblStage.setValue("Data Entry Pending");
-                    lblStage.setSclass("badge-entry");
                 } else {
                     lblStage.setValue("MICR Repair Pending");
-                    lblStage.setSclass("badge-repair");
                 }
+                lblStage.setStyle(orangeBadgeStyle);
                 cellStage.appendChild(lblStage);
 
-                // 6. Reason / Remarks
+                // 6. Reason / Remarks (Left-aligned)
                 Listcell cellRemarks = new Listcell();
+                cellRemarks.setStyle("text-align: left; vertical-align: middle; padding-left: 14px;");
                 String reasonText = dto.getSendBackReason() != null ? dto.getSendBackReason() : "Scan Review";
                 if (dto.getRemarks() != null && !dto.getRemarks().isEmpty()) {
                     reasonText += " (" + dto.getRemarks() + ")";
                 }
                 Label lblReason = new Label(reasonText);
-                lblReason.setSclass("list-remarks");
+                lblReason.setStyle("font-size: 12px; font-style: italic; color: #c2410c; display: block; word-break: break-word;");
                 cellRemarks.appendChild(lblReason);
 
-                // 7. Action Button
+                // 7. Action Button (Plain text, no icons, no symbols)
                 Listcell cellAction = new Listcell();
+                cellAction.setStyle("text-align: center; vertical-align: middle; padding: 0 8px;");
                 Button btnAction = new Button();
-                String darkBlueBtnStyle = "background: #1e3a8a; color: #ffffff; border: 1px solid #1e3a8a; "
-                        + "font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 4px; "
+                String darkNavyBtnStyle = "background: #173B61; color: #ffffff; border: 1px solid #173B61; "
+                        + "font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 4px; "
                         + "cursor: pointer; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.1);";
-                btnAction.setStyle(darkBlueBtnStyle);
+                btnAction.setStyle(darkNavyBtnStyle);
 
                 if (wasDataEntry) {
-                    btnAction.setLabel("Data Entry →");
-                    btnAction.setIconSclass("z-icon-pencil");
+                    btnAction.setLabel("Data Entry");
                 } else {
-                    btnAction.setLabel("MICR Repair →");
-                    btnAction.setIconSclass("z-icon-wrench");
+                    btnAction.setLabel("MICR Repair");
                 }
 
                 btnAction.addEventListener("onClick", event -> routeToMakerModule(dto, wasDataEntry));
@@ -215,7 +248,7 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
 
         final String searchKeyword = (searchKeywordInput != null) ? searchKeywordInput.trim().toLowerCase() : "";
 
-        List<UnprocessedChequeDTO> filtered = masterList.stream().filter(item -> {
+        this.currentFilteredList = masterList.stream().filter(item -> {
             boolean matchesStage = true;
             boolean isDataEntry = isItemDataEntry(item);
 
@@ -237,10 +270,67 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
             return matchesStage && matchesSearch;
         }).collect(Collectors.toList());
 
-        lstUnprocessed.setModel(new ListModelList<>(filtered));
+        // Calculate pages
+        this.totalPages = (int) Math.ceil((double) currentFilteredList.size() / PAGE_SIZE);
+        if (this.totalPages < 1) this.totalPages = 1;
+        
+        loadPage(0);
+    }
+    private void loadPage(int pageIndex) {
+        if (pageIndex >= this.totalPages) pageIndex = this.totalPages - 1;
+        if (pageIndex < 0) pageIndex = 0;
+        this.activePageIndex = pageIndex;
+
+        // Update toolbar controls
+        if (ibCurrentPage != null) ibCurrentPage.setValue(this.activePageIndex + 1);
+        if (lblTotalPages != null) lblTotalPages.setValue("/ " + this.totalPages);
+
+        boolean isFirst = (this.activePageIndex <= 0);
+        boolean isLast = (this.activePageIndex >= this.totalPages - 1);
+
+        if (btnFirstPage != null) btnFirstPage.setDisabled(isFirst);
+        if (btnPrevPage != null) btnPrevPage.setDisabled(isFirst);
+        if (btnNextPage != null) btnNextPage.setDisabled(isLast);
+        if (btnLastPage != null) btnLastPage.setDisabled(isLast);
+
+        // Slice list for active page
+        int fromIndex = this.activePageIndex * PAGE_SIZE;
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, currentFilteredList.size());
+        
+        List<UnprocessedChequeDTO> pageSubList = (fromIndex < currentFilteredList.size())
+                ? currentFilteredList.subList(fromIndex, toIndex)
+                : new ArrayList<>();
+
+        lstUnprocessed.setModel(new ListModelList<>(pageSubList));
+    }
+    public void onClick$btnFirstPage(Event event) {
+        if (activePageIndex > 0) loadPage(0);
     }
 
-    // =========================================================
+    public void onClick$btnPrevPage(Event event) {
+        if (activePageIndex > 0) loadPage(activePageIndex - 1);
+    }
+
+    public void onClick$btnNextPage(Event event) {
+        if (activePageIndex < totalPages - 1) loadPage(activePageIndex + 1);
+    }
+
+    public void onClick$btnLastPage(Event event) {
+        if (activePageIndex < totalPages - 1) loadPage(totalPages - 1);
+    }
+
+    public void onChange$ibCurrentPage(Event event) {
+        Integer target = ibCurrentPage.getValue();
+        if (target == null || target < 1) target = 1;
+        else if (target > totalPages) target = totalPages;
+        loadPage(target - 1);
+    }
+
+    public void onOK$ibCurrentPage(Event event) {
+        onChange$ibCurrentPage(event);
+    }
+
+	// =========================================================
     // ROUTING LOGIC
     // =========================================================
     private void routeToMakerModule(UnprocessedChequeDTO dto, boolean isDataEntry) {
