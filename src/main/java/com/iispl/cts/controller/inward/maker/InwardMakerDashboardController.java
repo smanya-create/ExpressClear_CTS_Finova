@@ -9,17 +9,18 @@ import java.util.Locale;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
-import org.zkoss.zul.A;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
+import org.zkoss.zul.Space;
+import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
@@ -36,7 +37,6 @@ import com.iispl.cts.serviceimpl.inward.InwardDashboardServiceImpl;
 public class InwardMakerDashboardController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-
     private static final int PAGE_SIZE = 5;
 
     // Services
@@ -44,7 +44,20 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private InwardBatchService batchService;
     private InwardChequeService chequeService;
 
-    // UI Components: Batches Processing Grid & Pagination
+    // Filter Toolbar Components
+    private Textbox inwardMakerTxtSearch;
+    private Combobox inwardMakerCmbModule;
+    private Combobox inwardMakerCmbStatus;
+    private Button inwardMakerBtnSearch;
+    private Button inwardMakerBtnClear;
+
+    // Section Containers
+    private Div inwardMakerReturnSection;
+    private Space inwardMakerSectionSpacer;
+    private Div inwardMakerProcessingSection;
+    private Div inwardMakerPaginationBar;
+
+    // Batches Processing Grid & Pagination
     private Grid inwardMakerGridBatchDetails;
     private Rows inwardMakerRowsBatchDetails;
     private Vlayout inwardMakerVlayoutEmptyState;
@@ -55,7 +68,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private Button inwardMakerBtnNext;
     private Button inwardMakerBtnLast;
 
-    // UI Components: Return From Checker Grid
+    // Return From Checker Grid
     private Grid inwardMakerGridReturnedBatches;
     private Rows inwardMakerRowsReturnedBatches;
     private Vlayout inwardMakerVlayoutReturnedEmptyState;
@@ -63,6 +76,11 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     // Data lists & state
     private List<InwardDashboardBatchDTO> batchList = new ArrayList<>();
     private int currentPage = 1;
+
+    // Active Filter State
+    private String currentSearchKeyword = "";
+    private String currentModule = "ALL";
+    private String currentStatus = "ALL";
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -72,7 +90,23 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         this.batchService = new InwardBatchServiceImpl();
         this.chequeService = new InwardChequeServiceImpl();
 
-        // Bind Pagination Button Listeners
+        // Default Combobox Selections
+        if (inwardMakerCmbModule != null && inwardMakerCmbModule.getItemCount() > 0) {
+            inwardMakerCmbModule.setSelectedIndex(0);
+        }
+        if (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getItemCount() > 0) {
+            inwardMakerCmbStatus.setSelectedIndex(0);
+        }
+
+        // Filter Actions
+        if (inwardMakerBtnSearch != null) inwardMakerBtnSearch.addEventListener("onClick", event -> onApplyFilter());
+        if (inwardMakerBtnClear != null) inwardMakerBtnClear.addEventListener("onClick", event -> onClearFilter());
+
+        if (inwardMakerTxtSearch != null) {
+            inwardMakerTxtSearch.addEventListener("onOK", event -> onApplyFilter());
+        }
+
+        // Pagination Button Listeners
         if (inwardMakerBtnFirst != null) inwardMakerBtnFirst.addEventListener("onClick", event -> goToFirstPage());
         if (inwardMakerBtnPrevious != null) inwardMakerBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
         if (inwardMakerBtnNext != null) inwardMakerBtnNext.addEventListener("onClick", event -> goToNextPage());
@@ -81,9 +115,45 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         refreshAllDashboardData();
     }
 
+    private void onApplyFilter() {
+        this.currentSearchKeyword = (inwardMakerTxtSearch != null && inwardMakerTxtSearch.getValue() != null)
+                ? inwardMakerTxtSearch.getValue().trim().toLowerCase() : "";
+
+        this.currentModule = (inwardMakerCmbModule != null && inwardMakerCmbModule.getSelectedItem() != null)
+                ? inwardMakerCmbModule.getSelectedItem().getValue().toString() : "ALL";
+
+        this.currentStatus = (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getSelectedItem() != null)
+                ? inwardMakerCmbStatus.getSelectedItem().getValue().toString() : "ALL";
+
+        refreshAllDashboardData();
+    }
+
+    private void onClearFilter() {
+        this.currentSearchKeyword = "";
+        this.currentModule = "ALL";
+        this.currentStatus = "ALL";
+
+        if (inwardMakerTxtSearch != null) inwardMakerTxtSearch.setValue("");
+        if (inwardMakerCmbModule != null && inwardMakerCmbModule.getItemCount() > 0) inwardMakerCmbModule.setSelectedIndex(0);
+        if (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getItemCount() > 0) inwardMakerCmbStatus.setSelectedIndex(0);
+
+        refreshAllDashboardData();
+    }
+
     public void refreshAllDashboardData() {
-        loadReturnedCheques();
-        loadBatches();
+        boolean showReturned = "ALL".equalsIgnoreCase(currentModule) || "RETURN_FROM_CHECKER".equalsIgnoreCase(currentModule);
+        boolean showProcessing = "ALL".equalsIgnoreCase(currentModule) || "BATCH_PROCESSING".equalsIgnoreCase(currentModule);
+
+        if (inwardMakerReturnSection != null) inwardMakerReturnSection.setVisible(showReturned);
+        if (inwardMakerSectionSpacer != null) inwardMakerSectionSpacer.setVisible(showReturned && showProcessing);
+        if (inwardMakerProcessingSection != null) inwardMakerProcessingSection.setVisible(showProcessing);
+
+        if (showReturned) {
+            loadReturnedCheques();
+        }
+        if (showProcessing) {
+            loadBatches();
+        }
     }
 
     // =========================================================
@@ -100,12 +170,29 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             if (recentBatches != null) {
                 for (InwardDashboardBatchDTO bDto : recentBatches) {
                     if (bDto.getBackToMakerCheques() > 0) {
+                        
+                        // Filter by Batch ID Only
+                        if (!currentSearchKeyword.isEmpty()) {
+                            String bId = bDto.getBatchId() != null ? bDto.getBatchId().toLowerCase() : "";
+                            if (!bId.contains(currentSearchKeyword)) {
+                                continue;
+                            }
+                        }
+
                         List<InwardCheque> batchCheques = chequeService.getChequesByBatchAndStatus(bDto.getBatchId(), null);
                         if (batchCheques != null) {
                             for (InwardCheque chq : batchCheques) {
                                 String status = chq.getChequeStatus();
                                 if (isSentBackStatus(status)) {
-                                    createReturnedChequeRow(bDto.getBatchId(), chq);
+                                    String normStatus = normalizeStatus(status);
+                                    String displayStatus = getDisplayStatus(normStatus);
+
+                                    // Filter by Status
+                                    if (!"ALL".equalsIgnoreCase(currentStatus) && !displayStatus.equalsIgnoreCase(currentStatus)) {
+                                        continue;
+                                    }
+
+                                    createReturnedChequeRow(bDto.getBatchId(), chq, displayStatus);
                                     hasReturnedCheques = true;
                                 }
                             }
@@ -126,27 +213,21 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         }
     }
 
-    private void createReturnedChequeRow(String batchId, InwardCheque cheque) {
+    private void createReturnedChequeRow(String batchId, InwardCheque cheque, String displayStatus) {
         Row row = new Row();
 
-        // 1. Batch ID
         Label batchIdLabel = new Label(getValue(batchId));
         batchIdLabel.setSclass("inward-maker-batch-id");
 
-        // 2. Cheque Number
         Label chequeNumberLabel = new Label(getValue(cheque.getChequeNumber()));
         chequeNumberLabel.setSclass("inward-maker-cheque-number");
 
-        // 3. Status Badge (Actionable label based on exact returned status)
-        String normStatus = normalizeStatus(cheque.getChequeStatus());
-        Label statusLabel = new Label(getDisplayStatus(normStatus));
+        Label statusLabel = new Label(displayStatus);
         statusLabel.setSclass("inward-maker-status");
 
-        // 4. Reason / Remarks (Outward standard placeholder)
         Label reasonLabel = new Label("-");
         reasonLabel.setSclass("inward-maker-reason");
 
-        // 5. Action Button
         Button viewButton = new Button("VIEW DETAILS");
         viewButton.setSclass("inward-maker-view-button");
         viewButton.addEventListener("onClick", event -> openBatchWorkflow(batchId));
@@ -170,8 +251,26 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
             if (allBatches != null) {
                 for (InwardDashboardBatchDTO b : allBatches) {
-                    // Match Outward: Exclude batches that are already listed under "Return From Checker"
                     if (b.getBackToMakerCheques() == 0 && !"SENT_BACK".equalsIgnoreCase(b.getDisplayStatus())) {
+                        
+                        // Filter by Search Keyword (Batch ID only)
+                        if (!currentSearchKeyword.isEmpty()) {
+                            String bId = b.getBatchId() != null ? b.getBatchId().toLowerCase() : "";
+                            if (!bId.contains(currentSearchKeyword)) {
+                                continue;
+                            }
+                        }
+
+                        // Determine Status
+                        String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
+                        String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
+                                ? "PENDING_MICR_REPAIR" : "PENDING_DATA_ENTRY";
+
+                        // Filter by Status
+                        if (!"ALL".equalsIgnoreCase(currentStatus) && !trueStatus.equalsIgnoreCase(currentStatus)) {
+                            continue;
+                        }
+
                         this.batchList.add(b);
                     }
                 }
@@ -194,12 +293,14 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         if (batchList == null || batchList.isEmpty()) {
             if (inwardMakerVlayoutEmptyState != null) inwardMakerVlayoutEmptyState.setVisible(true);
             if (inwardMakerGridBatchDetails != null) inwardMakerGridBatchDetails.setVisible(false);
+            if (inwardMakerPaginationBar != null) inwardMakerPaginationBar.setVisible(false);
             updatePagination();
             return;
         }
 
         if (inwardMakerVlayoutEmptyState != null) inwardMakerVlayoutEmptyState.setVisible(false);
         if (inwardMakerGridBatchDetails != null) inwardMakerGridBatchDetails.setVisible(true);
+        if (inwardMakerPaginationBar != null) inwardMakerPaginationBar.setVisible(true);
 
         int totalPages = getTotalPages();
         if (currentPage > totalPages) currentPage = totalPages;
@@ -221,36 +322,27 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private void createBatchRow(InwardDashboardBatchDTO batch) {
         Row row = new Row();
 
-        // 1. Batch ID (Blue clickable text)
         Label batchIdLabel = new Label(getValue(batch.getBatchId()));
         batchIdLabel.setSclass("inward-maker-batch-id");
         batchIdLabel.setStyle("cursor: pointer;");
         batchIdLabel.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
 
-        // 2. No. of Cheques
         Label chequeCountLabel = new Label(String.valueOf(batch.getTotalCheques()));
         chequeCountLabel.setSclass("inward-maker-cheque-count");
 
-        // 3. Total Amount
         InwardBatch fullBatch = batchService.getBatchById(batch.getBatchId());
         BigDecimal totalAmt = (fullBatch != null && fullBatch.getActualTotalAmount() != null) 
                 ? fullBatch.getActualTotalAmount() : BigDecimal.ZERO;
         Label totalAmountLabel = new Label(formatIndianAmount(totalAmt));
         totalAmountLabel.setSclass("inward-maker-total-amount");
 
-        // 4. Status Badge (Determine status based on target workspace)
         String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
-        String trueStatus;
-        if (targetZul != null && targetZul.toLowerCase().contains("micr")) {
-            trueStatus = "PENDING_MICR_REPAIR";
-        } else {
-            trueStatus = "PENDING_DATA_ENTRY";
-        }
+        String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
+                ? "PENDING_MICR_REPAIR" : "PENDING_DATA_ENTRY";
 
         Label statusLabel = new Label(getDisplayStatus(trueStatus));
         statusLabel.setSclass("inward-maker-status");
 
-        // 5. Action Button
         Button viewButton = new Button("VIEW DETAILS");
         viewButton.setSclass("inward-maker-view-button");
         viewButton.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
@@ -274,14 +366,12 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
         String trimmedBatchId = batchId.trim();
 
-        // 1. Set all session keys
         Sessions.getCurrent().setAttribute("INWARD_MAKER_SELECTED_BATCH_ID", trimmedBatchId);
         Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", trimmedBatchId);
         Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", trimmedBatchId);
         Sessions.getCurrent().setAttribute("DATA_ENTRY_BATCH_ID", trimmedBatchId);
         Sessions.getCurrent().setAttribute("batchId", trimmedBatchId);
 
-        // 2. Locate mainContentArea from inwardMakerRootWin
         Include mainContentArea = null;
         if (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null) {
             for (org.zkoss.zk.ui.Page page : Executions.getCurrent().getDesktop().getPages()) {
@@ -299,7 +389,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
                 mainContentArea.setDynamicProperty("batchId", trimmedBatchId);
                 mainContentArea.setAttribute("batchId", trimmedBatchId);
                 
-                // Clear and set src to trigger redraw
                 mainContentArea.setSrc(null);
                 mainContentArea.setSrc("/inward/maker/batch-details.zul?batchId=" + trimmedBatchId);
                 return;
@@ -308,41 +397,9 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             }
         }
 
-        // 3. Fallback: Full page redirect with query params
         Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + trimmedBatchId);
     }
-    
-    private Include findMainContentArea() {
-        // Search desktop pages for any Include container
-        if (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null) {
-            for (org.zkoss.zk.ui.Page page : Executions.getCurrent().getDesktop().getPages()) {
-                // Check standard IDs first
-                Component comp = page.getFellowIfAny("mainContentArea", true);
-                if (comp instanceof Include) return (Include) comp;
 
-                comp = page.getFellowIfAny("inwardMainContentArea", true);
-                if (comp instanceof Include) return (Include) comp;
-
-                comp = page.getFellowIfAny("contentInclude", true);
-                if (comp instanceof Include) return (Include) comp;
-            }
-        }
-
-        // Walk up from the grid
-        Component current = (inwardMakerGridBatchDetails != null) 
-                ? inwardMakerGridBatchDetails 
-                : inwardMakerGridReturnedBatches;
-
-        while (current != null) {
-            if (current instanceof Include) {
-                return (Include) current;
-            }
-            current = current.getParent();
-        }
-
-        return null;
-    }
-    
     // =========================================================
     // PAGINATION LOGIC
     // =========================================================
@@ -425,12 +482,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
         String s = status.trim().replace(" ", "_").toUpperCase();
 
-        // Top Table: Actionable Checker Rework
         if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equals(s)) return "FIX DATA ENTRY";
         if ("SEND_BACK_TO_MAKER_MICR".equals(s)) return "REPAIR MICR";
         if ("SEND_BACK_TO_MAKER".equals(s) || "SENT_BACK".equals(s)) return "NEEDS REWORK";
 
-        // Bottom Table: Standard Outward Maker Stages
         if ("PENDING_MICR_REPAIR".equals(s) || "MICR_REPAIR_PENDING".equals(s) || "MICR_REPAIR".equals(s)) {
             return "PENDING_MICR_REPAIR";
         }
