@@ -235,27 +235,28 @@
                                             </rows>
                                         </grid>
 
-                                        <!-- Action Switcher -->
-                                        <vlayout spacing="6px">
-                                            <label value="ACTION" sclass="cts-input-label" />
-                                            <hlayout spacing="12px">
-                                                <button id="btnActionEnable" label="ENABLE" sclass="cts-segment-btn" />
-                                                <button id="btnActionDisable" label="DISABLE" sclass="cts-segment-btn" />
-                                                <button id="btnActionChangeRole" label="CHANGE ROLE" sclass="cts-segment-btn cts-segment-btn-active" />
-                                            </hlayout>
-                                        </vlayout>
+                                       <!-- Action Switcher -->
+<vlayout spacing="6px">
+    <label value="ACTION" sclass="cts-input-label" />
+    <hlayout spacing="12px">
+        <button id="btnActionEnable" label="ENABLE" sclass="cts-segment-btn" />
+        <button id="btnActionDisable" label="DISABLE" sclass="cts-segment-btn" />
+        <button id="btnActionChangeRole" label="CHANGE ROLE" sclass="cts-segment-btn cts-segment-btn-active" />
+    </hlayout>
+</vlayout>
 
-                                        <!-- New Role Container -->
-                                        <vlayout id="divNewRoleContainer" visible="false" spacing="6px">
-                                            <label value="NEW ROLE" sclass="cts-input-label" />
-                                            <hlayout spacing="16px" valign="middle">
-                                                <combobox id="cmbNewRole" readonly="true" placeholder="Select new role" sclass="cts-combobox" width="280px" />
-                                                <vlayout spacing="2px">
-                                                    <label value="Select a different role from the list." sclass="cts-side-note" />
-                                                    <label value="The current role is excluded from the choices." sclass="cts-side-note" />
-                                                </vlayout>
-                                            </hlayout>
-                                        </vlayout>
+<!-- New Role Container -->
+<vlayout id="divNewRoleContainer" visible="true" spacing="6px" style="margin-top: 14px;">
+    <label value="NEW ROLE" sclass="cts-input-label" />
+    <hlayout spacing="16px" valign="middle">
+        <combobox id="cmbNewRole" readonly="true" placeholder="Select new role" sclass="cts-combobox" width="280px" />
+        <vlayout spacing="2px">
+            <label value="Select a different role from the list." sclass="cts-side-note" />
+            <label value="The current role is excluded from the choices." sclass="cts-side-note" />
+        </vlayout>
+    </hlayout>
+</vlayout>
+
 
                                         <hlayout spacing="12px" style="margin-top: 16px;">
                                             <button id="btnSaveModifications" label="SAVE" sclass="cts-btn-primary-action" />

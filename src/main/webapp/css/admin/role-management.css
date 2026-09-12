@@ -1,40 +1,44 @@
+/* ==========================================================================
+   ROLE MANAGEMENT - GLOBAL CANVAS & CARDS
+   ========================================================================== */
 .role-content {
-    background-color: #f8fafc;
-    min-height: calc(100vh - 75px);
+    background-color: #f1f5f9;
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
     box-sizing: border-box;
 }
 
 .page-title {
-    font-size: 22px !important;
-    font-weight: 800 !important;
-    color: #1e293b !important;
-    display: block !important;
-    letter-spacing: -0.2px !important;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.3px;
+    display: block;
 }
 
 .page-subtitle {
-    font-size: 13px !important;
-    color: #64748b !important;
-    display: block !important;
+    font-size: 13px;
+    color: #64748b;
+    display: block;
 }
 
 /* --- Card Panel --- */
 .card-panel {
-   background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    padding: 24px 28px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
-    box-sizing: border-box !important;
+   display: flex !important;
+    flex-direction: column !important;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
-/* Ensure inner flex elements do not overflow or clip borders */
+
 .card-panel > .z-vlayout-inner,
 .card-panel > .z-hlayout-inner {
     width: 100% !important;
     box-sizing: border-box !important;
 }
 
-/* Inner Card Header & Subtitle (Matched to User Details in Add User) */
 .cts-card-title {
     font-size: 15px !important;
     font-weight: 700 !important;
@@ -49,7 +53,7 @@
     margin-top: 2px !important;
 }
 
-/* --- Field Header Labels (Matched to Add User Screen) --- */
+/* --- Field Header Labels --- */
 .field-label {
     font-size: 10.5px !important;
     font-weight: 700 !important;
@@ -59,7 +63,7 @@
     display: block !important;
 }
 
-/* --- Input Box Styling (Matched to Add User Screen) --- */
+/* --- Input Box Styling --- */
 .input-box {
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 6px !important;
@@ -81,7 +85,6 @@
     font-size: 13px !important;
 }
 
-/* Readonly Input Styling (Matched to EMP ID) */
 .input-box-readonly {
     background: #f8fafc !important;
     color: #64748b !important;
@@ -89,7 +92,7 @@
     cursor: not-allowed !important;
 }
 
-/* --- Combobox Overrides in Forms --- */
+/* --- Combobox Overrides --- */
 .card-panel .z-combobox-input {
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 6px 0 0 6px !important;
@@ -169,31 +172,63 @@
     color: #1e293b !important;
 }
 
-/* --- Grid Overrides & Custom Theme --- */
+/* ==========================================================================
+   ROLE GRID - SLIM NAVY HEADERS & STYLING
+   ========================================================================== */
+/* Keep your outer grid styling intact */
 .role-grid.z-grid {
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
     background: #ffffff !important;
+    overflow: hidden !important;
 }
 
-.role-grid .z-columns .z-column {
-    background: #f8fafc !important;
-    border-bottom: 2px solid #e2e8f0 !important;
-    border-top: none !important;
-    border-left: none !important;
+/* This is where the scrolling actually happens */
+.role-grid .z-grid-body {
+    overflow-y: auto !important;
+}
+
+/* Paint all grid header containers, layers, and scrollbar gutters Navy Blue */
+.role-grid .z-grid-header,
+.role-grid .z-grid-header-bg,
+.role-grid .z-grid-header table,
+.role-grid .z-grid-header-border,
+.role-grid th.z-column,
+.role-grid th.z-columns-bar,
+.role-grid .z-columns-bar {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    background-image: none !important;
+    border-color: #0f2742 !important;
+}
+
+/* Slim column header dimensions */
+.role-grid th.z-column {
+    height: 32px !important;
+    padding: 4px 10px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-bottom: 1px solid #0f2742 !important;
+}
+
+/* Gutter spacer next to Actions */
+.role-grid th.z-columns-bar,
+.role-grid .z-columns-bar {
+    border-bottom: 1px solid #0f2742 !important;
     border-right: none !important;
-    padding: 12px 16px !important;
-    height: 44px !important;
+    box-shadow: none !important;
 }
 
 .role-grid .z-column-content {
+    color: #ffffff !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    color: #475569 !important;
     letter-spacing: 0.6px !important;
+    line-height: 24px !important;
+    padding: 0 4px !important;
     text-transform: uppercase !important;
 }
 
+/* Row & Cell Styling */
 .role-grid .z-row .z-row-inner,
 .role-grid .z-row .z-cell {
     border-bottom: 1px solid #f1f5f9 !important;
@@ -209,101 +244,49 @@
     background-color: #f8fafc !important;
 }
 
-/* --- Action Table Button (Modify) --- */
-.btn-action-modify {
-    background-color: #0f172a !important;
+.role-grid .z-row-content {
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    color: #334155 !important;
+}
+
+/* --- Dark Navy Blue Modify Button in Grid --- */
+.role-grid .btn-action-modify,
+.role-grid .z-row .z-button {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
     color: #ffffff !important;
-    border: 1px solid #0f172a !important;
-    border-radius: 6px !important;
+    border: 1px solid #173b61 !important;
+    border-radius: 4px !important;
     font-size: 11.5px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.3px !important;
-    height: 30px !important;
-    padding: 0 14px !important;
+    letter-spacing: 0.4px !important;
+    height: 28px !important;
+    padding: 0 16px !important;
     cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
     transition: all 0.15s ease-in-out !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
 }
 
-.btn-action-modify:hover {
-    background-color: #1e293b !important;
-    border-color: #1e293b !important;
+.role-grid .btn-action-modify:hover,
+.role-grid .z-row .z-button:hover {
+    background: #0f2844 !important;
+    background-color: #0f2844 !important;
+    border-color: #0f2844 !important;
+    color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 3px 5px rgba(15, 23, 42, 0.15) !important;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.2) !important;
 }
 
-.btn-action-modify:active {
-    background-color: #020617 !important;
+.role-grid .btn-action-modify:active,
+.role-grid .z-row .z-button:active {
+    background: #081a2f !important;
     transform: translateY(0);
 }
 
-
-/* --- Custom Listbox & Table Container --- */
-.custom-listbox {
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    overflow: hidden !important;
-    background: #ffffff !important;
-    width: 100% !important;
-}
-
-/* Fix header container overflow and background */
-.custom-listbox .z-listbox-header {
-    background: #173b61 !important;
-    border-bottom: none !important;
-}
-
-/* Header Cells */
-.custom-listbox .z-listheader {
-    background: #173b61 !important;
-    border: none !important;
-    height: 40px !important;
-}
-
-.custom-listbox .z-listheader-content {
-    color: #ffffff !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.5px !important;
-    padding: 10px 16px !important;
-    line-height: 20px !important;
-}
-
-/* Remove default ZK empty row placeholders and fix table body */
-.custom-listbox .z-listbox-body {
-    background: #ffffff !important;
-    overflow-y: auto !important;
-}
-
-/* Row & Cell Styling */
-.custom-listbox .z-listitem {
-    border-bottom: 1px solid #f1f5f9 !important;
-    background: #ffffff !important;
-    transition: background 0.15s ease !important;
-}
-
-.custom-listbox .z-listitem:hover {
-    background: #f8fafc !important;
-}
-
-.custom-listbox .z-listcell {
-    border: none !important;
-}
-
-.custom-listbox .z-listcell-content {
-    font-size: 13px !important;
-    color: #334155 !important;
-    padding: 12px 16px !important;
-    line-height: 1.4 !important;
-}
-
-/* Fix empty message styling if no operators are found */
-.custom-listbox .z-listbox-empty {
-    padding: 24px !important;
-    color: #94a3b8 !important;
-    font-size: 13px !important;
-}
-/* --- Pagination Toolbar --- */
+/* ==========================================================================
+   PAGINATION TOOLBAR
+   ========================================================================== */
 .cts-pagination-wrapper {
     display: inline-flex !important;
     align-items: center !important;
@@ -368,4 +351,130 @@
     vertical-align: middle !important;
     margin: 0 8px 0 2px !important;
     display: inline-block !important;
+}
+/* ==========================================================================
+   ASSIGNED OPERATORS - NAVY BLUE SLIM LISTBOX
+   ========================================================================== */
+.custom-listbox.z-listbox {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+}
+
+/* 1. Force Deep Navy Blue across all header layers and spacer gutters */
+.custom-listbox .z-listbox-header,
+.custom-listbox .z-listbox-header-bg,
+.custom-listbox .z-listbox-header table,
+.custom-listbox .z-listbox-header-border,
+.custom-listbox th.z-listheader,
+.custom-listbox th.z-listbox-bar,
+.custom-listbox .z-listbox-bar {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    background-image: none !important;
+    border-color: #0f2742 !important;
+}
+
+/* 2. Slim Header Height & White Text */
+.custom-listbox th.z-listheader {
+    height: 32px !important;
+    padding: 4px 10px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-bottom: 1px solid #0f2742 !important;
+}
+
+.custom-listbox th.z-listbox-bar,
+.custom-listbox .z-listbox-bar {
+    border-bottom: 1px solid #0f2742 !important;
+    border-right: none !important;
+    box-shadow: none !important;
+}
+
+.custom-listbox .z-listheader-content {
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px !important;
+    line-height: 24px !important;
+    padding: 0 4px !important;
+    text-transform: uppercase !important;
+}
+
+/* 3. Table Rows & Clean Borders */
+.custom-listbox .z-listitem {
+    background: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.custom-listbox .z-listitem:hover {
+    background-color: #f8fafc !important;
+}
+
+.custom-listbox .z-listcell {
+    border: none !important;
+    padding: 10px 14px !important;
+}
+
+.custom-listbox .z-listcell-content {
+    font-size: 13px !important;
+    color: #334155 !important;
+    line-height: 1.4 !important;
+}
+
+/* Listbox internal body scroll */
+.custom-listbox .z-listbox-body {
+    overflow-y: auto !important;
+    max-height: 220px !important;
+}
+/* Target the Listbox scrollbar gutter directly */
+.custom-listbox th.z-listhead-bar,
+.custom-listbox .z-listhead-bar,
+.custom-listbox .z-listbox-header-bg,
+.custom-listbox th.z-listbox-bar,
+.custom-listbox .z-listbox-bar {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    background-image: none !important;
+    border-color: #0f2742 !important;
+    border-bottom: 1px solid #0f2742 !important;
+    border-right: none !important;
+    box-shadow: none !important;
+}
+
+/* Fallback catch-all for any TH in the listbox header */
+.custom-listbox .z-listbox-header th {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    background-image: none !important;
+}
+/* 1. All Column Headers Center Aligned */
+.z-listheader, 
+.z-column {
+    text-align: center !important;
+}
+
+.z-listheader-content, 
+.z-column-content {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* 2. Text Cells Left Aligned by default */
+.z-listcell-content, 
+.z-row-inner {
+    text-align: left;
+}
+
+/* 3. Utility class for Numeric / Count / Status Cells (Centered) */
+.cell-center,
+.cell-num {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* 4. Utility class for Text / Descriptions (Left Aligned) */
+.cell-text {
+    text-align: left !important;
+    justify-content: flex-start !important;
 }
