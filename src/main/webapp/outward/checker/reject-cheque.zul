@@ -1,130 +1,120 @@
 <?page title="Reject Cheque" contentType="text/html;charset=UTF-8"?>
 
-<?link rel="stylesheet"
-        type="text/css"
-        href="/css/outward/reject-cheque.css"?>
+<?link rel="stylesheet" type="text/css" href="/css/outward/reject-cheque.css"?>
 
 <zk>
-
-    <!-- ============================================================
-         REJECT CHEQUE WINDOW
-         ============================================================ -->
 
     <window
         id="rejectWindow"
         title="Reject Cheque"
         border="normal"
-        width="545px"
+        width="680px"
         closable="true"
         sizable="false"
         mode="modal"
-        visible="false"
+        position="center"
         sclass="reject-cheque-window">
 
-        <div sclass="reject-content">
+        <!-- HEADER -->
+        <div sclass="reject-header">
 
-            <!-- ====================================================
-                 DESCRIPTION
-                 ==================================================== -->
+            <label
+                value="Reject Cheque"
+                sclass="reject-title"/>
 
             <label
                 value="Please select the reason for rejecting this cheque."
                 sclass="reject-description"/>
 
+        </div>
 
-            <!-- ====================================================
-                 BATCH ID
-                 ==================================================== -->
 
-            <div sclass="form-group">
+        <!-- CONTENT -->
+        <div sclass="reject-content">
 
-                <label
-                    value="BATCH ID"
-                    sclass="form-label"/>
+            <!-- BATCH + CHEQUE NUMBER -->
+            <div sclass="two-column">
 
-                <label
-                    id="lblRejectBatch"
-                    value=""
-                    sclass="form-value"/>
+                <div sclass="field-group">
+
+                    <label
+                        value="BATCH"
+                        sclass="field-label"/>
+
+                    <label
+                        id="lblRejectBatch"
+                        value="-"
+                        sclass="readonly-field"/>
+
+                </div>
+
+
+                <div sclass="field-group">
+
+                    <label
+                        value="CHEQUE NUMBER"
+                        sclass="field-label"/>
+
+                    <label
+                        id="lblRejectCheque"
+                        value="-"
+                        sclass="readonly-field"/>
+
+                </div>
 
             </div>
 
 
-            <!-- ====================================================
-                 CHEQUE NUMBER
-                 ==================================================== -->
-
-            <div sclass="form-group">
+            <!-- REJECTION REASON -->
+            <div sclass="field-group">
 
                 <label
-                    value="CHEQUE NUMBER"
-                    sclass="form-label"/>
-
-                <label
-                    id="lblRejectCheque"
-                    value=""
-                    sclass="form-value"/>
-
-            </div>
-
-
-            <!-- ====================================================
-                 REJECTION REASON
-                 ==================================================== -->
-
-            <div sclass="form-group">
-
-                <label
-                    value="REJECTION REASON"
-                    sclass="form-label"/>
+                    value="REJECTION REASON *"
+                    sclass="field-label"/>
 
                 <combobox
                     id="cmbRejectReason"
                     width="100%"
+                    placeholder="Select rejection reason"
                     readonly="true"
-                    placeholder="Select rejection reason"/>
+                    sclass="reason-combobox"/>
 
             </div>
 
 
-            <!-- ====================================================
-                 REMARKS
-                 ==================================================== -->
-
-            <div sclass="form-group">
+            <!-- REMARKS -->
+            <div sclass="field-group">
 
                 <label
                     value="REMARKS *"
-                    sclass="form-label"/>
+                    sclass="field-label"/>
 
                 <textbox
                     id="txtRejectRemarks"
-                    width="100%"
-                    rows="3"
                     multiline="true"
+                    rows="4"
+                    width="100%"
                     maxlength="255"
-                    placeholder="Enter remarks..."/>
+                    placeholder="Enter remarks..."
+                    sclass="remarks-field"/>
 
             </div>
 
+        </div>
 
-            <!-- ====================================================
-                 BUTTONS
-                 ==================================================== -->
 
-            <div sclass="reject-actions">
+        <!-- FOOTER -->
+        <div sclass="reject-footer">
 
-                <button
-                    id="btnRejectCancel"
-                    label="CANCEL"
-                    sclass="reject-cancel-button"/>
+            <button
+                id="btnRejectCancel"
+                label="CANCEL"
+                sclass="cancel-button"/>
 
-                <button
-                    id="btnRejectConfirm"
-                    label="REJECT"
-                    sclass="reject-confirm-button"/>
-
-            </div>
+            <button
+                id="btnRejectConfirm"
+                label="REJECT"
+                sclass="reject-confirm-button"/>
 
         </div>
 

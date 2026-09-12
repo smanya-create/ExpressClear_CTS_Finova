@@ -3,6 +3,7 @@ package com.iispl.cts.dao.outward;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.iispl.cts.dto.RejectRequestDTO;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
@@ -103,4 +104,7 @@ public interface OutwardCheckerQueueDAO {
     void saveRejectedCheque(
             OutwardRejectedCheques rejectedCheque)
             throws SQLException;
+    
+    RejectRequestDTO getRejectRequestByChequeId(
+            String chequeId) throws SQLException;
 }

@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardCheckerQueueDAO;
+import com.iispl.cts.dto.RejectRequestDTO;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeImage;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
@@ -50,7 +51,7 @@ public class OutwardCheckerQueueDAOImpl
               + "       cheque_image_back "
               + "FROM outward_cheque "
               + "WHERE outward_batch_id = ? "
-              + "AND cheque_status = 'PENDING_VERIFICATION' "
+              + "AND cheque_status IN ('PENDING_VERIFICATION', 'REJECT_REQUEST') "
               + "ORDER BY outward_cheque_id";
 
         try (Connection con = DBConnection.getConnection();
@@ -1030,5 +1031,143 @@ public class OutwardCheckerQueueDAOImpl
                  + rows
          );
      }
+ }
+ 
+ @Override
+ public RejectRequestDTO getRejectRequestByChequeId(
+         String chequeId) throws SQLException {
+
+     String sql =
+             "SELECT request_id, "
+           + "       cheque_id, "
+           + "       batch_id, "
+           + "       remarks, "
+           + "       reason_id, "
+           + "       reason "
+           + "FROM outward_cheque_request "
+           + "WHERE cheque_id = ?";
+
+     try (
+         Connection connection =
+                 DBConnection.getConnection();
+
+         PreparedStatement ps =
+                 connection.prepareStatement(sql)
+     ) {
+
+         // ----------------------------------------------------
+         // SET CHEQUE ID
+         // ----------------------------------------------------
+
+         ps.setString(1, chequeId);
+
+         System.out.println("=================================");
+         System.out.println("GET REJECT REQUEST");
+         System.out.println("Cheque ID = " + chequeId);
+         System.out.println("=================================");
+
+         try (ResultSet rs = ps.executeQuery()) {
+
+             // ------------------------------------------------
+             // CHECK WHETHER REQUEST EXISTS
+             // ------------------------------------------------
+
+             if (rs.next()) {
+
+                 RejectRequestDTO dto =
+                         new RejectRequestDTO();
+
+                 // --------------------------------------------
+                 // REQUEST ID
+                 // --------------------------------------------
+
+                 dto.setRequestId(
+                         rs.getString("request_id")
+                 );
+
+                 // --------------------------------------------
+                 // CHEQUE ID
+                 // --------------------------------------------
+
+                 dto.setChequeId(
+                         rs.getString("cheque_id")
+                 );
+
+                 // --------------------------------------------
+                 // BATCH ID
+                 // --------------------------------------------
+
+                 dto.setBatchId(
+                         rs.getString("batch_id")
+                 );
+
+                 // --------------------------------------------
+                 // REASON ID
+                 // --------------------------------------------
+
+                 dto.setRejectedReasonId(
+                         rs.getString("reason_id")
+                 );
+
+                 // --------------------------------------------
+                 // REASON
+                 // --------------------------------------------
+
+                 dto.setRejectedReasonName(
+                         rs.getString("reason")
+                 );
+
+                 // --------------------------------------------
+                 // REMARKS
+                 // --------------------------------------------
+
+                 dto.setRemarks(
+                         rs.getString("remarks")
+                 );
+
+                 System.out.println(
+                         "Reject Request Found");
+
+                 System.out.println(
+                         "Request ID = "
+                         + dto.getRequestId());
+
+                 System.out.println(
+                         "Cheque ID = "
+                         + dto.getChequeId());
+
+                 System.out.println(
+                         "Batch ID = "
+                         + dto.getBatchId());
+
+                 System.out.println(
+                         "Reason ID = "
+                         + dto.getRejectedReasonId());
+
+                 System.out.println(
+                         "Reason = "
+                         + dto.getRejectedReasonName());
+
+                 System.out.println(
+                         "Remarks = "
+                         + dto.getRemarks());
+
+                 System.out.println(
+                         "=================================");
+
+                 return dto;
+             }
+         }
+     }
+
+     // --------------------------------------------------------
+     // NO REQUEST FOUND
+     // --------------------------------------------------------
+
+     System.out.println(
+             "No reject request found for Cheque ID = "
+             + chequeId);
+
+     return null;
  }
 }
