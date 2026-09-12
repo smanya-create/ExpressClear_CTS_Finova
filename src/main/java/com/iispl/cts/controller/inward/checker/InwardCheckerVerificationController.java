@@ -200,7 +200,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		proceedButton.addEventListener(Events.ON_CLICK, event -> onClick$btnProceedReject());
 
 		cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
-		Window sendBackWindow = (Window) pageRoot.getFellow("sendBackReasonWindow");
+		
+		Window sendBackWindow = sendBackReasonWindow;
 
 		Button proceedSendBackButton = (Button) sendBackWindow.getFellow("btnProceedSendBack");
 
@@ -209,6 +210,13 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		proceedSendBackButton.addEventListener(Events.ON_CLICK, event -> proceedSendBack());
 
 		cancelSendBackButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelSendBack());
+		
+		sendBackWindow.addEventListener(
+		        Events.ON_CLOSE,
+		        event -> {
+		            event.stopPropagation();
+		            sendBackWindow.setVisible(false);
+		        });
 
 		verificationSummaryWindow = (Window) pageRoot.getFellow("verificationSummaryWindow");
 
@@ -1717,12 +1725,20 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				return;
 			}
 
-			Window window = (Window) pageRoot.getFellow("sendBackReasonWindow");
+			Window window = sendBackReasonWindow;
 
-			Combobox comboBox = (Combobox) window.getFellow("cmbSendBackReason");
+			Combobox comboBox =
+			        (Combobox) window.getFellow("cmbSendBackReason");
 
-			Textbox remarks = (Textbox) window.getFellow("txtSendBackRemarks");
+			Textbox remarks =
+			        (Textbox) window.getFellow("txtSendBackRemarks");
 
+			loadSendBackReasons(comboBox);
+
+			comboBox.setSelectedItem(null);
+			remarks.setValue("");
+
+			window.doModal();
 			loadSendBackReasons(comboBox);
 
 			comboBox.setSelectedItem(null);
@@ -1940,9 +1956,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	}
 	public void onClick$btnCancelSendBack() {
 
-		Window window = (Window) pageRoot.getFellow("sendBackReasonWindow");
-
-		window.setVisible(false);
+		sendBackReasonWindow.setVisible(false);
 	}
 
 	private void loadSendBackReasons(Combobox comboBox) {
