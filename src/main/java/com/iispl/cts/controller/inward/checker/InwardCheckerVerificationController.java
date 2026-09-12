@@ -625,115 +625,95 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	
 	private void loadChequeImage(InwardCheque cheque, String imageType) {
 
-	    zoomScale = 1.0;
-	    rotationAngle = 0;
-	    panX = 0;
-	    panY = 0;
+	    if (chequeImage == null) {
+	        return;
+	    }
 
-	    if (chequeImage == null || cheque == null) {
+	    // Reset image state
+	    chequeImage.setVisible(false);
+	    chequeImage.setSrc(null);
+
+	    if (cheque == null) {
 	        return;
 	    }
 
 	    try {
 
-	        String imagePath;
+	        String inwardChequeId = cheque.getInwardChequeId();
 
-	        if ("FRONT".equalsIgnoreCase(imageType)) {
-	            imagePath = cheque.getChequeImageFront();
-	        } else {
-	            imagePath = cheque.getChequeImageBack();
+	        if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
+	            System.out.println("Verification: Cheque ID is empty.");
+	            return;
 	        }
+
+	        InwardChequeImage image;
+
+	        if ("BACK".equalsIgnoreCase(imageType)) {
+
+	            image = inwardChequeService.getBackImage(inwardChequeId);
+
+	        } else {
+
+	            image = inwardChequeService.getFrontImage(inwardChequeId);
+	        }
+
+	        if (image == null) {
+
+	            System.out.println(
+	                "Verification: No "
+	                + imageType
+	                + " image found for cheque -> "
+	                + inwardChequeId
+	            );
+
+	            return;
+	        }
+
+	        String imagePath = image.getImagePath();
 
 	        if (imagePath == null || imagePath.trim().isEmpty()) {
 
 	            System.out.println(
-	                    "Verification: No "
-	                    + imageType
-	                    + " image path found for cheque -> "
-	                    + cheque.getInwardChequeId());
-
-	            chequeImage.setSrc(null);
-	            chequeImage.setContent((org.zkoss.image.Image) null);
-
-	            if (emptyImageState != null) {
-	                emptyImageState.setVisible(true);
-	            }
+	                "Verification: Image path is empty for cheque -> "
+	                + inwardChequeId
+	            );
 
 	            return;
 	        }
 
 	        imagePath = imagePath.trim();
 
-	        // Remove leading slash if present
-	        while (imagePath.startsWith("/")) {
+	        // Remove leading slash if DB already contains one
+	        if (imagePath.startsWith("/")) {
 	            imagePath = imagePath.substring(1);
 	        }
 
-	        // Build classpath resource path
-	        String resourcePath = "Inward-data/" + imagePath;
+	        // MICR uses this exact URL structure
+	        String imageSrc = "/Inward-data/" + imagePath;
 
 	        System.out.println(
-	                "Verification: Loading classpath image -> "
-	                + resourcePath);
+	            "Verification: Loading image URL -> "
+	            + imageSrc
+	        );
 
-	        InputStream inputStream =
-	                getClass()
-	                        .getClassLoader()
-	                        .getResourceAsStream(resourcePath);
-
-	        if (inputStream == null) {
-
-	            System.err.println(
-	                    "Verification: Image NOT FOUND in classpath -> "
-	                    + resourcePath);
-
-	            chequeImage.setSrc(null);
-	            chequeImage.setContent((org.zkoss.image.Image) null);
-
-	            if (emptyImageState != null) {
-	                emptyImageState.setVisible(true);
-	            }
-
-	            return;
-	        }
-
-	        org.zkoss.image.AImage aImage =
-	                new org.zkoss.image.AImage(
-	                        imagePath,
-	                        inputStream);
-
-	        chequeImage.setSrc(null);
-	        chequeImage.setContent(aImage);
+	        chequeImage.setSrc(imageSrc);
 	        chequeImage.setVisible(true);
-
-	        if (emptyImageState != null) {
-	            emptyImageState.setVisible(false);
-	        }
-
-	        System.out.println(
-	                "Verification: Image loaded successfully from classpath.");
-
-	        inputStream.close();
 
 	    } catch (Exception e) {
 
 	        System.err.println(
-	                "Verification: Failed to load image for cheque -> "
-	                + cheque.getInwardChequeId());
+	            "Verification: Failed to load "
+	            + imageType
+	            + " image for cheque -> "
+	            + cheque.getInwardChequeId()
+	        );
 
 	        e.printStackTrace();
 
+	        chequeImage.setVisible(false);
 	        chequeImage.setSrc(null);
-	        chequeImage.setContent((org.zkoss.image.Image) null);
-
-	        if (emptyImageState != null) {
-	            emptyImageState.setVisible(true);
-	        }
 	    }
-
-	    applyImageTransform();
-	}
-	
+	}	
 	private List<InwardCheque> prioritizeRejectionRequests(List<InwardCheque> cheques) {
 
 		if (cheques == null || cheques.isEmpty()) {
