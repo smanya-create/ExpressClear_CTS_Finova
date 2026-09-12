@@ -87,7 +87,7 @@ public class MakerReportServiceImpl implements MakerReportService {
                         String ts = rs.getTimestamp("uploaded_at") != null 
                                 ? "=\"" + sdf.format(rs.getTimestamp("uploaded_at")) + "\"" : "-";
                         sb.append(String.format("\"%s\",\"%s\",\"%d\",\"%d Items\",\"%s\",%s\n",
-                                rs.getString("outward_batch_id"),
+                                rs.getString("scanned_batch_id"), // Fixed: changed from outward_batch_id
                                 rs.getString("batch_reference_id"),
                                 rs.getLong("total_cheques"),
                                 rs.getLong("repaired_count"),
@@ -128,7 +128,7 @@ public class MakerReportServiceImpl implements MakerReportService {
                         String ts = rs.getTimestamp("uploaded_at") != null 
                                 ? "=\"" + sdf.format(rs.getTimestamp("uploaded_at")) + "\"" : "-";
                         sb.append(String.format("\"%s\",\"%s\",\"%d Items\",\"%s\",%s\n",
-                                rs.getString("outward_batch_id"),
+                                rs.getString("scanned_batch_id"), // Fixed: changed from outward_batch_id
                                 rs.getString("batch_reference_id"),
                                 rs.getLong("pending_items"),
                                 rs.getString("batch_status"),
@@ -146,7 +146,7 @@ public class MakerReportServiceImpl implements MakerReportService {
 
             String sql3 = "SELECT sc.scanned_batch_id, sc.scanned_cheque_id, "
                     + "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, "
-                    + "       COALESCE(sc.micR_code, 'UNREADABLE') AS micr_code, "
+                    + "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, "
                     + "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, "
                     + "       sc.cheque_amount, sc.cheque_status "
                     + "FROM scan_cheque sc "
@@ -166,8 +166,8 @@ public class MakerReportServiceImpl implements MakerReportService {
                     while (rs.next()) {
                         found = true;
                         sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
-                                rs.getString("outward_batch_id"),
-                                rs.getString("outward_cheque_id"),
+                                rs.getString("scanned_batch_id"),  // Fixed: changed from outward_batch_id
+                                rs.getString("scanned_cheque_id"), // Fixed: changed from outward_cheque_id
                                 rs.getString("cheque_number"),
                                 rs.getString("micr_code"),
                                 rs.getString("drawee_account_number"),
@@ -178,7 +178,7 @@ public class MakerReportServiceImpl implements MakerReportService {
                 }
             }
 
-            // SECTION 4: Batches Submitted to Checker
+            // SECTION 4: Batches Submitted to Checker (outward_batch keeps outward_batch_id)
             sb.append("\n\n========================================================================================\n");
             sb.append("                         4. BATCHES SUBMITTED TO CHECKER                                \n");
             sb.append("========================================================================================\n");

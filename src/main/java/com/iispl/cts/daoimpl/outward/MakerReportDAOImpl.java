@@ -21,8 +21,8 @@ public class MakerReportDAOImpl implements MakerReportDAO {
 
         try (Connection conn = DBConnection.getConnection()) {
 
-            // 1. Batches with MICR repairs
-            String sqlMicr = "SELECT sb.scanned_batch_id, sb.batch_reference_id, " +
+            // 1. Batches with MICR repairs (Added outward_batch_id alias)
+            String sqlMicr = "SELECT sb.scanned_batch_id, sb.scanned_batch_id AS outward_batch_id, sb.batch_reference_id, " +
                              "       COUNT(sc.scanned_cheque_id) AS total_cheques, " +
                              "       COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) AS repaired_count, " +
                              "       COALESCE(SUM(sc.cheque_amount), 0.00) AS total_amount, " +
@@ -36,8 +36,8 @@ public class MakerReportDAOImpl implements MakerReportDAO {
                              "ORDER BY sb.uploaded_at DESC";
             reportData.put("micrRepairs", executeQuery(conn, sqlMicr, makerId, fromDate, toDate));
 
-            // 2. Batches pending data entry
-            String sqlDataEntry = "SELECT sb.scanned_batch_id, sb.batch_reference_id, " +
+            // 2. Batches pending data entry (Added outward_batch_id alias)
+            String sqlDataEntry = "SELECT sb.scanned_batch_id, sb.scanned_batch_id AS outward_batch_id, sb.batch_reference_id, " +
                                   "       COUNT(sc.scanned_cheque_id) AS pending_items, " +
                                   "       sb.batch_status, sb.uploaded_at " +
                                   "FROM scan_batch sb " +
@@ -50,8 +50,9 @@ public class MakerReportDAOImpl implements MakerReportDAO {
                                   "ORDER BY sb.uploaded_at DESC";
             reportData.put("dataEntry", executeQuery(conn, sqlDataEntry, makerId, fromDate, toDate));
 
-            // 3. Unprocessed cheques audit
-            String sqlUnprocessed = "SELECT sc.scanned_batch_id, sc.scanned_cheque_id, " +
+            // 3. Unprocessed cheques audit (Added outward_batch_id & outward_cheque_id aliases)
+            String sqlUnprocessed = "SELECT sc.scanned_batch_id, sc.scanned_batch_id AS outward_batch_id, " +
+                                    "       sc.scanned_cheque_id, sc.scanned_cheque_id AS outward_cheque_id, " +
                                     "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, " +
                                     "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, " +
                                     "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, " +
