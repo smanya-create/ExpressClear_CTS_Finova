@@ -2,9 +2,8 @@
 <?link rel="stylesheet" type="text/css" href="/css/outward/rejected-cheques.css"?>
 
 <zk>
-
     <borderlayout apply="com.iispl.cts.controller.outward.checker.OutwardCheckerRejectionController"
-                  hflex="1" vflex="1">
+                  hflex="1" vflex="1" style="overflow: hidden !important;">
 
         <!-- ================= SIDEBAR ================= -->
         <west width="220px"
@@ -17,9 +16,9 @@
                      hflex="1" vflex="1" />
         </west>
 
-        <!-- ================= MAIN WORKSPACE ================= -->
-        <center border="none" autoscroll="true" style="background-color: #f8fafc;">
-            <vlayout spacing="0" hflex="1">
+        <!-- ================= MAIN WORKSPACE (LOCKED ZERO SCROLL) ================= -->
+        <center border="none" autoscroll="false" style=" overflow: hidden !important;">
+            <vlayout spacing="0" hflex="1" vflex="1" style="overflow: hidden !important;">
 
                 <!-- Shared Application Header -->
                 <include id="incHeader" src="/components/header.zul"
@@ -27,100 +26,85 @@
                          pageSubtitle="Rejected Cheques" />
 
                 <!-- Modal Window Host -->
-                <div id="windowHost"/>
+                <vlayout id="windowHost" spacing="0"/>
 
                 <!-- Content Area -->
-                <vlayout spacing="20px" style="padding: 24px;" hflex="1">
+                <vlayout spacing="12px" style="padding: 16px 24px; overflow: hidden !important;" hflex="1" vflex="1">
 
                     <!-- PAGE HEADING -->
-                    <vlayout spacing="4px">
+                    <vlayout spacing="2px">
                         <label value="Rejected Cheques" sclass="section-title"/>
                         <label value="Only individual cheques rejected by the Checker are listed here."
                                sclass="section-description"/>
                     </vlayout>
 
                     <!-- ================= SUMMARY CARD ================= -->
-                    <div sclass="summary-card">
-                        <div sclass="summary-item">
+                    <hlayout sclass="summary-card" hflex="1" valign="middle">
+                        <vlayout sclass="summary-item" spacing="2px">
                             <label value="TOTAL REJECTED CHEQUES" sclass="summary-label"/>
                             <label id="lblTotalRejected" value="0" sclass="summary-number"/>
-                        </div>
+                        </vlayout>
 
-                        <div sclass="summary-divider"/>
-
-                        <div sclass="summary-item source-item">
-                            <label value="SOURCE" sclass="summary-label"/>
-                            <label value="Checker Queue" sclass="summary-value"/>
-                        </div>
-                    </div>
+                        
+                    </hlayout>
 
                     <!-- ================= SEARCH BAR ================= -->
-                    <div sclass="search-card">
-                        <div sclass="search-field">
+                    <hlayout sclass="search-card" hflex="1" valign="bottom">
+                        <vlayout sclass="search-field" hflex="1" spacing="4px">
                             <label value="SEARCH" sclass="field-label"/>
                             <textbox id="txtSearch"
-                                     placeholder="Batch or cheque number"
-                                     width="100%"
+                                     placeholder="Search batch or cheque number..."
+                                     hflex="1"
                                      sclass="search-input"/>
-                        </div>
+                        </vlayout>
 
-                        <div sclass="search-field date-field">
+                        <vlayout sclass="search-field date-field" width="200px" spacing="4px">
                             <label value="DATE" sclass="field-label"/>
                             <datebox id="dateRejected"
                                      format="dd-MM-yyyy"
                                      placeholder="Select rejected date"
-                                     width="180px"
-                                     buttonVisible="true"/>
-                        </div>
+                                     hflex="1"
+                                     buttonVisible="true"
+                                     sclass="search-datebox"/>
+                        </vlayout>
 
                         <button id="btnSearch" label="SEARCH" sclass="search-button"/>
                         <button id="btnClear" label="CLEAR" sclass="clear-button"/>
-                    </div>
+                    </hlayout>
 
                     <!-- ================= TABLE SECTION ================= -->
-                    <div sclass="table-card" width="100%">
-                        <div sclass="list-title-section">
+                    <vlayout sclass="table-card" hflex="1" vflex="1" spacing="8px" style="min-height: 0; overflow: hidden !important;">
+                        <vlayout sclass="list-title-section" spacing="1px">
                             <label value="Rejected Cheques List" sclass="list-title"/>
                             <label value="List of cheques rejected by the Checker" sclass="list-subtitle"/>
-                        </div>
+                        </vlayout>
 
+                        <!-- Exclusively scrollable listbox -->
                         <listbox id="lstRejectedCheques"
-                                 width="100%"
-                                 height="340px"
+                                 hflex="1"
+                                 vflex="1"
                                  emptyMessage="No rejected cheques found."
                                  sclass="rejected-listbox">
                             <listhead sizable="false">
-                                <listheader label="BATCH ID" width="15%"/>
-                                <listheader label="CHEQUE NUMBER" width="17%"/>
-                                <listheader label="AMOUNT" width="15%"/>
-                                <listheader label="REJECTION REASON" width="25%"/>
-                                <listheader label="REJECTED ON" width="15%"/>
-                                <listheader label="ACTION" width="13%"/>
+                                <listheader label="BATCH ID" width="16%" align="center"/>
+                                <listheader label="CHEQUE NUMBER" width="16%" align="center"/>
+                                <listheader label="AMOUNT" width="15%" align="center"/>
+                                <listheader label="REJECTION REASON" width="25%" align="center"/>
+                                <listheader label="REJECTED ON" width="16%" align="center"/>
+                                <listheader label="ACTION" width="12%" align="center"/>
                             </listhead>
                         </listbox>
 
                         <!-- PAGINATION -->
-                        <div sclass="pagination-bar">
-                            <button id="btnFirst" label="|&lt;" sclass="pagination-button"/>
-                            <button id="btnPrevious" label="&lt;" sclass="pagination-button"/>
-                            <label id="lblPageInfo" value="Page 1" sclass="page-info"/>
-                            <button id="btnNext" label="&gt;" sclass="pagination-button"/>
-                            <button id="btnLast" label="&gt;|" sclass="pagination-button"/>
-                        </div>
-
-                        <!-- IMPORTANT NOTE -->
-                        <div sclass="important-box">
-                            <label value="IMPORTANT" sclass="important-title"/>
-                            <label value="Rejected Files contains only rejected individual cheques. The complete batch is not moved here."
-                                   sclass="important-text"/>
-                        </div>
-                    </div>
-
-                    <!-- ================= FOOTER ================= -->
-                    <div sclass="hardcoded-footer" width="100%">
-                        <label value="Express Clear CTS · Checker Portal" sclass="footer-left"/>
-                        <label value="Rejected Cheques" sclass="footer-right"/>
-                    </div>
+                        <hlayout sclass="pagination-bar" hflex="1" valign="middle">
+                            <button id="btnFirst" label="«" sclass="pagination-button"/>
+                            <button id="btnPrevious" label="‹" sclass="pagination-button"/>
+                            <intbox id="ibCurrentPage" value="1" sclass="pagination-input"/>
+                            <label id="lblTotalPages" value="/ 1" sclass="pagination-total"/>
+                            <button id="btnNext" label="›" sclass="pagination-button"/>
+                            <button id="btnLast" label="»" sclass="pagination-button"/>
+                        </hlayout>
+                    </vlayout>
 
                 </vlayout>
             </vlayout>

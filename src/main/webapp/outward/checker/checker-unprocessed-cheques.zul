@@ -25,7 +25,7 @@
                 <center border="none" autoscroll="true">
                     <window id="winCheckerUnprocessed" border="none" vflex="1" hflex="1"
                             apply="com.iispl.cts.controller.outward.checker.CheckerUnprocessedChequesController"
-                            style="padding: 20px 24px; background: #f8fafc;">
+                            style="padding: 20px 24px; ">
 
                         <vlayout spacing="16px" vflex="1">
                             
