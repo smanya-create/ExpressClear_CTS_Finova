@@ -10,6 +10,7 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
@@ -44,13 +45,17 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     private Button btnRefresh;
     private Listbox lstUnprocessed;
     
+    // Session state flag
+    private boolean isSessionClosed = false;
+
+    // Centered Pagination Controls
     private Button btnFirstPage;
     private Button btnPrevPage;
     private Intbox ibCurrentPage;
     private Label lblTotalPages;
     private Button btnNextPage;
     private Button btnLastPage;
-    
+
     private static final int PAGE_SIZE = 12;
     private int activePageIndex = 0;
     private int totalPages = 1;
@@ -67,6 +72,8 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
+        resolveSessionStatus();
+
         if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
             cmbStatusFilter.setSelectedIndex(0);
         }
@@ -75,10 +82,26 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         loadUnprocessedCheques();
     }
 
+    /**
+     * Inspects active session attribute to determine outward session status
+     */
+    private void resolveSessionStatus() {
+        Object sessionOpenAttr = Sessions.getCurrent() != null 
+                ? Sessions.getCurrent().getAttribute("CTS_SESSION_OPEN") 
+                : null;
+
+        if (sessionOpenAttr != null) {
+            if (sessionOpenAttr instanceof Boolean) {
+                this.isSessionClosed = !((Boolean) sessionOpenAttr);
+            } else {
+                this.isSessionClosed = "false".equalsIgnoreCase(sessionOpenAttr.toString().trim());
+            }
+        } else {
+            this.isSessionClosed = true;
+        }
+    }
+
     // =========================================================
-    // LISTBOX RENDERER
-    // =========================================================
- // =========================================================
     // LISTBOX RENDERER (Strict CTS Alignment System)
     // =========================================================
     private void initListboxRenderer() {
@@ -95,10 +118,10 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
 
                 Label lblBNo = new Label(dto.getBatchNo());
                 lblBNo.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block;");
-                
+
                 Label lblSName = new Label(dto.getOriginalSessionName() != null ? dto.getOriginalSessionName() : "Scan Staging");
                 lblSName.setStyle("font-size: 11px; color: #64748b; display: block;");
-                
+
                 vBatch.appendChild(lblBNo);
                 vBatch.appendChild(lblSName);
                 cellBatch.appendChild(vBatch);
@@ -124,21 +147,19 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
                 lblAmt.setStyle("font-size: 13px; font-weight: 700; color: #0f172a; display: block; text-align: center;");
                 cellAmt.appendChild(lblAmt);
 
-             // 5. Required Task Badge (Same Orange for Both)
+             // 5. STATUS (Exact database value displayed in Orange Pill)
                 Listcell cellStage = new Listcell();
-                cellStage.setStyle("text-align: center; vertical-align: middle;");
-                Label lblStage = new Label();
-                boolean wasDataEntry = isItemDataEntry(dto);
+                cellStage.setStyle("text-align: center; vertical-align: middle; padding: 4px 6px;");
+                
+                String rawDbStatus = (dto.getStatus() != null && !dto.getStatus().trim().isEmpty())
+                        ? dto.getStatus().trim()
+                        : "------";
 
-                String orangeBadgeStyle = "display: table; margin: 0 auto; padding: 4px 12px; border-radius: 12px; "
-                        + "font-size: 11px; font-weight: 700; white-space: nowrap; "
-                        + "background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa;";
-
-                if (wasDataEntry) {
-                    lblStage.setValue("Data Entry Pending");
-                } else {
-                    lblStage.setValue("MICR Repair Pending");
-                }
+                Label lblStage = new Label(rawDbStatus);
+                String orangeBadgeStyle = "display: inline-block; margin: 0 auto; padding: 4px 8px; border-radius: 12px; "
+                        + "font-size: 10px; font-weight: 700; white-space: nowrap; letter-spacing: 0.2px; "
+                        + "box-sizing: border-box; text-align: center; "
+                        + "background: #ffedd5 !important; color: #c2410c !important; border: 1px solid #fed7aa !important;";
                 lblStage.setStyle(orangeBadgeStyle);
                 cellStage.appendChild(lblStage);
 
@@ -153,22 +174,34 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
                 lblReason.setStyle("font-size: 12px; font-style: italic; color: #c2410c; display: block; word-break: break-word;");
                 cellRemarks.appendChild(lblReason);
 
-                // 7. Action Button (Plain text, no icons, no symbols)
+                // 7. Action Button ('Data Entry' / 'MICR Repair')
                 Listcell cellAction = new Listcell();
                 cellAction.setStyle("text-align: center; vertical-align: middle; padding: 0 8px;");
                 Button btnAction = new Button();
-                String darkNavyBtnStyle = "background: #173B61; color: #ffffff; border: 1px solid #173B61; "
-                        + "font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 4px; "
-                        + "cursor: pointer; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.1);";
-                btnAction.setStyle(darkNavyBtnStyle);
-
+                
+                boolean wasDataEntry = isItemDataEntry(dto);
                 if (wasDataEntry) {
                     btnAction.setLabel("Data Entry");
                 } else {
                     btnAction.setLabel("MICR Repair");
                 }
 
-                btnAction.addEventListener("onClick", event -> routeToMakerModule(dto, wasDataEntry));
+                if (isSessionClosed) {
+                    btnAction.setDisabled(true);
+                    btnAction.setTooltiptext("Outward Clearing session is closed by Admin. Processing is disabled.");
+                    btnAction.setStyle("background: #cbd5e1 !important; color: #94a3b8 !important; "
+                            + "border: 1px solid #cbd5e1 !important; font-size: 11px !important; "
+                            + "font-weight: 600 !important; padding: 6px 16px !important; border-radius: 4px !important; "
+                            + "cursor: not-allowed !important; white-space: nowrap !important; box-shadow: none !important;");
+                } else {
+                    btnAction.setDisabled(false);
+                    btnAction.setStyle("background: #173B61 !important; color: #ffffff !important; "
+                            + "border: 1px solid #173B61 !important; font-size: 11px !important; "
+                            + "font-weight: 600 !important; padding: 6px 16px !important; border-radius: 4px !important; "
+                            + "cursor: pointer !important; white-space: nowrap !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;");
+                    btnAction.addEventListener("onClick", event -> routeToMakerModule(dto, wasDataEntry));
+                }
+
                 cellAction.appendChild(btnAction);
 
                 // Add cells in order
@@ -183,13 +216,14 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         });
     }
 
-    // Helper: checks whether instrument was paused at Data Entry
+    // Helper: checks whether instrument requires Data Entry vs MICR Repair
     private boolean isItemDataEntry(UnprocessedChequeDTO dto) {
         if (dto == null) return false;
         String status = dto.getStatus() != null ? dto.getStatus().trim().toUpperCase() : "";
         String remarks = dto.getRemarks() != null ? dto.getRemarks().trim().toUpperCase() : "";
         return status.contains("DATA_ENTRY") || remarks.contains("DATA_ENTRY");
     }
+
     // =========================================================
     // DATA RETRIEVAL & COUNTERS
     // =========================================================
@@ -237,8 +271,9 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
             cmbStatusFilter.setSelectedIndex(0);
         }
+        resolveSessionStatus();
         loadUnprocessedCheques();
-        org.zkoss.zk.ui.util.Clients.showNotification("Queue refreshed", "info", null, "top_center", 1500);
+        Clients.showNotification("Queue refreshed", "info", null, "top_center", 1500);
     }
 
     private void applyFilters(String searchKeywordInput) {
@@ -264,7 +299,8 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
                 boolean cMatch = item.getChequeNo() != null && item.getChequeNo().toLowerCase().contains(searchKeyword);
                 boolean micrMatch = item.getSortCode() != null && item.getSortCode().toLowerCase().contains(searchKeyword);
                 boolean rMatch = item.getRemarks() != null && item.getRemarks().toLowerCase().contains(searchKeyword);
-                matchesSearch = bMatch || cMatch || micrMatch || rMatch;
+                boolean statusMatch = item.getStatus() != null && item.getStatus().toLowerCase().contains(searchKeyword);
+                matchesSearch = bMatch || cMatch || micrMatch || rMatch || statusMatch;
             }
 
             return matchesStage && matchesSearch;
@@ -273,9 +309,10 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         // Calculate pages
         this.totalPages = (int) Math.ceil((double) currentFilteredList.size() / PAGE_SIZE);
         if (this.totalPages < 1) this.totalPages = 1;
-        
+
         loadPage(0);
     }
+
     private void loadPage(int pageIndex) {
         if (pageIndex >= this.totalPages) pageIndex = this.totalPages - 1;
         if (pageIndex < 0) pageIndex = 0;
@@ -296,13 +333,14 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         // Slice list for active page
         int fromIndex = this.activePageIndex * PAGE_SIZE;
         int toIndex = Math.min(fromIndex + PAGE_SIZE, currentFilteredList.size());
-        
+
         List<UnprocessedChequeDTO> pageSubList = (fromIndex < currentFilteredList.size())
                 ? currentFilteredList.subList(fromIndex, toIndex)
                 : new ArrayList<>();
 
         lstUnprocessed.setModel(new ListModelList<>(pageSubList));
     }
+
     public void onClick$btnFirstPage(Event event) {
         if (activePageIndex > 0) loadPage(0);
     }
@@ -330,11 +368,16 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         onChange$ibCurrentPage(event);
     }
 
-	// =========================================================
+    // =========================================================
     // ROUTING LOGIC
     // =========================================================
     private void routeToMakerModule(UnprocessedChequeDTO dto, boolean isDataEntry) {
         if (dto == null) return;
+
+        if (isSessionClosed) {
+            Clients.showNotification("Session is CLOSED by Admin. Actions are locked.", "error", null, "top_center", 2500);
+            return;
+        }
 
         String batchIdStr = (dto.getBatchId() != null && dto.getBatchId() > 0) 
                 ? "BAT" + dto.getBatchId() 
@@ -367,5 +410,4 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
             Executions.sendRedirect("/outward/maker/micr-repair/micr-repair.zul");
         }
     }
-    
 }

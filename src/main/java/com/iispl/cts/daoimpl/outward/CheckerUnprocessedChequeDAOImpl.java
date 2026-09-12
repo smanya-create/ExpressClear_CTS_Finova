@@ -13,16 +13,24 @@ import com.iispl.cts.dto.UnprocessedChequeDTO;
 
 public class CheckerUnprocessedChequeDAOImpl implements CheckerUnprocessedChequeDAO {
 
-    @Override
+	@Override
     public List<UnprocessedChequeDTO> getCheckerUnprocessedCheques() {
         List<UnprocessedChequeDTO> list = new ArrayList<>();
 
         String sql = "SELECT c.outward_cheque_id, c.outward_batch_id, b.batch_reference_id, " +
-                     "c.cheque_number, c.micr_code, c.cheque_amount, c.cheque_status, c.created_at " +
+                     "       c.cheque_number, c.micr_code, c.cheque_amount, c.cheque_status, c.created_at " +
                      "FROM outward_cheque c " +
-                     "LEFT JOIN outward_batch b ON TRIM(c.outward_batch_id) = TRIM(b.outward_batch_id) " +
-                     "WHERE UPPER(c.cheque_status) IN ('UNPROCESSED', 'UNPROCESSED_VERIFY', 'PENDING_VERIFICATION', 'PENDING_CHECKER_VERIFICATION') " +
-                     "   OR UPPER(c.cheque_status) LIKE 'UNPROCESSED%' " +
+                     "INNER JOIN outward_batch b ON TRIM(c.outward_batch_id) = TRIM(b.outward_batch_id) " +
+                     "WHERE ( " +
+                     // Condition A: Cheque itself explicitly flagged as UNPROCESSED / ROLLED_OVER
+                     "       UPPER(c.cheque_status) IN ('UNPROCESSED', 'UNPROCESSED_VERIFICATION','UNPROCESSED_VERIFY') " +
+                     "       OR UPPER(c.cheque_status) LIKE 'UNPROCESSED%' " +
+                     "      ) " +
+                     "   OR ( " +
+                     // Condition B: The parent batch was closed under Forced EOD / Rolled over
+                     "       UPPER(b.batch_status) IN ('UNPROCESSED', 'ROLLED_OVER', 'FORCED_EOD') " +
+                     "       AND UPPER(c.cheque_status) IN ('UNPROCESSED', 'UNPROCESSED_VERIFY', 'PENDING_VERIFICATION', 'PENDING_CHECKER_VERIFICATION') " +
+                     "      ) " +
                      "ORDER BY c.created_at ASC, c.outward_cheque_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -47,12 +55,12 @@ public class CheckerUnprocessedChequeDAOImpl implements CheckerUnprocessedCheque
                 }
 
                 dto.setBatchNo(rs.getString("batch_reference_id") != null ? rs.getString("batch_reference_id") : batchIdStr);
-                dto.setOriginalSessionName("Outward Clearing");
+                dto.setOriginalSessionName("Prior EOD Rollover");
                 dto.setChequeNo(rs.getString("cheque_number"));
                 dto.setSortCode(rs.getString("micr_code"));
                 dto.setAmount(rs.getBigDecimal("cheque_amount"));
                 dto.setStatus(rs.getString("cheque_status"));
-                dto.setRemarks("(" + chqIdStr + " (" + batchIdStr + "))");
+                dto.setRemarks(chqIdStr + " (" + batchIdStr + ")");
                 dto.setForcedEodRollover(true);
                 list.add(dto);
             }
