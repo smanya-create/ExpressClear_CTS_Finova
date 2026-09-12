@@ -56,6 +56,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private Space inwardMakerSectionSpacer;
     private Div inwardMakerProcessingSection;
     private Div inwardMakerPaginationBar;
+    private Div inwardMakerReturnPaginationBar;
 
     // Batches Processing Grid & Pagination
     private Grid inwardMakerGridBatchDetails;
@@ -68,14 +69,22 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private Button inwardMakerBtnNext;
     private Button inwardMakerBtnLast;
 
-    // Return From Checker Grid
+    // Return From Checker Grid & Pagination
     private Grid inwardMakerGridReturnedBatches;
     private Rows inwardMakerRowsReturnedBatches;
     private Vlayout inwardMakerVlayoutReturnedEmptyState;
+    private Label inwardMakerLblReturnCurrentPage;
+
+    private Button inwardMakerBtnReturnFirst;
+    private Button inwardMakerBtnReturnPrevious;
+    private Button inwardMakerBtnReturnNext;
+    private Button inwardMakerBtnReturnLast;
 
     // Data lists & state
     private List<InwardDashboardBatchDTO> batchList = new ArrayList<>();
+    private List<ReturnedChequeDisplayItem> returnedChequeList = new ArrayList<>();
     private int currentPage = 1;
+    private int currentReturnPage = 1;
 
     // Active Filter State
     private String currentSearchKeyword = "";
@@ -106,11 +115,17 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             inwardMakerTxtSearch.addEventListener("onOK", event -> onApplyFilter());
         }
 
-        // Pagination Button Listeners
+        // Section 2 (Processing Batches) Pagination Listeners
         if (inwardMakerBtnFirst != null) inwardMakerBtnFirst.addEventListener("onClick", event -> goToFirstPage());
         if (inwardMakerBtnPrevious != null) inwardMakerBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
         if (inwardMakerBtnNext != null) inwardMakerBtnNext.addEventListener("onClick", event -> goToNextPage());
         if (inwardMakerBtnLast != null) inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
+
+        // Section 1 (Return From Checker) Pagination Listeners
+        if (inwardMakerBtnReturnFirst != null) inwardMakerBtnReturnFirst.addEventListener("onClick", event -> goToFirstReturnPage());
+        if (inwardMakerBtnReturnPrevious != null) inwardMakerBtnReturnPrevious.addEventListener("onClick", event -> goToPreviousReturnPage());
+        if (inwardMakerBtnReturnNext != null) inwardMakerBtnReturnNext.addEventListener("onClick", event -> goToNextReturnPage());
+        if (inwardMakerBtnReturnLast != null) inwardMakerBtnReturnLast.addEventListener("onClick", event -> goToLastReturnPage());
 
         refreshAllDashboardData();
     }
@@ -160,10 +175,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     // 1. RETURN FROM CHECKER SECTION
     // =========================================================
     private void loadReturnedCheques() {
-        if (inwardMakerRowsReturnedBatches == null) return;
-        inwardMakerRowsReturnedBatches.getChildren().clear();
-
-        boolean hasReturnedCheques = false;
+        this.returnedChequeList = new ArrayList<>();
 
         try {
             List<InwardDashboardBatchDTO> recentBatches = dashboardService.getRecentBatches("");
@@ -192,8 +204,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
                                         continue;
                                     }
 
-                                    createReturnedChequeRow(bDto.getBatchId(), chq, displayStatus);
-                                    hasReturnedCheques = true;
+                                    returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq, displayStatus));
                                 }
                             }
                         }
@@ -204,13 +215,41 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
             e.printStackTrace();
         }
 
-        if (!hasReturnedCheques) {
+        this.currentReturnPage = 1;
+        renderCurrentReturnPage();
+    }
+
+    private void renderCurrentReturnPage() {
+        if (inwardMakerRowsReturnedBatches == null) return;
+        inwardMakerRowsReturnedBatches.getChildren().clear();
+
+        if (returnedChequeList == null || returnedChequeList.isEmpty()) {
             if (inwardMakerVlayoutReturnedEmptyState != null) inwardMakerVlayoutReturnedEmptyState.setVisible(true);
             if (inwardMakerGridReturnedBatches != null) inwardMakerGridReturnedBatches.setVisible(false);
-        } else {
-            if (inwardMakerVlayoutReturnedEmptyState != null) inwardMakerVlayoutReturnedEmptyState.setVisible(false);
-            if (inwardMakerGridReturnedBatches != null) inwardMakerGridReturnedBatches.setVisible(true);
+            if (inwardMakerReturnPaginationBar != null) inwardMakerReturnPaginationBar.setVisible(false);
+            updateReturnPagination();
+            return;
         }
+
+        if (inwardMakerVlayoutReturnedEmptyState != null) inwardMakerVlayoutReturnedEmptyState.setVisible(false);
+        if (inwardMakerGridReturnedBatches != null) inwardMakerGridReturnedBatches.setVisible(true);
+        if (inwardMakerReturnPaginationBar != null) inwardMakerReturnPaginationBar.setVisible(true);
+
+        int totalPages = getTotalReturnPages();
+        if (currentReturnPage > totalPages) currentReturnPage = totalPages;
+        if (currentReturnPage < 1) currentReturnPage = 1;
+
+        int startIndex = (currentReturnPage - 1) * PAGE_SIZE;
+        int endIndex = Math.min(startIndex + PAGE_SIZE, returnedChequeList.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            ReturnedChequeDisplayItem item = returnedChequeList.get(i);
+            if (item != null) {
+                createReturnedChequeRow(item.batchId, item.cheque, item.displayStatus);
+            }
+        }
+
+        updateReturnPagination();
     }
 
     private void createReturnedChequeRow(String batchId, InwardCheque cheque, String displayStatus) {
@@ -239,6 +278,54 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         row.appendChild(viewButton);
 
         inwardMakerRowsReturnedBatches.appendChild(row);
+    }
+
+    // Return Pagination Navigation
+    private void goToFirstReturnPage() {
+        if (currentReturnPage > 1) {
+            currentReturnPage = 1;
+            renderCurrentReturnPage();
+        }
+    }
+
+    private void goToPreviousReturnPage() {
+        if (currentReturnPage > 1) {
+            currentReturnPage--;
+            renderCurrentReturnPage();
+        }
+    }
+
+    private void goToNextReturnPage() {
+        if (currentReturnPage < getTotalReturnPages()) {
+            currentReturnPage++;
+            renderCurrentReturnPage();
+        }
+    }
+
+    private void goToLastReturnPage() {
+        int totalPages = getTotalReturnPages();
+        if (currentReturnPage < totalPages) {
+            currentReturnPage = totalPages;
+            renderCurrentReturnPage();
+        }
+    }
+
+    private int getTotalReturnPages() {
+        if (returnedChequeList == null || returnedChequeList.isEmpty()) {
+            return 1;
+        }
+        return (int) Math.ceil((double) returnedChequeList.size() / PAGE_SIZE);
+    }
+
+    private void updateReturnPagination() {
+        int totalPages = getTotalReturnPages();
+        if (inwardMakerLblReturnCurrentPage != null) {
+            inwardMakerLblReturnCurrentPage.setValue(currentReturnPage + " / " + totalPages);
+        }
+        if (inwardMakerBtnReturnFirst != null) inwardMakerBtnReturnFirst.setDisabled(currentReturnPage <= 1);
+        if (inwardMakerBtnReturnPrevious != null) inwardMakerBtnReturnPrevious.setDisabled(currentReturnPage <= 1);
+        if (inwardMakerBtnReturnNext != null) inwardMakerBtnReturnNext.setDisabled(currentReturnPage >= totalPages);
+        if (inwardMakerBtnReturnLast != null) inwardMakerBtnReturnLast.setDisabled(currentReturnPage >= totalPages);
     }
 
     // =========================================================
@@ -401,7 +488,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     }
 
     // =========================================================
-    // PAGINATION LOGIC
+    // PROCESSING PAGINATION LOGIC
     // =========================================================
     private void goToFirstPage() {
         if (currentPage > 1) {
@@ -500,5 +587,18 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         }
 
         return s;
+    }
+
+    // Helper wrapper for paginating returned cheques
+    private static class ReturnedChequeDisplayItem {
+        final String batchId;
+        final InwardCheque cheque;
+        final String displayStatus;
+
+        ReturnedChequeDisplayItem(String batchId, InwardCheque cheque, String displayStatus) {
+            this.batchId = batchId;
+            this.cheque = cheque;
+            this.displayStatus = displayStatus;
+        }
     }
 }
