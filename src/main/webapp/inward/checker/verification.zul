@@ -263,28 +263,88 @@
 										value="Verify the captured details against the cheque image and maker request."
 										sclass="card-description" />
 
-									<!-- ================= MAKER REJECTION REQUEST ================= -->
-									<vlayout
-										id="makerRejectionRequestSection" 
-										visible="false" spacing="3px"
-										style="margin:6px 0 6px 0;
+				<!-- ================= MAKER REJECTION REQUEST ================= -->
+<vlayout
+    id="makerRejectionRequestSection"
+    visible="false"
+    spacing="3px"
+    style="margin:6px 0 6px 0;
            padding:7px 9px;
-           background:#FFF8E7;
+           background:#FFF7ED;
            border-left:3px solid #F59E0B;
            border-radius:3px;">
 
-										<label
-											value="MAKER REJECTION REQUEST"
-											style="font-size:10px;
+    <label
+        value="MAKER REJECTION REQUEST"
+        style="font-size:10px;
                font-weight:700;
                color:#B45309;" />
 
-										<label value=""
-											id="lblMakerRejectionRemarks"
-											style="font-size:11px;
+    <label
+        id="lblMakerRejectionReasonCode"
+        value=""
+        style="font-size:11px;
                color:#475569;
                white-space:normal;" />
-									</vlayout>
+
+    <label
+        id="lblMakerRejectionReasonName"
+        value=""
+        style="font-size:11px;
+               color:#475569;
+               white-space:normal;" />
+
+    <label
+        id="lblMakerRejectionRemarks"
+        value=""
+        style="font-size:11px;
+               color:#475569;
+               white-space:normal;" />
+
+</vlayout>
+									
+						<!-- ================= REJECTION DETAILS ================= -->
+
+<vlayout
+    id="rejectionDetailsSection"
+    visible="false"
+    spacing="3px"
+    style="margin:6px 0 6px 0;
+           padding:7px 9px;
+           background:#FFF1F2;
+           border-left:3px solid #DC2626;
+           border-radius:3px;">
+
+    <label
+        value="REJECTION DETAILS"
+        style="font-size:10px;
+               font-weight:700;
+               color:#B91C1C;" />
+
+    <label
+        id="lblRejectedReasonCode"
+        value=""
+        style="font-size:11px;
+               color:#475569;
+               white-space:normal;" />
+
+    <label
+        id="lblRejectedReasonName"
+        value=""
+        style="font-size:11px;
+               color:#475569;
+               white-space:normal;" />
+
+    <label
+        id="lblRejectedReasonRemarks"
+        value=""
+        style="font-size:11px;
+               color:#475569;
+               white-space:normal;" />
+
+</vlayout>
+																
+									
 									<!--  CBS VALIDATION  -->
 
 									<vlayout spacing="6px"

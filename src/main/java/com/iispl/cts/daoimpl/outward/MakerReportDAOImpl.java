@@ -14,56 +14,55 @@ import com.iispl.cts.dao.outward.MakerReportDAO;
 
 public class MakerReportDAOImpl implements MakerReportDAO {
 
-	@Override
-	public Map<String, List<Map<String, Object>>> getMakerReportData(String makerId, Date fromDate, Date toDate)
-			throws Exception {
-		// TODO Auto-generated method stub
-		Map<String, List<Map<String, Object>>> reportData = new HashMap<>();
+    @Override
+    public Map<String, List<Map<String, Object>>> getMakerReportData(String makerId, Date fromDate, Date toDate)
+            throws Exception {
+        Map<String, List<Map<String, Object>>> reportData = new HashMap<>();
 
         try (Connection conn = DBConnection.getConnection()) {
 
-            // 1. Batches with MICR repairs
-            String sqlMicr = "SELECT ob.outward_batch_id, ob.batch_reference_id, " +
-                             "       COUNT(oc.outward_cheque_id) AS total_cheques, " +
-                             "       COUNT(CASE WHEN UPPER(oc.cheque_status) LIKE '%REPAIR%' " +
-                             "                    OR UPPER(oc.cheque_status) LIKE '%MICR%' THEN 1 END) AS repaired_count, " +
-                             "       COALESCE(SUM(oc.cheque_amount), 0.00) AS total_amount, " +
-                             "       ob.uploaded_at " +
-                             "FROM outward_batch ob " +
-                             "JOIN outward_cheque oc ON ob.outward_batch_id = oc.outward_batch_id " +
-                             "WHERE ob.uploaded_by = ? " +
-                             "  AND CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ? " +
-                             "GROUP BY ob.outward_batch_id, ob.batch_reference_id, ob.uploaded_at " +
-                             "HAVING COUNT(CASE WHEN UPPER(oc.cheque_status) LIKE '%REPAIR%' " +
-                             "                    OR UPPER(oc.cheque_status) LIKE '%MICR%' THEN 1 END) > 0 " +
-                             "ORDER BY ob.uploaded_at DESC";
+            // 1. Batches with MICR repairs (Added outward_batch_id alias)
+            String sqlMicr = "SELECT sb.scanned_batch_id, sb.scanned_batch_id AS outward_batch_id, sb.batch_reference_id, " +
+                             "       COUNT(sc.scanned_cheque_id) AS total_cheques, " +
+                             "       COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) AS repaired_count, " +
+                             "       COALESCE(SUM(sc.cheque_amount), 0.00) AS total_amount, " +
+                             "       sb.uploaded_at " +
+                             "FROM scan_batch sb " +
+                             "JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
+                             "WHERE sb.uploaded_by = ? " +
+                             "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? " +
+                             "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.uploaded_at " +
+                             "HAVING COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) > 0 " +
+                             "ORDER BY sb.uploaded_at DESC";
             reportData.put("micrRepairs", executeQuery(conn, sqlMicr, makerId, fromDate, toDate));
 
-            // 2. Batches pending data entry
-            String sqlDataEntry = "SELECT ob.outward_batch_id, ob.batch_reference_id, " +
-                                  "       COUNT(oc.outward_cheque_id) AS pending_items, " +
-                                  "       ob.batch_status, ob.uploaded_at " +
-                                  "FROM outward_batch ob " +
-                                  "JOIN outward_cheque oc ON ob.outward_batch_id = oc.outward_batch_id " +
-                                  "WHERE ob.uploaded_by = ? " +
-                                  "  AND UPPER(oc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'KEYING_PENDING') " +
-                                  "  AND CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ? " +
-                                  "GROUP BY ob.outward_batch_id, ob.batch_reference_id, ob.batch_status, ob.uploaded_at " +
-                                  "ORDER BY ob.uploaded_at DESC";
+            // 2. Batches pending data entry (Added outward_batch_id alias)
+            String sqlDataEntry = "SELECT sb.scanned_batch_id, sb.scanned_batch_id AS outward_batch_id, sb.batch_reference_id, " +
+                                  "       COUNT(sc.scanned_cheque_id) AS pending_items, " +
+                                  "       sb.batch_status, sb.uploaded_at " +
+                                  "FROM scan_batch sb " +
+                                  "JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
+                                  "WHERE sb.uploaded_by = ? " +
+                                  "  AND UPPER(sb.batch_status) = 'PENDING_MAKER_PROCESS' " +
+                                  "  AND UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'REJECTED_MICR') " +
+                                  "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? " +
+                                  "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.batch_status, sb.uploaded_at " +
+                                  "ORDER BY sb.uploaded_at DESC";
             reportData.put("dataEntry", executeQuery(conn, sqlDataEntry, makerId, fromDate, toDate));
 
-            // 3. Unprocessed cheques
-            String sqlUnprocessed = "SELECT oc.outward_batch_id, oc.outward_cheque_id, " +
-                                    "       COALESCE(oc.cheque_number, 'UNREADABLE') AS cheque_number, " +
-                                    "       COALESCE(oc.micr_code, 'UNREADABLE') AS micr_code, " +
-                                    "       COALESCE(oc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, " +
-                                    "       oc.cheque_amount, oc.cheque_status, oc.created_at " +
-                                    "FROM outward_cheque oc " +
-                                    "JOIN outward_batch ob ON oc.outward_batch_id = oc.outward_batch_id " +
-                                    "WHERE ob.uploaded_by = ? " +
-                                    "  AND UPPER(oc.cheque_status) IN ('UNPROCESSED', 'PENDING', 'OCR_FAILED', 'IMAGE_REJECTED', 'FAILED') " +
-                                    "  AND CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ? " +
-                                    "ORDER BY oc.outward_batch_id, oc.outward_cheque_id";
+            // 3. Unprocessed cheques audit (Added outward_batch_id & outward_cheque_id aliases)
+            String sqlUnprocessed = "SELECT sc.scanned_batch_id, sc.scanned_batch_id AS outward_batch_id, " +
+                                    "       sc.scanned_cheque_id, sc.scanned_cheque_id AS outward_cheque_id, " +
+                                    "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, " +
+                                    "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, " +
+                                    "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, " +
+                                    "       sc.cheque_amount, sc.cheque_status, sc.created_at " +
+                                    "FROM scan_cheque sc " +
+                                    "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+                                    "WHERE sb.uploaded_by = ? " +
+                                    "  AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED') " +
+                                    "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? " +
+                                    "ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id";
             reportData.put("unprocessed", executeQuery(conn, sqlUnprocessed, makerId, fromDate, toDate));
 
             // 4. Batches submitted to checker
@@ -71,7 +70,7 @@ public class MakerReportDAOImpl implements MakerReportDAO {
                                 "       actual_total_amount, uploaded_at, batch_status " +
                                 "FROM outward_batch " +
                                 "WHERE uploaded_by = ? " +
-                                "  AND UPPER(batch_status) IN ('SUBMITTED_TO_CHECKER', 'PENDING_VERIFICATION', 'SUBMITTED', 'PENDING') " +
+                                "  AND UPPER(batch_status) = 'PENDING_CHECKER_PROCESS' " +
                                 "  AND CAST(uploaded_at AS DATE) BETWEEN ? AND ? " +
                                 "ORDER BY uploaded_at DESC";
             reportData.put("submittedToChecker", executeQuery(conn, sqlChecker, makerId, fromDate, toDate));
@@ -98,6 +97,5 @@ public class MakerReportDAOImpl implements MakerReportDAO {
             }
         }
         return list;
-	}
-
+    }
 }

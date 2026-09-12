@@ -95,9 +95,18 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 	}
 
 	public void updateBatchStatus(String batchId, String status) {
-		 outwardBatchDAO.updateBatchStatus(batchId, status);
-		
+		outwardBatchDAO.updateBatchStatus(batchId, status);
+
 	}
 
+	@Override
+	public List<OutwardBatch> getOnHoldBatches() {
+		return outwardBatchDAO.getOnHoldBatches();
+	}
+
+	@Override
+	public List<OutwardBatch> getScanBatchesReadyForDataEntry() {
+		return outwardBatchDAO.getScanBatchesReadyForDataEntry();
+	}
 
 }

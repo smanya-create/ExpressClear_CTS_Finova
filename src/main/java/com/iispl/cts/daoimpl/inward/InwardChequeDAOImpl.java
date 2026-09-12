@@ -151,6 +151,32 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 		return cheques;
 	}
+	
+	@Override
+	public String getBankNameByCode(String bankCode) {
+
+	    String sql = "SELECT bank_name "
+	               + "FROM master_bank "
+	               + "WHERE bank_code = ?";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, bankCode);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+	                return rs.getString("bank_name");
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
 
 	@Override
 	public List<InwardCheque> getAllCheques() {
@@ -184,6 +210,177 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	public InwardCheque getChequeById(String inwardChequeId) {
 
 		return findById(inwardChequeId);
+	}
+	
+	@Override
+	public String getRejectedReasonDetails(String inwardChequeId) {
+
+	    String sql =
+	            "SELECT rr.rejected_reason_code, " +
+	            "       rr.rejected_reason_name, " +
+	            "       r.remarks " +
+	            "FROM inward_cheque_rejection r " +
+	            "LEFT JOIN rejected_reasons rr " +
+	            "       ON rr.rejected_reason_id = r.rejected_reason_id " +
+	            "WHERE r.inward_cheque_id = ? " +
+	            "ORDER BY r.rejected_at DESC NULLS LAST " +
+	            "LIMIT 1";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, inwardChequeId);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+
+	                String reasonCode =
+	                        rs.getString("rejected_reason_code");
+
+	                String reasonName =
+	                        rs.getString("rejected_reason_name");
+
+	                String remarks =
+	                        rs.getString("remarks");
+
+	                StringBuilder result =
+	                        new StringBuilder();
+
+	                result.append("Reason: ")
+	                      .append(reasonCode)
+	                      .append(" - ")
+	                      .append(reasonName);
+
+	                if (remarks != null &&
+	                    !remarks.trim().isEmpty()) {
+
+	                    result.append("\nRemarks: ")
+	                          .append(remarks.trim());
+	                }
+
+	                return result.toString();
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
+	
+	
+	
+	
+	@Override
+	public BigDecimal getAccountBalance(String accountNumber) {
+
+	    if (accountNumber == null || accountNumber.trim().isEmpty()) {
+	        return null;
+	    }
+
+	    String sql =
+	            "SELECT account_balance " +
+	            "FROM master_account_new " +
+	            "WHERE account_number = ?";
+
+	    try (Connection connection = DBConnection.getConnection();
+	         PreparedStatement statement =
+	                 connection.prepareStatement(sql)) {
+
+	        statement.setString(1, accountNumber.trim());
+
+	        try (ResultSet resultSet = statement.executeQuery()) {
+
+	            if (resultSet.next()) {
+	                return resultSet.getBigDecimal("account_balance");
+	            }
+	        }
+
+	    } catch (SQLException e) {
+
+	        System.err.println(
+	                "Failed to fetch account balance for account: "
+	                + accountNumber);
+
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
+	
+	
+	@Override
+	public boolean saveSendBackRequest(
+	        String inwardChequeId,
+	        String inwardBatchId,
+	        String reasonId,
+	        String remarks,
+	        String sentBackBy) {
+
+	    String sql =
+	            "INSERT INTO inward_cheque_send_back_request "
+	            + "(inward_cheque_id, inward_batch_id, reason_id, "
+	            + "remarks, sent_back_by, request_status, requested_at) "
+	            + "VALUES (?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)";
+
+	    try (Connection connection = DBConnection.getConnection();
+	         PreparedStatement preparedStatement =
+	                 connection.prepareStatement(sql)) {
+
+	        preparedStatement.setString(1, inwardChequeId);
+	        preparedStatement.setString(2, inwardBatchId);
+	        preparedStatement.setString(3, reasonId);
+	        preparedStatement.setString(4, remarks);
+	        preparedStatement.setString(5, sentBackBy);
+
+	        int rows = preparedStatement.executeUpdate();
+
+	        return rows > 0;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+	
+	@Override
+	public String getMakerRejectionRequestDetails(String inwardChequeId) {
+
+	    String sql =
+	            "SELECT rejected_reason_id, remarks " +
+	            "FROM inward_cheque_rejection_request " +
+	            "WHERE inward_cheque_id = ? " +
+	            "AND request_status = 'PENDING' " +
+	            "ORDER BY requested_at DESC " +
+	            "LIMIT 1";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setString(1, inwardChequeId);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            if (rs.next()) {
+
+	                String rejectedReasonId =
+	                        rs.getString("rejected_reason_id");
+
+	                String remarks =
+	                        rs.getString("remarks");
+
+	                return rejectedReasonId + "||" +
+	                       (remarks != null ? remarks : "");
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
 	}
 
 	@Override

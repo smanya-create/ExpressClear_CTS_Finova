@@ -1,21 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!--
-	Created by ZK Studio
--->
-
 <zk>
-	<device-config>
-		<device-type>ajax</device-type>
-		<timeout-uri>/common/login.zul</timeout-uri><!-- An empty URL can cause the browser to reload the same URL -->
-        <server-push-class>org.zkoss.zk.ui.impl.PollingServerPush</server-push-class>
-        
-	</device-config>
-	<listener>
-           <listener-class>com.iispl.cts.listener.UserSession</listener-class>
-       </listener>
-	<!-- Check every 5 seconds for dead browser connections -->
+
+    <device-config>
+        <device-type>ajax</device-type>
+
+        <timeout-uri>/common/login.zul</timeout-uri>
+
+        <server-push-class>
+            org.zkoss.zk.ui.impl.PollingServerPush
+        </server-push-class>
+    </device-config>
+
+    <listener>
+        <listener-class>
+            com.iispl.cts.listener.UserSession
+        </listener-class>
+    </listener>
+    <listener>
+        <listener-class>
+            com.iispl.cts.listener.GlobalSessionLockInterceptor
+        </listener-class>
+    </listener>
+
     <client-config>
         <keep-alive>false</keep-alive>
     </client-config>
+
+    <system-config>
+        <upload-config>
+            <max-size>20480</max-size>
+        </upload-config>
+    </system-config>
+
 </zk>

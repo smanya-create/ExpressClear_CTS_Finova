@@ -118,6 +118,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	private int zoomLevel = 100;
 	private int rotationAngle = 0;
 
+	// Distinguish sent-back rework from initial normal batch processing
+	private boolean isReworkBatch = false;
+
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		super.doAfterCompose(comp);
@@ -189,11 +192,11 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		this.activeQueue = new ArrayList<>();
 
 		if (allCheques != null && !allCheques.isEmpty()) {
-			boolean hasSentBack = allCheques.stream().anyMatch(c -> isSentBackStatus(c.getChequeStatus()));
+			this.isReworkBatch = allCheques.stream().anyMatch(c -> isSentBackStatus(c.getChequeStatus()));
 
 			for (InwardCheque c : allCheques) {
 				String st = c.getChequeStatus();
-				if (hasSentBack) {
+				if (this.isReworkBatch) {
 					// ONLY load active sent-back items needing Maker rework
 					if (isSentBackStatus(st)) {
 						this.activeQueue.add(c);
@@ -537,13 +540,30 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		current.setChequeAmount(new BigDecimal(rawAmount));
 		current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
 
-		// Transition to MAKER_RETURNED if rework, else to standard CHECKER_PROCESSING_PENDING
-		if (isSentBackStatus(current.getChequeStatus())) {
+		boolean wasSentBack = isSentBackStatus(current.getChequeStatus());
+
+		// Transition to MAKER_RETURNED if rework, else standard CHECKER_PROCESSING_PENDING
+		if (wasSentBack) {
 			current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
 		} else {
 			current.setChequeStatus(InwardChequeStatus.CHECKER_PROCESSING_PENDING.name());
 		}
 		chequeService.updateChequeDetails(current);
+
+		// Dispatch notification immediately if sent-back item was resolved
+		if (wasSentBack) {
+			try {
+				User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
+				String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
+				String notifMsg = "Cheque #" + current.getChequeNumber() + " in Batch " 
+						+ this.currentBatchId + " has been corrected and returned by Maker (" + userId + "). Stage: DATA_ENTRY.";
+				
+				notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
+				System.out.println("DEBUG: Resend notification sent to INWARD_CHECKER for Cheque #" + current.getChequeNumber());
+			} catch (Exception e) {
+				System.err.println("WARN: Failed to dispatch resend notification to INWARD_CHECKER: " + e.getMessage());
+			}
+		}
 
 		if (currentIndex < activeQueue.size() - 1) {
 			currentIndex++;
@@ -611,7 +631,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		// Send notification to INWARD_CHECKER
 		String reasonLabel = cmbModalRejectionReason.getSelectedItem().getLabel();
 		String notifMsg = "Rejection requested for Cheque #" + current.getChequeNumber() + " in Batch "
-				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId;
+				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId + ". Stage: DATA_ENTRY.";
 
 		notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
 
@@ -686,7 +706,27 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			winCompletionConfirmModal.setVisible(false);
 		}
 
-		// Leaves batch_status untouched
+		try {
+			// Update parent batch_status ONLY for normal/fresh batches
+			if (!this.isReworkBatch) {
+				batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
+				System.out.println("DEBUG: Fresh batch " + currentBatchId + " updated to CHECKER_PROCESSING_PENDING");
+			} else {
+				System.out.println("DEBUG: Sent-back rework batch " + currentBatchId + " parent status left untouched.");
+			}
+
+			// Dispatch batch submission notification
+			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
+			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
+			String notifMsg = this.isReworkBatch
+					? "Rework for Batch " + currentBatchId + " completed by Maker (" + userId + ")."
+					: "Batch " + currentBatchId + " submitted to Checker by Maker (" + userId + ").";
+
+			notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
+		} catch (Exception e) {
+			System.err.println("ERROR: Failed in executeSubmitToChecker: " + e.getMessage());
+			e.printStackTrace();
+		}
 
 		Sessions.getCurrent().removeAttribute("ACTIVE_INWARD_BATCH_ID");
 

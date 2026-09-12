@@ -16,24 +16,73 @@ body {
     min-height: 100% !important;
 }
 
+.listbox-header .z-listhead {
+    height: 46px !important;
+}
+
 .listbox-header .z-listheader {
     background: #1C3673 !important;
     border-bottom: 1px solid #E0E6ED !important;
+    border-right: 1px solid #3D6BB5 !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+    text-align: center !important;
 }
 
 .listbox-header .z-listheader-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 46px !important;
+    padding: 4px 5px !important;
+    box-sizing: border-box !important;
     color: white !important;
     font-weight: bold !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+
+.listbox-header .z-listitem {
+    height: 40px !important;
+    min-height: 40px !important;
+}
+
+.listbox-header .z-listcell {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+    text-align: center !important;
 }
 
 .listbox-header .z-listcell-content {
-    font-size: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 40px !important;
+    padding: 0 5px !important;
+    box-sizing: border-box !important;
+    font-size: 11px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
     color: black !important;
 }
 
 .listbox-header .z-listitem:hover {
     background: transparent !important;
+}
+
+.listbox-header .z-listcell-content > * {
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .batch-status {
@@ -53,39 +102,54 @@ body {
     background: #28A745 !important;
     color: white !important;
     border: 1px solid #28A745 !important;
+    padding: 2px 8px !important;
+    border-radius: 15px !important;
+    font-size: 9px !important;
+    font-weight: bold !important;
+    line-height: 18px !important;
+    min-width: 65px !important;
+    text-align: center !important;
+    display: inline-block !important;
+    box-sizing: border-box !important;
 }
-
 .batch-status-pending {
     background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
     border: 1px solid #F5A900 !important;
     color: #7A4500 !important;
 }
+
 .z-listbox-paging {
     background: transparent !important;
     background-color: transparent !important;
     border: none !important;
+    border-top: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    box-shadow: none !important;
 }
 
 .z-listbox-paging .z-paging {
     background: transparent !important;
-    background-color: #EAF4FB !important;
+    background-color: transparent !important;
     border: none !important;
+    box-shadow: none !important;
 }
 
 .z-listbox-paging .z-paging-button {
     background: transparent !important;
-    background-color: #EAF4FB !important;
+    background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
 }
 
 .z-listbox-paging .z-paging-button:hover {
-    background: #EAF4FB !important;
-    background-color: #EAF4FB !important;
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
 .z-listbox-paging .z-paging-input {
-    background: #EAF4FB !important;
+    background: white !important;
     border: 1px solid #D0D7DE !important;
 }
 
@@ -95,7 +159,7 @@ body {
     padding: 0 6px !important;
     position: relative !important;
     box-sizing: border-box !important;
-    background: #EAF4FB !important;
+    background: transparent !important;
 }
 
 .z-paging-button {
@@ -108,7 +172,7 @@ body {
     line-height: 20px !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    background: #EAF4FB !important;
+    background: transparent !important;
     border: none !important;
 }
 

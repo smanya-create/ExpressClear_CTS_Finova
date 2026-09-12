@@ -16,7 +16,7 @@
 
     <property name="net.sf.jasperreports.export.character.encoding" value="UTF-8"/>
 
-    <!-- 1. Subdataset MUST come before main parameters -->
+    <!-- 1. Subdataset for Audit Logs -->
     <subDataset name="AuditDataset" uuid="6243fb3c-c9d3-4903-8820-c83ec83a3028">
         <parameter name="P_FROM_DATE" class="java.sql.Date"/>
         <parameter name="P_TO_DATE" class="java.sql.Date"/>
@@ -56,7 +56,7 @@
         <defaultValueExpression><![CDATA["ADMIN"]]></defaultValueExpression>
     </parameter>
 
-    <!-- 3. Main Query -->
+    <!-- 3. Main Query (Outward Batches) -->
     <queryString language="SQL">
         <![CDATA[
             SELECT 
@@ -84,28 +84,11 @@
     <field name="uploaded_by" class="java.lang.String"/>
     <field name="batch_status" class="java.lang.String"/>
 
-    <!-- 5. Group for Empty Batch State -->
-    <group name="BatchGroup">
-        <groupExpression><![CDATA[1]]></groupExpression>
-        <groupHeader>
-            <band height="20">
-                <printWhenExpression><![CDATA[$V{REPORT_COUNT} == 0]]></printWhenExpression>
-                <staticText>
-                    <reportElement x="0" y="2" width="802" height="16" forecolor="#64748B" uuid="d914833d-c11f-4e00-8438-6cf4041e1799"/>
-                    <textElement textAlignment="Center" verticalAlignment="Middle">
-                        <font fontName="SansSerif" size="8" isItalic="true"/>
-                    </textElement>
-                    <text><![CDATA[No outward clearing batches found for the selected date range.]]></text>
-                </staticText>
-            </band>
-        </groupHeader>
-    </group>
-
-    <!-- 6. Document Header -->
+    <!-- 5. Document Header (CTS Dark Navy Theme #173B61) -->
     <title>
         <band height="62">
             <rectangle>
-                <reportElement x="0" y="0" width="802" height="52" backcolor="#0B192E" uuid="ce1cb904-747f-4428-9844-326e5e8e8ba6"/>
+                <reportElement x="0" y="0" width="802" height="52" backcolor="#173B61" uuid="ce1cb904-747f-4428-9844-326e5e8e8ba6"/>
                 <graphicElement><pen lineWidth="0.0"/></graphicElement>
             </rectangle>
             <staticText>
@@ -139,7 +122,7 @@
         </band>
     </title>
 
-    <!-- 7. Section 1 Header (Batches) -->
+    <!-- 6. Section 1 Header (Batches) -->
     <columnHeader>
         <band height="44">
             <staticText>
@@ -154,44 +137,44 @@
                 <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
             </rectangle>
             <staticText>
-                <reportElement x="8" y="24" width="90" height="16" uuid="e8184d0b-6ae9-42b7-83eb-568eaecad970"/>
+                <reportElement x="8" y="24" width="85" height="16" uuid="e8184d0b-6ae9-42b7-83eb-568eaecad970"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[BATCH ID]]></text>
             </staticText>
             <staticText>
-                <reportElement x="105" y="24" width="160" height="16" uuid="53e6d2bc-681b-4f9e-9904-45377f525bfb"/>
+                <reportElement x="95" y="24" width="165" height="16" uuid="53e6d2bc-681b-4f9e-9904-45377f525bfb"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[REFERENCE ID]]></text>
             </staticText>
             <staticText>
-                <reportElement x="270" y="24" width="120" height="16" uuid="c24cf16a-ff99-4cce-91ba-43d9b43aa698"/>
+                <reportElement x="265" y="24" width="120" height="16" uuid="c24cf16a-ff99-4cce-91ba-43d9b43aa698"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[UPLOADED AT]]></text>
             </staticText>
             <staticText>
-                <reportElement x="395" y="24" width="70" height="16" uuid="3ae30e70-cfcf-4da8-963d-4c3e387c9f65"/>
+                <reportElement x="390" y="24" width="65" height="16" uuid="3ae30e70-cfcf-4da8-963d-4c3e387c9f65"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[CHEQUES]]></text>
             </staticText>
             <staticText>
-                <reportElement x="475" y="24" width="130" height="16" uuid="d614833d-c11f-4e00-8438-6cf4041e17d2"/>
+                <reportElement x="465" y="24" width="130" height="16" uuid="d614833d-c11f-4e00-8438-6cf4041e17d2"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[TOTAL AMOUNT (INR)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="620" y="24" width="100" height="16" uuid="e2646d6b-586b-4e67-93d3-fcf30f81d184"/>
+                <reportElement x="610" y="24" width="95" height="16" uuid="e2646d6b-586b-4e67-93d3-fcf30f81d184"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[UPLOADED BY]]></text>
             </staticText>
             <staticText>
-                <reportElement x="725" y="24" width="70" height="16" uuid="cfd01e14-d830-4e38-9276-87cfa3748281"/>
+                <reportElement x="710" y="24" width="85" height="16" uuid="cfd01e14-d830-4e38-9276-87cfa3748281"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[STATUS]]></text>
             </staticText>
         </band>
     </columnHeader>
 
-    <!-- 8. Main Detail Rows (Batches) -->
+    <!-- 7. Main Detail Rows (Batches) -->
     <detail>
         <band height="18">
             <rectangle>
@@ -201,44 +184,44 @@
                 <graphicElement><pen lineWidth="0.0"/></graphicElement>
             </rectangle>
             <textField>
-                <reportElement x="8" y="1" width="90" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa691"/>
+                <reportElement x="8" y="1" width="85" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa691"/>
                 <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="105" y="1" width="160" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa692"/>
+                <reportElement x="95" y="1" width="165" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa692"/>
                 <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression>
             </textField>
             <textField pattern="yyyy-MM-dd HH:mm">
-                <reportElement x="270" y="1" width="120" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa693"/>
+                <reportElement x="265" y="1" width="120" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa693"/>
                 <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="395" y="1" width="70" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa694"/>
+                <reportElement x="390" y="1" width="65" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa694"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{cheque_count}]]></textFieldExpression>
             </textField>
             <textField pattern="#,##0.00">
-                <reportElement x="475" y="1" width="130" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa695"/>
+                <reportElement x="465" y="1" width="130" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa695"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{total_amount}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="620" y="1" width="100" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa696"/>
+                <reportElement x="610" y="1" width="95" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa696"/>
                 <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                 <textFieldExpression><![CDATA[$F{uploaded_by}]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="725" y="1" width="70" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa697"/>
+                <reportElement x="710" y="1" width="85" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa697"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression>
             </textField>
         </band>
     </detail>
 
-    <!-- 9. Page Footer (Must come before Summary) -->
+    <!-- 8. Page Footer -->
     <pageFooter>
         <band height="20">
             <textField>
@@ -254,7 +237,7 @@
         </band>
     </pageFooter>
 
-    <!-- 10. Summary Band: Section 2 (System Audit Logs) -->
+    <!-- 9. Summary Band: Section 2 (System Audit Logs) -->
     <summary>
         <band height="100">
             <!-- Section 2 Header -->
@@ -272,42 +255,42 @@
                 <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
             </rectangle>
             <staticText>
-                <reportElement x="8" y="44" width="115" height="16" uuid="525fb843-030b-4835-94f7-34fa1b1bc270"/>
+                <reportElement x="8" y="44" width="112" height="16" uuid="525fb843-030b-4835-94f7-34fa1b1bc270"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[TIMESTAMP]]></text>
             </staticText>
             <staticText>
-                <reportElement x="128" y="44" width="85" height="16" uuid="d6141a02-5360-4965-9a8c-ce499d63d6b0"/>
+                <reportElement x="124" y="44" width="76" height="16" uuid="d6141a02-5360-4965-9a8c-ce499d63d6b0"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[USER]]></text>
             </staticText>
             <staticText>
-                <reportElement x="218" y="44" width="75" height="16" uuid="61f0088d-2947-4184-b0db-5509ba249f05"/>
+                <reportElement x="204" y="44" width="100" height="16" uuid="61f0088d-2947-4184-b0db-5509ba249f05"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[ROLE]]></text>
             </staticText>
             <staticText>
-                <reportElement x="298" y="44" width="75" height="16" uuid="096a6671-55c4-428a-aaef-e3ec920cfb2e"/>
+                <reportElement x="308" y="44" width="66" height="16" uuid="096a6671-55c4-428a-aaef-e3ec920cfb2e"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[MODULE]]></text>
             </staticText>
             <staticText>
-                <reportElement x="378" y="44" width="85" height="16" uuid="454b1f60-ea79-4d2c-a2b1-5e5d3fa96a5f"/>
+                <reportElement x="378" y="44" width="76" height="16" uuid="454b1f60-ea79-4d2c-a2b1-5e5d3fa96a5f"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[ACTION]]></text>
             </staticText>
             <staticText>
-                <reportElement x="468" y="44" width="195" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486a"/>
+                <reportElement x="458" y="44" width="192" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486a"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[DETAILS]]></text>
             </staticText>
             <staticText>
-                <reportElement x="668" y="44" width="75" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486b"/>
+                <reportElement x="654" y="44" width="86" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486b"/>
                 <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[IP ADDRESS]]></text>
             </staticText>
             <staticText>
-                <reportElement x="748" y="44" width="45" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486c"/>
+                <reportElement x="744" y="44" width="52" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486c"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                 <text><![CDATA[STATUS]]></text>
             </staticText>
@@ -329,42 +312,42 @@
                     </datasetRun>
                     <jr:listContents height="18">
                         <textField pattern="yyyy-MM-dd HH:mm:ss">
-                            <reportElement x="8" y="1" width="115" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000001"/>
+                            <reportElement x="8" y="1" width="112" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000001"/>
                             <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                             <textFieldExpression><![CDATA[$F{log_time}]]></textFieldExpression>
                         </textField>
                         <textField>
-                            <reportElement x="128" y="1" width="85" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000002"/>
+                            <reportElement x="124" y="1" width="76" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000002"/>
                             <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                             <textFieldExpression><![CDATA[$F{username}]]></textFieldExpression>
                         </textField>
                         <textField>
-                            <reportElement x="218" y="1" width="75" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000003"/>
+                            <reportElement x="204" y="1" width="100" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000003"/>
                             <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                             <textFieldExpression><![CDATA[$F{role_name}]]></textFieldExpression>
                         </textField>
                         <textField>
-                            <reportElement x="298" y="1" width="75" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000004"/>
+                            <reportElement x="308" y="1" width="66" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000004"/>
                             <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                             <textFieldExpression><![CDATA[$F{module}]]></textFieldExpression>
                         </textField>
                         <textField>
-                            <reportElement x="378" y="1" width="85" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000005"/>
+                            <reportElement x="378" y="1" width="76" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000005"/>
                             <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                             <textFieldExpression><![CDATA[$F{action}]]></textFieldExpression>
                         </textField>
                         <textField textAdjust="StretchHeight">
-                            <reportElement x="468" y="1" width="195" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000006"/>
+                            <reportElement x="458" y="1" width="192" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000006"/>
                             <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                             <textFieldExpression><![CDATA[$F{details}]]></textFieldExpression>
                         </textField>
                         <textField>
-                            <reportElement x="668" y="1" width="75" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000007"/>
+                            <reportElement x="654" y="1" width="86" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000007"/>
                             <textElement verticalAlignment="Middle"><font size="8"/></textElement>
                             <textFieldExpression><![CDATA[$F{ip_address}]]></textFieldExpression>
                         </textField>
                         <textField>
-                            <reportElement x="748" y="1" width="45" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000008"/>
+                            <reportElement x="744" y="1" width="52" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000008"/>
                             <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
                             <textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
                         </textField>

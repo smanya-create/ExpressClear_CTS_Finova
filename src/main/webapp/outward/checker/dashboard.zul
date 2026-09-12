@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?page title="Checker Dashboard" contentType="text/html;charset=UTF-8"?>
+<?page title="ExpressClear CTS - Checker Dashboard" contentType="text/html;charset=UTF-8"?>
 
 <zk title="CTS - Checker Dashboard">
 
@@ -61,37 +61,47 @@
                                     sclass="outward-checker-welcome-subtitle" />
 
                             </div>
+<div sclass="outward-checker-search-section">
 
-                            <div
-                                sclass="outward-checker-summary-card">
+    <label
+        value="Batch Search"
+        sclass="outward-checker-search-title" />
 
-                                <div
-                                    sclass="outward-checker-summary-item">
+    <hlayout
+        sclass="outward-checker-search-row"
+        spacing="8px">
 
-                                    <label
-                                        value="BATCHES AWAITING CHECKER"
-                                        sclass="outward-checker-summary-label" />
+        <textbox
+            id="txtBatchId"
+            placeholder="Enter Batch ID"
+            sclass="outward-checker-search-input"
+            hflex="1" />
 
-                                    <label
-                                        id="lblTotalBatches"
-                                        sclass="outward-checker-summary-value" />
+        <datebox
+            id="fromDate"
+            placeholder="From Date"
+            format="dd-MM-yyyy"
+            sclass="outward-checker-search-date" />
 
-                                </div>
+        <datebox
+            id="toDate"
+            placeholder="To Date"
+            format="dd-MM-yyyy"
+            sclass="outward-checker-search-date" />
 
-                                <div
-                                    sclass="outward-checker-summary-item">
+        <button
+            id="btnClear"
+            label="Clear"
+            sclass="outward-checker-clear-button" />
 
-                                    <label
-                                        value="CHEQUES"
-                                        sclass="outward-checker-summary-label" />
+        <button
+            id="btnSearch"
+            label="Search"
+            sclass="outward-checker-search-button" />
 
-                                    <label
-                                        id="lblTotalCheques"
-                                        sclass="outward-checker-summary-value" />
+    </hlayout>
 
-                                </div>
-
-                            </div>
+</div>
 
                             <div
                                 sclass="outward-checker-section-header">
@@ -111,10 +121,7 @@
 
                                 <listbox
                                     id="lstBatches"
-                                    sclass="outward-checker-batch-table"
-                                    height="270px"
-                                    mold="paging"
-                                    autopaging="false">
+                                    sclass="outward-checker-batch-table"	>
 
                                     <listhead>
 
@@ -140,7 +147,7 @@
 
                                         <listheader
                                             label="STATUS"
-                                            width="13%" />
+                                            width="17%" />
 
                                         <listheader
                                             label="Action"
@@ -152,27 +159,38 @@
 
                             </div>
 
-                            <div
-                                sclass="outward-checker-pagination">
+                            <div sclass="outward-checker-pagination">
 
-                                <button
-                                    id="btnPrevious"
-                                    label="‹"
-                                    disabled="true"
-                                    sclass="outward-checker-pagination-button" />
+    <button
+        id="btnFirst"
+        label="«"
+        disabled="true"
+        sclass="outward-checker-pagination-button" />
 
-                                <label
-                                    id="lblPage"
-                                    value="1/1"
-                                    sclass="outward-checker-pagination-label" />
+    <button
+        id="btnPrevious"
+        label="‹"
+        disabled="true"
+        sclass="outward-checker-pagination-button" />
 
-                                <button
-                                    id="btnNext"
-                                    label="›"
-                                    disabled="true"
-                                    sclass="outward-checker-pagination-button" />
+    <label
+        id="lblPage"
+        value="1/1"
+        sclass="outward-checker-pagination-label" />
 
-                            </div>
+    <button
+        id="btnNext"
+        label="›"
+        disabled="true"
+        sclass="outward-checker-pagination-button" />
+
+    <button
+        id="btnLast"
+        label="»"
+        disabled="true"
+        sclass="outward-checker-pagination-button" />
+
+</div>
 
                         </div>
 

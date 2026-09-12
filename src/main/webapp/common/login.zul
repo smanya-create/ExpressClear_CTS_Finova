@@ -18,7 +18,7 @@
     </hlayout>
 
     <!-- Login Card Container -->
-    <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center;padding: 40px 0;">
+    <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center; padding: 40px 0;">
         <vlayout sclass="login-card" spacing="0" style="margin-top: 50px !important; margin-bottom: 40px !important;">
             
             <vlayout spacing="6px" style="text-align: center; margin-bottom: 30px;">
@@ -27,12 +27,13 @@
             </vlayout>
 
             <vlayout spacing="18px">
-                <!-- Username Field -->
+                <!-- Username or Email Field -->
                 <vlayout spacing="4px">
-                    <label value="USERNAME" sclass="field-label"/>
-                    <textbox id="txtUsername" placeholder="Enter your username" 
-                             constraint="no empty: Username is required."
-                             sclass="input-field" hflex="1" height="42px" />
+                    <label value="USERNAME OR EMAIL" sclass="field-label"/>
+                    <textbox id="txtIdentifier" placeholder="Enter your username or email" 
+                             constraint="no empty: Username or email is required."
+                             sclass="input-field" hflex="1" height="42px" 
+                             onOK="$composer.onOKIdentifier()"/>
                 </vlayout>
 
                 <!-- Password Field -->
@@ -42,7 +43,8 @@
                         <textbox id="txtPassword" type="password" placeholder="Enter your password" 
                                  constraint="no empty: Password is required."
                                  sclass="input-field" hflex="1" height="42px"
-                                 style="padding-right: 42px; box-sizing: border-box;" />
+                                 style="padding-right: 42px; box-sizing: border-box;" 
+                                 onOK="$composer.onOKPassword()"/>
                         <button id="btnTogglePassword" 
                                 iconSclass="z-icon-eye"
                                 onClick="$composer.onTogglePasswordVisibility()"
@@ -50,25 +52,18 @@
                     </hlayout>
                 </vlayout>
 
-                <!-- Role Selection Dropdown -->
-                <vlayout spacing="4px">
-                    <label value="ROLE" sclass="field-label"/>
-                    <combobox id="cmbRole" placeholder="Select your role" readonly="true"
-                              hflex="1" height="42px" style="font-size: 13px;" />
-                </vlayout>
+                <!-- Inline Error Banner (Hidden by default) -->
+                <div id="divErrorBox" visible="false" 
+                     style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
+                    <span class="z-icon-exclamation-circle" style="color: #e53e3e; font-size: 14px;" />
+                    <label id="lblErrorMessage" style="color: #c53030; font-size: 12px; font-weight: 600; line-height: 1.4;" />
+                </div>
 
-                <separator height="10px"/>
+                <separator height="4px"/>
 
                 <!-- Sign In Button -->
-                <button id="btnSignIn" label="Sign In" hflex="1" height="42px" style="background: #0d2342 !important; background-color: #0d2342 !important; border: 1px solid #0d2342 !important; color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; border-radius: 6px !important; box-shadow: none !important;" />
-
-                <separator height="10px"/>
-
-                <!-- Authorization Notice -->
-                <vlayout spacing="2px" style="text-align: center;">
-                    <label value="Authorized users only" style="font-size: 11px; color: #a0aec0; display: block;"/>
-                    <label value="Your access is controlled by your assigned role." style="font-size: 11px; color: #a0aec0; display: block;"/>
-                </vlayout>
+                <button id="btnSignIn" label="Sign In" hflex="1" height="42px" 
+                        style="background: #0d2342 !important; background-color: #0d2342 !important; border: 1px solid #0d2342 !important; color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; border-radius: 6px !important; box-shadow: none !important; cursor: pointer;" />
             </vlayout>
 
         </vlayout>
@@ -76,7 +71,7 @@
 
     <!-- Footer Ribbon -->
     <div sclass="footer-text" hflex="1">
-        <label value="© Express Clear CTS · Secure Banking Application"/>
+        <label value="© Express Clear CTS · TEAM FINOVA"/>
     </div>
 
 </vlayout>

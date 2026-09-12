@@ -22,74 +22,137 @@
 
 			</div>
 
-			<div sclass="outward-maker-section-header">
+			<div sclass="outward-maker-return-section">
 
-				<div>
+				<div sclass="outward-maker-section-header">
 
-					<label value="Processing Batches"
-						sclass="outward-maker-section-title" />
+					<div>
 
-					<label
-						value="Batches currently available for outward processing."
-						sclass="outward-maker-section-subtitle" />
+						<label value="Return From Checker"
+							sclass="outward-maker-section-title" />
+
+						<label
+							value="Cheques returned by Checker that require Maker action."
+							sclass="outward-maker-section-subtitle" />
+
+					</div>
+
+				</div>
+
+				<div sclass="outward-maker-table-card">
+
+					<grid id="outwardMakerGridReturnedBatches"
+						width="100%" sclass="outward-maker-batch-grid">
+
+						<columns sizable="true">
+
+							<column label="Batch ID" width="20%" />
+
+							<column label="Cheque Number" width="20%" />
+
+							<column label="Status" width="25%" />
+
+							<column label="Reason / Remarks"
+								width="20%" />
+
+							<column label="Action" width="15%" />
+
+						</columns>
+
+						<rows id="outwardMakerRowsReturnedBatches" />
+
+					</grid>
+
+					<vlayout id="outwardMakerVlayoutReturnedEmptyState"
+						visible="false" sclass="outward-maker-empty-state">
+
+						<label value="No returned cheques found"
+							sclass="outward-maker-empty-title" />
+
+						<label
+							value="There are currently no cheques returned by Checker."
+							sclass="outward-maker-empty-subtitle" />
+
+					</vlayout>
 
 				</div>
 
 			</div>
 
-			<div sclass="outward-maker-table-card">
+			<space height="38px" />
 
-				<grid id="outwardMakerGridBatchDetails" width="100%"
-					sclass="outward-maker-batch-grid">
+			<div sclass="outward-maker-processing-section">
 
-					<columns sizable="true">
+				<div sclass="outward-maker-section-header">
 
-						<column label="Batch ID" width="20%" />
+					<div>
 
-						<column label="No. of Cheques" width="20%" />
+						<label value="Batches Processing"
+							sclass="outward-maker-section-title" />
 
-						<column label="Total Amount" width="20%" />
+						<label
+							value="Batches available for outward processing."
+							sclass="outward-maker-section-subtitle" />
 
-						<column label="Status" width="20%" />
+					</div>
 
-						<column label="Action" width="20%" />
+				</div>
 
-					</columns>
+				<div sclass="outward-maker-table-card">
 
-					<rows id="outwardMakerRowsBatchDetails" />
+					<grid id="outwardMakerGridBatchDetails" width="100%"
+						sclass="outward-maker-batch-grid">
 
-				</grid>
+						<columns sizable="true">
 
-				<vlayout id="outwardMakerVlayoutEmptyState"
-					visible="false" sclass="outward-maker-empty-state">
+							<column label="Batch ID" width="20%" />
 
-					<label value="No processing batches found"
-						sclass="outward-maker-empty-title" />
+							<column label="No. of Cheques" width="20%" />
 
-					<label
-						value="There are currently no batches available for outward processing."
-						sclass="outward-maker-empty-subtitle" />
+							<column label="Total Amount" width="20%" />
 
-				</vlayout>
+							<column label="Status" width="20%" />
 
-			</div>
+							<column label="Action" width="20%" />
 
-			<div sclass="outward-maker-pagination">
+						</columns>
 
-				<button id="outwardMakerBtnFirst" label="&lt;&lt;"
-					sclass="outward-maker-pagination-button" />
+						<rows id="outwardMakerRowsBatchDetails" />
 
-				<button id="outwardMakerBtnPrevious" label="&lt;"
-					sclass="outward-maker-pagination-button" />
+					</grid>
 
-				<label id="outwardMakerLblCurrentPage" value="1 / 1"
-					sclass="outward-maker-pagination-label" />
+					<vlayout id="outwardMakerVlayoutEmptyState"
+						visible="false" sclass="outward-maker-empty-state">
 
-				<button id="outwardMakerBtnNext" label="&gt;"
-					sclass="outward-maker-pagination-button" />
+						<label value="No new processing batches found"
+							sclass="outward-maker-empty-title" />
 
-				<button id="outwardMakerBtnLast" label="&gt;&gt;"
-					sclass="outward-maker-pagination-button" />
+						<label
+							value="There are currently no batches available for outward processing."
+							sclass="outward-maker-empty-subtitle" />
+
+					</vlayout>
+
+				</div>
+
+				<div sclass="outward-maker-pagination">
+
+					<button id="outwardMakerBtnFirst" label="&lt;&lt;"
+						sclass="outward-maker-pagination-button" />
+
+					<button id="outwardMakerBtnPrevious" label="&lt;"
+						sclass="outward-maker-pagination-button" />
+
+					<label id="outwardMakerLblCurrentPage" value="1 / 1"
+						sclass="outward-maker-pagination-label" />
+
+					<button id="outwardMakerBtnNext" label="&gt;"
+						sclass="outward-maker-pagination-button" />
+
+					<button id="outwardMakerBtnLast" label="&gt;&gt;"
+						sclass="outward-maker-pagination-button" />
+
+				</div>
 
 			</div>
 

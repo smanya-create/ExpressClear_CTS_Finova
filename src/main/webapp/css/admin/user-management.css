@@ -27,19 +27,14 @@
     font-weight: 600 !important;
 }
 
-/* Fix table header alignment and remove excess blue background */
-.cts-custom-grid .z-grid-header,
-.cts-custom-grid .z-column {
-    background: #eef3f8 !important;
-    border-right: none !important;
-}
 .cts-content-wrapper {
-    padding: 32px 40px 40px 40px;
-    background-color: #f0f4f8;
+    padding: 0 !important;
+    background-color: #f1f5f9;
     min-height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #1e293b;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .cts-section-header-row {
@@ -146,7 +141,7 @@
     border-color: #e2e8f0 !important;
 }
 
-/* Customizing ZK native Combobox to look like a modern select box */
+/* Customizing ZK native Combobox */
 .cts-combobox {
     display: block !important;
     width: 100% !important;
@@ -223,12 +218,12 @@
     background-color: #1a3962 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    font-size: 12px !important;
+    font-size: 11.5px !important;
     letter-spacing: 0.6px !important;
-    height: 42px !important;
-    padding: 0 24px !important;
+    height: 36px !important;
+    padding: 0 20px !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: background-color 0.15s ease;
@@ -238,21 +233,16 @@
     background-color: #112745 !important;
 }
 
-.cts-filter-actions {
-    display: flex;
-    gap: 10px;
-}
-
 .cts-btn-filter-search {
-    background-color: #1a3962 !important;
+    background-color: #173b61 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    font-size: 11.5px !important;
-    letter-spacing: 0.6px !important;
-    height: 40px !important;
-    padding: 0 22px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.5px !important;
+    height: 34px !important;
+    padding: 0 16px !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     cursor: pointer;
 }
 
@@ -264,12 +254,12 @@
     background-color: #e2e8f0 !important;
     color: #334155 !important;
     font-weight: 700 !important;
-    font-size: 11.5px !important;
-    letter-spacing: 0.6px !important;
-    height: 40px !important;
-    padding: 0 20px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.5px !important;
+    height: 34px !important;
+    padding: 0 14px !important;
     border: none !important;
-    border-radius: 8px !important;
+    border-radius: 6px !important;
     cursor: pointer;
 }
 
@@ -319,45 +309,72 @@
 }
 
 /* ==========================================================================
-   TABLE / GRID CUSTOM STYLING (ZK OVERRIDES)
+   NAVY BLUE SLIM GRID STYLING
    ========================================================================== */
-.cts-table-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.cts-count-caption {
-    font-size: 12.5px;
-    font-weight: 500;
-    color: #64748b;
-}
-
 .cts-custom-grid.z-grid {
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    overflow: hidden !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
     background: #ffffff !important;
+    overflow: hidden !important;
+}
+
+/* 1. Force Deep Navy Blue across all header elements and background tables */
+.cts-custom-grid .z-grid-header,
+.cts-custom-grid .z-grid-header-bg,
+.cts-custom-grid .z-grid-header table,
+.cts-custom-grid .z-grid-header-border,
+.cts-custom-grid th.z-column,
+.cts-custom-grid th.z-columns-bar,
+.cts-custom-grid .z-columns-bar {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    background-image: none !important;
+    border-color: #0f2742 !important;
+}
+
+/* 2. Fix the bright-blue scrollbar spacer column specifically */
+.cts-custom-grid th.z-columns-bar,
+.cts-custom-grid .z-columns-bar {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    background-image: none !important;
+    border-bottom: 1px solid #0f2742 !important;
+    border-right: none !important;
+    box-shadow: none !important;
 }
 
 .cts-custom-grid .z-grid-header-bg {
-    background: #f1f5f9 !important;
+    background: #173b61 !important;
+    border-bottom: 1px solid #0f2742 !important;
 }
 
-.cts-custom-grid .z-column {
-    background: #f1f5f9 !important;
-    border-bottom: 1.5px solid #e2e8f0 !important;
-    border-right: none !important;
-    padding: 12px 16px !important;
+.cts-custom-grid .z-grid-header {
+    background: #173b61 !important;
+    border-bottom: 1px solid #0f2842 !important;
+}
+
+/* Slim column headers */
+.cts-custom-grid th.z-column {
+    height: 32px !important;
+    padding: 4px 10px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-bottom: 1px solid #0f2742 !important;
 }
 
 .cts-custom-grid .z-column-content {
+    color: #ffffff !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    color: #475569 !important;
     letter-spacing: 0.6px !important;
+    line-height: 24px !important;
+    padding: 0 4px !important;
     text-transform: uppercase !important;
+}
+
+/* Scrollable grid body */
+.cts-custom-grid .z-grid-body {
+    overflow-y: auto !important;
+    max-height: 100% !important;
 }
 
 .cts-custom-grid .z-row .z-row-inner {
@@ -366,8 +383,8 @@
 }
 
 .cts-custom-grid .z-row-content {
-    padding: 14px 16px !important;
-    font-size: 13.5px !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
     color: #334155 !important;
 }
 
@@ -375,51 +392,31 @@
     background-color: #f8fafc !important;
 }
 
-.cts-btn-modify-row {
-    background-color: #e2e8f0 !important;
-    color: #1a3962 !important;
+/* 3. Navy Blue Modify Button with White Text */
+.cts-btn-modify-row,
+.cts-custom-grid .cts-btn-modify-row,
+.cts-custom-grid .z-row .z-button {
+    background: #173b61 !important;
+    background-color: #173b61 !important;
+    color: #ffffff !important;
     font-size: 11px !important;
     font-weight: 700 !important;
     letter-spacing: 0.5px !important;
-    height: 30px !important;
+    height: 28px !important;
     padding: 0 16px !important;
     border: none !important;
-    border-radius: 5px !important;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    transition: background-color 0.15s ease !important;
 }
 
-.cts-btn-modify-row:hover {
-    background-color: #cbd5e1 !important;
-}
-
-/* Pagination Bar */
-.cts-pagination-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.cts-pagination-info {
-    font-size: 12.5px;
-    color: #64748b;
-}
-
-.cts-page-box {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12.5px;
-    font-weight: 700;
-}
-
-.cts-page-box-active {
-    background-color: #1a3962;
-    color: #ffffff;
+.cts-btn-modify-row:hover,
+.cts-custom-grid .cts-btn-modify-row:hover,
+.cts-custom-grid .z-row .z-button:hover {
+    background: #0f2742 !important;
+    background-color: #0f2742 !important;
+    color: #ffffff !important;
 }
 
 /* ==========================================================================
@@ -485,28 +482,15 @@
     color: #64748b;
 }
 
-/* Bottom Footer */
-.cts-portal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 20px;
-    margin-top: 16px;
-}
-
-.cts-footer-left, .cts-footer-right {
-    font-size: 11.5px;
-    color: #94a3b8;
-}
-/* Container wrapper */
+/* ==========================================================================
+   PAGINATION TOOLBAR
+   ========================================================================== */
 .cts-pagination-wrapper {
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;
 }
 
-/* Page navigation buttons */
 .pg-nav-btn {
     width: 32px !important;
     height: 32px !important;
@@ -537,7 +521,6 @@
     border-color: #e2e8f0 !important;
 }
 
-/* Current page input box - centered and compact */
 .pg-current-input {
     width: 38px !important;
     height: 32px !important;
@@ -558,7 +541,6 @@
     outline: none !important;
 }
 
-/* Total pages label - perfectly vertically centered */
 .pg-total-label {
     font-size: 13px !important;
     font-weight: 700 !important;
@@ -567,4 +549,50 @@
     vertical-align: middle !important;
     margin: 0 8px 0 2px !important;
     display: inline-block !important;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.cts-portal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 10px;
+}
+
+.cts-footer-left, .cts-footer-right {
+    font-size: 11.5px;
+    color: #94a3b8;
+}
+/* 1. All Column Headers Center Aligned */
+.z-listheader, 
+.z-column {
+    text-align: center !important;
+}
+
+.z-listheader-content, 
+.z-column-content {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* 2. Text Cells Left Aligned by default */
+.z-listcell-content, 
+.z-row-inner {
+    text-align: left;
+}
+
+/* 3. Utility class for Numeric / Count / Status Cells (Centered) */
+.cell-center,
+.cell-num {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* 4. Utility class for Text / Descriptions (Left Aligned) */
+.cell-text {
+    text-align: left !important;
+    justify-content: flex-start !important;
 }

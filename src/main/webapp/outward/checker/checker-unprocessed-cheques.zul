@@ -1,106 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?style src="/css/cts-unprocessed.css"?>
+<?page title="ExpressClear CTS - Checker Unprocessed Cheques"?>
+<?link rel="stylesheet" type="text/css" href="/css/cts-unprocessed.css"?>
 <zk xmlns="http://www.zkoss.org/2005/zul">
-    <!-- Top-Level Layout: Full Height Sidebar on Left, Content on Right -->
+    <!-- Top-Level Layout: Sidebar on Left, Work Area on Right -->
     <borderlayout vflex="1" hflex="1">
         
-        <!-- Full-Height Checker Sidebar -->
+        <!-- Sidebar -->
         <west width="240px" border="none" collapsible="false">
             <include src="/components/sidebar.zul" role="OUTWARD_CHECKER" activeTab="unprocessed" />
         </west>
 
-        <!-- Right View Container -->
+        <!-- Right Workspace -->
         <center border="none">
             <borderlayout vflex="1" hflex="1">
                 
-                <!-- Inner North: Header pinned on top -->
+                <!-- Header Component -->
                 <north size="80px" border="none">
                     <include id="incHeader" src="/components/header.zul" 
                              pageTitle="Outward Checker" 
                              pageSubtitle="Unprocessed Cheques" />
                 </north>
 
-                <!-- Inner Center: Checker Workspace -->
+                <!-- Checker Content Area -->
                 <center border="none" autoscroll="true">
                     <window id="winCheckerUnprocessed" border="none" vflex="1" hflex="1"
                             apply="com.iispl.cts.controller.outward.checker.CheckerUnprocessedChequesController"
-                            style="padding: 20px 24px; background: #f8fafc;">
+                            style="padding: 20px 24px; ">
 
                         <vlayout spacing="16px" vflex="1">
+                            
                             <!-- Page Title Banner -->
                             <vlayout spacing="4px">
-    <hlayout valign="middle" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <vlayout spacing="2px">
-            <label value="Checker Forced EOD Rollover Cheques" sclass="page-heading"/>
-            <label value="Rollover instruments requiring Checker verification before inclusion in the outward clearing session." sclass="page-subheading"/>
-        </vlayout>
-        
-        <!-- Compact Circular Refresh Button -->
-        <button id="btnRefreshQueue" 
-                iconSclass="z-icon-refresh" 
-                tooltiptext="Refresh Verification Queue" 
-                sclass="btn-icon-refresh"
-                onClick="$composer.loadCheckerUnprocessedCheques()"/>
-    </hlayout>
-</vlayout>
-
-                            <!-- Summary Metrics Cards -->
-                            <hlayout spacing="16px" width="100%">
-                                <hlayout sclass="stat-card" hflex="1" valign="middle" >
+                                <hlayout valign="middle" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                     <vlayout spacing="2px">
-                                        <label value="PENDING VERIFICATIONS" sclass="stat-card-title text-blue"/>
-                                        <label id="lblTotalVerifyCount" value="0" sclass="stat-card-value text-blue"/>
+                                        <label value="Checker Forced EOD Rollover Cheques" sclass="page-heading"/>
+                                        <label value="Rollover instruments requiring Checker verification before inclusion in the outward clearing session." sclass="page-subheading"/>
                                     </vlayout>
                                     
+                                    <button id="btnRefreshQueue" 
+                                            iconSclass="z-icon-refresh" 
+                                            tooltiptext="Refresh Verification Queue" 
+                                            sclass="btn-icon-refresh"/>
+                                </hlayout>
+                            </vlayout>
+
+                            <!-- Summary Metric Cards -->
+                            <hlayout spacing="16px" width="100%">
+                                <hlayout hflex="1" valign="middle" sclass="stat-card">
+                                    <vlayout spacing="4px">
+                                        <label value="PENDING VERIFICATIONS" sclass="stat-card-title"/>
+                                        <label id="lblTotalVerifyCount" value="0" sclass="stat-card-value"/>
+                                    </vlayout>
                                 </hlayout>
 
-                                <hlayout sclass="stat-card" hflex="1" valign="middle" >
-                                    <vlayout spacing="2px">
-                                        <label value="TOTAL AMOUNT TO VERIFY" sclass="stat-card-title text-dark"/>
-                                        <label id="lblTotalVerifyAmount" value="₹ 0.00" sclass="stat-card-value text-dark"/>
+                                <hlayout hflex="1" valign="middle" sclass="stat-card">
+                                    <vlayout spacing="4px">
+                                        <label value="TOTAL AMOUNT TO VERIFY" sclass="stat-card-title"/>
+                                        <label id="lblTotalVerifyAmount" value="₹ 0.00" sclass="stat-card-value"/>
                                     </vlayout>
-                                    
                                 </hlayout>
                             </hlayout>
 
-                            
-                           <!-- Search Bar with Search & Reset Buttons -->
-                           <!-- Search Bar -->
-<hlayout spacing="10px" valign="middle" sclass="filter-bar">
-    <label value="Search Cheque / Batch:" sclass="filter-label"/>
-    <textbox id="txtSearchBatch" 
-             placeholder="Search Batch Reference / Cheque No..." 
-             width="280px"
-             forward="onOK=onSearchClick"/>
-    
-    <button id="btnSearch" 
-            label="Search" 
-            iconSclass="z-icon-search" 
-            sclass="btn-process" 
-            forward="onClick=onSearchClick"
-            style="padding: 4px 12px; font-size: 11px; height: 32px;"/>
-            
-    <button id="btnReset" 
-            label="Reset" 
-            iconSclass="z-icon-undo" 
-            sclass="btn-refresh" 
-            forward="onClick=onResetClick"
-            style="padding: 4px 12px; font-size: 11px; height: 32px;"/>
-</hlayout>
+                            <!-- Search Filter Bar -->
+                            <hlayout spacing="12px" valign="middle" sclass="filter-bar">
+                                <label value="Search Cheque / Batch:" sclass="filter-label"/>
+                                <textbox id="txtSearchBatch" 
+                                         placeholder="Search Batch Reference / Cheque No..." 
+                                         width="280px"
+                                         sclass="search-input"/>
+                                
+                                <button id="btnSearch" 
+                                        label="Search" 
+                                        sclass="btn-primary-action"/>
+                                        
+                                <button id="btnReset" 
+                                        label="Reset" 
+                                        sclass="btn-secondary-action"/>
+                            </hlayout>
 
-                            <!-- Checker Cheque Verification Grid -->
-                            <listbox id="lstCheckerUnprocessed" vflex="1" mold="paging" pageSize="12"
+                            <!-- Checker Verification Grid -->
+                            <listbox id="lstCheckerUnprocessed" 
+                                     sclass="unprocessed-box"
+                                     vflex="1" 
                                      emptyMessage="No Forced EOD rollover cheques pending for Checker verification.">
-                                <listhead sizable="true">
-                                    <listheader label="Original Batch / Session" width="240px"/>
-                                    <listheader label="Cheque No" width="120px"/>
-                                    <listheader label="MICR Code" width="120px"/>
-                                    <listheader label="Amount" width="140px" align="right"/>
-                                    <listheader label="Required Task" width="180px"/>
-                                    <listheader label="Reason / Remarks" hflex="1"/>
-                                    <listheader label="Action" width="120px" align="center"/>
+                                <listhead sizable="false">
+                                    <listheader label="BATCH ID" width="230px" align="center"/>
+                                    <listheader label="CHEQUE NO" width="120px" align="center"/>
+                                    <listheader label="MICR CODE" width="130px" align="center"/>
+                                    <listheader label="AMOUNT (INR)" width="150px" align="center"/>
+                                    <listheader label="STATUS" width="180px" align="center"/>
+                                    <listheader label="REASON / REMARKS" hflex="1" align="center"/>
+                                    <listheader label="ACTION" width="165px" align="center"/>
                                 </listhead>
                             </listbox>
+
+                            <!-- ZK-Native Pagination Toolbar -->
+                            <div sclass="pagination-toolbar-wrapper">
+                                <div sclass="pagination-controls-box">
+                                    <button id="btnFirstPage" label="«" sclass="pagination-btn" tooltiptext="First Page" />
+                                    <button id="btnPrevPage" label="‹" sclass="pagination-btn" tooltiptext="Previous Page" />
+                                    <intbox id="ibCurrentPage" value="1" sclass="pagination-input" />
+                                    <label id="lblTotalPages" value="/ 1" sclass="pagination-slash-label" />
+                                    <button id="btnNextPage" label="›" sclass="pagination-btn" tooltiptext="Next Page" />
+                                    <button id="btnLastPage" label="»" sclass="pagination-btn" tooltiptext="Last Page" />
+                                </div>
+                            </div>
+
                         </vlayout>
                     </window>
                 </center>

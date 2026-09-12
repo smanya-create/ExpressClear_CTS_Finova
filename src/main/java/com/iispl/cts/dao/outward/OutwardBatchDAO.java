@@ -38,4 +38,6 @@ public interface OutwardBatchDAO {
 
 	void updateBatchStatus(String batchId, String status);
 
+	List<OutwardBatch> getOnHoldBatches();
+
 }

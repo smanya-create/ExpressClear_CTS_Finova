@@ -24,6 +24,7 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.Role;
@@ -39,9 +40,9 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     private static final long serialVersionUID = 1L;
 
     // View Containers & Shared Header
-    private Div viewUserList;
-    private Div viewAddUser;
-    private Div viewModifyUser;
+    private Vlayout viewUserList;
+    private Vlayout viewAddUser;
+    private Vlayout viewModifyUser;
     private Include incHeader;
 
     // View 1 (List) Controls
@@ -89,7 +90,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     private Button btnActionEnable;
     private Button btnActionDisable;
     private Button btnActionChangeRole;
-    private Div divNewRoleContainer;
+    private Vlayout divNewRoleContainer;
     private Combobox cmbNewRole;
     private Button btnSaveModifications;
     private Button btnCancelModifications;
@@ -442,7 +443,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
     // --- SCREEN 3: MODIFY USER VIEW ---
 
     private void openModifyView(User user) {
-        this.currentModUser = user;
+    	this.currentModUser = user;
         txtModEmployeeId.setValue(user.getEmployeeId());
         txtModUsername.setValue(user.getUsername());
         txtModEmail.setValue(user.getEmail());
@@ -458,7 +459,8 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             }
         }
 
-        this.selectedModifyAction = "";
+        // Set CHANGE_ROLE as active by default when entering the view
+        this.selectedModifyAction = "CHANGE_ROLE";
         updateModifyActionStyles();
         switchView("MODIFY");
     }

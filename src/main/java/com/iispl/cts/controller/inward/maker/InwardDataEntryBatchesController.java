@@ -11,18 +11,18 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Grid;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.ListModelList;
-import org.zkoss.zul.Listbox;
-import org.zkoss.zul.Listcell;
-import org.zkoss.zul.Listitem;
-import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Paging;
+import org.zkoss.zul.Row;
+import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
@@ -34,31 +34,38 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
     private static final long serialVersionUID = 1L;
 
-    private Listbox lbxDataEntryBatches;
-    private Button btnRefresh;
+    private Grid grdDataEntryBatches;
+    private Rows rowsDataEntryBatches;
+    private Paging pagingDataEntry;
+    private Div divDataEntryEmpty;
+
     private Textbox txtSearchBatch;
     private Button btnClearSearch;
+    private Label lblBatchResultCount;
 
-    // Cache full batch list for rapid client-side filtering
     private List<DataEntryBatchItemDTO> allBatches = new ArrayList<>();
+    private List<DataEntryBatchItemDTO> filteredBatches = new ArrayList<>();
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        initListRenderer();
+
+        if (pagingDataEntry != null) {
+            pagingDataEntry.addEventListener("onPaging", new EventListener<Event>() {
+                @Override
+                public void onEvent(Event event) throws Exception {
+                    renderPage();
+                }
+            });
+        }
+
         loadBatches();
     }
 
-    public void onClick$btnRefresh() {
-        loadBatches();
-    }
-
-    // Live filtering as user types
     public void onChanging$txtSearchBatch(InputEvent event) {
         applyFilter(event.getValue());
     }
 
-    // Fallback for Enter key or manual blur
     public void onChange$txtSearchBatch() {
         applyFilter(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
     }
@@ -70,87 +77,118 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         applyFilter("");
     }
 
-    private void initListRenderer() {
-        if (lbxDataEntryBatches == null) return;
-
-        lbxDataEntryBatches.setItemRenderer(new ListitemRenderer<DataEntryBatchItemDTO>() {
-            @Override
-            public void render(Listitem item, DataEntryBatchItemDTO batch, int index) throws Exception {
-                item.setValue(batch);
-
-                // 1. Batch ID (Outward Deep Blue Link Color)
-                Listcell cellBatchId = new Listcell(batch.getBatchId());
-                cellBatchId.setStyle("font-weight: 700; color: #1d4ed8; text-align: center;");
-                cellBatchId.setParent(item);
-
-                // 2. Total Items
-                Listcell cellTotal = new Listcell(String.valueOf(batch.getTotalCheques()));
-                cellTotal.setStyle("font-weight: 600; color: #334155; text-align: center;");
-                cellTotal.setParent(item);
-
-                // 3. Pending Items
-                Listcell cellPending = new Listcell(String.valueOf(batch.getPendingCheques()));
-                cellPending.setStyle("font-weight: 700; color: #0284c7; text-align: center;");
-                cellPending.setParent(item);
-
-                // 4. Batch Total Amount
-                Listcell cellAmount = new Listcell(batch.getFormattedAmount());
-                cellAmount.setStyle("font-family: monospace; font-size: 13px; font-weight: 600; color: #1e293b; text-align: center;");
-                cellAmount.setParent(item);
-
-                // 5. Dynamic Status Badge
-                Listcell cellStatus = new Listcell();
-                cellStatus.setStyle("text-align: center;");
-                Label lblStatus = new Label(batch.getDisplayStatus());
-                lblStatus.setStyle(batch.getStatusBadgeStyle());
-                lblStatus.setParent(cellStatus);
-                cellStatus.setParent(item);
-
-                // 6. Action Button
-                Listcell cellAction = new Listcell();
-                cellAction.setStyle("text-align: center;");
-                Button btnAction = new Button(batch.getActionLabel());
-                btnAction.setSclass(batch.getActionButtonClass());
-                btnAction.addEventListener(Events.ON_CLICK, (Event e) -> processBatch(batch));
-                btnAction.setParent(cellAction);
-                cellAction.setParent(item);
-            }
-        });
-    }
-
     private void loadBatches() {
         this.allBatches = fetchEligibleBatches();
         applyFilter(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
     }
 
     private void applyFilter(String rawQuery) {
-        if (lbxDataEntryBatches == null) return;
-
         String query = (rawQuery != null) ? rawQuery.trim().toLowerCase() : "";
 
         if (query.isEmpty()) {
-            lbxDataEntryBatches.setModel(new ListModelList<>(allBatches));
+            this.filteredBatches = new ArrayList<>(allBatches);
+        } else {
+            this.filteredBatches = new ArrayList<>();
+            for (DataEntryBatchItemDTO item : allBatches) {
+                boolean matchesId = item.getBatchId() != null && item.getBatchId().toLowerCase().contains(query);
+                boolean matchesStatus = item.getDisplayStatus() != null && item.getDisplayStatus().toLowerCase().contains(query);
+
+                if (matchesId || matchesStatus) {
+                    this.filteredBatches.add(item);
+                }
+            }
+        }
+
+        setupPagination();
+    }
+
+    private void setupPagination() {
+        int totalSize = filteredBatches.size();
+
+        if (lblBatchResultCount != null) {
+            lblBatchResultCount.setValue(totalSize + (totalSize == 1 ? " Batch" : " Batches"));
+        }
+
+        if (totalSize == 0) {
+            if (grdDataEntryBatches != null) grdDataEntryBatches.setVisible(false);
+            if (pagingDataEntry != null) pagingDataEntry.setVisible(false);
+            if (divDataEntryEmpty != null) divDataEntryEmpty.setVisible(true);
             return;
         }
 
-        List<DataEntryBatchItemDTO> filtered = new ArrayList<>();
-        for (DataEntryBatchItemDTO item : allBatches) {
-            boolean matchesId = item.getBatchId() != null && item.getBatchId().toLowerCase().contains(query);
-            boolean matchesStatus = item.getDisplayStatus() != null && item.getDisplayStatus().toLowerCase().contains(query);
+        if (grdDataEntryBatches != null) grdDataEntryBatches.setVisible(true);
+        if (divDataEntryEmpty != null) divDataEntryEmpty.setVisible(false);
 
-            if (matchesId || matchesStatus) {
-                filtered.add(item);
+        if (pagingDataEntry != null) {
+            pagingDataEntry.setTotalSize(totalSize);
+            pagingDataEntry.setActivePage(0);
+            pagingDataEntry.setVisible(totalSize > pagingDataEntry.getPageSize());
+        }
+
+        renderPage();
+    }
+
+    private void renderPage() {
+        if (rowsDataEntryBatches == null) return;
+        rowsDataEntryBatches.getChildren().clear();
+
+        int pageSize = (pagingDataEntry != null) ? pagingDataEntry.getPageSize() : 10;
+        int activePage = (pagingDataEntry != null) ? pagingDataEntry.getActivePage() : 0;
+
+        int startIndex = activePage * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, filteredBatches.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            DataEntryBatchItemDTO batch = filteredBatches.get(i);
+            if (batch != null) {
+                createBatchRow(batch);
             }
         }
-        lbxDataEntryBatches.setModel(new ListModelList<>(filtered));
+    }
+
+    private void createBatchRow(DataEntryBatchItemDTO batch) {
+        Row row = new Row();
+
+        // 1. Batch ID Link (Identical to MICR Repair)
+        Label lblBatchId = new Label(batch.getBatchId());
+        lblBatchId.setSclass("micr-repair-batch-id");
+        lblBatchId.addEventListener("onClick", event -> processBatch(batch));
+
+        // 2. Total Items
+        Label lblTotal = new Label(String.valueOf(batch.getTotalCheques()));
+        lblTotal.setSclass("micr-repair-count-text");
+
+        // 3. Pending Items (Highlighted amber)
+        Label lblPending = new Label(String.valueOf(batch.getPendingCheques()));
+        lblPending.setSclass("micr-repair-pending-count");
+
+        // 4. Total Amount
+        Label lblAmount = new Label(batch.getFormattedAmount());
+        lblAmount.setSclass("micr-repair-cell-text");
+        lblAmount.setStyle("font-weight: 700; color: #0f172a;");
+
+        // 5. Status Badge (Exact Golden Pill from MICR Repair)
+        Label lblStatus = new Label("PENDING_MAKER_PROCESS");
+        lblStatus.setSclass("micr-repair-status");
+
+        // 6. Action Button (Exact 'OPEN' Navy Button from MICR Repair)
+        Button btnAction = new Button("OPEN");
+        btnAction.setSclass("btn-action-repair");
+        btnAction.addEventListener("onClick", event -> processBatch(batch));
+
+        row.appendChild(lblBatchId);
+        row.appendChild(lblTotal);
+        row.appendChild(lblPending);
+        row.appendChild(lblAmount);
+        row.appendChild(lblStatus);
+        row.appendChild(btnAction);
+
+        rowsDataEntryBatches.appendChild(row);
     }
 
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-        // Query discovers batches based on cheque status:
-        // 1. Checks for DATA_ENTRY_PENDING, DATA_ENTRY_IN_PROGRESS, or SEND_BACK_TO_MAKER_DATA_ENTRY
-        // 2. Filters out batches with unresolved MICR repair items
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +
@@ -199,7 +237,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                 int sentBackCount = rs.getInt("sent_back_cheques");
                 String bStatus = rs.getString("batch_status");
                 
-                // Prioritize Sent Back status label when instruments are returned
                 if (sentBackCount > 0) {
                     dto.setBatchStatus(InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name());
                 } else {
@@ -214,7 +251,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
             Messagebox.show("Database error loading batches: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
         }
 
-        // Keep Sent Back items ordered at the top
         batches.sort((b1, b2) -> {
             boolean b1Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b1.getBatchStatus());
             boolean b2Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b2.getBatchStatus());
@@ -227,12 +263,8 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     }
 
     private void processBatch(DataEntryBatchItemDTO batch) {
-        if (batch.getPendingCheques() == 0) {
-            submitBatchToChecker(batch.getBatchId());
-            return;
-        }
-
         Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());
+        Sessions.getCurrent().setAttribute("batchId", batch.getBatchId());
 
         Include mainInclude = null;
         try {
@@ -251,7 +283,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
         if (mainInclude != null) {
             mainInclude.setSrc(null);
-            mainInclude.setSrc("/inward/maker/data-entry/data-entry.zul");
+            mainInclude.setSrc("/inward/maker/data-entry/data-entry.zul?batchId=" + batch.getBatchId());
 
             Component root = (self.getPage() != null) ? self.getPage().getFirstRoot() : null;
             if (root != null) {
@@ -263,25 +295,5 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         } else {
             Messagebox.show("Navigation container (mainContentArea) not found.", "Navigation Error", Messagebox.OK, Messagebox.ERROR);
         }
-    }
-
-    private void submitBatchToChecker(String batchId) {
-        Messagebox.show("Submit batch " + batchId + " to Inward Checker?",
-            "Submit Confirmation", Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, evt -> {
-                if (Messagebox.ON_YES.equals(evt.getName())) {
-                    String sql = "UPDATE inward_batch SET batch_status = ? WHERE inward_batch_id = ?";
-                    try (Connection conn = DBConnection.getConnection();
-                         PreparedStatement ps = conn.prepareStatement(sql)) {
-                        ps.setString(1, InwardBatchStatus.CHECKER_PROCESSING_PENDING.name());
-                        ps.setString(2, batchId);
-                        ps.executeUpdate();
-                        Messagebox.show("Batch submitted to checker successfully.", "Success", Messagebox.OK, Messagebox.INFORMATION);
-                        loadBatches();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        Messagebox.show("Update failed: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
-                    }
-                }
-            });
     }
 }
