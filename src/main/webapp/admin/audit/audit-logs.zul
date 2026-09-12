@@ -78,13 +78,13 @@
                         <!-- ONLY this Grid Body Scrolls Vertically -->
                         <grid id="gridAudit" sclass="role-grid" span="true" vflex="1" hflex="1" emptyMessage="No audit logs found.">
                             <columns sizable="false">
-                                <column label="TIMESTAMP" hflex="3"/>
-                                <column label="USER / ROLE" hflex="3"/>
-                                <column label="MODULE" hflex="2"/>
-                                <column label="ACTION" hflex="2"/>
-                                <column label="DETAILS" hflex="5"/>
-                                <column label="IP ADDRESS" hflex="2"/>
-                                <column label="STATUS" hflex="1" align="center"/>
+                                <column label="TIMESTAMP" hflex="3" align="center"/>
+                                <column label="USER / ROLE" hflex="3" align="center"/>
+                                <column label="MODULE" hflex="2" align="center"/>
+                                <column label="ACTION" hflex="2" align="center"/>
+                                <column label="DETAILS" hflex="5" align="center"/>
+                                <column label="IP ADDRESS" hflex="2" align="center"/>
+                                <column label="STATUS" hflex="2" align="center"/>
                             </columns>
                             <rows id="rowsAudit">
                                 <!-- Populated dynamically by AuditLogsController -->

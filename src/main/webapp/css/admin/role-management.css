@@ -448,3 +448,33 @@
     background-color: #173b61 !important;
     background-image: none !important;
 }
+/* 1. All Column Headers Center Aligned */
+.z-listheader, 
+.z-column {
+    text-align: center !important;
+}
+
+.z-listheader-content, 
+.z-column-content {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* 2. Text Cells Left Aligned by default */
+.z-listcell-content, 
+.z-row-inner {
+    text-align: left;
+}
+
+/* 3. Utility class for Numeric / Count / Status Cells (Centered) */
+.cell-center,
+.cell-num {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* 4. Utility class for Text / Descriptions (Left Aligned) */
+.cell-text {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}

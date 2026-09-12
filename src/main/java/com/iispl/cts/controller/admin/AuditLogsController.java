@@ -155,40 +155,40 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             Row row = new Row();
             row.setStyle("border-bottom: 1px solid #f1f5f9; height: 48px;");
 
-            // Timestamp
+            // 1. Timestamp (Centered)
             Label lblTime = new Label(log.getTimestamp() != null ? df.format(log.getTimestamp()) : "-");
-            lblTime.setStyle("font-size: 12px; color: #64748b;");
+            lblTime.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblTime);
 
-            // User / Role
-            Label lblUser = new Label((log.getUsername() != null ? log.getUsername() : log.getUserId()) + " (" + log.getRoleName() + ")");
-            lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b;");
+            // 2. User / Role (Left aligned)
+            Label lblUser = new Label((log.getUsername() != null ? log.getUsername() : log.getUserId()) 
+                                      + " (" + (log.getRoleName() != null ? log.getRoleName() : "-") + ")");
+            lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block; text-align: left; padding-left: 6px;");
             row.appendChild(lblUser);
 
-            // Module Badge
+            // 3. Module Badge (Centered)
             Label lblMod = new Label(log.getModule());
-            lblMod.setStyle("font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: 600;");
+            lblMod.setStyle("font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 4px; font-weight: 600; display: table; margin: 0 auto;");
             row.appendChild(lblMod);
 
-            // Action
+            // 4. Action (Left aligned)
             Label lblAction = new Label(log.getAction());
-            lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155;");
+            lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155; display: block; text-align: left; padding-left: 6px;");
             row.appendChild(lblAction);
 
-            // Details
+            // 5. Details (Left aligned)
             Label lblDetails = new Label(log.getDetails() != null ? log.getDetails() : "-");
-            lblDetails.setStyle("font-size: 12px; color: #475569;");
+            lblDetails.setStyle("font-size: 12px; color: #475569; display: block; text-align: left; padding-left: 6px;");
             row.appendChild(lblDetails);
 
-            // IP Address
+            // 6. IP Address (Centered)
             Label lblIp = new Label(log.getIpAddress() != null ? log.getIpAddress() : "-");
-            lblIp.setStyle("font-size: 12px; color: #64748b;");
+            lblIp.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblIp);
 
-            // Status Badge
+            // 7. Status Badge (Centered with scrollbar padding)
             Label lblStatus = new Label(log.getStatus() != null ? log.getStatus() : "SUCCESS");
-
-            String baseBadgeStyle = "display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
+            String baseBadgeStyle = "display: table; margin: 0 auto; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
 
             if ("SUCCESS".equalsIgnoreCase(log.getStatus())) {
                 lblStatus.setStyle(baseBadgeStyle + " background: #dcfce7; color: #15803d;");
@@ -196,12 +196,8 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
                 lblStatus.setStyle(baseBadgeStyle + " background: #fee2e2; color: #b91c1c;");
             }
 
-            // Wrap in a centered Div or Cell so it does not touch the grid border
-            org.zkoss.zul.Cell cellStatus = new org.zkoss.zul.Cell();
-            cellStatus.setStyle("text-align: center; padding-right: 14px;");
-            cellStatus.appendChild(lblStatus);
+            row.appendChild(lblStatus);
 
-            row.appendChild(cellStatus);
             rowsAudit.appendChild(row);
         }
     }
