@@ -43,7 +43,7 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     private Textbox txtSearchBatch;
     private Button btnRefresh;
     private Listbox lstUnprocessed;
-    
+    private boolean isSessionClosed = false;
     private Button btnFirstPage;
     private Button btnPrevPage;
     private Intbox ibCurrentPage;
