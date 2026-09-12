@@ -1,224 +1,212 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <zk>
 
-	<style src="/css/outward/batch-upload.css"/>
-	<window id="uploadBatchWindow"
-		apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchUploadController"
-		border="none" width="100%" height="100%"
-		contentStyle="padding:0; margin:0; overflow:auto;">
+    <window id="winBatchUpload"
+            apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchUploadController"
+            title="Batch Upload"
+            width="100%"
+            height="100%"
+            border="none">
 
-		<div width="100%" sclass="upload-batch-page">
+        <vlayout width="100%" height="100%" spacing="15px">
 
-			<!-- =========================================================
-				PAGE HEADER
-				========================================================= -->
+            <groupbox id="grpBatchUpload"
+                      width="100%"
+                      closable="false">
 
-			<div sclass="page-header">
+                <caption label="Batch Upload"/>
 
-				<label value="Upload Batch" sclass="page-title" />
+                <vlayout width="100%" spacing="10px">
 
-				<label
-					value="Enter batch control information and scan the cheque folder."
-					sclass="page-description" />
+                    <hlayout width="100%" spacing="10px">
 
-			</div>
+                        <vlayout width="250px">
 
+                            <label value="Expected Total Cheques"/>
 
-			<!-- =========================================================
-				BATCH CONTROL INFORMATION
-				========================================================= -->
+                            <intbox id="txtExpectedTotalCheques"
+                                    width="100%"/>
 
-			<groupbox id="batchControlGroup" width="100%"
-				sclass="batch-control-groupbox">
-
-				<caption label="BATCH CONTROL INFORMATION"
-					sclass="groupbox-caption" />
-
-				<vlayout width="100%" spacing="16px"
-					sclass="batch-control-vlayout">
+                        </vlayout>
 
 
-					<!-- =================================================
-						EXPECTED COUNT + EXPECTED AMOUNT
-						================================================= -->
+                        <vlayout width="250px">
 
-					<hlayout width="100%" spacing="16px"
-						sclass="batch-control-hlayout">
+                            <label value="Expected Total Cheque Amount"/>
 
-						<div sclass="form-group-wrapper">
+                            <decimalbox id="txtExpectedTotalChequeAmount"
+                                        width="100%"/>
 
-							<label value="Expected Cheque Count *"
-								sclass="form-label" />
+                        </vlayout>
 
-							<intbox id="txtExpectedTotalCheques"
-								placeholder="Enter expected number of cheques"
-								sclass="form-input" width="100%" />
-
-						</div>
+                    </hlayout>
 
 
-						<div sclass="form-group-wrapper">
+                    <hlayout width="100%" spacing="10px">
 
-							<label value="Expected Total Amount *"
-								sclass="form-label" />
+                        <textbox id="txtChequeFolder"
+                                 width="500px"
+                                 readonly="true"/>
 
-							<decimalbox
-								id="txtExpectedTotalChequeAmount"
-								placeholder="Enter expected total amount" sclass="form-input"
-								width="100%" />
-
-						</div>
-
-					</hlayout>
-
-
-					<!-- =================================================
-						CHEQUE ZIP
-						================================================= -->
-
-					<div sclass="form-group-full folder-group">
-
-						<label value="Cheque Folder *"
-							sclass="form-label" />
-
-						<hlayout width="100%" spacing="12px"
-							sclass="folder-row">
-
-							<textbox id="txtChequeFolder"
-								placeholder="Cheque ZIP file selected" readonly="true" hflex="1"
-								sclass="form-input folder-input" />
-
-							<button id="btnBrowse" label="Browse"
+                        <button id="btnBrowse" label="Browse"
 								sclass="btn-browse" upload="true,maxsize=104857600" />
 
-						</hlayout>
+                                
+                                
 
-						<label
-							value="Note: Please select a ZIP file containing one XML file and cheque front/back JPEG images."
-							sclass="form-hint" />
+                        <button id="btnValidateBatch"
+                                label="Validate Batch"
+                                disabled="true"/>
 
-					</div>
+                    </hlayout>
 
+                </vlayout>
 
-					<!-- =================================================
-						BATCH NUMBER
-						================================================= -->
-
-					<div class="form-group-full">
-
-						<label value="Batch Number" sclass="form-label" />
-
-						<textbox id="txtBatchNumber" readonly="true"
-							placeholder="Generated from batch XML" sclass="form-input"
-							width="100%" />
-
-						<label
-							value="Automatically generated from the uploaded batch XML"
-							sclass="form-hint" />
-
-					</div>
+            </groupbox>
 
 
-					<!-- =================================================
-						VALIDATE BUTTON
-						================================================= -->
+            <!-- Success Message -->
 
-					<div sclass="form-actions-inline">
+            <div id="divSuccessMessage"
+                 visible="false"
+                 width="100%">
 
-						<button id="btnValidateBatch"
-							label="Validate Batch" sclass="btn-validate" disabled="true" />
+                <label id="lblSuccessText"
+                       value=""
+                       width="100%"/>
 
-					</div>
-
-				</vlayout>
-
-			</groupbox>
+            </div>
 
 
-			<!-- =========================================================
-				SUCCESS MESSAGE
-				IMPORTANT:
-				This is BEFORE Scanning Batches
-				========================================================= -->
+            <!-- Batch Details -->
 
-			<div id="divSuccessMessage" visible="false"
-				sclass="success-message">
+            <groupbox id="batchDetailsGroup"
+                      width="100%"
+                      visible="false"
+                      closable="false">
 
-				<div sclass="success-icon">✓</div>
+                <caption label="Batch Details"/>
 
-				<vlayout spacing="4px">
+                <listbox id="lstBatchDetails"
+                         width="100%"
+                         height="220px">
 
-					<label value="Batch Uploaded Successfully"
-						sclass="success-title" />
+                    <listhead>
 
-					<label id="lblSuccessText" value=""
-						sclass="success-text" />
+                        <listheader label="Batch ID"
+                                    width="20%"/>
 
-				</vlayout>
+                        <listheader label="Scan Date"
+                                    width="20%"/>
 
-			</div>
+                        <listheader label="Total Cheques"
+                                    width="15%"/>
 
+                        <listheader label="MICR Errors"
+                                    width="15%"/>
 
-			<!-- =========================================================
-				SCANNING BATCHES
-				ONLY BATCH INFORMATION IS DISPLAYED
-				========================================================= -->
+                        <listheader label="Status"
+                                    width="15%"/>
 
-			<groupbox id="batchDetailsGroup" visible="false"
-				width="100%" sclass="batch-details-section">
+                        <listheader label="Action"
+                                    width="15%"/>
 
-				<caption label="Scanning Batches"
-					sclass="groupbox-caption" />
+                    </listhead>
 
-				<div width="100%" sclass="batch-details-content">
+                </listbox>
 
-					<label
-						value="Batches from scanning that contain cheques requiring MICR repair."
-						sclass="batch-details-description" />
+            </groupbox>
 
 
-					<listbox id="lstBatchDetails" width="100%"
-						sclass="batch-details-table" emptyMessage="No batch found">
+            <!-- Cheque Details -->
 
-						<listhead sizable="false">
+            <groupbox id="grpChequeDetails"
+                      width="100%"
+                      visible="false"
+                      closable="false">
 
-							<listheader label="BATCH" width="18%" />
+                <caption label="Cheque Details"/>
 
-							<listheader label="SCAN DATE" width="16%" />
+                <vlayout width="100%" spacing="10px">
 
-							<listheader label="TOTAL CHEQUES"
-								width="18%" />
+                    <hlayout width="100%" spacing="10px">
 
-							<listheader label="MICR ERRORS" width="16%" />
+                        <label id="lblChequeFilter"
+                               value="Filter:"/>
 
-							<listheader label="STATUS" width="16%" />
+                        <combobox id="cmbChequeFilter"
+                                  width="220px"
+                                  readonly="true">
 
-							<listheader label="ACTION" width="16%" />
+                            <comboitem label="All Cheques"
+                                       value="ALL"/>
 
-						</listhead>
+                            <comboitem label="Normal Cheques"
+                                       value="NORMAL"/>
 
-					</listbox>
+                            <comboitem label="MICR Repair Cheques"
+                                       value="MICR_REPAIR"/>
 
-				</div>
+                        </combobox>
 
-			</groupbox>
+                        <label id="lblTotalCheques"
+                               value=""/>
+
+                    </hlayout>
 
 
-			<!-- =========================================================
-				FOOTER
-				========================================================= -->
+                    <!-- Cheque List -->
 
-			<div sclass="page-footer">
+                    <listbox id="lstCheques"
+                             width="100%"
+                             height="230px">
 
-				<label value="Express Clear CTS · Maker Portal" />
+                        <listhead>
 
-				<label value="Secure Batch Processing" />
+                            <listheader label="Cheque ID"
+                                        width="20%"/>
 
-			</div>
+                            <listheader label="Cheque Number"
+                                        width="15%"/>
 
-		</div>
+                            <listheader label="Amount"
+                                        width="15%"/>
 
-	</window>
+                            <listheader label="Status"
+                                        width="20%"/>
+
+                            <listheader label="MICR"
+                                        width="15%"/>
+
+                            <listheader label="Action"
+                                        width="15%"/>
+
+                        </listhead>
+
+                    </listbox>
+
+
+                    <hlayout width="100%"
+                             spacing="10px">
+
+                        <button id="btnChequePrevious"
+                                label="Previous"
+                                disabled="true"/>
+
+                        <label id="lblChequePage"
+                               value="Page 1"/>
+
+                        <button id="btnChequeNext"
+                                label="Next"
+                                disabled="true"/>
+
+                    </hlayout>
+
+                </vlayout>
+
+            </groupbox>
+
+        </vlayout>
+
+    </window>
 
 </zk>

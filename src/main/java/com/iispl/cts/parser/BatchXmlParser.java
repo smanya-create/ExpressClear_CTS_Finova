@@ -1,7 +1,6 @@
 package com.iispl.cts.parser;
 
 import java.io.ByteArrayOutputStream;
-
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -15,130 +14,188 @@ import java.util.zip.ZipFile;
 
 import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
-import com.iispl.cts.service.outward.ScanService;
 import com.ximpleware.AutoPilot;
 import com.ximpleware.VTDGen;
 import com.ximpleware.VTDNav;
 
 public class BatchXmlParser {
 
-    private final ScanService scanService;
-
-    public BatchXmlParser(ScanService scanService) {
-        this.scanService = scanService;
-    }
-
-    /**
-     * Receives the uploaded ZIP path.
+    /*
+     * =========================================================
+     * PARSED BATCH DATA
+     * =========================================================
      *
-     * Flow:
+     * Parser returns TWO things:
      *
-     * Controller
-     *      ↓
-     * BatchXmlParser
-     *      ↓
-     * ScanBatch
-     * List<ScanCheque>
-     *      ↓
-     * ScanService
-     *      ↓
-     * DB
+     * 1. ScanBatch
+     * 2. List<ScanCheque>
      *
-     * @param zipFilePath uploaded ZIP file path
-     * @return scannedBatchId returned by service
+     * No database operation is performed here.
      */
-    public String parse(String zipFilePath) throws Exception {
+    public static class ParsedBatchData {
 
-        if (zipFilePath == null || zipFilePath.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "ZIP file path is empty");
+        private final ScanBatch scanBatch;
+        private final List<ScanCheque> chequeList;
+
+        public ParsedBatchData(
+                ScanBatch scanBatch,
+                List<ScanCheque> chequeList) {
+
+            this.scanBatch = scanBatch;
+            this.chequeList = chequeList;
         }
 
-        File zipFile = new File(zipFilePath);
+        public ScanBatch getScanBatch() {
+            return scanBatch;
+        }
+
+        public List<ScanCheque> getChequeList() {
+            return chequeList;
+        }
+    }
+
+    /*
+     * =========================================================
+     * PARSE
+     * =========================================================
+     *
+     * Controller sends:
+     *
+     * 1. expectedTotalCheques
+     * 2. expectedTotalAmount
+     * 3. uploadedZipPath
+     *
+     * Parser returns:
+     *
+     * 1. ScanBatch
+     * 2. List<ScanCheque>
+     *
+     * IMPORTANT:
+     * No DB save happens here.
+     */
+    public ParsedBatchData parse(
+            Integer expectedTotalCheques,
+            BigDecimal expectedTotalAmount,
+            String zipFilePath)
+            throws Exception {
+
+        /*
+         * =====================================================
+         * VALIDATE INPUT
+         * =====================================================
+         */
+
+        if (expectedTotalCheques == null) {
+            throw new IllegalArgumentException(
+                    "Expected cheque count is required.");
+        }
+
+        if (expectedTotalAmount == null) {
+            throw new IllegalArgumentException(
+                    "Expected total amount is required.");
+        }
+
+        if (zipFilePath == null
+                || zipFilePath.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "ZIP file path is empty.");
+        }
+
+        File zipFile =
+                new File(zipFilePath);
 
         if (!zipFile.exists()) {
             throw new IllegalArgumentException(
-                    "ZIP file does not exist: " + zipFilePath);
+                    "ZIP file does not exist: "
+                            + zipFilePath);
         }
 
         if (!zipFile.isFile()) {
             throw new IllegalArgumentException(
-                    "Invalid ZIP file: " + zipFilePath);
+                    "Invalid ZIP file: "
+                            + zipFilePath);
         }
 
         /*
-         * Lists which will be sent to service.
+         * =====================================================
+         * RESULT OBJECTS
+         * =====================================================
          */
-        ScanBatch scanBatch;
+
+        ScanBatch scanBatch = null;
 
         List<ScanCheque> chequeList =
                 new ArrayList<ScanCheque>();
 
         /*
-         * =========================================================
+         * =====================================================
          * OPEN ZIP
-         * =========================================================
+         * =====================================================
          */
-        try (ZipFile zip = new ZipFile(zipFile)) {
+
+        try (ZipFile zip =
+                new ZipFile(zipFile)) {
 
             /*
-             * Find XML inside ZIP.
+             * =================================================
+             * FIND XML
+             * =================================================
              */
-            ZipEntry xmlEntry = findXmlEntry(zip);
+
+            ZipEntry xmlEntry =
+                    findXmlEntry(zip);
 
             if (xmlEntry == null) {
+
                 throw new Exception(
-                        "No XML file found inside ZIP");
+                        "No XML file found inside ZIP.");
             }
 
             /*
-             * =====================================================
-             * OPEN XML AS STREAM
-             * =====================================================
-             *
-             * XML is read directly from ZIP.
-             *
-             * We do NOT extract XML to another file.
+             * =================================================
+             * OPEN XML
+             * =================================================
              */
+
             try (InputStream xmlInputStream =
                     zip.getInputStream(xmlEntry)) {
 
                 /*
-                 * =================================================
-                 * VTD-XML
-                 * =================================================
+                 * =============================================
+                 * READ XML
+                 * =============================================
                  */
-                VTDGen vtdGen = new VTDGen();
 
-                /*
-                 * Read XML bytes.
-                 */
                 byte[] xmlBytes =
-                        readXmlBytes(xmlInputStream);
+                        readXmlBytes(
+                                xmlInputStream);
 
                 /*
-                 * Give XML document to VTDGen.
+                 * =============================================
+                 * VTD XML
+                 * =============================================
                  */
+
+                VTDGen vtdGen =
+                        new VTDGen();
+
                 vtdGen.setDoc(xmlBytes);
 
                 /*
-                 * Parse XML.
-                 *
                  * true = namespace aware
-                 *
-                 * Your XML has:
-                 *
-                 * xmlns="urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing"
                  */
                 vtdGen.parse(true);
 
-                VTDNav vn = vtdGen.getNav();
+                VTDNav vn =
+                        vtdGen.getNav();
 
                 /*
-                 * =================================================
-                 * SET XML NAMESPACE
-                 * =================================================
+                 * =============================================
+                 * XML NAMESPACE
+                 * =============================================
                  */
+
                 AutoPilot namespacePilot =
                         new AutoPilot(vn);
 
@@ -147,25 +204,30 @@ public class BatchXmlParser {
                         "urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing");
 
                 /*
-                 * =================================================
+                 * =============================================
                  * VALIDATE ROOT
-                 * =================================================
+                 * =============================================
                  */
-                vn.toElement(VTDNav.ROOT);
+
+                vn.toElement(
+                        VTDNav.ROOT);
 
                 String rootName =
-                        vn.toString(vn.getCurrentIndex());
+                        vn.toString(
+                                vn.getCurrentIndex());
 
-                if (!"ChequeBatchTransmission".equals(rootName)) {
+                if (!"ChequeBatchTransmission"
+                        .equals(rootName)) {
+
                     throw new Exception(
                             "Invalid XML root element: "
                                     + rootName);
                 }
 
                 /*
-                 * =================================================
+                 * =============================================
                  * READ BATCH HEADER
-                 * =================================================
+                 * =============================================
                  */
 
                 String scannedBatchId =
@@ -216,21 +278,32 @@ public class BatchXmlParser {
                                 namespacePilot,
                                 "/cts:ChequeBatchTransmission/cts:BatchHeader/cts:UploadedAt");
 
+                /*
+                 * =============================================
+                 * CONVERT BATCH HEADER VALUES
+                 * =============================================
+                 */
+
                 int actualChequeCount =
-                        parseInteger(actualChequeCountText);
+                        parseInteger(
+                                actualChequeCountText);
 
                 BigDecimal actualTotalAmount =
-                        parseBigDecimal(actualTotalAmountText);
+                        parseBigDecimal(
+                                actualTotalAmountText);
 
                 Timestamp uploadedAt =
-                        parseTimestamp(uploadedAtText);
+                        parseTimestamp(
+                                uploadedAtText);
 
                 /*
-                 * =================================================
-                 * CREATE ScanBatch
-                 * =================================================
+                 * =============================================
+                 * CREATE SCAN BATCH
+                 * =============================================
                  */
-                scanBatch = new ScanBatch();
+
+                scanBatch =
+                        new ScanBatch();
 
                 scanBatch.setScannedBatchId(
                         scannedBatchId);
@@ -257,12 +330,13 @@ public class BatchXmlParser {
                         uploadedAt);
 
                 /*
-                 * =================================================
+                 * =============================================
                  * READ ALL CHEQUES
-                 * =================================================
+                 * =============================================
                  */
 
-                vn.toElement(VTDNav.ROOT);
+                vn.toElement(
+                        VTDNav.ROOT);
 
                 AutoPilot chequePilot =
                         new AutoPilot(vn);
@@ -274,11 +348,14 @@ public class BatchXmlParser {
                 chequePilot.selectXPath(
                         "/cts:ChequeBatchTransmission/cts:Cheques/cts:ChequeItem");
 
-                int chequeCount = 0;
+                /*
+                 * =============================================
+                 * PARSE EACH CHEQUE
+                 * =============================================
+                 */
 
-                while (chequePilot.evalXPath() != -1) {
-
-                    chequeCount++;
+                while (chequePilot.evalXPath()
+                        != -1) {
 
                     /*
                      * Current VTDNav position:
@@ -294,24 +371,44 @@ public class BatchXmlParser {
                     /*
                      * Set batch ID from BatchHeader.
                      */
+
                     cheque.setScannedBatchId(
                             scannedBatchId);
 
-                    chequeList.add(cheque);
+                    chequeList.add(
+                            cheque);
                 }
 
                 /*
-                 * =================================================
-                 * VALIDATE CHEQUE COUNT
-                 * =================================================
+                 * =============================================
+                 * CHEQUE LIST MUST NOT BE EMPTY
+                 * =============================================
                  */
 
                 if (chequeList.isEmpty()) {
+
                     throw new Exception(
-                            "No ChequeItem found in XML");
+                            "No ChequeItem found in XML.");
                 }
 
-                if (actualChequeCount != chequeList.size()) {
+                /*
+                 * =============================================
+                 * PARSER-LEVEL COUNT CHECK
+                 * =============================================
+                 *
+                 * This only verifies XML consistency:
+                 *
+                 * BatchHeader ActualChequeCount
+                 *              =
+                 * Number of ChequeItem nodes
+                 *
+                 * Expected count comparison will be done
+                 * later by the validation layer.
+                 */
+
+                if (actualChequeCount
+                        != chequeList.size()) {
+
                     throw new Exception(
                             "Cheque count mismatch. "
                                     + "XML ActualChequeCount = "
@@ -323,39 +420,27 @@ public class BatchXmlParser {
         }
 
         /*
-         * =========================================================
-         * SEND TO SERVICE
-         * =========================================================
+         * =====================================================
+         * IMPORTANT
+         * =====================================================
          *
-         * Service handles the transaction.
+         * NO scanService.saveScanBatch()
+         * NO INSERT
+         * NO UPDATE
+         * NO DATABASE OPERATION
          *
-         * The service should:
-         *
-         * 1. Open one Connection
-         * 2. setAutoCommit(false)
-         * 3. Save ScanBatch
-         * 4. Save ScanCheque records
-         * 5. Commit
-         *
-         * If anything fails:
-         *
-         * 6. Rollback everything
+         * Parser only returns parsed objects.
          */
-        String resultScannedBatchId =
-                scanService.saveScanBatch(
-                        scanBatch,
-                        chequeList);
 
-        /*
-         * Return ID to controller.
-         */
-        return resultScannedBatchId;
+        return new ParsedBatchData(
+                scanBatch,
+                chequeList);
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * PARSE ONE CHEQUE
-     * =============================================================
+     * =========================================================
      */
     private ScanCheque parseCheque(
             VTDNav vn,
@@ -366,10 +451,11 @@ public class BatchXmlParser {
                 new ScanCheque();
 
         /*
-         * =========================================================
+         * =====================================================
          * SCANNED CHEQUE ID
-         * =========================================================
+         * =====================================================
          */
+
         String scannedChequeId =
                 getValue(
                         vn,
@@ -380,10 +466,11 @@ public class BatchXmlParser {
                 scannedChequeId);
 
         /*
-         * =========================================================
+         * =====================================================
          * CHEQUE NUMBER
-         * =========================================================
+         * =====================================================
          */
+
         String chequeNumber =
                 getValue(
                         vn,
@@ -394,10 +481,11 @@ public class BatchXmlParser {
                 chequeNumber);
 
         /*
-         * =========================================================
+         * =====================================================
          * CHEQUE DATE
-         * =========================================================
+         * =====================================================
          */
+
         String chequeDateText =
                 getValue(
                         vn,
@@ -405,13 +493,15 @@ public class BatchXmlParser {
                         "./cts:ChequeDate");
 
         cheque.setChequeDate(
-                parseDate(chequeDateText));
+                parseDate(
+                        chequeDateText));
 
         /*
-         * =========================================================
+         * =====================================================
          * CHEQUE AMOUNT
-         * =========================================================
+         * =====================================================
          */
+
         String chequeAmountText =
                 getValue(
                         vn,
@@ -419,13 +509,15 @@ public class BatchXmlParser {
                         "./cts:Amount");
 
         cheque.setChequeAmount(
-                parseBigDecimal(chequeAmountText));
+                parseBigDecimal(
+                        chequeAmountText));
 
         /*
-         * =========================================================
+         * =====================================================
          * CHEQUE STATUS
-         * =========================================================
+         * =====================================================
          */
+
         String chequeStatus =
                 getValue(
                         vn,
@@ -436,9 +528,9 @@ public class BatchXmlParser {
                 chequeStatus);
 
         /*
-         * =========================================================
+         * =====================================================
          * MICR DETAILS
-         * =========================================================
+         * =====================================================
          */
 
         String fullMicr =
@@ -478,14 +570,17 @@ public class BatchXmlParser {
                 branchCode);
 
         /*
-         * =========================================================
+         * =====================================================
          * DRAWEE
-         * =========================================================
+         * =====================================================
          *
-         * Drawee/AccountHolderName → draweeName
+         * Drawee/AccountHolderName
+         *          -> draweeName
          *
-         * Drawee/AccountNumber → draweeAccountNumber
+         * Drawee/AccountNumber
+         *          -> draweeAccountNumber
          */
+
         String draweeName =
                 getValue(
                         vn,
@@ -505,10 +600,11 @@ public class BatchXmlParser {
                 draweeAccountNumber);
 
         /*
-         * =========================================================
+         * =====================================================
          * PAYEE
-         * =========================================================
+         * =====================================================
          */
+
         String payeeName =
                 getValue(
                         vn,
@@ -528,18 +624,17 @@ public class BatchXmlParser {
                 payeeAccountNumber);
 
         /*
-         * =========================================================
+         * =====================================================
          * FRONT IMAGE
-         * =========================================================
+         * =====================================================
          *
          * XML:
          *
          * <FrontImage
-         *      path="Batch1002-images/cheque004_front.png"
-         *      type="FRONT"/>
-         *
-         * We need the path attribute.
+         *     path="Batch1002-images/cheque004_front.png"
+         *     type="FRONT"/>
          */
+
         String frontImagePath =
                 getAttributeValue(
                         vn,
@@ -551,10 +646,11 @@ public class BatchXmlParser {
                 frontImagePath);
 
         /*
-         * =========================================================
+         * =====================================================
          * BACK IMAGE
-         * =========================================================
+         * =====================================================
          */
+
         String backImagePath =
                 getAttributeValue(
                         vn,
@@ -566,34 +662,34 @@ public class BatchXmlParser {
                 backImagePath);
 
         /*
-         * =========================================================
+         * =====================================================
          * ACCOUNT ID
-         * =========================================================
+         * =====================================================
          *
-         * accountId is not present in XML.
-         *
-         * Leave it null.
+         * Account ID is not present in XML.
          */
-        cheque.setAccountId(null);
+
+        cheque.setAccountId(
+                null);
 
         /*
-         * =========================================================
+         * =====================================================
          * CREATED AT
-         * =========================================================
+         * =====================================================
          *
-         * createdAt is not present in XML.
-         *
-         * We can leave it null if DB handles it.
+         * CreatedAt is not present in XML.
          */
-        cheque.setCreatedAt(null);
+
+        cheque.setCreatedAt(
+                null);
 
         return cheque;
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * GET XML ELEMENT VALUE
-     * =============================================================
+     * =========================================================
      */
     private String getValue(
             VTDNav vn,
@@ -607,7 +703,8 @@ public class BatchXmlParser {
 
             namespacePilot.bind(vn);
 
-            namespacePilot.selectXPath(xpath);
+            namespacePilot.selectXPath(
+                    xpath);
 
             int index =
                     namespacePilot.evalXPath();
@@ -623,7 +720,8 @@ public class BatchXmlParser {
                 return null;
             }
 
-            return vn.toString(textIndex).trim();
+            return vn.toString(
+                    textIndex).trim();
 
         } finally {
 
@@ -632,9 +730,9 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * GET XML ATTRIBUTE VALUE
-     * =============================================================
+     * =========================================================
      */
     private String getAttributeValue(
             VTDNav vn,
@@ -649,7 +747,8 @@ public class BatchXmlParser {
 
             namespacePilot.bind(vn);
 
-            namespacePilot.selectXPath(xpath);
+            namespacePilot.selectXPath(
+                    xpath);
 
             int index =
                     namespacePilot.evalXPath();
@@ -659,13 +758,15 @@ public class BatchXmlParser {
             }
 
             int attrIndex =
-                    vn.getAttrVal(attributeName);
+                    vn.getAttrVal(
+                            attributeName);
 
             if (attrIndex == -1) {
                 return null;
             }
 
-            return vn.toString(attrIndex).trim();
+            return vn.toString(
+                    attrIndex).trim();
 
         } finally {
 
@@ -674,9 +775,9 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * FIND XML FILE INSIDE ZIP
-     * =============================================================
+     * =========================================================
      */
     private ZipEntry findXmlEntry(
             ZipFile zip) {
@@ -694,7 +795,8 @@ public class BatchXmlParser {
             }
 
             String name =
-                    entry.getName().toLowerCase();
+                    entry.getName()
+                            .toLowerCase();
 
             if (name.endsWith(".xml")) {
                 return entry;
@@ -705,15 +807,16 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * PARSE INTEGER
-     * =============================================================
+     * =========================================================
      */
     private int parseInteger(
             String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
+
             return 0;
         }
 
@@ -729,15 +832,16 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * PARSE BIG DECIMAL
-     * =============================================================
+     * =========================================================
      */
     private BigDecimal parseBigDecimal(
             String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
+
             return null;
         }
 
@@ -753,19 +857,20 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * PARSE DATE
+     * =========================================================
      *
-     * Current XML format:
+     * XML example:
      *
      * 2026-06-30
-     * =============================================================
      */
     private Date parseDate(
             String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
+
             return null;
         }
 
@@ -781,19 +886,20 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * PARSE TIMESTAMP
+     * =========================================================
      *
-     * Example:
+     * XML example:
      *
      * 2026-08-31T15:14:01
-     * =============================================================
      */
     private Timestamp parseTimestamp(
             String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
+
             return null;
         }
 
@@ -801,7 +907,9 @@ public class BatchXmlParser {
 
             return Timestamp.valueOf(
                     value.trim()
-                         .replace("T", " "));
+                            .replace(
+                                    "T",
+                                    " "));
 
         } catch (IllegalArgumentException e) {
 
@@ -810,9 +918,9 @@ public class BatchXmlParser {
     }
 
     /**
-     * =============================================================
+     * =========================================================
      * READ XML BYTES
-     * =============================================================
+     * =========================================================
      */
     private byte[] readXmlBytes(
             InputStream inputStream)
@@ -827,7 +935,8 @@ public class BatchXmlParser {
         int length;
 
         while ((length =
-                inputStream.read(buffer)) != -1) {
+                inputStream.read(buffer))
+                != -1) {
 
             outputStream.write(
                     buffer,
