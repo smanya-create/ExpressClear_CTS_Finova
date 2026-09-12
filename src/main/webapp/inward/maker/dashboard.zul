@@ -10,17 +10,62 @@
 		<div sclass="inward-maker-dashboard-scroll" width="100%"
 			height="100%">
 
-			<!-- Welcome Banner -->
-			<div sclass="inward-maker-welcome-section">
-				<label value="Welcome, Maker"
-					sclass="inward-maker-welcome-title" />
-				<label
-					value="Manage and process inward cheque batches."
-					sclass="inward-maker-welcome-subtitle" />
+			<!-- Filter Card: Title on top line, Controls on next line -->
+			<div sclass="inward-maker-filter-card">
+				
+				<!-- Line 1: Header Label -->
+				<div sclass="inward-maker-filter-title-box">
+					<label value="Search &amp; Filter" sclass="inward-maker-filter-heading" />
+				</div>
+
+				<!-- Line 2: Search Box, Comboboxes, and Buttons -->
+				<hlayout spacing="12px" sclass="inward-maker-filter-controls z-valign-middle">
+					
+					<!-- Search by Batch ID only -->
+					<textbox id="inwardMakerTxtSearch" 
+						placeholder="Search by Batch ID..." 
+						width="240px" 
+						sclass="inward-maker-input" />
+
+					<!-- Module Dropdown -->
+					<combobox id="inwardMakerCmbModule" 
+						placeholder="All Modules" 
+						readonly="true" 
+						width="190px" 
+						sclass="inward-maker-combobox">
+						<comboitem label="All Modules" value="ALL" />
+						<comboitem label="Return from Checker" value="RETURN_FROM_CHECKER" />
+						<comboitem label="Batches Processing" value="BATCH_PROCESSING" />
+					</combobox>
+
+					<!-- Status Dropdown -->
+					<combobox id="inwardMakerCmbStatus" 
+						placeholder="All Statuses" 
+						readonly="true" 
+						width="180px" 
+						sclass="inward-maker-combobox">
+						<comboitem label="All Statuses" value="ALL" />
+						<comboitem label="Pending Data Entry" value="PENDING_DATA_ENTRY" />
+						<comboitem label="Pending MICR Repair" value="PENDING_MICR_REPAIR" />
+						<comboitem label="Fix Data Entry" value="FIX DATA ENTRY" />
+						<comboitem label="Needs Rework" value="NEEDS REWORK" />
+					</combobox>
+
+					<!-- Action Buttons -->
+					<button id="inwardMakerBtnSearch" 
+						label="SEARCH" 
+						iconSclass="z-icon-search"
+						sclass="inward-maker-btn-action-search" />
+					<button id="inwardMakerBtnClear" 
+						label="CLEAR" 
+						iconSclass="z-icon-undo"
+						sclass="inward-maker-btn-action-clear" />
+
+				</hlayout>
 			</div>
 
 			<!-- Section 1: Return From Checker -->
-			<div sclass="inward-maker-return-section">
+			<div id="inwardMakerReturnSection" sclass="inward-maker-return-section">
 				<div sclass="inward-maker-section-header">
 					<div>
 						<label value="Return From Checker"
@@ -55,10 +100,10 @@
 				</div>
 			</div>
 
-			<space height="38px" />
+			<space id="inwardMakerSectionSpacer" height="34px" />
 
 			<!-- Section 2: Batches Processing -->
-			<div sclass="inward-maker-processing-section">
+			<div id="inwardMakerProcessingSection" sclass="inward-maker-processing-section">
 				<div sclass="inward-maker-section-header">
 					<div>
 						<label value="Batches Processing"
@@ -93,7 +138,7 @@
 				</div>
 
 				<!-- Centered Pagination Bar -->
-				<div sclass="inward-maker-pagination">
+				<div id="inwardMakerPaginationBar" sclass="inward-maker-pagination">
 					<button id="inwardMakerBtnFirst" label="&lt;&lt;"
 						sclass="inward-maker-pagination-button" />
 					<button id="inwardMakerBtnPrevious" label="&lt;"
