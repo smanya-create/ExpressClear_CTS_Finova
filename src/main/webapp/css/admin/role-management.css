@@ -478,3 +478,33 @@
     text-align: left !important;
     justify-content: flex-start !important;
 }
+/* Unprocessed Listbox Header - Theme Match */
+.z-listbox-header-bg {
+    background: #173B61 !important;
+}
+
+.z-listheader {
+    background: #173B61 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+    text-align: center !important;
+}
+
+.z-listheader-content {
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 10px 8px !important;
+}
+
+/* Ensure row cells have clean height and separation */
+.z-listitem {
+    height: 52px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.z-listitem:hover {
+    background-color: #f8fafc !important;
+}
