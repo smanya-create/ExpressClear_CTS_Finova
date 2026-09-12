@@ -57,6 +57,11 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 	}
 
 	@Override
+	public List<OutwardCheque> getOnHoldCheques(String outwardBatchId) {
+		return outwardChequeDAO.getOnHoldCheques(outwardBatchId);
+	}
+
+	@Override
 	public BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId) {
 		return outwardChequeDAO.getTotalChequeAmountByBatchId(outwardBatchId);
 	}
@@ -146,15 +151,22 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			String existingOutwardChequeId = cheque.getOutwardChequeId();
 
 			if (existingOutwardChequeId != null && !existingOutwardChequeId.trim().isEmpty()) {
+
 				existingOutwardChequeId = existingOutwardChequeId.trim();
 				cheque.setOutwardChequeId(existingOutwardChequeId);
+
+				cheque.setChequeStatus("PENDING_VERIFICATION");
 
 				boolean updated = outwardChequeDAO.saveDataEntry(connection, cheque);
 
 				if (!updated) {
 					throw new IllegalStateException("Unable to update outward cheque: " + existingOutwardChequeId);
 				}
+
 			} else {
+
+				cheque.setChequeStatus("PENDING_VERIFICATION");
+
 				String outwardChequeId = outwardChequeDAO.createOutwardChequeFromScan(connection, outwardBatchId,
 						cheque);
 
@@ -166,6 +178,7 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			}
 
 			connection.commit();
+
 			return cheque;
 
 		} catch (Exception exception) {
@@ -178,17 +191,19 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 				}
 			}
 
-			throw new RuntimeException("Unable to save Maker cheque for scanned batch: " + batchId, exception);
+			String errorMessage = exception.getMessage();
+
+			if (errorMessage == null || errorMessage.trim().isEmpty()) {
+				errorMessage = exception.getClass().getSimpleName();
+			}
+
+			throw new RuntimeException(
+					"Unable to save Maker cheque for scanned batch: " + batchId + ". Cause: " + errorMessage,
+					exception);
 
 		} finally {
 
 			if (connection != null) {
-				try {
-					connection.setAutoCommit(true);
-				} catch (SQLException autoCommitException) {
-					autoCommitException.printStackTrace();
-				}
-
 				try {
 					connection.close();
 				} catch (SQLException closeException) {
@@ -197,4 +212,5 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			}
 		}
 	}
+
 }

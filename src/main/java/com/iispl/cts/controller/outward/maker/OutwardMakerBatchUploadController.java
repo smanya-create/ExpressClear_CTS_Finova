@@ -30,14 +30,17 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.dto.BatchValidationData;
+import com.iispl.cts.dto.ValidationResult;
 import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
 import com.iispl.cts.parser.BatchXmlParser;
+import com.iispl.cts.service.outward.BatchValidationService;
 import com.iispl.cts.service.outward.ScanService;
+import com.iispl.cts.serviceimpl.outward.BatchValidationServiceImpl;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
-public class OutwardMakerBatchUploadController
-        implements Composer<Component> {
+public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,32 +49,36 @@ public class OutwardMakerBatchUploadController
     // =========================================================
 
     private Intbox txtExpectedTotalCheques;
+
     private Decimalbox txtExpectedTotalChequeAmount;
 
     private Textbox txtChequeFolder;
-    private Textbox txtBatchNumber;
 
     private Button btnBrowse;
+
     private Button btnValidateBatch;
 
     private Div divSuccessMessage;
+
     private Label lblSuccessText;
 
     private Groupbox batchDetailsGroup;
+
     private Listbox lstBatchDetails;
 
     // =========================================================
     // ROOT COMPONENT
-    // Used for attaching custom popup
     // =========================================================
 
     private Component pageRoot;
 
     // =========================================================
-    // SERVICE
+    // SERVICES
     // =========================================================
 
     private ScanService scanService;
+
+    private BatchValidationService batchValidationService;
 
     // =========================================================
     // UPLOADED ZIP
@@ -80,7 +87,7 @@ public class OutwardMakerBatchUploadController
     private File uploadedZipFile;
 
     // =========================================================
-    // BATCH ID
+    // CURRENT BATCH
     // =========================================================
 
     private String batchId;
@@ -90,73 +97,58 @@ public class OutwardMakerBatchUploadController
     // =========================================================
 
     @Override
-    public void doAfterCompose(Component component)
-            throws Exception {
+    public void doAfterCompose(Component component) throws Exception {
 
         // =====================================================
         // STORE PAGE ROOT
         // =====================================================
 
-        pageRoot =
-                component.getPage()
-                        .getFirstRoot();
+        pageRoot = component.getPage().getFirstRoot();
 
         // =====================================================
         // GET ZUL COMPONENTS
         // =====================================================
 
         txtExpectedTotalCheques =
-                (Intbox) component.getFellow(
-                        "txtExpectedTotalCheques");
+                (Intbox) component.getFellow("txtExpectedTotalCheques");
 
         txtExpectedTotalChequeAmount =
                 (Decimalbox) component.getFellow(
                         "txtExpectedTotalChequeAmount");
 
         txtChequeFolder =
-                (Textbox) component.getFellow(
-                        "txtChequeFolder");
-
-        txtBatchNumber =
-                (Textbox) component.getFellow(
-                        "txtBatchNumber");
+                (Textbox) component.getFellow("txtChequeFolder");
 
         btnBrowse =
-                (Button) component.getFellow(
-                        "btnBrowse");
+                (Button) component.getFellow("btnBrowse");
 
         btnValidateBatch =
-                (Button) component.getFellow(
-                        "btnValidateBatch");
+                (Button) component.getFellow("btnValidateBatch");
 
         divSuccessMessage =
-                (Div) component.getFellow(
-                        "divSuccessMessage");
+                (Div) component.getFellow("divSuccessMessage");
 
         lblSuccessText =
-                (Label) component.getFellow(
-                        "lblSuccessText");
+                (Label) component.getFellow("lblSuccessText");
 
         batchDetailsGroup =
-                (Groupbox) component.getFellow(
-                        "batchDetailsGroup");
+                (Groupbox) component.getFellow("batchDetailsGroup");
 
         lstBatchDetails =
-                (Listbox) component.getFellow(
-                        "lstBatchDetails");
+                (Listbox) component.getFellow("lstBatchDetails");
 
         // =====================================================
-        // CREATE SERVICE
+        // CREATE SERVICES
         // =====================================================
 
-        scanService =
-                new ScanServiceImpl();
+        scanService = new ScanServiceImpl();
+
+        batchValidationService =
+                new BatchValidationServiceImpl();
 
         // =====================================================
         // INITIAL PAGE STATE
         // =====================================================
-
-        txtBatchNumber.setValue("");
 
         divSuccessMessage.setVisible(false);
 
@@ -169,7 +161,7 @@ public class OutwardMakerBatchUploadController
         // =====================================================
 
         btnBrowse.addEventListener(
-                "onUpload",
+                Events.ON_UPLOAD,
                 new EventListener<Event>() {
 
                     @Override
@@ -181,11 +173,11 @@ public class OutwardMakerBatchUploadController
                 });
 
         // =====================================================
-        // VALIDATE BATCH BUTTON
+        // VALIDATE BUTTON
         // =====================================================
 
         btnValidateBatch.addEventListener(
-                "onClick",
+                Events.ON_CLICK,
                 new EventListener<Event>() {
 
                     @Override
@@ -198,40 +190,32 @@ public class OutwardMakerBatchUploadController
 
     // =========================================================
     // HANDLE ZIP UPLOAD
-    //
-    // IMPORTANT:
-    // No popup is shown here.
-    //
-    // User requested that failure popup should be related
-    // to VALIDATE BATCH processing.
     // =========================================================
 
-    private void handleZipUpload(
-            UploadEvent uploadEvent) {
+    private void handleZipUpload(UploadEvent uploadEvent) {
 
-        Media media =
-                uploadEvent.getMedia();
+        Media media = uploadEvent.getMedia();
 
         if (media == null) {
             return;
         }
 
-        String fileName =
-                media.getName();
+        String fileName = media.getName();
 
         // =====================================================
-        // CHECK ZIP EXTENSION
+        // CHECK ZIP
         // =====================================================
 
         if (fileName == null
-                || !fileName.toLowerCase()
-                        .endsWith(".zip")) {
+                || !fileName.toLowerCase().endsWith(".zip")) {
+
+            showErrorMessage("Please upload a ZIP file.");
 
             return;
         }
 
         // =====================================================
-        // GET WEBAPP / TEMPDATA PATH
+        // GET TEMPDATA PATH
         // =====================================================
 
         String tempDataPath =
@@ -241,6 +225,10 @@ public class OutwardMakerBatchUploadController
                         .getRealPath("/TempData");
 
         if (tempDataPath == null) {
+
+            showErrorMessage(
+                    "Unable to access TempData directory.");
+
             return;
         }
 
@@ -248,18 +236,22 @@ public class OutwardMakerBatchUploadController
                 new File(tempDataPath);
 
         // =====================================================
-        // CREATE TEMPDATA FOLDER
+        // CREATE TEMPDATA DIRECTORY
         // =====================================================
 
         if (!tempDataDirectory.exists()) {
 
             if (!tempDataDirectory.mkdirs()) {
+
+                showErrorMessage(
+                        "Unable to create TempData directory.");
+
                 return;
             }
         }
 
         // =====================================================
-        // DESTINATION ZIP
+        // DESTINATION FILE
         // =====================================================
 
         File destinationFile =
@@ -268,7 +260,7 @@ public class OutwardMakerBatchUploadController
                         fileName);
 
         // =====================================================
-        // SAVE ZIP ONLY
+        // SAVE ZIP
         // =====================================================
 
         try (
@@ -277,19 +269,14 @@ public class OutwardMakerBatchUploadController
 
                 FileOutputStream outputStream =
                         new FileOutputStream(
-                                destinationFile)
-        ) {
+                                destinationFile)) {
 
-            byte[] buffer =
-                    new byte[8192];
+            byte[] buffer = new byte[8192];
 
             int bytesRead;
 
-            while (
-                    (bytesRead =
-                            inputStream.read(buffer))
-                            != -1
-            ) {
+            while ((bytesRead =
+                    inputStream.read(buffer)) != -1) {
 
                 outputStream.write(
                         buffer,
@@ -302,30 +289,31 @@ public class OutwardMakerBatchUploadController
         } catch (Exception e) {
 
             e.printStackTrace();
+
+            showErrorMessage(
+                    "Unable to save uploaded ZIP file.");
+
             return;
         }
 
         // =====================================================
-        // STORE UPLOADED ZIP
+        // STORE UPLOADED FILE
         // =====================================================
 
         uploadedZipFile =
                 destinationFile;
 
         // =====================================================
-        // DISPLAY SELECTED FILE
+        // DISPLAY FILE NAME
         // =====================================================
 
-        txtChequeFolder.setValue(
-                fileName);
+        txtChequeFolder.setValue(fileName);
 
         // =====================================================
         // RESET PREVIOUS RESULT
         // =====================================================
 
         batchId = null;
-
-        txtBatchNumber.setValue("");
 
         divSuccessMessage.setVisible(false);
 
@@ -345,6 +333,41 @@ public class OutwardMakerBatchUploadController
     // =========================================================
     // VALIDATE BATCH
     // =========================================================
+    //
+    // FLOW:
+    //
+    // Controller
+    //     |
+    //     | expectedTotalCheques
+    //     | expectedTotalAmount
+    //     | zipPath
+    //     ↓
+    // BatchXmlParser
+    //     |
+    //     | ScanBatch
+    //     | List<ScanCheque>
+    //     ↓
+    // BatchValidationData
+    //     ↓
+    // BatchValidationService
+    //     ↓
+    // BatchValidationServiceImpl
+    //     ↓
+    // Validators
+    //     ↓
+    // ValidationResult
+    //     |
+    //     +---- FAIL → showErrorMessage()
+    //     |
+    //     +---- PASS
+    //              ↓
+    //           SAVE
+    //              ↓
+    //        SUCCESS MESSAGE
+    //              ↓
+    //        BATCH DETAILS
+    //
+    // =========================================================
 
     private void validateBatch() {
 
@@ -361,289 +384,227 @@ public class OutwardMakerBatchUploadController
             return;
         }
 
+        // =====================================================
+        // GET EXPECTED COUNT
+        // =====================================================
+
+        Integer expectedTotalCheques =
+                txtExpectedTotalCheques.getValue();
+
+        if (expectedTotalCheques == null
+                || expectedTotalCheques <= 0) {
+
+            showErrorMessage(
+                    "Please enter a valid expected cheque count.");
+
+            return;
+        }
+
+        // =====================================================
+        // GET EXPECTED AMOUNT
+        // =====================================================
+
+        BigDecimal expectedTotalAmount =
+                txtExpectedTotalChequeAmount.getValue();
+
+        if (expectedTotalAmount == null
+                || expectedTotalAmount.signum() <= 0) {
+
+            showErrorMessage(
+                    "Please enter a valid expected total amount.");
+
+            return;
+        }
+
         try {
 
             // =================================================
             // STEP 1
-            // PARSE XML
+            // PARSE
             // =================================================
 
             BatchXmlParser parser =
-                    new BatchXmlParser(
-                            scanService);
+                    new BatchXmlParser();
 
-            /*
-             * ZIP
-             *   ↓
-             * XML
-             *   ↓
-             * ScanBatch
-             *   ↓
-             * ScanCheque
-             *   ↓
-             * ScanService
-             *   ↓
-             * scan_batch / scan_cheque
-             *
-             * Parser returns batchId.
-             */
+            BatchXmlParser.ParsedBatchData parsedData =
+                    parser.parse(
+                            expectedTotalCheques,
+                            expectedTotalAmount,
+                            uploadedZipFile.getAbsolutePath());
+
+            // =================================================
+            // STEP 2
+            // GET PARSED BATCH
+            // =================================================
+
+            ScanBatch scanBatch =
+                    parsedData.getScanBatch();
+
+            if (scanBatch == null) {
+
+                throw new RuntimeException(
+                        "Batch information could not be parsed.");
+            }
+
+            // =================================================
+            // STEP 3
+            // GET PARSED CHEQUES
+            // =================================================
+
+            List<ScanCheque> chequeList =
+                    parsedData.getChequeList();
+
+            if (chequeList == null
+                    || chequeList.isEmpty()) {
+
+                throw new RuntimeException(
+                        "No cheques were found in the uploaded batch.");
+            }
+
+            // =================================================
+            // STEP 4
+            // GET BATCH ID
+            // =================================================
 
             batchId =
-                    parser.parse(
-                            uploadedZipFile
-                                    .getAbsolutePath());
-
-            // =================================================
-            // CHECK BATCH ID
-            // =================================================
+                    scanBatch.getScannedBatchId();
 
             if (batchId == null
                     || batchId.trim().isEmpty()) {
 
                 throw new RuntimeException(
-                        "Batch ID was not returned.");
+                        "Batch ID was not found in the XML.");
             }
 
             batchId =
                     batchId.trim();
 
             // =================================================
-            // DISPLAY BATCH NUMBER
-            // =================================================
-
-            txtBatchNumber.setValue(
-                    batchId);
-
-            // =================================================
-            // STEP 2
-            // GET SCAN BATCH
-            // =================================================
-
-            ScanBatch scanBatch =
-                    scanService.getBatchById(
-                            batchId);
-
-            if (scanBatch == null) {
-
-                throw new RuntimeException(
-                        "Batch not found in database: "
-                                + batchId);
-            }
-
-            // =================================================
-            // STEP 3
-            // GET ACTUAL VALUES
-            // =================================================
-
-            int actualChequeCount =
-                    scanBatch
-                            .getActualChequeCount();
-
-            BigDecimal actualTotalAmount =
-                    scanBatch
-                            .getActualTotalAmount();
-
-            // =================================================
-            // STEP 4
-            // GET EXPECTED VALUES
-            // =================================================
-
-            Integer expectedChequeCount =
-                    txtExpectedTotalCheques
-                            .getValue();
-
-            BigDecimal expectedTotalAmount =
-                    txtExpectedTotalChequeAmount
-                            .getValue();
-
-            if (expectedChequeCount == null) {
-
-                throw new RuntimeException(
-                        "Expected cheque count is required.");
-            }
-
-            if (expectedTotalAmount == null) {
-
-                throw new RuntimeException(
-                        "Expected total amount is required.");
-            }
-
-            // =================================================
             // STEP 5
-            // VALIDATE COUNT
+            // CREATE VALIDATION DATA
             // =================================================
 
-            boolean chequeCountValid =
-                    expectedChequeCount.intValue()
-                            == actualChequeCount;
+            BatchValidationData validationData =
+                    new BatchValidationData();
+
+            validationData.setBatch(
+                    scanBatch);
+
+            validationData.setChequeList(
+                    chequeList);
+
+            validationData.setExpectedTotalCheques(
+                    expectedTotalCheques);
+
+            validationData.setExpectedTotalAmount(
+                    expectedTotalAmount);
 
             // =================================================
             // STEP 6
-            // VALIDATE AMOUNT
+            // VALIDATE
             // =================================================
 
-            boolean amountValid =
-                    actualTotalAmount != null
-                            && expectedTotalAmount
-                                    .compareTo(
-                                            actualTotalAmount)
-                                    == 0;
+            ValidationResult validationResult =
+                    batchValidationService.validateBatch(
+                            validationData);
 
             // =================================================
             // STEP 7
             // VALIDATION FAILED
             // =================================================
 
-            if (!chequeCountValid
-                    || !amountValid) {
+            if (!validationResult.isValid()) {
 
-                batchDetailsGroup
-                        .setVisible(false);
-
-                StringBuilder errorMessage =
-                        new StringBuilder();
-
-                errorMessage.append(
-                        "Batch validation failed.");
-
-                if (!chequeCountValid) {
-
-                    errorMessage.append(
-                            "\nExpected cheque count: ")
-                            .append(
-                                    expectedChequeCount)
-                            .append(
-                                    "\nActual cheque count: ")
-                            .append(
-                                    actualChequeCount);
-                }
-
-                if (!amountValid) {
-
-                    errorMessage.append(
-                            "\nExpected total amount: ")
-                            .append(
-                                    expectedTotalAmount)
-                            .append(
-                                    "\nActual total amount: ")
-                            .append(
-                                    actualTotalAmount);
-                }
+                batchDetailsGroup.setVisible(false);
 
                 showErrorMessage(
-                        errorMessage.toString());
+                        validationResult.getMessage());
 
                 return;
             }
 
             // =================================================
             // STEP 8
-            // GET ALL CHEQUES
+            // VALIDATION PASSED → SAVE
             // =================================================
 
-            List<ScanCheque> scanCheques =
-                    scanService
-                            .getChequesByBatchId(
-                                    batchId);
+            String savedBatchId =
+                    scanService.saveScanBatch(
+                            scanBatch,
+                            chequeList);
 
-            if (scanCheques == null) {
+            if (savedBatchId == null
+                    || savedBatchId.trim().isEmpty()) {
 
                 throw new RuntimeException(
-                        "Unable to retrieve scan cheques.");
+                        "Batch could not be saved.");
             }
+
+            batchId =
+                    savedBatchId.trim();
 
             // =================================================
             // STEP 9
-            // COUNT MICR REPAIR CHEQUES
+            // COUNT MICR REPAIR
             // =================================================
 
-            int micrRepairCount = 0;
-
-            for (ScanCheque cheque :
-                    scanCheques) {
-
-                if (cheque == null) {
-                    continue;
-                }
-
-                String status =
-                        cheque.getChequeStatus();
-
-                if ("PENDING_MICR_REPAIR"
-                        .equalsIgnoreCase(status)) {
-
-                    micrRepairCount++;
-                }
-            }
+            int micrRepairCount =
+                    countMicrRepairCheques(
+                            chequeList);
 
             // =================================================
             // STEP 10
-            // DISPLAY ONLY BATCH INFORMATION
+            // SUCCESS MESSAGE
+            // =================================================
+
+            divSuccessMessage.setVisible(true);
+
+            lblSuccessText.setValue(
+                    "Batch " + batchId
+                            + " has been uploaded successfully.");
+
+            // =================================================
+            // STEP 11
+            // DISPLAY BATCH DETAILS
             // =================================================
 
             displayBatchDetails(
                     scanBatch,
-                    actualChequeCount,
+                    chequeList.size(),
                     micrRepairCount);
 
             // =================================================
-            // STEP 11
-            // SUCCESS MESSAGE
-            // =================================================
-
-            divSuccessMessage
-                    .setVisible(true);
-
-            lblSuccessText.setValue(
-                    "Batch "
-                            + batchId
-                            + " has been validated successfully.");
-
-            // =================================================
             // STEP 12
-            // CLEAR INPUT FIELDS
-            //
-            // IMPORTANT:
-            //
-            // Batch Number is NOT cleared.
+            // CLEAR INPUTS
             // =================================================
 
-            txtExpectedTotalCheques
-                    .setValue(null);
+            txtExpectedTotalCheques.setValue(null);
 
             txtExpectedTotalChequeAmount
                     .setValue(BigDecimal.ZERO);
 
-            txtChequeFolder
-                    .setValue("");
+            txtChequeFolder.setValue("");
 
             uploadedZipFile = null;
 
-            btnValidateBatch
-                    .setDisabled(true);
+            btnValidateBatch.setDisabled(true);
 
         } catch (Exception e) {
 
             // =================================================
-            // LOG ACTUAL TECHNICAL ERROR
+            // LOG ERROR
             // =================================================
 
             e.printStackTrace();
 
             // =================================================
-            // HIDE BATCH DETAILS
+            // HIDE DETAILS
             // =================================================
 
-            batchDetailsGroup
-                    .setVisible(false);
-
-            /*
-             * Do NOT clear Batch Number here if the
-             * batch ID was successfully returned.
-             */
+            batchDetailsGroup.setVisible(false);
 
             // =================================================
-            // SHOW POPUP
+            // ERROR MESSAGE
             // =================================================
 
             String errorMessage =
@@ -662,47 +623,48 @@ public class OutwardMakerBatchUploadController
     }
 
     // =========================================================
-    // ERROR MESSAGE POPUP
+    // COUNT MICR REPAIR CHEQUES
     // =========================================================
-    //
-    // This is the reusable popup method.
-    //
-    // Popup ID:
-    //     batchValidationErrorPopup
-    //
-    // CSS class:
-    //     batch-validation-error-popup
-    //
-    // You can style it from CSS later.
+
+    private int countMicrRepairCheques(
+            List<ScanCheque> chequeList) {
+
+        int count = 0;
+
+        for (ScanCheque cheque : chequeList) {
+
+            if (cheque == null) {
+                continue;
+            }
+
+            String status =
+                    cheque.getChequeStatus();
+
+            if ("PENDING_MICR_REPAIR"
+                    .equalsIgnoreCase(status)) {
+
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    // =========================================================
+    // ERROR MESSAGE POPUP
     // =========================================================
 
     private void showErrorMessage(
             String message) {
 
-        // =====================================================
-        // CREATE WINDOW
-        // =====================================================
-
         final Window errorWindow =
                 new Window();
-
-        // =====================================================
-        // POPUP ID
-        // =====================================================
 
         errorWindow.setId(
                 "batchValidationErrorPopup");
 
-        // =====================================================
-        // CSS CLASS
-        // =====================================================
-
         errorWindow.setSclass(
                 "batch-validation-error-popup");
-
-        // =====================================================
-        // WINDOW SETTINGS
-        // =====================================================
 
         errorWindow.setTitle(
                 "Batch Validation Failed");
@@ -710,8 +672,7 @@ public class OutwardMakerBatchUploadController
         errorWindow.setBorder(
                 "normal");
 
-        errorWindow.setClosable(
-                false);
+        errorWindow.setClosable(false);
 
         errorWindow.setWidth(
                 "450px");
@@ -736,7 +697,7 @@ public class OutwardMakerBatchUploadController
                 "padding:20px;");
 
         // =====================================================
-        // ERROR MESSAGE
+        // MESSAGE
         // =====================================================
 
         Label messageLabel =
@@ -783,21 +744,21 @@ public class OutwardMakerBatchUploadController
                 okButton);
 
         // =====================================================
-        // ADD CONTENT TO WINDOW
+        // ADD CONTENT
         // =====================================================
 
         errorWindow.appendChild(
                 content);
 
         // =====================================================
-        // ATTACH POPUP TO PAGE ROOT
+        // ATTACH TO PAGE
         // =====================================================
 
         pageRoot.appendChild(
                 errorWindow);
 
         // =====================================================
-        // SHOW AS MODAL POPUP
+        // SHOW MODAL
         // =====================================================
 
         errorWindow.doModal();
@@ -835,7 +796,7 @@ public class OutwardMakerBatchUploadController
                 new Listitem();
 
         // =====================================================
-        // BATCH
+        // BATCH ID
         // =====================================================
 
         String displayBatchId =
@@ -859,8 +820,7 @@ public class OutwardMakerBatchUploadController
         item.appendChild(
                 new Listcell(
                         formatDate(
-                                scanBatch
-                                        .getUploadedAt())));
+                                scanBatch.getUploadedAt())));
 
         // =====================================================
         // TOTAL CHEQUES
@@ -894,8 +854,7 @@ public class OutwardMakerBatchUploadController
         }
 
         item.appendChild(
-                new Listcell(
-                        status));
+                new Listcell(status));
 
         // =====================================================
         // ACTION
@@ -905,14 +864,13 @@ public class OutwardMakerBatchUploadController
                 new Listcell();
 
         // =====================================================
-        // MICR REPAIR REQUIRED
+        // MICR REPAIR
         // =====================================================
 
         if (micrRepairCount > 0) {
 
             Button micrRepairButton =
-                    new Button(
-                            "MICR Repair");
+                    new Button("MICR Repair");
 
             micrRepairButton.setSclass(
                     "btn-batch-action");
@@ -920,20 +878,19 @@ public class OutwardMakerBatchUploadController
             final String selectedBatchId =
                     displayBatchId;
 
-            micrRepairButton
-                    .addEventListener(
-                            "onClick",
-                            new EventListener<Event>() {
+            micrRepairButton.addEventListener(
+                    Events.ON_CLICK,
+                    new EventListener<Event>() {
 
-                                @Override
-                                public void onEvent(
-                                        Event event) {
+                        @Override
+                        public void onEvent(
+                                Event event) {
 
-                                    openMicrRepair(
-                                            "SCAN",
-                                            selectedBatchId);
-                                }
-                            });
+                            openMicrRepair(
+                                    "SCAN",
+                                    selectedBatchId);
+                        }
+                    });
 
             actionCell.appendChild(
                     micrRepairButton);
@@ -941,12 +898,11 @@ public class OutwardMakerBatchUploadController
         } else {
 
             // =================================================
-            // NO MICR REPAIR
+            // DATA ENTRY
             // =================================================
 
             Button dataEntryButton =
-                    new Button(
-                            "Data Entry");
+                    new Button("Data Entry");
 
             dataEntryButton.setSclass(
                     "btn-batch-action");
@@ -954,34 +910,26 @@ public class OutwardMakerBatchUploadController
             final String selectedBatchId =
                     displayBatchId;
 
-            dataEntryButton
-                    .addEventListener(
-                            "onClick",
-                            new EventListener<Event>() {
+            dataEntryButton.addEventListener(
+                    Events.ON_CLICK,
+                    new EventListener<Event>() {
 
-                                @Override
-                                public void onEvent(
-                                        Event event) {
+                        @Override
+                        public void onEvent(
+                                Event event) {
 
-                                    /*
-                                     * Data Entry navigation
-                                     * can be connected here once
-                                     * the exact Data Entry include
-                                     * path/attributes are finalized.
-                                     */
-
-                                    System.out.println(
-                                            "Data Entry clicked for batch: "
-                                                    + selectedBatchId);
-                                }
-                            });
+                            System.out.println(
+                                    "Data Entry clicked for batch: "
+                                            + selectedBatchId);
+                        }
+                    });
 
             actionCell.appendChild(
                     dataEntryButton);
         }
 
         // =====================================================
-        // ADD ACTION CELL
+        // ADD ACTION
         // =====================================================
 
         item.appendChild(
@@ -991,8 +939,8 @@ public class OutwardMakerBatchUploadController
         // ADD ROW
         // =====================================================
 
-        lstBatchDetails
-                .appendChild(item);
+        lstBatchDetails.appendChild(
+                item);
     }
 
     // =========================================================
@@ -1043,41 +991,24 @@ public class OutwardMakerBatchUploadController
                         true);
 
         // =====================================================
-        // LOAD MICR REPAIR THROUGH INCLUDE
+        // LOAD MICR REPAIR
         // =====================================================
 
-        if (mainContentArea
-                instanceof Include) {
+        if (mainContentArea instanceof Include) {
 
             Include include =
                     (Include) mainContentArea;
-
-            // =================================================
-            // PASS SOURCE
-            // =================================================
 
             include.setAttribute(
                     "MICR_REPAIR_SOURCE",
                     source.trim());
 
-            // =================================================
-            // PASS BATCH ID
-            // =================================================
-
             include.setAttribute(
                     "MICR_REPAIR_BATCH_ID",
                     batchId.trim());
 
-            // =================================================
-            // LOAD MICR REPAIR ZUL
-            // =================================================
-
             include.setSrc(
                     "/outward/maker/micr-repair/micr-repair.zul");
-
-            // =================================================
-            // DEBUG
-            // =================================================
 
             System.out.println(
                     "MICR REPAIR SOURCE = "
@@ -1086,10 +1017,6 @@ public class OutwardMakerBatchUploadController
             System.out.println(
                     "MICR REPAIR BATCH ID = "
                             + batchId);
-
-            System.out.println(
-                    "MICR REPAIR ZUL = "
-                            + "/outward/maker/micr-repair/micr-repair.zul");
         }
     }
 
@@ -1097,8 +1024,7 @@ public class OutwardMakerBatchUploadController
     // FORMAT DATE
     // =========================================================
 
-    private String formatDate(
-            Date date) {
+    private String formatDate(Date date) {
 
         if (date == null) {
             return "-";
@@ -1115,8 +1041,7 @@ public class OutwardMakerBatchUploadController
     // SAFE VALUE
     // =========================================================
 
-    private String safe(
-            String value) {
+    private String safe(String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {

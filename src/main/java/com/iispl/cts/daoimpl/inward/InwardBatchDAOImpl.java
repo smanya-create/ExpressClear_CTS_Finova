@@ -251,13 +251,13 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	public List<DashboardSummaryDTO> getDashboardBatches() {
 		String dashboardSummaryQuery = "SELECT ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count AS total_cheques, "
 		        + "COUNT(CASE WHEN ic.cheque_status = 'CHECKER_PROCESSING_PENDING' THEN 1 END) AS normal_cheques, "
-		        + "COUNT(CASE WHEN ic.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS rejected_cheques "
+		        + "COUNT(CASE WHEN ic.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS rejected_cheques, "
+		        + "COUNT(CASE WHEN ic.cheque_status = 'MAKER_RETURNED' THEN 1 END) AS maker_returned "
 		        + "FROM inward_batch ib "
 		        + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
-		        + "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING','COMPLETED') "
+		        + "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING', 'COMPLETED') "
 		        + "GROUP BY ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count "
 		        + "ORDER BY ib.inward_batch_id;";
-
 	    List<DashboardSummaryDTO> batchList = new ArrayList<>();
 
 	    try (Connection conn = DBConnection.getConnection();
@@ -269,6 +269,7 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	            summary.setBatchStatus(rs.getString("batch_status"));
 	            summary.setTotalCheques(rs.getInt("total_cheques"));
 	            summary.setRejectionRequestCheques(rs.getInt("rejected_cheques"));
+	            summary.setMakerReturned(rs.getInt("maker_returned"));
 	            summary.setMakerApprovedCheques(rs.getInt("normal_cheques"));
 	            batchList.add(summary);
 	        }

@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-
 <zk xmlns="http://www.zkoss.org/2005/zul">
-
-<html>
-        <link rel="stylesheet"
-              type="text/css"
-              href="/ExpressClear_CTS_Finova/css/cts-unprocessed.css?v=1"/>
-    </html>
-
 
     <window id="winUnprocessedCheques"
             border="none"
@@ -17,180 +8,179 @@
             apply="com.iispl.cts.controller.outward.maker.MakerUnprocessedChequesController"
             style="padding: 20px 24px; background: #f8fafc;">
 
+        <!-- Dark Navy Header & Right-Side Filler Box -->
+        <style><![CDATA[
+            .unprocessed-box .z-listbox-header,
+            .unprocessed-box .z-listbox-header-bg,
+            .unprocessed-box .z-listhead-bar,
+            .unprocessed-box th.z-listhead-bar,
+            .unprocessed-box .z-listhead-filler,
+            .unprocessed-box th.z-listhead-filler,
+            .unprocessed-box .z-auxhead-bar,
+            .unprocessed-box th.z-auxhead-bar {
+                background: #173B61 !important;
+                background-color: #173B61 !important;
+                background-image: none !important;
+                border: none !important;
+                border-bottom: 1px solid #0f2640 !important;
+                box-shadow: none !important;
+            }
+
+            .unprocessed-box .z-listheader {
+                background: #173B61 !important;
+                background-color: #173B61 !important;
+                background-image: none !important;
+                border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+                border-top: none !important;
+                border-left: none !important;
+                border-bottom: 1px solid #0f2640 !important;
+            }
+
+            .unprocessed-box .z-listheader-content {
+                color: #ffffff !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.5px !important;
+                text-transform: uppercase !important;
+                text-align: center !important;
+                justify-content: center !important;
+                padding: 12px 6px !important;
+            }
+
+            .unprocessed-box .z-listitem {
+                height: 52px !important;
+                border-bottom: 1px solid #f1f5f9 !important;
+            }
+        ]]></style>
+
         <vlayout spacing="16px" vflex="1">
 
             <!-- Page Heading -->
-
             <vlayout spacing="4px">
-
-                <hlayout valign="middle"
-                         style="display: flex; justify-content: space-between; width: 100%;">
-
+                <hlayout valign="middle" style="display: flex; justify-content: space-between; width: 100%;">
                     <vlayout spacing="2px">
-
-                        <label value="Forced EOD Unprocessed Cheques"
-                               sclass="page-heading"/>
-
-                        <label value="Rollover instruments requiring Maker MICR Repair or Data Entry to re-enter outward clearing."
-                               sclass="page-subheading"/>
-
+                        <label value="Forced EOD Unprocessed Cheques" 
+                               style="font-size: 18px; font-weight: 700; color: #173B61;"/>
+                        <label value="Rollover instruments requiring Maker MICR Repair or Data Entry to re-enter outward clearing." 
+                               style="font-size: 13px; color: #64748b;"/>
                     </vlayout>
 
                     <button id="btnRefresh"
                             iconSclass="z-icon-refresh"
                             tooltiptext="Refresh Queue"
-                            style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"/>
-
+                            style="width: 36px; height: 36px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #cbd5e1; color: #173B61; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"/>
                 </hlayout>
-
             </vlayout>
 
+            <!-- Counter Cards (All Text in Dark Navy Blue) -->
+            <hlayout spacing="16px" width="100%">
 
-            <!-- Maker Summary Counter Cards -->
-
-            <hlayout spacing="16px"
-                     width="100%">
-
-                <hlayout sclass="stat-card"
-                         hflex="1"
-                         valign="middle"
-                         style="justify-content: space-between;">
-
-                    <vlayout spacing="2px">
-
-                        <label value="TOTAL MAKER PENDING"
-                               sclass="stat-card-title text-muted"/>
-
-                        <label id="lblTotalCount"
-                               value="0"
-                               sclass="stat-card-value text-dark"/>
-
+                <!-- Card 1: Total Pending -->
+                <hlayout hflex="1" valign="middle" 
+                         style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+                    <vlayout spacing="4px">
+                        <label value="TOTAL MAKER PENDING" 
+                               style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #173B61; text-transform: uppercase;"/>
+                        <label id="lblTotalCount" value="0" 
+                               style="font-size: 26px; font-weight: 800; color: #173B61; line-height: 1.2;"/>
                     </vlayout>
-
-                    <label sclass="z-icon-history icon-gray"/>
-
                 </hlayout>
 
-
-                <hlayout sclass="stat-card"
-                         hflex="1"
-                         valign="middle"
-                         style="justify-content: space-between;">
-
-                    <vlayout spacing="2px">
-
-                        <label value="MICR REPAIR PENDING"
-                               sclass="stat-card-title text-orange"/>
-
-                        <label id="lblRepairCount"
-                               value="0"
-                               sclass="stat-card-value text-orange"/>
-
+                <!-- Card 2: MICR Repair Pending -->
+                <hlayout hflex="1" valign="middle" 
+                         style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+                    <vlayout spacing="4px">
+                        <label value="MICR REPAIR PENDING" 
+                               style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #173B61; text-transform: uppercase;"/>
+                        <label id="lblRepairCount" value="0" 
+                               style="font-size: 26px; font-weight: 800; color: #173B61; line-height: 1.2;"/>
                     </vlayout>
-
-                    <label sclass="z-icon-wrench icon-orange"/>
-
                 </hlayout>
 
-
-                <hlayout sclass="stat-card"
-                         hflex="1"
-                         valign="middle"
-                         style="justify-content: space-between;">
-
-                    <vlayout spacing="2px">
-
-                        <label value="DATA ENTRY PENDING"
-                               sclass="stat-card-title text-purple"/>
-
-                        <label id="lblDataEntryCount"
-                               value="0"
-                               sclass="stat-card-value text-purple"/>
-
+                <!-- Card 3: Data Entry Pending -->
+                <hlayout hflex="1" valign="middle" 
+                         style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+                    <vlayout spacing="4px">
+                        <label value="DATA ENTRY PENDING" 
+                               style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #173B61; text-transform: uppercase;"/>
+                        <label id="lblDataEntryCount" value="0" 
+                               style="font-size: 26px; font-weight: 800; color: #173B61; line-height: 1.2;"/>
                     </vlayout>
-
-                    <label sclass="z-icon-edit icon-purple"/>
-
                 </hlayout>
 
             </hlayout>
 
-
-            <!-- Filter Controls -->
-
-            <hlayout spacing="12px"
-                     valign="middle"
-                     sclass="filter-bar">
-
-                <label value="Filter By Action:"
-                       sclass="filter-label"/>
-
+            <!-- Filter Controls Bar -->
+            <hlayout spacing="12px" valign="middle" 
+                     style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px;">
+                <label value="Filter By Action:" 
+                       style="font-size: 12px; font-weight: 700; color: #173B61;"/>
+                
                 <combobox id="cmbStatusFilter"
                           readonly="true"
                           width="190px"
+                          height="36px"
                           onSelect="$composer.onFilterChanged()">
-
-                    <comboitem label="All Maker Actions"
-                               value="ALL"/>
-
-                    <comboitem label="Needs MICR Repair"
-                               value="PENDING_REPAIR"/>
-
-                    <comboitem label="Needs Data Entry"
-                               value="PENDING_DATA_ENTRY"/>
-
+                    <comboitem label="All Maker Actions" value="ALL"/>
+                    <comboitem label="Needs MICR Repair" value="PENDING_REPAIR"/>
+                    <comboitem label="Needs Data Entry" value="PENDING_DATA_ENTRY"/>
                 </combobox>
-
 
                 <textbox id="txtSearchBatch"
                          placeholder="Search Batch / Cheque No / MICR..."
-                         width="260px"
+                         width="280px"
+                         height="36px"
                          instant="true"
                          onChanging="$composer.onChanging$txtSearchBatch(event)"
                          onOK="$composer.onOK$txtSearchBatch(event)"/>
-
             </hlayout>
 
-
-            <!-- Listbox -->
-
+            <!-- Listbox (NO mold="paging") -->
             <listbox id="lstUnprocessed"
+                     sclass="unprocessed-box"
                      vflex="1"
-                     mold="paging"
-                     pageSize="12"
-                     emptyMessage="No Forced EOD rollover cheques pending for Maker processing.">
-
-                <listhead sizable="true">
-
-                    <listheader label="Original Batch / Session"
-                                width="240px"/>
-
-                    <listheader label="Cheque No"
-                                width="120px"/>
-
-                    <listheader label="MICR Code"
-                                width="120px"/>
-
-                    <listheader label="Amount"
-                                width="140px"
-                                align="right"/>
-
-                    <listheader label="Required Task"
-                                width="180px"/>
-
-                    <listheader label="Reason / Remarks"
-                                hflex="1"/>
-
-                    <listheader label="Action"
-                                width="145px"
-                                align="center"/>
-
+                     emptyMessage="No Forced EOD rollover cheques pending for Maker processing."
+                     style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px 8px 0 0; overflow: hidden;">
+                <listhead sizable="false">
+                    <listheader label="BATCH ID" width="230px" align="center"/>
+                    <listheader label="CHEQUE NO" width="120px" align="center"/>
+                    <listheader label="MICR CODE" width="130px" align="center"/>
+                    <listheader label="AMOUNT (INR)" width="150px" align="center"/>
+                    <listheader label="STATUS" width="210px" align="center" sort="auto(status)"/>
+                    <listheader label="REASON / REMARKS" hflex="1" align="center"/>
+                    <listheader label="ACTION" width="165px" align="center"/>
                 </listhead>
-
             </listbox>
 
+            <!-- Flexbox-Centered Pagination Toolbar (Guaranteed Perfectly Level) -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; padding: 10px 16px; width: 100%; box-sizing: border-box;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
+                    
+                    <button id="btnFirstPage" label="«" 
+                            style="width: 32px; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #173B61; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1;" 
+                            tooltiptext="First Page" />
+                    
+                    <button id="btnPrevPage" label="‹" 
+                            style="width: 32px; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #173B61; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1;" 
+                            tooltiptext="Previous Page" />
+
+                    <intbox id="ibCurrentPage" value="1" 
+                            style="width: 38px; height: 32px; text-align: center; font-size: 13px; font-weight: 700; color: #173B61; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;" />
+
+                    <label id="lblTotalPages" value="/ 1" 
+                            style="font-size: 13px; font-weight: 700; color: #173B61; padding: 0 4px; line-height: 32px; display: inline-flex; align-items: center; justify-content: center; margin: 0;" />
+
+                    <button id="btnNextPage" label="›" 
+                            style="width: 32px; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #173B61; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1;" 
+                            tooltiptext="Next Page" />
+                    
+                    <button id="btnLastPage" label="»" 
+                            style="width: 32px; height: 32px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #173B61; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1;" 
+                            tooltiptext="Last Page" />
+
+                </div>
+            </div>
+
         </vlayout>
-
     </window>
-
 </zk>

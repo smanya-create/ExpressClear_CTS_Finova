@@ -14,9 +14,8 @@ import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
-import com.iispl.cts.entity.outward.ScanBatch;
-import com.iispl.cts.service.outward.ScanService;
-import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
+import com.iispl.cts.service.outward.OutwardBatchService;
+import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 
 public class OutwardDataEntryController extends GenericForwardComposer<Component> {
 
@@ -25,7 +24,16 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 	private static final int PAGE_SIZE = 5;
 
 	private static final String STATUS_PENDING_MAKER_PROCESS = "PENDING_MAKER_PROCESS";
+	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
+	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
+	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
+	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
+	private static final String STATUS_ON_HOLD = "ON_HOLD";
+	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
+
 	private static final String MODE_DATA_ENTRY = "DATA_ENTRY";
+
+	private static final String RETURN_FROM_CHECKER = "RETURN_FROM_CHECKER";
 
 	private Rows outwardDataEntryRowsBatch;
 
@@ -41,14 +49,14 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private Button outwardDataEntryBtnLast;
 
-	private final ScanService scanService;
+	private final OutwardBatchService outwardBatchService;
 
 	private List<OutwardBatch> outwardDataEntryBatchList;
 
 	private int outwardDataEntryCurrentPage = 1;
 
 	public OutwardDataEntryController() {
-		scanService = new ScanServiceImpl();
+		outwardBatchService = new OutwardBatchServiceImpl();
 		outwardDataEntryBatchList = new ArrayList<>();
 	}
 
@@ -166,49 +174,11 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		try {
 
-			List<ScanBatch> scanBatches = scanService.getMakerDashboardBatches();
-
 			outwardDataEntryBatchList = new ArrayList<>();
 
-			if (scanBatches != null) {
+			loadInitialDataEntryBatches();
 
-				for (ScanBatch scanBatch : scanBatches) {
-
-					if (scanBatch == null) {
-						continue;
-					}
-
-					String scannedBatchId = scanBatch.getScannedBatchId();
-
-					if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-						continue;
-					}
-
-					String batchStatus = scanBatch.getBatchStatus();
-
-					if (batchStatus == null || !STATUS_PENDING_MAKER_PROCESS.equalsIgnoreCase(batchStatus.trim())) {
-						continue;
-					}
-
-					OutwardBatch outwardBatch = new OutwardBatch();
-
-					outwardBatch.setOutwardBatchId(scannedBatchId.trim());
-
-					outwardBatch.setBatchReferenceId(scanBatch.getBatchReferenceId());
-
-					outwardBatch.setActualChequeCount(scanBatch.getActualChequeCount());
-
-					outwardBatch.setActualTotalAmount(scanBatch.getActualTotalAmount());
-
-					outwardBatch.setBatchStatus(STATUS_PENDING_MAKER_PROCESS);
-
-					outwardBatch.setUploadedBy(scanBatch.getUploadedBy());
-
-					outwardBatch.setUploadedAt(scanBatch.getUploadedAt());
-
-					outwardDataEntryBatchList.add(outwardBatch);
-				}
-			}
+			loadReturnedDataEntryBatches();
 
 			outwardDataEntryCurrentPage = 1;
 
@@ -224,6 +194,93 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 			exception.printStackTrace();
 		}
+	}
+
+	private void loadInitialDataEntryBatches() {
+
+		List<OutwardBatch> initialBatches = outwardBatchService.getScanBatchesReadyForDataEntry();
+
+		if (initialBatches == null || initialBatches.isEmpty()) {
+			return;
+		}
+
+		for (OutwardBatch batch : initialBatches) {
+
+			if (batch == null) {
+				continue;
+			}
+
+			String batchId = getValue(batch.getOutwardBatchId());
+
+			if ("--".equals(batchId)) {
+				continue;
+			}
+
+			batch.setBatchStatus(STATUS_PENDING_MAKER_PROCESS);
+
+			if (!containsBatch(batchId)) {
+
+				outwardDataEntryBatchList.add(batch);
+			}
+		}
+	}
+
+	private void loadReturnedDataEntryBatches() {
+
+		List<OutwardBatch> returnedBatches = outwardBatchService.getBatchesReadyForDataEntry();
+
+		if (returnedBatches == null || returnedBatches.isEmpty()) {
+			return;
+		}
+
+		for (OutwardBatch batch : returnedBatches) {
+
+			if (batch == null) {
+				continue;
+			}
+
+			String batchId = getValue(batch.getOutwardBatchId());
+
+			if ("--".equals(batchId)) {
+				continue;
+			}
+
+			String batchStatus = normalizeStatus(batch.getBatchStatus());
+
+			if (!STATUS_ON_HOLD.equals(batchStatus)) {
+				continue;
+			}
+
+			batch.setBatchStatus(STATUS_ON_HOLD);
+
+			if (!containsBatch(batchId)) {
+
+				outwardDataEntryBatchList.add(batch);
+			}
+		}
+	}
+
+	private boolean containsBatch(String batchId) {
+
+		if (batchId == null || batchId.trim().isEmpty()) {
+			return false;
+		}
+
+		for (OutwardBatch existingBatch : outwardDataEntryBatchList) {
+
+			if (existingBatch == null) {
+				continue;
+			}
+
+			String existingBatchId = existingBatch.getOutwardBatchId();
+
+			if (existingBatchId != null && batchId.trim().equalsIgnoreCase(existingBatchId.trim())) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private void renderCurrentPage() {
@@ -289,12 +346,12 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		outwardDataEntryLblDataEntered.setSclass("outward-data-entry-cell outward-data-entry-progress");
 
-		String batchStatus = getValue(batch.getBatchStatus());
+		String batchStatus = normalizeStatus(batch.getBatchStatus());
 
 		Label outwardDataEntryLblStatus = new Label(batchStatus);
 
 		outwardDataEntryLblStatus
-				.setSclass("outward-data-entry-cell outward-data-entry-status " + getStatusClass(batchStatus));
+				.setSclass("outward-data-entry-cell " + "outward-data-entry-status " + getStatusClass(batchStatus));
 
 		Button outwardDataEntryBtnProceed = new Button("PROCEED");
 
@@ -321,23 +378,20 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 			return 0;
 		}
 
-		String scannedBatchId = batch.getOutwardBatchId();
+		int totalCheques = batch.getActualChequeCount();
 
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+		String batchStatus = normalizeStatus(batch.getBatchStatus());
 
-			return 0;
-		}
-
-		try {
-
-			return scanService.getDataEnteredCountByBatchId(scannedBatchId.trim());
-
-		} catch (Exception exception) {
-
-			exception.printStackTrace();
+		if (STATUS_ON_HOLD.equals(batchStatus)) {
 
 			return 0;
 		}
+
+		if (totalCheques <= 0) {
+			return 0;
+		}
+
+		return 0;
 	}
 
 	private void openChequeDataEntry(OutwardBatch batch) {
@@ -346,10 +400,9 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 			return;
 		}
 
-		String scannedBatchId = batch.getOutwardBatchId();
+		String batchId = batch.getOutwardBatchId();
 
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
+		if (batchId == null || batchId.trim().isEmpty()) {
 			return;
 		}
 
@@ -359,7 +412,11 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 			return;
 		}
 
-		String batchId = scannedBatchId.trim();
+		batchId = batchId.trim();
+
+		String batchStatus = normalizeStatus(batch.getBatchStatus());
+
+		boolean returnedFromChecker = STATUS_ON_HOLD.equals(batchStatus);
 
 		mainContentArea.clearDynamicProperties();
 
@@ -367,9 +424,13 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		mainContentArea.setDynamicProperty("mode", MODE_DATA_ENTRY);
 
+		mainContentArea.setDynamicProperty(RETURN_FROM_CHECKER, returnedFromChecker);
+
 		mainContentArea.setAttribute("batchId", batchId);
 
 		mainContentArea.setAttribute("mode", MODE_DATA_ENTRY);
+
+		mainContentArea.setAttribute(RETURN_FROM_CHECKER, returnedFromChecker);
 
 		mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
 	}
@@ -430,7 +491,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		int totalPages = getTotalPages();
 
-		if (outwardDataEntryCurrentPage == totalPages) {
+		if (outwardDataEntryCurrentPage >= totalPages) {
 			return;
 		}
 
@@ -466,53 +527,95 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private String getStatusClass(String status) {
 
-		if (status == null || status.trim().isEmpty()) {
+		String normalizedStatus = normalizeStatus(status);
 
-			return "pending";
+		if (STATUS_PENDING_MAKER_PROCESS.equals(normalizedStatus)) {
+
+			return "pending-maker-process";
 		}
 
-		String normalizedStatus = status.trim().toLowerCase().replace(" ", "-").replace("_", "-");
+		if (STATUS_PENDING_DATA_ENTRY.equals(normalizedStatus)) {
 
-		if ("pending-maker-process".equals(normalizedStatus)) {
-			return "pending";
+			return "pending-data-entry";
 		}
 
-		if ("pending-data-entry".equals(normalizedStatus)) {
-			return "pending";
+		if (STATUS_PENDING_MICR_REPAIR.equals(normalizedStatus)) {
+
+			return "pending-micr-repair";
 		}
 
-		if ("processing".equals(normalizedStatus)) {
-			return "processing";
+		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalizedStatus)) {
+
+			return "pending-checker-process";
 		}
 
-		if ("completed".equals(normalizedStatus)) {
-			return "completed";
+		if (STATUS_PENDING_VERIFICATION.equals(normalizedStatus)) {
+
+			return "pending-verification";
 		}
 
-		if ("rejected".equals(normalizedStatus)) {
-			return "rejected";
+		if (STATUS_ON_HOLD.equals(normalizedStatus)) {
+
+			return "on-hold";
 		}
 
-		if ("pending".equals(normalizedStatus)) {
-			return "pending";
-		}
+		if (STATUS_REJECTION_REQUEST.equals(normalizedStatus)) {
 
-		if ("send-back-maker".equals(normalizedStatus) || "send-back".equals(normalizedStatus)) {
-
-			return "send-back";
-		}
-
-		if ("rejection-request".equals(normalizedStatus)) {
 			return "rejection-request";
 		}
 
-		return "pending";
+		return "pending-maker-process";
+	}
+
+	private String normalizeStatus(String status) {
+
+		if (status == null || status.trim().isEmpty()) {
+			return STATUS_PENDING_MAKER_PROCESS;
+		}
+
+		String normalizedStatus = status.trim().toUpperCase().replace('-', '_').replace(' ', '_');
+
+		if (STATUS_PENDING_MAKER_PROCESS.equals(normalizedStatus)) {
+
+			return STATUS_PENDING_MAKER_PROCESS;
+		}
+
+		if (STATUS_PENDING_DATA_ENTRY.equals(normalizedStatus)) {
+
+			return STATUS_PENDING_DATA_ENTRY;
+		}
+
+		if (STATUS_PENDING_MICR_REPAIR.equals(normalizedStatus)) {
+
+			return STATUS_PENDING_MICR_REPAIR;
+		}
+
+		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalizedStatus)) {
+
+			return STATUS_PENDING_CHECKER_PROCESS;
+		}
+
+		if (STATUS_PENDING_VERIFICATION.equals(normalizedStatus)) {
+
+			return STATUS_PENDING_VERIFICATION;
+		}
+
+		if (STATUS_ON_HOLD.equals(normalizedStatus)) {
+
+			return STATUS_ON_HOLD;
+		}
+
+		if (STATUS_REJECTION_REQUEST.equals(normalizedStatus)) {
+
+			return STATUS_REJECTION_REQUEST;
+		}
+
+		return normalizedStatus;
 	}
 
 	private String getValue(String value) {
 
 		if (value == null || value.trim().isEmpty()) {
-
 			return "--";
 		}
 

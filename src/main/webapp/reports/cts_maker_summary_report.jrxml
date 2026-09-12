@@ -8,29 +8,29 @@
               uuid="b62c451a-7b3e-4d51-bf5c-191a82f3ef71">
 
     <!-- DATASETS -->
+    <!-- 1. Batches with MICR Repairs -->
     <subDataset name="DatasetMicrRepairs" uuid="d1e57c6b-5861-4603-b09b-43956461c312">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
         <parameter name="DS_TO_DATE" class="java.sql.Date"/>
         <queryString>
             <![CDATA[
-            SELECT ob.outward_batch_id, ob.batch_reference_id,
-                   COUNT(oc.outward_cheque_id) AS total_cheques,
-                   COUNT(CASE WHEN UPPER(oc.cheque_status) LIKE '%REPAIR%' 
-                                OR UPPER(oc.cheque_status) LIKE '%MICR%' THEN 1 END) AS repaired_count,
-                   COALESCE(SUM(oc.cheque_amount), 0.00) AS total_amount,
-                   ob.uploaded_at
-            FROM outward_batch ob
-            JOIN outward_cheque oc ON ob.outward_batch_id = oc.outward_batch_id
-            WHERE ob.uploaded_by = $P{DS_MAKER_ID}
-              AND CAST(ob.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
-            GROUP BY ob.outward_batch_id, ob.batch_reference_id, ob.uploaded_at
-            HAVING COUNT(CASE WHEN UPPER(oc.cheque_status) LIKE '%REPAIR%' 
-                                OR UPPER(oc.cheque_status) LIKE '%MICR%' THEN 1 END) > 0
-            ORDER BY ob.uploaded_at DESC
+            SELECT sb.scanned_batch_id, 
+                   sb.batch_reference_id,
+                   COUNT(sc.scanned_cheque_id) AS total_cheques,
+                   COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) AS repaired_count,
+                   COALESCE(SUM(sc.cheque_amount), 0.00) AS total_amount,
+                   sb.uploaded_at
+            FROM scan_batch sb
+            JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id
+            WHERE sb.uploaded_by = $P{DS_MAKER_ID}
+              AND CAST(sb.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
+            GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.uploaded_at
+            HAVING COUNT(CASE WHEN UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'REJECTED_MICR') THEN 1 END) > 0
+            ORDER BY sb.uploaded_at DESC
             ]]>
         </queryString>
-        <field name="outward_batch_id" class="java.lang.String"/>
+        <field name="scanned_batch_id" class="java.lang.String"/>
         <field name="batch_reference_id" class="java.lang.String"/>
         <field name="total_cheques" class="java.lang.Long"/>
         <field name="repaired_count" class="java.lang.Long"/>
@@ -38,52 +38,59 @@
         <field name="uploaded_at" class="java.sql.Timestamp"/>
     </subDataset>
 
+    <!-- 2. Batches Gone for Data Entry -->
     <subDataset name="DatasetDataEntry" uuid="a7f47e7a-9b16-419b-a3d8-4f169213bc54">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
         <parameter name="DS_TO_DATE" class="java.sql.Date"/>
         <queryString>
             <![CDATA[
-            SELECT ob.outward_batch_id, ob.batch_reference_id,
-                   COUNT(oc.outward_cheque_id) AS pending_items,
-                   ob.batch_status, ob.uploaded_at
-            FROM outward_batch ob
-            JOIN outward_cheque oc ON ob.outward_batch_id = oc.outward_batch_id
-            WHERE ob.uploaded_by = $P{DS_MAKER_ID}
-              AND UPPER(oc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'KEYING_PENDING')
-              AND CAST(ob.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
-            GROUP BY ob.outward_batch_id, ob.batch_reference_id, ob.batch_status, ob.uploaded_at
-            ORDER BY ob.uploaded_at DESC
+            SELECT sb.scanned_batch_id, 
+                   sb.batch_reference_id,
+                   COUNT(sc.scanned_cheque_id) AS pending_items,
+                   sb.batch_status, 
+                   sb.uploaded_at
+            FROM scan_batch sb
+            JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id
+            WHERE sb.uploaded_by = $P{DS_MAKER_ID}
+              AND UPPER(sb.batch_status) = 'PENDING_MAKER_PROCESS'
+              AND UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'REJECTED_MICR')
+              AND CAST(sb.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
+            GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.batch_status, sb.uploaded_at
+            ORDER BY sb.uploaded_at DESC
             ]]>
         </queryString>
-        <field name="outward_batch_id" class="java.lang.String"/>
+        <field name="scanned_batch_id" class="java.lang.String"/>
         <field name="batch_reference_id" class="java.lang.String"/>
         <field name="pending_items" class="java.lang.Long"/>
         <field name="batch_status" class="java.lang.String"/>
         <field name="uploaded_at" class="java.sql.Timestamp"/>
     </subDataset>
 
+    <!-- 3. Unprocessed Cheques Audit -->
     <subDataset name="DatasetUnprocessed" uuid="b8c73489-0824-4f4c-8fa0-681b4d0812de">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
         <parameter name="DS_TO_DATE" class="java.sql.Date"/>
         <queryString>
             <![CDATA[
-            SELECT oc.outward_batch_id, oc.outward_cheque_id,
-                   COALESCE(oc.cheque_number, 'UNREADABLE') AS cheque_number,
-                   COALESCE(oc.micr_code, 'UNREADABLE') AS micr_code,
-                   COALESCE(oc.drawee_account_number, 'UNREADABLE') AS drawee_account_number,
-                   oc.cheque_amount, oc.cheque_status
-            FROM outward_cheque oc
-            JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id
-            WHERE ob.uploaded_by = $P{DS_MAKER_ID}
-              AND UPPER(oc.cheque_status) IN ('UNPROCESSED', 'PENDING', 'OCR_FAILED', 'IMAGE_REJECTED', 'FAILED')
-              AND CAST(ob.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
-            ORDER BY oc.outward_batch_id, oc.outward_cheque_id
+            SELECT sc.scanned_batch_id, 
+                   sc.scanned_cheque_id,
+                   COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number,
+                   COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code,
+                   COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number,
+                   sc.cheque_amount, 
+                   sc.cheque_status
+            FROM scan_cheque sc
+            JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id
+            WHERE sb.uploaded_by = $P{DS_MAKER_ID}
+              AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED')
+              AND CAST(sb.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
+            ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id
             ]]>
         </queryString>
-        <field name="outward_batch_id" class="java.lang.String"/>
-        <field name="outward_cheque_id" class="java.lang.String"/>
+        <field name="scanned_batch_id" class="java.lang.String"/>
+        <field name="scanned_cheque_id" class="java.lang.String"/>
         <field name="cheque_number" class="java.lang.String"/>
         <field name="micr_code" class="java.lang.String"/>
         <field name="drawee_account_number" class="java.lang.String"/>
@@ -91,17 +98,22 @@
         <field name="cheque_status" class="java.lang.String"/>
     </subDataset>
 
+    <!-- 4. Batches Submitted to Checker -->
     <subDataset name="DatasetSubmittedChecker" uuid="e6181fcd-f446-4cb4-96d5-a337198a964f">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
         <parameter name="DS_TO_DATE" class="java.sql.Date"/>
         <queryString>
             <![CDATA[
-            SELECT outward_batch_id, batch_reference_id, actual_cheque_count,
-                   actual_total_amount, uploaded_at, batch_status
+            SELECT outward_batch_id, 
+                   batch_reference_id, 
+                   actual_cheque_count,
+                   actual_total_amount, 
+                   uploaded_at, 
+                   batch_status
             FROM outward_batch
             WHERE uploaded_by = $P{DS_MAKER_ID}
-              AND UPPER(batch_status) IN ('SUBMITTED_TO_CHECKER', 'PENDING_VERIFICATION', 'SUBMITTED', 'PENDING')
+              AND UPPER(batch_status) = 'PENDING_CHECKER_PROCESS'
               AND CAST(uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
             ORDER BY uploaded_at DESC
             ]]>
@@ -189,7 +201,7 @@
                     </datasetRun>
                     <jr:column width="110">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="4fa815e1-9556-4257-8178-57d47228a1c1"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="a6593539-7a0e-4361-9c60-e64e1c75c88b"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="a6593539-7a0e-4361-9c60-e64e1c75c88b"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{scanned_batch_id}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
                     <jr:column width="190">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="190" height="20" backcolor="#E2E8F0" uuid="8ea6f874-5fe5-4c07-b31c-c0c1694f72ea"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH REFERENCE]]></text></staticText></jr:columnHeader>
@@ -237,7 +249,7 @@
                     </datasetRun>
                     <jr:column width="140">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="140" height="20" backcolor="#E2E8F0" uuid="ff9ea17d-2b47-4e94-8255-081cfb5a32ba"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="140" height="18" uuid="93952f41-3b7c-4740-9a3d-a4175b9e2898"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="140" height="18" uuid="93952f41-3b7c-4740-9a3d-a4175b9e2898"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{scanned_batch_id}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
                     <jr:column width="240">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="240" height="20" backcolor="#E2E8F0" uuid="c24a2979-58d0-4bf6-90dc-9b9aaee498e8"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH REFERENCE]]></text></staticText></jr:columnHeader>
@@ -281,11 +293,11 @@
                     </datasetRun>
                     <jr:column width="100">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="100" height="20" backcolor="#E2E8F0" uuid="f9ea5168-98e9-4e78-ba9f-4318d172eef0"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="100" height="18" uuid="7a659223-bdce-4b21-a472-fc17625539fa"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="100" height="18" uuid="7a659223-bdce-4b21-a472-fc17625539fa"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{scanned_batch_id}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
                     <jr:column width="110">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="09d3b764-da32-48f5-9be9-d65298a0fc43"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CHEQUE ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="ea6549b0-4f51-40ef-9fa0-c081734ef98b"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{outward_cheque_id}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="ea6549b0-4f51-40ef-9fa0-c081734ef98b"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{scanned_cheque_id}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
                     <jr:column width="110">
                         <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="a6590924-fca1-4560-bf5d-16a8d7cbefda"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CHEQUE NO]]></text></staticText></jr:columnHeader>
@@ -331,29 +343,29 @@
                         <datasetParameter name="DS_TO_DATE"><datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression></datasetParameter>
                         <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
                     </datasetRun>
-                    <jr:column width="130">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="130" height="20" backcolor="#E2E8F0" uuid="7cf424fa-8b8f-4a0b-8d76-e8220556635a"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="130" height="18" uuid="8cf424fa-8b8f-4a0b-8d76-e8220556635b"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="220">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="220" height="20" backcolor="#E2E8F0" uuid="9cf424fa-8b8f-4a0b-8d76-e8220556635c"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH REFERENCE]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="220" height="18" uuid="acf424fa-8b8f-4a0b-8d76-e8220556635d"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
                     <jr:column width="110">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="bcf424fa-8b8f-4a0b-8d76-e8220556635e"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[TOTAL CHEQUES]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="ccf424fa-8b8f-4a0b-8d76-e8220556635f"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{actual_cheque_count}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="7cf424fa-8b8f-4a0b-8d76-e8220556635a"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="8cf424fa-8b8f-4a0b-8d76-e8220556635b"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
-                    <jr:column width="140">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="140" height="20" backcolor="#E2E8F0" uuid="dcf424fa-8b8f-4a0b-8d76-e82205566360"/><box rightPadding="4"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[TOTAL AMOUNT (INR)]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField pattern="#,##0.00"><reportElement x="0" y="0" width="140" height="18" uuid="ecf424fa-8b8f-4a0b-8d76-e82205566361"/><box rightPadding="4"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{actual_total_amount}]]></textFieldExpression></textField></jr:detailCell>
+                    <jr:column width="200">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="200" height="20" backcolor="#E2E8F0" uuid="9cf424fa-8b8f-4a0b-8d76-e8220556635c"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH REFERENCE]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="200" height="18" uuid="acf424fa-8b8f-4a0b-8d76-e8220556635d"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
-                    <jr:column width="102">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="102" height="20" backcolor="#E2E8F0" uuid="fcf424fa-8b8f-4a0b-8d76-e82205566362"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="102" height="18" uuid="0df424fa-8b8f-4a0b-8d76-e82205566363"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression></textField></jr:detailCell>
+                    <jr:column width="90">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="90" height="20" backcolor="#E2E8F0" uuid="bcf424fa-8b8f-4a0b-8d76-e8220556635e"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[TOTAL CHEQUES]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="90" height="18" uuid="ccf424fa-8b8f-4a0b-8d76-e8220556635f"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{actual_cheque_count}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
-                    <jr:column width="100">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="100" height="20" backcolor="#E2E8F0" uuid="1ef424fa-8b8f-4a0b-8d76-e82205566364"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[SUBMITTED TIME]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField pattern="yyyy-MM-dd HH:mm:ss"><reportElement x="0" y="0" width="100" height="18" uuid="2ef424fa-8b8f-4a0b-8d76-e82205566365"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression></textField></jr:detailCell>
+                    <jr:column width="130">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="130" height="20" backcolor="#E2E8F0" uuid="dcf424fa-8b8f-4a0b-8d76-e82205566360"/><box rightPadding="4"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[TOTAL AMOUNT (INR)]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField pattern="#,##0.00"><reportElement x="0" y="0" width="130" height="18" uuid="ecf424fa-8b8f-4a0b-8d76-e82205566361"/><box rightPadding="4"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{actual_total_amount}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="150" height="20" backcolor="#E2E8F0" uuid="fcf424fa-8b8f-4a0b-8d76-e82205566362"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="150" height="18" uuid="0df424fa-8b8f-4a0b-8d76-e82205566363"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="122">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="122" height="20" backcolor="#E2E8F0" uuid="1ef424fa-8b8f-4a0b-8d76-e82205566364"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[SUBMITTED TIME]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField pattern="yyyy-MM-dd HH:mm:ss"><reportElement x="0" y="0" width="122" height="18" uuid="2ef424fa-8b8f-4a0b-8d76-e82205566365"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression></textField></jr:detailCell>
                     </jr:column>
                 </jr:table>
             </componentElement>

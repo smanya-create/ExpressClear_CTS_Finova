@@ -1,66 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?page title="Express Clear - CTS Admin Reports"?>
-<?link rel="stylesheet" type="text/css" href="/css/admin/admin-report.css"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
 <zk>
 <borderlayout apply="com.iispl.cts.controller.admin.AdminReportController" hflex="1" vflex="1">
 
+    <!-- Left Navigation Sidebar -->
     <west width="240px" border="none" collapsible="false">
         <include src="/components/sidebar.zul" role="ADMIN" activeTab="reports" />
     </west>
 
-    <center border="none" autoscroll="true" style="background-color: #f8fafc;">
-        <vlayout spacing="0" hflex="1" vflex="1">
+    <center border="none">
+        <borderlayout hflex="1" vflex="1">
+            
+            <!-- Fixed Header -->
+            <north size="auto" border="none">
+                <include id="incHeader" src="/components/header.zul" 
+                         pageTitle="Admin Dashboard" 
+                         pageSubtitle="Consolidated Reports" />
+            </north>
 
-            <include id="incHeader" src="/components/header.zul" 
-                     pageTitle="Admin Dashboard" 
-                     pageSubtitle="Consolidated Reports" />
+            <!-- Main Content Canvas -->
+            <center border="none" autoscroll="false" style="background-color: #f8fafc; overflow: hidden;">
+                <vlayout sclass="role-content" spacing="16px" vflex="1" hflex="1" 
+                         style="padding: 24px; box-sizing: border-box; overflow-y: auto;">
+                    
+                    <!-- Page Title -->
+                    <vlayout spacing="3px" style="flex: 0 0 auto;">
+                        <label value="CONSOLIDATED SYSTEM &amp; AUDIT REPORT" sclass="page-title" />
+                        <label value="Select a date range to generate and download the full administrative report, covering outward clearing batches and complete user audit activity." 
+                               sclass="page-subtitle" />
+                    </vlayout>
 
-            <vlayout spacing="24px" style="padding: 32px; max-width: 800px;" hflex="1">
-                
-                <vlayout spacing="6px">
-                    <label value="CONSOLIDATED SYSTEM &amp; AUDIT REPORT" style="font-size: 22px; font-weight: bold; color: #0B192E;"/>
-                    <label value="Select a date range to generate and download the full administrative report, covering outward clearing batches and complete user audit activity." 
-                           style="color: #64748B; font-size: 13px; line-height: 1.5;"/>
-                </vlayout>
-
-                <!-- Export Control Card -->
-                <div style="background: #ffffff; padding: 28px; border-radius: 8px; border: 1px solid #E2E8F0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                    <vlayout spacing="20px">
+                    <!-- Parameters Card Container -->
+                    <vlayout sclass="card-panel" spacing="20px" 
+                             style="padding: 26px 30px; margin-top: 8px; max-width: 820px; flex: 0 0 auto;">
                         
-                        <label value="REPORT PARAMETERS" style="font-size: 13px; font-weight: bold; color: #1E293B; letter-spacing: 0.5px;"/>
+                        <label value="REPORT PARAMETERS" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 0.5px;" />
                         
-                        <!-- Date Pickers -->
-                        <hlayout spacing="20px">
-                            <vlayout spacing="6px">
-                                <label value="FROM DATE" style="font-size: 11px; font-weight: bold; color: #475569;"/>
-                                <datebox id="dtFromDate" format="yyyy-MM-dd" height="38px" width="180px"/>
+                        <!-- Report Type Selector -->
+                        <vlayout spacing="6px" hflex="1">
+                            <label value="REPORT TYPE" sclass="field-label" />
+                            <combobox id="cmbReportType" readonly="true" width="100%" height="38px" style="font-size: 13px;">
+                                <comboitem label="User Activity &amp; Security Audit Report" value="USER_AUDIT" />
+                                <comboitem label="BOD / EOD Session Lifecycle &amp; Batch Summary Report" value="SESSION_LIFECYCLE" />
+                            </combobox>
+                        </vlayout>
+                        
+                        <!-- Date Pickers Row -->
+                        <hlayout spacing="24px" hflex="1">
+                            <vlayout spacing="6px" hflex="1">
+                                <label value="FROM DATE" sclass="field-label" />
+                                <datebox id="dtFromDate" format="yyyy-MM-dd" height="38px" hflex="1" />
                             </vlayout>
 
-                            <vlayout spacing="6px">
-                                <label value="TO DATE" style="font-size: 11px; font-weight: bold; color: #475569;"/>
-                                <datebox id="dtToDate" format="yyyy-MM-dd" height="38px" width="180px"/>
+                            <vlayout spacing="6px" hflex="1">
+                                <label value="TO DATE" sclass="field-label" />
+                                <datebox id="dtToDate" format="yyyy-MM-dd" height="38px" hflex="1" />
                             </vlayout>
                         </hlayout>
 
-                        <separator bar="true" style="background-color: #F1F5F9; margin: 8px 0;"/>
+                        <!-- Standard Card Divider -->
+                        <div style="height: 1px; background: #e2e8f0; width: 100%; margin: 4px 0;" />
 
-                        <!-- Action Buttons -->
+                        <!-- Standardized Action Buttons -->
                         <vlayout spacing="8px">
-                            <label value="DOWNLOAD FORMAT" style="font-size: 11px; font-weight: bold; color: #475569;"/>
-                            <hlayout spacing="16px">
-                                <button id="btnExportCsv" label="DOWNLOAD CSV REPORT" height="40px" 
-                                        style="background-color: #0F766E; color: #FFFFFF; font-weight: bold; padding: 0 20px; border: none; border-radius: 6px; cursor: pointer;"/>
-                                
-                                <button id="btnExportPdf" label="DOWNLOAD PDF REPORT" height="40px" 
-                                        style="background-color: #991B1B; color: #FFFFFF; font-weight: bold; padding: 0 20px; border: none; border-radius: 6px; cursor: pointer;"/>
+                            <label value="DOWNLOAD FORMAT" sclass="field-label" />
+                            <hlayout spacing="14px">
+                                <button id="btnExportCsv" label="DOWNLOAD CSV REPORT" sclass="btn-primary" height="38px" />
+                                <button id="btnExportPdf" label="DOWNLOAD PDF REPORT" sclass="btn-outline" height="38px" />
                             </hlayout>
                         </vlayout>
 
                     </vlayout>
-                </div>
 
-            </vlayout>
-        </vlayout>
+                </vlayout>
+            </center>
+        </borderlayout>
     </center>
 </borderlayout>
 </zk>

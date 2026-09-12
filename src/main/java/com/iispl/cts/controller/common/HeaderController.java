@@ -73,6 +73,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
         if (divNotificationBell != null && divNotificationBell.isVisible()) {
             loadDatabaseNotifications();
         }
+        com.iispl.cts.common.util.SecurityUtil.applySessionLockdown(comp.getPage());
         
 
         // Attach listener to first root element of the page
@@ -125,7 +126,10 @@ public class HeaderController extends GenericForwardComposer<Component> {
         LocalDate clearingDate = null;
 
         // 1. Fetch from Database
-        String sql = "SELECT clearing_date, session_status FROM clearing_session ORDER BY session_id DESC LIMIT 1";
+        String sql = "SELECT clearing_date, session_status "
+                + "FROM clearing_session "
+                + "ORDER BY clearing_date DESC, opened_at DESC "
+                + "LIMIT 1";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -162,16 +166,17 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
     private void updateSessionBadge(boolean isOpen) {
         if (lblHeaderSessionStatus == null) {
-            System.out.println("DEBUG: lblHeaderSessionStatus is NULL in HeaderController!");
             return;
         }
 
+        String basePill = "display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; box-sizing:border-box; ";
+
         if (isOpen) {
             lblHeaderSessionStatus.setValue("● OPEN");
-            lblHeaderSessionStatus.setStyle("font-size: 11px; font-weight: bold; color: #276749; background: #c6f6d5; padding: 3px 10px; border-radius: 12px;");
+            lblHeaderSessionStatus.setStyle(basePill + "color:#276749; background:#c6f6d5;");
         } else {
             lblHeaderSessionStatus.setValue("● CLOSED");
-            lblHeaderSessionStatus.setStyle("font-size: 11px; font-weight: bold; color: #9b2c2c; background: #fed7d7; padding: 3px 10px; border-radius: 12px;");
+            lblHeaderSessionStatus.setStyle(basePill + "color:#9b2c2c; background:#fed7d7;");
         }
     }
 

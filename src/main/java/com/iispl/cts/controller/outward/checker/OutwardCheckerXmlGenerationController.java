@@ -1,10 +1,11 @@
 package com.iispl.cts.controller.outward.checker;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
@@ -25,6 +26,7 @@ import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
 
 public class OutwardCheckerXmlGenerationController extends GenericForwardComposer<Component> {
+
 	private Listbox lstVerifiedBatches;
 	private Hlayout generatedXmlRow;
 	private Hlayout xmlInfoMessage;
@@ -32,45 +34,69 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 	private Label lblXmlFileDescription;
 	private Button btnSendToNPCI;
 	private Label lblVerifiedBatches;
+
 	private OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
 	private OutwardChequeService outwardChequeService = new OutwardChequeServiceImpl();
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
 		super.doAfterCompose(component);
+
+		restoreGeneratedXmlState();
 		loadVerifiedBatches();
 	}
 
 	public void loadVerifiedBatches() {
+
 		List<OutwardBatch> verifiedBatches = outwardBatchService.getVerifiedBatches();
-		System.out.println("Verified batches: " + verifiedBatches);
-		System.out.println("Verified batch count: " + verifiedBatches.size());
-		 lblVerifiedBatches.setValue(
-		            String.valueOf(verifiedBatches.size()));
+
+		System.out.println("XML generation batches: " + verifiedBatches);
+		System.out.println("XML generation batch count: " + verifiedBatches.size());
+
+		lblVerifiedBatches.setValue(String.valueOf(verifiedBatches.size()));
+
 		ListModelList<OutwardBatch> model = new ListModelList<>(verifiedBatches);
+
 		lstVerifiedBatches.setModel(model);
+
 		lstVerifiedBatches.setItemRenderer(new ListitemRenderer<OutwardBatch>() {
 
 			@Override
 			public void render(Listitem item, OutwardBatch verifiedBatch, int index) throws Exception {
+
 				item.appendChild(new Listcell(verifiedBatch.getOutwardBatchId()));
+
 				item.appendChild(new Listcell(String.valueOf(verifiedBatch.getActualChequeCount())));
+
 				item.appendChild(new Listcell(String.valueOf(verifiedBatch.getActualTotalAmount())));
+
 				item.appendChild(new Listcell(verifiedBatch.getBatchStatus()));
+
 				Listcell actionCell = new Listcell();
+
 				Button generateXmlButton = new Button("Generate bxf");
+
 				generateXmlButton.setClass("generate-button");
 
 				generateXmlButton.setAttribute("batch", verifiedBatch);
+
+				if ("COMPLETED".equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
+
+					generateXmlButton.setDisabled(true);
+				}
+
 				generateXmlButton.addEventListener(Events.ON_CLICK, event -> {
 
-					OutwardBatch selectedBatch = (OutwardBatch) generateXmlButton.getAttribute("batch");
+					if ("COMPLETED".equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
+						return;
+					}
 
-					generateXml(selectedBatch);
+					generateXml(verifiedBatch);
 				});
-				actionCell.appendChild(generateXmlButton);
-				item.appendChild(actionCell);
 
+				actionCell.appendChild(generateXmlButton);
+
+				item.appendChild(actionCell);
 			}
 		});
 	}
@@ -80,36 +106,51 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 		try {
 
 			String batchId = batch.getOutwardBatchId();
+
 			List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId);
+
 			if (cheques == null || cheques.isEmpty()) {
+
 				Messagebox.show("No cheques found for batch " + batchId, "XML Generation", Messagebox.OK,
 						Messagebox.EXCLAMATION);
+
 				return;
 			}
 
-			String outputDirectory =
-					"/home/administrator/snap/eclipse/common/git/ExpressClear_CTS_Finova/src/main/resources/xml-output";
+			String outputDirectory = Paths.get(System.getProperty("user.home"), "Downloads/xml-output").toString();
 
 			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
 
+			if (xmlFile == null) {
+
+				Messagebox.show("XML file was not generated.", "XML Generation", Messagebox.OK, Messagebox.ERROR);
+
+				return;
+			}
+
 			outwardBatchService.updateBatchStatus(batchId, "COMPLETED");
-			loadVerifiedBatches();
+
+			Sessions.getCurrent().setAttribute("XML_GENERATED_BATCH_ID", batchId);
+
+			Sessions.getCurrent().setAttribute("XML_GENERATED_FILE", xmlFile.toString());
 
 			lblXmlFileName.setValue(xmlFile.getFileName().toString());
 
-			lblXmlFileDescription.setValue(
-			        "XML generated successfully - Ready to send to NPCI.");
+			lblXmlFileDescription.setValue("XML generated successfully - Ready to send to NPCI.");
 
 			generatedXmlRow.setVisible(true);
 
 			btnSendToNPCI.setVisible(true);
 
+			btnSendToNPCI.setAttribute("xmlFile", xmlFile);
+
+			btnSendToNPCI.setAttribute("batchId", batchId);
+
 			xmlInfoMessage.setVisible(false);
 
-			btnSendToNPCI.setAttribute(
-			        "xmlFile",
-			        xmlFile);
 			System.out.println("XML FILE LOCATION: " + xmlFile.toAbsolutePath());
+
+			loadVerifiedBatches();
 
 			Messagebox.show(
 					"XML generated successfully.\n\n" + "Batch: " + batchId + "\n" + "File: " + xmlFile.getFileName(),
@@ -123,26 +164,81 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 					Messagebox.ERROR);
 		}
 	}
-	
-	public void onClickSendToNPCI() {
 
-		 Path xmlFile = (Path) btnSendToNPCI.getAttribute("xmlFile");
+	private void restoreGeneratedXmlState() {
 
-		    if (xmlFile == null) {
-		        Messagebox.show(
-		                "Please generate XML first.",
-		                "NPCI",
-		                Messagebox.OK,
-		                Messagebox.EXCLAMATION);
-		        return;
-		    }
+		String batchId = (String) Sessions.getCurrent().getAttribute("XML_GENERATED_BATCH_ID");
 
-		    Messagebox.show(
-		            "XML ready to send to NPCI:\n"
-		            + xmlFile.getFileName(),
-		            "NPCI",
-		            Messagebox.OK,
-		            Messagebox.INFORMATION);
+		String xmlFilePath = (String) Sessions.getCurrent().getAttribute("XML_GENERATED_FILE");
+
+		if (batchId == null || xmlFilePath == null) {
+
+			generatedXmlRow.setVisible(false);
+			btnSendToNPCI.setVisible(false);
+
+			return;
+		}
+
+		Path xmlFile = Paths.get(xmlFilePath);
+
+		lblXmlFileName.setValue(xmlFile.getFileName().toString());
+
+		lblXmlFileDescription.setValue("XML generated successfully - Ready to send to NPCI.");
+
+		generatedXmlRow.setVisible(true);
+
+		btnSendToNPCI.setVisible(true);
+
+		btnSendToNPCI.setAttribute("xmlFile", xmlFile);
+
+		btnSendToNPCI.setAttribute("batchId", batchId);
+
+		xmlInfoMessage.setVisible(false);
 	}
 
+	public void onClickSendToNPCI() {
+
+		Path xmlFile = (Path) btnSendToNPCI.getAttribute("xmlFile");
+
+		String batchId = (String) btnSendToNPCI.getAttribute("batchId");
+
+		if (xmlFile == null || batchId == null) {
+
+			Messagebox.show("Please generate XML first.", "NPCI", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			return;
+		}
+
+		try {
+
+			/*
+			 * Actual NPCI sending logic will come here. For now, the button click
+			 * represents successful sending to NPCI.
+			 */
+
+			outwardBatchService.updateBatchStatus(batchId, "SENT_TO_NPCI");
+
+			Sessions.getCurrent().removeAttribute("XML_GENERATED_BATCH_ID");
+
+			Sessions.getCurrent().removeAttribute("XML_GENERATED_FILE");
+
+			generatedXmlRow.setVisible(false);
+
+			btnSendToNPCI.setVisible(false);
+
+			xmlInfoMessage.setVisible(true);
+
+			loadVerifiedBatches();
+
+			Messagebox.show("XML sent to NPCI successfully.\n\n" + "Batch: " + batchId + "\n" + "File: "
+					+ xmlFile.getFileName(), "NPCI", Messagebox.OK, Messagebox.INFORMATION);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to send XML to NPCI.\n\n" + e.getMessage(), "NPCI", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
 }

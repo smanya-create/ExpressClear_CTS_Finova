@@ -4,11 +4,7 @@
 
 <zk>
 
-    <html>
-        <link rel="stylesheet"
-              type="text/css"
-              href="/ExpressClear_CTS_Finova/css/outward/micr-repair.css?v=9" />
-    </html>
+    <style src="/css/outward/micr-repair.css"/>
 
     <window id="micrEntryWindow"
             border="none"

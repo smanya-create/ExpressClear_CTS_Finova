@@ -1,138 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk>
+	<style src="/css/inward/maker-batch-details.css" />
 
-	<style src="/css/outward/maker-batch-details.css" />
+	<div id="inwardMakerBatchDetailsDiv" width="100%"
+		sclass="inward-maker-batch-details"
+		apply="com.iispl.cts.controller.inward.maker.InwardMakerBatchDetailsController">
 
-	<div id="outwardMakerBatchDetailsDiv" hflex="1" vflex="1"
-		sclass="outward-maker-batch-details"
-		apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchDetailsController">
+		<div sclass="inward-maker-batch-details-scroll">
 
-		<div sclass="outward-maker-batch-details-scroll">
+			<div sclass="inward-maker-batch-details-card">
 
-			<div sclass="outward-maker-batch-details-card">
-
-				<div sclass="outward-maker-batch-details-heading">
-
+				<div sclass="inward-maker-batch-details-heading">
 					<div>
 						<label value="Batch Details"
-							sclass="outward-maker-batch-details-title" />
-
+							sclass="inward-maker-batch-details-title" />
 						<label
-							value="View and process cheques in this batch."
-							sclass="outward-maker-batch-details-subtitle" />
+							value="View and process inward cheques in this batch."
+							sclass="inward-maker-batch-details-subtitle" />
 					</div>
 
-					<button id="outwardMakerBtnBack"
+					<button id="inwardMakerBtnBack"
 						label="BACK TO DASHBOARD"
-						sclass="outward-maker-batch-back-button" />
-
+						sclass="inward-maker-batch-back-button" />
 				</div>
 
-				<div sclass="outward-maker-batch-summary">
+				<div sclass="inward-maker-batch-summary">
 
-					<div sclass="outward-maker-batch-summary-item">
-
+					<div sclass="inward-maker-batch-summary-item">
 						<label value="BATCH ID"
-							sclass="outward-maker-batch-summary-label" />
-
-						<label id="outwardMakerLblBatchId" value="-"
-							sclass="outward-maker-batch-summary-value" />
-
+							sclass="inward-maker-batch-summary-label" />
+						<label id="inwardMakerLblBatchId" value="-"
+							sclass="inward-maker-batch-summary-value" />
 					</div>
 
-					<div sclass="outward-maker-batch-summary-item">
-
+					<div sclass="inward-maker-batch-summary-item">
 						<label value="NO. OF CHEQUES"
-							sclass="outward-maker-batch-summary-label" />
-
-						<label id="outwardMakerLblChequeCount" value="0"
-							sclass="outward-maker-batch-summary-value" />
-
+							sclass="inward-maker-batch-summary-label" />
+						<label id="inwardMakerLblChequeCount" value="0"
+							sclass="inward-maker-batch-summary-value" />
 					</div>
 
-					<div sclass="outward-maker-batch-summary-item">
-
+					<div sclass="inward-maker-batch-summary-item">
 						<label value="TOTAL AMOUNT"
-							sclass="outward-maker-batch-summary-label" />
-
-						<label id="outwardMakerLblTotalAmount"
-							value="₹0.00" sclass="outward-maker-batch-summary-value" />
-
+							sclass="inward-maker-batch-summary-label" />
+						<label id="inwardMakerLblTotalAmount"
+							value="₹0.00" sclass="inward-maker-batch-summary-value" />
 					</div>
 
 				</div>
 
-				<div sclass="outward-maker-cheque-section">
-
+				<div sclass="inward-maker-cheque-section">
 					<label value="Cheque Details"
-						sclass="outward-maker-cheque-section-title" />
-
+						sclass="inward-maker-cheque-section-title" />
 					<label
-						value="Review cheque information and take the required action."
-						sclass="outward-maker-cheque-section-subtitle" />
-
+						value="Review inward cheque information and take the required action."
+						sclass="inward-maker-cheque-section-subtitle" />
 				</div>
 
-				<div sclass="outward-maker-cheque-table-card">
+				<div sclass="inward-maker-cheque-table-card">
 
-					<grid id="outwardMakerGridChequeDetails"
-						width="100%" sclass="outward-maker-cheque-grid">
+					<grid id="inwardMakerGridChequeDetails"
+						width="100%" sclass="inward-maker-cheque-grid">
 
 						<columns sizable="true">
-
-							<column label="Cheque No." width="15%" />
-
-							<column label="Payee Account No."
-								width="18%" />
-
-							<column label="Cheque Date" width="13%" />
-
-							<column label="MICR Code" width="15%" />
-
-							<column label="Cheque Status" width="15%" />
-
+							<column label="Cheque No." width="14%" />
+							<column label="Drawee Account No." width="17%" />
+							<column label="Cheque Date" width="12%" />
+							<column label="MICR Code" width="14%" />
+							<column label="Cheque Status" width="19%" />
 							<column label="Cheque Amount" width="12%" />
-
 							<column label="Action" width="12%" />
-
 						</columns>
 
-						<rows id="outwardMakerRowsChequeDetails" />
+						<rows id="inwardMakerRowsChequeDetails" />
 
 					</grid>
 
-					<vlayout id="outwardMakerVlayoutEmptyState"
-						visible="false" sclass="outward-maker-batch-empty-state">
-
+					<vlayout id="inwardMakerVlayoutEmptyState"
+						visible="false" sclass="inward-maker-batch-empty-state">
 						<label value="No cheques found"
-							sclass="outward-maker-batch-empty-title" />
-
+							sclass="inward-maker-batch-empty-title" />
 						<label
 							value="There are currently no cheques available in this batch."
-							sclass="outward-maker-batch-empty-subtitle" />
-
+							sclass="inward-maker-batch-empty-subtitle" />
 					</vlayout>
 
 				</div>
 
-				<div sclass="outward-maker-batch-pagination">
-
-					<button id="outwardMakerBtnFirst" label="&lt;&lt;"
-						sclass="outward-maker-pagination-button" />
-
-					<button id="outwardMakerBtnPrevious" label="&lt;"
-						sclass="outward-maker-pagination-button" />
-
-					<label id="outwardMakerLblCurrentPage" value="1 / 1"
-						sclass="outward-maker-pagination-label" />
-
-					<button id="outwardMakerBtnNext" label="&gt;"
-						sclass="outward-maker-pagination-button" />
-
-					<button id="outwardMakerBtnLast" label="&gt;&gt;"
-						sclass="outward-maker-pagination-button" />
-
+				<div sclass="inward-maker-batch-pagination">
+					<button id="inwardMakerBtnFirst" label="&lt;&lt;"
+						sclass="inward-maker-pagination-button" />
+					<button id="inwardMakerBtnPrevious" label="&lt;"
+						sclass="inward-maker-pagination-button" />
+					<label id="inwardMakerLblCurrentPage" value="1 / 1"
+						sclass="inward-maker-pagination-label" />
+					<button id="inwardMakerBtnNext" label="&gt;"
+						sclass="inward-maker-pagination-button" />
+					<button id="inwardMakerBtnLast" label="&gt;&gt;"
+						sclass="inward-maker-pagination-button" />
 				</div>
 
 			</div>

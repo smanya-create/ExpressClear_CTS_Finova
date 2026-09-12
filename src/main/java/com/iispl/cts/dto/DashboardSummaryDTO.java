@@ -6,7 +6,14 @@ public class DashboardSummaryDTO {
     private int totalCheques;
     private int rejectionRequestCheques;
     private int makerApprovedCheques;
-    private String batchStatus;
+    private int makerReturned;
+    public int getMakerReturned() {
+		return makerReturned;
+	}
+	public void setMakerReturned(int makerReturned) {
+		this.makerReturned = makerReturned;
+	}
+	private String batchStatus;
 
    
     public String getBatchStatus() {

@@ -4,11 +4,8 @@
 
 <zk>
 
-    <html>
-        <link rel="stylesheet"
-              type="text/css"
-              href="/ExpressClear_CTS_Finova/css/outward/maker-report.css?v=9" />
-    </html>
+   
+    <style src="/css/outward/maker-report.css"/>
 
     <vlayout
         apply="com.iispl.cts.controller.outward.maker.MakerReportController"

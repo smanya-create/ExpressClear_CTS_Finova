@@ -21,19 +21,23 @@
                          pageSubtitle="Role Management" />
             </north>
 
-            <!-- Scrollable Content Workspace -->
-            <center border="none" autoscroll="true">
-                <vlayout sclass="role-content" spacing="20px" style="padding: 24px;" hflex="1">
+            <!-- Non-Scrollable Content Workspace -->
+            <center border="none" autoscroll="false" style="overflow: hidden; background-color: #f1f5f9;">
+                <vlayout sclass="role-content" spacing="14px" vflex="1" hflex="1" 
+                         style="padding: 20px 28px 16px 28px; box-sizing: border-box; overflow: hidden;">
                     
-                    <!-- Page Title -->
-                    <vlayout spacing="4px">
+                    <!-- Fixed Page Title -->
+                    <vlayout spacing="2px" style="flex: 0 0 auto;">
                         <label value="Role Management" sclass="page-title"/>
                         <label value="Manage system access levels, operational permissions, and CTS queue assignments." sclass="page-subtitle"/>
                     </vlayout>
 
-                    <!-- Roles Table Card -->
-                    <vlayout sclass="card-panel" spacing="16px" style="padding: 24px 28px; margin-top: 16px;" hflex="1">
-                        <hlayout valign="middle" spacing="10px" hflex="1">
+                    <!-- Roles Table Card (Fills remaining height) -->
+                    <vlayout sclass="card-panel" spacing="12px" vflex="1" hflex="1" 
+                             style="padding: 16px 22px; box-sizing: border-box; overflow: hidden;">
+                        
+                        <!-- Top Bar: Counter & Add Button (Fixed inside card) -->
+                        <hlayout valign="middle" spacing="10px" hflex="1" style="flex: 0 0 auto;">
                             <hlayout valign="middle" spacing="10px" hflex="1">
                                 <label value="System Roles" style="font-size: 16px; font-weight: 800; color: #1e293b;"/>
                                 <label id="lblRoleCount" value="Loading..." 
@@ -41,16 +45,17 @@
                             </hlayout>
 
                             <!-- Primary Action Button -->
-                            <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="38px"/>
+                            <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="36px"/>
                         </hlayout>
 
-                        <grid sclass="role-grid" hflex="1">
-                            <columns sizable="true">
-                                <column label="ROLE ID" width="120px"/>
-                                <column label="ROLE NAME" width="200px"/>
-                                <column label="DESCRIPTION" hflex="1"/>
-                                <column label="STATUS" width="120px" align="center"/>
-                                <column label="ACTIONS" width="120px" align="center"/>
+                        <!-- Only This Grid Scrolls Vertically -->
+                        <grid id="gridRoles" sclass="role-grid" span="true" emptyMessage="No roles found." vflex="1" hflex="1">
+                            <columns sizable="false">
+                                <column label="ROLE ID" hflex="2"/>
+                                <column label="ROLE NAME" hflex="3"/>
+                                <column label="DESCRIPTION" hflex="6"/>
+                                <column label="STATUS" hflex="2" align="center"/>
+                                <column label="ACTIONS" hflex="2" align="center"/>
                             </columns>
                             <rows id="rowsRoles">
                                 <!-- Populated dynamically by RoleManagementController -->

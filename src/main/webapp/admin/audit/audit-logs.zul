@@ -14,7 +14,7 @@
         <!-- Nested Borderlayout to pin header and scroll only the audit logs -->
         <borderlayout hflex="1" vflex="1">
 
-            <!-- Fixed Header (Does NOT scroll) -->
+            <!-- Fixed Header (Pinned at top) -->
             <north size="auto" border="none">
                 <include id="incHeader" src="/components/header.zul" 
                          pageTitle="Admin Dashboard" 
@@ -22,18 +22,20 @@
                          showNotifications="false" />
             </north>
 
-            <!-- Scrollable Content Workspace -->
-            <center border="none" autoscroll="true" style="background-color: #f8fafc;">
-                <vlayout sclass="role-content" spacing="20px" style="padding: 24px;">
+            <!-- Non-Scrollable Content Workspace -->
+            <center border="none" autoscroll="false" style="background-color: #f8fafc; overflow: hidden;">
+                <vlayout sclass="role-content" spacing="14px" vflex="1" hflex="1" 
+                         style="padding: 20px 24px 16px 24px; box-sizing: border-box; overflow: hidden;">
                     
-                    <!-- Page Title Header -->
-                    <vlayout spacing="4px">
+                    <!-- Fixed Page Title Header -->
+                    <vlayout spacing="2px" style="flex: 0 0 auto;">
                         <label value="System Audit Logs" sclass="page-title"/>
                         <label value="Track all security events, user logins, batch submissions, and operational activities." sclass="page-subtitle"/>
                     </vlayout>
 
-                    <!-- Filter Controls Card -->
-                    <vlayout sclass="card-panel" hflex="1" spacing="0" style="padding: 24px 28px; box-sizing: border-box;">
+                    <!-- Fixed Filter Controls Card -->
+                    <vlayout sclass="card-panel" hflex="1" spacing="0" 
+                             style="padding: 16px 22px; box-sizing: border-box; flex: 0 0 auto;">
                         <hlayout spacing="16px" valign="bottom" hflex="1">
                             <vlayout spacing="6px" width="150px">
                                 <label value="FROM DATE" sclass="field-label"/>
@@ -63,28 +65,34 @@
                         </hlayout>
                     </vlayout>
 
-                    <!-- Audit Log Table Card -->
-                    <vlayout sclass="card-panel" spacing="16px">
-                        <hlayout valign="middle" hflex="1" style="justify-content: space-between;">
+                    <!-- Audit Log Table Card (Takes up remaining screen height) -->
+                    <vlayout sclass="card-panel" spacing="12px" vflex="1" hflex="1" 
+                             style="padding: 16px 22px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;">
+                        
+                        <!-- Fixed Header row inside card -->
+                        <hlayout valign="middle" hflex="1" style="justify-content: space-between; flex: 0 0 auto;">
                             <label value="Audit Trail" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
                             <label id="lblAuditCount" value="Loading logs..." style="color: #64748b; font-size: 12px;"/>
                         </hlayout>
 
-                        <grid sclass="role-grid" hflex="1">
-                            <columns sizable="true">
-                                <column label="TIMESTAMP" width="160px"/>
-                                <column label="USER / ROLE" width="200px"/>
-                                <column label="MODULE" width="140px"/>
-                                <column label="ACTION" width="150px"/>
-                                <column label="DETAILS" hflex="1"/>
-                                <column label="IP ADDRESS" width="130px"/>
-                                <column label="STATUS" width="110px" align="center" style="text-align: center;"/>
+                        <!-- ONLY this Grid Body Scrolls Vertically -->
+                        <grid id="gridAudit" sclass="role-grid" span="true" vflex="1" hflex="1" emptyMessage="No audit logs found.">
+                            <columns sizable="false">
+                                <column label="TIMESTAMP" hflex="3" align="center"/>
+                                <column label="USER / ROLE" hflex="3" align="center"/>
+                                <column label="MODULE" hflex="2" align="center"/>
+                                <column label="ACTION" hflex="2" align="center"/>
+                                <column label="DETAILS" hflex="5" align="center"/>
+                                <column label="IP ADDRESS" hflex="2" align="center"/>
+                                <column label="STATUS" hflex="2" align="center"/>
                             </columns>
                             <rows id="rowsAudit">
                                 <!-- Populated dynamically by AuditLogsController -->
                             </rows>
                         </grid>
-                        <hlayout valign="middle" style="margin-top: 14px;">
+
+                        <!-- Pinned Pagination Toolbar -->
+                        <hlayout valign="middle" hflex="1" style="flex: 0 0 auto; margin-top: 4px;">
                             <space hflex="1" />
                             <hlayout spacing="4px" valign="middle" sclass="cts-pagination-wrapper">
                                 <button id="btnFirstPage" label="«" sclass="pg-nav-btn" tooltiptext="First Page" />
