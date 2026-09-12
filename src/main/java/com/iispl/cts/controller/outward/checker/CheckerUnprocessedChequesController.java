@@ -81,10 +81,14 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
                 cellAmt.setSclass("list-amount");
 
                 // 5. Status Badge (Pending Verification)
-                Listcell cellStage = new Listcell();
-                Label lblStage = new Label("Pending Verification");
-                lblStage.setSclass("badge-verify");
-                cellStage.appendChild(lblStage);
+                Listcell cellTask = new Listcell();
+                cellTask.setStyle("text-align: center; vertical-align: middle;");
+
+                Label lblTask = new Label("Pending Verification");
+                lblTask.setStyle("display: table; margin: 0 auto; padding: 4px 12px; border-radius: 12px; "
+                        + "font-size: 11px; font-weight: 700; white-space: nowrap; "
+                        + "background: #ffedd5 !important; color: #c2410c !important; border: 1px solid #fed7aa !important;");
+                cellTask.appendChild(lblTask);
 
                 // 6. Reason / Remarks
                 Listcell cellRemarks = new Listcell();
@@ -99,10 +103,20 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
                 }
 
                 // 7. Action Button
+             // 7. Action Button (Plain text 'Queue', Dark Navy, No Icons/Symbols)
                 Listcell cellAction = new Listcell();
-                Button btnAction = new Button("Verify");
-                btnAction.setIconSclass("z-icon-check-square-o");
-                btnAction.setSclass("btn-process");
+                cellAction.setStyle("text-align: center; vertical-align: middle; padding: 0 8px;");
+
+                Button btnAction = new Button("Queue");
+                btnAction.setImage(null);
+                btnAction.setIconSclass(null);
+                btnAction.setStyle("background: #173B61 !important; background-color: #173B61 !important; "
+                        + "color: #ffffff !important; border: 1px solid #173B61 !important; "
+                        + "font-size: 11px !important; font-weight: 600 !important; "
+                        + "padding: 6px 18px !important; border-radius: 4px !important; "
+                        + "cursor: pointer !important; white-space: nowrap !important; "
+                        + "box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;");
+
                 btnAction.addEventListener("onClick", event -> routeToCheckerVerification(dto));
                 cellAction.appendChild(btnAction);
 
@@ -110,7 +124,7 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
                 item.appendChild(cellChq);
                 item.appendChild(cellSort);
                 item.appendChild(cellAmt);
-                item.appendChild(cellStage);
+                item.appendChild(cellTask);
                 item.appendChild(cellRemarks);
                 item.appendChild(cellAction);
             }
