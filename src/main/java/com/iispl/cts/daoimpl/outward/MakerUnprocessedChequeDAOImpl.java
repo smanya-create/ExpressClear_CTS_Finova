@@ -67,20 +67,17 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
 
 	            // Differentiate MICR Repair vs Data Entry
 	            String dbStatus = rs.getString("cheque_status");
+	            dto.setStatus(dbStatus);
 	            String upperStatus = dbStatus != null ? dbStatus.trim().toUpperCase() : "";
 
 	            if ("UNPROCESSED_DATA_ENTRY".equals(upperStatus) || upperStatus.contains("DATA_ENTRY")) {
-	                dto.setStatus("PENDING_DATA_ENTRY");
 	                dto.setSendBackReason("Pending Courtesy/Legal Amount Keying (CAR/LAR)");
 	            } else if ("UNPROCESSED_MICR".equals(upperStatus) || upperStatus.contains("MICR") || upperStatus.contains("REPAIR")) {
-	                dto.setStatus("PENDING_REPAIR");
 	                dto.setSendBackReason("Defective / Unread MICR Codeline");
 	            } else if (micr == null || micr.trim().isEmpty() || micr.contains("?") || "UNREADABLE".equalsIgnoreCase(micr)) {
-	                dto.setStatus("PENDING_REPAIR");
 	                dto.setSendBackReason("Defective / Unread MICR Codeline");
 	            } else {
-	                dto.setStatus("PENDING_DATA_ENTRY");
-	                dto.setSendBackReason("Pending Courtesy/Legal Amount Keying (CAR/LAR)");
+	                dto.setSendBackReason("EOD Rollover Instrument");
 	            }
 
 	            dto.setRemarks(chqIdStr + " (" + batchIdStr + ")");

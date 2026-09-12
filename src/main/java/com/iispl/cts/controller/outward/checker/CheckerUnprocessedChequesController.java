@@ -139,10 +139,15 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
                 lblAmt.setStyle("font-size: 13px; font-weight: 700; color: #0f172a; display: block; text-align: center;");
                 cellAmt.appendChild(lblAmt);
 
-                // 5. Required Task Badge (Orange Pill)
+             // 5. Exact Cheque Status from DB
                 Listcell cellTask = new Listcell();
                 cellTask.setStyle("text-align: center; vertical-align: middle;");
-                Label lblTask = new Label("Pending Verification");
+
+                String rawDbStatus = (dto.getStatus() != null && !dto.getStatus().trim().isEmpty()) 
+                        ? dto.getStatus().trim() 
+                        : "------";
+
+                Label lblTask = new Label(rawDbStatus);
                 lblTask.setStyle("display: table; margin: 0 auto; padding: 4px 12px; border-radius: 12px; "
                         + "font-size: 11px; font-weight: 700; white-space: nowrap; "
                         + "background: #ffedd5 !important; color: #c2410c !important; border: 1px solid #fed7aa !important;");

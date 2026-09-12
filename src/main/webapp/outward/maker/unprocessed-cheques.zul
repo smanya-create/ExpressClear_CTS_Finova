@@ -146,7 +146,7 @@
                     <listheader label="CHEQUE NO" width="120px" align="center"/>
                     <listheader label="MICR CODE" width="130px" align="center"/>
                     <listheader label="AMOUNT (INR)" width="150px" align="center"/>
-                    <listheader label="REQUIRED TASK" width="180px" align="center"/>
+                    <listheader label="STATUS" width="210px" align="center" sort="auto(status)"/>
                     <listheader label="REASON / REMARKS" hflex="1" align="center"/>
                     <listheader label="ACTION" width="165px" align="center"/>
                 </listhead>
