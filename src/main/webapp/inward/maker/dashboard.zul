@@ -98,6 +98,20 @@
 							sclass="inward-maker-empty-subtitle" />
 					</vlayout>
 				</div>
+
+				<!-- Section 1 Pagination Bar -->
+				<div id="inwardMakerReturnPaginationBar" sclass="inward-maker-pagination">
+					<button id="inwardMakerBtnReturnFirst" label="&lt;&lt;"
+						sclass="inward-maker-pagination-button" />
+					<button id="inwardMakerBtnReturnPrevious" label="&lt;"
+						sclass="inward-maker-pagination-button" />
+					<label id="inwardMakerLblReturnCurrentPage" value="1 / 1"
+						sclass="inward-maker-pagination-label" />
+					<button id="inwardMakerBtnReturnNext" label="&gt;"
+						sclass="inward-maker-pagination-button" />
+					<button id="inwardMakerBtnReturnLast" label="&gt;&gt;"
+						sclass="inward-maker-pagination-button" />
+				</div>
 			</div>
 
 			<space id="inwardMakerSectionSpacer" height="34px" />
@@ -137,7 +151,7 @@
 					</vlayout>
 				</div>
 
-				<!-- Centered Pagination Bar -->
+				<!-- Section 2 Pagination Bar -->
 				<div id="inwardMakerPaginationBar" sclass="inward-maker-pagination">
 					<button id="inwardMakerBtnFirst" label="&lt;&lt;"
 						sclass="inward-maker-pagination-button" />
