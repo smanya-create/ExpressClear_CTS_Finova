@@ -79,25 +79,32 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
 		return inwardChequeDAO.validateCbs(cheque);
 	}
-	
+
 	@Override
 	public BigDecimal getAccountBalance(String accountNumber) {
-	    return inwardChequeDAO.getAccountBalance(accountNumber);
+		return inwardChequeDAO.getAccountBalance(accountNumber);
 	}
-	
+
 	@Override
 	public String getBankNameByCode(String bankCode) {
-	    return inwardChequeDAO.getBankNameByCode(bankCode);
+		return inwardChequeDAO.getBankNameByCode(bankCode);
 	}
-	
+
 	@Override
 	public String getRejectedReasonDetails(String inwardChequeId) {
-	    return inwardChequeDAO.getRejectedReasonDetails(inwardChequeId);
+		return inwardChequeDAO.getRejectedReasonDetails(inwardChequeId);
 	}
-	
+
 	@Override
 	public String getMakerRejectionRequestDetails(String inwardChequeId) {
-	    return inwardChequeDAO.getMakerRejectionRequestDetails(inwardChequeId);
+		return inwardChequeDAO.getMakerRejectionRequestDetails(inwardChequeId);
+	}
+
+	@Override
+	public boolean saveSendBackRequest(String inwardChequeId, String inwardBatchId, String reasonId, String remarks,
+			String sentBackBy) {
+
+		return inwardChequeDAO.saveSendBackRequest(inwardChequeId, inwardBatchId, reasonId, remarks, sentBackBy);
 	}
 
 }

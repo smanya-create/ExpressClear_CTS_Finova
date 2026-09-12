@@ -310,6 +310,41 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	    return null;
 	}
 	
+	
+	@Override
+	public boolean saveSendBackRequest(
+	        String inwardChequeId,
+	        String inwardBatchId,
+	        String reasonId,
+	        String remarks,
+	        String sentBackBy) {
+
+	    String sql =
+	            "INSERT INTO inward_cheque_send_back_request "
+	            + "(inward_cheque_id, inward_batch_id, reason_id, "
+	            + "remarks, sent_back_by, request_status, requested_at) "
+	            + "VALUES (?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)";
+
+	    try (Connection connection = DBConnection.getConnection();
+	         PreparedStatement preparedStatement =
+	                 connection.prepareStatement(sql)) {
+
+	        preparedStatement.setString(1, inwardChequeId);
+	        preparedStatement.setString(2, inwardBatchId);
+	        preparedStatement.setString(3, reasonId);
+	        preparedStatement.setString(4, remarks);
+	        preparedStatement.setString(5, sentBackBy);
+
+	        int rows = preparedStatement.executeUpdate();
+
+	        return rows > 0;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+	
 	@Override
 	public String getMakerRejectionRequestDetails(String inwardChequeId) {
 
