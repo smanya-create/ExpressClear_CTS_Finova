@@ -15,6 +15,11 @@
             com.iispl.cts.listener.UserSession
         </listener-class>
     </listener>
+    <listener>
+        <listener-class>
+            com.iispl.cts.listener.GlobalSessionLockInterceptor
+        </listener-class>
+    </listener>
 
     <client-config>
         <keep-alive>false</keep-alive>
