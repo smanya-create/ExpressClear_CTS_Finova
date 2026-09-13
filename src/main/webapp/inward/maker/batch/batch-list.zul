@@ -6,6 +6,7 @@
 
 	<!-- Use window as root so InwardBatchController can cast it without ClassCastException -->
 	<window id="inwardBatchQueueWindow" border="none" width="100%"
+		style="margin: 0 !important; padding: 0 !important;"
 		apply="com.iispl.cts.controller.inward.maker.InwardBatchController"
 		sclass="batch-page">
 
@@ -45,12 +46,12 @@
 							<label value="Batch No."
 								sclass="filter-label" />
 							<textbox id="batchSearchTextbox"
-								placeholder="Enter Batch No..." width="220px"
+								placeholder="Enter Batch No..." width="180px"
 								sclass="batch-filter-input" />
 
 							<label value="Status" sclass="filter-label" />
 							<combobox id="statusCombobox"
-								readonly="true" width="190px" sclass="batch-filter-combobox"
+								readonly="true" width="200px" sclass="batch-filter-combobox"
 								value="All">
 								<comboitem label="All" />
 								<comboitem label="Received" />
@@ -71,7 +72,7 @@
 							<label value="Received Date"
 								sclass="filter-label" />
 							<datebox id="receivedDatebox"
-								placeholder="Select Date" width="160px"
+								placeholder="Select Date" width="140px"
 								sclass="batch-filter-datebox" />
 
 							<button id="searchButton" label="Search"

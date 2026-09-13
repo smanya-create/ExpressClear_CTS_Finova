@@ -3,13 +3,13 @@
    ========================================================= */
 
 .batch-page {
-    width: 100%;
+    width: 100% !important;
     height: 100% !important;
-    box-sizing: border-box;
-    padding: 12px 24px 12px 24px !important;
-    margin: 0;
-    background: #f8fafc !important;
-    overflow: hidden !important; /* Kills the outer page scrollbar completely */
+    box-sizing: border-box !important;
+    padding: 0 !important;      /* Removes the double outer padding */
+    margin: 0 !important;
+    background: transparent !important;
+    overflow: hidden !important;
 }
 
 /* ---------------------------------------------------------
@@ -164,7 +164,7 @@
 }
 
 /* ---------------------------------------------------------
-   4. Table Wrapper, Deep Navy Header & Internal Scroll
+   4. Table Wrapper, MICR-Style Header & Internal Scroll
    --------------------------------------------------------- */
 .batch-table-wrapper {
     width: 100%;
@@ -181,40 +181,46 @@
     width: 100% !important;
 }
 
-/* Force Deep Navy Header on both tables */
+/* Header Container */
 .batch-listbox .z-listhead,
 .batch-listbox .z-listhead-bar,
-.batch-listbox .z-listheader,
-.batch-listbox .z-listheader-content,
 .cheque-listbox .z-listhead,
-.cheque-listbox .z-listhead-bar,
-.cheque-listbox .z-listheader,
-.cheque-listbox .z-listheader-content {
+.cheque-listbox .z-listhead-bar {
     background: #18275c !important;
     background-color: #18275c !important;
-    background-image: none !important;
-    color: #ffffff !important;
     border: none !important;
-    border-bottom: 1px solid #30406f !important;
-    font-size: 10px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    height: 38px !important;
-    line-height: 38px !important;
-    padding: 0 8px !important;
-    text-align: center !important;
-    white-space: nowrap !important;
 }
 
+/* Header Cells: Bright distinct vertical separators like MICR Repair */
 .batch-listbox .z-listheader,
 .cheque-listbox .z-listheader {
-    border-right: 1px solid #30406f !important;
+    background: #18275c !important;
+    background-color: #18275c !important;
+    border-right: 1px solid #3b82f6 !important; /* Bright blue divider */
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #18275c !important;
+    padding: 0 !important;
 }
 
 .batch-listbox .z-listheader:last-child,
 .cheque-listbox .z-listheader:last-child {
     border-right: none !important;
+}
+
+.batch-listbox .z-listheader-content,
+.cheque-listbox .z-listheader-content {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    text-align: center !important;
+    padding: 0 8px !important;
+    white-space: nowrap !important;
 }
 
 /* Allow internal scrolling without locking fixed pixel height */
@@ -224,18 +230,7 @@
     height: 240px !important;      /* Fits ~5 rows, remaining 5 scroll inside */
 }
 
-/* Ensure pagination bar stays visible directly below */
-.batch-listbox .z-paging {
-    border: none !important;
-    border-top: 1px solid #e2e8f0 !important;
-    background: #ffffff !important;
-    padding: 8px 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    height: 42px !important;
-}
-
+/* Custom modern scrollbar styling */
 .batch-listbox .z-listbox-body::-webkit-scrollbar {
     width: 6px;
 }
@@ -264,12 +259,15 @@
     background: #f8fafc !important;
 }
 
+/* Data Row Cells: NO vertical separators, clean horizontal underline */
 .batch-listbox .z-listcell,
 .cheque-listbox .z-listcell {
     height: 48px !important;
     padding: 0 8px !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    border-right: none !important;
+    border-right: none !important;  /* No vertical dividers in data rows */
+    border-left: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid #edf2f7 !important; /* Clean horizontal row border */
     vertical-align: middle !important;
     text-align: center !important;
 }
@@ -490,6 +488,7 @@
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
+    height: 42px !important;
 }
 
 .batch-listbox .z-paging-info,
