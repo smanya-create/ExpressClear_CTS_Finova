@@ -1,604 +1,332 @@
 /* =========================================================
-   MICR REPAIR PAGE
+   CTS MICR REPAIR
+   Temporary UI CSS
    ========================================================= */
 
-.outward-cheque-data-entry-page {
-    width: 100% !important;
-    height: 100% !important;
 
-    box-sizing: border-box !important;
+/* =========================================================
+   MAIN PAGE
+   ========================================================= */
 
-    padding: 16px 20px 24px 20px !important;
+.micr-repair-window {
+    background: #ffffff;
+}
 
-    background: #f8fafc !important;
-
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+.micr-repair-page {
+    box-sizing: border-box;
+    padding: 12px 16px 8px 16px;
+    background: #ffffff;
 }
 
 
 /* =========================================================
-   HEADER
+   PAGE HEADER
    ========================================================= */
 
-.micr-page-header {
-    width: 100% !important;
-
-    margin-bottom: 12px !important;
+.micr-repair-header {
+    min-height: 52px;
+    padding: 4px 4px 8px 4px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #d9e1ea;
 }
 
-.outward-cheque-data-entry-title {
-    font-size: 20px !important;
-
-    font-weight: 800 !important;
-
-    color: #0f172a !important;
-
-    line-height: 26px !important;
+.micr-repair-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #16345c;
 }
 
-.outward-cheque-data-entry-subtitle {
-    font-size: 11px !important;
+.micr-repair-description {
+    font-size: 12px;
+    color: #687789;
+}
 
-    color: #64748b !important;
+.cheque-navigation {
+    white-space: nowrap;
+}
 
-    line-height: 16px !important;
+.cheque-position {
+    text-align: center;
+    font-weight: 600;
+    color: #34495e;
+}
+
+.micr-button {
+    font-size: 12px;
+}
+
+.back-button {
+    margin-left: 4px;
 }
 
 
 /* =========================================================
-   BACK BUTTON
+   BATCH INFORMATION
    ========================================================= */
 
-.outward-cheque-back-button {
-    height: 34px !important;
-
-    padding: 0 16px !important;
-
-    background: #ffffff !important;
-
-    border: 1px solid #cbd5e1 !important;
-
-    border-radius: 6px !important;
-
-    color: #0f3d91 !important;
-
-    font-size: 10px !important;
-
-    font-weight: 700 !important;
+.batch-information {
+    padding: 10px 12px;
+    box-sizing: border-box;
+    background: #f7f9fc;
+    border: 1px solid #dce3eb;
+    border-radius: 4px;
 }
 
-.outward-cheque-back-button:hover {
-    background: #eff6ff !important;
+.batch-information-layout {
+    min-height: 48px;
+}
 
-    border-color: #1677e8 !important;
+.batch-information-item {
+    padding: 2px 8px;
+    box-sizing: border-box;
+}
+
+.batch-label-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7785;
+}
+
+.batch-label-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f3b5b;
 }
 
 
 /* =========================================================
-   BATCH SUMMARY
+   MAIN CONTENT
    ========================================================= */
 
-.outward-cheque-batch-summary {
-    width: 100% !important;
-
-    box-sizing: border-box !important;
-
-    padding: 13px 16px !important;
-
-    margin-bottom: 12px !important;
-
-    background: #ffffff !important;
-
-    border: 1px solid #d7e0eb !important;
-
-    border-radius: 8px !important;
-
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+.micr-repair-content {
+    min-height: 0;
+    box-sizing: border-box;
 }
 
-.outward-cheque-summary-label {
-    font-size: 9px !important;
-
-    font-weight: 800 !important;
-
-    color: #64748b !important;
-
-    line-height: 14px !important;
-}
-
-.outward-cheque-summary-value {
-    font-size: 13px !important;
-
-    font-weight: 800 !important;
-
-    color: #0f172a !important;
-
-    line-height: 18px !important;
+.cheque-image-section,
+.micr-details-section {
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
 }
 
 
 /* =========================================================
-   MAIN 55 / 45 LAYOUT
+   LEFT IMAGE SECTION
    ========================================================= */
 
-.outward-cheque-content-layout {
-    width: 100% !important;
+.cheque-image-content {
+    min-height: 0;
+}
 
-    min-width: 0 !important;
+.section-header {
+    min-height: 34px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    background: #f4f7fa;
+    border: 1px solid #dce3eb;
+    border-radius: 4px;
+}
 
-    box-sizing: border-box !important;
+.section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1c3e65;
+}
 
-    align-items: stretch !important;
+.record-position {
+    font-size: 11px;
+    color: #687789;
 }
 
 
 /* =========================================================
-   LEFT CARD
+   CHEQUE IMAGE CONTAINER
    ========================================================= */
 
-.outward-cheque-image-card {
-    min-width: 0 !important;
+.cheque-image-container {
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid #cbd5df;
+    border-radius: 4px;
+    background: #f5f6f8;
+    overflow: hidden;
+    text-align: center;
+}
 
-    height: 600px !important;
+.cheque-image {
+    object-fit: contain;
+}
 
-    box-sizing: border-box !important;
-
-    padding: 12px !important;
-
-    background: #ffffff !important;
-
-    border: 1px solid #d5dfeb !important;
-
-    border-radius: 8px !important;
-
-    box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05) !important;
+.cheque-image-placeholder {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    color: #7a8795;
+    font-size: 13px;
 }
 
 
 /* =========================================================
-   RIGHT CARD
-   SAME HEIGHT AS LEFT
+   IMAGE CONTROLS
    ========================================================= */
 
-.outward-cheque-details-card {
-    min-width: 0 !important;
+.image-controls {
+    width: 100%;
+}
 
-    height: 600px !important;
+.image-control-button {
+    font-size: 11px;
+}
 
-    box-sizing: border-box !important;
+.image-navigation {
+    width: 100%;
+}
 
-    padding: 12px !important;
-
-    background: #ffffff !important;
-
-    border: 1px solid #d5dfeb !important;
-
-    border-radius: 8px !important;
-
-    box-shadow: 0 2px 7px rgba(15, 23, 42, 0.05) !important;
+.image-position {
+    text-align: center;
+    font-size: 11px;
+    color: #687789;
 }
 
 
 /* =========================================================
-   CARD TITLE
+   RIGHT MICR DETAILS
    ========================================================= */
 
-.outward-cheque-card-title {
-    font-size: 14px !important;
-
-    font-weight: 800 !important;
-
-    color: #0f172a !important;
-
-    line-height: 20px !important;
+.micr-details-content {
+    min-height: 0;
 }
 
-.outward-cheque-record-label {
-    font-size: 9px !important;
-
-    font-weight: 600 !important;
-
-    color: #64748b !important;
-
-    line-height: 15px !important;
+.cheque-status {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6c7a89;
 }
 
 
 /* =========================================================
-   IMAGE VIEWER
+   CHECKER RETURN INFORMATION
    ========================================================= */
 
-.outward-cheque-image-container {
-    width: 100% !important;
+.checker-return-information {
+    padding: 8px 10px;
+    box-sizing: border-box;
+    background: #fff8e6;
+    border: 1px solid #ead59b;
+    border-radius: 4px;
+}
 
-    height: 400px !important;
+.checker-return-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #745b14;
+}
 
-    box-sizing: border-box !important;
+.checker-label-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6c6c6c;
+}
 
-    display: flex !important;
-
-    align-items: center !important;
-
-    justify-content: center !important;
-
-    position: relative !important;
-
-    background: #f1f5f9 !important;
-
-    border: 1px solid #cbd5e1 !important;
-
-    border-radius: 7px !important;
-
-    overflow: hidden !important;
+.checker-label-value {
+    font-size: 11px;
+    color: #333333;
 }
 
 
 /* =========================================================
-   IMAGE
+   MICR FORM
    ========================================================= */
 
-.outward-cheque-image {
-    max-width: 100% !important;
+.micr-details-grid {
+    border: 1px solid #dce3eb;
+    border-radius: 4px;
+    background: #ffffff;
+    padding: 8px;
+    box-sizing: border-box;
+}
 
-    max-height: 100% !important;
+.micr-details-grid .z-row {
+    border-bottom: 1px solid #edf1f5;
+}
 
-    width: auto !important;
+.micr-details-grid .z-row:last-child {
+    border-bottom: none;
+}
 
-    height: auto !important;
+.micr-field {
+    padding: 7px;
+    box-sizing: border-box;
+}
 
-    object-fit: contain !important;
-
-    display: block !important;
-
-    transform-origin: center center !important;
-
-    transition: transform 0.15s ease !important;
+.field-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #5e6b78;
 }
 
 
 /* =========================================================
-   PLACEHOLDER
+   TEXTBOXES
    ========================================================= */
 
-.outward-cheque-image-placeholder {
-    width: 100% !important;
+.micr-textbox {
+    font-size: 13px;
+    height: 32px;
+}
 
-    height: 100% !important;
+.readonly-field {
+    background: #f3f5f7;
+}
 
-    display: flex !important;
-
-    align-items: center !important;
-
-    justify-content: center !important;
-
-    color: #64748b !important;
-
-    font-size: 10px !important;
+.corrected-micr-field {
+    font-weight: 600;
 }
 
 
 /* =========================================================
-   FIVE IMAGE BUTTONS
+   VALIDATION MESSAGE
    ========================================================= */
 
-.outward-cheque-image-buttons {
-    width: 100% !important;
-
-    box-sizing: border-box !important;
-
-    display: flex !important;
-
-    align-items: stretch !important;
-}
-
-
-/*
- * IMPORTANT:
- * Do NOT use pack.
- * Do NOT use width:0.
- * hflex="1" in ZUL distributes the five buttons.
- */
-
-.outward-cheque-image-control {
-    height: 46px !important;
-
-    min-width: 0 !important;
-
-    box-sizing: border-box !important;
-
-    border: 1px solid #1677e8 !important;
-
-    border-radius: 7px !important;
-
-    background: #1677e8 !important;
-
-    color: #ffffff !important;
-
-    font-size: 11px !important;
-
-    font-weight: 800 !important;
-
-    white-space: nowrap !important;
-
-    cursor: pointer !important;
-}
-
-
-/* BLUE */
-
-.zoom-button {
-    background: #1677e8 !important;
-
-    border-color: #1677e8 !important;
-}
-
-.zoom-button:hover {
-    background: #0f65c7 !important;
-
-    border-color: #0f65c7 !important;
-}
-
-
-/* RESET */
-
-.reset-button {
-    background: #64748b !important;
-
-    border-color: #64748b !important;
-}
-
-.reset-button:hover {
-    background: #475569 !important;
-
-    border-color: #475569 !important;
+.micr-validation-message {
+    padding: 6px 8px;
+    box-sizing: border-box;
+    font-size: 11px;
+    color: #b3261e;
+    background: #fff1f0;
+    border: 1px solid #efc2bf;
+    border-radius: 3px;
 }
 
 
 /* =========================================================
-   NAVIGATION
+   ACTION BUTTONS
    ========================================================= */
 
-.outward-cheque-image-navigation {
-    width: 100% !important;
-
-    box-sizing: border-box !important;
-
-    padding-top: 8px !important;
-
-    border-top: 1px solid #e2e8f0 !important;
-
-    display: flex !important;
+.micr-action-buttons {
+    width: 100%;
+    padding-top: 2px;
 }
 
-
-/* Previous / Next */
-
-.outward-cheque-navigation-button {
-    height: 42px !important;
-
-    min-width: 0 !important;
-
-    box-sizing: border-box !important;
-
-    background: #ffffff !important;
-
-    border: 1px solid #cbd5e1 !important;
-
-    border-radius: 7px !important;
-
-    color: #0f172a !important;
-
-    font-size: 11px !important;
-
-    font-weight: 800 !important;
+.micr-action-button {
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.outward-cheque-navigation-button:hover {
-    background: #eff6ff !important;
-
-    border-color: #1677e8 !important;
-
-    color: #1677e8 !important;
+.reject-button {
+    min-width: 0;
 }
 
-
-/* 1 / 1 */
-
-.outward-cheque-navigation-label {
-    text-align: center !important;
-
-    font-size: 12px !important;
-
-    font-weight: 800 !important;
-
-    color: #1e3a8a !important;
-
-    line-height: 42px !important;
+.save-button {
+    min-width: 0;
 }
 
-
-/* =========================================================
-   FORM GRID
-   ========================================================= */
-
-.outward-cheque-form-grid {
-    width: 100% !important;
-
-    background: #ffffff !important;
-
-    border: none !important;
-}
-
-.outward-cheque-form-grid .z-row {
-    background: #ffffff !important;
-}
-
-.outward-cheque-form-grid .z-cell {
-    background: #ffffff !important;
-
-    border: none !important;
-
-    padding: 7px 6px !important;
-
-    vertical-align: top !important;
-}
-
-
-/* =========================================================
-   FIELD LABELS
-   ========================================================= */
-
-.outward-cheque-field-label {
-    font-size: 9px !important;
-
-    font-weight: 800 !important;
-
-    color: #334155 !important;
-
-    line-height: 14px !important;
-}
-
-
-/* =========================================================
-   TEXT BOXES
-   ========================================================= */
-
-.outward-cheque-field,
-.outward-cheque-readonly-field {
-    width: 100% !important;
-
-    height: 36px !important;
-
-    box-sizing: border-box !important;
-
-    padding: 0 10px !important;
-
-    border-radius: 5px !important;
-
-    font-size: 10px !important;
-}
-
-
-/* EDITABLE */
-
-.outward-cheque-field {
-    background: #ffffff !important;
-
-    border: 1px solid #cbd5e1 !important;
-
-    color: #0f172a !important;
-}
-
-.outward-cheque-field:focus {
-    border-color: #1677e8 !important;
-
-    box-shadow: 0 0 0 2px rgba(22, 119, 232, 0.12) !important;
-
-    outline: none !important;
-}
-
-
-/* READ ONLY */
-
-.outward-cheque-readonly-field {
-    background: #f1f5f9 !important;
-
-    border: 1px solid #d5dde8 !important;
-
-    color: #64748b !important;
-}
-
-
-/* CORRECTED MICR */
-
-#txtCorrectedMicr {
-    font-weight: 700 !important;
-
-    letter-spacing: 1px !important;
-}
-
-
-/* =========================================================
-   REJECT / SAVE BUTTONS
-   ========================================================= */
-
-.outward-cheque-action-buttons {
-    width: 100% !important;
-
-    display: flex !important;
-
-    align-items: stretch !important;
-
-    box-sizing: border-box !important;
-
-    padding-top: 6px !important;
-}
-
-
-/* BOTH */
-
-.outward-cheque-reject-button,
-.outward-cheque-save-button {
-    height: 42px !important;
-
-    min-width: 0 !important;
-
-    box-sizing: border-box !important;
-
-    border-radius: 7px !important;
-
-    color: #ffffff !important;
-
-    font-size: 11px !important;
-
-    font-weight: 800 !important;
-}
-
-
-/* =========================================================
-   REQUEST REJECT = RED
-   ========================================================= */
-
-.outward-cheque-reject-button {
-    background: #dc2626 !important;
-
-    border: 1px solid #dc2626 !important;
-}
-
-.outward-cheque-reject-button:hover {
-    background: #b91c1c !important;
-
-    border-color: #b91c1c !important;
-}
-
-.outward-cheque-reject-button:active {
-    background: #991b1b !important;
-
-    border-color: #991b1b !important;
-}
-
-
-/* =========================================================
-   SAVE & NEXT = GREEN
-   ========================================================= */
-
-.outward-cheque-save-button {
-    background: #16a34a !important;
-
-    border: 1px solid #16a34a !important;
-}
-
-.outward-cheque-save-button:hover {
-    background: #15803d !important;
-
-    border-color: #15803d !important;
-}
-
-.outward-cheque-save-button:active {
-    background: #166534 !important;
-
-    border-color: #166534 !important;
+.submit-button {
+    min-width: 0;
 }
 
 
@@ -606,163 +334,89 @@
    PROGRESS
    ========================================================= */
 
-.outward-cheque-progress-section {
-    width: 100% !important;
-
-    box-sizing: border-box !important;
-
-    margin-top: 2px !important;
-
-    padding-top: 8px !important;
-
-    border-top: 1px solid #e2e8f0 !important;
+.micr-progress {
+    width: 100%;
+    padding-top: 3px;
 }
 
-
-/* PROGRESS TRACK */
-
-.outward-cheque-progress-track {
-    width: 100% !important;
-
-    height: 9px !important;
-
-    box-sizing: border-box !important;
-
-    background: #dbe4ef !important;
-
-    border-radius: 8px !important;
-
-    overflow: hidden !important;
+.progress-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #5e6b78;
 }
 
+.progress-text {
+    font-size: 10px;
+    color: #687789;
+}
 
-/* PROGRESS FILL */
-
-.outward-cheque-progress-fill {
-    height: 100% !important;
-
-    background: #1677e8 !important;
-
-    border-radius: 8px !important;
-
-    transition: width 0.25s ease-in-out !important;
+.micr-progress-meter {
+    width: 100%;
 }
 
 
 /* =========================================================
-   SEPARATOR
+   FOOTER
    ========================================================= */
 
-.outward-cheque-details-card .z-separator {
-    border-top: 1px solid #e2e8f0 !important;
+.micr-repair-footer {
+    min-height: 28px;
+    padding: 5px 4px 2px 4px;
+    box-sizing: border-box;
+    border-top: 1px solid #d9e1ea;
+}
+
+.footer-text {
+    font-size: 10px;
+    color: #7a8795;
+}
+
+.footer-version {
+    font-size: 10px;
+    color: #7a8795;
 }
 
 
 /* =========================================================
-   WHOLE WINDOW SCROLL
+   POPUPS
    ========================================================= */
 
-.outward-cheque-data-entry-page {
-    overflow-y: auto !important;
-
-    overflow-x: hidden !important;
-}
-
-
-/*
- * Image does NOT scroll.
- * Zoom stays inside the image viewer.
- */
-
-.outward-cheque-image-container {
-    overflow: hidden !important;
+.micr-popup {
+    padding: 8px;
 }
 
 
 /* =========================================================
-   SCREEN WIDTH 1100px AND BELOW
+   RESPONSIVE SAFETY
    ========================================================= */
 
-@media (max-width: 1100px) {
+@media screen and (max-width: 900px) {
 
-    .outward-cheque-data-entry-page {
-        padding: 12px !important;
+    .micr-repair-page {
+        padding: 8px;
     }
 
-    .outward-cheque-content-layout {
-        spacing: 10px !important;
+    .micr-repair-header {
+        min-height: 48px;
     }
 
-    .outward-cheque-image-card,
-    .outward-cheque-details-card {
-        height: 580px !important;
+    .micr-repair-title {
+        font-size: 16px;
     }
 
-    .outward-cheque-image-container {
-        height: 380px !important;
+    .micr-repair-description {
+        font-size: 11px;
     }
 
-    .outward-cheque-image-control {
-        font-size: 9px !important;
-    }
-}
-
-
-/* =========================================================
-   SMALL SCREEN
-   ========================================================= */
-
-@media (max-width: 850px) {
-
-    .outward-cheque-content-layout {
-        flex-direction: column !important;
+    .batch-information-layout {
+        spacing: 10px;
     }
 
-    .outward-cheque-image-card,
-    .outward-cheque-details-card {
-        width: 100% !important;
-
-        height: auto !important;
-
-        min-height: 0 !important;
+    .section-title {
+        font-size: 12px;
     }
 
-    .outward-cheque-image-container {
-        height: 420px !important;
-    }
-}
-
-
-/* =========================================================
-   VERY SMALL SCREEN
-   ========================================================= */
-
-@media (max-width: 600px) {
-
-    .outward-cheque-data-entry-page {
-        padding: 10px !important;
-    }
-
-    .outward-cheque-image-container {
-        height: 350px !important;
-    }
-
-    .outward-cheque-image-control {
-        height: 42px !important;
-
-        font-size: 8px !important;
-    }
-
-    .outward-cheque-navigation-button {
-        height: 38px !important;
-    }
-
-    .outward-cheque-navigation-label {
-        line-height: 38px !important;
-    }
-
-    .outward-cheque-reject-button,
-    .outward-cheque-save-button {
-        height: 38px !important;
+    .micr-textbox {
+        height: 30px;
     }
 }

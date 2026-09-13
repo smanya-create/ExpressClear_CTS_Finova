@@ -1,1320 +1,2491 @@
 package com.iispl.cts.controller.outward.maker;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
+
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.event.InputEvent;
-import org.zkoss.zk.ui.util.Clients;
-import org.zkoss.zk.ui.select.SelectorComposer;
-import org.zkoss.zk.ui.select.annotation.Listen;
+
 import org.zkoss.zk.ui.select.annotation.Wire;
+
+import org.zkoss.zk.ui.util.Clients;
+
+import org.zkoss.zk.ui.util.GenericForwardComposer;
+
 import org.zkoss.zul.Button;
+
+import org.zkoss.zul.Combobox;
+
 import org.zkoss.zul.Div;
+
+import org.zkoss.zul.Image;
+
 import org.zkoss.zul.Include;
+
 import org.zkoss.zul.Label;
+
+import org.zkoss.zul.Comboitem;
+
 import org.zkoss.zul.Textbox;
+
 import org.zkoss.zul.Window;
 
-import com.iispl.cts.entity.outward.OutwardCheque;
-import com.iispl.cts.entity.outward.ScanCheque;
+import com.iispl.cts.dto.MicrRepairChequeDTO;
+
+import com.iispl.cts.entity.outward.RejectedReason;
+
 import com.iispl.cts.service.outward.OutwardMakerService;
+
 import com.iispl.cts.serviceimpl.outward.OutwardMakerServiceImpl;
 
-public class OutwardMakerMicrRepairController
-        extends SelectorComposer<Window> {
+public class OutwardMakerMicrRepairController extends GenericForwardComposer<Window> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private final OutwardMakerService outwardMakerService =
-            new OutwardMakerServiceImpl();
+	private final OutwardMakerService outwardMakerService;
 
-    @Wire
-    private Label lblBatchNumber;
+	// =========================================================
 
-    @Wire
-    private Label lblMicrRepairRequired;
+	// MAIN COMPONENTS
 
-    @Wire
-    private Label lblCompletedCheques;
+	// =========================================================
 
-    @Wire
-    private Label lblRemainingCheques;
+	@Wire
 
-    @Wire
-    private Label lblRecordPosition;
+	private Window winMicrRepair;
 
-    @Wire
-    private Label lblChequeNavigation;
+	@Wire
 
-    @Wire
-    private Label lblProgressText;
+	private Label lblBatchId;
 
-    @Wire
-    private Label lblChequeImageTitle;
+	@Wire
 
-    @Wire
-    private Label lblMicrError;
+	private Label lblMicrRepairCount;
 
-    @Wire
-    private Textbox txtChequeNumber;
+	@Wire
 
-    @Wire
-    private Textbox txtCityCode;
+	private Label lblCompletedCount;
 
-    @Wire
-    private Textbox txtBankCode;
+	@Wire
 
-    @Wire
-    private Textbox txtBranchCode;
+	private Label lblRemainingCount;
 
-    @Wire
-    private Textbox txtCurrentMicr;
+	@Wire
 
-    @Wire
-    private Textbox txtCorrectedMicr;
+	private Label lblChequePosition;
 
-    @Wire
-    private Button btnPrevious;
+	@Wire
 
-    @Wire
-    private Button btnNext;
+	private Button btnPrevious;
 
-    @Wire
-    private Button btnZoom;
+	@Wire
 
-    @Wire
-    private Button btnZoomOut;
+	private Button btnNext;
 
-    @Wire
-    private Button btnZoomReset;
+	@Wire
 
-    @Wire
-    private Button btnRotate;
+	private Button btnBackToList;
 
-    @Wire
-    private Button btnImageToggle;
+	// =========================================================
 
-    @Wire
-    private Button btnRejectRequest;
+	// IMAGE COMPONENTS
 
-    @Wire
-    private Button btnSaveNext;
+	// =========================================================
 
-    @Wire
-    private Div divProgressFill;
+	@Wire
 
-    @Wire
-    private org.zkoss.zul.Image imgCheque;
+	private Image imgCheque;
 
-    private List<?> micrRepairCheques;
+	@Wire
 
-    private int currentIndex = 0;
-    private int completedCount = 0;
+	private Label lblChequeImageTitle;
 
-    private String source;
-    private String batchId;
+	@Wire
 
-    /*
-     * Image viewing state
-     */
-    private double zoomLevel = 1.0;
+	private Label lblImageRecordPosition;
 
-    private int rotation = 0;
+	@Wire
 
-    private int imageX = 0;
-    private int imageY = 0;
+	private Label lblImagePosition;
 
-    private boolean showingBackImage = false;
-    private boolean updatingMicrFields = false;
+	@Wire
 
-    @Override
-    public void doAfterCompose(Window window) throws Exception {
+	private Label lblChequeImagePlaceholder;
 
-        super.doAfterCompose(window);
+	@Wire
 
-        loadParameters();
+	private Button btnZoom;
 
-        if (batchId == null || batchId.trim().isEmpty()) {
-            showError("Batch ID is missing.");
-            return;
-        }
+	@Wire
 
-        if (source == null || source.trim().isEmpty()) {
-            source = "SCAN";
-        }
+	private Button btnZoomOut;
 
-        loadMicrRepairCheques();
+	@Wire
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()) {
+	private Button btnZoomReset;
 
-            showWarning(
-                    "No MICR repair cheques found for batch "
-                    + batchId);
+	@Wire
 
-            updateSummary();
-            updateProgress();
+	private Button btnRotate;
 
-            return;
-        }
+	@Wire
 
-        currentIndex = 0;
+	private Button btnImageToggle;
 
-        loadCurrentCheque();
+	@Wire
 
-        initializeImageViewer();
-    }
+	private Button btnImagePrevious;
 
-    private void loadParameters() {
+	@Wire
 
-        Component parent = getSelf().getParent();
+	private Button btnImageNext;
 
-        while (parent != null && !(parent instanceof Include)) {
-            parent = parent.getParent();
-        }
+	// =========================================================
 
-        if (parent instanceof Include) {
+	// MICR DETAILS
 
-            Include include = (Include) parent;
+	// =========================================================
 
-            Object sourceAttr =
-                    include.getAttribute("MICR_REPAIR_SOURCE");
+	@Wire
 
-            Object batchAttr =
-                    include.getAttribute("MICR_REPAIR_BATCH_ID");
+	private Label lblChequeStatus;
 
-            if (sourceAttr != null) {
-                source = String.valueOf(sourceAttr);
-            }
+	@Wire
 
-            if (batchAttr != null) {
-                batchId = String.valueOf(batchAttr);
-            }
-        }
+	private Textbox txtChequeNumber;
 
-        if (source == null || source.trim().isEmpty()) {
+	@Wire
 
-            source =
-                    Executions.getCurrent()
-                            .getParameter("source");
-        }
+	private Textbox txtCityCode;
 
-        if (batchId == null || batchId.trim().isEmpty()) {
+	@Wire
 
-            batchId =
-                    Executions.getCurrent()
-                            .getParameter("batchId");
-        }
+	private Textbox txtBankCode;
 
-        if (source != null) {
-            source = source.trim();
-        }
+	@Wire
 
-        if (batchId != null) {
-            batchId = batchId.trim();
-        }
-    }
+	private Textbox txtBranchCode;
 
-    private void loadMicrRepairCheques() {
+	@Wire
 
-        try {
+	private Textbox txtCurrentMicr;
 
-            if ("SCAN".equalsIgnoreCase(source)) {
+	@Wire
 
-                List<ScanCheque> cheques =
-                        outwardMakerService
-                                .getScanMicrRepairCheques(batchId);
+	private Textbox txtCorrectedMicr;
 
-                micrRepairCheques = cheques;
+	@Wire
 
-            } else {
+	private Label lblMicrValidationMessage;
 
-                List<OutwardCheque> cheques =
-                        outwardMakerService
-                                .getOutwardMicrRepairCheques(batchId);
+	// =========================================================
 
-                micrRepairCheques = cheques;
-            }
+	// CHECKER RETURN / REJECTION INFORMATION
 
-        } catch (Exception e) {
+	// =========================================================
 
-            showError(
-                    "Unable to load MICR repair cheques.");
+	@Wire
 
-            e.printStackTrace();
-        }
-    }
+	private Div divCheckerReturnInformation;
 
-    private void loadCurrentCheque() {
+	@Wire
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()
-                || currentIndex < 0
-                || currentIndex >= micrRepairCheques.size()) {
+	private Label lblCheckerReasonId;
 
-            return;
-        }
+	@Wire
 
-        Object cheque =
-                micrRepairCheques.get(currentIndex);
+	private Label lblCheckerReason;
 
-        resetImageViewState();
+	@Wire
 
-        if (cheque instanceof ScanCheque) {
+	private Label lblCheckerRemarks;
 
-            populateScanCheque(
-                    (ScanCheque) cheque);
+	// =========================================================
 
-        } else if (cheque instanceof OutwardCheque) {
+	// ACTION BUTTONS
 
-            populateOutwardCheque(
-                    (OutwardCheque) cheque);
-        }
+	// =========================================================
 
-        showFrontImage();
+	@Wire
 
-        updateNavigationButtons();
-        updateSummary();
-        updateProgress();
-        updateSaveButton();
-    }
+	private Button btnRejectRequest;
 
-    private void populateScanCheque(
-            ScanCheque cheque) {
+	@Wire
 
-        lblBatchNumber.setValue(batchId);
+	private Button btnSaveNext;
 
-        txtChequeNumber.setValue(
-                safe(cheque.getChequeNumber()));
+	@Wire
 
-        txtCityCode.setValue(
-                safe(cheque.getCityCode()));
+	private Button btnSubmit;
 
-        txtBankCode.setValue(
-                safe(cheque.getBankCode()));
+	// =========================================================
 
-        txtBranchCode.setValue(
-                safe(cheque.getBranchCode()));
+	// PROGRESS
 
-        txtCurrentMicr.setValue(
-                safe(cheque.getMicrCode()));
+	// =========================================================
 
-        setCorrectedMicrFromCodes();
+	@Wire
 
-        updateImage(cheque, false);
-    }
+	private Label lblProgressText;
 
-    private void populateOutwardCheque(
-            OutwardCheque cheque) {
+	@Wire
 
-        lblBatchNumber.setValue(batchId);
+	private org.zkoss.zul.Progressmeter prgMicrRepair;
 
-        txtChequeNumber.setValue(
-                safe(cheque.getChequeNumber()));
+	// =========================================================
 
-        txtCityCode.setValue(
-                safe(cheque.getCityCode()));
+	// REJECT POPUP
 
-        txtBankCode.setValue(
-                safe(cheque.getBankCode()));
+	// =========================================================
 
-        txtBranchCode.setValue(
-                safe(cheque.getBranchCode()));
+	@Wire
 
-        txtCurrentMicr.setValue(
-                safe(cheque.getMicrCode()));
+	private Window winRejectRequest;
 
-        setCorrectedMicrFromCodes();
+	@Wire
 
-        updateImage(cheque, false);
-    }
+	private Combobox cmbRejectReason;
 
-    private void updateImage(
-            Object cheque,
-            boolean back) {
+	@Wire
 
-        String imagePath = null;
+	private Textbox txtRejectRemarks;
 
-        if (cheque == null) {
+	@Wire
 
-            imgCheque.setVisible(false);
+	private Button btnCancelReject;
 
-            lblChequeImageTitle
-                    .setValue("Cheque Image");
+	@Wire
 
-            return;
-        }
+	private Button btnProceedReject;
 
-        String methodName =
-                back
-                        ? "getChequeImageBack"
-                        : "getChequeImageFront";
+	// =========================================================
 
-        try {
+	// SAVE CONFIRMATION POPUP
 
-            Method method =
-                    cheque.getClass()
-                            .getMethod(methodName);
+	// =========================================================
 
-            Object value =
-                    method.invoke(cheque);
+	@Wire
 
-            if (value != null) {
-                imagePath =
-                        String.valueOf(value);
-            }
+	private Window winConfirmSave;
 
-        } catch (Exception e) {
+	@Wire
 
-            e.printStackTrace();
-        }
+	private Label lblConfirmSaveMessage;
 
-        if (imagePath == null
-                || imagePath.trim().isEmpty()) {
+	@Wire
 
-            imgCheque.setVisible(false);
+	private Button btnCancelSave;
 
-            lblChequeImageTitle.setValue(
-                    back
-                            ? "Cheque Back Image"
-                            : "Cheque Front Image");
+	@Wire
 
-            return;
-        }
+	private Button btnConfirmSave;
 
-        try {
+	// =========================================================
 
-            if (!imagePath.startsWith("/")) {
-                imagePath = "/" + imagePath;
-            }
+	// INFORMATION POPUP
 
-            imgCheque.setSrc(imagePath);
-            imgCheque.setVisible(true);
+	// =========================================================
 
-            lblChequeImageTitle.setValue(
-                    back
-                            ? "Cheque Back Image"
-                            : "Cheque Front Image");
+	@Wire
 
-            applyImageTransform();
+	private Window winMicrInformation;
 
-        } catch (Exception e) {
+	@Wire
 
-            imgCheque.setVisible(false);
+	private Label lblMicrInformationMessage;
 
-            e.printStackTrace();
-        }
-    }
+	@Wire
 
-    /*
-     * Initialize browser-side image viewer.
-     *
-     * The viewer remains fixed.
-     * The image can be zoomed and dragged inside it.
-     */
-    private void initializeImageViewer() {
+	private Button btnCloseMicrInformation;
 
-        Clients.evalJavaScript(
-                "window.setTimeout(function(){"
-                + "var img=document.getElementById('"
-                + imgCheque.getUuid()
-                + "');"
-                + "if(!img)return;"
+	// =========================================================
 
-                + "img.style.cursor='grab';"
-                + "img.style.userSelect='none';"
-                + "img.style.webkitUserSelect='none';"
+	// DATA
 
-                + "if(img.dataset.micrViewerReady==='true')return;"
-                + "img.dataset.micrViewerReady='true';"
+	// =========================================================
 
-                + "var dragging=false;"
-                + "var startX=0;"
-                + "var startY=0;"
-                + "var startLeft=0;"
-                + "var startTop=0;"
+	private List<MicrRepairChequeDTO> micrRepairCheques = new ArrayList<MicrRepairChequeDTO>();
 
-                + "img.addEventListener('mousedown',function(e){"
-                + "if(e.button!==0)return;"
-                + "dragging=true;"
-                + "startX=e.clientX;"
-                + "startY=e.clientY;"
-                + "startLeft=parseFloat(img.dataset.posX||'0');"
-                + "startTop=parseFloat(img.dataset.posY||'0');"
-                + "img.style.cursor='grabbing';"
-                + "e.preventDefault();"
-                + "});"
+	/*
+	 * 
+	 * source is deliberately NOT part of MicrRepairChequeDTO.
+	 *
+	 * 
+	 * 
+	 * It remains page/request context and continues to come from the existing
+	 * 
+	 * Include / URL flow.
+	 * 
+	 */
 
-                + "document.addEventListener('mousemove',function(e){"
-                + "if(!dragging)return;"
-                + "var x=startLeft+(e.clientX-startX);"
-                + "var y=startTop+(e.clientY-startY);"
-                + "img.dataset.posX=x;"
-                + "img.dataset.posY=y;"
-                + "img.style.transform="
-                + "'translate('+x+'px,'+y+'px) scale('+"
-                + "(img.dataset.zoom||'1')"
-                + " + ') rotate('+"
-                + "(img.dataset.rotation||'0')"
-                + " + 'deg)';"
-                + "});"
+	private String source;
 
-                + "document.addEventListener('mouseup',function(){"
-                + "if(!dragging)return;"
-                + "dragging=false;"
-                + "img.style.cursor='grab';"
-                + "});"
+	private String batchId;
 
-                + "img.addEventListener('wheel',function(e){"
-                + "e.preventDefault();"
-                + "var oldZoom=parseFloat(img.dataset.zoom||'1');"
-                + "var newZoom=e.deltaY<0"
-                + "?Math.min(oldZoom+0.1,3)"
-                + ":Math.max(oldZoom-0.1,1);"
-                + "if(newZoom===oldZoom)return;"
+	/*
+	 * 
+	 * Optional chequeId used when opening/resuming a particular cheque.
+	 * 
+	 */
 
-                + "var rect=img.getBoundingClientRect();"
-                + "var mouseX=e.clientX-(rect.left+rect.width/2);"
-                + "var mouseY=e.clientY-(rect.top+rect.height/2);"
+	private String chequeId;
 
-                + "var currentX=parseFloat(img.dataset.posX||'0');"
-                + "var currentY=parseFloat(img.dataset.posY||'0');"
+	private int currentIndex = 0;
 
-                + "var ratio=newZoom/oldZoom;"
+	// =========================================================
 
-                + "currentX=currentX-(mouseX*(ratio-1));"
-                + "currentY=currentY-(mouseY*(ratio-1));"
+	// STATUS VALUES
 
-                + "img.dataset.zoom=newZoom;"
-                + "img.dataset.posX=currentX;"
-                + "img.dataset.posY=currentY;"
+	// =========================================================
 
-                + "img.style.transform="
-                + "'translate('+currentX+'px,'+currentY+'px) scale('+"
-                + "newZoom"
-                + " + ') rotate('+"
-                + "(img.dataset.rotation||'0')"
-                + " + 'deg)';"
-                + "},{passive:false});"
+	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
 
-                + "},100);");
-    }
+	private static final String STATUS_MICR_REPAIRED = "MICR_REPAIRED";
 
-    private void resetImageViewState() {
+	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
 
-        zoomLevel = 1.0;
-        rotation = 0;
+	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 
-        imageX = 0;
-        imageY = 0;
+	private static final String STATUS_REJECT_REQUESTED = "REJECT_REQUESTED";
 
-        applyImageTransform();
-    }
+	// =========================================================
 
-    @Listen("onClick = #btnImageToggle")
-    public void toggleImage() {
+	// IMAGE STATE
 
-        resetImageViewState();
+	// =========================================================
 
-        if (showingBackImage) {
+	private boolean showingBackImage = false;
 
-            showFrontImage();
+	private double zoomLevel = 1.0;
 
-        } else {
+	private int rotation = 0;
 
-            showBackImage();
-        }
-    }
+	/*
+	 * 
+	 * Image paths are not part of MicrRepairChequeDTO.
+	 *
+	 * 
+	 * 
+	 * They therefore remain empty until the separate image retrieval flow is
+	 * 
+	 * connected.
+	 * 
+	 */
 
-    private void showFrontImage() {
+	private String frontImagePath = "";
 
-        showingBackImage = false;
+	private String backImagePath = "";
 
-        btnImageToggle.setLabel("View Back");
+	// =========================================================
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()) {
+	// CONSTRUCTOR
 
-            return;
-        }
+	// =========================================================
 
-        Object cheque =
-                micrRepairCheques.get(currentIndex);
+	public OutwardMakerMicrRepairController() {
 
-        updateImage(cheque, false);
-    }
+		outwardMakerService = new OutwardMakerServiceImpl();
 
-    private void showBackImage() {
+	}
 
-        showingBackImage = true;
+	// =========================================================
 
-        btnImageToggle.setLabel("View Front");
+	// AFTER COMPOSE
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()) {
+	// =========================================================
 
-            return;
-        }
+	@Override
 
-        Object cheque =
-                micrRepairCheques.get(currentIndex);
+	public void doAfterCompose(Window window) throws Exception {
 
-        updateImage(cheque, true);
-    }
+		super.doAfterCompose(window);
 
-    @Listen("onClick = #btnZoom")
-    public void zoomIn() {
+		System.out.println("[MICR-TRACE] doAfterCompose: super COMPLETE");
 
-        zoomLevel += 0.25;
+		// The reject popup is a nested Window/ID space. Resolve its components
+		// explicitly so event handling does not depend on nested ID-space forwarding.
+		if (winRejectRequest == null) {
+			Component popup = window.getFellowIfAny("winRejectRequest", true);
+			if (popup instanceof Window) {
+				winRejectRequest = (Window) popup;
+			}
+		}
 
-        if (zoomLevel > 3.0) {
-            zoomLevel = 3.0;
-        }
+		if (winRejectRequest != null) {
+			if (cmbRejectReason == null) {
+				Component component = winRejectRequest.getFellowIfAny("cmbRejectReason");
+				if (component instanceof Combobox) {
+					cmbRejectReason = (Combobox) component;
+				}
+			}
 
-        applyImageTransform();
-    }
+			if (txtRejectRemarks == null) {
+				Component component = winRejectRequest.getFellowIfAny("txtRejectRemarks");
+				if (component instanceof Textbox) {
+					txtRejectRemarks = (Textbox) component;
+				}
+			}
 
-    @Listen("onClick = #btnZoomOut")
-    public void zoomOut() {
+			if (btnCancelReject == null) {
+				Component component = winRejectRequest.getFellowIfAny("btnCancelReject");
+				if (component instanceof Button) {
+					btnCancelReject = (Button) component;
+				}
+			}
 
-        zoomLevel -= 0.25;
+			if (btnProceedReject == null) {
+				Component component = winRejectRequest.getFellowIfAny("btnProceedReject");
+				if (component instanceof Button) {
+					btnProceedReject = (Button) component;
+				}
+			}
 
-        if (zoomLevel < 1.0) {
-            zoomLevel = 1.0;
-        }
+			registerRejectPopupListeners();
+		}
 
-        if (zoomLevel == 1.0) {
-            imageX = 0;
-            imageY = 0;
-        }
+		loadParameters(window);
 
-        applyImageTransform();
-    }
+		// -----------------------------------------------------
 
-    @Listen("onClick = #btnZoomReset")
-    public void resetZoom() {
+		// Validate source
 
-        zoomLevel = 1.0;
-        imageX = 0;
-        imageY = 0;
+		// -----------------------------------------------------
 
-        applyImageTransform();
-    }
+		if (source == null || source.trim().isEmpty()) {
 
-    @Listen("onClick = #btnRotate")
-    public void rotateImage() {
+			showError("MICR repair source is missing.");
 
-        rotation += 90;
+			return;
 
-        if (rotation >= 360) {
-            rotation = 0;
-        }
+		}
 
-        applyImageTransform();
-    }
+		source = source.trim().toUpperCase();
 
-    private void applyImageTransform() {
+		if (!"SCAN".equals(source) && !"OUTWARD".equals(source)) {
 
-        if (imgCheque == null) {
-            return;
-        }
+			showError("Invalid MICR repair source.");
 
-        String transform =
-                "translate("
-                + imageX
-                + "px,"
-                + imageY
-                + "px) "
-                + "scale("
-                + zoomLevel
-                + ") "
-                + "rotate("
-                + rotation
-                + "deg);";
+			return;
 
-        imgCheque.setStyle(
-                "transform:"
-                + transform
-                + "transform-origin:center center;"
-                + "cursor:"
-                + (zoomLevel > 1.0
-                        ? "grab;"
-                        : "default;")
-                + "user-select:none;"
-                + "-webkit-user-select:none;");
+		}
 
-        String script =
-                "var img=document.getElementById('"
-                + imgCheque.getUuid()
-                + "');"
-                + "if(img){"
-                + "img.dataset.zoom='"
-                + zoomLevel
-                + "';"
-                + "img.dataset.rotation='"
-                + rotation
-                + "';"
-                + "img.dataset.posX='"
-                + imageX
-                + "';"
-                + "img.dataset.posY='"
-                + imageY
-                + "';"
-                + "}";
+		// -----------------------------------------------------
 
-        Clients.evalJavaScript(script);
-    }
+		// Validate batch
 
-    @Listen("onClick = #btnPrevious")
-    public void previousCheque() {
+		// -----------------------------------------------------
 
-        if (currentIndex <= 0) {
-            return;
-        }
+		if (batchId == null || batchId.trim().isEmpty()) {
 
-        currentIndex--;
+			showError("Batch ID is missing.");
 
-        loadCurrentCheque();
-    }
+			return;
 
-    @Listen("onClick = #btnNext")
-    public void nextCheque() {
+		}
 
-        if (micrRepairCheques == null
-                || currentIndex
-                    >= micrRepairCheques.size() - 1) {
+		batchId = batchId.trim();
 
-            return;
-        }
+		lblBatchId.setValue(batchId);
 
-        currentIndex++;
+		loadRejectedReasons();
 
-        loadCurrentCheque();
-    }
+		// Submit is always disabled until all cheques
 
-    private void updateNavigationButtons() {
+		// have been individually processed.
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()) {
+		btnSubmit.setDisabled(true);
 
-            btnPrevious.setDisabled(true);
-            btnNext.setDisabled(true);
+		// -----------------------------------------------------
 
-            return;
-        }
+		// Load DTO list
 
-        btnPrevious.setDisabled(
-                currentIndex <= 0);
+		// -----------------------------------------------------
 
-        btnNext.setDisabled(
-                currentIndex
-                    >= micrRepairCheques.size() - 1);
-    }
+		loadMicrRepairCheques();
 
-    private void updateSummary() {
+		int totalCheques = getTotalCheques();
 
-        int total =
-                getTotalCheques();
+		if (totalCheques == 0) {
 
-        lblMicrRepairRequired.setValue(
-                String.valueOf(total));
+			showError("No MICR repair cheques found for batch " + batchId);
 
-        int completed = completedCount;
+			btnSaveNext.setDisabled(true);
 
-        if (completed < 0) {
-            completed = 0;
-        }
+			btnRejectRequest.setDisabled(true);
 
-        if (completed > total) {
-            completed = total;
-        }
+			btnSubmit.setDisabled(true);
 
-        int remaining =
-                total - completed;
+			btnPrevious.setDisabled(true);
 
-        lblCompletedCheques.setValue(
-                String.valueOf(completed));
+			btnNext.setDisabled(true);
 
-        lblRemainingCheques.setValue(
-                String.valueOf(remaining));
+			updateProgress();
 
-        if (total == 0) {
+			return;
 
-            lblRecordPosition.setValue(
-                    "Record 0 of 0");
+		}
 
-            lblChequeNavigation.setValue("");
+		// -----------------------------------------------------
 
-        } else {
+		// Determine opening position
 
-            lblRecordPosition.setValue(
-                    "Record "
-                    + (currentIndex + 1)
-                    + " of "
-                    + total);
+		// -----------------------------------------------------
 
-            lblChequeNavigation.setValue(
-                    (currentIndex + 1)
-                    + " / "
-                    + total);
-        }
-    }
+		currentIndex = findOpeningChequeIndex();
 
-    private void updateProgress() {
+		if (currentIndex < 0) {
 
-        int total =
-                getTotalCheques();
+			currentIndex = 0;
 
-        if (total <= 0) {
+		}
 
-            lblProgressText.setValue(
-                    "Record 0 of 0");
+		loadCurrentCheque();
 
-            divProgressFill.setWidth("0%");
+		updateSubmitButton();
 
-            return;
-        }
+	}
 
-        int completed =
-                completedCount;
+	// =========================================================
 
-        if (completed < 0) {
-            completed = 0;
-        }
+	// =========================================================
+	// REJECT POPUP EVENT LISTENERS
+	// =========================================================
+	private void registerRejectPopupListeners() {
+		if (btnCancelReject != null) {
+			btnCancelReject.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+				@Override
+				public void onEvent(Event event) throws Exception {
+					onClick$btnCancelReject(event);
+				}
+			});
+		}
 
-        if (completed > total) {
-            completed = total;
-        }
+		if (btnProceedReject != null) {
+			btnProceedReject.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+				@Override
+				public void onEvent(Event event) throws Exception {
+					onClick$btnProceedReject(event);
+				}
+			});
+		}
 
-        int percentage =
-                (int) Math.round(
-                        ((double) completed
-                                / total) * 100);
+		System.out.println("[MICR-TRACE] Reject popup listeners registered. " + "Cancel=" + (btnCancelReject != null)
+				+ ", Proceed=" + (btnProceedReject != null));
+	}
 
-        lblProgressText.setValue(
-                "Record "
-                + (currentIndex + 1)
-                + " of "
-                + total);
+	// LOAD PARAMETERS
 
-        divProgressFill.setWidth(
-                percentage + "%");
-    }
+	// =========================================================
 
-    private int getTotalCheques() {
+	/*
+	 * 
+	 * IMPORTANT: Existing source handling is preserved.
+	 * 
+	 */
 
-        if (micrRepairCheques == null) {
-            return 0;
-        }
+	private void loadParameters(Window window) {
 
-        return micrRepairCheques.size();
-    }
+		Component parent = window.getParent();
 
-    @Listen("onChanging = #txtCityCode")
-    public void cityCodeChanging(
-            InputEvent event) {
+		while (parent != null && !(parent instanceof Include)) {
 
-        if (updatingMicrFields) {
-            return;
-        }
+			parent = parent.getParent();
 
-        String value =
-                event.getValue();
+		}
 
-        txtCityCode.setValue(value);
+		if (parent instanceof Include) {
 
-        updateCorrectedMicrFromCodes(
-                value,
-                txtBankCode.getValue(),
-                txtBranchCode.getValue());
+			Include include = (Include) parent;
 
-        updateSaveButton();
-    }
+			Object sourceAttribute = include.getAttribute("MICR_REPAIR_SOURCE");
 
-    @Listen("onChanging = #txtBankCode")
-    public void bankCodeChanging(
-            InputEvent event) {
+			Object batchAttribute = include.getAttribute("MICR_REPAIR_BATCH_ID");
 
-        if (updatingMicrFields) {
-            return;
-        }
+			Object chequeAttribute = include.getAttribute("MICR_REPAIR_CHEQUE_ID");
 
-        String value =
-                event.getValue();
+			if (sourceAttribute != null) {
 
-        txtBankCode.setValue(value);
+				source = sourceAttribute.toString();
 
-        updateCorrectedMicrFromCodes(
-                txtCityCode.getValue(),
-                value,
-                txtBranchCode.getValue());
+			}
 
-        updateSaveButton();
-    }
+			if (batchAttribute != null) {
 
-    @Listen("onChanging = #txtBranchCode")
-    public void branchCodeChanging(
-            InputEvent event) {
+				batchId = batchAttribute.toString();
 
-        if (updatingMicrFields) {
-            return;
-        }
+			}
 
-        String value =
-                event.getValue();
+			if (chequeAttribute != null) {
 
-        txtBranchCode.setValue(value);
+				chequeId = chequeAttribute.toString();
 
-        updateCorrectedMicrFromCodes(
-                txtCityCode.getValue(),
-                txtBankCode.getValue(),
-                value);
+			}
 
-        updateSaveButton();
-    }
+		}
 
-    @Listen("onChanging = #txtCorrectedMicr")
-    public void correctedMicrChanging(
-            InputEvent event) {
+		// -----------------------------------------------------
 
-        if (updatingMicrFields) {
-            return;
-        }
+		// Existing direct URL fallback
 
-        String micr =
-                event.getValue();
+		// -----------------------------------------------------
 
-        txtCorrectedMicr.setValue(micr);
+		if (source == null || source.trim().isEmpty()) {
 
-        updateCodesFromCorrectedMicr(
-                micr);
+			source = Executions.getCurrent().getParameter("source");
 
-        updateSaveButton();
-    }
+		}
 
-    private void setCorrectedMicrFromCodes() {
+		if (batchId == null || batchId.trim().isEmpty()) {
 
-        updatingMicrFields = true;
+			batchId = Executions.getCurrent().getParameter("batchId");
 
-        try {
+		}
 
-            String city =
-                    safe(txtCityCode.getValue());
+		if (chequeId == null || chequeId.trim().isEmpty()) {
 
-            String bank =
-                    safe(txtBankCode.getValue());
+			chequeId = Executions.getCurrent().getParameter("chequeId");
 
-            String branch =
-                    safe(txtBranchCode.getValue());
+		}
 
-            if (city.length() == 3
-                    && bank.length() == 3
-                    && branch.length() == 3) {
+		System.out.println("MICR REPAIR source = [" + source + "]");
 
-                txtCorrectedMicr.setValue(
-                        city + bank + branch);
+		System.out.println("MICR REPAIR batchId = [" + batchId + "]");
 
-            } else {
+		System.out.println("MICR REPAIR chequeId = [" + chequeId + "]");
 
-                txtCorrectedMicr.setValue("");
-            }
+	}
 
-        } finally {
+	// =========================================================
 
-            updatingMicrFields = false;
-        }
-    }
+	// =========================================================
 
-    private void updateCorrectedMicrFromCodes(
-            String city,
-            String bank,
-            String branch) {
+	// LOAD REJECTED REASONS
 
-        if (updatingMicrFields) {
-            return;
-        }
+	// =========================================================
 
-        updatingMicrFields = true;
+	private void loadRejectedReasons() {
 
-        try {
+		try {
 
-            city = safe(city);
-            bank = safe(bank);
-            branch = safe(branch);
+			List<RejectedReason> reasons =
 
-            txtCorrectedMicr.setValue(
-                    city + bank + branch);
+					outwardMakerService.getRejectedReasons();
 
-        } finally {
+			cmbRejectReason.getItems().clear();
 
-            updatingMicrFields = false;
-        }
-    }
+			if (reasons == null) {
 
-    private void updateCodesFromCorrectedMicr(
-            String micr) {
+				return;
 
-        if (updatingMicrFields) {
-            return;
-        }
+			}
 
-        micr = safe(micr);
+			for (RejectedReason reason : reasons) {
 
-        updatingMicrFields = true;
+				Comboitem item = new Comboitem();
 
-        try {
+				item.setLabel(safe(reason.getRejectedReasonName()));
 
-            if (micr.length() >= 3) {
+				item.setValue(reason.getRejectedReasonId());
 
-                txtCityCode.setValue(
-                        micr.substring(0, 3));
+				cmbRejectReason.appendChild(item);
 
-            } else {
+			}
 
-                txtCityCode.setValue(micr);
-            }
+			System.out.println("Rejected reasons loaded = " + reasons.size());
 
-            if (micr.length() >= 6) {
+		} catch (Exception e) {
 
-                txtBankCode.setValue(
-                        micr.substring(3, 6));
+			e.printStackTrace();
 
-            } else if (micr.length() > 3) {
+			showError("Unable to load rejection reasons.");
 
-                txtBankCode.setValue(
-                        micr.substring(3));
+		}
 
-            } else {
+	}
 
-                txtBankCode.setValue("");
-            }
+	// LOAD MICR REPAIR CHEQUES
 
-            if (micr.length() >= 9) {
+	// =========================================================
 
-                txtBranchCode.setValue(
-                        micr.substring(6, 9));
+	// =========================================================
 
-            } else if (micr.length() > 6) {
+	// LOAD MICR REPAIR CHEQUES
 
-                txtBranchCode.setValue(
-                        micr.substring(6));
+	// =========================================================
 
-            } else {
+	private void loadMicrRepairCheques() {
 
-                txtBranchCode.setValue("");
-            }
+		System.out.println("\n========== LOAD MICR REPAIR CHEQUES ==========");
 
-        } finally {
+		System.out.println("Source = [" + source + "]");
 
-            updatingMicrFields = false;
-        }
-    }
+		System.out.println("Batch ID = [" + batchId + "]");
 
-    private boolean isValidMicrCodes() {
+		try {
 
-        String city =
-                safe(txtCityCode.getValue());
+			if ("SCAN".equals(source)) {
 
-        String bank =
-                safe(txtBankCode.getValue());
+				System.out.println("Calling SCAN cheque service...");
 
-        String branch =
-                safe(txtBranchCode.getValue());
+				micrRepairCheques =
 
-        String micr =
-                safe(txtCorrectedMicr.getValue());
+						outwardMakerService.getScanMicrRepairCheques(batchId);
 
-        if (city.length() != 3
-                || bank.length() != 3
-                || branch.length() != 3) {
+			} else {
 
-            return false;
-        }
+				System.out.println("Calling OUTWARD cheque service...");
 
-        if (micr.length() != 9) {
-            return false;
-        }
+				micrRepairCheques =
 
-        return micr.equals(
-                city + bank + branch);
-    }
+						outwardMakerService.getOutwardMicrRepairCheques(batchId);
 
-    private void updateSaveButton() {
+			}
 
-        boolean valid =
-                isValidMicrCodes();
+			if (micrRepairCheques == null) {
 
-        btnSaveNext.setVisible(valid);
+				System.out.println("Cheque list returned = NULL");
 
-        if (!valid) {
+				micrRepairCheques =
 
-            lblMicrError.setVisible(true);
+						new ArrayList<MicrRepairChequeDTO>();
 
-            lblMicrError.setValue(
-                    "City Code, Bank Code and Branch Code must each contain exactly 3 characters.");
+			}
 
-            return;
-        }
+			System.out.println("Cheque list returned = "
 
-        lblMicrError.setVisible(false);
+					+ micrRepairCheques.size());
 
-        int totalCheques =
-                getTotalCheques();
+			for (MicrRepairChequeDTO cheque : micrRepairCheques) {
 
-        if (currentIndex
-                == totalCheques - 1) {
+				System.out.println(
 
-            btnSaveNext.setLabel("Save");
+						"Cheque ID = [" + cheque.getChequeId() + "]"
 
-        } else {
+								+ " | Cheque No = [" + cheque.getChequeNumber() + "]"
 
-            btnSaveNext.setLabel(
-                    "Save & Next");
-        }
-    }
+								+ " | Status = [" + cheque.getChequeStatus() + "]");
 
-    @Listen("onClick = #btnSaveNext")
-    public void saveMicrRepair() {
+			}
 
-        if (!isValidMicrCodes()) {
+			System.out.println(
 
-            showWarning(
-                    "City Code, Bank Code and Branch Code must each contain exactly 3 characters.");
+					"========== LOAD MICR REPAIR CHEQUES COMPLETE ==========\n");
 
-            updateSaveButton();
+		} catch (Exception e) {
 
-            return;
-        }
+			System.out.println(
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()
-                || currentIndex < 0
-                || currentIndex
-                    >= micrRepairCheques.size()) {
+					"========== LOAD MICR REPAIR CHEQUES ERROR ==========");
 
-            return;
-        }
+			e.printStackTrace();
 
-        String cityCode =
-                safe(txtCityCode.getValue());
+			micrRepairCheques =
 
-        String bankCode =
-                safe(txtBankCode.getValue());
+					new ArrayList<MicrRepairChequeDTO>();
 
-        String branchCode =
-                safe(txtBranchCode.getValue());
+			showError("Unable to load MICR repair cheques.");
 
-        String correctedMicr =
-                safe(txtCorrectedMicr.getValue());
+		}
 
-        Object currentCheque =
-                micrRepairCheques
-                        .get(currentIndex);
+	}
 
-        try {
+	// =========================================================
 
-            if (currentCheque
-                    instanceof ScanCheque) {
+	// GET TOTAL CHEQUES
 
-                ScanCheque cheque =
-                        (ScanCheque) currentCheque;
+	// =========================================================
 
-                cheque.setCityCode(cityCode);
-                cheque.setBankCode(bankCode);
-                cheque.setBranchCode(branchCode);
-                cheque.setMicrCode(
-                        correctedMicr);
+	private int getTotalCheques() {
 
-                cheque.setChequeStatus(
-                        "PENDING_DATA_ENTRY");
+		if (micrRepairCheques == null) {
 
-                outwardMakerService
-                        .saveScanMicrRepair(
-                                cheque);
+			return 0;
 
-                completedCount++;
+		}
 
-            } else if (currentCheque
-                    instanceof OutwardCheque) {
+		return micrRepairCheques.size();
 
-                OutwardCheque cheque =
-                        (OutwardCheque) currentCheque;
+	}
 
-                cheque.setCityCode(cityCode);
-                cheque.setBankCode(bankCode);
-                cheque.setBranchCode(branchCode);
-                cheque.setMicrCode(
-                        correctedMicr);
+	// =========================================================
 
-                cheque.setChequeStatus(
-                        "PENDING_DATA_ENTRY");
+	// FIND OPENING CHEQUE
 
-                outwardMakerService
-                        .saveOutwardMicrRepair(
-                                cheque);
+	// =========================================================
 
-                completedCount++;
-            }
+	private int findOpeningChequeIndex() {
 
-            if (currentIndex
-                    >= micrRepairCheques.size() - 1) {
+		if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
 
-                goBackToList();
+			return -1;
 
-            } else {
+		}
 
-                currentIndex++;
+		// -----------------------------------------------------
 
-                loadCurrentCheque();
-            }
+		// Specific cheque requested
 
-        } catch (Exception e) {
+		// -----------------------------------------------------
 
-            showError(
-                    "Unable to save MICR repair.");
+		if (chequeId != null && !chequeId.trim().isEmpty()) {
 
-            e.printStackTrace();
-        }
-    }
+			String requestedId = chequeId.trim();
 
-    @Listen("onClick = #btnRejectRequest")
-    public void requestReject() {
+			for (int i = 0; i < micrRepairCheques.size(); i++) {
 
-        if (micrRepairCheques == null
-                || micrRepairCheques.isEmpty()
-                || currentIndex < 0
-                || currentIndex
-                    >= micrRepairCheques.size()) {
+				MicrRepairChequeDTO cheque = micrRepairCheques.get(i);
 
-            return;
-        }
+				if (cheque == null) {
 
-        Object currentCheque =
-                micrRepairCheques
-                        .get(currentIndex);
+					continue;
 
-        try {
+				}
 
-            if (currentCheque
-                    instanceof ScanCheque) {
+				if (requestedId.equals(safe(cheque.getChequeId()))) {
 
-                ScanCheque cheque =
-                        (ScanCheque) currentCheque;
+					return i;
 
-                cheque.setChequeStatus(
-                        "REJECT_REQUEST");
+				}
 
-                outwardMakerService
-                        .saveScanMicrRepair(
-                                cheque);
+			}
 
-                completedCount++;
+		}
 
-            } else if (currentCheque
-                    instanceof OutwardCheque) {
+		// -----------------------------------------------------
 
-                OutwardCheque cheque =
-                        (OutwardCheque) currentCheque;
+		// Resume at first unfinished cheque
 
-                cheque.setChequeStatus(
-                        "REJECT_REQUEST");
+		// -----------------------------------------------------
 
-                outwardMakerService
-                        .saveOutwardMicrRepair(
-                                cheque);
+		for (int i = 0; i < micrRepairCheques.size(); i++) {
 
-                completedCount++;
-            }
+			MicrRepairChequeDTO cheque = micrRepairCheques.get(i);
 
-            if (currentIndex
-                    >= micrRepairCheques.size() - 1) {
+			if (cheque == null) {
 
-                goBackToList();
+				continue;
 
-            } else {
+			}
 
-                currentIndex++;
+			if (isPendingMicrRepair(cheque)) {
 
-                loadCurrentCheque();
-            }
+				return i;
 
-        } catch (Exception e) {
+			}
 
-            showError(
-                    "Unable to submit reject request.");
+		}
 
-            e.printStackTrace();
-        }
-    }
+		return 0;
 
-    @Listen("onClick = #btnBackToList")
-    public void backToList() {
+	}
 
-        goBackToList();
-    }
+	// =========================================================
 
-    private void goBackToList() {
+	// LOAD CURRENT CHEQUE
 
-        Component root =
-                getSelf()
-                        .getPage()
-                        .getFirstRoot();
+	// =========================================================
 
-        Component mainContentArea =
-                root.getFellowIfAny(
-                        "mainContentArea",
-                        true);
+	private void loadCurrentCheque() {
 
-        if (mainContentArea
-                instanceof Include) {
+		System.out.println("\n========== LOAD CURRENT CHEQUE ==========");
 
-            Include include =
-                    (Include) mainContentArea;
+		System.out.println("[MICR-TRACE] loadCurrentCheque ENTER");
 
-            include.setAttribute(
-                    "MICR_REPAIR_SOURCE",
-                    source);
+		System.out.println("Current index = " + currentIndex);
 
-            include.setAttribute(
-                    "MICR_REPAIR_BATCH_ID",
-                    batchId);
+		System.out.println("Total cheques = " + (micrRepairCheques == null ? "NULL" : micrRepairCheques.size()));
 
-            include.setSrc(
-                    "/outward/maker/micr-repair/micr-repair-view.zul");
+		System.out.println("[MICR-TRACE] 01. Calling getTotalCheques()");
 
-        } else {
+		int totalCheques = getTotalCheques();
 
-            Executions.sendRedirect(
-                    "/outward/maker/micr-repair/micr-repair-view.zul"
-                    + "?source=" + source
-                    + "&batchId=" + batchId);
-        }
-    }
+		System.out.println("[MICR-TRACE] 01. getTotalCheques COMPLETE = " + totalCheques);
 
-    private String safe(String value) {
+		if (currentIndex < 0 || currentIndex >= totalCheques) {
 
-        return value == null
-                ? ""
-                : value.trim();
-    }
+			System.out.println("[MICR-TRACE] INVALID currentIndex - returning");
 
-    private void showError(String message) {
+			return;
 
-        org.zkoss.zul.Messagebox.show(
-                message,
-                "Error",
-                org.zkoss.zul.Messagebox.OK,
-                org.zkoss.zul.Messagebox.ERROR);
-    }
+		}
 
-    private void showWarning(String message) {
+		System.out.println("[MICR-TRACE] 02. Resetting screen state");
 
-        org.zkoss.zul.Messagebox.show(
-                message,
-                "Warning",
-                org.zkoss.zul.Messagebox.OK,
-                org.zkoss.zul.Messagebox.EXCLAMATION);
-    }
+		txtCityCode.setValue("");
+
+		txtBankCode.setValue("");
+
+		txtBranchCode.setValue("");
+
+		txtCurrentMicr.setValue("");
+
+		txtCorrectedMicr.setValue("");
+
+		lblMicrValidationMessage.setVisible(false);
+
+		lblMicrValidationMessage.setValue("");
+
+		divCheckerReturnInformation.setVisible(false);
+
+		lblCheckerReasonId.setValue("");
+
+		lblCheckerReason.setValue("");
+
+		lblCheckerRemarks.setValue("");
+
+		showingBackImage = false;
+
+		zoomLevel = 1.0;
+
+		rotation = 0;
+
+		frontImagePath = "";
+
+		backImagePath = "";
+
+		System.out.println("[MICR-TRACE] 02. Screen state reset COMPLETE");
+
+		System.out.println("[MICR-TRACE] 03. Reading DTO");
+
+		MicrRepairChequeDTO cheque = micrRepairCheques.get(currentIndex);
+
+		if (cheque == null) {
+
+			System.out.println("[MICR-TRACE] DTO IS NULL - returning");
+
+			return;
+
+		}
+
+		System.out.println("Current cheque ID = [" + cheque.getChequeId() + "]");
+
+		System.out.println("Current cheque number = [" + cheque.getChequeNumber() + "]");
+
+		System.out.println("Current cheque status = [" + cheque.getChequeStatus() + "]");
+
+		System.out.println("[MICR-TRACE] 04. Calling populateCheque()");
+
+		populateCheque(cheque);
+
+		System.out.println("[MICR-TRACE] 04. populateCheque COMPLETE");
+
+		System.out.println("[MICR-TRACE] 05. Calling updateProgress()");
+
+		updateProgress();
+
+		System.out.println("[MICR-TRACE] 05. updateProgress COMPLETE");
+
+		System.out.println("[MICR-TRACE] 06. Calling updateNavigationButtons()");
+
+		updateNavigationButtons();
+
+		System.out.println("[MICR-TRACE] 06. updateNavigationButtons COMPLETE");
+
+		System.out.println("[MICR-TRACE] 07. Calling updateActionButtons()");
+
+		updateActionButtons();
+
+		System.out.println("[MICR-TRACE] 07. updateActionButtons COMPLETE");
+
+		System.out.println("[MICR-TRACE] 08. Calling updateSubmitButton()");
+
+		updateSubmitButton();
+
+		System.out.println("[MICR-TRACE] 08. updateSubmitButton COMPLETE");
+
+		System.out.println("========== LOAD CURRENT CHEQUE COMPLETE ==========");
+
+	}
+
+	private void populateCheque(MicrRepairChequeDTO cheque) {
+
+		System.out.println("\n========== POPULATE CHEQUE ==========");
+
+		System.out.println("[MICR-TRACE] populateCheque ENTER");
+
+		if (cheque == null) {
+
+			System.out.println("[MICR-TRACE] populateCheque: DTO NULL - returning");
+
+			return;
+
+		}
+
+		System.out.println("Populate cheque ID = [" + cheque.getChequeId() + "]");
+
+		System.out.println("Populate cheque number = [" + cheque.getChequeNumber() + "]");
+
+		System.out.println("Populate cheque status = [" + cheque.getChequeStatus() + "]");
+
+		System.out.println("Populate MICR = [" + cheque.getFullMicr() + "]");
+
+		System.out.println("1. Setting cheque number");
+
+		txtChequeNumber.setValue(safe(cheque.getChequeNumber()));
+
+		System.out.println("1. cheque number COMPLETE");
+
+		System.out.println("2. Setting city code");
+
+		txtCityCode.setValue(safe(cheque.getCityCode()));
+
+		System.out.println("2. city code COMPLETE = [" + safe(cheque.getCityCode()) + "]");
+
+		System.out.println("3. Setting bank code");
+
+		txtBankCode.setValue(safe(cheque.getBankCode()));
+
+		System.out.println("3. bank code COMPLETE = [" + safe(cheque.getBankCode()) + "]");
+
+		System.out.println("4. Setting branch code");
+
+		txtBranchCode.setValue(safe(cheque.getBranchCode()));
+
+		System.out.println("4. branch code COMPLETE = [" + safe(cheque.getBranchCode()) + "]");
+
+		System.out.println("5. Setting current MICR");
+
+		String currentMicr = safe(cheque.getFullMicr());
+
+		txtCurrentMicr.setValue(currentMicr);
+
+		System.out.println("5. current MICR COMPLETE = [" + currentMicr + "]");
+
+		System.out.println("6. Setting corrected MICR");
+
+		txtCorrectedMicr.setValue(currentMicr);
+
+		System.out.println("6. corrected MICR COMPLETE = [" + currentMicr + "]");
+
+		System.out.println("7. Setting cheque status");
+
+		lblChequeStatus.setValue(safe(cheque.getChequeStatus()));
+
+		System.out.println("7. cheque status COMPLETE");
+
+		System.out.println("========== MICR DETAILS POPULATED ==========");
+
+		System.out.println("8. Reading rejection information");
+
+		String reasonId = safe(cheque.getReasonId());
+
+		String reason = safe(cheque.getReason());
+
+		String remarks = safe(cheque.getRemarks());
+
+		System.out.println("Reason ID = [" + reasonId + "]");
+
+		System.out.println("Reason = [" + reason + "]");
+
+		System.out.println("Remarks = [" + remarks + "]");
+
+		if (!reasonId.isEmpty() || !reason.isEmpty() || !remarks.isEmpty()) {
+
+			System.out.println("9. Rejection information is available - showing section");
+
+			divCheckerReturnInformation.setVisible(true);
+
+			System.out.println("10. Setting checker reason ID");
+
+			lblCheckerReasonId.setValue(reasonId);
+
+			System.out.println("10. checker reason ID COMPLETE");
+
+			System.out.println("11. Setting checker reason");
+
+			lblCheckerReason.setValue(reason);
+
+			System.out.println("11. checker reason COMPLETE");
+
+			System.out.println("12. Setting checker remarks");
+
+			lblCheckerRemarks.setValue(remarks);
+
+			System.out.println("12. checker remarks COMPLETE");
+
+		} else {
+
+			System.out.println("9. No rejection information - hiding section");
+
+			divCheckerReturnInformation.setVisible(false);
+
+		}
+
+		frontImagePath = safe(cheque.getChequeImageFront());
+
+		backImagePath = safe(cheque.getChequeImageBack());
+
+		System.out.println("========== CHECKER INFORMATION COMPLETE ==========");
+
+		System.out.println("13. Calling showFrontImage()");
+
+		showFrontImage();
+
+		System.out.println("13. showFrontImage COMPLETE");
+
+		System.out.println("========== POPULATE CHEQUE COMPLETE ==========");
+
+	}
+
+	private void showFrontImage() {
+
+		showingBackImage = false;
+
+		lblChequeImageTitle.setValue("Cheque Front Image");
+
+		loadChequeImage(frontImagePath);
+
+		updateImagePosition();
+
+		applyImageTransform();
+
+	}
+
+	private void showBackImage() {
+
+		showingBackImage = true;
+
+		lblChequeImageTitle.setValue("Cheque Back Image");
+
+		if (backImagePath == null || backImagePath.trim().isEmpty()) {
+
+			imgCheque.setVisible(false);
+
+			imgCheque.setSrc("");
+
+			lblChequeImagePlaceholder.setVisible(true);
+
+			lblChequeImageTitle.setValue("Cheque Back Image Not Available");
+
+			updateImagePosition();
+
+			return;
+
+		}
+
+		loadChequeImage(backImagePath);
+
+		updateImagePosition();
+
+		applyImageTransform();
+
+	}
+
+	private void loadChequeImage(String imagePath) {
+
+		if (imagePath == null || imagePath.trim().isEmpty()) {
+
+			imgCheque.setSrc("");
+
+			imgCheque.setVisible(false);
+
+			lblChequeImagePlaceholder.setVisible(true);
+
+			return;
+
+		}
+
+		imagePath = imagePath.trim();
+
+		if (!imagePath.startsWith("/")) {
+
+			imagePath = "/" + imagePath;
+
+		}
+
+		imgCheque.setSrc(imagePath);
+
+		imgCheque.setVisible(true);
+
+		lblChequeImagePlaceholder.setVisible(false);
+
+	}
+
+	private void updateImagePosition() {
+
+		if (showingBackImage) {
+
+			lblImagePosition.setValue("2 of 2");
+
+		} else {
+
+			lblImagePosition.setValue("1 of 2");
+
+		}
+
+		lblImageRecordPosition.setValue("Record " + (currentIndex + 1) + " of " + getTotalCheques());
+
+	}
+
+	// =========================================================
+
+	// FRONT / BACK IMAGE
+
+	// =========================================================
+
+	public void onClick$btnImageToggle(Event event) {
+
+		if (showingBackImage) {
+
+			zoomLevel = 1.0;
+
+			rotation = 0;
+
+			showFrontImage();
+
+			btnImageToggle.setLabel("View Back");
+
+		} else {
+
+			zoomLevel = 1.0;
+
+			rotation = 0;
+
+			showBackImage();
+
+			btnImageToggle.setLabel("View Front");
+
+		}
+
+	}
+
+	public void onClick$btnZoom(Event event) {
+
+		zoomLevel += 0.25;
+
+		if (zoomLevel > 3.0) {
+
+			zoomLevel = 3.0;
+
+		}
+
+		applyImageTransform();
+
+	}
+
+	public void onClick$btnZoomOut(Event event) {
+
+		zoomLevel -= 0.25;
+
+		if (zoomLevel < 0.5) {
+
+			zoomLevel = 0.5;
+
+		}
+
+		applyImageTransform();
+
+	}
+
+	public void onClick$btnZoomReset(Event event) {
+
+		zoomLevel = 1.0;
+
+		rotation = 0;
+
+		applyImageTransform();
+
+	}
+
+	public void onClick$btnRotate(Event event) {
+
+		rotation += 90;
+
+		if (rotation >= 360) {
+
+			rotation = 0;
+
+		}
+
+		applyImageTransform();
+
+	}
+
+	private void applyImageTransform() {
+
+		String transform = "transform: scale(" + zoomLevel + ") rotate(" + rotation + "deg);"
+
+				+ "transform-origin:center center;";
+
+		imgCheque.setStyle(transform);
+
+	}
+
+	public void onClick$btnImagePrevious(Event event) {
+
+		if (showingBackImage) {
+
+			zoomLevel = 1.0;
+
+			rotation = 0;
+
+			showFrontImage();
+
+			btnImageToggle.setLabel("View Back");
+
+		}
+
+	}
+
+	public void onClick$btnImageNext(Event event) {
+
+		if (!showingBackImage) {
+
+			zoomLevel = 1.0;
+
+			rotation = 0;
+
+			showBackImage();
+
+			btnImageToggle.setLabel("View Front");
+
+		}
+
+	}
+
+	// =========================================================
+
+	// PREVIOUS CHEQUE
+
+	// =========================================================
+
+	public void onClick$btnPrevious(Event event) {
+
+		if (currentIndex <= 0) {
+
+			return;
+
+		}
+
+		currentIndex--;
+
+		loadCurrentCheque();
+
+	}
+
+	// =========================================================
+
+	// NEXT CHEQUE
+
+	// =========================================================
+
+	public void onClick$btnNext(Event event) {
+
+		int totalCheques = getTotalCheques();
+
+		if (currentIndex >= totalCheques - 1) {
+
+			return;
+
+		}
+
+		currentIndex++;
+
+		loadCurrentCheque();
+
+	}
+
+	// =========================================================
+
+	// NAVIGATION BUTTONS
+
+	// =========================================================
+
+	private void updateNavigationButtons() {
+
+		System.out.println("[MICR-TRACE] private void updateNavigationButtons ENTER");
+
+		int totalCheques = getTotalCheques();
+
+		btnPrevious.setDisabled(currentIndex <= 0);
+
+		btnNext.setDisabled(currentIndex >= totalCheques - 1);
+
+		lblChequePosition.setValue((currentIndex + 1) + " of " + totalCheques);
+
+	}
+
+	// =========================================================
+
+	// PROGRESS
+
+	// =========================================================
+
+	private void updateProgress() {
+
+		System.out.println("[MICR-TRACE] private void updateProgress ENTER");
+
+		int totalCheques = getTotalCheques();
+
+		if (totalCheques <= 0) {
+
+			lblProgressText.setValue("Record 0 of 0");
+
+			prgMicrRepair.setValue(0);
+
+			lblMicrRepairCount.setValue("0");
+
+			lblCompletedCount.setValue("0");
+
+			lblRemainingCount.setValue("0");
+
+			return;
+
+		}
+
+		int processed = countProcessedCheques();
+
+		int pending = countPendingCheques();
+
+		int recordNumber = currentIndex + 1;
+
+		int percentage = (processed * 100) / totalCheques;
+
+		lblProgressText.setValue("Record " + recordNumber + " of " + totalCheques);
+
+		prgMicrRepair.setValue(percentage);
+
+		lblMicrRepairCount.setValue(String.valueOf(totalCheques));
+
+		lblCompletedCount.setValue(String.valueOf(processed));
+
+		lblRemainingCount.setValue(String.valueOf(pending));
+
+	}
+
+	// =========================================================
+
+	// COUNT PROCESSED
+
+	// =========================================================
+
+	private int countProcessedCheques() {
+
+		if (micrRepairCheques == null) {
+
+			return 0;
+
+		}
+
+		int count = 0;
+
+		for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+
+			if (cheque == null) {
+
+				continue;
+
+			}
+
+			if (!isPendingMicrRepair(cheque)) {
+
+				count++;
+
+			}
+
+		}
+
+		return count;
+
+	}
+
+	// =========================================================
+
+	// COUNT PENDING
+
+	// =========================================================
+
+	private int countPendingCheques() {
+
+		if (micrRepairCheques == null) {
+
+			return 0;
+
+		}
+
+		int count = 0;
+
+		for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+
+			if (cheque == null) {
+
+				continue;
+
+			}
+
+			if (isPendingMicrRepair(cheque)) {
+
+				count++;
+
+			}
+
+		}
+
+		return count;
+
+	}
+
+	// =========================================================
+
+	// ACTION BUTTON STATE
+
+	// =========================================================
+
+	private void updateActionButtons() {
+
+		System.out.println("[MICR-TRACE] private void updateActionButtons ENTER");
+
+		if (currentIndex < 0 || currentIndex >= getTotalCheques()) {
+
+			btnSaveNext.setDisabled(true);
+
+			btnRejectRequest.setDisabled(true);
+
+			return;
+
+		}
+
+		MicrRepairChequeDTO cheque = micrRepairCheques.get(currentIndex);
+
+		boolean pending = isPendingMicrRepair(cheque);
+
+		btnSaveNext.setDisabled(!pending);
+
+		btnRejectRequest.setDisabled(!pending);
+
+	}
+
+	// =========================================================
+
+	// SUBMIT BUTTON
+
+	// =========================================================
+
+	private void updateSubmitButton() {
+
+		System.out.println("[MICR-TRACE] private void updateSubmitButton ENTER");
+
+		if (btnSubmit == null) {
+
+			return;
+
+		}
+
+		btnSubmit.setDisabled(!areAllChequesProcessed());
+
+	}
+
+	private boolean areAllChequesProcessed() {
+
+		System.out.println("[MICR-TRACE] private boolean areAllChequesProcessed ENTER");
+
+		if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
+
+			return false;
+
+		}
+
+		for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+
+			if (cheque == null) {
+
+				return false;
+
+			}
+
+			if (isPendingMicrRepair(cheque)) {
+
+				return false;
+
+			}
+
+		}
+
+		return true;
+
+	}
+
+	// =========================================================
+
+	// SAVE / NEXT
+
+	// =========================================================
+
+	public void onClick$btnSaveNext(Event event) {
+
+		System.out.println("========== SAVE BUTTON CLICKED ==========");
+
+		int totalCheques = getTotalCheques();
+
+		if (currentIndex < 0 || currentIndex >= totalCheques) {
+
+			showError("Invalid cheque selection.");
+
+			return;
+
+		}
+
+		MicrRepairChequeDTO cheque = micrRepairCheques.get(currentIndex);
+
+		if (cheque == null) {
+
+			showError("Cheque information is unavailable.");
+
+			return;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Already processed
+
+		// -----------------------------------------------------
+
+		if (!isPendingMicrRepair(cheque)) {
+
+			showWarning("This cheque has already been processed.");
+
+			updateSubmitButton();
+
+			return;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Validate MICR
+
+		// -----------------------------------------------------
+
+		if (!validateMicrFields()) {
+
+			return;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Update DTO from screen
+
+		// -----------------------------------------------------
+
+		updateChequeFromScreen(cheque);
+
+		/*
+		 * 
+		 * Individual Save status.
+		 *
+		 * 
+		 * 
+		 * Final status is NOT assigned here.
+		 * 
+		 */
+
+		cheque.setChequeStatus(STATUS_MICR_REPAIRED);
+
+		try {
+
+			if ("SCAN".equals(source)) {
+
+				outwardMakerService.saveScanMicrRepair(cheque);
+
+			} else {
+
+				outwardMakerService.saveOutwardMicrRepair(cheque);
+
+			}
+
+			updateProgress();
+
+			updateSubmitButton();
+
+			// -------------------------------------------------
+
+			// Move to next cheque
+
+			// -------------------------------------------------
+
+			if (currentIndex < totalCheques - 1) {
+
+				currentIndex++;
+
+				loadCurrentCheque();
+
+				Clients.showNotification("MICR repair saved successfully.", Clients.NOTIFICATION_TYPE_INFO, null,
+
+						"top_center", 1500);
+
+			} else {
+
+				/*
+				 * 
+				 * Last cheque saved.
+				 *
+				 * 
+				 * 
+				 * DO NOT automatically submit.
+				 * 
+				 */
+
+				updateSubmitButton();
+
+				if (areAllChequesProcessed()) {
+
+					Clients.showNotification(
+
+							"All MICR repair cheques have been processed. " + "Click Submit to complete.",
+
+							Clients.NOTIFICATION_TYPE_INFO, null, "top_center", 2500);
+
+				} else {
+
+					Clients.showNotification("MICR repair saved successfully.", Clients.NOTIFICATION_TYPE_INFO, null,
+
+							"top_center", 1500);
+
+				}
+
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			/*
+			 * 
+			 * Restore the DTO status so the cheque remains available for processing if the
+			 * 
+			 * database save failed.
+			 * 
+			 */
+
+			cheque.setChequeStatus(STATUS_PENDING_MICR_REPAIR);
+
+			updateProgress();
+
+			updateSubmitButton();
+
+			showError("Failed to save MICR repair: " + safe(e.getMessage()));
+
+		}
+
+	}
+
+	// =========================================================
+
+	// UPDATE DTO FROM SCREEN
+
+	// =========================================================
+
+	private void updateChequeFromScreen(MicrRepairChequeDTO cheque) {
+
+		System.out.println("[MICR-TRACE] private void updateChequeFromScreen ENTER");
+
+		cheque.setCityCode(safe(txtCityCode.getValue()).trim());
+
+		cheque.setBankCode(safe(txtBankCode.getValue()).trim());
+
+		cheque.setBranchCode(safe(txtBranchCode.getValue()).trim());
+
+		cheque.setFullMicr(safe(txtCorrectedMicr.getValue()).trim());
+
+	}
+
+	// =========================================================
+
+	// MICR VALIDATION
+
+	// =========================================================
+
+	private boolean validateMicrFields() {
+
+		System.out.println("[MICR-TRACE] private boolean validateMicrFields ENTER");
+
+		String city = safe(txtCityCode.getValue()).trim();
+
+		String bank = safe(txtBankCode.getValue()).trim();
+
+		String branch = safe(txtBranchCode.getValue()).trim();
+
+		String micr = safe(txtCorrectedMicr.getValue()).trim();
+
+		lblMicrValidationMessage.setVisible(false);
+
+		lblMicrValidationMessage.setValue("");
+
+		// -----------------------------------------------------
+
+		// City
+
+		// -----------------------------------------------------
+
+		if (city.isEmpty()) {
+
+			showValidationMessage("City Code is required.");
+
+			txtCityCode.setFocus(true);
+
+			return false;
+
+		}
+
+		if (!isValidMicrPart(city)) {
+
+			showValidationMessage("City Code must contain exactly 3 " + "alphanumeric characters and cannot be 000.");
+
+			txtCityCode.setFocus(true);
+
+			return false;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Bank
+
+		// -----------------------------------------------------
+
+		if (bank.isEmpty()) {
+
+			showValidationMessage("Bank Code is required.");
+
+			txtBankCode.setFocus(true);
+
+			return false;
+
+		}
+
+		if (!isValidMicrPart(bank)) {
+
+			showValidationMessage("Bank Code must contain exactly 3 " + "alphanumeric characters and cannot be 000.");
+
+			txtBankCode.setFocus(true);
+
+			return false;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Branch
+
+		// -----------------------------------------------------
+
+		if (branch.isEmpty()) {
+
+			showValidationMessage("Branch Code is required.");
+
+			txtBranchCode.setFocus(true);
+
+			return false;
+
+		}
+
+		if (!isValidMicrPart(branch)) {
+
+			showValidationMessage("Branch Code must contain exactly 3 " + "alphanumeric characters and cannot be 000.");
+
+			txtBranchCode.setFocus(true);
+
+			return false;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Corrected MICR
+
+		// -----------------------------------------------------
+
+		if (micr.isEmpty()) {
+
+			showValidationMessage("Corrected MICR Code is required.");
+
+			txtCorrectedMicr.setFocus(true);
+
+			return false;
+
+		}
+
+		if (!micr.matches("[A-Za-z0-9]{9}")) {
+
+			showValidationMessage("Corrected MICR Code must contain exactly 9 " + "alphanumeric characters.");
+
+			txtCorrectedMicr.setFocus(true);
+
+			return false;
+
+		}
+
+		if (!micr.equals(city + bank + branch)) {
+
+			showValidationMessage("Corrected MICR Code must match " + "City Code + Bank Code + Branch Code.");
+
+			txtCorrectedMicr.setFocus(true);
+
+			return false;
+
+		}
+
+		return true;
+
+	}
+
+	private void showValidationMessage(String message) {
+
+		lblMicrValidationMessage.setValue(message);
+
+		lblMicrValidationMessage.setVisible(true);
+
+	}
+
+	// =========================================================
+
+	// VALID MICR PART
+
+	// =========================================================
+
+	private boolean isValidMicrPart(String value) {
+
+		if (value == null) {
+
+			return false;
+
+		}
+
+		if (value.length() != 3) {
+
+			return false;
+
+		}
+
+		if (!value.matches("[A-Za-z0-9]{3}")) {
+
+			return false;
+
+		}
+
+		if ("000".equals(value)) {
+
+			return false;
+
+		}
+
+		return true;
+
+	}
+
+	// =========================================================
+
+	// IS PENDING MICR REPAIR
+
+	// =========================================================
+
+	private boolean isPendingMicrRepair(MicrRepairChequeDTO cheque) {
+
+		if (cheque == null) {
+
+			return false;
+
+		}
+
+		return STATUS_PENDING_MICR_REPAIR.equalsIgnoreCase(safe(cheque.getChequeStatus()));
+
+	}
+
+	// =========================================================
+
+	// REQUEST REJECT
+
+	// =========================================================
+
+	public void onClick$btnRejectRequest(Event event) {
+		System.out.println("========== REQUEST REJECT CLICKED ==========");
+
+		int totalCheques = getTotalCheques();
+
+		if (currentIndex < 0 || currentIndex >= totalCheques) {
+
+			return;
+
+		}
+
+		MicrRepairChequeDTO cheque = micrRepairCheques.get(currentIndex);
+
+		if (cheque == null) {
+
+			return;
+
+		}
+
+		if (!isPendingMicrRepair(cheque)) {
+
+			showWarning("This cheque has already been processed " + "and cannot be rejected again.");
+
+			return;
+
+		}
+
+		cmbRejectReason.setValue("");
+
+		txtRejectRemarks.setValue("");
+
+		winRejectRequest.setVisible(true);
+
+	}
+
+	// =========================================================
+
+	// CANCEL REJECT
+
+	// =========================================================
+
+	public void onClick$btnCancelReject(Event event) {
+
+		cmbRejectReason.setValue("");
+
+		txtRejectRemarks.setValue("");
+
+		winRejectRequest.setVisible(false);
+
+	}
+
+	// =========================================================
+
+	// PROCEED REJECT
+
+	// =========================================================
+
+	public void onClick$btnProceedReject(Event event) {
+		System.out.println("========== PROCEED REJECT CLICKED ==========");
+
+		if (currentIndex < 0 || currentIndex >= getTotalCheques()) {
+
+			return;
+
+		}
+
+		MicrRepairChequeDTO cheque = micrRepairCheques.get(currentIndex);
+
+		if (cheque == null) {
+
+			showError("Cheque information is unavailable.");
+
+			return;
+
+		}
+
+		if (!isPendingMicrRepair(cheque)) {
+
+			winRejectRequest.setVisible(false);
+
+			showWarning("This cheque has already been processed.");
+
+			return;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Validate reason
+
+		// -----------------------------------------------------
+
+		Comboitem selectedItem = (Comboitem) cmbRejectReason.getSelectedItem();
+
+		if (selectedItem == null) {
+
+			showWarning("Rejected reason is required.");
+
+			cmbRejectReason.setFocus(true);
+
+			return;
+
+		}
+
+		String reasonId = safe(selectedItem.getValue() == null ? null : selectedItem.getValue().toString()).trim();
+
+		String reason = safe(selectedItem.getLabel()).trim();
+
+		String remarks = safe(txtRejectRemarks.getValue()).trim();
+
+		if (reasonId.isEmpty()) {
+
+			showWarning("Rejected reason is required.");
+
+			return;
+
+		}
+
+		if (reason.isEmpty()) {
+
+			showWarning("Rejected reason is required.");
+
+			return;
+
+		}
+
+		if (remarks.isEmpty()) {
+
+			showWarning("Remarks are required.");
+
+			txtRejectRemarks.setFocus(true);
+
+			return;
+
+		}
+
+		// -----------------------------------------------------
+
+		// Update DTO
+
+		// -----------------------------------------------------
+
+		cheque.setReasonId(reasonId);
+
+		cheque.setReason(reason);
+
+		cheque.setRemarks(remarks);
+
+		/*
+		 * 
+		 * Rejection request is saved individually. Final status will be
+		 * 
+		 * REJECT_REQUESTED when the complete list is submitted.
+		 * 
+		 */
+
+		cheque.setChequeStatus(STATUS_MICR_REJECTED);
+
+		try {
+
+			if ("SCAN".equals(source)) {
+
+				outwardMakerService.saveScanMicrRepair(cheque);
+
+			} else {
+
+				outwardMakerService.saveOutwardMicrRepair(cheque);
+
+			}
+
+			winRejectRequest.setVisible(false);
+
+			updateProgress();
+
+			updateSubmitButton();
+
+			updateActionButtons();
+
+			Clients.showNotification("Rejection request saved successfully.", Clients.NOTIFICATION_TYPE_INFO, null,
+
+					"top_center", 2000);
+
+			// -------------------------------------------------
+
+			// Move to next cheque
+
+			// -------------------------------------------------
+
+			if (currentIndex < getTotalCheques() - 1) {
+
+				currentIndex++;
+
+				loadCurrentCheque();
+
+			} else {
+
+				updateSubmitButton();
+
+				if (areAllChequesProcessed()) {
+
+					Clients.showNotification(
+
+							"All MICR repair cheques have been processed. " + "Click Submit to complete.",
+
+							Clients.NOTIFICATION_TYPE_INFO, null, "top_center", 2500);
+
+				}
+
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			cheque.setChequeStatus(STATUS_PENDING_MICR_REPAIR);
+
+			updateProgress();
+
+			updateSubmitButton();
+
+			updateActionButtons();
+
+			showError("Failed to save rejection request: " + safe(e.getMessage()));
+
+		}
+
+	}
+
+	// =========================================================
+
+	// FINAL SUBMIT
+
+	// =========================================================
+
+	public void onClick$btnSubmit(Event event) {
+		System.out.println("========== SUBMIT BUTTON CLICKED ==========");
+
+		if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
+
+			showError("No MICR repair cheques available.");
+
+			return;
+
+		}
+
+		// -----------------------------------------------------
+
+		// All cheques must be individually processed
+
+		// -----------------------------------------------------
+
+		if (!areAllChequesProcessed()) {
+
+			updateSubmitButton();
+
+			showWarning("Please process all MICR repair cheques " + "before submitting.");
+
+			return;
+
+		}
+
+		/*
+		 * 
+		 * ----------------------------------------------------- Set final statuses.
+		 *
+		 * 
+		 * 
+		 * MICR_REPAIR -> PENDING_DATA_ENTRY
+		 *
+		 * 
+		 * 
+		 * MICR_REJECTED -> REJECT_REQUESTED
+		 * 
+		 * -----------------------------------------------------
+		 * 
+		 */
+
+		for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+
+			if (cheque == null) {
+
+				continue;
+
+			}
+
+			String status = safe(cheque.getChequeStatus());
+
+			if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
+
+				cheque.setChequeStatus(STATUS_REJECT_REQUESTED);
+
+			} else {
+
+				cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
+
+			}
+
+		}
+
+		try {
+
+			if ("SCAN".equals(source)) {
+
+				outwardMakerService.submitScanMicrRepair(micrRepairCheques);
+
+			} else {
+
+				outwardMakerService.submitOutwardMicrRepair(micrRepairCheques);
+
+			}
+
+			btnSubmit.setDisabled(true);
+
+			btnSaveNext.setDisabled(true);
+
+			btnRejectRequest.setDisabled(true);
+
+			Clients.showNotification("MICR repair submitted successfully.", Clients.NOTIFICATION_TYPE_INFO, null,
+
+					"top_center", 2500);
+
+			redirectToMicrRepairView();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			/*
+			 * 
+			 * Restore the in-memory final status to the individual/stage status if final
+			 * 
+			 * Submit failed.
+			 * 
+			 */
+
+			for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+
+				if (cheque == null) {
+
+					continue;
+
+				}
+
+				String status = safe(cheque.getChequeStatus());
+
+				if (STATUS_PENDING_DATA_ENTRY.equalsIgnoreCase(status)) {
+
+					cheque.setChequeStatus(STATUS_MICR_REPAIRED);
+
+				} else if (STATUS_REJECT_REQUESTED.equalsIgnoreCase(status)) {
+
+					cheque.setChequeStatus(STATUS_MICR_REJECTED);
+
+				}
+
+			}
+
+			updateProgress();
+
+			updateSubmitButton();
+
+			updateActionButtons();
+
+			showError("Failed to submit MICR repair: " + safe(e.getMessage()));
+
+		}
+
+	}
+
+	// =========================================================
+
+	// SAVE CONFIRMATION POPUP
+
+	// =========================================================
+
+	public void onClick$btnCancelSave(Event event) {
+
+		winConfirmSave.setVisible(false);
+
+	}
+
+	// =========================================================
+
+	// INFORMATION POPUP
+
+	// =========================================================
+
+	public void onClick$btnCloseMicrInformation(Event event) {
+
+		winMicrInformation.setVisible(false);
+
+	}
+
+	private void showInformation(String message) {
+
+		lblMicrInformationMessage.setValue(message);
+
+		winMicrInformation.setVisible(true);
+
+	}
+
+	// =========================================================
+
+	// BACK TO LIST
+
+	// =========================================================
+
+	public void onClick$btnBackToList(Event event) {
+
+		System.out.println("========== BACK TO LIST CLICKED ==========");
+
+		redirectToMicrRepairView();
+
+	}
+
+	// =========================================================
+
+	// REDIRECT TO MICR REPAIR VIEW
+
+	// =========================================================
+
+	private void redirectToMicrRepairView() {
+
+		Component root = winMicrRepair.getDesktop().getFirstPage().getFirstRoot();
+
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+
+		if (mainContentArea instanceof Include) {
+
+			Include include = (Include) mainContentArea;
+
+			include.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
+
+			return;
+
+		}
+
+		Executions.sendRedirect("/outward/maker/micr-repair/micr-repair-view.zul");
+
+	}
+
+	// =========================================================
+
+	// SAFE STRING
+
+	// =========================================================
+
+	private String safe(String value) {
+
+		if (value == null) {
+
+			return "";
+
+		}
+
+		return value;
+
+	}
+
+	// =========================================================
+
+	// ERROR
+
+	// =========================================================
+
+	private void showError(String message) {
+
+		Clients.showNotification(message, Clients.NOTIFICATION_TYPE_ERROR, null, "top_center", 4000);
+
+	}
+
+	// =========================================================
+
+	// WARNING
+
+	// =========================================================
+
+	private void showWarning(String message) {
+
+		Clients.showNotification(message, Clients.NOTIFICATION_TYPE_WARNING, null, "top_center", 3000);
+
+	}
+
 }
