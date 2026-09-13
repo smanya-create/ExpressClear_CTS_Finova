@@ -17,74 +17,57 @@ import net.sf.jasperreports.engine.JasperReport;
 
 public class OutwardChequeReportDAOImpl implements OutwardChequeReportDAO {
 
-	private static final String REPORT_PATH = "/reports/outward/outward_cheque_report.jrxml";
+    private static final String SETTLEMENT_REPORT_PATH = "/reports/cts_checker_settlement_report.jrxml";
+    private static final String REJECTIONS_REPORT_PATH = "/reports/cts_checker_rejections_report.jrxml";
+    private static final String LEGACY_FALLBACK_PATH   = "/reports/outward/outward_cheque_report.jrxml";
 
-	@Override
-	public byte[] generateReport(Date fromDate, Date toDate) throws Exception {
+    @Override
+    public byte[] generateReport(Date fromDate, Date toDate, String reportType) throws Exception {
 
+        if (fromDate == null) throw new IllegalArgumentException("From date is required.");
+        if (toDate == null) throw new IllegalArgumentException("To date is required.");
+        if (fromDate.after(toDate)) throw new IllegalArgumentException("From date cannot be later than To date.");
 
-		if (fromDate == null) {
-			throw new IllegalArgumentException("From date is required.");
-		}
+        String targetPath = "OUTWARD_REJECTIONS_AUDIT".equals(reportType) 
+                ? REJECTIONS_REPORT_PATH 
+                : SETTLEMENT_REPORT_PATH;
 
-		if (toDate == null) {
-			throw new IllegalArgumentException("To date is required.");
-		}
+        InputStream reportStream = getClass().getResourceAsStream(targetPath);
+        if (reportStream == null) {
+            reportStream = getClass().getResourceAsStream(LEGACY_FALLBACK_PATH);
+        }
+        if (reportStream == null) {
+            throw new IllegalStateException("Jasper report template not found at: " + targetPath + " or fallback: " + LEGACY_FALLBACK_PATH);
+        }
 
-		if (fromDate.after(toDate)) {
-			throw new IllegalArgumentException("From date cannot be later than To date.");
-		}
+        JasperReport jasperReport;
+        try (InputStream stream = reportStream) {
+            jasperReport = JasperCompileManager.compileReport(stream);
+        }
 
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("FROM_DATE", fromDate);
+        parameters.put("TO_DATE", toDate);
+        parameters.put("GENERATED_BY", "CHECKER");
+        parameters.put("GENERATION_DATE", new java.util.Date());
 
-		InputStream reportStream = getClass().getResourceAsStream(REPORT_PATH);
+        try (Connection connection = DBConnection.getConnection()) {
+            if (connection == null) {
+                throw new IllegalStateException("Database connection is null.");
+            }
 
-		if (reportStream == null) {
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
 
-			throw new IllegalStateException("Jasper report file not found: " + REPORT_PATH);
-		}
+            if (jasperPrint.getPages().isEmpty()) {
+                return new byte[0];
+            }
 
-		
-		JasperReport jasperReport;
+            byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
+            if (pdfBytes == null || pdfBytes.length == 0) {
+                throw new IllegalStateException("Generated PDF is empty.");
+            }
 
-		try (InputStream stream = reportStream) {
-
-			jasperReport = JasperCompileManager.compileReport(stream);
-		}
-
-		Map<String, Object> parameters = new HashMap<>();
-
-		parameters.put("FROM_DATE", fromDate);
-
-		parameters.put("TO_DATE", toDate);
-
-		parameters.put("GENERATED_BY", "CHECKER");
-
-		parameters.put("GENERATION_DATE", new java.util.Date());
-
-		try (Connection connection = DBConnection.getConnection()) {
-
-			if (connection == null) {
-
-				throw new IllegalStateException("Database connection is null.");
-			}
-
-			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
-
-
-			if (jasperPrint.getPages().isEmpty()) {
-
-				return new byte[0];
-			}
-
-
-			byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
-
-			if (pdfBytes == null || pdfBytes.length == 0) {
-
-				throw new IllegalStateException("Generated PDF is empty.");
-			}
-
-			return pdfBytes;
-		}
-	}
+            return pdfBytes;
+        }
+    }
 }
