@@ -3,12 +3,12 @@
 
 <zk xmlns:h="xhtml">
 
-	<style src="/css/inward/micr-repair.css?v=20" />
+	<style src="/css/inward/micr-repair.css?v=28" />
 
 	<div id="inwardMicrRepairRoot" sclass="cts-data-entry-wrapper"
 		apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairControllerr">
 
-		<!-- Top Header Bar: Title Stacked & Indented on Left, Spacious Pill on Right -->
+		<!-- Top Header Bar: Stacked on Left, Spacious Nav Pill on Right -->
 		<div sclass="cts-title-group">
 			<div>
 				<label value="Inward MICR Repair" sclass="cts-main-title" />
@@ -62,7 +62,7 @@
 			</div>
 		</div>
 
-		<!-- Two-Column Workspace Layout (Exact Grid of Data Entry) -->
+		<!-- Two-Column Workspace Layout -->
 		<div sclass="cts-data-entry-grid">
 
 			<!-- Left Card: Cheque Viewer -->
@@ -179,24 +179,34 @@
 
 		</div>
 
-		<!-- Rejection Reason Modal Window -->
-		<window id="rejectRequestWindow"
-			title="Reject MICR Repair Request" mode="modal" visible="false"
-			closable="true" sclass="micr-modal-win">
+		<!-- Rejection Reason Modal Window (Matches Data Entry Modal Exactly) -->
+		<window id="rejectRequestWindow" mode="modal" visible="false" border="none" sclass="cts-modal-window">
+			<div sclass="cts-modal-box">
+				<vlayout spacing="12px">
+					<div sclass="cts-modal-title-bar">
+						<label value="Request Instrument Rejection" sclass="cts-modal-heading" />
+					</div>
 
-			<vlayout width="100%" spacing="12px" sclass="micr-modal-content">
-				<label value="Select the reason for requesting rejection from the checker:" sclass="micr-modal-desc" />
+					<label value="Please specify the CTS return reason and any remarks for the checker:"
+						sclass="cts-modal-desc" />
 
-				<vlayout width="100%" spacing="4px">
-					<label value="Rejection Reason *" sclass="cts-field-lbl" />
-					<combobox id="cmbRejectReason" width="100%" placeholder="Select return reason..." readonly="true" />
+					<vlayout spacing="4px">
+						<label value="Rejection Reason / Return Code *" sclass="cts-field-lbl-bold" />
+						<combobox id="cmbRejectReason" readonly="true" placeholder="Select return reason..." width="100%" />
+					</vlayout>
+
+					<vlayout spacing="4px">
+						<label value="Rejection Remark" sclass="cts-field-lbl-bold" />
+						<textbox id="txtModalRejectionRemark" rows="2" placeholder="Enter reason details..." width="100%"
+							sclass="cts-textarea" />
+					</vlayout>
+
+					<div sclass="cts-modal-footer-bar">
+						<button id="btnCancelReject" label="Cancel" sclass="cts-btn-secondary cts-btn-modal-cancel" />
+						<button id="btnConfirmReject" label="Confirm Rejection" sclass="cts-btn-solid-primary cts-btn-modal-confirm" />
+					</div>
 				</vlayout>
-
-				<hlayout width="100%" spacing="8px" sclass="micr-modal-footer">
-					<button id="btnCancelReject" label="Cancel" sclass="cts-btn-secondary micr-btn-modal" />
-					<button id="btnConfirmReject" label="Confirm Rejection" sclass="cts-btn-solid-primary micr-btn-modal-danger" />
-				</hlayout>
-			</vlayout>
+			</div>
 		</window>
 
 	</div>

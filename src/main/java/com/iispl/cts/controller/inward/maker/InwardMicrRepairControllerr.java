@@ -82,6 +82,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private Textbox txtTransactionCode;
 	private Textbox txtCorrectedMicr;
 	private Textbox txtRemarks;
+	private Textbox txtModalRejectionRemark;
 
 	private Progressmeter progressMeter;
 
@@ -121,12 +122,17 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		micrValidator = new MICRValidatorImpl();
 
 		if (rejectRequestWindow != null) {
-			cmbRejectReason = (Combobox) rejectRequestWindow.getFellow("cmbRejectReason");
-			Button confirmButton = (Button) rejectRequestWindow.getFellow("btnConfirmReject");
-			Button cancelButton = (Button) rejectRequestWindow.getFellow("btnCancelReject");
+			cmbRejectReason = (Combobox) rejectRequestWindow.getFellowIfAny("cmbRejectReason");
+			txtModalRejectionRemark = (Textbox) rejectRequestWindow.getFellowIfAny("txtModalRejectionRemark");
+			Button confirmButton = (Button) rejectRequestWindow.getFellowIfAny("btnConfirmReject");
+			Button cancelButton = (Button) rejectRequestWindow.getFellowIfAny("btnCancelReject");
 
-			confirmButton.addEventListener(Events.ON_CLICK, event -> onClick$btnConfirmReject());
-			cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
+			if (confirmButton != null) {
+				confirmButton.addEventListener(Events.ON_CLICK, event -> onClick$btnConfirmReject());
+			}
+			if (cancelButton != null) {
+				cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
+			}
 		}
 
 		loadRepairRecord();
@@ -188,7 +194,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			totalRecords = repairCheques.size();
 
-			// Detect target chequeId from URL parameters or Session attributes
+			// Target chequeId resolution
 			String targetChequeId = Executions.getCurrent().getParameter("chequeId");
 			if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
 				Object sessChq = Executions.getCurrent().getSession().getAttribute("TARGET_CHEQUE_ID");
@@ -207,7 +213,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				}
 			}
 
-			// Clear session targets once consumed
 			Executions.getCurrent().getSession().removeAttribute("TARGET_CHEQUE_ID");
 			Executions.getCurrent().getSession().removeAttribute("MICR_REPAIR_CHEQUE_ID");
 
@@ -489,7 +494,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		Messagebox.show("MICR correction saved successfully.", "MICR Repair", Messagebox.OK, Messagebox.INFORMATION);
 
-		// Resolve checker send-back audit record
 		if (InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(currentCheque.getChequeStatus())) {
 			try {
 				new InwardSendBackRequestServiceImpl().markRequestResolved(currentCheque.getInwardChequeId(), repairedBy);
@@ -546,12 +550,21 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 		loadRejectedReasons();
-		if (cmbRejectReason != null) cmbRejectReason.setSelectedItem(null);
-		if (rejectRequestWindow != null) rejectRequestWindow.setVisible(true);
+		if (cmbRejectReason != null) {
+			cmbRejectReason.setSelectedItem(null);
+		}
+		if (txtModalRejectionRemark != null) {
+			txtModalRejectionRemark.setValue("");
+		}
+		if (rejectRequestWindow != null) {
+			rejectRequestWindow.setVisible(true);
+		}
 	}
 
 	public void onClick$btnCancelReject() {
-		if (rejectRequestWindow != null) rejectRequestWindow.setVisible(false);
+		if (rejectRequestWindow != null) {
+			rejectRequestWindow.setVisible(false);
+		}
 	}
 
 	public void onClick$btnConfirmReject() {
@@ -584,7 +597,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		request.setInwardChequeId(currentCheque.getInwardChequeId());
 		request.setInwardBatchId(currentCheque.getInwardBatchId());
 		request.setRejectedReasonId(rejectedReasonId);
-		request.setRemarks(txtRemarks != null ? txtRemarks.getValue() : "");
+		
+		String modalRemark = (txtModalRejectionRemark != null && !txtModalRejectionRemark.getValue().trim().isEmpty())
+				? txtModalRejectionRemark.getValue().trim()
+				: (txtRemarks != null ? txtRemarks.getValue() : "");
+		request.setRemarks(modalRemark);
+		
 		request.setRequestedBy(requestedBy);
 		request.setRequestStage("MICR_REPAIR");
 		request.setRequestStatus("PENDING");
@@ -606,6 +624,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		notificationService.sendNotification("INWARD_CHECKER", null, message);
 
 		if (cmbRejectReason != null) cmbRejectReason.setSelectedItem(null);
+		if (txtModalRejectionRemark != null) txtModalRejectionRemark.setValue("");
 		if (rejectRequestWindow != null) rejectRequestWindow.setVisible(false);
 
 		Messagebox.show("Reject request submitted successfully to the Checker.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
