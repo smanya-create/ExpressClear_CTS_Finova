@@ -18,6 +18,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Vlayout;
@@ -219,6 +220,16 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		inwardMakerRowsChequeDetails.appendChild(row);
 	}
 
+	private boolean doesBatchHavePendingMicrRepair() {
+		if (inwardChequeList == null) return false;
+		for (InwardCheque chq : inwardChequeList) {
+			if (chq != null && isMicrRepairStatus(normalizeStatus(chq.getChequeStatus()))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private Component createActionComponent(InwardCheque cheque) {
 		String status = normalizeStatus(cheque.getChequeStatus());
 
@@ -231,8 +242,16 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 		if (isDataEntryStatus(status)) {
 			Button button = new Button("DATA ENTRY REQUIRED");
-			button.setSclass("inward-maker-action-button");
-			button.addEventListener("onClick", event -> openDataEntry(cheque));
+
+			if (doesBatchHavePendingMicrRepair()) {
+				button.setDisabled(true);
+				button.setTooltiptext("Complete all pending MICR Repairs for this batch before starting Data Entry.");
+				button.setSclass("inward-maker-action-button btn-action-disabled");
+			} else {
+				button.setDisabled(false);
+				button.setSclass("inward-maker-action-button");
+				button.addEventListener("onClick", event -> openDataEntry(cheque));
+			}
 			return button;
 		}
 
@@ -254,6 +273,17 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 	private void openDataEntry(InwardCheque cheque) {
 		if (cheque == null) return;
+
+		if (doesBatchHavePendingMicrRepair()) {
+			Messagebox.show(
+				"This batch still has instruments requiring MICR Repair. Please complete MICR Repair first.",
+				"Data Entry Blocked",
+				Messagebox.OK,
+				Messagebox.EXCLAMATION
+			);
+			return;
+		}
+
 		String chqId = cheque.getInwardChequeId();
 
 		Sessions.getCurrent().setAttribute("DATA_ENTRY_BATCH_ID", this.currentBatchId);

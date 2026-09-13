@@ -475,3 +475,13 @@
 	background-color: #172554 !important;
 	border: none !important;
 }
+
+.btn-action-disabled.z-button,
+.btn-action-disabled.z-button[disabled] {
+    background: #cbd5e1 !important;
+    border-color: #cbd5e1 !important;
+    color: #64748b !important;
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+    box-shadow: none !important;
+}
