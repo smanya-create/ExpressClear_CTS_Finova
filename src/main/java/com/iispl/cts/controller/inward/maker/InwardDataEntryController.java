@@ -43,6 +43,7 @@ import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
+import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
 public class InwardDataEntryController extends GenericForwardComposer<Component> {
 
@@ -212,8 +213,35 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 		}
 
-		// Automatically resume from the first pending/unresolved item
-		this.currentIndex = findFirstPendingIndex();
+		// Check if a specific cheque was requested from batch-details
+		String targetChequeId = execution.getParameter("chequeId");
+		if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
+		    Object sessChq = Sessions.getCurrent().getAttribute("TARGET_CHEQUE_ID");
+		    if (sessChq == null) sessChq = Sessions.getCurrent().getAttribute("DATA_ENTRY_CHEQUE_ID");
+		    if (sessChq == null) sessChq = Sessions.getCurrent().getAttribute("chequeId");
+		    if (sessChq != null) targetChequeId = sessChq.toString().trim();
+		}
+
+		int targetIndex = -1;
+		if (targetChequeId != null && !targetChequeId.isEmpty() && this.activeQueue != null) {
+		    for (int i = 0; i < this.activeQueue.size(); i++) {
+		        if (targetChequeId.equalsIgnoreCase(this.activeQueue.get(i).getInwardChequeId())) {
+		            targetIndex = i;
+		            break;
+		        }
+		    }
+		}
+
+		// Clear temporary session targets so subsequent batch loads don't get stuck
+		Sessions.getCurrent().removeAttribute("TARGET_CHEQUE_ID");
+		Sessions.getCurrent().removeAttribute("DATA_ENTRY_CHEQUE_ID");
+
+		if (targetIndex != -1) {
+		    this.currentIndex = targetIndex;
+		} else {
+		    // Default fallback to the first pending/unresolved item
+		    this.currentIndex = findFirstPendingIndex();
+		}
 
 		displayCurrentCheque();
 		updateProgressBar();
@@ -544,9 +572,19 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		// Transition to MAKER_RETURNED if rework, else standard CHECKER_PROCESSING_PENDING
 		if (wasSentBack) {
-			current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
+		    current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
+		    
+		    // Resolve the checker send-back audit record
+		    try {
+		        User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
+		        String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
+		        new InwardSendBackRequestServiceImpl()
+		            .markRequestResolved(current.getInwardChequeId(), userId);
+		    } catch (Exception ex) {
+		        System.err.println("WARN: Could not mark send-back request resolved: " + ex.getMessage());
+		    }
 		} else {
-			current.setChequeStatus(InwardChequeStatus.CHECKER_PROCESSING_PENDING.name());
+		    current.setChequeStatus(InwardChequeStatus.CHECKER_PROCESSING_PENDING.name());
 		}
 		chequeService.updateChequeDetails(current);
 

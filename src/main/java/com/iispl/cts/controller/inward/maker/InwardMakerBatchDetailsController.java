@@ -272,25 +272,27 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 	}
 
 	private void openDataEntry(InwardCheque cheque) {
-		if (cheque == null) return;
+	    if (cheque == null) return;
 
-		if (doesBatchHavePendingMicrRepair()) {
-			Messagebox.show(
-				"This batch still has instruments requiring MICR Repair. Please complete MICR Repair first.",
-				"Data Entry Blocked",
-				Messagebox.OK,
-				Messagebox.EXCLAMATION
-			);
-			return;
-		}
+	    if (doesBatchHavePendingMicrRepair()) {
+	        Messagebox.show(
+	            "This batch still has instruments requiring MICR Repair. Please complete MICR Repair first.",
+	            "Data Entry Blocked",
+	            Messagebox.OK,
+	            Messagebox.EXCLAMATION
+	        );
+	        return;
+	    }
 
-		String chqId = cheque.getInwardChequeId();
+	    String chqId = cheque.getInwardChequeId();
 
-		Sessions.getCurrent().setAttribute("DATA_ENTRY_BATCH_ID", this.currentBatchId);
-		Sessions.getCurrent().setAttribute("DATA_ENTRY_CHEQUE_ID", chqId);
-		Sessions.getCurrent().setAttribute("batchId", this.currentBatchId);
+	    Sessions.getCurrent().setAttribute("DATA_ENTRY_BATCH_ID", this.currentBatchId);
+	    Sessions.getCurrent().setAttribute("DATA_ENTRY_CHEQUE_ID", chqId);
+	    Sessions.getCurrent().setAttribute("TARGET_CHEQUE_ID", chqId);
+	    Sessions.getCurrent().setAttribute("batchId", this.currentBatchId);
+	    Sessions.getCurrent().setAttribute("chequeId", chqId);
 
-		Executions.sendRedirect("/inward/maker/index.zul?page=data-entry&batchId=" + this.currentBatchId + "&chequeId=" + chqId);
+	    Executions.sendRedirect("/inward/maker/index.zul?page=data-entry&batchId=" + this.currentBatchId + "&chequeId=" + chqId);
 	}
 
 	private void goBackToDashboard() {
