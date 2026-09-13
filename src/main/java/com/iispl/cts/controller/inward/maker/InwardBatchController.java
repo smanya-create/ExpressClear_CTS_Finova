@@ -4,10 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,6 +46,8 @@ import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 public class InwardBatchController extends SelectorComposer<Window> {
 
 	private static final long serialVersionUID = 1L;
+	private static final DecimalFormat CURRENCY_FORMAT = new DecimalFormat("##,##,##0.00", 
+			DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 
 	private InwardBatchService inwardBatchService;
 	private InwardChequeDAOImpl inwardChequeDAO;
@@ -54,6 +59,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	private Textbox batchSearchTextbox;
 	private Combobox statusCombobox;
 	private Datebox receivedDatebox;
+	private Button clearButton;
 
 	private Listbox chequeListbox;
 	private Textbox chequeSearchTextbox;
@@ -82,6 +88,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			Button searchButton = (Button) window.getFellow("searchButton");
 			searchButton.addEventListener("onClick", event -> searchBatches());
 
+			if (window.getFellowIfAny("clearButton") != null) {
+				clearButton = (Button) window.getFellow("clearButton");
+				clearButton.addEventListener("onClick", event -> clearSearch());
+			}
+
 			loadBatches();
 		}
 
@@ -90,19 +101,22 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 	}
 
-	private void loadBatches() {
+	private void clearSearch() {
+		if (batchSearchTextbox != null) batchSearchTextbox.setValue("");
+		if (statusCombobox != null) statusCombobox.setSelectedIndex(0);
+		if (receivedDatebox != null) receivedDatebox.setValue(null);
+		displayBatches(allBatches);
+	}
 
+	private void loadBatches() {
 		allBatches.clear();
 
 		try {
-
 			String inwardDataPath = currentWindow.getDesktop().getWebApp().getRealPath("/Inward-data");
 
 			if (inwardDataPath == null) {
-
 				Messagebox.show("Unable to locate Inward-data folder.", "Batch Intake", Messagebox.OK,
 						Messagebox.ERROR);
-
 				displayBatches(allBatches);
 				return;
 			}
@@ -110,9 +124,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			File inwardDataDirectory = new File(inwardDataPath);
 
 			if (!inwardDataDirectory.isDirectory()) {
-
 				Messagebox.show("Inward-data folder not found.", "Batch Intake", Messagebox.OK, Messagebox.ERROR);
-
 				displayBatches(allBatches);
 				return;
 			}
@@ -120,13 +132,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			File[] batchFolders = inwardDataDirectory.listFiles(File::isDirectory);
 
 			if (batchFolders == null) {
-
 				displayBatches(allBatches);
 				return;
 			}
 
 			for (File batchFolder : batchFolders) {
-
 				File npciXmlFile = new File(batchFolder, "NPCI_Inward.xml");
 
 				if (!npciXmlFile.isFile()) {
@@ -146,19 +156,14 @@ public class InwardBatchController extends SelectorComposer<Window> {
 				InwardBatch dbBatch = inwardBatchService.getBatchById(header.batchId);
 
 				if (dbBatch != null) {
-
 					allBatches.add(dbBatch);
-
 				} else {
-
 					InwardBatch batch = new InwardBatch();
-
 					batch.setInwardBatchId(header.batchId);
 					batch.setBatchReferenceId(header.batchReferenceId);
 					batch.setBatchStatus("Received");
 					batch.setActualChequeCount(0);
 					batch.setActualTotalAmount(java.math.BigDecimal.ZERO);
-
 					allBatches.add(batch);
 				}
 			}
@@ -166,35 +171,10 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			displayBatches(allBatches);
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to load inward batches: " + e.getMessage(), "Batch Intake", Messagebox.OK,
 					Messagebox.ERROR);
 		}
-	}
-
-	private void addBatchToQueue(String batchId, String folderName) {
-		try {
-			InwardBatch dbBatch = inwardBatchService.getBatchById(batchId);
-
-			if (dbBatch != null) {
-				allBatches.add(dbBatch);
-				return;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		InwardBatch batch = new InwardBatch();
-
-		batch.setInwardBatchId(batchId);
-		batch.setBatchReferenceId(folderName);
-		batch.setBatchStatus("Received");
-		batch.setActualChequeCount(0);
-		batch.setActualTotalAmount(java.math.BigDecimal.ZERO);
-
-		allBatches.add(batch);
 	}
 
 	private void displayBatches(List<InwardBatch> batches) {
@@ -208,42 +188,43 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			Listitem item = new Listitem();
 			item.setValue(batch);
 
+			// 1. Batch No. (Bold Link)
 			Listcell batchCell = new Listcell();
-			batchCell.appendChild(new Label(valueOrEmpty(batch.getInwardBatchId())));
+			Label lblBatch = new Label(valueOrEmpty(batch.getInwardBatchId()));
+			lblBatch.setSclass("batch-id-link");
+			lblBatch.addEventListener("onClick", event -> openBatchView(item));
+			batchCell.appendChild(lblBatch);
 			item.appendChild(batchCell);
 
+			// 2. Received Date
 			Listcell dateCell = new Listcell();
-
-			if (batch.getUploadedAt() != null) {
-				dateCell.appendChild(new Label(batch.getUploadedAt().toString()));
-			}
-
+			Label lblDate = new Label(batch.getUploadedAt() != null ? batch.getUploadedAt().toString() : "-");
+			lblDate.setSclass("batch-cell-text");
+			dateCell.appendChild(lblDate);
 			item.appendChild(dateCell);
 
+			// 3. Amount
 			Listcell amountCell = new Listcell();
-
+			String amtFormatted = "₹ 0.00";
 			if (batch.getActualTotalAmount() != null) {
-				amountCell.appendChild(new Label("₹ " + batch.getActualTotalAmount().toPlainString()));
-			} else {
-				amountCell.appendChild(new Label("₹ 0"));
+				amtFormatted = "₹ " + CURRENCY_FORMAT.format(batch.getActualTotalAmount());
 			}
-
+			Label lblAmt = new Label(amtFormatted);
+			lblAmt.setSclass("batch-cell-amount");
+			amountCell.appendChild(lblAmt);
 			item.appendChild(amountCell);
 
+			// 4. Status Badge
 			Listcell statusCell = new Listcell();
-
 			String status = getDisplayStatus(batch);
-
 			Label statusLabel = new Label(status);
 			setStatusStyle(statusLabel, status);
-
 			statusCell.appendChild(statusLabel);
 			item.appendChild(statusCell);
 
+			// 5. Action Button
 			Listcell actionCell = new Listcell();
-
 			createActionButton(item, actionCell, batch);
-
 			item.appendChild(actionCell);
 
 			batchListbox.appendChild(item);
@@ -254,25 +235,15 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 	private void updateBatchCount(int count) {
 		Label batchCountLabel = (Label) currentWindow.getFellowIfAny("batchCountLabel");
-
-		if (batchCountLabel == null) {
-			return;
-		}
-
-		if (count == 0) {
-			batchCountLabel.setValue("Showing 0 to 0 of 0 batches");
-			return;
-		}
-
-		batchCountLabel.setValue("Showing 1 to " + count + " of " + count + " batches");
+		if (batchCountLabel == null) return;
+		batchCountLabel.setValue(count + (count == 1 ? " Batch" : " Batches"));
 	}
 
 	private void createActionButton(Listitem item, Listcell actionCell, InwardBatch batch) {
-
 		String status = getDisplayStatus(batch);
 
 		if ("Received".equalsIgnoreCase(status)) {
-			Button parseButton = new Button("Parse");
+			Button parseButton = new Button("PARSE");
 			parseButton.setSclass("parse-button");
 			parseButton.addEventListener("onClick", event -> parseBatch(event));
 			actionCell.appendChild(parseButton);
@@ -280,79 +251,36 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 
 		if ("Parsing".equalsIgnoreCase(status)) {
-			Button parsingButton = new Button("Parsing...");
+			Button parsingButton = new Button("PARSING...");
 			parsingButton.setDisabled(true);
 			parsingButton.setSclass("parsing-button");
 			actionCell.appendChild(parsingButton);
 			return;
 		}
-		Button viewButton = new Button("View");
+
+		Button viewButton = new Button("VIEW");
 		viewButton.setSclass("view-button");
-		viewButton.setWidth("90px");
 		viewButton.addEventListener("onClick", event -> openBatchView(item));
 		actionCell.appendChild(viewButton);
 	}
 
 	private String getDisplayStatus(InwardBatch batch) {
-		if (batch == null) {
-			return "Received";
-		}
-
+		if (batch == null) return "Received";
 		String status = batch.getBatchStatus();
-
-		if (status == null || status.trim().isEmpty()) {
-			return "Received";
-		}
-
+		if (status == null || status.trim().isEmpty()) return "Received";
 		status = status.trim();
 
-		if ("VALIDATED".equalsIgnoreCase(status)) {
-			return "Processing";
-		}
-
-		if ("PROCESSING".equalsIgnoreCase(status)) {
-			return "Processing";
-		}
-
-		if ("RECEIVED".equalsIgnoreCase(status)) {
-			return "Received";
-		}
-
-		if ("PARSING".equalsIgnoreCase(status)) {
-			return "Parsing";
-		}
-
-		if ("COMPLETED".equalsIgnoreCase(status)) {
-			return "Completed";
-		}
-
-		if ("VALIDATION_FAILED".equalsIgnoreCase(status)) {
-			return "Validation Failed";
-		}
-
-		if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status)) {
-			return "Checker Processing Pending";
-		}
-
-		if ("CHECKER_PROCESSING".equalsIgnoreCase(status)) {
-			return "Checker Processing";
-		}
-
-		if ("IN_VERIFICATION".equalsIgnoreCase(status)) {
-			return "In Verification";
-		}
-
-		if ("HOLD".equalsIgnoreCase(status)) {
-			return "Hold";
-		}
-
-		if ("REJECTED".equalsIgnoreCase(status)) {
-			return "Rejected";
-		}
-
-		if ("FAILED".equalsIgnoreCase(status)) {
-			return "Failed";
-		}
+		if ("VALIDATED".equalsIgnoreCase(status) || "PROCESSING".equalsIgnoreCase(status)) return "Processing";
+		if ("RECEIVED".equalsIgnoreCase(status)) return "Received";
+		if ("PARSING".equalsIgnoreCase(status)) return "Parsing";
+		if ("COMPLETED".equalsIgnoreCase(status)) return "Completed";
+		if ("VALIDATION_FAILED".equalsIgnoreCase(status)) return "Validation Failed";
+		if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status)) return "Checker Processing Pending";
+		if ("CHECKER_PROCESSING".equalsIgnoreCase(status)) return "Checker Processing";
+		if ("IN_VERIFICATION".equalsIgnoreCase(status)) return "In Verification";
+		if ("HOLD".equalsIgnoreCase(status)) return "Hold";
+		if ("REJECTED".equalsIgnoreCase(status)) return "Rejected";
+		if ("FAILED".equalsIgnoreCase(status)) return "Failed";
 
 		return formatStatus(status);
 	}
@@ -362,32 +290,38 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		StringBuilder result = new StringBuilder();
 
 		for (String word : words) {
-			if (word.isEmpty()) {
-				continue;
-			}
-
-			if (result.length() > 0) {
-				result.append(" ");
-			}
-
+			if (word.isEmpty()) continue;
+			if (result.length() > 0) result.append(" ");
 			result.append(Character.toUpperCase(word.charAt(0)));
-
-			if (word.length() > 1) {
-				result.append(word.substring(1));
-			}
+			if (word.length() > 1) result.append(word.substring(1));
 		}
 
 		return result.toString();
 	}
 
+	private void setStatusStyle(Label label, String status) {
+		if ("Processing".equalsIgnoreCase(status) 
+				|| "Checker Processing".equalsIgnoreCase(status)
+				|| "In Verification".equalsIgnoreCase(status)) {
+			label.setSclass("status-pill-gold");
+		} else if ("Completed".equalsIgnoreCase(status)) {
+			label.setSclass("status-pill-completed");
+		} else if ("Validation Failed".equalsIgnoreCase(status) 
+				|| "Rejected".equalsIgnoreCase(status) 
+				|| "Failed".equalsIgnoreCase(status)) {
+			label.setSclass("status-pill-failed");
+		} else if (status.toUpperCase().contains("SENT BACK") || status.toUpperCase().contains("REWORK")) {
+			label.setSclass("status-pill-sentback");
+		} else {
+			label.setSclass("status-pill-gold");
+		}
+	}
+
 	private void parseBatch(Event event) {
 		try {
 			Button clickedButton = (Button) event.getTarget();
-
 			Listcell actionCell = (Listcell) clickedButton.getParent();
-
 			Listitem item = (Listitem) actionCell.getParent();
-
 			InwardBatch batch = (InwardBatch) item.getValue();
 
 			if (batch == null) {
@@ -396,26 +330,21 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			}
 
 			String batchId = batch.getInwardBatchId();
-
 			if (batchId == null || batchId.trim().isEmpty()) {
 				Messagebox.show("Batch number is missing.", "Parse Failed", Messagebox.OK, Messagebox.ERROR);
 				return;
 			}
 
 			String folderName = getBatchFolderName(batchId);
-
 			if (folderName == null) {
-				Messagebox.show("Batch folder not found for: " + batchId, "Parse Failed", Messagebox.OK,
-						Messagebox.ERROR);
+				Messagebox.show("Batch folder not found for: " + batchId, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
 				return;
 			}
 
 			String npciXml = "Inward-data/" + folderName + "/NPCI_Inward.xml";
-
 			String ocrXml = "Inward-data/" + folderName + "/OCR_Mock.xml";
 
 			String npciPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + npciXml);
-
 			String ocrPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + ocrXml);
 
 			if (npciPath == null || !new File(npciPath).isFile()) {
@@ -437,94 +366,61 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			final String finalFolderName = folderName;
 
 			Thread parsingThread = new Thread(() -> {
-
 				ParseResult result;
-
 				try {
 					ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(finalNpciPath, finalOcrPath);
 
 					if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
-
-						result = new ParseResult(finalBatchId, null, "Validation Failed",
-								"Unable to parse NPCI and OCR XML.");
-
+						result = new ParseResult(finalBatchId, null, "Validation Failed", "Unable to parse NPCI and OCR XML.");
 					} else {
-
 						InwardBatch parsedBatch = parsedBatchData.getInwardBatch();
-
 						String xmlBatchId = parsedBatch.getInwardBatchId();
 
 						if (xmlBatchId == null || xmlBatchId.trim().isEmpty()) {
-
 							parsedBatch.setInwardBatchId(finalBatchId);
-
 						} else if (!finalBatchId.equalsIgnoreCase(xmlBatchId)) {
-
 							result = new ParseResult(finalBatchId, null, "Validation Failed",
-									"Batch number mismatch. Queue Batch: " + finalBatchId + " XML Batch: "
-											+ xmlBatchId);
-
+									"Batch number mismatch. Queue Batch: " + finalBatchId + " XML Batch: " + xmlBatchId);
 							scheduleParseResult(result);
 							return;
 						}
 
-						if (parsedBatch.getBatchReferenceId() == null
-								|| parsedBatch.getBatchReferenceId().trim().isEmpty()) {
-
+						if (parsedBatch.getBatchReferenceId() == null || parsedBatch.getBatchReferenceId().trim().isEmpty()) {
 							parsedBatch.setBatchReferenceId(finalFolderName);
 						}
 
 						if (parsedBatch.getActualChequeCount() <= 0) {
-
-							int chequeCount = parsedBatchData.getInwardCheques() == null ? 0
-									: parsedBatchData.getInwardCheques().size();
-
+							int chequeCount = parsedBatchData.getInwardCheques() == null ? 0 : parsedBatchData.getInwardCheques().size();
 							parsedBatch.setActualChequeCount(chequeCount);
 						}
 
 						parsedBatch.setBatchStatus("Processing");
-
 						boolean saved = inwardBatchService.saveParsedBatch(parsedBatchData);
 
 						if (saved) {
-
 							result = new ParseResult(finalBatchId, parsedBatchData, "Processing", null);
-
 						} else {
-
-							result = new ParseResult(finalBatchId, null, "Validation Failed",
-									"Batch parsed successfully but database save failed.");
+							result = new ParseResult(finalBatchId, null, "Validation Failed", "Batch parsed successfully but database save failed.");
 						}
 					}
-
 				} catch (Exception e) {
-
 					e.printStackTrace();
-
 					String errorMessage = e.getMessage();
-
 					if (errorMessage == null || errorMessage.trim().isEmpty()) {
-
 						errorMessage = e.getClass().getSimpleName();
 					}
-
 					result = new ParseResult(finalBatchId, null, "Validation Failed", errorMessage);
 				}
 
 				scheduleParseResult(result);
-
 			});
 
 			parsingThread.setName("InwardBatchParser-" + batchId);
-
 			parsingThread.start();
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
-			Messagebox.show("Unable to start parsing: " + e.getMessage(), "Parse Failed", Messagebox.OK,
-					Messagebox.ERROR);
+			Messagebox.show("Unable to start parsing: " + e.getMessage(), "Parse Failed", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -538,37 +434,26 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void handleParseComplete(ParseResult result) {
-		if (result == null) {
-			return;
-		}
+		if (result == null) return;
 
 		try {
 			String batchId = result.getBatchId();
-
 			Listitem targetItem = null;
 
 			for (Listitem item : batchListbox.getItems()) {
-
 				InwardBatch itemBatch = (InwardBatch) item.getValue();
-
 				if (itemBatch != null && itemBatch.getInwardBatchId() != null
 						&& batchId.equalsIgnoreCase(itemBatch.getInwardBatchId())) {
-
 					targetItem = item;
 					break;
 				}
 			}
 
 			if ("Processing".equalsIgnoreCase(result.getStatus())) {
-
 				ParsedBatchData data = result.getParsedBatchData();
-
-				if (data == null || data.getInwardBatch() == null) {
-					return;
-				}
+				if (data == null || data.getInwardBatch() == null) return;
 
 				InwardBatch parsedBatch = data.getInwardBatch();
-
 				parsedBatch.setBatchStatus("Processing");
 
 				if (targetItem != null) {
@@ -577,12 +462,9 @@ public class InwardBatchController extends SelectorComposer<Window> {
 				}
 
 				for (int i = 0; i < allBatches.size(); i++) {
-
 					InwardBatch current = allBatches.get(i);
-
 					if (current != null && current.getInwardBatchId() != null
 							&& batchId.equalsIgnoreCase(current.getInwardBatchId())) {
-
 						allBatches.set(i, parsedBatch);
 						break;
 					}
@@ -592,202 +474,133 @@ public class InwardBatchController extends SelectorComposer<Window> {
 						Messagebox.OK, Messagebox.INFORMATION);
 
 			} else {
-
 				if (targetItem != null) {
-
 					InwardBatch failedBatch = (InwardBatch) targetItem.getValue();
-
 					if (failedBatch != null) {
 						failedBatch.setBatchStatus("Validation Failed");
 					}
-
 					updateFailedRow(targetItem);
 				}
 
 				String message = result.getMessage();
-
 				if (message == null || message.trim().isEmpty()) {
-
 					message = "NPCI/OCR parsing or validation failed.";
 				}
-
 				Messagebox.show(message, "Validation Failed", Messagebox.OK, Messagebox.ERROR);
 			}
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
-			Messagebox.show("Unable to update batch status: " + e.getMessage(), "Error", Messagebox.OK,
-					Messagebox.ERROR);
+			Messagebox.show("Unable to update batch status: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
 	private void updateParsingRow(Listitem item) {
-
 		Listcell statusCell = (Listcell) item.getChildren().get(3);
-
 		statusCell.getChildren().clear();
-
 		Label statusLabel = new Label("Parsing");
-
 		setStatusStyle(statusLabel, "Parsing");
-
 		statusCell.appendChild(statusLabel);
 
 		Listcell actionCell = (Listcell) item.getChildren().get(4);
-
 		actionCell.getChildren().clear();
-
-		Button parsingButton = new Button("Parsing...");
-
+		Button parsingButton = new Button("PARSING...");
 		parsingButton.setDisabled(true);
 		parsingButton.setSclass("parsing-button");
-
 		actionCell.appendChild(parsingButton);
 	}
 
 	private void updateProcessingRow(Listitem item) {
-
 		Listcell statusCell = (Listcell) item.getChildren().get(3);
-
 		statusCell.getChildren().clear();
-
 		Label statusLabel = new Label("Processing");
-
 		setStatusStyle(statusLabel, "Processing");
-
 		statusCell.appendChild(statusLabel);
 
 		Listcell actionCell = (Listcell) item.getChildren().get(4);
-
 		actionCell.getChildren().clear();
-
-		Button viewButton = new Button("View");
-
+		Button viewButton = new Button("VIEW");
 		viewButton.setSclass("view-button");
-		viewButton.setWidth("90px");
-
 		viewButton.addEventListener("onClick", event -> openBatchView(item));
-
 		actionCell.appendChild(viewButton);
 	}
 
 	private void updateFailedRow(Listitem item) {
-
 		Listcell statusCell = (Listcell) item.getChildren().get(3);
-
 		statusCell.getChildren().clear();
-
 		Label statusLabel = new Label("Validation Failed");
-
 		setStatusStyle(statusLabel, "Validation Failed");
-
 		statusCell.appendChild(statusLabel);
 
 		Listcell actionCell = (Listcell) item.getChildren().get(4);
-
 		actionCell.getChildren().clear();
-
-		Button parseButton = new Button("Parse");
-
+		Button parseButton = new Button("PARSE");
 		parseButton.setSclass("parse-button");
-
 		parseButton.addEventListener("onClick", event -> parseBatch(event));
-
 		actionCell.appendChild(parseButton);
 	}
 
 	private void openBatchView(Listitem item) {
 		try {
-
 			InwardBatch batch = (InwardBatch) item.getValue();
-
-			if (batch == null) {
-				return;
-			}
+			if (batch == null) return;
 
 			String batchId = batch.getInwardBatchId();
-
 			if (batchId == null || batchId.trim().isEmpty()) {
-
 				Messagebox.show("Batch number is missing.", "Batch View", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
 			String encodedBatchId = URLEncoder.encode(batchId, "UTF-8");
-
 			Executions.sendRedirect("/inward/maker/batch/batch-view.zul?batchId=" + encodedBatchId);
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to open batch details.", "Batch View", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
 	private void searchBatches() {
-
 		String batchNo = batchSearchTextbox.getValue();
-
-		if (batchNo == null) {
-			batchNo = "";
-		}
-
+		if (batchNo == null) batchNo = "";
 		batchNo = batchNo.trim();
 
 		String selectedStatus = "All";
-
 		if (statusCombobox.getSelectedItem() != null) {
 			selectedStatus = statusCombobox.getSelectedItem().getLabel();
 		}
 
 		Date selectedDate = receivedDatebox.getValue();
-
 		List<InwardBatch> filteredBatches = new ArrayList<InwardBatch>();
 
 		for (InwardBatch batch : allBatches) {
-
 			boolean batchMatch = true;
 			boolean statusMatch = true;
 			boolean dateMatch = true;
 
 			if (!batchNo.isEmpty()) {
-
 				String currentBatchNo = batch.getInwardBatchId();
-
 				if (currentBatchNo == null || !currentBatchNo.toLowerCase().contains(batchNo.toLowerCase())) {
-
 					batchMatch = false;
 				}
 			}
 
 			if (!"All".equalsIgnoreCase(selectedStatus)) {
-
 				String currentStatus = getDisplayStatus(batch);
-
 				if (!selectedStatus.equalsIgnoreCase(currentStatus)) {
-
 					statusMatch = false;
 				}
 			}
 
 			if (selectedDate != null) {
-
 				if (batch.getUploadedAt() == null) {
-
 					dateMatch = false;
-
 				} else {
-
 					dateMatch = isSameDate(selectedDate, batch.getUploadedAt());
 				}
 			}
 
 			if (batchMatch && statusMatch && dateMatch) {
-
 				filteredBatches.add(batch);
 			}
 		}
@@ -795,20 +608,15 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		displayBatches(filteredBatches);
 
 		if (filteredBatches.isEmpty()) {
-
 			Messagebox.show("No batches found matching the search criteria.", "Search Result", Messagebox.OK,
 					Messagebox.INFORMATION);
 		}
 	}
 
 	private boolean isSameDate(Date selectedDate, Date uploadedDate) {
-
 		Calendar selectedCalendar = Calendar.getInstance();
-
 		selectedCalendar.setTime(selectedDate);
-
 		Calendar uploadedCalendar = Calendar.getInstance();
-
 		uploadedCalendar.setTime(uploadedDate);
 
 		return selectedCalendar.get(Calendar.YEAR) == uploadedCalendar.get(Calendar.YEAR)
@@ -816,48 +624,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 				&& selectedCalendar.get(Calendar.DAY_OF_MONTH) == uploadedCalendar.get(Calendar.DAY_OF_MONTH);
 	}
 
-	private void setStatusStyle(Label label, String status) {
-
-		if ("Processing".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-processing");
-
-		} else if ("Received".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-received");
-
-		} else if ("Parsing".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-parsing");
-
-		} else if ("Completed".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-completed");
-
-		} else if ("Validation Failed".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-validation-failed");
-
-		} else if ("Checker Processing Pending".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-processing-pending");
-
-		} else if ("Checker Processing".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-checker-processing");
-
-		} else if ("In Verification".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-in-verification");
-
-		} else if ("Hold".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-hold");
-
-		} else if ("Rejected".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-rejected");
-
-		} else if ("Failed".equalsIgnoreCase(status)) {
-			label.setSclass("batch-status-badge status-failed");
-
-		} else {
-			label.setSclass("batch-status-badge status-received");
-		}
-	}
-
 	private static class BatchHeaderInfo {
-
 		private String batchId;
 		private String batchReferenceId;
 
@@ -868,116 +635,65 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private BatchHeaderInfo readBatchHeader(File npciXmlFile) {
-
 		try {
-
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
 			factory.setNamespaceAware(true);
-
 			Document document = factory.newDocumentBuilder().parse(npciXmlFile);
-
 			Element root = document.getDocumentElement();
-
-			if (root == null) {
-				return null;
-			}
+			if (root == null) return null;
 
 			NodeList batchHeaders = root.getElementsByTagNameNS("*", "BatchHeader");
-
-			if (batchHeaders.getLength() == 0) {
-				return null;
-			}
+			if (batchHeaders.getLength() == 0) return null;
 
 			Element batchHeader = (Element) batchHeaders.item(0);
-
 			String batchId = getXmlChildValue(batchHeader, "ScannedBatchId");
-
 			String batchReferenceId = getXmlChildValue(batchHeader, "BatchReferenceId");
 
-			if (batchId == null || batchId.trim().isEmpty()) {
-
-				return null;
-			}
-
+			if (batchId == null || batchId.trim().isEmpty()) return null;
 			if (batchReferenceId == null || batchReferenceId.trim().isEmpty()) {
-
 				batchReferenceId = npciXmlFile.getParentFile().getName();
 			}
 
 			return new BatchHeaderInfo(batchId.trim(), batchReferenceId.trim());
-
 		} catch (Exception e) {
-
 			System.err.println("Unable to read batch header from: " + npciXmlFile.getAbsolutePath());
-
 			e.printStackTrace();
-
 			return null;
 		}
 	}
 
 	private String getXmlChildValue(Element parent, String childName) {
-
 		NodeList nodes = parent.getElementsByTagNameNS("*", childName);
-
-		if (nodes.getLength() == 0) {
-			return null;
-		}
-
+		if (nodes.getLength() == 0) return null;
 		String value = nodes.item(0).getTextContent();
-
 		return value == null ? null : value.trim();
 	}
 
 	private String getBatchFolderName(String batchId) {
-
-		if (batchId == null || batchId.trim().isEmpty()) {
-			return null;
-		}
+		if (batchId == null || batchId.trim().isEmpty()) return null;
 
 		try {
-
 			String inwardDataPath = currentWindow.getDesktop().getWebApp().getRealPath("/Inward-data");
-
-			if (inwardDataPath == null) {
-				return null;
-			}
+			if (inwardDataPath == null) return null;
 
 			File inwardDataDirectory = new File(inwardDataPath);
-
-			if (!inwardDataDirectory.isDirectory()) {
-				return null;
-			}
+			if (!inwardDataDirectory.isDirectory()) return null;
 
 			File[] batchFolders = inwardDataDirectory.listFiles(File::isDirectory);
-
-			if (batchFolders == null) {
-				return null;
-			}
+			if (batchFolders == null) return null;
 
 			for (File batchFolder : batchFolders) {
-
 				File npciXmlFile = new File(batchFolder, "NPCI_Inward.xml");
-
-				if (!npciXmlFile.isFile()) {
-					continue;
-				}
+				if (!npciXmlFile.isFile()) continue;
 
 				BatchHeaderInfo header = readBatchHeader(npciXmlFile);
-
-				if (header == null || header.batchId == null) {
-					continue;
-				}
+				if (header == null || header.batchId == null) continue;
 
 				if (batchId.equalsIgnoreCase(header.batchId)) {
-
 					return batchFolder.getName();
 				}
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
 
@@ -985,104 +701,70 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void initializeBatchView(Window window) {
-
 		try {
-
 			chequeListbox = (Listbox) window.getFellow("chequeListbox");
-
 			chequeSearchTextbox = (Textbox) window.getFellow("chequeSearchTextbox");
-
 			chequeCountLabel = (Label) window.getFellow("chequeCountLabel");
 
 			inwardChequeDAO = InwardChequeDAOImpl.getInstance();
-
 			inwardChequeImageDAO = InwardChequeImageDAOImpl.getInstance();
 
 			Button filterButton = (Button) window.getFellow("filterButton");
-
 			Button backButton = (Button) window.getFellow("backButton");
 
 			filterButton.addEventListener("onClick", event -> filterCheques());
-
 			backButton.addEventListener("onClick",
 					event -> Executions.sendRedirect("/inward/maker/index.zul?page=batch-intake"));
 
 			String batchId = Executions.getCurrent().getParameter("batchId");
-
 			if (batchId == null || batchId.trim().isEmpty()) {
-
 				Messagebox.show("Batch number is missing.", "Batch View", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
 			loadBatchDetails(batchId.trim());
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to initialize batch view.", "Batch View", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
 	private void loadBatchDetails(String batchId) {
-
 		try {
-
 			InwardBatch batch = inwardBatchService.getBatchById(batchId);
-
 			if (batch == null) {
-
 				Messagebox.show("Batch not found: " + batchId, "Batch View", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
 			Label batchIdLabel = (Label) currentWindow.getFellow("batchIdLabel");
-
 			Label batchReferenceLabel = (Label) currentWindow.getFellow("batchReferenceLabel");
-
 			Label receivedDateTimeLabel = (Label) currentWindow.getFellow("receivedDateTimeLabel");
-
 			Label fileNameLabel = (Label) currentWindow.getFellow("fileNameLabel");
-
 			Label uploadedByLabel = (Label) currentWindow.getFellow("uploadedByLabel");
-
 			Label totalChequesLabel = (Label) currentWindow.getFellow("totalChequesLabel");
-
 			Label totalAmountLabel = (Label) currentWindow.getFellow("totalAmountLabel");
-
 			Label parsingStatusLabel = (Label) currentWindow.getFellow("parsingStatusLabel");
-
 			Label batchStatusLabel = (Label) currentWindow.getFellow("batchStatusLabel");
 
 			batchIdLabel.setValue(valueOrEmpty(batch.getInwardBatchId()));
-
 			batchReferenceLabel.setValue(valueOrEmpty(batch.getBatchReferenceId()));
 
 			if (batch.getUploadedAt() != null) {
-
 				receivedDateTimeLabel.setValue(batch.getUploadedAt().toString());
-
 			} else {
-
 				receivedDateTimeLabel.setValue("");
 			}
 
 			fileNameLabel.setValue("NPCI_Inward.xml");
-
 			uploadedByLabel.setValue(valueOrEmpty(batch.getUploadedBy()));
-
 			totalChequesLabel.setValue(String.valueOf(batch.getActualChequeCount()));
 
 			if (batch.getActualTotalAmount() != null) {
-
-				totalAmountLabel.setValue("₹ " + batch.getActualTotalAmount().toPlainString());
-
+				totalAmountLabel.setValue("₹ " + CURRENCY_FORMAT.format(batch.getActualTotalAmount()));
 			} else {
-
-				totalAmountLabel.setValue("₹ 0");
+				totalAmountLabel.setValue("₹ 0.00");
 			}
 
 			String status = getDisplayStatus(batch);
@@ -1091,15 +773,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 					|| "Checker Processing".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status)
 					|| "In Verification".equalsIgnoreCase(status) || "Hold".equalsIgnoreCase(status)
 					|| "Rejected".equalsIgnoreCase(status)) {
-
 				parsingStatusLabel.setValue("SUCCESS");
 				parsingStatusLabel.setSclass("status-badge status-success");
-
 			} else if ("Parsing".equalsIgnoreCase(status)) {
-
 				parsingStatusLabel.setValue("PARSING");
 				parsingStatusLabel.setSclass("status-badge status-hold");
-
 			} else if ("Validation Failed".equalsIgnoreCase(status) || "Failed".equalsIgnoreCase(status)) {
 				parsingStatusLabel.setValue("FAILED");
 				parsingStatusLabel.setSclass("status-badge status-hold");
@@ -1109,114 +787,76 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			}
 
 			batchStatusLabel.setValue(status);
-
 			batchStatusLabel.setSclass("status-badge status-hold");
 
 			currentBatchFolderName = getBatchFolderName(batchId);
-
 			loadBatchCheques(batchId);
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to load batch details.", "Batch View", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
 	private void loadBatchCheques(String batchId) {
-
 		try {
-
 			allCheques = inwardChequeDAO.getChequesByBatchId(batchId);
-
 			if (allCheques == null) {
-
 				allCheques = new ArrayList<InwardCheque>();
 			}
-
 			displayCheques(allCheques);
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			allCheques = new ArrayList<InwardCheque>();
-
 			displayCheques(allCheques);
 		}
 	}
 
 	private void displayCheques(List<InwardCheque> cheques) {
-
 		chequeListbox.getItems().clear();
 
 		if (cheques == null) {
-
 			cheques = new ArrayList<InwardCheque>();
 		}
 
 		for (int i = 0; i < cheques.size(); i++) {
-
 			InwardCheque cheque = cheques.get(i);
-
 			Listitem item = new Listitem();
-
 			item.setValue(cheque);
 
 			item.appendChild(new Listcell(String.valueOf(i + 1)));
-
 			item.appendChild(new Listcell(valueOrEmpty(cheque.getChequeNumber())));
-
 			item.appendChild(new Listcell(valueOrEmpty(cheque.getMicrCode())));
-
 			item.appendChild(new Listcell(valueOrEmpty(cheque.getDraweeAccountNumber())));
-
 			item.appendChild(new Listcell(valueOrEmpty(cheque.getPayeeName())));
 
-			String amount = "₹ 0";
-
+			String amount = "₹ 0.00";
 			if (cheque.getChequeAmount() != null) {
-
-				amount = "₹ " + cheque.getChequeAmount().toPlainString();
+				amount = "₹ " + CURRENCY_FORMAT.format(cheque.getChequeAmount());
 			}
-
 			item.appendChild(new Listcell(amount));
 
 			Listcell statusCell = new Listcell();
-
 			String chequeStatus = valueOrEmpty(cheque.getChequeStatus());
-
 			Label statusLabel = new Label(chequeStatus);
 
 			if ("MICR REPAIR".equalsIgnoreCase(chequeStatus) || "MICR_REPAIR_REQUIRED".equalsIgnoreCase(chequeStatus)
 					|| "MICR_REPAIR_PENDING".equalsIgnoreCase(chequeStatus)) {
-
 				statusLabel.setSclass("cheque-status-repair");
-
 			} else {
-
 				statusLabel.setSclass("cheque-status-normal");
 			}
 
 			statusCell.appendChild(statusLabel);
-
 			item.appendChild(statusCell);
 
 			Listcell actionCell = new Listcell();
-
 			Button viewButton = new Button("View");
-
 			viewButton.setSclass("view-button");
-
 			viewButton.setWidth("70px");
-
 			final InwardCheque selectedCheque = cheque;
-
 			viewButton.addEventListener("onClick", event -> showChequeImages(selectedCheque));
-
 			actionCell.appendChild(viewButton);
-
 			item.appendChild(actionCell);
 
 			chequeListbox.appendChild(item);
@@ -1226,22 +866,15 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void showChequeImages(InwardCheque cheque) {
-
 		try {
-
 			if (cheque == null) {
-
 				Messagebox.show("Cheque information not found.", "Cheque Images", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
 			String chequeId = valueOrEmpty(cheque.getInwardChequeId()).trim();
-
 			if (chequeId.isEmpty()) {
-
 				Messagebox.show("Cheque ID not found.", "Cheque Images", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
@@ -1250,193 +883,123 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			}
 
 			List<InwardChequeImage> imageRecords = inwardChequeImageDAO.getImagesByChequeId(chequeId);
-
 			InwardChequeImage frontRecord = null;
-
 			InwardChequeImage backRecord = null;
 
 			if (imageRecords != null) {
-
 				for (InwardChequeImage imageRecord : imageRecords) {
-
-					if (imageRecord == null) {
-						continue;
-					}
-
+					if (imageRecord == null) continue;
 					String imageType = valueOrEmpty(imageRecord.getImageType()).trim();
-
 					if ("FRONT".equalsIgnoreCase(imageType)) {
-
 						frontRecord = imageRecord;
-
 					} else if ("BACK".equalsIgnoreCase(imageType)) {
-
 						backRecord = imageRecord;
 					}
 				}
 			}
 
 			byte[] frontBytes = null;
-
 			byte[] backBytes = null;
 
 			if (frontRecord != null) {
-
 				String frontPath = valueOrEmpty(frontRecord.getImagePath()).trim();
-
 				if (!frontPath.isEmpty()) {
-
 					frontBytes = readResourceBytesWithFallback(frontPath);
 				}
 			}
 
 			if (backRecord != null) {
-
 				String backPath = valueOrEmpty(backRecord.getImagePath()).trim();
-
 				if (!backPath.isEmpty()) {
-
 					backBytes = readResourceBytesWithFallback(backPath);
 				}
 			}
 
 			if (frontBytes == null && backBytes == null) {
-
 				Messagebox.show("Images not found for Cheque No.: " + valueOrEmpty(cheque.getChequeNumber()),
 						"Cheque Images", Messagebox.OK, Messagebox.ERROR);
-
 				return;
 			}
 
 			Window imageWindow = new Window("Cheque Images", "normal", true);
-
 			imageWindow.setWidth("1100px");
-
 			imageWindow.setHeight("700px");
-
 			imageWindow.setClosable(true);
-
 			imageWindow.setSizable(true);
 
 			Vlayout mainLayout = new Vlayout();
-
 			mainLayout.setWidth("100%");
-
 			mainLayout.setSpacing("15px");
-
 			mainLayout.setStyle("padding:20px;");
 
 			Label title = new Label("Cheque No.: " + valueOrEmpty(cheque.getChequeNumber()));
-
 			title.setStyle("font-size:18px;font-weight:600;");
-
 			mainLayout.appendChild(title);
 
 			Hlayout imagesLayout = new Hlayout();
-
 			imagesLayout.setWidth("100%");
-
 			imagesLayout.setSpacing("20px");
-
 			imagesLayout.setStyle("align-items:flex-start;");
 
 			Vlayout frontLayout = new Vlayout();
-
 			frontLayout.setHflex("1");
-
 			frontLayout.setSpacing("8px");
 
 			Label frontLabel = new Label("Front Image");
-
 			frontLabel.setStyle("font-size:15px;font-weight:600;text-align:center;");
-
 			frontLayout.appendChild(frontLabel);
 
 			if (frontBytes != null && frontBytes.length > 0) {
-
 				Image frontImage = new Image();
-
 				frontImage.setWidth("100%");
-
 				frontImage.setHeight("520px");
-
-				frontImage.setStyle(
-						"object-fit:contain;" + "border:1px solid #d9e2ec;" + "padding:8px;" + "background:#ffffff;");
-
+				frontImage.setStyle("object-fit:contain; border:1px solid #d9e2ec; padding:8px; background:#ffffff;");
 				frontImage.setContent(new AImage("front.jpg", frontBytes));
-
 				frontLayout.appendChild(frontImage);
-
 			} else {
-
 				Label frontMissing = new Label("Front image not found");
-
 				frontMissing.setStyle("font-size:14px;color:#999;text-align:center;");
-
 				frontLayout.appendChild(frontMissing);
 			}
 
 			imagesLayout.appendChild(frontLayout);
 
 			Vlayout backLayout = new Vlayout();
-
 			backLayout.setHflex("1");
-
 			backLayout.setSpacing("8px");
 
 			Label backLabel = new Label("Back Image");
-
 			backLabel.setStyle("font-size:15px;font-weight:600;text-align:center;");
-
 			backLayout.appendChild(backLabel);
 
 			if (backBytes != null && backBytes.length > 0) {
-
 				Image backImage = new Image();
-
 				backImage.setWidth("100%");
-
 				backImage.setHeight("520px");
-
-				backImage.setStyle(
-						"object-fit:contain;" + "border:1px solid #d9e2ec;" + "padding:8px;" + "background:#ffffff;");
-
+				backImage.setStyle("object-fit:contain; border:1px solid #d9e2ec; padding:8px; background:#ffffff;");
 				backImage.setContent(new AImage("back.png", backBytes));
-
 				backLayout.appendChild(backImage);
-
 			} else {
-
 				Label backMissing = new Label("Back image not found");
-
 				backMissing.setStyle("font-size:14px;color:#999;text-align:center;");
-
 				backLayout.appendChild(backMissing);
 			}
 
 			imagesLayout.appendChild(backLayout);
-
 			mainLayout.appendChild(imagesLayout);
-
 			imageWindow.appendChild(mainLayout);
-
 			currentWindow.appendChild(imageWindow);
-
 			imageWindow.doModal();
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to open cheque images.\n" + e.getMessage(), "Cheque Images", Messagebox.OK,
 					Messagebox.ERROR);
 		}
 	}
 
 	private byte[] readResourceBytesWithFallback(String imagePath) {
-
 		String normalizedPath = imagePath.trim();
-
 		while (normalizedPath.startsWith("/")) {
 			normalizedPath = normalizedPath.substring(1);
 		}
@@ -1444,11 +1007,8 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		String[] possiblePaths = new String[] { normalizedPath, "Inward-data/" + normalizedPath };
 
 		for (String path : possiblePaths) {
-
 			byte[] bytes = readResourceBytes(path);
-
 			if (bytes != null && bytes.length > 0) {
-
 				return bytes;
 			}
 		}
@@ -1457,192 +1017,105 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private byte[] readResourceBytes(String resourcePath) {
-
 		InputStream inputStream = null;
-
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 		try {
 			inputStream = getResourceStream(resourcePath);
-			if (inputStream == null) {
-				return null;
-			}
+			if (inputStream == null) return null;
 			byte[] buffer = new byte[8192];
-
 			int length;
 
 			while ((length = inputStream.read(buffer)) != -1) {
-
 				outputStream.write(buffer, 0, length);
 			}
 
 			return outputStream.toByteArray();
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			return null;
-
 		} finally {
-
 			try {
-
-				if (inputStream != null) {
-					inputStream.close();
-				}
-
-			} catch (Exception e) {
-			}
+				if (inputStream != null) inputStream.close();
+			} catch (Exception e) {}
 			try {
 				outputStream.close();
-			} catch (Exception e) {
-			}
+			} catch (Exception e) {}
 		}
 	}
 
 	private InputStream getResourceStream(String resourcePath) {
-
 		String normalizedPath = resourcePath;
-
-		if (normalizedPath == null) {
-			return null;
-		}
+		if (normalizedPath == null) return null;
 		normalizedPath = normalizedPath.trim();
 
 		while (normalizedPath.startsWith("/")) {
 			normalizedPath = normalizedPath.substring(1);
 		}
 		try {
-
 			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-
 			if (contextClassLoader != null) {
-
 				InputStream stream = contextClassLoader.getResourceAsStream(normalizedPath);
-
-				if (stream != null) {
-					return stream;
-				}
+				if (stream != null) return stream;
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		try {
-
 			ClassLoader classLoader = InwardBatchController.class.getClassLoader();
-
 			if (classLoader != null) {
-
 				InputStream stream = classLoader.getResourceAsStream(normalizedPath);
-
-				if (stream != null) {
-					return stream;
-				}
+				if (stream != null) return stream;
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
 
 		try {
-
 			String realPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + normalizedPath);
-
 			if (realPath != null) {
-
 				File file = new File(realPath);
-
 				if (file.isFile()) {
-
 					return java.nio.file.Files.newInputStream(file.toPath());
 				}
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
 
 		try {
-
 			String realPath = currentWindow.getDesktop().getWebApp().getRealPath("/WEB-INF/classes/" + normalizedPath);
-
 			if (realPath != null) {
-
 				File file = new File(realPath);
-
 				if (file.isFile()) {
-
 					return java.nio.file.Files.newInputStream(file.toPath());
 				}
 			}
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
 
 		return null;
 	}
 
-	private String extractChequeImageNumber(String inwardChequeId) {
-
-		if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
-
-			return null;
-		}
-
-		String value = inwardChequeId.trim();
-
-		int chqIndex = value.lastIndexOf("CHQ");
-
-		if (chqIndex < 0) {
-			return null;
-		}
-
-		String number = value.substring(chqIndex + 3);
-
-		if (number.isEmpty()) {
-			return null;
-		}
-		for (int i = 0; i < number.length(); i++) {
-			if (!Character.isDigit(number.charAt(i))) {
-				return null;
-			}
-		}
-		return String.format("%03d", Integer.parseInt(number));
-	}
-
 	private void filterCheques() {
-
 		String searchValue = chequeSearchTextbox.getValue();
-
-		if (searchValue == null) {
-			searchValue = "";
-		}
-
+		if (searchValue == null) searchValue = "";
 		searchValue = searchValue.trim().toLowerCase();
 
 		if (searchValue.isEmpty()) {
-
 			displayCheques(allCheques);
-
 			return;
 		}
 
 		List<InwardCheque> filteredCheques = new ArrayList<InwardCheque>();
 
 		for (InwardCheque cheque : allCheques) {
-
 			String chequeNumber = valueOrEmpty(cheque.getChequeNumber()).toLowerCase();
-
 			String accountNumber = valueOrEmpty(cheque.getDraweeAccountNumber()).toLowerCase();
 
 			if (chequeNumber.contains(searchValue) || accountNumber.contains(searchValue)) {
-
 				filteredCheques.add(cheque);
 			}
 		}
