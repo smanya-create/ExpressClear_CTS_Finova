@@ -15,6 +15,7 @@ import com.iispl.cts.enums.inward.InwardChequeStatus;
 import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
+import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 import com.iispl.cts.validator.MICRValidator;
 import com.iispl.cts.validatorimpl.MICRValidatorImpl;
@@ -241,12 +242,38 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			totalRecords = repairCheques.size();
 
-			if (currentRecord < 0) {
-				currentRecord = 0;
+			// Detect target chequeId from URL parameters or Session attributes
+			String targetChequeId = Executions.getCurrent().getParameter("chequeId");
+			if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
+				Object sessChq = Executions.getCurrent().getSession().getAttribute("TARGET_CHEQUE_ID");
+				if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_CHEQUE_ID");
+				if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("chequeId");
+				if (sessChq != null) targetChequeId = String.valueOf(sessChq).trim();
 			}
 
-			if (currentRecord >= totalRecords) {
-				currentRecord = totalRecords - 1;
+			int targetIndex = -1;
+			if (targetChequeId != null && !targetChequeId.isEmpty()) {
+				for (int i = 0; i < repairCheques.size(); i++) {
+					if (targetChequeId.equalsIgnoreCase(repairCheques.get(i).getInwardChequeId())) {
+						targetIndex = i;
+						break;
+					}
+				}
+			}
+
+			// Clear session targets once consumed
+			Executions.getCurrent().getSession().removeAttribute("TARGET_CHEQUE_ID");
+			Executions.getCurrent().getSession().removeAttribute("MICR_REPAIR_CHEQUE_ID");
+
+			if (targetIndex != -1) {
+				currentRecord = targetIndex;
+			} else {
+				if (currentRecord < 0) {
+					currentRecord = 0;
+				}
+				if (currentRecord >= totalRecords) {
+					currentRecord = totalRecords - 1;
+				}
 			}
 
 			currentCheque = repairCheques.get(currentRecord);
@@ -750,6 +777,16 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		}
 
 		Messagebox.show("MICR correction saved successfully.", "MICR Repair", Messagebox.OK, Messagebox.INFORMATION);
+		
+		// Resolve send-back request if this instrument was returned by checker for MICR
+				if (InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(currentCheque.getChequeStatus())) {
+					try {
+						new InwardSendBackRequestServiceImpl()
+								.markRequestResolved(currentCheque.getInwardChequeId(), repairedBy);
+					} catch (Exception ex) {
+						System.err.println("WARN: Failed to mark MICR send-back request resolved: " + ex.getMessage());
+					}
+				}
 
 		String batchId = (String) Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_BATCH_ID");
 

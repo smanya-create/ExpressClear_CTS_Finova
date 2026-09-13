@@ -266,7 +266,9 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 		Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", this.currentBatchId);
 		Sessions.getCurrent().setAttribute("MICR_REPAIR_CHEQUE_ID", chqId);
+		Sessions.getCurrent().setAttribute("TARGET_CHEQUE_ID", chqId);
 		Sessions.getCurrent().setAttribute("batchId", this.currentBatchId);
+		Sessions.getCurrent().setAttribute("chequeId", chqId);
 
 		Executions.sendRedirect("/inward/maker/index.zul?page=micr-repair&batchId=" + this.currentBatchId + "&chequeId=" + chqId);
 	}
