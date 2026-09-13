@@ -52,8 +52,7 @@
                                     <comboitem label="AUTH" value="AUTH"/>
                                     <comboitem label="ROLE_MGMT" value="ROLE_MGMT"/>
                                     <comboitem label="USER_MGMT" value="USER_MGMT"/>
-                                    <comboitem label="OUTWARD_BATCH" value="OUTWARD_BATCH"/>
-                                    <comboitem label="INWARD_CLEARING" value="INWARD_CLEARING"/>
+                                    
                                 </combobox>
                             </vlayout>
                             <vlayout spacing="6px" hflex="1">
