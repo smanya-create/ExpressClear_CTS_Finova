@@ -1,131 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?page title="CTS - Batch Intake" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-
 	<style src="/css/inward/batch.css" />
 
-	<window id="inwardBatchQueueWindow" title="Inward Batch Queue"
-		border="none" width="95%"
-		apply="com.iispl.cts.controller.inward.maker.InwardBatchController">
-		<vlayout width="100%" sclass="batch-page">
+	<!-- Use window as root so InwardBatchController can cast it without ClassCastException -->
+	<window id="inwardBatchQueueWindow" border="none" width="100%"
+		apply="com.iispl.cts.controller.inward.maker.InwardBatchController"
+		sclass="batch-page">
 
-			<label value="Inward Batch Queue" sclass="page-title" />
+		<vlayout width="100%" spacing="16px">
 
-			<label
-				value="Manage received inward batches and initiate XML parsing."
-				sclass="page-subtitle" />
-
-			<div sclass="search-container">
-
-				<label value="SEARCH BATCH" sclass="section-title" />
-
-				<hlayout width="100%" spacing="20px"
-					sclass="search-row">
-
-					<vlayout hflex="1" sclass="search-field">
-
-						<label value="Batch No." sclass="field-label" />
-
-						<textbox id="batchSearchTextbox"
-							placeholder="Batch No." width="100%" sclass="input-field" />
-
-					</vlayout>
-
-					<vlayout width="220px" sclass="search-field">
-
-						<label value="Status" sclass="field-label" />
-
-						<combobox id="statusCombobox" width="100%"
-							value="All" readonly="true">
-
-							<comboitem label="All" value="ALL" />
-
-							<comboitem label="Received"
-								value="RECEIVED" />
-
-							<comboitem label="Parsing" value="PARSING" />
-
-							<comboitem label="Validation Failed"
-								value="VALIDATION_FAILED" />
-
-							<comboitem label="Processing"
-								value="PROCESSING" />
-
-							<comboitem
-								label="Checker Processing Pending"
-								value="CHECKER_PROCESSING_PENDING" />
-
-							<comboitem label="Checker Processing"
-								value="CHECKER_PROCESSING" />
-
-							<comboitem label="Completed"
-								value="COMPLETED" />
-
-							<comboitem label="Hold" value="HOLD" />
-
-						</combobox>
-
-					</vlayout>
-
-					<vlayout width="250px" sclass="search-field">
-
-						<label value="Received Date"
-							sclass="field-label" />
-
-						<datebox id="receivedDatebox" width="100%"
-							placeholder="Select Date" format="dd-MMM-yyyy" />
-
-					</vlayout>
-
-					<vlayout width="120px"
-						sclass="search-button-area">
-
-						<space height="27px" />
-
-						<button id="searchButton" label="Search"
-							width="100%" sclass="search-button" />
-
-					</vlayout>
-
-				</hlayout>
-
-			</div>
-
-			<div sclass="batch-container">
-
-				<label value="Received Inward Batches"
-					sclass="batch-title" />
-
+			<!-- 1. Unified Page Title -->
+			<vlayout spacing="4px" sclass="batch-title-section">
+				<label value="BATCH INTAKE" sclass="batch-page-title" />
 				<label
-					value="Parse each received batch before it enters the next stage of inward processing."
-					sclass="section-description" />
+					value="Validate each batch before it enters MICR Repair or Data entry."
+					sclass="batch-page-subtitle" />
+			</vlayout>
 
-				<listbox id="batchListbox" width="100%"
-					sclass="batch-table" emptyMessage="No inward batches found">
+			<!-- 2. Main Section Card -->
+			<div sclass="batch-section-card" width="100%">
 
-					<listhead>
+				<vlayout width="100%" spacing="12px">
 
-						<listheader label="Batch No." width="19%" />
+					<!-- Section Header & Count -->
+					<hlayout width="100%" valign="middle"
+						sclass="batch-card-header">
+						<vlayout spacing="3px">
+							<label value="Received Inward Batches"
+								sclass="batch-section-title" />
+							<label
+								value="Inward batch packages detected in the intake directory."
+								sclass="batch-section-subtitle" />
+						</vlayout>
+						<label id="batchCountLabel" value="0 Batches"
+							sclass="batch-result-count" />
+					</hlayout>
 
-						<listheader label="Received On" width="20%" />
+					<!-- Filter Toolbar -->
+					<div sclass="batch-filter-bar">
+						<hlayout valign="middle" spacing="12px"
+							sclass="z-valign-middle">
+							<label value="Batch No."
+								sclass="filter-label" />
+							<textbox id="batchSearchTextbox"
+								placeholder="Enter Batch No..." width="220px"
+								sclass="batch-filter-input" />
 
-						<listheader label="Amount" width="18%" />
+							<label value="Status" sclass="filter-label" />
+							<combobox id="statusCombobox"
+								readonly="true" width="190px" sclass="batch-filter-combobox"
+								value="All">
+								<comboitem label="All" />
+								<comboitem label="Received" />
+								<comboitem label="Parsing" />
+								<comboitem label="Processing" />
+								<comboitem
+									label="Checker Processing Pending" />
+								<comboitem label="Checker Processing" />
+								<comboitem
+									label="Send Back To Maker Micr" />
+								<comboitem
+									label="Send Back To Maker Data Entry" />
+								<comboitem label="Completed" />
+								<comboitem label="Pending Validation" />
+								<comboitem label="Validation Failed" />
+							</combobox>
 
-						<listheader label="Status" width="22%" />
+							<label value="Received Date"
+								sclass="filter-label" />
+							<datebox id="receivedDatebox"
+								placeholder="Select Date" width="160px"
+								sclass="batch-filter-datebox" />
 
-						<listheader label="Action" width="21%" />
+							<button id="searchButton" label="Search"
+								iconSclass="z-icon-search" sclass="batch-btn-search" />
 
-					</listhead>
+							<button id="clearButton" label="Clear"
+								iconSclass="z-icon-undo" sclass="batch-btn-clear" />
+						</hlayout>
+					</div>
 
-				</listbox>
-
-				<label id="batchCountLabel"
-					value="Showing 0 to 0 of 0 batches" sclass="batch-count" />
+					<!-- Table with Deep Navy Header, Fixed Height Scroll, and Paging -->
+					<div sclass="batch-table-wrapper">
+						<listbox id="batchListbox" width="100%"
+							mold="paging" pageSize="10" sclass="batch-listbox"
+							emptyMessage="No inward batches found">
+							<listhead sizable="false">
+								<listheader label="BATCH NO."
+									width="20%" align="center" />
+								<listheader label="RECEIVED ON"
+									width="22%" align="center" />
+								<listheader label="AMOUNT (INR)"
+									width="20%" align="center" />
+								<listheader label="STATUS" width="20%"
+									align="center" />
+								<listheader label="ACTION" width="18%"
+									align="center" />
+							</listhead>
+						</listbox>
+					</div>
+				</vlayout>
 
 			</div>
 
 		</vlayout>
 
 	</window>
-
 </zk>

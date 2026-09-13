@@ -1,835 +1,545 @@
+/* =========================================================
+   INWARD BATCH INTAKE & BATCH VIEW - COMPLETE UNIFIED THEME
+   ========================================================= */
+
 .batch-page {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 20px 28px 30px 28px;
-	background: #f5f8fc;
+    width: 100%;
+    height: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 24px 12px 24px !important;
+    margin: 0;
+    background: #f8fafc !important;
+    overflow: hidden !important; /* Kills the outer page scrollbar completely */
 }
 
-.page-title {
-	font-size: 21px;
-	font-weight: 600;
-	color: #234e78;
-	margin-bottom: 3px;
-}
-
-.page-subtitle {
-	font-size: 12px;
-	color: #71839a;
-	margin-bottom: 18px;
-}
-
-.search-container {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d7e1ec;
-	border-radius: 7px;
-	padding: 22px;
-	margin-bottom: 18px;
-}
-
-.section-title {
-	font-size: 17px;
-	font-weight: 600;
-	color: #185487;
-}
-
-.search-row {
-	margin-top: 18px;
-	align-items: flex-end;
-}
-
-.search-field {
-	box-sizing: border-box;
-}
-
-.field-label {
-	font-size: 12px;
-	font-weight: 600;
-	color: #274764;
-	margin-bottom: 7px;
-}
-
-.input-field, .search-combobox, .search-date {
-	height: 40px;
-	border: 1px solid #cbd8e6;
-	border-radius: 5px;
-	background: #ffffff;
-	box-sizing: border-box;
-}
-
-.input-field:focus, .search-combobox:focus, .search-date:focus {
-	border-color: #2a679b;
-}
-
-.search-button-area {
-	box-sizing: border-box;
-}
-
-.search-button {
-	height: 40px;
-	background: #1d5787;
-	border: 1px solid #1d5787;
-	border-radius: 5px;
-	color: #ffffff;
-	font-size: 13px;
-	font-weight: 600;
-}
-
-.search-button:hover {
-	background: #16476f;
-	border-color: #16476f;
-}
-
-.batch-container {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d7e1ec;
-	border-radius: 7px;
-	padding: 22px;
-}
-
-.batch-title {
-	display: block;
-	font-size: 17px;
-	font-weight: 600;
-	color: #185487;
-	margin-bottom: 3px;
-}
-
-.section-description {
-	display: block;
-	font-size: 12px;
-	color: #71839a;
-	margin-bottom: 16px;
-}
-
-.batch-table {
-	width: 100%;
-	border: 1px solid #d5dfeb;
-	border-radius: 5px;
-	overflow: hidden;
-}
-
-.batch-table .z-listbox-header th {
-	background: #1d5787;
-	color: #ffffff;
-	font-size: 13px;
-	font-weight: 600;
-	padding: 12px 10px;
-	border-right: 1px solid rgba(255, 255, 255, 0.25);
-}
-.batch-table .z-listbox-header th {
-	text-align: center !important;
-}
-
-.batch-table .z-listcell-content {
-	color: #173b5e;
-	font-size: 13px;
-	padding: 15px 12px;
-	text-align: center !important;
-}
-
-.batch-table .z-listitem {
-	background: #ffffff;
-}
-
-.batch-table .z-listitem:hover {
-	background: #f5f9fd;
-}
-
-.batch-table .z-listitem+.z-listitem {
-	border-top: 1px solid #e6edf4;
-}
-
-.parse-button {
-	height: 34px;
-	min-width: 95px;
-	background: #1d5787;
-	border: 1px solid #1d5787;
-	border-radius: 5px;
-	color: #ffffff;
-	font-size: 12px;
-	font-weight: 600;
-}
-
-.parse-button:hover {
-	background: #16476f;
-	border-color: #16476f;
-}
-
-.batch-count {
-	display: block;
-	margin-top: 12px;
-	font-size: 11px;
-	color: #71839a;
-}
-
-/* STATUS */
-
-.batch-status-badge {
-	display: inline-block;
-	min-width: 58px;
-	padding: 4px 10px;
-	border-radius: 12px;
-	text-align: center;
-	font-size: 9px;
-	font-weight: 600;
-	white-space: nowrap;
-	box-sizing: border-box;
-}
-
-.batch-status-badge.status-received {
-	background: #e7f1fb;
-	color: #185587;
-}
-
-.batch-status-badge.status-parsing {
-	background: #e8efff;
-	color: #315eb7;
-}
-
-.batch-status-badge.status-validation-failed {
-	background: #fde8e7;
-	color: #c33a32;
-}
-
-.batch-status-badge.status-processing {
-	background: #fff0d1;
-	color: #b56a00;
-	border: 1px solid #f3dbab;
-}
-
-.batch-status-badge.status-processing-pending {
-	background: #eee8ff;
-	color: #6950a8;
-	border: 1px solid #d8cef5;
-}
-
-.batch-status-badge.status-checker-processing {
-	background: #e6f4f0;
-	color: #16745c;
-}
-
-.batch-status-badge.status-completed {
-	background: #e4f5e9;
-	color: #18723b;
-}
-
-.batch-status-badge.status-hold {
-	background: #f2e6e6;
-	color: #8b3434;
-}
-
-.batch-status-badge.status-in-verification {
-	background: #e8efff;
-	color: #315eb7;
-}
-
-.batch-status-badge.status-rejected {
-	background: #fde8e7;
-	color: #c33a32;
-}
-
-.batch-status-badge.status-failed {
-	background: #fde8e7;
-	color: #c33a32;
-}
-
-/* BATCH VIEW */
-.batch-view-page {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 12px 20px 25px 20px;
-	background: #f5f8fc;
-}
-
+/* ---------------------------------------------------------
+   1. Page Titles & Headers
+   --------------------------------------------------------- */
+.batch-title-section,
 .view-header {
-	margin-bottom: 15px;
+    padding: 0;
+    margin: 0 0 4px 0;
 }
 
+.batch-page-title,
 .view-page-title {
-	font-size: 21px;
-	font-weight: 600;
-	color: #234e78;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    line-height: 28px !important;
+    letter-spacing: 0.2px;
 }
 
+.batch-page-subtitle,
 .view-page-subtitle {
-	font-size: 12px;
-	color: #71839a;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: #64748b !important;
+    line-height: 16px !important;
 }
 
-.information-card {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d7e1ec;
-	border-radius: 6px;
-	padding: 14px 12px;
-	margin-bottom: 14px;
-}
-
-.view-section-title {
-	font-size: 14px;
-	font-weight: 600;
-	color: #173f67;
-}
-
-.information-columns {
-	margin-top: 8px;
-}
-
-.information-column {
-	box-sizing: border-box;
-}
-
-.information-row {
-	min-height: 27px;
-	align-items: center;
-	border-top: 1px solid #e4ebf3;
-}
-
-.information-row:last-child {
-	border-bottom: 1px solid #e4ebf3;
-}
-
-.information-label {
-	width: 165px;
-	font-size: 11px;
-	color: #506a85;
-}
-
-.information-colon {
-	width: 18px;
-	font-size: 11px;
-	color: #506a85;
-	text-align: center;
-}
-
-.information-value {
-	font-size: 11px;
-	color: #173b5e;
-	font-weight: 500;
-}
-
-/* CHEQUE LIST */
+/* ---------------------------------------------------------
+   2. Main Container Cards
+   --------------------------------------------------------- */
+.batch-section-card,
+.information-card,
 .cheque-card {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d7e1ec;
-	border-radius: 6px;
-	padding: 13px 10px 10px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff !important;
+    border: 1px solid #d9dee7 !important;
+    border-radius: 8px !important;
+    padding: 16px 20px 14px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
-.cheque-header {
-	align-items: center;
-	justify-content: space-between;
+.batch-card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
 
-.cheque-header-subtitle {
-	font-size: 11px;
-	color: #71839a;
-}
-
-.cheque-tools {
-	align-items: center;
-}
-
-.cheque-search {
-	height: 32px;
-	border: 1px solid #cbd8e6;
-	border-radius: 5px;
-	font-size: 11px;
-}
-
-.secondary-button {
-	height: 34px;
-	background: #ffffff;
-	border: 1px solid #b7c9dc;
-	border-radius: 5px;
-	color: #28577e;
-	font-size: 12px;
-	font-weight: 600;
-}
-
-.secondary-button:hover {
-	background: #eef5fb;
-}
-
-.cheque-listbox {
-	width: 100%;
-	margin-top: 10px;
-	border: 1px solid #d5dfeb;
-	border-radius: 5px;
-	overflow: hidden;
-}
-
-.cheque-listbox .z-listbox-header th {
-	background: #1d5787;
-	color: #ffffff;
-	font-size: 10px;
-	font-weight: 600;
-	padding: 9px 7px;
-}
-
-.cheque-listbox .z-listcell-content {
-	font-size: 10px;
-	color: #173b5e;
-	padding: 10px 7px;
-}
-
-.cheque-listbox .z-listitem:hover {
-	background: #f5f9fd;
-}
-
-.cheque-status-normal {
-	display: inline-block;
-	padding: 4px 9px;
-	border-radius: 3px;
-	background: #e7f2ff;
-	color: #1762a0;
-	font-size: 9px;
-	font-weight: 600;
-}
-
-.cheque-status-repair {
-	display: inline-block;
-	padding: 4px 9px;
-	border-radius: 3px;
-	background: #fff0d5;
-	color: #b86b00;
-	font-size: 9px;
-	font-weight: 600;
-}
-
-.cheque-footer {
-	margin-top: 9px;
-}
-
-.pagination-info {
-	font-size: 10px;
-	color: #71839a;
-}
-
-.view-actions {
-	justify-content: flex-end;
-	margin-top: 12px;
-}
-
-.hold-button {
-	height: 34px;
-	background: #fff7e8;
-	border: 1px solid #e4c98d;
-	border-radius: 5px;
-	color: #a76500;
-	font-size: 12px;
-	font-weight: 600;
-}
-
-.hold-button:hover {
-	background: #fff0d2;
-}
-
-.batch-view-page {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 8px 16px 20px 16px;
-	background: #f5f8fc;
-}
-
-.view-header {
-	margin-bottom: 14px;
-}
-
-.view-page-title {
-	font-size: 21px;
-	font-weight: 600;
-	color: #174d7d;
-}
-
-.view-page-subtitle {
-	font-size: 11px;
-	color: #5d7691;
-}
-
-/* BATCH INFORMATION */
-.information-card {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d6e2ee;
-	border-radius: 5px;
-	padding: 11px 12px 10px 12px;
-	margin-bottom: 13px;
-}
-
+.batch-section-title,
 .view-section-title {
-	font-size: 14px;
-	font-weight: 600;
-	color: #173f67;
+    font-size: 15px !important;
+    font-weight: 750 !important;
+    color: #0f172a !important;
+    line-height: 20px !important;
 }
 
-.information-columns {
-	margin-top: 6px;
+.batch-section-subtitle {
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    color: #64748b !important;
+    line-height: 15px !important;
 }
 
-.information-column {
-	box-sizing: border-box;
+.batch-result-count {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: #eaf2fb;
+    color: #172554;
+    font-size: 10.5px;
+    font-weight: 700;
 }
 
-.information-row {
-	min-height: 26px;
-	align-items: center;
-	border-top: 1px solid #e3ebf3;
+/* ---------------------------------------------------------
+   3. Filter Bar & Controls
+   --------------------------------------------------------- */
+.batch-filter-bar {
+    width: 100%;
+    box-sizing: border-box;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
 }
 
-.information-row:last-child {
-	border-bottom: 1px solid #e3ebf3;
+.filter-label {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
 }
 
-.information-label {
-	width: 160px;
-	font-size: 10px;
-	color: #4f6985;
-}
-
-.information-colon {
-	width: 18px;
-	text-align: center;
-	font-size: 10px;
-	color: #4f6985;
-}
-
-.information-value {
-	font-size: 10px;
-	font-weight: 500;
-	color: #102f4e;
-}
-
-/* STATUS BADGES */
-.status-badge {
-	display: inline-block;
-	min-width: 58px;
-	padding: 4px 10px;
-	border-radius: 4px;
-	text-align: center;
-	font-size: 9px;
-	font-weight: 600;
-}
-
-.status-success {
-	background: #e2f4e8;
-	color: #16703b;
-	border: 1px solid #c7e8d2;
-}
-
-.status-hold {
-	background: #fff0d1;
-	color: #b56a00;
-	border: 1px solid #f3dbab;
-}
-
-/* CHEQUE CARD */
-.cheque-card {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d6e2ee;
-	border-radius: 5px;
-	padding: 10px 9px 9px 9px;
-}
-
-.cheque-header {
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 9px;
-}
-
-.cheque-title-area {
-	align-items: center;
-}
-
-.cheque-header-subtitle {
-	font-size: 10px;
-	color: #71839a;
-}
-
-.cheque-tools {
-	align-items: center;
-}
-
+.batch-filter-input,
+.batch-filter-combobox .z-combobox-input,
+.batch-filter-datebox .z-datebox-input,
 .cheque-search {
-	height: 27px;
-	border: 1px solid #d1ddea;
-	border-radius: 4px;
-	font-size: 9px;
-	background: #ffffff;
+    height: 32px !important;
+    padding: 0 10px !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    color: #1e293b !important;
+    font-size: 11.5px !important;
 }
 
-.filter-button {
-	height: 27px;
-	background: #ffffff;
-	border: 1px solid #c7d6e5;
-	border-radius: 4px;
-	color: #28577e;
-	font-size: 10px;
-	font-weight: 600;
+.batch-filter-combobox .z-combobox-button,
+.batch-filter-datebox .z-datebox-button {
+    height: 32px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: none !important;
+    background: #ffffff !important;
 }
 
-.filter-button:hover {
-	background: #f0f6fb;
+.batch-btn-search.z-button,
+.filter-button.z-button {
+    height: 32px !important;
+    padding: 0 16px !important;
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
+    border-radius: 5px !important;
+    color: #ffffff !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
 }
 
-/* CHEQUE TABLE */
+.batch-btn-search.z-button:hover,
+.filter-button.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
+}
+
+.batch-btn-clear.z-button,
+.back-button.z-button {
+    height: 32px !important;
+    padding: 0 16px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    color: #475569 !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.batch-btn-clear.z-button:hover,
+.back-button.z-button:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+/* ---------------------------------------------------------
+   4. Table Wrapper, Deep Navy Header & Internal Scroll
+   --------------------------------------------------------- */
+.batch-table-wrapper {
+    width: 100%;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+}
+
+.batch-listbox,
 .cheque-listbox {
-	width: 100%;
-	border: 1px solid #d5e0eb;
-	border-radius: 4px;
-	overflow: hidden;
+    border: none !important;
+    background: transparent !important;
+    width: 100% !important;
 }
 
-.cheque-listbox .z-listbox-header th {
-	background: #1d5787;
-	color: #ffffff;
-	font-size: 9px;
-	font-weight: 600;
-	padding: 8px 6px;
-	border-right: 1px solid rgba(255, 255, 255, 0.25);
+/* Force Deep Navy Header on both tables */
+.batch-listbox .z-listhead,
+.batch-listbox .z-listhead-bar,
+.batch-listbox .z-listheader,
+.batch-listbox .z-listheader-content,
+.cheque-listbox .z-listhead,
+.cheque-listbox .z-listhead-bar,
+.cheque-listbox .z-listheader,
+.cheque-listbox .z-listheader-content {
+    background: #18275c !important;
+    background-color: #18275c !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-bottom: 1px solid #30406f !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    padding: 0 8px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
 }
 
-.cheque-listbox .z-listbox-header th {
-	text-align: center !important;
-}
-.cheque-listbox .z-listcell-content {
-	font-size: 9px;
-	color: #173b5e;
-	padding: 9px 6px;
-	text-align: center;
+.batch-listbox .z-listheader,
+.cheque-listbox .z-listheader {
+    border-right: 1px solid #30406f !important;
 }
 
+.batch-listbox .z-listheader:last-child,
+.cheque-listbox .z-listheader:last-child {
+    border-right: none !important;
+}
+
+/* Allow internal scrolling without locking fixed pixel height */
+.batch-listbox .z-listbox-body {
+    overflow-y: scroll !important; /* Force internal vertical scrollbar */
+    overflow-x: hidden !important;
+    height: 240px !important;      /* Fits ~5 rows, remaining 5 scroll inside */
+}
+
+/* Ensure pagination bar stays visible directly below */
+.batch-listbox .z-paging {
+    border: none !important;
+    border-top: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    padding: 8px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 42px !important;
+}
+
+.batch-listbox .z-listbox-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.batch-listbox .z-listbox-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.batch-listbox .z-listbox-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.batch-listbox .z-listbox-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.batch-listbox .z-listitem,
 .cheque-listbox .z-listitem {
-	background: #ffffff;
+    height: 48px !important;
+    background: #ffffff !important;
 }
 
+.batch-listbox .z-listitem:hover,
 .cheque-listbox .z-listitem:hover {
-	background: #f5f9fd;
+    background: #f8fafc !important;
 }
 
-.cheque-listbox .z-listitem+.z-listitem {
-	border-top: 1px solid #e5edf5;
+.batch-listbox .z-listcell,
+.cheque-listbox .z-listcell {
+    height: 48px !important;
+    padding: 0 8px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    border-right: none !important;
+    vertical-align: middle !important;
+    text-align: center !important;
 }
 
-/* CHEQUE STATUS */
-.cheque-status-normal {
-	display: inline-block;
-	padding: 3px 8px;
-	border-radius: 3px;
-	background: #e5f1ff;
-	color: #1762a0;
-	border: 1px solid #c9e0f8;
-	font-size: 8px;
-	font-weight: 600;
-	white-space: nowrap;
+.batch-listbox .z-listcell-content,
+.cheque-listbox .z-listcell-content {
+    padding: 0 6px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
 }
 
-.cheque-status-repair {
-	display: inline-block;
-	padding: 3px 8px;
-	border-radius: 3px;
-	background: #fff0d5;
-	color: #b66b00;
-	border: 1px solid #f4dcae;
-	font-size: 8px;
-	font-weight: 600;
-	white-space: nowrap;
+/* Cell Elements */
+.batch-id-link {
+    color: #075bd3 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    text-align: center !important;
 }
 
-/* VIEW BUTTON */
-.view-button {
-	height: 24px;
-	min-width: 55px;
-	background: #ffffff;
-	border: 1px solid #9dbbd8;
-	border-radius: 3px;
-	color: #175a91;
-	font-size: 9px;
-	font-weight: 600;
+.batch-cell-text {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
 }
 
-.view-button:hover {
-	background: #edf5fc;
+.batch-cell-amount {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
 }
 
-/* FOOTER */
-.cheque-footer {
-	margin-top: 8px;
-	align-items: center;
+/* ---------------------------------------------------------
+   5. Status Badges
+   --------------------------------------------------------- */
+.status-pill-gold {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 115px !important;
+    height: 24px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important;
+    color: #172554 !important;
+    border: 1px solid #ffb000 !important;
+    border-radius: 9999px !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
 }
 
-.pagination-info {
-	font-size: 9px;
-	color: #657d95;
+.status-pill-sentback {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 115px !important;
+    height: 24px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    background: #ffedd5 !important;
+    color: #9a3412 !important;
+    border: 1px solid #fdba74 !important;
+    border-radius: 9999px !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
 }
 
-/* BOTTOM ACTIONS */
-.view-actions {
-	justify-content: flex-start;
-	margin-top: 4px;
+.status-pill-completed {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 115px !important;
+    height: 24px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #86efac !important;
+    border-radius: 9999px !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
 }
 
-.back-button {
-	height: 34px;
-	background: #ffffff;
-	border: 1px solid #a9bfd5;
-	border-radius: 4px;
-	color: #28577e;
-	font-size: 10px;
-	font-weight: 600;
+.status-pill-failed {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 115px !important;
+    height: 24px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fca5a5 !important;
+    border-radius: 9999px !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
 }
 
-.back-button:hover {
-	background: #eef5fb;
+/* Support for Batch View badges */
+.status-badge.status-success {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2px 10px !important;
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #86efac !important;
+    border-radius: 9999px !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
 }
 
-.hold-button {
-	height: 34px;
-	background: #fff7e6;
-	border: 1px solid #e6c98d;
-	border-radius: 4px;
-	color: #a66300;
-	font-size: 10px;
-	font-weight: 600;
+.status-badge.status-hold {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2px 10px !important;
+    background: #fff8d6 !important;
+    color: #172554 !important;
+    border: 1px solid #ffb000 !important;
+    border-radius: 9999px !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
 }
 
-.hold-button:hover {
-	background: #fff0d0;
+/* ---------------------------------------------------------
+   6. Action Buttons
+   --------------------------------------------------------- */
+.view-button.z-button {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    min-width: 82px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    padding: 0 10px !important;
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
+    border-radius: 4px !important;
+    color: #ffffff !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
 }
 
-.information-card {
-	width: 100%;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #d6e2ee;
-	border-radius: 6px;
-	padding: 16px 14px 18px 14px;
-	margin-bottom: 14px;
+.view-button.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
 }
 
+.parse-button.z-button {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    min-width: 82px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    padding: 0 10px !important;
+    background: #d97706 !important;
+    border: 1px solid #d97706 !important;
+    border-radius: 4px !important;
+    color: #ffffff !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    cursor: pointer !important;
+}
+
+.parse-button.z-button:hover {
+    background: #b45309 !important;
+    border-color: #b45309 !important;
+}
+
+.parsing-button.z-button {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    min-width: 82px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    padding: 0 10px !important;
+    background: #94a3b8 !important;
+    border: 1px solid #94a3b8 !important;
+    border-radius: 4px !important;
+    color: #ffffff !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-align: center !important;
+}
+
+/* ---------------------------------------------------------
+   7. Native Paging Bar
+   --------------------------------------------------------- */
+.batch-listbox .z-paging,
+.cheque-listbox .z-paging {
+    border: none !important;
+    border-top: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    padding: 8px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.batch-listbox .z-paging-info,
+.cheque-listbox .z-paging-info {
+    display: none !important;
+}
+
+.batch-listbox .z-paging-btn,
+.cheque-listbox .z-paging-btn {
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    border-radius: 4px !important;
+    margin: 0 3px !important;
+    min-width: 30px !important;
+    height: 28px !important;
+    cursor: pointer !important;
+    color: #1e293b !important;
+}
+
+.batch-listbox .z-paging-btn:hover,
+.cheque-listbox .z-paging-btn:hover {
+    background: #f1f5f9 !important;
+}
+
+/* ---------------------------------------------------------
+   8. Batch View Metadata Grid
+   --------------------------------------------------------- */
 .batch-information-grid {
-	width: 100%;
-	margin-top: 10px;
-	border: none;
-}
-
-.batch-information-grid .z-grid-body {
-	border: none;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    overflow: hidden;
 }
 
 .batch-information-grid .z-row {
-	border-top: 1px solid #e7edf3;
-	background: #ffffff;
+    background: #ffffff !important;
 }
 
-.batch-information-grid .z-row:last-child {
-	border-bottom: 1px solid #e7edf3;
-}
-
-.batch-information-grid .z-row>td {
-	padding: 10px 8px;
-	vertical-align: middle;
+.batch-information-grid .z-row-inner {
+    padding: 8px 12px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
 }
 
 .information-label {
-	font-size: 11px;
-	font-weight: 600;
-	color: #506a85;
-	white-space: nowrap;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
 }
 
 .information-value {
-	font-size: 11px;
-	font-weight: 500;
-	color: #173b5e;
-	white-space: normal;
-	word-break: break-word;
-}
-
-.batch-information-grid .information-value {
-	padding-left: 4px;
-}
-
-.batch-information-grid .status-badge {
-	margin-left: 4px;
-}
-
-.view-section-title {
-	font-size: 15px;
-	font-weight: 600;
-	color: #173f67;
-}
-
-.cheque-image-popup {
-	box-sizing: border-box;
-	padding: 18px;
-	background: #f7faff;
-}
-
-.cheque-image-popup-title {
-	font-size: 16px;
-	font-weight: 600;
-	color: #1d5787;
-	padding-bottom: 8px;
-	border-bottom: 1px solid #d6e2ee;
-}
-
-.cheque-image-container {
-	align-items: flex-start;
-	justify-content: center;
-}
-
-.cheque-image-section {
-	box-sizing: border-box;
-	padding: 12px;
-	background: #ffffff;
-	border: 1px solid #d6e2ee;
-	border-radius: 6px;
-	align-items: center;
-}
-
-.cheque-image-label {
-	font-size: 12px;
-	font-weight: 600;
-	color: #1d5787;
-}
-
-.cheque-preview-image {
-	width: 400px;
-	height: 250px;
-	object-fit: contain;
-	background: #f4f6f8;
-	border: 1px solid #d5e0eb;
-	border-radius: 4px;
-}
-
-.cheque-image-status {
-	font-size: 11px;
-	font-weight: 600;
-	color: #536b82;
-	padding-top: 5px;
-}
-
-.no-cheque-image {
-	width: 400px;
-	height: 250px;
-	box-sizing: border-box;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: #f4f6f8;
-	border: 1px solid #d5e0eb;
-	border-radius: 4px;
-	color: #8999aa;
-	font-size: 11px;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
 }

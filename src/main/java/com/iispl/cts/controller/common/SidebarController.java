@@ -259,7 +259,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToBatchIntake() {
-		navigateTo("/inward/maker/intake/batch-intake.zul", "Batch Intake", navBatchIntake);
+	    navigateTo("/inward/maker/batch/batch-list.zul", "Batch Intake", navBatchIntake);
 	}
 
 	public void navToInwardMicrRepair() {
