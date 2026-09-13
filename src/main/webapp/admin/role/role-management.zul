@@ -4,56 +4,55 @@
 <zk>
 <borderlayout apply="com.iispl.cts.controller.admin.RoleManagementController" hflex="1" vflex="1">
 
-    <!-- Left Sidebar Navigation -->
+    <!-- 1. Match Shared Left Sidebar Navigation (240px) -->
     <west width="240px" border="none" collapsible="false">
         <include src="/components/sidebar.zul" role="ADMIN" activeTab="role-management" />
     </west>
 
     <!-- Main Workspace -->
     <center border="none">
-        <!-- Nested Borderlayout to pin header and scroll only the content -->
         <borderlayout hflex="1" vflex="1">
-            
-            <!-- Fixed Header (Does NOT scroll) -->
+
+            <!-- Fixed Header -->
             <north size="auto" border="none">
                 <include id="incHeader" src="/components/header.zul" 
                          pageTitle="Admin Dashboard" 
-                         pageSubtitle="Role Management" />
+                         pageSubtitle="Role Management"
+                         showNotifications="false" />
             </north>
 
-            <!-- Non-Scrollable Content Workspace -->
-            <center border="none" autoscroll="false" style="overflow: hidden; background-color: #f1f5f9;">
+            <!-- 2. Match Exact Content Workspace Padding & Background -->
+            <center border="none" autoscroll="false" style="background-color: #f8fafc; overflow: hidden;">
                 <vlayout sclass="role-content" spacing="14px" vflex="1" hflex="1" 
-                         style="padding: 20px 28px 16px 28px; box-sizing: border-box; overflow: hidden;">
+                         style="padding: 20px 24px 16px 24px; box-sizing: border-box; overflow: hidden;">
                     
-                    <!-- Fixed Page Title -->
+                    <!-- Fixed Page Title Header -->
                     <vlayout spacing="2px" style="flex: 0 0 auto;">
                         <label value="Role Management" sclass="page-title"/>
                         <label value="Manage system access levels, operational permissions, and CTS queue assignments." sclass="page-subtitle"/>
                     </vlayout>
 
-                    <!-- Roles Table Card (Fills remaining height) -->
-                    <vlayout sclass="card-panel" spacing="12px" vflex="1" hflex="1" 
-                             style="padding: 16px 22px; box-sizing: border-box; overflow: hidden;">
+                    <!-- 3. Roles Table Card (Locked to ~420px to match Audit Trail card height) -->
+                    <vlayout sclass="card-panel" spacing="12px" hflex="1" 
+                             style="padding: 16px 22px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; height: 420px; flex: 0 0 auto !important;">
                         
-                        <!-- Top Bar: Counter & Add Button (Fixed inside card) -->
-                        <hlayout valign="middle" spacing="10px" hflex="1" style="flex: 0 0 auto;">
-                            <hlayout valign="middle" spacing="10px" hflex="1">
-                                <label value="System Roles" style="font-size: 16px; font-weight: 800; color: #1e293b;"/>
-                                <label id="lblRoleCount" value="Loading..." 
-                                       style="color: #64748b; font-size: 11.5px; font-weight: 600; background: #f1f5f9; padding: 3px 10px; border-radius: 12px;"/>
+                        <!-- Top Bar: Counter & Add Button -->
+                        <hlayout valign="middle" hflex="1" style="justify-content: space-between; flex: 0 0 auto;">
+                            <hlayout valign="middle" spacing="8px">
+                                <label value="System Roles" style="font-size: 16px; font-weight: 700; color: #0f172a;"/>
+                                <label id="lblRoleCount" value="Loading roles..." style="color: #64748b; font-size: 12px;"/>
                             </hlayout>
+                            <space hflex="1" />
 
-                            <!-- Primary Action Button -->
-                            <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="36px"/>
+                            <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="34px"/>
                         </hlayout>
 
-                        <!-- Only This Grid Scrolls Vertically -->
-                        <grid id="gridRoles" sclass="role-grid" span="true" emptyMessage="No roles found." vflex="1" hflex="1">
+                        <!-- Scrollable Grid Body -->
+                        <grid id="gridRoles" sclass="role-grid" span="true" vflex="1" hflex="1" emptyMessage="No roles found.">
                             <columns sizable="false">
-                                <column label="ROLE ID" hflex="2"/>
-                                <column label="ROLE NAME" hflex="3"/>
-                                <column label="DESCRIPTION" hflex="6"/>
+                                <column label="ROLE ID" hflex="2" align="center"/>
+                                <column label="ROLE NAME" hflex="3" align="center"/>
+                                <column label="DESCRIPTION" hflex="6" align="center"/>
                                 <column label="STATUS" hflex="2" align="center"/>
                                 <column label="ACTIONS" hflex="2" align="center"/>
                             </columns>

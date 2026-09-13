@@ -131,7 +131,7 @@
 
                         <!-- Portal Footer -->
                         <hlayout sclass="cts-portal-footer" hflex="1" style="justify-content: space-between; margin-top: auto; padding-top: 8px;">
-                            <label value="Express Clear CTS · Admin Portal" sclass="cts-footer-left" />
+                            <label value="Express Clear CTS · Admin " sclass="cts-footer-left" />
                             <label value="Secure Session Management" sclass="cts-footer-right" />
                         </hlayout>
 

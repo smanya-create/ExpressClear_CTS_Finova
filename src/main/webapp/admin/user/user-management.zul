@@ -1,281 +1,439 @@
 <?page title="Express Clear - User Management"?>
 <zk>
-    <style src="/css/admin/user-management.css" />
+	<style src="/css/admin/user-management.css" />
 
-    <borderlayout sclass="main-layout" height="100vh" apply="com.iispl.cts.controller.admin.UserManagementController">
-        
-        <!-- Left Sidebar Navigation -->
-        <west width="220px" border="none" collapsible="false">
-            <include src="/components/sidebar.zul" role="ADMIN" activeTab="user-management" />
-        </west>
+	<borderlayout sclass="main-layout" height="100vh"
+		apply="com.iispl.cts.controller.admin.UserManagementController">
 
-        <!-- Main Body Area -->
-        <center border="none">
-            <borderlayout vflex="1" hflex="1">
-                
-                <!-- Fixed Header (Does NOT scroll) -->
-                <north size="auto" border="none">
-                    <include id="incHeader" src="/components/header.zul" 
-                             pageTitle="Admin Dashboard" 
-                             pageSubtitle="User Management" />
-                </north>
+		<!-- Left Sidebar Navigation -->
+		<west width="220px" border="none" collapsible="false">
+			<include src="/components/sidebar.zul" role="ADMIN"
+				activeTab="user-management" />
+		</west>
 
-                <!-- Non-Scrollable Content Area -->
-                <center border="none" autoscroll="false" style="overflow: hidden; background-color: #f1f5f9;">
-                    <vlayout sclass="cts-content-wrapper" vflex="1" hflex="1" spacing="0">
-                        
-                        <!-- ========================================================================= -->
-                        <!-- 1. SCREEN 1: USER LIST VIEW                                               -->
-                        <!-- ========================================================================= -->
-                        <vlayout id="viewUserList" visible="true" vflex="1" hflex="1" spacing="12px"
-                                 style="padding: 16px 28px 10px 28px; box-sizing: border-box; overflow: hidden;">
-                        
-                            <!-- Top Header: Title & Add User Button (Fixed) -->
-                            <hlayout valign="middle" hflex="1">
-                                <vlayout spacing="2px" hflex="1">
-                                    <label value="User Management" sclass="cts-main-title" style="font-size: 20px;" />
-                                    <label value="Manage system users, roles and access." sclass="cts-main-subtitle" style="margin-top: 2px;" />
-                                </vlayout>
-                                <button id="btnAddUser" label="+ ADD USER" sclass="cts-btn-add-user" />
-                            </hlayout>
+		<!-- Main Body Area -->
+		<center border="none">
+			<borderlayout vflex="1" hflex="1">
 
-                            <!-- Fixed Search & Filter Card (Does NOT scroll) -->
-                            <panel sclass="cts-filter-panel" hflex="1" border="none"
-                                   style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                                <panelchildren style="padding: 14px 20px;">
-                                    <vlayout spacing="10px" hflex="1">
-                                        <label value="Search &amp; Filter Users" style="font-size: 13px; font-weight: 700; color: #1e293b;" />
+				<!-- Fixed Header (Does NOT scroll) -->
+				<north size="auto" border="none">
+					<include id="incHeader" src="/components/header.zul"
+						pageTitle="Admin Dashboard" pageSubtitle="User Management" />
+				</north>
 
-                                        <hlayout spacing="14px" valign="bottom" hflex="1">
-                                            <!-- Search Employee Field -->
-                                            <vlayout spacing="4px" hflex="4">
-                                                <label value="SEARCH EMPLOYEE" sclass="cts-input-label" style="font-size: 10px; margin-bottom: 0;" />
-                                                <textbox id="txtSearchQuery" placeholder="🔍  Employee ID, username or name" 
-                                                         hflex="1" height="34px" style="border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 12.5px; color: #1e293b; box-sizing: border-box;" />
-                                            </vlayout>
-
-                                            <!-- Role Dropdown -->
-                                            <vlayout spacing="4px" hflex="2">
-                                                <label value="ROLE" sclass="cts-input-label" style="font-size: 10px; margin-bottom: 0;" />
-                                                <combobox id="cmbRoleFilter" readonly="true" hflex="1" height="34px">
-                                                    <comboitem label="All Roles" value="ALL" />
-                                                </combobox>
-                                            </vlayout>
-
-                                            <!-- Status Dropdown -->
-                                            <vlayout spacing="4px" hflex="2">
-                                                <label value="STATUS" sclass="cts-input-label" style="font-size: 10px; margin-bottom: 0;" />
-                                                <combobox id="cmbStatusFilter" readonly="true" hflex="1" height="34px">
-                                                    <comboitem label="All Status" value="ALL" />
-                                                    <comboitem label="Active" value="ACTIVE" />
-                                                    <comboitem label="Inactive" value="INACTIVE" />
-                                                </combobox>
-                                            </vlayout>
-
-                                            <!-- Action Buttons -->
-                                            <hlayout spacing="8px" valign="bottom">
-                                                <button id="btnSearch" label="SEARCH" sclass="cts-btn-filter-search" />
-                                                <button id="btnClearFilter" label="CLEAR" sclass="cts-btn-filter-clear" />
-                                            </hlayout>
-                                        </hlayout>
-                                    </vlayout>
-                                </panelchildren>
-                            </panel>
-
-                            <!-- Users Table Card (Only grid rows scroll) -->
-                            <!-- Users Table Card -->
-<!-- Users Table Card (Fills available space) -->
-<panel sclass="cts-table-panel" vflex="1" hflex="1" border="none"
-       style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
-    <panelchildren style="padding: 14px 18px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
-        <hlayout valign="middle" hflex="1" style="flex: 0 0 auto; margin-bottom: 10px;">
-            <label value="Users" style="font-size: 14px; font-weight: 700; color: #1e293b;" hflex="1" />
-            <label id="lblUserCount" value="0 users found" style="font-size: 11.5px; color: #64748b;" />
-        </hlayout>
-
-        <!-- Scrollable Grid Body -->
-        <grid id="gridUsers" sclass="cts-custom-grid" span="true" vflex="1" hflex="1" emptyMessage="No users found.">
-            <columns sizable="false">
-                <column label="EMPLOYEE ID" hflex="2" />
-                <column label="USER NAME"   hflex="2" />
-                <column label="EMAIL"       hflex="3" />
-                <column label="PHONE"       hflex="2" />
-                <column label="ROLE"        hflex="2" />
-                <column label="STATUS"      hflex="1" align="center" />
-                <column label="ACTION"      hflex="2" align="center" />
-            </columns>
-            <rows id="rowsUsers" />
-        </grid>
-
-        <!-- Pinned Pagination Toolbar -->
-        <hlayout valign="middle" hflex="1" style="flex: 0 0 auto; margin-top: 10px;">
-            <space hflex="1" />
-            <hlayout spacing="6px" sclass="cts-pagination-wrapper">
-                <button id="btnFirstPage" label="«" sclass="pg-nav-btn" tooltiptext="First Page" />
-                <button id="btnPrevPage" label="‹" sclass="pg-nav-btn" tooltiptext="Previous Page" />
-                <intbox id="ibCurrentPage" value="1" sclass="pg-current-input" />
-                <label id="lblTotalPages" value="/ 1" sclass="pg-total-label" />
-                <button id="btnNextPage" label="›" sclass="pg-nav-btn" tooltiptext="Next Page" />
-                <button id="btnLastPage" label="»" sclass="pg-nav-btn" tooltiptext="Last Page" />
-            </hlayout>
-        </hlayout>
-    </panelchildren>
-</panel>
-                        </vlayout>
-
-                        <!-- ========================================================================= -->
-                        <!-- 2. SCREEN 2: ADD USER VIEW                                                -->
-                        <!-- ========================================================================= -->
-                        <vlayout id="viewAddUser" visible="false" vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;" spacing="18px">
-                            <vlayout sclass="cts-section-header" spacing="2px">
-                                <label value="Add User" sclass="cts-main-title" />
-                                <label value="Create a new system user and assign the appropriate role." sclass="cts-main-subtitle" />
-                            </vlayout>
-
-                            <panel sclass="cts-card-container" hflex="1">
-                                <panelchildren>
-                                    <vlayout spacing="16px">
-                                        <label value="User Details" sclass="cts-card-title" />
-                                        <label value="Enter the user's basic information and access role." sclass="cts-card-subtitle" />
-
-                                        <grid sclass="cts-form-grid" style="border:none;" hflex="1">
-                                            <columns>
-                                                <column hflex="1" />
-                                                <column hflex="1" />
-                                            </columns>
-                                            <rows>
-                                                <row style="border:none; background:transparent;">
-                                                    <vlayout spacing="6px">
-                                                        <label value="EMPLOYEE ID" sclass="cts-input-label" />
-                                                        <textbox id="txtAddEmployeeId" readonly="true" placeholder="Auto generated" sclass="cts-textbox cts-textbox-disabled" hflex="1" />
-                                                    </vlayout>
-                                                    <vlayout spacing="6px">
-                                                        <label value="USER NAME" sclass="cts-input-label" />
-                                                        <textbox id="txtAddUsername" placeholder="Enter user name" sclass="cts-textbox" hflex="1" />
-                                                    </vlayout>
-                                                </row>
-                                                <row style="border:none; background:transparent;">
-                                                    <vlayout spacing="6px">
-                                                        <label value="EMAIL" sclass="cts-input-label" />
-                                                        <textbox id="txtAddEmail" placeholder="Enter email address" sclass="cts-textbox" hflex="1" />
-                                                    </vlayout>
-                                                    <vlayout spacing="6px">
-                                                        <label value="PHONE" sclass="cts-input-label" />
-                                                        <textbox id="txtAddPhone" placeholder="Enter phone number" sclass="cts-textbox" hflex="1" />
-                                                    </vlayout>
-                                                </row>
-                                                <row style="border:none; background:transparent;">
-                                                    <vlayout spacing="6px">
-                                                        <label value="PASSWORD" sclass="cts-input-label" />
-                                                        <hlayout valign="middle" hflex="1">
-                                                            <textbox id="txtAddPassword" type="password" placeholder="Create temporary password" sclass="cts-textbox" hflex="1" />
-                                                            <a id="btnTogglePassword" label="Show" sclass="cts-toggle-pw-btn" />
-                                                        </hlayout>
-                                                    </vlayout>
-                                                    <vlayout spacing="6px">
-                                                        <label value="ROLE" sclass="cts-input-label" />
-                                                        <combobox id="cmbAddRole" readonly="true" placeholder="Select role" sclass="cts-combobox" hflex="1" />
-                                                    </vlayout>
-                                                </row>
-                                            </rows>
-                                        </grid>
-
-                                        <hlayout spacing="12px" style="margin-top: 16px;">
-                                            <button id="btnSubmitAddUser" label="CREATE USER" sclass="cts-btn-primary-action" />
-                                            <button id="btnClearAddForm" label="CLEAR" sclass="cts-btn-secondary-action" />
-                                            <button id="btnCancelAdd" label="CANCEL" sclass="cts-btn-secondary-action" />
-                                        </hlayout>
-
-                                        
-                                    </vlayout>
-                                </panelchildren>
-                            </panel>
-                        </vlayout>
-
-                        <!-- ========================================================================= -->
-                        <!-- 3. SCREEN 3: MODIFY USER VIEW                                             -->
-                        <!-- ========================================================================= -->
-                        <vlayout id="viewModifyUser" visible="false" vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;" spacing="18px">
-                            <vlayout sclass="cts-section-header" spacing="2px">
-                                <label value="Modify User" sclass="cts-main-title" />
-                                <label value="Manage user status and role." sclass="cts-main-subtitle" />
-                            </vlayout>
-
-                            <panel sclass="cts-card-container" hflex="1">
-                                <panelchildren>
-                                    <vlayout spacing="18px">
-                                        <label value="User Details" sclass="cts-card-title" />
-
-                                        <grid sclass="cts-form-grid" style="border:none;" hflex="1">
-                                            <columns>
-                                                <column hflex="1" />
-                                                <column hflex="1" />
-                                            </columns>
-                                            <rows>
-                                                <row style="border:none; background:transparent;">
-                                                    <vlayout spacing="6px">
-                                                        <label value="EMPLOYEE ID" sclass="cts-input-label" />
-                                                        <textbox id="txtModEmployeeId" readonly="true" sclass="cts-textbox cts-textbox-disabled" hflex="1" />
-                                                    </vlayout>
-                                                    <vlayout spacing="6px">
-                                                        <label value="USER NAME" sclass="cts-input-label" />
-                                                        <textbox id="txtModUsername" readonly="true" sclass="cts-textbox cts-textbox-disabled" hflex="1" />
-                                                    </vlayout>
-                                                </row>
-                                                <row style="border:none; background:transparent;">
-                                                    <vlayout spacing="6px">
-                                                        <label value="EMAIL" sclass="cts-input-label" />
-                                                        <textbox id="txtModEmail" readonly="true" sclass="cts-textbox cts-textbox-disabled" hflex="1" />
-                                                    </vlayout>
-                                                    <vlayout spacing="6px">
-                                                        <label value="CURRENT ROLE" sclass="cts-input-label" />
-                                                        <textbox id="txtModCurrentRole" readonly="true" sclass="cts-textbox cts-textbox-disabled" hflex="1" />
-                                                    </vlayout>
-                                                </row>
-                                            </rows>
-                                        </grid>
-
-                                       <!-- Action Switcher -->
-<vlayout spacing="6px">
-    <label value="ACTION" sclass="cts-input-label" />
-    <hlayout spacing="12px">
-        <button id="btnActionEnable" label="ENABLE" sclass="cts-segment-btn" />
-        <button id="btnActionDisable" label="DISABLE" sclass="cts-segment-btn" />
-        <button id="btnActionChangeRole" label="CHANGE ROLE" sclass="cts-segment-btn cts-segment-btn-active" />
-    </hlayout>
-</vlayout>
-
-<!-- New Role Container -->
-<vlayout id="divNewRoleContainer" visible="true" spacing="6px" style="margin-top: 14px;">
-    <label value="NEW ROLE" sclass="cts-input-label" />
-    <hlayout spacing="16px" valign="middle">
-        <combobox id="cmbNewRole" readonly="true" placeholder="Select new role" sclass="cts-combobox" width="280px" />
-        <vlayout spacing="2px">
-            <label value="Select a different role from the list." sclass="cts-side-note" />
-            <label value="The current role is excluded from the choices." sclass="cts-side-note" />
-        </vlayout>
-    </hlayout>
-</vlayout>
+				<!-- Non-Scrollable Content Area -->
+				<center border="none" autoscroll="false"
+					style="overflow: hidden; background-color: #f1f5f9;">
+					<vlayout sclass="cts-content-wrapper" vflex="1"
+						hflex="1" spacing="0">
 
 
-                                        <hlayout spacing="12px" style="margin-top: 16px;">
-                                            <button id="btnSaveModifications" label="SAVE" sclass="cts-btn-primary-action" />
-                                            <button id="btnCancelModifications" label="CANCEL" sclass="cts-btn-secondary-action" />
-                                        </hlayout>
-                                    </vlayout>
-                                </panelchildren>
-                            </panel>
-                        </vlayout>
+						<vlayout id="viewUserList" visible="true"
+							vflex="1" hflex="1" spacing="12px"
+							style="padding: 16px 28px 10px 28px; box-sizing: border-box; overflow: hidden;">
 
-                        <!-- Pinned Page Footer -->
-                        <hlayout sclass="cts-portal-footer" hflex="1" style="padding: 6px 28px 10px 28px; box-sizing: border-box;">
-                            <label value="Express Clear CTS · Admin Portal" sclass="cts-footer-left" />
-                            <label value="User Management" sclass="cts-footer-right" />
-                        </hlayout>
+							<!-- Top Header: Title & Add User Button (Fixed) -->
+							<hlayout valign="middle" hflex="1">
+								<vlayout spacing="2px" hflex="1">
+									<label value="User Management"
+										sclass="cts-main-title" style="font-size: 20px;" />
+									<label
+										value="Manage system users, roles and access."
+										sclass="cts-main-subtitle" style="margin-top: 2px;" />
+								</vlayout>
+								<button id="btnAddUser"
+									label="+ ADD USER" sclass="cts-btn-add-user" />
+							</hlayout>
 
-                    </vlayout>
-                </center>
-            </borderlayout>
-        </center>
-    </borderlayout>
+							<!-- Fixed Search & Filter Card (Does NOT scroll) -->
+							<panel sclass="cts-filter-panel" hflex="1"
+								border="none"
+								style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+								<panelchildren
+									style="padding: 14px 20px;">
+									<vlayout spacing="10px" hflex="1">
+										<label
+											value="Search &amp; Filter Users"
+											style="font-size: 13px; font-weight: 700; color: #1e293b;" />
+
+										<hlayout spacing="14px"
+											valign="bottom" hflex="1">
+											<!-- Search Employee Field -->
+											<vlayout spacing="4px"
+												hflex="4">
+												<label
+													value="SEARCH EMPLOYEE" sclass="cts-input-label"
+													style="font-size: 10px; margin-bottom: 0;" />
+												<textbox
+													id="txtSearchQuery"
+													placeholder="🔍  Employee ID, username or name" hflex="1"
+													height="34px"
+													style="border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 0 10px; font-size: 12.5px; color: #1e293b; box-sizing: border-box;" />
+											</vlayout>
+
+											<!-- Role Dropdown -->
+											<vlayout spacing="4px"
+												hflex="2">
+												<label value="ROLE"
+													sclass="cts-input-label"
+													style="font-size: 10px; margin-bottom: 0;" />
+												<combobox
+													id="cmbRoleFilter" readonly="true" hflex="1"
+													height="34px">
+													<comboitem
+														label="All Roles" value="ALL" />
+												</combobox>
+											</vlayout>
+
+											<!-- Status Dropdown -->
+											<vlayout spacing="4px"
+												hflex="2">
+												<label value="STATUS"
+													sclass="cts-input-label"
+													style="font-size: 10px; margin-bottom: 0;" />
+												<combobox
+													id="cmbStatusFilter" readonly="true" hflex="1"
+													height="34px">
+													<comboitem
+														label="All Status" value="ALL" />
+													<comboitem
+														label="Active" value="ACTIVE" />
+													<comboitem
+														label="Inactive" value="INACTIVE" />
+												</combobox>
+											</vlayout>
+
+											<!-- Action Buttons -->
+											<hlayout spacing="8px"
+												valign="bottom">
+												<button id="btnSearch"
+													label="SEARCH" sclass="cts-btn-filter-search" />
+												<button
+													id="btnClearFilter" label="CLEAR"
+													sclass="cts-btn-filter-clear" />
+											</hlayout>
+										</hlayout>
+									</vlayout>
+								</panelchildren>
+							</panel>
+
+							
+							<!-- Users Table Card -->
+							
+							<panel sclass="cts-table-panel" vflex="1"
+								hflex="1" border="none"
+								style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
+								<panelchildren
+									style="padding: 14px 18px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+									<hlayout valign="middle" hflex="1"
+										style="flex: 0 0 auto; margin-bottom: 10px;">
+										<label value="Users"
+											style="font-size: 14px; font-weight: 700; color: #1e293b;"
+											hflex="1" />
+										<label id="lblUserCount"
+											value="0 users found"
+											style="font-size: 11.5px; color: #64748b;" />
+									</hlayout>
+
+									<!-- Scrollable Grid Body -->
+									<grid id="gridUsers"
+										sclass="cts-custom-grid" span="true" vflex="1" hflex="1"
+										emptyMessage="No users found.">
+										<columns sizable="false">
+											<column label="EMPLOYEE ID"
+												hflex="2" />
+											<column label="USER NAME"
+												hflex="2" />
+											<column label="EMAIL"
+												hflex="3" />
+											<column label="PHONE"
+												hflex="2" />
+											<column label="ROLE"
+												hflex="2" />
+											<column label="STATUS"
+												hflex="1" align="center" />
+											<column label="ACTION"
+												hflex="2" align="center" />
+										</columns>
+										<rows id="rowsUsers" />
+									</grid>
+
+									<!-- Pinned Pagination Toolbar -->
+									<hlayout valign="middle" hflex="1"
+										style="flex: 0 0 auto; margin-top: 10px;">
+										<space hflex="1" />
+										<hlayout spacing="6px"
+											sclass="cts-pagination-wrapper">
+											<button id="btnFirstPage"
+												label="«" sclass="pg-nav-btn" tooltiptext="First Page" />
+											<button id="btnPrevPage"
+												label="‹" sclass="pg-nav-btn" tooltiptext="Previous Page" />
+											<intbox id="ibCurrentPage"
+												value="1" sclass="pg-current-input" />
+											<label id="lblTotalPages"
+												value="/ 1" sclass="pg-total-label" />
+											<button id="btnNextPage"
+												label="›" sclass="pg-nav-btn" tooltiptext="Next Page" />
+											<button id="btnLastPage"
+												label="»" sclass="pg-nav-btn" tooltiptext="Last Page" />
+										</hlayout>
+									</hlayout>
+								</panelchildren>
+							</panel>
+						</vlayout>
+
+
+						<vlayout id="viewAddUser" visible="false"
+							vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;"
+							spacing="18px">
+							<vlayout sclass="cts-section-header"
+								spacing="2px">
+								<label value="Add User"
+									sclass="cts-main-title" />
+								<label
+									value="Create a new system user and assign the appropriate role."
+									sclass="cts-main-subtitle" />
+							</vlayout>
+
+							<panel sclass="cts-card-container"
+								hflex="1">
+								<panelchildren>
+									<vlayout spacing="16px">
+										<label value="User Details"
+											sclass="cts-card-title" />
+										<label
+											value="Enter the user's basic information and access role."
+											sclass="cts-card-subtitle" />
+
+										<grid sclass="cts-form-grid"
+											style="border:none;" hflex="1">
+											<columns>
+												<column hflex="1" />
+												<column hflex="1" />
+											</columns>
+											<rows>
+												<row
+													style="border:none; background:transparent;">
+													<vlayout
+														spacing="6px">
+														<label
+															value="EMPLOYEE ID" sclass="cts-input-label" />
+														<textbox
+															id="txtAddEmployeeId" readonly="true"
+															placeholder="Auto generated"
+															sclass="cts-textbox cts-textbox-disabled" hflex="1" />
+													</vlayout>
+													<vlayout
+														spacing="6px">
+														<label
+															value="USER NAME" sclass="cts-input-label" />
+														<textbox
+															id="txtAddUsername" placeholder="Enter user name"
+															sclass="cts-textbox" hflex="1" />
+													</vlayout>
+												</row>
+												<row
+													style="border:none; background:transparent;">
+													<vlayout
+														spacing="6px">
+														<label
+															value="EMAIL" sclass="cts-input-label" />
+														<textbox
+															id="txtAddEmail" placeholder="Enter email address"
+															sclass="cts-textbox" hflex="1" />
+													</vlayout>
+													<vlayout
+														spacing="6px">
+														<label
+															value="PHONE" sclass="cts-input-label" />
+														<textbox
+															id="txtAddPhone" placeholder="Enter phone number"
+															sclass="cts-textbox" hflex="1" />
+													</vlayout>
+												</row>
+												<row
+													style="border:none; background:transparent;">
+													<vlayout
+														spacing="6px">
+														<label
+															value="PASSWORD" sclass="cts-input-label" />
+														<hlayout
+															valign="middle" hflex="1">
+															<textbox
+																id="txtAddPassword" type="password"
+																placeholder="Create temporary password"
+																sclass="cts-textbox" hflex="1" />
+															<a
+																id="btnTogglePassword" label="Show"
+																sclass="cts-toggle-pw-btn" />
+														</hlayout>
+													</vlayout>
+													<vlayout
+														spacing="6px">
+														<label
+															value="ROLE" sclass="cts-input-label" />
+														<combobox
+															id="cmbAddRole" readonly="true" placeholder="Select role"
+															sclass="cts-combobox" hflex="1" />
+													</vlayout>
+												</row>
+											</rows>
+										</grid>
+
+										<hlayout spacing="12px"
+											style="margin-top: 16px;">
+											<button
+												id="btnSubmitAddUser" label="CREATE USER"
+												sclass="cts-btn-primary-action" />
+											<button id="btnClearAddForm"
+												label="CLEAR" sclass="cts-btn-secondary-action" />
+											<button id="btnCancelAdd"
+												label="CANCEL" sclass="cts-btn-secondary-action" />
+										</hlayout>
+
+
+									</vlayout>
+								</panelchildren>
+							</panel>
+						</vlayout>
+
+						
+						<vlayout id="viewModifyUser" visible="false"
+							vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;"
+							spacing="18px">
+							<vlayout sclass="cts-section-header"
+								spacing="2px">
+								<label value="Modify User"
+									sclass="cts-main-title" />
+								<label
+									value="Manage user status and role."
+									sclass="cts-main-subtitle" />
+							</vlayout>
+
+							<panel sclass="cts-card-container"
+								hflex="1">
+								<panelchildren>
+									<vlayout spacing="18px">
+										<label value="User Details"
+											sclass="cts-card-title" />
+
+										<grid sclass="cts-form-grid"
+											style="border:none;" hflex="1">
+											<columns>
+												<column hflex="1" />
+												<column hflex="1" />
+											</columns>
+											<rows>
+												<row
+													style="border:none; background:transparent;">
+													<vlayout
+														spacing="6px">
+														<label
+															value="EMPLOYEE ID" sclass="cts-input-label" />
+														<textbox
+															id="txtModEmployeeId" readonly="true"
+															sclass="cts-textbox cts-textbox-disabled" hflex="1" />
+													</vlayout>
+													<vlayout
+														spacing="6px">
+														<label
+															value="USER NAME" sclass="cts-input-label" />
+														<textbox
+															id="txtModUsername" readonly="true"
+															sclass="cts-textbox cts-textbox-disabled" hflex="1" />
+													</vlayout>
+												</row>
+												<row
+													style="border:none; background:transparent;">
+													<vlayout
+														spacing="6px">
+														<label
+															value="EMAIL" sclass="cts-input-label" />
+														<textbox
+															id="txtModEmail" readonly="true"
+															sclass="cts-textbox cts-textbox-disabled" hflex="1" />
+													</vlayout>
+													<vlayout
+														spacing="6px">
+														<label
+															value="CURRENT ROLE" sclass="cts-input-label" />
+														<textbox
+															id="txtModCurrentRole" readonly="true"
+															sclass="cts-textbox cts-textbox-disabled" hflex="1" />
+													</vlayout>
+												</row>
+											</rows>
+										</grid>
+
+										<!-- Action Switcher -->
+										<vlayout spacing="6px">
+											<label value="ACTION"
+												sclass="cts-input-label" />
+											<hlayout spacing="12px">
+												<button
+													id="btnActionEnable" label="ENABLE"
+													sclass="cts-segment-btn" />
+												<button
+													id="btnActionDisable" label="DISABLE"
+													sclass="cts-segment-btn" />
+												<button
+													id="btnActionChangeRole" label="CHANGE ROLE"
+													sclass="cts-segment-btn cts-segment-btn-active" />
+											</hlayout>
+										</vlayout>
+
+										<!-- New Role Container -->
+										<vlayout
+											id="divNewRoleContainer" visible="true" spacing="6px"
+											style="margin-top: 14px;">
+											<label value="NEW ROLE"
+												sclass="cts-input-label" />
+											<hlayout spacing="16px"
+												valign="middle">
+												<combobox
+													id="cmbNewRole" readonly="true"
+													placeholder="Select new role" sclass="cts-combobox"
+													width="280px" />
+												<vlayout
+													spacing="2px">
+													<label
+														value="Select a different role from the list."
+														sclass="cts-side-note" />
+													<label
+														value="The current role is excluded from the choices."
+														sclass="cts-side-note" />
+												</vlayout>
+											</hlayout>
+										</vlayout>
+
+
+										<hlayout spacing="12px"
+											style="margin-top: 16px;">
+											<button
+												id="btnSaveModifications" label="SAVE"
+												sclass="cts-btn-primary-action" />
+											<button
+												id="btnCancelModifications" label="CANCEL"
+												sclass="cts-btn-secondary-action" />
+										</hlayout>
+									</vlayout>
+								</panelchildren>
+							</panel>
+						</vlayout>
+
+						<!-- Pinned Page Footer -->
+						<hlayout sclass="cts-portal-footer" hflex="1"
+							style="padding: 6px 28px 10px 28px; box-sizing: border-box;">
+							<label
+								value="Express Clear CTS · Admin "
+								sclass="cts-footer-left" />
+							<label value="User Management"
+								sclass="cts-footer-right" />
+						</hlayout>
+
+					</vlayout>
+				</center>
+			</borderlayout>
+		</center>
+	</borderlayout>
 </zk>
