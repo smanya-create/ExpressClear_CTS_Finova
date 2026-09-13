@@ -34,7 +34,7 @@
     color: #64748b !important;
     display: block !important;
     margin-top: 4px !important;
-    margin-left: 8px !important; /* Indented line 2 */
+    margin-left: 8px !important;
 }
 
 /* Top Header Right: Spacious Nav Pill */
@@ -178,7 +178,7 @@
     color: #64748b !important;
     display: block !important;
     margin-top: 2px !important;
-    margin-left: 4px !important; /* Indented line 2 */
+    margin-left: 4px !important;
 }
 
 .micr-btn-tab {
@@ -328,6 +328,14 @@
     display: block !important;
 }
 
+.cts-field-lbl-bold {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 2px !important;
+    display: block !important;
+}
+
 .cts-input-text {
     width: 100% !important;
     height: 28px !important;
@@ -394,7 +402,7 @@
     background: #142f50 !important;
 }
 
-/* Highlight Preservation */
+/* Field Highlights */
 .readonly-field {
     background: #f1f5f9 !important;
     border: 1px solid #d5dde8 !important;
@@ -440,34 +448,74 @@
     outline: none !important;
 }
 
-/* Rejection Modal */
-.micr-modal-win {
-    width: 440px !important;
+/* Modal Window (Exact Replication of Data Entry Modal) */
+.cts-modal-window {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.micr-modal-content {
-    padding: 6px !important;
+.cts-modal-window .z-window-content {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
 }
 
-.micr-modal-desc {
+.cts-modal-box {
+    background: #ffffff !important;
+    width: 460px !important;
+    border-radius: 8px !important;
+    padding: 18px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3) !important;
+    box-sizing: border-box !important;
+}
+
+.cts-modal-title-bar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 8px !important;
+}
+
+.cts-modal-heading {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.cts-modal-desc {
     font-size: 12px !important;
     color: #475569 !important;
 }
 
-.micr-modal-footer {
+.cts-modal-footer-bar {
     border-top: 1px solid #e2e8f0 !important;
     padding-top: 10px !important;
+    display: flex !important;
     justify-content: flex-end !important;
+    gap: 8px !important;
 }
 
-.micr-btn-modal {
+.cts-btn-modal-cancel {
     height: 30px !important;
-    padding: 0 12px !important;
-}
-
-.micr-btn-modal-danger {
-    background: #dc2626 !important;
-    border-color: #dc2626 !important;
-    height: 30px !important;
+    font-size: 12px !important;
     padding: 0 14px !important;
+}
+
+.cts-btn-modal-confirm {
+    background: #dc2626 !important;
+    border: 1px solid #dc2626 !important;
+    color: #ffffff !important;
+    height: 30px !important;
+    font-size: 12px !important;
+    padding: 0 14px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+}
+
+.cts-btn-modal-confirm:hover {
+    background: #b91c1c !important;
+    border-color: #b91c1c !important;
 }
