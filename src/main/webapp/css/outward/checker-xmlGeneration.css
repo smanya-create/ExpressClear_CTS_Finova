@@ -3,7 +3,6 @@ html, body {
     padding: 0;
     height: 100%;
     font-family: Arial, sans-serif;
-    background: #eaf2f8;
     font-size: 14px;
 }
 
@@ -87,6 +86,9 @@ html, body {
     margin-top: 8px;
 }
 
+
+/* XML BATCH TABLE */
+
 .xml-batch-table {
     width: 100%;
     box-sizing: border-box;
@@ -96,34 +98,44 @@ html, body {
     overflow: hidden;
 }
 
+
+/* XML HEADER - SAME STYLE AS CHECKER DASHBOARD */
+
 .xml-batch-table .z-listbox-header-bg {
-    background: #1d5689;
+    background: #172554;
     background-image: none;
 }
 
 .xml-batch-table .z-listbox-header {
-    background: #1d5689;
+    background: #172554;
     background-image: none;
 }
 
 .xml-batch-table .z-listbox-header table {
-    background: #1d5689;
+    width: 100%;
+    background: #172554;
+    border-spacing: 0;
+    border-collapse: collapse;
+    border: none;
 }
 
 .xml-batch-table .z-listhead {
     margin: 0;
     padding: 0;
-    background: #1d5689;
+    background: #172554;
     border: none;
 }
 
 .xml-batch-table .z-listheader {
-    height: 46px;
     margin: 0;
     padding: 0;
-    background: #1d5689;
-    border: none;
-    border-right: 1px solid #174a78;
+    background: #172554;
+    background-image: none;
+    color: #ffffff;
+    border-right: none;
+    border-bottom: none;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .xml-batch-table .z-listheader:last-child {
@@ -132,15 +144,22 @@ html, body {
 
 .xml-batch-table .z-listheader-content {
     margin: 0;
-    padding: 14px 12px;
-    background: #1d5689;
+    padding: 15px 12px;
+    box-sizing: border-box;
+    background: #172554;
+    background-image: none;
     color: #ffffff;
+    border: none;
+    box-shadow: none;
+    outline: none;
     font-size: 10px;
-    font-weight: bold;
+    font-weight: 800;
     text-align: center;
-    letter-spacing: 0.5px;
     white-space: nowrap;
 }
+
+
+/* XML TABLE ROWS */
 
 .xml-batch-table .z-listitem {
     min-height: 62px;
@@ -234,6 +253,9 @@ html, body {
     padding: 0;
 }
 
+
+/* GENERATE BUTTON */
+
 .generate-button {
     width: 130px;
     min-width: 130px;
@@ -254,6 +276,9 @@ html, body {
     background: #174a78;
     border-color: #174a78;
 }
+
+
+/* GENERATED SECTION */
 
 .generated-section {
     width: 100%;
@@ -316,6 +341,9 @@ html, body {
     color: #8aa0b5;
 }
 
+
+/* SEND BUTTON */
+
 .send-button {
     width: 130px;
     min-width: 130px;
@@ -334,6 +362,9 @@ html, body {
     border-color: #174a78;
 }
 
+
+/* XML INFO MESSAGE */
+
 .xml-info-message {
     width: 100%;
     min-height: 28px;
@@ -348,6 +379,9 @@ html, body {
     font-size: 8px;
     color: #7590a8;
 }
+
+
+/* ZK LAYOUT */
 
 .z-borderlayout {
     border: none;
