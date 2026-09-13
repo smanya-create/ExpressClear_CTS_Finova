@@ -111,15 +111,7 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 		return outwardChequeDAO.updateChequeStatus(outwardChequeId, chequeStatus);
 	}
 
-	@Override
-	public List<OutwardCheque> getOutwardMicrRepairCheques(String outwardBatchId) {
-		return outwardChequeDAO.getOutwardMicrRepairCheques(outwardBatchId);
-	}
-
-	@Override
-	public void saveOutwardMicrRepair(OutwardCheque cheque) {
-		outwardChequeDAO.saveOutwardMicrRepair(cheque);
-	}
+	
 
 	@Override
 	public OutwardCheque saveMakerCheque(String scannedBatchId, OutwardCheque cheque) {
