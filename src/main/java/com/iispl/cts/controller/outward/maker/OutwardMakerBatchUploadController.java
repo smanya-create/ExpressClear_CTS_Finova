@@ -34,6 +34,7 @@ import com.iispl.cts.dto.BatchValidationData;
 import com.iispl.cts.dto.ValidationResult;
 import com.iispl.cts.entity.outward.ScanBatch;
 import com.iispl.cts.entity.outward.ScanCheque;
+import com.iispl.cts.outward.batchvalidator.MicrCodeHelper;
 import com.iispl.cts.parser.BatchXmlParser;
 import com.iispl.cts.service.outward.BatchValidationService;
 import com.iispl.cts.service.outward.ScanService;
@@ -527,11 +528,15 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             // STEP 8
             // VALIDATION PASSED → SAVE
             // =================================================
+            MicrCodeHelper micrCodeHelper = new MicrCodeHelper();
+            List<ScanCheque> micrChequeList =
+                    micrCodeHelper.checkMicrCode(chequeList);
+
 
             String savedBatchId =
                     scanService.saveScanBatch(
                             scanBatch,
-                            chequeList);
+                            micrChequeList);
 
             if (savedBatchId == null
                     || savedBatchId.trim().isEmpty()) {

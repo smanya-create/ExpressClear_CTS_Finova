@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.ScanChequeDAO;
+import com.iispl.cts.dto.MicrRepairChequeDTO;
 import com.iispl.cts.entity.outward.ScanCheque;
 
 public class ScanChequeDAOImpl implements ScanChequeDAO {
@@ -276,93 +277,6 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 					e);
 		}
 	}
-
-	@Override
-	public List<ScanCheque> getScanMicrRepairCheques(
-			String scannedBatchId) {
-
-		if (scannedBatchId == null
-				|| scannedBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Scanned batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT "
-				+ "scanned_cheque_id, scanned_batch_id, cheque_number, "
-				+ "micr_code, drawee_name, drawee_account_number, "
-				+ "payee_name, payee_account_number, cheque_amount, "
-				+ "cheque_date, cheque_status, account_id, created_at, "
-				+ "city_code, bank_code, branch_code, "
-				+ "cheque_image_front, cheque_image_back "
-				+ "FROM scan_cheque "
-				+ "WHERE scanned_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) = 'PENDING_MICR_REPAIR' "
-				+ "ORDER BY scanned_cheque_id";
-
-		List<ScanCheque> chequeList = new ArrayList<>();
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
-
-			statement.setString(1, scannedBatchId);
-
-			try (ResultSet resultSet = statement.executeQuery()) {
-
-				while (resultSet.next()) {
-
-					ScanCheque cheque = new ScanCheque();
-
-					cheque.setScannedChequeId(
-							resultSet.getString("scanned_cheque_id"));
-					cheque.setScannedBatchId(
-							resultSet.getString("scanned_batch_id"));
-					cheque.setChequeNumber(
-							resultSet.getString("cheque_number"));
-					cheque.setMicrCode(
-							resultSet.getString("micr_code"));
-					cheque.setDraweeName(
-							resultSet.getString("drawee_name"));
-					cheque.setDraweeAccountNumber(
-							resultSet.getString("drawee_account_number"));
-					cheque.setPayeeName(
-							resultSet.getString("payee_name"));
-					cheque.setPayeeAccountNumber(
-							resultSet.getString("payee_account_number"));
-					cheque.setChequeAmount(
-							resultSet.getBigDecimal("cheque_amount"));
-					cheque.setChequeDate(
-							resultSet.getDate("cheque_date"));
-					cheque.setChequeStatus(
-							resultSet.getString("cheque_status"));
-					cheque.setAccountId(
-							resultSet.getString("account_id"));
-					cheque.setCreatedAt(
-							resultSet.getTimestamp("created_at"));
-					cheque.setCityCode(
-							resultSet.getString("city_code"));
-					cheque.setBankCode(
-							resultSet.getString("bank_code"));
-					cheque.setBranchCode(
-							resultSet.getString("branch_code"));
-					cheque.setChequeImageFront(
-							resultSet.getString("cheque_image_front"));
-					cheque.setChequeImageBack(
-							resultSet.getString("cheque_image_back"));
-
-					chequeList.add(cheque);
-				}
-			}
-
-			return chequeList;
-
-		} catch (SQLException e) {
-			throw new RuntimeException(
-					"Error while retrieving MICR repair cheques "
-							+ "for batch: " + scannedBatchId,
-					e);
-		}
-	}
-
 	@Override
 	public int getDataEnteredCountByBatchId(
 			String scannedBatchId) {
@@ -403,52 +317,7 @@ public class ScanChequeDAOImpl implements ScanChequeDAO {
 
 		return 0;
 	}
+	
 
-	@Override
-	public void saveScanMicrRepair(ScanCheque cheque) {
-
-		if (cheque == null) {
-			throw new IllegalArgumentException(
-					"Scan cheque cannot be null");
-		}
-
-		if (cheque.getScannedChequeId() == null
-				|| cheque.getScannedChequeId().trim().isEmpty()) {
-			throw new IllegalArgumentException(
-					"Scanned cheque ID cannot be null or empty");
-		}
-
-		String sql = "UPDATE scan_cheque SET "
-				+ "micr_code = ?, "
-				+ "city_code = ?, "
-				+ "bank_code = ?, "
-				+ "branch_code = ?, "
-				+ "cheque_status = ? "
-				+ "WHERE scanned_cheque_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
-
-			statement.setString(1, cheque.getMicrCode());
-			statement.setString(2, cheque.getCityCode());
-			statement.setString(3, cheque.getBankCode());
-			statement.setString(4, cheque.getBranchCode());
-			statement.setString(5, cheque.getChequeStatus());
-			statement.setString(6, cheque.getScannedChequeId());
-
-			int rowsUpdated = statement.executeUpdate();
-
-			if (rowsUpdated == 0) {
-				throw new IllegalStateException(
-						"Scan cheque not found for ID: "
-								+ cheque.getScannedChequeId());
-			}
-
-		} catch (SQLException e) {
-			throw new RuntimeException(
-					"Failed to save MICR repair for scan cheque: "
-							+ cheque.getScannedChequeId(),
-					e);
-		}
-	}
+	
 }

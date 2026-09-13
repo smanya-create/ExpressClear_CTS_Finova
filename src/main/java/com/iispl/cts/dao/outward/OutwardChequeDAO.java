@@ -31,9 +31,5 @@ public interface OutwardChequeDAO {
 
 	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
 
-	List<OutwardCheque> getOutwardMicrRepairCheques(String outwardBatchId);
-
-	void saveOutwardMicrRepair(OutwardCheque cheque);
-
 	List<OutwardCheque> getOnHoldCheques(String outwardBatchId);
 }
