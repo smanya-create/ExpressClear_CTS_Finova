@@ -1,20 +1,25 @@
 body {
-    background-color: #EAF4FB !important;
+    background-color: #FFFFFF !important;
 }
 
-.checker-dashboard-center {
-    background-color: #EAF4FB !important;
+.checker-reports-center {
+    background-color: #FFFFFF !important;
     --zk-paging-background-color: transparent !important;
 }
 
-.checker-dashboard-center .z-center-body {
-    background-color: #EAF4FB !important;
+.checker-reports-center .z-center-body {
+    background-color: #FFFFFF !important;
 }
 
-.checker-dashboard-content {
-    background-color: #EAF4FB !important;
+.checker-reports-content {
+    background-color: #FFFFFF !important;
     min-height: 100% !important;
 }
+
+
+/* =========================================================
+   REPORT TABLE HEADER
+   ========================================================= */
 
 .listbox-header .z-listhead {
     height: 46px !important;
@@ -48,9 +53,15 @@ body {
     text-overflow: clip !important;
 }
 
+
+/* =========================================================
+   REPORT TABLE ROWS
+   ========================================================= */
+
 .listbox-header .z-listitem {
     height: 40px !important;
     min-height: 40px !important;
+    background: #FFFFFF !important;
 }
 
 .listbox-header .z-listcell {
@@ -59,6 +70,7 @@ body {
     padding: 0 !important;
     vertical-align: middle !important;
     text-align: center !important;
+    background: #FFFFFF !important;
 }
 
 .listbox-header .z-listcell-content {
@@ -77,13 +89,18 @@ body {
 }
 
 .listbox-header .z-listitem:hover {
-    background: transparent !important;
+    background: #FFFFFF !important;
 }
 
 .listbox-header .z-listcell-content > * {
     margin-left: auto !important;
     margin-right: auto !important;
 }
+
+
+/* =========================================================
+   BATCH STATUS
+   ========================================================= */
 
 .batch-status {
     display: inline-block !important;
@@ -112,54 +129,93 @@ body {
     display: inline-block !important;
     box-sizing: border-box !important;
 }
+
 .batch-status-pending {
     background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
     border: 1px solid #F5A900 !important;
     color: #7A4500 !important;
 }
 
-.z-listbox-paging {
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    border-top: 0 !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
+
+/* =========================================================
+   REPORT BUTTONS
+   ========================================================= */
+
+.rrf-button,
+.bsf-button {
+    background: #1B4A8F !important;
+    color: white !important;
+    border: 1px solid #163D73 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    padding: 2px 8px !important;
+    height: 22px !important;
+    line-height: 18px !important;
+    min-width: 60px !important;
+    text-align: center !important;
+    display: inline-block !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
+}
+
+.rrf-button:hover,
+.bsf-button:hover {
+    background: #163D73 !important;
+}
+
+
+/* =========================================================
+   LISTBOX WHITE BACKGROUND
+   ========================================================= */
+
+.listbox-header,
+.listbox-header .z-listbox-body,
+.listbox-header .z-listbox-footer {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+   Same as checker-dashboard.css
+   ========================================================= */
+
+.z-listbox-paging,
+.z-paging,
+.z-paging-body {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .z-listbox-paging .z-paging {
-    background: transparent !important;
-    background-color: transparent !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     border: none !important;
     box-shadow: none !important;
-}
-
-.z-listbox-paging .z-paging-button {
-    background: transparent !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-.z-listbox-paging .z-paging-button:hover {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
-.z-listbox-paging .z-paging-input {
-    background: white !important;
-    border: 1px solid #D0D7DE !important;
 }
 
 .z-paging {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     height: 28px !important;
     min-height: 28px !important;
     padding: 0 6px !important;
     position: relative !important;
     box-sizing: border-box !important;
-    background: transparent !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 0 !important;
 }
 
 .z-paging-button {
@@ -172,8 +228,15 @@ body {
     line-height: 20px !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    background: transparent !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     border: none !important;
+    box-shadow: none !important;
+}
+
+.z-paging-button:hover {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
 }
 
 .z-paging-input {
@@ -186,6 +249,9 @@ body {
     font-size: 11px !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #D0D7DE !important;
 }
 
 .z-paging-text {
@@ -198,13 +264,30 @@ body {
 
 .z-paging-info {
     position: absolute !important;
-    right: 6px !important;
-    top: 0 !important;
-    height: 28px !important;
-    line-height: 28px !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    height: auto !important;
+    line-height: normal !important;
     font-size: 11px !important;
     margin: 0 !important;
     padding: 0 !important;
     white-space: nowrap !important;
     display: block !important;
+}
+
+
+/* =========================================================
+   FINAL LISTBOX OVERRIDES
+   ========================================================= */
+
+.z-listbox,
+.z-listbox-body,
+.z-listbox-footer,
+.z-listbox-paging,
+.z-paging,
+.z-paging-body {
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border: none !important;
 }

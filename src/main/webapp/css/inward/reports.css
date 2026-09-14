@@ -1,56 +1,94 @@
-.checker-reports-center {
-    background-color: #EAF4FB !important;
+html,
+body,
+.checker-reports-center,
+.checker-reports-center *,
+.checker-reports-content,
+.checker-reports-content *,
+.report-card,
+.report-card * {
+    background-image: none !important;
+    box-shadow: none !important;
 }
 
-.checker-reports-center .z-center-body {
-    background-color: #EAF4FB !important;
+html,
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.checker-reports-center,
+.checker-reports-content,
+.report-card,
+.compact-report-listbox,
+.compact-report-listbox .z-listbox-body,
+.compact-report-listbox .z-listbox-body-inner,
+.compact-report-listbox .z-listbox-footer,
+.compact-report-listbox .z-listbox-paging,
+.compact-report-listbox .z-paging,
+.compact-report-listbox .z-paging-body {
+    background: #fff !important;
+}
+
+.checker-reports-center,
+.checker-reports-content,
+.report-card {
+    border: none !important;
 }
 
 .checker-reports-content {
-    background-color: #EAF4FB !important;
+    width: 100% !important;
     min-height: 100% !important;
+    box-sizing: border-box !important;
 }
 
+/* Table Header */
+.compact-report-listbox .z-listhead,
+.compact-report-listbox .z-listheader,
 .listbox-header .z-listheader {
     background: #1B4A8F !important;
+    background-image: none !important;
     border-bottom: 1px solid #163D73 !important;
 }
 
+.compact-report-listbox .z-listheader-content,
 .listbox-header .z-listheader-content {
-    color: white !important;
+    color: #fff !important;
     font-weight: bold !important;
-    font-size: 14px !important;
+    font-size: 12px !important;
+    text-align: center !important;
 }
 
-.compact-report-listbox .z-listitem {
+/* Rows */
+.compact-report-listbox .z-listitem,
+.compact-report-listbox .z-listcell {
     height: 42px !important;
     min-height: 42px !important;
+    background: #fff !important;
 }
 
-.compact-report-listbox .z-listitem .z-listcell {
-    height: 42px !important;
-    min-height: 42px !important;
+.compact-report-listbox .z-listitem:hover {
+    background: #fff !important;
+}
+
+.compact-report-listbox .z-listcell {
     padding: 0 8px !important;
     vertical-align: middle !important;
 }
 
-.compact-report-listbox .z-listitem .z-listcell-content {
+/* Cell Content */
+.compact-report-listbox .z-listcell-content {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     height: 32px !important;
     padding: 6px !important;
-    font-size: 10px !important;
+    font-size: 12px !important;
     line-height: normal !important;
-    vertical-align: middle !important;
 }
 
-.compact-report-listbox .z-listitem .z-listcell-content * {
-    font-size: 14px !important;
-    line-height: normal !important;
-    vertical-align: middle !important;
-}
-
+/* Buttons */
 .compact-report-listbox .z-listitem .z-button {
     height: 26px !important;
     min-height: 26px !important;
@@ -60,45 +98,62 @@
     margin: 0 !important;
 }
 
-.compact-report-listbox .z-listitem:hover {
-    background: transparent !important;
+.rrf-button,
+.bsf-button {
+    background: #1B4A8F !important;
+    color: #fff !important;
+    border: 1px solid #163D73 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    padding: 3px 10px !important;
+    height: 26px !important;
+    box-shadow: none !important;
 }
-.z-listbox-paging {
-    background: transparent !important;
-    background-color: transparent !important;
+
+.rrf-button:hover,
+.bsf-button:hover {
+    background: #163D73 !important;
+}
+
+/* ==========================================================================
+   PAGINATION STYLES (CENTERED, BORDERLESS & SMALL SIZE)
+   ========================================================================== */
+
+.z-listbox-paging,
+.z-paging,
+.z-paging-body {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .z-listbox-paging .z-paging {
-    background: transparent !important;
-    background-color: #EAF4FB !important;
-    border: none !important;
-}
-
-.z-listbox-paging .z-paging-button {
-    background: transparent !important;
-    background-color: #EAF4FB !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-.z-listbox-paging .z-paging-button:hover {
-    background: #EAF4FB !important;
-    background-color: #EAF4FB !important;
-}
-
-.z-listbox-paging .z-paging-input {
-    background: #EAF4FB !important;
-    border: 1px solid #D0D7DE !important;
-}
-
 .z-paging {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     height: 28px !important;
     min-height: 28px !important;
     padding: 0 6px !important;
     position: relative !important;
     box-sizing: border-box !important;
-    background: #EAF4FB !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 0 !important;
 }
 
 .z-paging-button {
@@ -111,8 +166,15 @@
     line-height: 20px !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    background: #EAF4FB !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     border: none !important;
+    box-shadow: none !important;
+}
+
+.z-paging-button:hover {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
 }
 
 .z-paging-input {
@@ -125,6 +187,9 @@
     font-size: 11px !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #D0D7DE !important;
 }
 
 .z-paging-text {
@@ -137,13 +202,36 @@
 
 .z-paging-info {
     position: absolute !important;
-    right: 6px !important;
-    top: 0 !important;
-    height: 28px !important;
-    line-height: 28px !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    height: auto !important;
+    line-height: normal !important;
     font-size: 11px !important;
     margin: 0 !important;
     padding: 0 !important;
     white-space: nowrap !important;
     display: block !important;
+}
+
+
+.z-listbox,
+.z-listbox-body,
+.z-listbox-footer,
+.z-listbox-paging,
+.z-paging,
+.z-paging-body {
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border: none !important;
+}
+/* Keep table header blue */
+.checker-reports-center .compact-report-listbox .z-listhead,
+.checker-reports-center .compact-report-listbox .z-listheader {
+    background: #1B4A8F !important;
+}
+
+.checker-reports-center .compact-report-listbox .z-listheader-content {
+    background: transparent !important;
+    color: #fff !important;
 }

@@ -37,6 +37,11 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	private A navInwardMicr;
 	private A navInwardDataEntry;
 	private A navInwardUnprocessed;
+	
+	// Inward Checker Nav Links
+	private A navInwardCheckerDash;
+	private A navVerification;
+	private A navInwardCheckerReports;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -275,22 +280,21 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 		
 	// Inward Checker Navigation Actions
+
+	// Inward Checker Navigation Actions
+
 	public void navToInwardCheckerDashboard() {
-		Executions.sendRedirect("/inward/checker/dashboard.zul");
+	    Executions.sendRedirect("/inward/checker/dashboard.zul");
 	}
 
 	public void navToVerification() {
-		Executions.sendRedirect("/inward/checker/verification.zul");
-	}
-
-	public void navToRRF() {
-		Executions.sendRedirect("/inward/checker/return.zul");
+	    Executions.sendRedirect("/inward/checker/verification.zul");
 	}
 
 	public void navToInwardCheckerReports() {
-		Executions.sendRedirect("/inward/checker/reports.zul");
+	    Executions.sendRedirect("/inward/checker/reports.zul");
 	}
-
+	
 	// Global Logout
 	public void onClickLogout() {
 		AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
@@ -308,7 +312,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 			Sessions.getCurrent().invalidate();
 		}
 
-		// Redirect back to login page
+		// Redirect back to login page	
 		Executions.sendRedirect("/common/login.zul");
 	}
 	
@@ -373,5 +377,5 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		if (navInwardDataEntry != null) navInwardDataEntry.setSclass("nav-item");
 		if (navInwardUnprocessed != null) navInwardUnprocessed.setSclass("nav-item");
 	}
-
+	
 }
