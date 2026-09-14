@@ -47,6 +47,7 @@ import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
+import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
@@ -186,17 +187,17 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		inwardChequeService = new InwardChequeServiceImpl();
 
 		sendBackReasonService = new SendBackReasonServiceImpl();
+		
+		inwardBatchService = new InwardBatchServiceImpl();
 
-		// Get reject popup
 		Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
-		// Get Proceed button from popup ID space
+		
 		Button proceedButton = (Button) window.getFellow("btnProceedReject");
 
-		// Get Cancel button from popup ID space
 		Button cancelButton = (Button) window.getFellow("btnCancelReject");
 
-		// Manually register events because popup has its own ID space
+		
 		proceedButton.addEventListener(Events.ON_CLICK, event -> onClick$btnProceedReject());
 
 		cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
@@ -479,7 +480,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	    String status = cheque.getChequeStatus();
 
-	    // Show only for Maker rejection-requested cheques
 	    if (!"REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 	        return;
 	    }
@@ -491,8 +491,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	    }
 
 	    try {
-
-	        // Get details from Service -> DAO
 	        String details =
 	                inwardChequeService.getMakerRejectionRequestDetails(
 	                        chequeId.trim());
@@ -506,14 +504,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        /*
-	         * DAO returns:
-	         *
-	         * rejectedReasonId||remarks
-	         *
-	         * Example:
-	         * 6||check again
-	         */
 
 	        String[] parts = details.split("\\|\\|", -1);
 
@@ -523,7 +513,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	        String remarks =
 	                parts.length > 1 ? parts[1].trim() : "";
 
-	        // Find reason using existing RejectedReasonService
 	        RejectedReason reason = null;
 
 	        List<RejectedReason> reasons =
@@ -544,7 +533,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
-	        // Reason Code
 	        if (lblMakerRejectionReasonCode != null) {
 
 	            if (reason != null) {
@@ -557,7 +545,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
-	        // Reason Name
 	        if (lblMakerRejectionReasonName != null) {
 
 	            if (reason != null) {
@@ -570,7 +557,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
-	        // Remarks
 	        if (lblMakerRejectionRemarks != null) {
 
 	            if (remarks != null && !remarks.isEmpty()) {
@@ -585,7 +571,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
-	        // Show Maker Rejection Request section
+	        
 	        if (makerRejectionRequestSection != null) {
 	            makerRejectionRequestSection.setVisible(true);
 	        }
@@ -637,7 +623,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	        return;
 	    }
 
-	    // Reset image state
 	    chequeImage.setVisible(false);
 	    chequeImage.setSrc(null);
 
@@ -691,12 +676,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        imagePath = imagePath.trim();
 
-	        // Remove leading slash if DB already contains one
 	        if (imagePath.startsWith("/")) {
 	            imagePath = imagePath.substring(1);
 	        }
 
-	        // MICR uses this exact URL structure
 	        String imageSrc = "/Inward-data/" + imagePath;
 
 	        System.out.println(
@@ -858,10 +841,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // CBS VALIDATION
-	        // ---------------------------------------------------------
-
+	      
 	        CbsValidationResult cbsResult = runCbsValidation(cheque);
 
 	        if (!cbsResult.isPassed()) {
@@ -931,11 +911,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	                return;
 	            }
-
-	            // ---------------------------------------------------------
-	            // UPDATE UI
-	            // ---------------------------------------------------------
-
 	            if (lblChequeStatus != null) {
 
 	                lblChequeStatus.setValue("REJECTED");
@@ -958,10 +933,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	            updateVerificationCount();
 
-	            // ---------------------------------------------------------
-	            // CBS FAILURE POPUP
-	            // ---------------------------------------------------------
-
 	            Messagebox.show(
 	                    "CBS validation failed.\n\n"
 	                            + "Cheque has been rejected.\n\n"
@@ -973,10 +944,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // CBS VALIDATION PASSED
-	        // ---------------------------------------------------------
-
+	       
 	        cheque.setChequeStatus("ACCEPTED");
 
 	        boolean updated =
@@ -994,10 +962,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // UPDATE UI
-	        // ---------------------------------------------------------
-
+	      
 	        if (lblChequeStatus != null) {
 
 	            lblChequeStatus.setValue("ACCEPTED");
@@ -1020,10 +985,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        updateVerificationCount();
 
-	        // ---------------------------------------------------------
-	        // SUCCESS POPUP
-	        // ---------------------------------------------------------
-
 	        Messagebox.show(
 	                "Cheque accepted successfully.",
 	                "Verification",
@@ -1043,10 +1004,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                Messagebox.ERROR);
 	    }
 	}
-	
-	
-	
-	
+		
 	private void highlightCbsField(Label field) {
 
 		if (field == null) {
@@ -1786,10 +1744,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // GET CHEQUE
-	        // ---------------------------------------------------------
-
 	        InwardCheque cheque =
 	                inwardChequeService.findById(currentChequeId);
 
@@ -1803,10 +1757,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	            return;
 	        }
-
-	        // ---------------------------------------------------------
-	        // GET SELECTED SEND BACK REASON
-	        // ---------------------------------------------------------
 
 	        SendBackReason selectedReason =
 	                (SendBackReason) selectedItem.getValue();
@@ -1832,10 +1782,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                remarksBox != null
 	                        ? remarksBox.getValue()
 	                        : "";
-
-	        // ---------------------------------------------------------
-	        // DETERMINE MAKER QUEUE
-	        // ---------------------------------------------------------
 
 	        String sendBackStatus;
 
@@ -1865,10 +1811,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // GET CURRENT USER
-	        // ---------------------------------------------------------
-
 	        Object userObject =
 	                Sessions.getCurrent()
 	                        .getAttribute("CTS_USERNAME");
@@ -1880,10 +1822,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	        } else {
 	            sentBackBy = "SYSTEM";
 	        }
-
-	        // ---------------------------------------------------------
-	        // SAVE SEND BACK REQUEST FIRST
-	        // ---------------------------------------------------------
 
 	        boolean requestSaved =
 	                inwardChequeService.saveSendBackRequest(
@@ -1904,10 +1842,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // UPDATE CHEQUE STATUS
-	        // ---------------------------------------------------------
-
+	      
 	        cheque.setChequeStatus(sendBackStatus);
 
 	        boolean updated =
@@ -1925,15 +1860,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	        // ---------------------------------------------------------
-	        // CLOSE POPUP
-	        // ---------------------------------------------------------
-
 	        window.setVisible(false);
-
-	        // ---------------------------------------------------------
-	        // SUCCESS
-	        // ---------------------------------------------------------
 
 	        Messagebox.show(
 	                "Cheque has been sent back to Maker successfully.",
@@ -2175,7 +2102,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			int verified = accepted + rejected;
 
-			// Safety check
 			if (total == 0 || verified != total) {
 
 				Messagebox.show("All cheques must be verified before submitting the batch.", "Verification",
