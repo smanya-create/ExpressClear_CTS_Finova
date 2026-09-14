@@ -111,6 +111,15 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 
 		for (InwardCheque inwardCheque : inwardCheques) {
 
+			String accountId = inwardChequeDAO.findAccountIdByAccountNumber(inwardCheque.getDraweeAccountNumber());
+
+			if (accountId == null || accountId.trim().isEmpty()) {
+				throw new RuntimeException("Account not found for cheque " + inwardCheque.getInwardChequeId()
+						+ ". Drawee account number: " + inwardCheque.getDraweeAccountNumber());
+			}
+
+			inwardCheque.setAccountId(accountId);
+
 			if (!inwardChequeDAO.saveCheque(inwardCheque)) {
 				throw new RuntimeException(
 						"Failed to save cheque " + inwardCheque.getInwardChequeId() + " for batch " + batchId);
@@ -152,7 +161,7 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 
 	@Override
 	public boolean updateProcessingBatchStatus(String batchId, InwardBatchStatus status) {
-		
+
 		return inwardBatchDAO.updateProcessingBatchStatus(batchId, status);
 	}
 }

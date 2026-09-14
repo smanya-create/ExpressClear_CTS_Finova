@@ -34,6 +34,8 @@ public interface InwardChequeService {
 	CbsValidationResult validateCbs(InwardCheque cheque);
 
 	BigDecimal getAccountBalance(String accountNumber);
+	
+	String findAccountIdByAccountNumber(String accountNumber);
 
 	String getBankNameByCode(String bankCode);
 
