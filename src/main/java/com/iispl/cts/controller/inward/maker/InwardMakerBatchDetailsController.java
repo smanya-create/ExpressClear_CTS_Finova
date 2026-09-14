@@ -255,16 +255,9 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 		if (isDataEntryStatus(status)) {
 			Button button = new Button("DATA ENTRY REQUIRED");
-
-			if (doesBatchHavePendingMicrRepair()) {
-				button.setDisabled(true);
-				button.setTooltiptext("Complete all pending MICR Repairs for this batch before starting Data Entry.");
-				button.setSclass("inward-maker-action-button btn-action-disabled");
-			} else {
-				button.setDisabled(false);
-				button.setSclass("inward-maker-action-button");
-				button.addEventListener("onClick", event -> openDataEntry(cheque));
-			}
+			button.setDisabled(false);
+			button.setSclass("inward-maker-action-button");
+			button.addEventListener("onClick", event -> openDataEntry(cheque));
 			return button;
 		}
 
@@ -288,16 +281,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 	private void openDataEntry(InwardCheque cheque) {
 	    if (cheque == null) return;
-
-	    if (doesBatchHavePendingMicrRepair()) {
-	        Messagebox.show(
-	            "This batch still has instruments requiring MICR Repair. Please complete MICR Repair first.",
-	            "Data Entry Blocked",
-	            Messagebox.OK,
-	            Messagebox.EXCLAMATION
-	        );
-	        return;
-	    }
 
 	    String chqId = cheque.getInwardChequeId();
 

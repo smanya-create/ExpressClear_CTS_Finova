@@ -149,7 +149,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private void createBatchRow(DataEntryBatchItemDTO batch) {
         Row row = new Row();
 
-        // 1. Batch ID Link (Identical to MICR Repair)
+        // 1. Batch ID Link
         Label lblBatchId = new Label(batch.getBatchId());
         lblBatchId.setSclass("micr-repair-batch-id");
         lblBatchId.addEventListener("onClick", event -> processBatch(batch));
@@ -167,11 +167,11 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         lblAmount.setSclass("micr-repair-cell-text");
         lblAmount.setStyle("font-weight: 700; color: #0f172a;");
 
-        // 5. Status Badge (Exact Golden Pill from MICR Repair)
+        // 5. Status Badge
         Label lblStatus = new Label("PENDING_MAKER_PROCESS");
         lblStatus.setSclass("micr-repair-status");
 
-        // 6. Action Button (Exact 'OPEN' Navy Button from MICR Repair)
+        // 6. Action Button
         Button btnAction = new Button("OPEN");
         btnAction.setSclass("btn-action-repair");
         btnAction.addEventListener("onClick", event -> processBatch(batch));
@@ -189,7 +189,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-        // Retain batch in Data Entry queue until it is formally submitted to the Checker
+        // Retains batches that need Data Entry OR batches where all cheques are approved and awaiting "Submit to Checker"
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +
@@ -206,14 +206,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                      "FROM inward_batch b " +
                      "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
                      "WHERE b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'REJECTED') " +
-                     "  AND NOT EXISTS ( " +
-                     "      SELECT 1 FROM inward_cheque ic_micr " +
-                     "      WHERE ic_micr.inward_batch_id = b.inward_batch_id " +
-                     "        AND ic_micr.cheque_status IN ('" 
-                     + InwardChequeStatus.MICR_REPAIR_PENDING.name() + "', '" 
-                     + InwardChequeStatus.MICR_REPAIR_IN_PROGRESS.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name() + "') " +
-                     "  ) " +
                      "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status " +
                      "ORDER BY b.inward_batch_id ASC";
 
