@@ -95,20 +95,6 @@ html, body {
     border-radius: 12px;
     overflow: hidden;
 }
-.xml-batch-table .z-listbox-header {
-    overflow: hidden;
-}
-
-.xml-batch-table .z-listbox-header-bg {
-    background: #172554;
-    background-image: none;
-}
-
-.xml-batch-table .z-listbox-header,
-.xml-batch-table .z-listbox-header table {
-    background: #172554;
-    background-image: none;
-}
 
 .xml-batch-table .z-listheader:last-child {
     border-right: none;
@@ -304,8 +290,6 @@ html, body {
 }
 
 
-/* SEND BUTTON */
-
 .send-button {
     width: 130px;
     min-width: 130px;
@@ -339,8 +323,6 @@ html, body {
     color: #7590a8;
 }
 
-
-/* ZK LAYOUT */
 
 .z-borderlayout {
     border: none;
@@ -390,11 +372,183 @@ html, body {
 }
 .xml-batch-table .z-listbox-header-bg,
 .xml-batch-table .z-listbox-header,
-.xml-batch-table .z-listbox-header table,
-.xml-batch-table .z-listbox-header .z-scrollbar,
-.xml-batch-table .z-listbox-header .z-scrollbar-rail,
-.xml-batch-table .z-listbox-header .z-scrollbar-indicator {
-    background: #1d5689;
+.xml-batch-table .z-listbox-header table {
+    background: #172554;
     background-image: none;
     border: none;
+}
+
+.xml-batch-table .z-listbox-body {
+    background: #ffffff;
+    border: none;
+}
+
+.xml-batch-table .z-listbox-header-bg,
+.xml-batch-table .z-listbox-header,
+.xml-batch-table .z-listbox-header table,
+.xml-batch-table .z-listhead,
+.xml-batch-table .z-listheader,
+.xml-batch-table .z-listheader-content {
+    background: #172554;
+    background-image: none;
+    border-top: none;
+    border-bottom: none;
+}
+
+.xml-batch-table .z-listbox-body {
+    background: #ffffff;
+    border: none;
+}
+
+.xml-batch-table .z-listbox-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.xml-batch-table .z-listbox-body {
+    scrollbar-width: none;
+}
+
+.xml-batch-table .z-listbox-header-bg,
+.xml-batch-table .z-listbox-header,
+.xml-batch-table .z-listbox-header table,
+.xml-batch-table .z-listhead {
+    background: #172554;
+    background-image: none;
+    border: none;
+}
+
+.xml-batch-table .z-listbox-header .z-scrollbar-horizontal,
+.xml-batch-table .z-listbox-header .z-scrollbar-vertical {
+    display: none;
+}
+
+.xml-batch-table .z-listbox-body .z-scrollbar-vertical {
+    background: #ffffff;
+    border: none;
+}
+
+.xml-batch-table .z-listbox-body .z-scrollbar-vertical .z-scrollbar-rail {
+    background: #ffffff;
+    border: none;
+}
+
+.xml-batch-table .z-listbox-body .z-scrollbar-vertical .z-scrollbar-indicator {
+    background: #ffffff;
+    border: none;
+}
+
+.npci-success-window {
+    border: none;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.20);
+}
+
+.npci-success-window .z-window-content {
+    padding: 0;
+    background: #ffffff;
+    border: none;
+}
+
+.npci-success-content {
+    padding: 30px;
+    align-items: center;
+    text-align: center;
+}
+
+.npci-success-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.npci-success-icon .z-label {
+    font-size: 28px;
+    font-weight: 700;
+    color: #15803d;
+}
+
+.npci-success-title {
+    font-size: 21px;
+    font-weight: 700;
+    color: #172554;
+}
+
+.npci-success-description {
+    width: 360px;
+    font-size: 13px;
+    line-height: 20px;
+    color: #64748b;
+}
+
+.npci-success-details {
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.npci-detail-row {
+    width: 100%;
+    align-items: center;
+}
+
+.npci-detail-label {
+    width: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+}
+
+.npci-detail-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: left;
+}
+
+.npci-status {
+    font-size: 11px;
+    font-weight: 700;
+    color: #15803d;
+    text-align: left;
+}
+
+.npci-done-button {
+    width: 80px;
+    min-width: 80px;
+    height: 34px;
+    box-sizing: border-box;
+    padding: 0 6px;
+    margin: 0;
+    background: #172554;
+    background-image: none;
+    border: 1px solid #172554;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.npci-done-button:hover {
+    background: #0f1b3d;
+    background-image: none;
+    border-color: #0f1b3d;
+}
+
+.npci-done-button .z-button-content {
+    background: transparent;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 800;
 }

@@ -346,7 +346,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 					makerReturned++;
 
-				} else if ("REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+				} else if ("REJECT_REQUEST".equalsIgnoreCase(status)) {
 
 					rejectionRequests++;
 

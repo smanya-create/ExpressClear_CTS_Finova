@@ -2,9 +2,12 @@ package com.iispl.cts.controller.outward.checker;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -18,6 +21,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Window;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
@@ -281,13 +285,17 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 			loadVerifiedBatches();
 
-			Messagebox.show(
-					"XML sent to NPCI successfully.\n\n"
-					+ "Batch: " + batchId + "\n"
-					+ "File: " + xmlFile.getFileName(),
-					"NPCI",
-					Messagebox.OK,
-					Messagebox.INFORMATION);
+			Map<String, Object> arguments = new HashMap<>();
+
+			arguments.put("batchId", batchId);
+			arguments.put("fileName", xmlFile.getFileName().toString());
+
+			Window popup = (Window) Executions.createComponents(
+			        "/outward/checker/npci-success-popup.zul",
+			        null,
+			        arguments);
+
+			popup.doModal();
 
 		} catch (Exception e) {
 
