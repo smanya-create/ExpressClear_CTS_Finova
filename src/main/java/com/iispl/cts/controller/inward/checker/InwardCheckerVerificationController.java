@@ -41,10 +41,12 @@ import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.SendBackReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
@@ -90,6 +92,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private InwardChequeService inwardChequeService;
 	private RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 	private List<InwardCheque> currentBatchCheques = new ArrayList<>();
+	private final NotificationService notificationService =
+	        NotificationServiceImpl.getInstance();
 	private String currentChequeId;
 	private String currentBatchId;
 	private int currentChequeIndex = 0;
@@ -1697,13 +1701,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			remarks.setValue("");
 
 			window.doModal();
-			loadSendBackReasons(comboBox);
-
-			comboBox.setSelectedItem(null);
-			remarks.setValue("");
-
-			window.doModal();
-
+			
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -1728,10 +1726,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        Comboitem selectedItem =
 	                comboBox.getSelectedItem();
-
-	        // ---------------------------------------------------------
-	        // VALIDATE REASON
-	        // ---------------------------------------------------------
 
 	        if (selectedItem == null) {
 
