@@ -22,6 +22,9 @@ import com.ximpleware.VTDGen;
 import com.ximpleware.VTDNav;
 
 public class InwardBatchXmlParser {
+	
+	
+	
 
 	public ParsedBatchData parse(String npciXmlPath, String ocrXmlPath) throws Exception {
 
@@ -276,9 +279,9 @@ public class InwardBatchXmlParser {
 			inwardCheque.setChequeDate(chequeDate);
 
 			inwardCheque.setChequeStatus(finalChequeStatus);
-
+			
 			inwardCheque.setAccountId(null);
-
+			
 			inwardCheque.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
 			inwardCheque.setCityCode(cityCode);

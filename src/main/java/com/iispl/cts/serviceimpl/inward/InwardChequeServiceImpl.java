@@ -81,6 +81,11 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	}
 
 	@Override
+	public String findAccountIdByAccountNumber(String accountNumber) {
+		return inwardChequeDAO.findAccountIdByAccountNumber(accountNumber);
+	}
+
+	@Override
 	public BigDecimal getAccountBalance(String accountNumber) {
 		return inwardChequeDAO.getAccountBalance(accountNumber);
 	}

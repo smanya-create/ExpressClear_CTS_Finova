@@ -18,6 +18,8 @@ public interface InwardChequeDAO {
 	List<InwardCheque> getAllCheques();
 
 	BigDecimal getAccountBalance(String accountNumber);
+	
+	String findAccountIdByAccountNumber(String accountNumber);
 
 	String getBankNameByCode(String bankCode);
 
