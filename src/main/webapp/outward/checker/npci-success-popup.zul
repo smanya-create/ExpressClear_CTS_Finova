@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+    <window id="successWindow"
+            title=""
+            border="none"
+            width="480px"
+            closable="false"
+            sizable="false"
+            mode="modal"
+            sclass="npci-success-window"
+            apply = "com.iispl.cts.controller.outward.checker.NpciSuccessPopupController">
+
+        <vlayout sclass="npci-success-content"
+                 spacing="12px">
+
+            <div sclass="npci-success-icon">
+                <label value="✓"/>
+            </div>
+
+            <label value="XML Sent Successfully"
+                   sclass="npci-success-title"/>
+
+            <label value="The batch has been successfully sent to NPCI for further processing."
+                   sclass="npci-success-description"/>
+
+            <vlayout sclass="npci-success-details"
+                     spacing="8px">
+
+                <hlayout sclass="npci-detail-row">
+                    <label value="Batch ID"
+                           sclass="npci-detail-label"/>
+                    <label id="lblBatchId"
+                           sclass="npci-detail-value"/>
+                </hlayout>
+
+                <hlayout sclass="npci-detail-row">
+                    <label value="File"
+                           sclass="npci-detail-label"/>
+                    <label id="lblFileName"
+                           sclass="npci-detail-value"/>
+                </hlayout>
+
+                <hlayout sclass="npci-detail-row">
+                    <label value="Status"
+                           sclass="npci-detail-label"/>
+                    <label value="SENT TO NPCI"
+                           sclass="npci-status"/>
+                </hlayout>
+
+            </vlayout>
+
+            <button id="btnDone"
+                    label="DONE"
+                    sclass="npci-done-button"/>
+
+        </vlayout>
+
+    </window>
+
+</zk>
