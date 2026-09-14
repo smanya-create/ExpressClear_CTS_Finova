@@ -1,9 +1,13 @@
 package com.iispl.cts.controller.inward.maker;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.File;
+
 import java.io.InputStream;
+
 import java.net.URLEncoder;
+
 import java.math.BigDecimal;
 
 import java.sql.Timestamp;
@@ -444,7 +448,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		Label dashLabel = new Label("-");
 
-		dashLabel.setStyle("font-size:12px;font-weight:700;color:#334155;");
+		dashLabel.setSclass("batch-action-dash");
 
 		actionCell.appendChild(dashLabel);
 
@@ -954,7 +958,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		Label dashLabel = new Label("-");
 
-		dashLabel.setStyle("font-size:12px;font-weight:700;color:#334155;");
+		dashLabel.setSclass("batch-action-dash");
 
 		actionCell.appendChild(dashLabel);
 
@@ -978,7 +982,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		Label dashLabel = new Label("-");
 
-		dashLabel.setStyle("font-size:12px;font-weight:700;color:#334155;");
+		dashLabel.setSclass("batch-action-dash");
 
 		actionCell.appendChild(dashLabel);
 
@@ -1056,9 +1060,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		validationWindow.setBorder("normal");
 
-		validationWindow
-
-				.setStyle("background:#ffffff;border-radius:8px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,0.20);");
+		validationWindow.setSclass("batch-validation-window");
 
 		Vlayout layout = new Vlayout();
 
@@ -1070,13 +1072,13 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		Label titleLabel = new Label("Validate Batch " + batch.getInwardBatchId());
 
-		titleLabel.setStyle("font-size:18px;font-weight:700;color:#0f172a;margin-bottom:4px;");
+		titleLabel.setSclass("batch-validation-title");
 
 		layout.appendChild(titleLabel);
 
 		Label countLabel = new Label("Expected Count");
 
-		countLabel.setStyle("font-size:12px;font-weight:700;color:#334155;");
+		countLabel.setSclass("batch-validation-label");
 
 		layout.appendChild(countLabel);
 
@@ -1090,7 +1092,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		Label amountLabel = new Label("Expected Amount");
 
-		amountLabel.setStyle("font-size:12px;font-weight:700;color:#334155;");
+		amountLabel.setSclass("batch-validation-label");
 
 		layout.appendChild(amountLabel);
 
@@ -1103,13 +1105,19 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		layout.appendChild(expectedAmount);
 
 		Label messageLabel = new Label("");
+
 		messageLabel.setSclass("batch-validation-message");
+
 		messageLabel.setVisible(false);
+
 		layout.appendChild(messageLabel);
 
 		Label actualLabel = new Label("");
+
 		actualLabel.setSclass("batch-validation-actual");
+
 		actualLabel.setVisible(false);
+
 		layout.appendChild(actualLabel);
 
 		Hlayout buttonLayout = new Hlayout();
@@ -1249,17 +1257,14 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 
 		batch.setBatchStatus("PROCESSING");
+
 		updateProcessingAfterValidationRow(item, batch);
 
 		messageLabel.setValue("Validation Successful. Batch validation completed successfully.");
 
 		messageLabel.setVisible(true);
 
-		messageLabel.setStyle(
-
-				"font-size:11px;font-weight:700;color:#166534;" + "background:#dcfce7;border:1px solid #86efac;"
-
-						+ "border-radius:12px;padding:5px 10px;text-align:center;");
+		messageLabel.setSclass("batch-validation-success");
 
 		actualLabel.setVisible(false);
 
@@ -2039,11 +2044,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			mainLayout.setSpacing("15px");
 
-			mainLayout.setStyle("padding:20px;");
+			mainLayout.setSclass("cheque-image-layout");
 
 			Label title = new Label("Cheque No.: " + valueOrEmpty(cheque.getChequeNumber()));
 
-			title.setStyle("font-size:18px;font-weight:600;");
+			title.setSclass("cheque-image-title");
 
 			mainLayout.appendChild(title);
 
@@ -2053,7 +2058,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			imagesLayout.setSpacing("20px");
 
-			imagesLayout.setStyle("align-items:flex-start;");
+			imagesLayout.setSclass("cheque-images-layout");
 
 			Vlayout frontLayout = new Vlayout();
 
@@ -2063,7 +2068,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			Label frontLabel = new Label("Front Image");
 
-			frontLabel.setStyle("font-size:15px;font-weight:600;text-align:center;");
+			frontLabel.setSclass("cheque-image-label");
 
 			frontLayout.appendChild(frontLabel);
 
@@ -2075,7 +2080,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 				frontImage.setHeight("520px");
 
-				frontImage.setStyle("object-fit:contain; border:1px solid #d9e2ec; padding:8px; background:#ffffff;");
+				frontImage.setSclass("cheque-image");
 
 				frontImage.setContent(new AImage("front.jpg", frontBytes));
 
@@ -2085,7 +2090,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 				Label frontMissing = new Label("Front image not found");
 
-				frontMissing.setStyle("font-size:14px;color:#999;text-align:center;");
+				frontMissing.setSclass("cheque-image-missing");
 
 				frontLayout.appendChild(frontMissing);
 
@@ -2101,7 +2106,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 			Label backLabel = new Label("Back Image");
 
-			backLabel.setStyle("font-size:15px;font-weight:600;text-align:center;");
+			backLabel.setSclass("cheque-image-label");
 
 			backLayout.appendChild(backLabel);
 
@@ -2113,7 +2118,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 				backImage.setHeight("520px");
 
-				backImage.setStyle("object-fit:contain; border:1px solid #d9e2ec; padding:8px; background:#ffffff;");
+				backImage.setSclass("cheque-image");
 
 				backImage.setContent(new AImage("back.png", backBytes));
 
@@ -2123,7 +2128,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 				Label backMissing = new Label("Back image not found");
 
-				backMissing.setStyle("font-size:14px;color:#999;text-align:center;");
+				backMissing.setSclass("cheque-image-missing");
 
 				backLayout.appendChild(backMissing);
 
