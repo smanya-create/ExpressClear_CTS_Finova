@@ -201,8 +201,6 @@
 										sclass="image-control-btn" />
 									<button id="btnZoomIn" label="+"
 										sclass="image-control-btn" />
-									<button id="btnZoomFit" label="▣ Zoom Fit"
-										sclass="image-control-wide" />
 									<button id="btnRotate" label="↻ Rotate"
 										sclass="image-control-wide" />
 								</hlayout>
