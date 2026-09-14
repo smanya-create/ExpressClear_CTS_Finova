@@ -11,10 +11,6 @@ import com.iispl.cts.dao.inward.InwardChequeImageDAO;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 
 
-	
-	
-
-
 public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
 	private static InwardChequeImageDAOImpl instance;
