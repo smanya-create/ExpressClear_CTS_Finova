@@ -72,7 +72,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		if (inwardMakerBtnLast != null) inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
 		if (inwardMakerBtnBack != null) inwardMakerBtnBack.addEventListener("onClick", event -> goBackToDashboard());
 
-		// Guarantees post-DOM render execution
 		comp.addEventListener("onInitialDataLoad", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -129,10 +128,8 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 			populateBatchSummary();
 			this.currentPage = 1;
 
-			// Direct render
 			renderCurrentPage();
 
-			// Echo render ensures rows are injected even if ZK lifecycle wasn't ready
 			if (comp != null) {
 				Events.echoEvent("onInitialDataLoad", comp, null);
 			}
@@ -231,7 +228,23 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 	}
 
 	private Component createActionComponent(InwardCheque cheque) {
+		String bStatus = this.inwardBatch != null ? normalizeStatus(this.inwardBatch.getBatchStatus()) : "";
+
+		// If a normal batch is submitted to Checker, lock actions with '-'
+		if ("CHECKER_PROCESSING_PENDING".equals(bStatus)) {
+			Label label = new Label("-");
+			label.setStyle("color: #94a3b8; font-weight: 800; font-size: 14px; text-align: center; display: block; width: 100%;");
+			return label;
+		}
+
 		String status = normalizeStatus(cheque.getChequeStatus());
+
+		// If an individual cheque is already returned or pending checker, do not allow re-editing
+		if ("MAKER_RETURNED".equals(status) || "CHECKER_PROCESSING_PENDING".equals(status) || "COMPLETED".equals(status)) {
+			Label label = new Label("-");
+			label.setStyle("color: #94a3b8; font-weight: 800; font-size: 14px; text-align: center; display: block; width: 100%;");
+			return label;
+		}
 
 		if (isMicrRepairStatus(status)) {
 			Button button = new Button("MICR REPAIR REQUIRED");
