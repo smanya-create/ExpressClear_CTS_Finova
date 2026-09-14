@@ -90,7 +90,10 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
     public List<InwardDashboardBatchDTO> getRecentBatches() {
         List<InwardDashboardBatchDTO> batches = new ArrayList<>();
 
-        // Retains active batches needing Maker work AND submitted batches awaiting Checker review
+        // Retains ALL non-completed/non-rejected batches:
+        // 1. Batches actively being processed (even if all cheques are approved and awaiting submit)
+        // 2. Batches submitted to Checker (CHECKER_PROCESSING_PENDING)
+        // 3. Batches with sent-back cheques (CHECKER_PROCESSING)
         String sql = 
             "SELECT * FROM ( " +
             "    SELECT " +
@@ -107,9 +110,6 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             "    WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
             "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count " +
             ") sub " +
-            "WHERE sub.back_to_maker_count > 0 " +
-            "   OR sub.maker_work_count > 0 " +
-            "   OR sub.batch_status = 'CHECKER_PROCESSING_PENDING' " +
             "ORDER BY sub.uploaded_at DESC";
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");

@@ -214,12 +214,19 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 			for (InwardCheque c : allCheques) {
 				String st = c.getChequeStatus();
+
+				// Exclude cheques that are actively pending or in-progress in MICR repair
+				if (isMicrRepairStatus(st)) {
+					continue;
+				}
+
 				if (this.isReworkBatch) {
+					// In a rework batch, include only items that need rework or have been reworked
 					if (isSentBackStatus(st) || InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st)) {
 						this.activeQueue.add(c);
 					}
 				} else {
-					// Retain all cheques in working queue so the queue doesn't vanish upon final approval
+					// In normal batch, include all non-MICR cheques
 					this.activeQueue.add(c);
 				}
 			}
@@ -261,6 +268,13 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			return false;
 		return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(status)
 				|| InwardChequeStatus.SEND_BACK_TO_MAKER.name().equalsIgnoreCase(status);
+	}
+
+	private boolean isMicrRepairStatus(String status) {
+		if (status == null) return false;
+		String s = status.trim().toUpperCase();
+		return "MICR_REPAIR_PENDING".equals(s) || "MICR_REPAIR_IN_PROGRESS".equals(s) 
+				|| "MICR_REPAIR_REQUIRED".equals(s) || "SEND_BACK_TO_MAKER_MICR".equals(s);
 	}
 
 	private int findFirstPendingIndex() {
@@ -329,8 +343,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				lblDataStatus.setValue("REJECT REQ");
 				lblDataStatus.setStyle(
 						"background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 700;");
-			} else if (InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(status)
-					|| InwardChequeStatus.MICR_REPAIR_IN_PROGRESS.name().equalsIgnoreCase(status)) {
+			} else if (InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(status)) {
 				lblDataStatus.setValue("IN PROGRESS");
 				lblDataStatus.setStyle(
 						"background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-weight: 700;");
@@ -402,13 +415,14 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				sendBackReasonBox.setVisible(false);
 			}
 		} catch (Exception e) {
-			System.err.println("WARN: Could not fetch send-back details for cheque " + chequeId + ": " + e.getMessage());
 			sendBackReasonBox.setVisible(false);
 		}
 	}
 
 	private void updateProgressBar() {
-		if (activeQueue == null || activeQueue.isEmpty()) {
+		// Evaluate resolution across the ENTIRE batch so uncompleted MICR cheques prevent submission
+		List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
+		if (fullBatchCheques == null || fullBatchCheques.isEmpty()) {
 			if (pmBatchProgress != null)
 				pmBatchProgress.setValue(0);
 			if (lblProgressText != null)
@@ -418,8 +432,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			return;
 		}
 
-		int total = activeQueue.size();
-		long resolvedCount = activeQueue.stream()
+		int totalInBatch = fullBatchCheques.size();
+		long resolvedInBatch = fullBatchCheques.stream()
 				.filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
 						|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
 						|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
@@ -429,14 +443,15 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
-		int percentage = (int) Math.round(((double) resolvedCount / total) * 100);
+		int percentage = (int) Math.round(((double) resolvedInBatch / totalInBatch) * 100);
 
 		if (pmBatchProgress != null)
 			pmBatchProgress.setValue(percentage);
 		if (lblProgressText != null)
-			lblProgressText.setValue(resolvedCount + "/" + total + " (" + percentage + "%)");
+			lblProgressText.setValue(resolvedInBatch + "/" + totalInBatch + " (" + percentage + "%)");
 
-		boolean allResolved = (resolvedCount == total);
+		// The Submit button unlocks ONLY when every cheque across the whole batch has completed processing
+		boolean allResolved = (resolvedInBatch == totalInBatch);
 		if (btnSubmitToChecker != null) {
 			btnSubmitToChecker.setDisabled(!allResolved);
 		}
@@ -518,20 +533,15 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 
 			if (image == null || image.getImagePath() == null || image.getImagePath().trim().isEmpty()) {
-				System.out.println("Data Entry: No " + (isViewingFront ? "front" : "back")
-						+ " image found for cheque -> " + chequeId);
 				imgCheque.setSrc(null);
 				return;
 			}
 
 			String imagePath = image.getImagePath().trim();
 			String imageSrc = "/Inward-data/" + imagePath;
-			System.out.println("Data Entry: Loading image URL -> " + imageSrc);
 			imgCheque.setSrc(imageSrc);
 
 		} catch (Exception e) {
-			System.err.println("Data Entry: Failed to load image for cheque -> " + item.getInwardChequeId());
-			e.printStackTrace();
 			imgCheque.setSrc(null);
 		}
 
@@ -630,9 +640,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 		chequeService.updateChequeDetails(current);
 
-		// Note: Parent batch status in inward_batch is NOT touched here!
-		// It remains in its current status until explicit submission.
-
 		if (currentIndex < activeQueue.size() - 1) {
 			currentIndex++;
 		}
@@ -730,22 +737,23 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	}
 
 	public void onClick$btnSubmitToChecker() {
-		if (activeQueue == null || activeQueue.isEmpty())
+		List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
+		if (fullBatchCheques == null || fullBatchCheques.isEmpty())
 			return;
 
-		long accepted = activeQueue.stream()
+		long accepted = fullBatchCheques.stream()
 				.filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
 						|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
 						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
 						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
 				.count();
-		long rejected = activeQueue.stream()
+		long rejected = fullBatchCheques.stream()
 				.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
 						|| InwardChequeStatus.REJECTED.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
 		if (lblModalTotal != null)
-			lblModalTotal.setValue(String.valueOf(activeQueue.size()));
+			lblModalTotal.setValue(String.valueOf(fullBatchCheques.size()));
 		if (lblModalAccepted != null)
 			lblModalAccepted.setValue(String.valueOf(accepted));
 		if (lblModalRejected != null)
@@ -781,7 +789,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				System.out.println("DEBUG: Sent-back rework batch " + currentBatchId + " parent status left untouched.");
 			}
 
-			// Dispatch notification to Checker
 			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
 			String notifMsg = this.isReworkBatch
