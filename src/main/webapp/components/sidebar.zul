@@ -137,21 +137,27 @@
 
 				<!-- INWARD CHECKER MODULES -->
 				<div id="divInwardCheckerMenu" visible="false">
-					<vlayout spacing="2px">
-						<a id="navInwardCheckerDash" label="Dashboard"
-							sclass="${arg.activeTab eq 'inward-checker-dash' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToInwardCheckerDashboard()" />
-						<a id="navVerification" label="Verification"
-							sclass="${arg.activeTab eq 'verification' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToVerification()" />
-						<a id="navRrf" label="RRF"
-							sclass="${arg.activeTab eq 'rrf' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToRRF()" />
-						<a id="navInwardCheckerReports" label="Reports"
-							sclass="${arg.activeTab eq 'inward-checker-reports' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToInwardCheckerReports()" />
-					</vlayout>
-				</div>
+
+    <vlayout spacing="2px">
+
+        <a id="navInwardCheckerDash"
+           label="Dashboard"
+           sclass="${param.activeTab eq 'inward-checker-dash' ? 'nav-item active' : 'nav-item'}"
+           onClick="$composer.navToInwardCheckerDashboard()" />
+
+        <a id="navVerification"
+           label="Verification"
+           sclass="${param.activeTab eq 'verification' ? 'nav-item active' : 'nav-item'}"
+           onClick="$composer.navToVerification()" />
+
+        <a id="navInwardCheckerReports"
+           label="Reports"
+           sclass="${param.activeTab eq 'inward-checker-reports' ? 'nav-item active' : 'nav-item'}"
+           onClick="$composer.navToInwardCheckerReports()" />
+
+    </vlayout>
+
+</div>
 			</vlayout>
 		</vlayout>
 

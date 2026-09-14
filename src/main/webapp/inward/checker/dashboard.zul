@@ -35,11 +35,10 @@
 
                             <label value="Checker Dashboard"
                                    style="font-size:24px;font-weight:bold;color:black"/>
-
+							<label value="Monitor batches submitted by maker"
+								style="font-size:10px;color:#807977"/>
                         </vlayout>
-
-                        <separator style="border-top:2px solid black;"/>
-
+						
                         <label value="Batch Search"
                                style="font-weight:bold;font-size:16px"/>
 
