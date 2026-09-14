@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -28,6 +29,7 @@ import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.entity.inward.InwardBatch;
@@ -39,6 +41,7 @@ import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.service.inward.InwardSendBackRequestService;
 import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
@@ -52,6 +55,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	// Database Services
 	private final InwardBatchService batchService = new InwardBatchServiceImpl();
 	private final InwardChequeService chequeService = new InwardChequeServiceImpl();
+	private final InwardSendBackRequestService sendBackRequestService = new InwardSendBackRequestServiceImpl();
 	private final RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 	private final NotificationService notificationService = NotificationServiceImpl.getInstance();
 
@@ -79,6 +83,11 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	private Button btnZoomOut;
 	private Button btnZoomFit;
 	private Button btnRotate;
+
+	// Send-Back Alert Box
+	private Div sendBackReasonBox;
+	private Label lblSendBackReason;
+	private Label lblSendBackRemarks;
 
 	// Form Fields
 	private Textbox txtChequeNumber;
@@ -176,9 +185,17 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	public void loadBatch(String batchId) {
 		this.currentBatchId = batchId;
 
-		// Populate Batch Header Data
 		InwardBatch batch = batchService.getBatchById(batchId);
 		if (batch != null) {
+			// Lockout guard: block maker edits if batch is already submitted to the Checker
+			if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(batch.getBatchStatus())) {
+				Messagebox.show("This batch is currently under Checker review. Data Entry is locked in view-only mode.", 
+						"Batch Locked", Messagebox.OK, Messagebox.INFORMATION, evt -> {
+							Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + batchId);
+						});
+				return;
+			}
+
 			if (lblBatchId != null)
 				lblBatchId.setValue(batch.getInwardBatchId());
 			if (lblTotalCheques != null)
@@ -188,32 +205,26 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 		}
 
-		// Fetch all cheques for this batch
 		List<InwardCheque> allCheques = chequeService.getChequesByBatchAndStatus(batchId, null);
 		this.activeQueue = new ArrayList<>();
 
 		if (allCheques != null && !allCheques.isEmpty()) {
-			this.isReworkBatch = allCheques.stream().anyMatch(c -> isSentBackStatus(c.getChequeStatus()));
+			this.isReworkBatch = allCheques.stream().anyMatch(c -> isSentBackStatus(c.getChequeStatus()) 
+					|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus()));
 
 			for (InwardCheque c : allCheques) {
 				String st = c.getChequeStatus();
 				if (this.isReworkBatch) {
-					// ONLY load active sent-back items needing Maker rework
-					if (isSentBackStatus(st)) {
+					if (isSentBackStatus(st) || InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st)) {
 						this.activeQueue.add(c);
 					}
 				} else {
-					// Normal batch: only load pending/in-progress items
-					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
-							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-							|| "DATA_ENTRY_REQUIRED".equalsIgnoreCase(st)) {
-						this.activeQueue.add(c);
-					}
+					// Retain all cheques in working queue so the queue doesn't vanish upon final approval
+					this.activeQueue.add(c);
 				}
 			}
 		}
 
-		// Check if a specific cheque was requested from batch-details
 		String targetChequeId = execution.getParameter("chequeId");
 		if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
 		    Object sessChq = Sessions.getCurrent().getAttribute("TARGET_CHEQUE_ID");
@@ -232,14 +243,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		    }
 		}
 
-		// Clear temporary session targets so subsequent batch loads don't get stuck
 		Sessions.getCurrent().removeAttribute("TARGET_CHEQUE_ID");
 		Sessions.getCurrent().removeAttribute("DATA_ENTRY_CHEQUE_ID");
 
 		if (targetIndex != -1) {
 		    this.currentIndex = targetIndex;
 		} else {
-		    // Default fallback to the first pending/unresolved item
 		    this.currentIndex = findFirstPendingIndex();
 		}
 
@@ -287,6 +296,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 			if (lblChequePosition != null)
 				lblChequePosition.setValue("0 of 0");
+			if (sendBackReasonBox != null)
+				sendBackReasonBox.setVisible(false);
 			updateNavigationState();
 			updateProgressBar();
 			return;
@@ -304,9 +315,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		if (lblChequePosition != null)
 			lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
 
-		// Status Badge Logic
+		String status = item.getChequeStatus();
 		if (lblDataStatus != null) {
-			String status = item.getChequeStatus();
 			if (isSentBackStatus(status)) {
 				lblDataStatus.setValue("SENT BACK");
 				lblDataStatus.setStyle(
@@ -338,6 +348,14 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 		}
 
+		if (isSentBackStatus(status) || InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status)) {
+			loadSendBackDetails(item.getInwardChequeId());
+		} else {
+			if (sendBackReasonBox != null) {
+				sendBackReasonBox.setVisible(false);
+			}
+		}
+
 		isViewingFront = true;
 		resetImageTransformations();
 		updateDisplayedImage(item);
@@ -361,6 +379,32 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		updateNavigationState();
 		updateProgressBar();
+	}
+
+	private void loadSendBackDetails(String chequeId) {
+		if (sendBackReasonBox == null)
+			return;
+
+		try {
+			InwardSendBackRequestDTO dto = sendBackRequestService.getLatestPendingByChequeId(chequeId);
+			if (dto != null) {
+				if (lblSendBackReason != null) {
+					String rCode = dto.getReasonCode() != null ? dto.getReasonCode().trim() : "";
+					String rName = dto.getReasonName() != null ? dto.getReasonName().trim() : "Checker Return";
+					lblSendBackReason.setValue(!rCode.isEmpty() ? ("[" + rCode + "] " + rName) : rName);
+				}
+				if (lblSendBackRemarks != null) {
+					String rem = dto.getRemarks();
+					lblSendBackRemarks.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None");
+				}
+				sendBackReasonBox.setVisible(true);
+			} else {
+				sendBackReasonBox.setVisible(false);
+			}
+		} catch (Exception e) {
+			System.err.println("WARN: Could not fetch send-back details for cheque " + chequeId + ": " + e.getMessage());
+			sendBackReasonBox.setVisible(false);
+		}
 	}
 
 	private void updateProgressBar() {
@@ -570,16 +614,14 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		boolean wasSentBack = isSentBackStatus(current.getChequeStatus());
 
-		// Transition to MAKER_RETURNED if rework, else standard CHECKER_PROCESSING_PENDING
+		// Sent-back cheque -> MAKER_RETURNED
+		// Normal cheque -> CHECKER_PROCESSING_PENDING
 		if (wasSentBack) {
 		    current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
-		    
-		    // Resolve the checker send-back audit record
 		    try {
 		        User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 		        String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
-		        new InwardSendBackRequestServiceImpl()
-		            .markRequestResolved(current.getInwardChequeId(), userId);
+		        sendBackRequestService.markRequestResolved(current.getInwardChequeId(), userId);
 		    } catch (Exception ex) {
 		        System.err.println("WARN: Could not mark send-back request resolved: " + ex.getMessage());
 		    }
@@ -588,20 +630,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 		chequeService.updateChequeDetails(current);
 
-		// Dispatch notification immediately if sent-back item was resolved
-		if (wasSentBack) {
-			try {
-				User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
-				String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
-				String notifMsg = "Cheque #" + current.getChequeNumber() + " in Batch " 
-						+ this.currentBatchId + " has been corrected and returned by Maker (" + userId + "). Stage: DATA_ENTRY.";
-				
-				notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
-				System.out.println("DEBUG: Resend notification sent to INWARD_CHECKER for Cheque #" + current.getChequeNumber());
-			} catch (Exception e) {
-				System.err.println("WARN: Failed to dispatch resend notification to INWARD_CHECKER: " + e.getMessage());
-			}
-		}
+		// Note: Parent batch status in inward_batch is NOT touched here!
+		// It remains in its current status until explicit submission.
 
 		if (currentIndex < activeQueue.size() - 1) {
 			currentIndex++;
@@ -658,15 +688,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 		String userId = currentUser != null ? currentUser.getUserId() : "SYSTEM";
 
-		// Mark instrument as rejection requested
 		current.setChequeStatus(InwardChequeStatus.REJECTION_REQUESTED.name());
 		chequeService.updateChequeDetails(current);
 
-		// Persist to inward_cheque_rejection_request
 		saveRejectionRequestRecord(current.getInwardChequeId(), this.currentBatchId, reasonId, remarks, userId,
 				"DATA_ENTRY");
 
-		// Send notification to INWARD_CHECKER
 		String reasonLabel = cmbModalRejectionReason.getSelectedItem().getLabel();
 		String notifMsg = "Rejection requested for Cheque #" + current.getChequeNumber() + " in Batch "
 				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId + ". Stage: DATA_ENTRY.";
@@ -745,19 +772,20 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		try {
-			// Update parent batch_status ONLY for normal/fresh batches
+			// Update parent batch status ONLY for normal batches.
+			// For sent-back batches, the parent status is already CHECKER_PROCESSING, so leave it untouched!
 			if (!this.isReworkBatch) {
 				batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
-				System.out.println("DEBUG: Fresh batch " + currentBatchId + " updated to CHECKER_PROCESSING_PENDING");
+				System.out.println("DEBUG: Normal batch " + currentBatchId + " parent status updated to CHECKER_PROCESSING_PENDING");
 			} else {
 				System.out.println("DEBUG: Sent-back rework batch " + currentBatchId + " parent status left untouched.");
 			}
 
-			// Dispatch batch submission notification
+			// Dispatch notification to Checker
 			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
 			String notifMsg = this.isReworkBatch
-					? "Rework for Batch " + currentBatchId + " completed by Maker (" + userId + ")."
+					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId + ")."
 					: "Batch " + currentBatchId + " submitted to Checker by Maker (" + userId + ").";
 
 			notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);

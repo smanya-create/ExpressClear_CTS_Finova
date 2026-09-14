@@ -88,6 +88,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private int currentRecord = 0;
 	private int totalRecords = 0;
+	private boolean initialTargetResolved = false;
 
 	private InwardChequeService inwardChequeService;
 	private InwardBatchService inwardBatchService;
@@ -166,6 +167,17 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			}
 
 			batchId = batchId.trim();
+
+			// Lockout guard: block maker edits if batch is already submitted to the Checker
+			InwardBatch batch = inwardBatchService.getBatchById(batchId);
+			if (batch != null && "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(batch.getBatchStatus())) {
+				Messagebox.show("This batch is currently under Checker review. MICR repair is locked in view-only mode.", 
+						"Batch Locked", Messagebox.OK, Messagebox.INFORMATION, evt -> {
+							Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + batch.getInwardBatchId());
+						});
+				return;
+			}
+
 			List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, null);
 			repairCheques = new ArrayList<>();
 
@@ -194,45 +206,41 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			totalRecords = repairCheques.size();
 
-			// Target chequeId resolution
-			String targetChequeId = Executions.getCurrent().getParameter("chequeId");
-			if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
-				Object sessChq = Executions.getCurrent().getSession().getAttribute("TARGET_CHEQUE_ID");
-				if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_CHEQUE_ID");
-				if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("chequeId");
-				if (sessChq != null) targetChequeId = String.valueOf(sessChq).trim();
-			}
+			// Resolve targetChequeId only ONCE upon entry to avoid resetting pagination on Next/Prev clicks
+			if (!initialTargetResolved) {
+				String targetChequeId = Executions.getCurrent().getParameter("chequeId");
+				if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
+					Object sessChq = Executions.getCurrent().getSession().getAttribute("TARGET_CHEQUE_ID");
+					if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_CHEQUE_ID");
+					if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("chequeId");
+					if (sessChq != null) targetChequeId = String.valueOf(sessChq).trim();
+				}
 
-			int targetIndex = -1;
-			if (targetChequeId != null && !targetChequeId.isEmpty()) {
-				for (int i = 0; i < repairCheques.size(); i++) {
-					if (targetChequeId.equalsIgnoreCase(repairCheques.get(i).getInwardChequeId())) {
-						targetIndex = i;
-						break;
+				int targetIndex = -1;
+				if (targetChequeId != null && !targetChequeId.isEmpty()) {
+					for (int i = 0; i < repairCheques.size(); i++) {
+						if (targetChequeId.equalsIgnoreCase(repairCheques.get(i).getInwardChequeId())) {
+							targetIndex = i;
+							break;
+						}
 					}
 				}
+
+				Executions.getCurrent().getSession().removeAttribute("TARGET_CHEQUE_ID");
+				Executions.getCurrent().getSession().removeAttribute("MICR_REPAIR_CHEQUE_ID");
+
+				if (targetIndex != -1) {
+					currentRecord = targetIndex;
+				} else {
+					currentRecord = 0;
+				}
+				initialTargetResolved = true;
 			}
 
-			Executions.getCurrent().getSession().removeAttribute("TARGET_CHEQUE_ID");
-			Executions.getCurrent().getSession().removeAttribute("MICR_REPAIR_CHEQUE_ID");
+			if (currentRecord < 0) currentRecord = 0;
+			if (currentRecord >= totalRecords) currentRecord = totalRecords - 1;
 
-			if (targetIndex != -1) {
-				currentRecord = targetIndex;
-			} else {
-				if (currentRecord < 0) currentRecord = 0;
-				if (currentRecord >= totalRecords) currentRecord = totalRecords - 1;
-			}
-
-			currentCheque = repairCheques.get(currentRecord);
-
-			if (micrRepairCompletedState != null) {
-				micrRepairCompletedState.setVisible(false);
-			}
-
-			loadBatchSummary(currentCheque);
-			populateChequeFields(currentCheque);
-			updateNavigation();
-			loadChequeImage(currentCheque.getInwardChequeId());
+			displayCurrentCheque();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -244,6 +252,24 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			loadChequeImage(null);
 			Messagebox.show("Unable to load MICR repair records.", "Error", Messagebox.OK, Messagebox.ERROR);
 		}
+	}
+
+	private void displayCurrentCheque() {
+		if (repairCheques == null || repairCheques.isEmpty()) return;
+
+		if (currentRecord < 0) currentRecord = 0;
+		if (currentRecord >= repairCheques.size()) currentRecord = repairCheques.size() - 1;
+
+		currentCheque = repairCheques.get(currentRecord);
+
+		if (micrRepairCompletedState != null) {
+			micrRepairCompletedState.setVisible(false);
+		}
+
+		loadBatchSummary(currentCheque);
+		populateChequeFields(currentCheque);
+		updateNavigation();
+		loadChequeImage(currentCheque.getInwardChequeId());
 	}
 
 	private void loadBatchSummary(InwardCheque cheque) {
@@ -433,13 +459,13 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	public void onClick$btnPrevious() {
 		if (totalRecords == 0 || currentRecord <= 0) return;
 		currentRecord--;
-		loadRepairRecord();
+		displayCurrentCheque();
 	}
 
 	public void onClick$btnNext() {
 		if (totalRecords == 0 || currentRecord >= totalRecords - 1) return;
 		currentRecord++;
-		loadRepairRecord();
+		displayCurrentCheque();
 	}
 
 	private String getNextDataEntryStatus() {
@@ -541,7 +567,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			currentRecord = totalRecords - 1;
 		}
 
-		loadRepairRecord();
+		displayCurrentCheque();
 	}
 
 	public void onClick$btnRejectRequest() {
@@ -628,7 +654,23 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		if (rejectRequestWindow != null) rejectRequestWindow.setVisible(false);
 
 		Messagebox.show("Reject request submitted successfully to the Checker.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
-		loadRepairRecord();
+		
+		// Remove rejected cheque from the local list and display the next available
+		repairCheques.remove(currentRecord);
+		totalRecords = repairCheques.size();
+		if (totalRecords == 0) {
+			currentRecord = 0;
+			currentCheque = null;
+			clearRecordFields();
+			updateNavigation();
+			loadChequeImage(null);
+			if (micrRepairCompletedState != null) micrRepairCompletedState.setVisible(true);
+			return;
+		}
+		if (currentRecord >= totalRecords) {
+			currentRecord = totalRecords - 1;
+		}
+		displayCurrentCheque();
 	}
 
 	public void onClick$btnBackToList() {

@@ -189,6 +189,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
+        // Retain batch in Data Entry queue until it is formally submitted to the Checker
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +
@@ -204,15 +205,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                      + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS sent_back_cheques " +
                      "FROM inward_batch b " +
                      "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-                     "WHERE EXISTS ( " +
-                     "    SELECT 1 FROM inward_cheque ic_need " +
-                     "    WHERE ic_need.inward_batch_id = b.inward_batch_id " +
-                     "      AND ic_need.cheque_status IN ('" 
-                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
-                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') " +
-                     ") " +
+                     "WHERE b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'REJECTED') " +
                      "  AND NOT EXISTS ( " +
                      "      SELECT 1 FROM inward_cheque ic_micr " +
                      "      WHERE ic_micr.inward_batch_id = b.inward_batch_id " +
