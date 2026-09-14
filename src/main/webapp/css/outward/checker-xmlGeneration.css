@@ -12,9 +12,9 @@ html, body {
     box-sizing: border-box;
     margin: 0;
     padding: 30px;
-    background: #eaf2f8;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
+    min-height: 0;
 }
 
 .outward-maker-welcome-section {
@@ -87,8 +87,6 @@ html, body {
 }
 
 
-/* XML BATCH TABLE */
-
 .xml-batch-table {
     width: 100%;
     box-sizing: border-box;
@@ -97,45 +95,19 @@ html, body {
     border-radius: 12px;
     overflow: hidden;
 }
-
-
-/* XML HEADER - SAME STYLE AS CHECKER DASHBOARD */
+.xml-batch-table .z-listbox-header {
+    overflow: hidden;
+}
 
 .xml-batch-table .z-listbox-header-bg {
     background: #172554;
     background-image: none;
 }
 
-.xml-batch-table .z-listbox-header {
-    background: #172554;
-    background-image: none;
-}
-
+.xml-batch-table .z-listbox-header,
 .xml-batch-table .z-listbox-header table {
-    width: 100%;
-    background: #172554;
-    border-spacing: 0;
-    border-collapse: collapse;
-    border: none;
-}
-
-.xml-batch-table .z-listhead {
-    margin: 0;
-    padding: 0;
-    background: #172554;
-    border: none;
-}
-
-.xml-batch-table .z-listheader {
-    margin: 0;
-    padding: 0;
     background: #172554;
     background-image: none;
-    color: #ffffff;
-    border-right: none;
-    border-bottom: none;
-    text-align: center;
-    vertical-align: middle;
 }
 
 .xml-batch-table .z-listheader:last-child {
@@ -157,10 +129,6 @@ html, body {
     text-align: center;
     white-space: nowrap;
 }
-
-
-/* XML TABLE ROWS */
-
 .xml-batch-table .z-listitem {
     min-height: 62px;
     height: 62px;
@@ -253,9 +221,6 @@ html, body {
     padding: 0;
 }
 
-
-/* GENERATE BUTTON */
-
 .generate-button {
     width: 130px;
     min-width: 130px;
@@ -276,9 +241,6 @@ html, body {
     background: #174a78;
     border-color: #174a78;
 }
-
-
-/* GENERATED SECTION */
 
 .generated-section {
     width: 100%;
@@ -362,9 +324,6 @@ html, body {
     border-color: #174a78;
 }
 
-
-/* XML INFO MESSAGE */
-
 .xml-info-message {
     width: 100%;
     min-height: 28px;
@@ -401,8 +360,7 @@ html, body {
     border: none;
     padding: 0;
     margin: 0;
-    background: #eaf2f8;
-}
+   }
 
 .z-north {
     border: none;
@@ -429,4 +387,14 @@ html, body {
     color: #ffffff;
     border-left: 3px solid #63b3ed;
     font-weight: bold;
+}
+.xml-batch-table .z-listbox-header-bg,
+.xml-batch-table .z-listbox-header,
+.xml-batch-table .z-listbox-header table,
+.xml-batch-table .z-listbox-header .z-scrollbar,
+.xml-batch-table .z-listbox-header .z-scrollbar-rail,
+.xml-batch-table .z-listbox-header .z-scrollbar-indicator {
+    background: #1d5689;
+    background-image: none;
+    border: none;
 }

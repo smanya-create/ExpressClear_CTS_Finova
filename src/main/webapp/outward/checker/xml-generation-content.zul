@@ -67,8 +67,8 @@
         <listbox
             id="lstVerifiedBatches"
             sclass="xml-batch-table"
-            hflex="1">
-
+             hflex="1">
+ 
             <listhead>
 
                 <listheader

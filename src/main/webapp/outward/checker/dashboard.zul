@@ -151,18 +151,18 @@
 
                                         <listheader
                                             label="REJECTION REQUESTS"
-                                            width="14%" />
+                                            width="17%" />
 
                                         <listheader
                                             label="SUBMITTED AT"
-                                            width="17%" />
+                                            width="16%" />
 
                                         <listheader
                                             label="BATCH STATUS"
                                             width="16%" />
 
                                         <listheader
-                                            label="Action"
+                                            label="ACTION"
                                             width="100px"
                                             align="center" />
 
