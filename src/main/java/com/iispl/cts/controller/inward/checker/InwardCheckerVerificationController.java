@@ -49,7 +49,6 @@ import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
-import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
@@ -191,17 +190,17 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		inwardChequeService = new InwardChequeServiceImpl();
 
 		sendBackReasonService = new SendBackReasonServiceImpl();
-		
-		inwardBatchService = new InwardBatchServiceImpl();
 
+		// Get reject popup
 		Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
-		
+		// Get Proceed button from popup ID space
 		Button proceedButton = (Button) window.getFellow("btnProceedReject");
 
+		// Get Cancel button from popup ID space
 		Button cancelButton = (Button) window.getFellow("btnCancelReject");
 
-		
+		// Manually register events because popup has its own ID space
 		proceedButton.addEventListener(Events.ON_CLICK, event -> onClick$btnProceedReject());
 
 		cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
@@ -444,9 +443,27 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				} else {
 
-					lblVerificationStatus.setValue("PENDING");
-					lblVerificationStatus.setSclass("verification-status-badge");
-					lblVerificationStatus.setStyle("");
+				    lblVerificationStatus.setValue("PENDING");
+
+				    lblVerificationStatus.setStyle(
+				            "background:#FFF8E9;"
+				            + "color:#C57A00;"
+				            + "border:1px solid #F5C96B;"
+				            + "border-radius:12px;"
+				            + "display:inline-flex;"
+				            + "align-items:center;"
+				            + "justify-content:center;"
+				            + "width:72px;"
+				            + "height:24px;"
+				            + "box-sizing:border-box;"
+				            + "white-space:nowrap;"
+				            + "text-align:center;"
+				            + "flex-shrink:0;"
+				            + "padding:2px 8px;"
+				            + "font-size:10px;"
+				            + "font-weight:600;"
+				            + "line-height:18px;"
+				            + "margin-right:10px;");
 				}
 			}
 			updateChequePosition();
@@ -484,6 +501,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	    String status = cheque.getChequeStatus();
 
+	   
 	    if (!"REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 	        return;
 	    }
@@ -495,6 +513,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	    }
 
 	    try {
+
+	       
 	        String details =
 	                inwardChequeService.getMakerRejectionRequestDetails(
 	                        chequeId.trim());
@@ -508,6 +528,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
+	       
 
 	        String[] parts = details.split("\\|\\|", -1);
 
@@ -537,6 +558,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
+	      
 	        if (lblMakerRejectionReasonCode != null) {
 
 	            if (reason != null) {
@@ -549,6 +571,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
+	    
 	        if (lblMakerRejectionReasonName != null) {
 
 	            if (reason != null) {
@@ -561,6 +584,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
+	  
 	        if (lblMakerRejectionRemarks != null) {
 
 	            if (remarks != null && !remarks.isEmpty()) {
@@ -575,7 +599,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            }
 	        }
 
-	        
+	   
 	        if (makerRejectionRequestSection != null) {
 	            makerRejectionRequestSection.setVisible(true);
 	        }
@@ -680,10 +704,12 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        imagePath = imagePath.trim();
 
+	        // Remove leading slash if DB already contains one
 	        if (imagePath.startsWith("/")) {
 	            imagePath = imagePath.substring(1);
 	        }
 
+	        // MICR uses this exact URL structure
 	        String imageSrc = "/Inward-data/" + imagePath;
 
 	        System.out.println(
@@ -845,7 +871,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	      
+	       
 	        CbsValidationResult cbsResult = runCbsValidation(cheque);
 
 	        if (!cbsResult.isPassed()) {
@@ -915,6 +941,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	                return;
 	            }
+
 	            if (lblChequeStatus != null) {
 
 	                lblChequeStatus.setValue("REJECTED");
@@ -937,6 +964,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	            updateVerificationCount();
 
+	           
 	            Messagebox.show(
 	                    "CBS validation failed.\n\n"
 	                            + "Cheque has been rejected.\n\n"
@@ -948,7 +976,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	       
+	      
 	        cheque.setChequeStatus("ACCEPTED");
 
 	        boolean updated =
@@ -966,7 +994,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
-	      
+	        
 	        if (lblChequeStatus != null) {
 
 	            lblChequeStatus.setValue("ACCEPTED");
@@ -989,6 +1017,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	        updateVerificationCount();
 
+
 	        Messagebox.show(
 	                "Cheque accepted successfully.",
 	                "Verification",
@@ -1008,7 +1037,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                Messagebox.ERROR);
 	    }
 	}
-		
+	
+	
+	
+	
 	private void highlightCbsField(Label field) {
 
 		if (field == null) {
@@ -1752,6 +1784,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            return;
 	        }
 
+	       
 	        SendBackReason selectedReason =
 	                (SendBackReason) selectedItem.getValue();
 
@@ -1777,6 +1810,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	                        ? remarksBox.getValue()
 	                        : "";
 
+	      
 	        String sendBackStatus;
 
 	        if ("SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
@@ -1817,6 +1851,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	            sentBackBy = "SYSTEM";
 	        }
 
+	       
 	        boolean requestSaved =
 	                inwardChequeService.saveSendBackRequest(
 	                        cheque.getInwardChequeId(),
@@ -1853,9 +1888,30 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	            return;
 	        }
+	        
+	
+	        String notificationMessage =
+	                "Cheque #"
+	                + cheque.getChequeNumber()
+	                + " has been sent back to Maker."
+	                + " Batch: "
+	                + cheque.getInwardBatchId()
+	                + ". Reason: "
+	                + selectedReason.getReasonCode()
+	                + " - "
+	                + selectedReason.getReasonName();
 
+	        notificationService.sendNotification(
+	                "INWARD_MAKER",
+	                null,
+	                notificationMessage);
+	        
+	        
+
+	      
 	        window.setVisible(false);
 
+	       
 	        Messagebox.show(
 	                "Cheque has been sent back to Maker successfully.",
 	                "Send Back",
@@ -2096,6 +2152,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			int verified = accepted + rejected;
 
+			// Safety check
 			if (total == 0 || verified != total) {
 
 				Messagebox.show("All cheques must be verified before submitting the batch.", "Verification",
