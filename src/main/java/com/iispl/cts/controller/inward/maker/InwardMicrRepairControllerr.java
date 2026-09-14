@@ -1,6 +1,9 @@
 package com.iispl.cts.controller.inward.maker;
 
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +20,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Groupbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
@@ -26,6 +30,8 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
@@ -36,6 +42,7 @@ import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.service.inward.InwardSendBackRequestService;
 import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
@@ -74,6 +81,16 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private Vlayout micrRepairCompletedState;
 	private Label lblCompletedBatchId;
 
+	// Dynamic Alert Banner Controls
+	private Div micrAlertBox;
+	private Label lblMicrAlertTitle;
+	private Label lblMicrCodeTitle;
+	private Label lblMicrReasonCode;
+	private Label lblMicrNameTitle;
+	private Label lblMicrReasonName;
+	private Label lblMicrRemarksTitle;
+	private Label lblMicrRemarks;
+
 	private Textbox txtChequeNumber;
 	private Textbox txtCityCode;
 	private Textbox txtBankCode;
@@ -92,6 +109,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private InwardChequeService inwardChequeService;
 	private InwardBatchService inwardBatchService;
+	private InwardSendBackRequestService sendBackRequestService;
 
 	private Label lblBatchSource;
 	private Label lblTotalCheques;
@@ -118,6 +136,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		inwardChequeService = new InwardChequeServiceImpl();
 		inwardBatchService = new InwardBatchServiceImpl();
+		sendBackRequestService = new InwardSendBackRequestServiceImpl();
 		rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 		notificationService = NotificationServiceImpl.getInstance();
 		micrValidator = new MICRValidatorImpl();
@@ -168,7 +187,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			batchId = batchId.trim();
 
-			// Lockout guard: block maker edits if batch is already submitted to the Checker
 			InwardBatch batch = inwardBatchService.getBatchById(batchId);
 			if (batch != null && "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(batch.getBatchStatus())) {
 				Messagebox.show("This batch is currently under Checker review. MICR repair is locked in view-only mode.", 
@@ -206,9 +224,11 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			totalRecords = repairCheques.size();
 
-			// Resolve targetChequeId only ONCE upon entry to avoid resetting pagination on Next/Prev clicks
 			if (!initialTargetResolved) {
 				String targetChequeId = Executions.getCurrent().getParameter("chequeId");
+				if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
+					targetChequeId = Executions.getCurrent().getParameter("amp;chequeId");
+				}
 				if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
 					Object sessChq = Executions.getCurrent().getSession().getAttribute("TARGET_CHEQUE_ID");
 					if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_CHEQUE_ID");
@@ -268,8 +288,69 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		loadBatchSummary(currentCheque);
 		populateChequeFields(currentCheque);
+		loadChequeAlertReason(currentCheque);
 		updateNavigation();
 		loadChequeImage(currentCheque.getInwardChequeId());
+	}
+
+	private void loadChequeAlertReason(InwardCheque item) {
+		if (micrAlertBox == null || item == null) return;
+
+		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
+
+		// 1. Case: Checker Return / Send-Back
+		if (status.contains("SEND_BACK") || status.contains("SENT_BACK") || "MAKER_RETURNED".equals(status)) {
+			try {
+				InwardSendBackRequestDTO dto = sendBackRequestService.getLatestPendingByChequeId(item.getInwardChequeId());
+				if (dto != null) {
+					if (lblMicrAlertTitle != null) lblMicrAlertTitle.setValue("CHECKER SEND BACK");
+					if (lblMicrCodeTitle != null) lblMicrCodeTitle.setValue("Reason Code:");
+					if (lblMicrReasonCode != null) lblMicrReasonCode.setValue(dto.getReasonCode() != null ? dto.getReasonCode().trim() : "-");
+					if (lblMicrNameTitle != null) lblMicrNameTitle.setValue("Reason:");
+					if (lblMicrReasonName != null) lblMicrReasonName.setValue(dto.getReasonName() != null ? dto.getReasonName().trim() : "Send Back to Maker");
+					if (lblMicrRemarksTitle != null) lblMicrRemarksTitle.setValue("Remarks:");
+					if (lblMicrRemarks != null) {
+						String rem = dto.getRemarks();
+						lblMicrRemarks.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
+					}
+					micrAlertBox.setVisible(true);
+					return;
+				}
+			} catch (Exception ignored) {}
+		}
+
+		// 2. Case: Maker Rejection Request
+		if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)) {
+			String sql = "SELECT rr.rejected_reason_code, rr.rejected_reason_name, r.remarks "
+					+ "FROM inward_cheque_rejection_request r "
+					+ "LEFT JOIN rejected_reasons rr ON rr.rejected_reason_id::text = r.rejected_reason_id::text "
+					+ "WHERE r.inward_cheque_id = ? "
+					+ "ORDER BY r.requested_at DESC LIMIT 1";
+			try (Connection conn = DBConnection.getConnection();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+				ps.setString(1, item.getInwardChequeId());
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						if (lblMicrAlertTitle != null) lblMicrAlertTitle.setValue("MAKER REJECTION REQUEST");
+						if (lblMicrCodeTitle != null) lblMicrCodeTitle.setValue("Reason Code:");
+						if (lblMicrReasonCode != null) lblMicrReasonCode.setValue(rs.getString("rejected_reason_code") != null ? rs.getString("rejected_reason_code") : "-");
+						if (lblMicrNameTitle != null) lblMicrNameTitle.setValue("Reason:");
+						if (lblMicrReasonName != null) lblMicrReasonName.setValue(rs.getString("rejected_reason_name") != null ? rs.getString("rejected_reason_name") : "Rejection Requested");
+						if (lblMicrRemarksTitle != null) lblMicrRemarksTitle.setValue("Remarks:");
+						if (lblMicrRemarks != null) {
+							String rem = rs.getString("remarks");
+							lblMicrRemarks.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
+						}
+						micrAlertBox.setVisible(true);
+						return;
+					}
+				}
+			} catch (Exception ignored) {}
+		}
+
+		if (micrAlertBox != null) {
+			micrAlertBox.setVisible(false);
+		}
 	}
 
 	private void loadBatchSummary(InwardCheque cheque) {
@@ -298,6 +379,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		if (txtCorrectedMicr != null) txtCorrectedMicr.setValue("");
 		if (txtRemarks != null) txtRemarks.setValue("");
 		if (lblRepairStatus != null) lblRepairStatus.setValue("MICR ERROR");
+		if (micrAlertBox != null) micrAlertBox.setVisible(false);
 	}
 
 	private void updateNavigation() {
@@ -655,7 +737,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		Messagebox.show("Reject request submitted successfully to the Checker.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
 		
-		// Remove rejected cheque from the local list and display the next available
 		repairCheques.remove(currentRecord);
 		totalRecords = repairCheques.size();
 		if (totalRecords == 0) {

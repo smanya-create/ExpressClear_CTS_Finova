@@ -183,6 +183,34 @@
 					<label value="TRANSACTION DATA" class="cts-card-title" style="font-size: 13px; font-weight: 700; color: #0f172a;" />
 					<label value="Edits are preserved automatically during navigation." class="cts-card-tagline" style="font-size: 10px; color: #64748b; margin-left: 4px;" />
 				</div>
+				
+				<!-- Checker Return / Rejection Alert Card -->
+				<div id="dataEntryAlertBox" visible="false"
+					style="background: #fffdf5; border: 1px solid #fef08a; border-left: 3px solid #f59e0b; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px;">
+					<label id="lblDataEntryAlertTitle" value="CHECKER SEND BACK"
+						style="font-size: 10px; font-weight: 800; color: #b45309; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; display: block;" />
+					
+					<hlayout spacing="8px" style="align-items: center; margin-bottom: 2px;">
+						<label id="lblDataEntryCodeTitle" value="Reason Code:"
+							style="font-size: 11px; font-weight: 600; color: #78350f; width: 85px; min-width: 85px; white-space: nowrap;" />
+						<label id="lblDataEntryReasonCode" value="-"
+							style="font-size: 11px; font-weight: 700; color: #0f172a;" />
+					</hlayout>
+					
+					<hlayout spacing="8px" style="align-items: baseline; margin-bottom: 2px;">
+						<label id="lblDataEntryNameTitle" value="Reason:"
+							style="font-size: 11px; font-weight: 600; color: #78350f; width: 85px; min-width: 85px; white-space: nowrap;" />
+						<label id="lblDataEntryReasonName" value="-"
+							style="font-size: 11px; font-weight: 500; color: #1e293b;" />
+					</hlayout>
+					
+					<hlayout spacing="8px" style="align-items: baseline;">
+						<label id="lblDataEntryRemarksTitle" value="Remarks:"
+							style="font-size: 11px; font-weight: 600; color: #78350f; width: 85px; min-width: 85px; white-space: nowrap;" />
+						<label id="lblDataEntryRemarks" value="-"
+							style="font-size: 11px; font-weight: 400; color: #334155;" />
+					</hlayout>
+				</div>
 
 				<!-- Row 1: Cheque Number & Cheque Date -->
 				<div class="cts-form-row">
