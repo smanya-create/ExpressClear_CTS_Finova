@@ -231,14 +231,22 @@
 										<label value="CHEQUE VERIFICATION" sclass="card-title"
 											hflex="1" style="white-space:nowrap;" />
 
-										<label id="lblVerificationStatus" value="PENDING"
-											sclass="verification-status-badge" width="72px" height="22px"
-											style="flex-shrink:0;
-           white-space:nowrap;
-           text-align:center;
-           margin-right:10px;
-           box-sizing:border-box;
-           line-height:16px;" />
+							<label id="lblVerificationStatus"
+       value="PENDING"
+       sclass="verification-status-pending"
+       width="72px"
+       height="24px"
+       style="display:inline-flex;
+              align-items:center;
+              justify-content:center;
+              flex-shrink:0;
+              white-space:nowrap;
+              text-align:center;
+              margin-right:10px;
+              box-sizing:border-box;
+              padding:2px 8px;
+              line-height:18px;" />
+              
 									</hlayout>
 
 									<label
