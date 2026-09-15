@@ -326,26 +326,47 @@ html, body {
 
 .z-borderlayout {
     border: none;
+    background: transparent;
 }
 
 .z-west {
     border: none;
+    background: transparent;
 }
 
 .z-center {
     border: none;
     padding: 0;
     margin: 0;
+    background: transparent;
 }
 
 .z-center-body {
     border: none;
     padding: 0;
     margin: 0;
-   }
+    background: transparent;
+}
 
 .z-north {
     border: none;
+    background: transparent;
+}
+
+.z-north-body {
+    border: none;
+    border-bottom: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.sidebar {
+    border: none;
+}
+
+.header {
+    border: none;
+    border-bottom: none;
 }
 
 .z-south {
@@ -551,4 +572,34 @@ html, body {
     color: #ffffff;
     font-size: 9px;
     font-weight: 800;
+}
+
+.outward-checker-xml-center {
+    background: #f8fafc;
+}
+
+.outward-checker-xml-center .z-center-body {
+    background: #f8fafc;
+}
+
+.xml-generation-content {
+    background: #f8fafc;
+}
+.xml-batch-table .z-listbox-header {
+    background: #172554;
+    background-image: none;
+}
+
+.xml-batch-table .z-listbox-header-bg {
+    background: #172554;
+    background-image: none;
+}
+
+.xml-batch-table .z-scrollbar-vertical {
+    display: none;
+}
+
+.xml-batch-table .z-scrollbar-vertical,
+.xml-batch-table .z-scrollbar-horizontal {
+    display: none;
 }

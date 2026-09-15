@@ -18,9 +18,21 @@
     margin: 0;
 
     padding: 0;
+    background: trasparent;
 
     overflow: hidden;
 
+
+}
+
+.outward-checker-center {
+    background: #f8fafc;
+    border: none;
+}
+
+.outward-checker-center .z-center-body {
+    background: #f8fafc;
+    border: none;
 }
 .outward-checker-dashboard .rejection-request-count {
     color: #dc2626;
@@ -46,7 +58,7 @@
 
     padding: 30px;
 
-    background: #eaf2f8;
+    background: trasparent;
 
     overflow-y: auto;
 
