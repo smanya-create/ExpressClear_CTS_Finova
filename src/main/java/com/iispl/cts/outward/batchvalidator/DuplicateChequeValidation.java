@@ -1,4 +1,3 @@
-
 package com.iispl.cts.outward.batchvalidator;
 
 import java.util.HashSet;
@@ -8,8 +7,17 @@ import java.util.Set;
 import com.iispl.cts.dto.BatchValidationData;
 import com.iispl.cts.dto.ValidationResult;
 import com.iispl.cts.entity.outward.ScanCheque;
+import com.iispl.cts.service.outward.OutwardMakerService;
 
 public class DuplicateChequeValidation implements ValidateBatch {
+
+    private OutwardMakerService outwardMakerService;
+
+    public DuplicateChequeValidation(
+            OutwardMakerService outwardMakerService) {
+
+        this.outwardMakerService = outwardMakerService;
+    }
 
     @Override
     public ValidationResult validate(BatchValidationData data) {
@@ -39,12 +47,20 @@ public class DuplicateChequeValidation implements ValidateBatch {
                         "Invalid cheque information found. Please check the uploaded file.");
             }
 
-            String scannedChequeId = cheque.getScannedChequeId();
-            String chequeNumber = cheque.getChequeNumber();
-            String accountNumber = cheque.getDraweeAccountNumber();
+            String scannedChequeId =
+                    cheque.getScannedChequeId();
+
+            String chequeNumber =
+                    cheque.getChequeNumber();
+
+            String accountNumber =
+                    cheque.getDraweeAccountNumber();
+
 
             /*
              * Duplicate Scanned Cheque ID
+             *
+             * This is only checked inside the current batch.
              */
             if (scannedChequeId != null
                     && !scannedChequeId.trim().isEmpty()) {
@@ -62,6 +78,7 @@ public class DuplicateChequeValidation implements ValidateBatch {
                 }
             }
 
+
             /*
              * Duplicate Cheque Number + Account Number
              */
@@ -76,7 +93,12 @@ public class DuplicateChequeValidation implements ValidateBatch {
                 String combination =
                         chequeNumber + "|" + accountNumber;
 
-                if (!chequeNumberAccountCombinations.add(combination)) {
+
+                /*
+                 * 1. Duplicate inside current batch
+                 */
+                if (!chequeNumberAccountCombinations
+                        .add(combination)) {
 
                     return new ValidationResult(
                             false,
@@ -87,10 +109,28 @@ public class DuplicateChequeValidation implements ValidateBatch {
                                     + " already exists in the uploaded batch. "
                                     + "Please check the cheque details.");
                 }
+
+
+                /*
+                 * 2. Duplicate in previous/existing batches
+                 */
+                if (outwardMakerService
+                        .existsChequeNumberAndAccount(
+                                chequeNumber,
+                                accountNumber)) {
+
+                    return new ValidationResult(
+                            false,
+                            "Duplicate cheque found. Cheque number "
+                                    + chequeNumber
+                                    + " with account number "
+                                    + accountNumber
+                                    + " already exists in another batch. "
+                                    + "Please check the cheque details.");
+                }
             }
         }
 
         return new ValidationResult(true, null);
     }
 }
-

@@ -1,62 +1,117 @@
 /* =========================================================
-   CTS MICR REPAIR
-   Temporary UI CSS
-   ========================================================= */
-
-
-/* =========================================================
-   MAIN PAGE
+   CTS OUTWARD - MICR REPAIR
    ========================================================= */
 
 .micr-repair-window {
-    background: #ffffff;
+    background: #f4f7fb;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #243447;
 }
 
 .micr-repair-page {
+    padding: 12px 16px;
     box-sizing: border-box;
-    padding: 12px 16px 8px 16px;
-    background: #ffffff;
+    background: #f4f7fb;
 }
 
 
 /* =========================================================
-   PAGE HEADER
+   HEADER
    ========================================================= */
 
 .micr-repair-header {
-    min-height: 52px;
-    padding: 4px 4px 8px 4px;
-    box-sizing: border-box;
-    border-bottom: 1px solid #d9e1ea;
+    min-height: 58px;
 }
 
 .micr-repair-title {
-    font-size: 18px;
+    font-size: 21px;
     font-weight: 700;
-    color: #16345c;
+    color: #17324d;
+    line-height: 25px;
 }
 
 .micr-repair-description {
     font-size: 12px;
-    color: #687789;
+    color: #718096;
+    line-height: 16px;
 }
+
+
+/* =========================================================
+   HEADER PROGRESS
+   Progress is above Prev / Next
+   ========================================================= */
+
+.header-progress {
+    box-sizing: border-box;
+    padding: 2px 4px;
+}
+
+.header-progress .progress-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: #7b8794;
+    letter-spacing: 0.4px;
+}
+
+.header-progress .progress-text {
+    font-size: 9px;
+    color: #64748b;
+    text-align: right;
+}
+
+.micr-progress-meter {
+    width: 100%;
+    height: 6px;
+    border: none;
+    border-radius: 5px;
+    background: #e2e8f0;
+}
+
+
+/* =========================================================
+   TOP NAVIGATION
+   ========================================================= */
 
 .cheque-navigation {
-    white-space: nowrap;
-}
-
-.cheque-position {
-    text-align: center;
-    font-weight: 600;
-    color: #34495e;
+    margin-right: 4px;
 }
 
 .micr-button {
+    box-sizing: border-box;
+    border-radius: 4px;
     font-size: 12px;
+    font-weight: 600;
+}
+
+.navigation-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+}
+
+.navigation-button:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
 }
 
 .back-button {
-    margin-left: 4px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+}
+
+.back-button:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.cheque-position {
+    min-width: 45px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
 }
 
 
@@ -65,97 +120,148 @@
    ========================================================= */
 
 .batch-information {
-    padding: 10px 12px;
+    width: 100%;
     box-sizing: border-box;
-    background: #f7f9fc;
-    border: 1px solid #dce3eb;
-    border-radius: 4px;
+    padding: 11px 15px;
+    background: #ffffff;
+    border: 1px solid #dbe3ec;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
 
 .batch-information-layout {
-    min-height: 48px;
+    min-height: 42px;
 }
 
 .batch-information-item {
-    padding: 2px 8px;
-    box-sizing: border-box;
+    min-width: 0;
 }
 
 .batch-label-title {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
-    color: #6b7785;
+    color: #7b8794;
+    letter-spacing: 0.5px;
+    line-height: 12px;
 }
 
 .batch-label-value {
     font-size: 14px;
-    font-weight: 600;
-    color: #1f3b5b;
+    font-weight: 700;
+    color: #243b53;
+    line-height: 18px;
 }
 
 
 /* =========================================================
-   MAIN CONTENT
+   MAIN WORKSPACE
    ========================================================= */
 
 .micr-repair-content {
-    min-height: 0;
-    box-sizing: border-box;
-}
-
-.cheque-image-section,
-.micr-details-section {
-    min-width: 0;
+    width: 100%;
     min-height: 0;
     box-sizing: border-box;
 }
 
 
 /* =========================================================
-   LEFT IMAGE SECTION
+   LEFT - CHEQUE IMAGE CARD
    ========================================================= */
 
+.cheque-image-section {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #dbe3ec;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
 .cheque-image-content {
+    width: 100%;
+    height: 100%;
     min-height: 0;
 }
 
 .section-header {
-    min-height: 34px;
-    padding: 4px 8px;
-    box-sizing: border-box;
-    background: #f4f7fa;
-    border: 1px solid #dce3eb;
-    border-radius: 4px;
+    min-height: 31px;
 }
 
 .section-title {
     font-size: 13px;
     font-weight: 700;
-    color: #1c3e65;
+    color: #243b53;
+    line-height: 17px;
+}
+
+.section-subtitle {
+    font-size: 10px;
+    color: #8a96a3;
+    line-height: 13px;
 }
 
 .record-position {
-    font-size: 11px;
-    color: #687789;
+    font-size: 10px;
+    color: #64748b;
+    text-align: right;
+    white-space: nowrap;
 }
 
 
 /* =========================================================
-   CHEQUE IMAGE CONTAINER
+   FRONT / BACK IMAGE BUTTONS
+   ========================================================= */
+
+.image-side-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.image-side-button:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+
+/* =========================================================
+   CHEQUE IMAGE VIEWER
    ========================================================= */
 
 .cheque-image-container {
     position: relative;
-    box-sizing: border-box;
-    border: 1px solid #cbd5df;
-    border-radius: 4px;
-    background: #f5f6f8;
+    width: 100%;
+    min-height: 0;
     overflow: hidden;
+    background: #eef2f6;
+    border: 1px solid #d7dee7;
+    border-radius: 4px;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .cheque-image {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: auto;
+    cursor: grab;
+    transform-origin: center center;
+}
+
+.cheque-image:active {
+    cursor: grabbing;
 }
 
 .cheque-image-placeholder {
@@ -163,10 +269,10 @@
     left: 0;
     right: 0;
     top: 50%;
-    transform: translateY(-50%);
+    margin-top: -8px;
     text-align: center;
-    color: #7a8795;
-    font-size: 13px;
+    font-size: 12px;
+    color: #8a96a3;
 }
 
 
@@ -179,32 +285,71 @@
 }
 
 .image-control-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 4px;
     font-size: 11px;
+    font-weight: 600;
 }
 
-.image-navigation {
-    width: 100%;
+.image-control-button:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
 }
 
-.image-position {
-    text-align: center;
-    font-size: 11px;
-    color: #687789;
+.compact-image-button {
+    font-size: 13px;
+    font-weight: 700;
 }
 
 
 /* =========================================================
-   RIGHT MICR DETAILS
+   RIGHT - MICR DETAILS CARD
    ========================================================= */
 
-.micr-details-content {
+.micr-details-section {
+    min-width: 0;
     min-height: 0;
+    height: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #dbe3ec;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+
+/* IMPORTANT:
+   Only this MICR area gets a scrollbar.
+   The rest of the page does not scroll because of this rule. */
+
+.micr-details-scroll {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    padding-right: 4px;
+}
+
+.micr-details-content {
+    width: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
 }
 
 .cheque-status {
-    font-size: 11px;
-    font-weight: 600;
-    color: #6c7a89;
+    padding: 4px 8px;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
+    color: #be123c;
+    font-size: 9px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 
@@ -213,28 +358,29 @@
    ========================================================= */
 
 .checker-return-information {
-    padding: 8px 10px;
+    width: 100%;
     box-sizing: border-box;
-    background: #fff8e6;
-    border: 1px solid #ead59b;
+    padding: 8px 10px;
+    background: #fff8e8;
+    border: 1px solid #f5d48a;
     border-radius: 4px;
 }
 
 .checker-return-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: #745b14;
+    color: #8a5a00;
 }
 
 .checker-label-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    color: #6c6c6c;
+    color: #64748b;
 }
 
 .checker-label-value {
-    font-size: 11px;
-    color: #333333;
+    font-size: 10px;
+    color: #334155;
 }
 
 
@@ -242,48 +388,75 @@
    MICR FORM
    ========================================================= */
 
-.micr-details-grid {
-    border: 1px solid #dce3eb;
-    border-radius: 4px;
-    background: #ffffff;
-    padding: 8px;
+.cts-form-row {
+    display: flex;
+    width: 100%;
+    gap: 10px;
     box-sizing: border-box;
 }
 
-.micr-details-grid .z-row {
-    border-bottom: 1px solid #edf1f5;
+.cts-form-field {
+    flex: 1;
+    min-width: 0;
 }
 
-.micr-details-grid .z-row:last-child {
-    border-bottom: none;
-}
-
-.micr-field {
-    padding: 7px;
-    box-sizing: border-box;
-}
-
-.field-label {
+.cts-field-lbl {
+    display: block;
+    margin-bottom: 4px;
     font-size: 10px;
-    font-weight: 700;
-    color: #5e6b78;
+    font-weight: 600;
+    color: #475569;
+}
+
+.cts-input-text {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 30px;
+    padding: 5px 8px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    color: #243b53;
+    font-size: 12px;
+}
+
+.cts-input-text:focus {
+    border-color: #4c9be8;
+    box-shadow: 0 0 0 2px rgba(29, 117, 214, 0.10);
+}
+
+.readonly-field {
+    background: #f1f5f9;
+    color: #64748b;
 }
 
 
 /* =========================================================
-   TEXTBOXES
+   CURRENT MICR ERROR
    ========================================================= */
 
-.micr-textbox {
-    font-size: 13px;
-    height: 32px;
+.error-field {
+    background: #fff1f2;
+    border: 1px solid #f0a1aa;
+    color: #9f1239;
 }
 
-.readonly-field {
-    background: #f3f5f7;
+.error-field:focus {
+    border-color: #e56b76;
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.08);
 }
 
-.corrected-micr-field {
+
+/* =========================================================
+   CORRECTED MICR
+   ========================================================= */
+
+.correction-field {
+    background: #ffffff;
+}
+
+.micr-code-field {
+    letter-spacing: 0.8px;
     font-weight: 600;
 }
 
@@ -293,13 +466,15 @@
    ========================================================= */
 
 .micr-validation-message {
-    padding: 6px 8px;
+    width: 100%;
+    padding: 5px 7px;
     box-sizing: border-box;
-    font-size: 11px;
-    color: #b3261e;
-    background: #fff1f0;
-    border: 1px solid #efc2bf;
-    border-radius: 3px;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 4px;
+    color: #be123c;
+    font-size: 10px;
+    line-height: 14px;
 }
 
 
@@ -309,49 +484,72 @@
 
 .micr-action-buttons {
     width: 100%;
-    padding-top: 2px;
 }
 
 .micr-action-button {
-    font-size: 12px;
-    font-weight: 600;
+    box-sizing: border-box;
+    height: 32px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
 }
 
-.reject-button {
-    min-width: 0;
-}
+
+/* Save & Next - CTS sidebar color */
 
 .save-button {
-    min-width: 0;
+    background: #1d3d61;
+    border: 1px solid #1d3d61;
+    color: #ffffff;
 }
+
+.save-button:hover {
+    background: #254b75;
+    border-color: #254b75;
+}
+
+
+/* Request Rejection */
+
+.reject-button {
+    background: #ffffff;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.reject-button:hover {
+    background: #fff5f5;
+    border-color: #c82333;
+    color: #c82333;
+}
+
+
+/* Submit - disabled until all MICR repairs are processed */
 
 .submit-button {
-    min-width: 0;
+    background: #e5e7eb;
+    border: 1px solid #d1d5db;
+    color: #9ca3af;
+}
+
+.submit-button:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+    color: #9ca3af;
 }
 
 
-/* =========================================================
-   PROGRESS
-   ========================================================= */
+/* Submit after controller enables it */
 
-.micr-progress {
-    width: 100%;
-    padding-top: 3px;
+.submit-button:not([disabled]) {
+    background: #1d3d61;
+    border: 1px solid #1d3d61;
+    color: #ffffff;
 }
 
-.progress-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: #5e6b78;
-}
-
-.progress-text {
-    font-size: 10px;
-    color: #687789;
-}
-
-.micr-progress-meter {
-    width: 100%;
+.submit-button:not([disabled]):hover {
+    background: #254b75;
+    border-color: #254b75;
 }
 
 
@@ -360,34 +558,97 @@
    ========================================================= */
 
 .micr-repair-footer {
-    min-height: 28px;
-    padding: 5px 4px 2px 4px;
-    box-sizing: border-box;
-    border-top: 1px solid #d9e1ea;
+    border-top: 1px solid #dbe3ec;
 }
 
 .footer-text {
-    font-size: 10px;
-    color: #7a8795;
+    font-size: 9px;
+    color: #94a3b8;
 }
 
 .footer-version {
-    font-size: 10px;
-    color: #7a8795;
+    font-size: 9px;
+    color: #94a3b8;
+    text-align: right;
 }
 
 
 /* =========================================================
-   POPUPS
+   REJECTION POPUP
+   ========================================================= */
+
+.reject-request-window {
+    background: #ffffff;
+}
+
+.reject-request-description {
+    font-size: 11px;
+    line-height: 16px;
+    color: #475569;
+}
+
+.reject-field-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.reject-reason-combobox {
+    box-sizing: border-box;
+    min-height: 30px;
+}
+
+.reject-remarks {
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+.reject-cancel-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.reject-confirm-button {
+    background: #dc3545;
+    border: 1px solid #dc3545;
+    color: #ffffff;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   GENERAL POPUPS
    ========================================================= */
 
 .micr-popup {
-    padding: 8px;
+    background: #ffffff;
+}
+
+.micr-popup .z-window-content {
+    padding: 14px;
 }
 
 
 /* =========================================================
-   RESPONSIVE SAFETY
+   DISABLED COMPONENTS
+   ========================================================= */
+
+.z-button[disabled] {
+    opacity: 1;
+    cursor: default;
+}
+
+
+/* =========================================================
+   SMALL SCREEN SUPPORT
    ========================================================= */
 
 @media screen and (max-width: 900px) {
@@ -396,27 +657,29 @@
         padding: 8px;
     }
 
+    .micr-repair-content {
+        display: block;
+    }
+
+    .cheque-image-section,
+    .micr-details-section {
+        width: 100%;
+        height: 100%;
+    }
+
+    .cheque-image-container {
+        height: 260px;
+    }
+
     .micr-repair-header {
-        min-height: 48px;
+        min-height: 40px;
     }
 
     .micr-repair-title {
-        font-size: 16px;
+        font-size: 18px;
     }
 
-    .micr-repair-description {
-        font-size: 11px;
-    }
-
-    .batch-information-layout {
-        spacing: 10px;
-    }
-
-    .section-title {
-        font-size: 12px;
-    }
-
-    .micr-textbox {
-        height: 30px;
+    .header-progress {
+        width: 160px;
     }
 }

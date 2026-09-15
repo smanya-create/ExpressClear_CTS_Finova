@@ -8,35 +8,32 @@ import com.iispl.cts.entity.outward.RejectedReason;
 
 public interface OutwardMakerService {
 
-    // =========================================================
-    // Scan MICR Repair
-    // =========================================================
+	// =========================================================
+	// Scan MICR Repair
+	// =========================================================
 
-    List<MicrRepairBatch> getScanMicrRepairBatches();
+	List<MicrRepairBatch> getScanMicrRepairBatches();
 
-    List<MicrRepairChequeDTO> getScanMicrRepairCheques(
-            String scannedBatchId);
+	List<MicrRepairChequeDTO> getScanMicrRepairCheques(String scannedBatchId);
 
-    void submitScanMicrRepair(
-            List<MicrRepairChequeDTO> cheques);
-    
-    void saveScanMicrRepair(MicrRepairChequeDTO cheque);
+	void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques);
 
+	void saveScanMicrRepair(MicrRepairChequeDTO cheque);
 
-    // =========================================================
-    // Outward MICR Repair
-    // =========================================================
+	// =========================================================
+	// Outward MICR Repair
+	// =========================================================
 
-    List<MicrRepairBatch> getOutwardMicrRepairBatches();
+	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 
-    List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(
-            String outwardBatchId);
+	List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(String outwardBatchId);
 
-    void submitOutwardMicrRepair(
-            List<MicrRepairChequeDTO> cheques);
-    
-    void saveOutwardMicrRepair(MicrRepairChequeDTO cheque);
-    
-    List<RejectedReason> getRejectedReasons();
+	void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques);
+
+	void saveOutwardMicrRepair(MicrRepairChequeDTO cheque);
+
+	List<RejectedReason> getRejectedReasons();
+
+	boolean existsChequeNumberAndAccount(String chequeNumber, String accountNumber);
 
 }

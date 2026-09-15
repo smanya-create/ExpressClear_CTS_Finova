@@ -1,542 +1,350 @@
 /* =========================================================
-   OUTWARD MAKER - BATCH UPLOAD
+   BATCH UPLOAD PAGE
    ========================================================= */
 
-* {
+.batch-upload-window {
+    background: #f7f9fc;
+}
+
+.batch-upload-page {
+    background: #f7f9fc;
+    padding: 18px 22px;
     box-sizing: border-box;
 }
 
-
 /* =========================================================
-   PAGE
+   GROUPBOX
    ========================================================= */
 
-.upload-batch-page {
-    width: 100%;
-    min-height: 100%;
-    padding: 24px 28px 18px 28px;
-    background: #f8fafc;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #172554;
-}
-
-
-/* =========================================================
-   PAGE HEADER
-   ========================================================= */
-
-.page-header {
-    width: 100%;
-    margin-bottom: 18px;
-}
-
-.page-title {
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    color: #172554;
-    margin-bottom: 5px;
-}
-
-.page-description {
-    display: block;
-    font-size: 13px;
-    color: #64748b;
-}
-
-
-/* =========================================================
-   GROUPBOX COMMON
-   ========================================================= */
-
-.batch-control-groupbox,
-.batch-details-section {
-    width: 100%;
+.batch-upload-page .z-groupbox {
     background: #ffffff;
-    border: 1px solid #d8dee8;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-    margin-bottom: 16px;
+    border: 1px solid #d9dee7;
+    border-radius: 4px;
 }
 
-
-/* =========================================================
-   GROUPBOX CAPTION
-   ========================================================= */
-
-.groupbox-caption {
-    color: #172554 !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.3px;
-}
-
-
-/* =========================================================
-   BATCH CONTROL CONTENT
-   ========================================================= */
-
-.batch-control-vlayout {
-    padding: 18px;
-}
-
-.batch-control-hlayout {
-    display: flex;
-    width: 100%;
-    align-items: flex-start;
-}
-
-
-/* =========================================================
-   FORM GROUP
-   ========================================================= */
-
-.form-group-wrapper {
-    flex: 1 1 0;
-    min-width: 0;
-}
-
-.form-group-full {
-    width: 100%;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 7px;
-    color: #172554;
-    font-size: 12px;
-    font-weight: 700;
-
-    /* Keep labels in one line */
-    white-space: nowrap;
-}
-
-
-/* =========================================================
-   FORM INPUT
-   ========================================================= */
-
-.form-input {
-    width: 100%;
-    min-height: 36px;
-
-    border: 1px solid #cbd5e1;
-    border-radius: 5px;
-
+.batch-upload-page .z-groupbox-header {
     background: #ffffff;
-    color: #172554;
+    border-bottom: 1px solid #e3e7ed;
+    padding: 10px 14px;
+}
 
+.batch-upload-page .z-caption {
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.batch-upload-page .z-groupbox-content {
+    background: #ffffff;
+    padding: 14px;
+}
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
+.batch-upload-page .z-label {
+    color: #374151;
     font-size: 13px;
 }
 
-.form-input:focus {
-    border-color: #17295c;
-    box-shadow: 0 0 0 2px rgba(23, 41, 92, 0.10);
-}
-
-
 /* =========================================================
-   FOLDER ROW
+   INPUTS
    ========================================================= */
 
-.folder-row {
-    display: flex;
-    width: 100%;
-    align-items: center;
+.batch-upload-page .z-textbox,
+.batch-upload-page .z-intbox,
+.batch-upload-page .z-decimalbox {
+    height: 34px;
+    border: 1px solid #cfd6df;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 13px;
+    box-sizing: border-box;
 }
 
-.folder-input {
-    min-width: 0;
+.batch-upload-page .z-textbox:focus,
+.batch-upload-page .z-intbox:focus,
+.batch-upload-page .z-decimalbox:focus {
+    border-color: #1d3d61;
+    box-shadow: 0 0 0 2px rgba(29, 61, 97, 0.10);
 }
 
+.batch-upload-page .z-textbox[readonly] {
+    background: #f4f5f7;
+    color: #4b5563;
+}
 
 /* =========================================================
-   BROWSE BUTTON
+   BUTTONS - MATCH CTS SIDEBAR
    ========================================================= */
 
-.btn-browse {
-    min-width: 92px;
-    height: 36px;
-
-    background: #18295c !important;
-    border: 1px solid #18295c !important;
-    border-radius: 5px !important;
-
-    color: #ffffff !important;
-
-    font-size: 12px !important;
-    font-weight: 700 !important;
-
+.batch-upload-page .z-button {
+    height: 34px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
 }
 
-.btn-browse:hover {
-    background: #22386f !important;
-    border-color: #22386f !important;
+.batch-upload-page .btn-browse,
+.batch-upload-page #btnValidateBatch,
+.batch-upload-page .btn-batch-action {
+    background: #1d3d61;
+    border: 1px solid #1d3d61;
+    color: #ffffff;
 }
 
-
-/* =========================================================
-   FORM HINT
-   ========================================================= */
-
-.form-hint {
-    display: block;
-    margin-top: 6px;
-
-    color: #64748b;
-    font-size: 11px;
-
-    white-space: normal;
+.batch-upload-page .btn-browse {
+    min-width: 78px;
 }
 
-
-/* =========================================================
-   VALIDATE BUTTON
-   ========================================================= */
-
-.form-actions-inline {
-    width: 100%;
-    padding-top: 2px;
+.batch-upload-page #btnValidateBatch {
+    min-width: 110px;
 }
 
-.btn-validate {
-    min-width: 130px;
-    height: 36px;
-
-    padding: 0 18px;
-
-    background: #18295c !important;
-    border: 1px solid #18295c !important;
-    border-radius: 5px !important;
-
-    color: #ffffff !important;
-
-    font-size: 12px !important;
-    font-weight: 700 !important;
-
-    cursor: pointer;
+.batch-upload-page .btn-browse:hover,
+.batch-upload-page #btnValidateBatch:hover,
+.batch-upload-page .btn-batch-action:hover {
+    background: #254b75;
+    border-color: #254b75;
 }
 
-.btn-validate:hover {
-    background: #22386f !important;
-    border-color: #22386f !important;
-}
-
-.btn-validate[disabled],
-.btn-validate.z-button-disabled {
-    opacity: 0.55;
+.batch-upload-page #btnValidateBatch:disabled,
+.batch-upload-page .btn-batch-action:disabled {
+    background: #d9dde3;
+    border-color: #d9dde3;
+    color: #8a919b;
     cursor: default;
 }
-
 
 /* =========================================================
    SUCCESS MESSAGE
    ========================================================= */
 
-.success-message {
-    width: 100%;
-
-    display: flex;
-    align-items: center;
-
+.batch-upload-page #divSuccessMessage {
+    background: #ecfdf3;
+    border: 1px solid #a7e4bd;
+    border-radius: 4px;
     padding: 10px 14px;
-
-    margin-bottom: 16px;
-
-    background: #f0fdf4;
-
-    border: 1px solid #86efac;
-    border-left: 3px solid #22c55e;
-
-    border-radius: 5px;
+    box-sizing: border-box;
 }
 
-.success-icon {
-    width: 22px;
-    height: 22px;
-
-    margin-right: 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #22c55e;
-    border-radius: 50%;
-
-    color: #ffffff;
-
-    font-size: 13px;
-    font-weight: 700;
-
-    flex-shrink: 0;
-}
-
-.success-title {
-    display: block;
-
+.batch-upload-page #lblSuccessText {
     color: #166534;
-
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 500;
 }
-
-.success-text {
-    display: block;
-
-    color: #4d7c5a;
-
-    font-size: 10px;
-}
-
 
 /* =========================================================
-   BATCH DETAILS
+   LISTBOXES / SCROLLING
    ========================================================= */
 
-.batch-details-section {
-    margin-bottom: 18px;
+.batch-upload-page .z-listbox {
+    border: 1px solid #d5dbe3;
+    background: #ffffff;
+    border-radius: 2px;
 }
 
-.batch-details-content {
-    width: 100%;
-    padding: 14px 14px 16px 14px;
+.batch-upload-page .z-listbox-body {
+    overflow-y: auto;
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 
-.batch-details-description {
-    display: block;
+.batch-upload-page #lstBatchDetails .z-listbox-body,
+.batch-upload-page #lstCheques .z-listbox-body {
+    overflow-y: auto;
+}
 
-    margin-bottom: 10px;
+/* =========================================================
+   TABLE HEADINGS - ALWAYS CENTERED
+   ========================================================= */
 
-    color: #172554;
-
-    font-size: 12px;
+.batch-upload-page .z-listheader {
+    background: #1d3d61;
+    border-right: 1px solid #2b4d70;
+    color: #ffffff;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 13px;
     font-weight: 600;
 }
 
+.batch-upload-page .z-listheader-content {
+    color: #ffffff;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 6px;
+    box-sizing: border-box;
+}
 
 /* =========================================================
-   BATCH DETAILS TABLE
+   TABLE ROWS / CELLS
    ========================================================= */
 
-.batch-details-table {
-    width: 100%;
-
-    border: 1px solid #d8dee8;
-
-    background: #ffffff;
-
-    border-collapse: collapse;
-}
-
-
-/* =========================================================
-   TABLE HEADER
-   ========================================================= */
-
-.batch-details-table .z-listhead {
-    background: #18295c !important;
-}
-
-.batch-details-table .z-listheader {
-    height: 36px;
-
-    background: #18295c !important;
-
-    border-right: 1px solid #304477 !important;
-    border-bottom: 1px solid #18295c !important;
-
-    color: #ffffff !important;
-
-    font-size: 11px !important;
-    font-weight: 700 !important;
-}
-
-.batch-details-table .z-listheader-content {
-    padding: 0 12px !important;
-
-    color: #ffffff !important;
-
-    font-size: 11px !important;
-    font-weight: 700 !important;
-}
-
-
-/* =========================================================
-   TABLE ROW
-   ========================================================= */
-
-.batch-details-table .z-listitem {
-    min-height: 42px;
-
+.batch-upload-page .z-listitem {
     background: #ffffff;
 }
 
-.batch-details-table .z-listitem:hover {
-    background: #f8fafc;
+.batch-upload-page .z-listitem:hover {
+    background: #f5f8fb;
 }
 
-.batch-details-table .z-listcell {
-    height: 42px;
-
-    border-right: 1px solid #dbe2ea !important;
-    border-bottom: 1px solid #dbe2ea !important;
-
-    color: #172554 !important;
-
-    font-size: 12px !important;
-
-    text-align: left !important;
+.batch-upload-page .z-listcell {
+    border-right: 1px solid #e5e9ef;
+    border-bottom: 1px solid #e5e9ef;
+    background: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    vertical-align: middle;
 }
 
-.batch-details-table .z-listcell-content {
-    padding: 0 12px !important;
-
-    color: #172554 !important;
-
-    font-size: 12px !important;
-
-    text-align: left !important;
+.batch-upload-page .z-listcell-content {
+    text-align: left;
+    padding: 8px 10px;
+    box-sizing: border-box;
 }
-
 
 /* =========================================================
-   BATCH NUMBER
+   BATCH TABLE ALIGNMENT
+   Text/date/status = LEFT
+   Numbers/action = CENTER
    ========================================================= */
 
-.batch-details-table .z-listitem:first-child
-.z-listcell:first-child
+.batch-upload-page #lstBatchDetails
+.z-listitem > .z-listcell:nth-child(1)
+.z-listcell-content,
+.batch-upload-page #lstBatchDetails
+.z-listitem > .z-listcell:nth-child(2)
+.z-listcell-content,
+.batch-upload-page #lstBatchDetails
+.z-listitem > .z-listcell:nth-child(5)
 .z-listcell-content {
-    font-weight: 700;
+    text-align: left;
 }
 
-
-/* =========================================================
-   ACTION CELL
-   ========================================================= */
-
-.batch-details-table .z-listcell:last-child {
-    text-align: left !important;
-}
-
-.batch-details-table .z-listcell:last-child
+.batch-upload-page #lstBatchDetails
+.z-listitem > .z-listcell:nth-child(3)
+.z-listcell-content,
+.batch-upload-page #lstBatchDetails
+.z-listitem > .z-listcell:nth-child(4)
+.z-listcell-content,
+.batch-upload-page #lstBatchDetails
+.z-listitem > .z-listcell:nth-child(6)
 .z-listcell-content {
-    text-align: left !important;
+    text-align: center;
 }
-
 
 /* =========================================================
-   BATCH ACTION BUTTON
-   Used for:
-      MICR Repair
-      Data Entry
+   CHEQUE TABLE ALIGNMENT
+   Text/code/status = LEFT
+   Number/amount/action = CENTER
    ========================================================= */
 
-.btn-batch-action {
-    min-width: 108px;
-    height: 34px;
-
-    padding: 0 13px;
-
-    background: #18295c !important;
-    border: 1px solid #18295c !important;
-    border-radius: 5px !important;
-
-    color: #ffffff !important;
-
-    font-size: 11px !important;
-    font-weight: 700 !important;
-
-    cursor: pointer;
+.batch-upload-page #lstCheques
+.z-listitem > .z-listcell:nth-child(1)
+.z-listcell-content,
+.batch-upload-page #lstCheques
+.z-listitem > .z-listcell:nth-child(4)
+.z-listcell-content,
+.batch-upload-page #lstCheques
+.z-listitem > .z-listcell:nth-child(5)
+.z-listcell-content {
+    text-align: left;
 }
 
-.btn-batch-action:hover {
-    background: #22386f !important;
-    border-color: #22386f !important;
+.batch-upload-page #lstCheques
+.z-listitem > .z-listcell:nth-child(2)
+.z-listcell-content,
+.batch-upload-page #lstCheques
+.z-listitem > .z-listcell:nth-child(3)
+.z-listcell-content,
+.batch-upload-page #lstCheques
+.z-listitem > .z-listcell:nth-child(6)
+.z-listcell-content {
+    text-align: center;
 }
-
 
 /* =========================================================
-   FOOTER
+   ACTION BUTTON
    ========================================================= */
 
-.page-footer {
-    width: 100%;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    padding: 12px 4px 4px 4px;
-
-    color: #94a3b8;
-
-    font-size: 10px;
+.batch-upload-page .btn-batch-action {
+    min-width: 92px;
+    height: 30px;
+    margin: 0 3px;
+    padding: 0 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.cheque-pagination {
+    padding-top: 2px;
+    box-sizing: border-box;
+}
+
+.batch-upload-page #btnChequePrevious,
+.batch-upload-page #btnChequeNext {
+    min-width: 80px;
+    height: 30px;
+    background: #1d3d61;
+    border: 1px solid #1d3d61;
+    color: #ffffff;
+}
+
+.batch-upload-page #btnChequePrevious:hover,
+.batch-upload-page #btnChequeNext:hover {
+    background: #254b75;
+    border-color: #254b75;
+}
+
+.batch-upload-page #btnChequePrevious:disabled,
+.batch-upload-page #btnChequeNext:disabled {
+    background: #d9dde3;
+    border-color: #d9dde3;
+    color: #8a919b;
+    cursor: default;
+}
+
+.batch-upload-page #lblChequePage {
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 8px;
+}
+
+.batch-upload-page #lblTotalCheques {
+    color: #374151;
+    font-size: 13px;
+    font-weight: 500;
+    padding-left: 8px;
+}
 
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 
-@media (max-width: 900px) {
-
-    .upload-batch-page {
-        padding: 18px;
+@media screen and (max-width: 900px) {
+    .batch-upload-page {
+        padding: 12px;
     }
 
-    .batch-control-hlayout {
-        display: block;
-    }
-
-    .form-group-wrapper {
-        width: 100%;
-        margin-bottom: 14px;
-    }
-
-    .batch-details-content {
-        overflow-x: auto;
-    }
-
-    .batch-details-table {
-        min-width: 750px;
-    }
-}
-
-
-@media (max-width: 600px) {
-
-    .upload-batch-page {
-        padding: 14px;
-    }
-
-    .page-title {
-        font-size: 18px;
-    }
-
-    .page-description {
+    .batch-upload-page .z-listheader-content,
+    .batch-upload-page .z-listcell-content {
         font-size: 12px;
     }
 
-    .folder-row {
-        display: flex;
-    }
-
-    .btn-browse {
+    .batch-upload-page .btn-batch-action {
         min-width: 82px;
-    }
-
-    .success-message {
-        padding: 9px 10px;
-    }
-
-    .page-footer {
-        display: block;
-    }
-
-    .page-footer label {
-        display: block;
-        margin-bottom: 4px;
+        padding: 0 7px;
+        font-size: 11px;
     }
 }

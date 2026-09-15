@@ -1,3 +1,4 @@
+
 package com.iispl.cts.controller.outward.maker;
 
 import java.io.File;
@@ -6,6 +7,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.util.media.Media;
@@ -17,6 +19,7 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.UploadEvent;
 import org.zkoss.zk.ui.util.Composer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Decimalbox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Groupbox;
@@ -67,6 +70,31 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     private Listbox lstBatchDetails;
 
+    private Groupbox chequeDetailsGroup;
+
+    private Listbox lstCheques;
+
+    private Combobox cmbChequeFilter;
+
+    private Label lblTotalCheques;
+
+    private Button btnChequePrevious;
+
+    private Label lblChequePage;
+
+    private Button btnChequeNext;
+
+    // =========================================================
+    // CURRENT CHEQUE LIST / PAGINATION
+    // =========================================================
+
+    private List<ScanCheque> currentChequeList =
+            new ArrayList<ScanCheque>();
+
+    private int currentChequePage = 0;
+
+    private static final int CHEQUES_PER_PAGE = 10;
+
     // =========================================================
     // ROOT COMPONENT
     // =========================================================
@@ -111,38 +139,75 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         // =====================================================
 
         txtExpectedTotalCheques =
-                (Intbox) component.getFellow("txtExpectedTotalCheques");
+                (Intbox) component.getFellow(
+                        "txtExpectedTotalCheques");
 
         txtExpectedTotalChequeAmount =
                 (Decimalbox) component.getFellow(
                         "txtExpectedTotalChequeAmount");
 
         txtChequeFolder =
-                (Textbox) component.getFellow("txtChequeFolder");
+                (Textbox) component.getFellow(
+                        "txtChequeFolder");
 
         btnBrowse =
-                (Button) component.getFellow("btnBrowse");
+                (Button) component.getFellow(
+                        "btnBrowse");
 
         btnValidateBatch =
-                (Button) component.getFellow("btnValidateBatch");
+                (Button) component.getFellow(
+                        "btnValidateBatch");
 
         divSuccessMessage =
-                (Div) component.getFellow("divSuccessMessage");
+                (Div) component.getFellow(
+                        "divSuccessMessage");
 
         lblSuccessText =
-                (Label) component.getFellow("lblSuccessText");
+                (Label) component.getFellow(
+                        "lblSuccessText");
 
         batchDetailsGroup =
-                (Groupbox) component.getFellow("batchDetailsGroup");
+                (Groupbox) component.getFellow(
+                        "batchDetailsGroup");
 
         lstBatchDetails =
-                (Listbox) component.getFellow("lstBatchDetails");
+                (Listbox) component.getFellow(
+                        "lstBatchDetails");
+
+        chequeDetailsGroup =
+                (Groupbox) component.getFellow(
+                        "grpChequeDetails");
+
+        lstCheques =
+                (Listbox) component.getFellow(
+                        "lstCheques");
+
+        cmbChequeFilter =
+                (Combobox) component.getFellow(
+                        "cmbChequeFilter");
+
+        lblTotalCheques =
+                (Label) component.getFellow(
+                        "lblTotalCheques");
+
+        btnChequePrevious =
+                (Button) component.getFellow(
+                        "btnChequePrevious");
+
+        lblChequePage =
+                (Label) component.getFellow(
+                        "lblChequePage");
+
+        btnChequeNext =
+                (Button) component.getFellow(
+                        "btnChequeNext");
 
         // =====================================================
         // CREATE SERVICES
         // =====================================================
 
-        scanService = new ScanServiceImpl();
+        scanService =
+                new ScanServiceImpl();
 
         batchValidationService =
                 new BatchValidationServiceImpl();
@@ -154,6 +219,82 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         divSuccessMessage.setVisible(false);
 
         batchDetailsGroup.setVisible(false);
+
+        chequeDetailsGroup.setVisible(false);
+
+        lstCheques.getItems().clear();
+
+        currentChequeList.clear();
+
+        currentChequePage = 0;
+
+        lblTotalCheques.setValue(
+                "Total Cheques: 0");
+
+        lblChequePage.setValue(
+                "Page 1");
+
+        btnChequePrevious.setDisabled(true);
+
+        btnChequeNext.setDisabled(true);
+
+        // =====================================================
+        // CHEQUE FILTER
+        // =====================================================
+
+        cmbChequeFilter.addEventListener(
+                Events.ON_CHANGE,
+                new EventListener<Event>() {
+
+                    @Override
+                    public void onEvent(Event event) {
+
+                        currentChequePage = 0;
+
+                        displayChequeDetails();
+                    }
+                });
+
+        // =====================================================
+        // PREVIOUS BUTTON
+        // =====================================================
+
+        btnChequePrevious.addEventListener(
+                Events.ON_CLICK,
+                new EventListener<Event>() {
+
+                    @Override
+                    public void onEvent(Event event) {
+
+                        if (currentChequePage > 0) {
+
+                            currentChequePage--;
+
+                            displayChequeDetails();
+                        }
+                    }
+                });
+
+        // =====================================================
+        // NEXT BUTTON
+        // =====================================================
+
+        btnChequeNext.addEventListener(
+                Events.ON_CLICK,
+                new EventListener<Event>() {
+
+                    @Override
+                    public void onEvent(Event event) {
+
+                        if (currentChequePage
+                                < getTotalChequePages() - 1) {
+
+                            currentChequePage++;
+
+                            displayChequeDetails();
+                        }
+                    }
+                });
 
         btnValidateBatch.setDisabled(true);
 
@@ -193,24 +334,29 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
     // HANDLE ZIP UPLOAD
     // =========================================================
 
-    private void handleZipUpload(UploadEvent uploadEvent) {
+    private void handleZipUpload(
+            UploadEvent uploadEvent) {
 
-        Media media = uploadEvent.getMedia();
+        Media media =
+                uploadEvent.getMedia();
 
         if (media == null) {
             return;
         }
 
-        String fileName = media.getName();
+        String fileName =
+                media.getName();
 
         // =====================================================
         // CHECK ZIP
         // =====================================================
 
         if (fileName == null
-                || !fileName.toLowerCase().endsWith(".zip")) {
+                || !fileName.toLowerCase()
+                        .endsWith(".zip")) {
 
-            showErrorMessage("Please upload a ZIP file.");
+            showErrorMessage(
+                    "Please upload a ZIP file.");
 
             return;
         }
@@ -223,7 +369,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                 Executions.getCurrent()
                         .getDesktop()
                         .getWebApp()
-                        .getRealPath("/TempData");
+                        .getRealPath(
+                                "/TempData");
 
         if (tempDataPath == null) {
 
@@ -272,7 +419,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                         new FileOutputStream(
                                 destinationFile)) {
 
-            byte[] buffer = new byte[8192];
+            byte[] buffer =
+                    new byte[8192];
 
             int bytesRead;
 
@@ -308,7 +456,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         // DISPLAY FILE NAME
         // =====================================================
 
-        txtChequeFolder.setValue(fileName);
+        txtChequeFolder.setValue(
+                fileName);
 
         // =====================================================
         // RESET PREVIOUS RESULT
@@ -324,6 +473,24 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                 .getItems()
                 .clear();
 
+        chequeDetailsGroup.setVisible(false);
+
+        currentChequeList.clear();
+
+        currentChequePage = 0;
+
+        lstCheques.getItems().clear();
+
+        lblTotalCheques.setValue(
+                "Total Cheques: 0");
+
+        lblChequePage.setValue(
+                "Page 1");
+
+        btnChequePrevious.setDisabled(true);
+
+        btnChequeNext.setDisabled(true);
+
         // =====================================================
         // ENABLE VALIDATE
         // =====================================================
@@ -333,41 +500,6 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     // =========================================================
     // VALIDATE BATCH
-    // =========================================================
-    //
-    // FLOW:
-    //
-    // Controller
-    //     |
-    //     | expectedTotalCheques
-    //     | expectedTotalAmount
-    //     | zipPath
-    //     ↓
-    // BatchXmlParser
-    //     |
-    //     | ScanBatch
-    //     | List<ScanCheque>
-    //     ↓
-    // BatchValidationData
-    //     ↓
-    // BatchValidationService
-    //     ↓
-    // BatchValidationServiceImpl
-    //     ↓
-    // Validators
-    //     ↓
-    // ValidationResult
-    //     |
-    //     +---- FAIL → showErrorMessage()
-    //     |
-    //     +---- PASS
-    //              ↓
-    //           SAVE
-    //              ↓
-    //        SUCCESS MESSAGE
-    //              ↓
-    //        BATCH DETAILS
-    //
     // =========================================================
 
     private void validateBatch() {
@@ -528,10 +660,13 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             // STEP 8
             // VALIDATION PASSED → SAVE
             // =================================================
-            MicrCodeHelper micrCodeHelper = new MicrCodeHelper();
-            List<ScanCheque> micrChequeList =
-                    micrCodeHelper.checkMicrCode(chequeList);
 
+            MicrCodeHelper micrCodeHelper =
+                    new MicrCodeHelper();
+
+            List<ScanCheque> micrChequeList =
+                    micrCodeHelper.checkMicrCode(
+                            chequeList);
 
             String savedBatchId =
                     scanService.saveScanBatch(
@@ -556,6 +691,16 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             int micrRepairCount =
                     countMicrRepairCheques(
                             chequeList);
+
+            currentChequeList =
+                    new ArrayList<ScanCheque>(
+                            chequeList);
+
+            currentChequePage = 0;
+
+            chequeDetailsGroup.setVisible(false);
+
+            lstCheques.getItems().clear();
 
             // =================================================
             // STEP 10
@@ -782,27 +927,24 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         // CLEAR OLD DATA
         // =====================================================
 
-        lstBatchDetails
-                .getItems()
-                .clear();
+        lstBatchDetails.getItems().clear();
 
         // =====================================================
-        // SHOW SECTION
+        // SHOW BATCH SECTION
         // =====================================================
 
-        batchDetailsGroup
-                .setVisible(true);
+        batchDetailsGroup.setVisible(true);
+
+        // Cheque details remain hidden until the user clicks
+        // View Cheques.
+        chequeDetailsGroup.setVisible(false);
 
         // =====================================================
-        // CREATE ROW
+        // CREATE BATCH ROW
         // =====================================================
 
         Listitem item =
                 new Listitem();
-
-        // =====================================================
-        // BATCH ID
-        // =====================================================
 
         String displayBatchId =
                 scanBatch.getScannedBatchId();
@@ -810,44 +952,27 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         if (displayBatchId == null
                 || displayBatchId.trim().isEmpty()) {
 
-            displayBatchId =
-                    batchId;
+            displayBatchId = batchId;
         }
 
         item.appendChild(
                 new Listcell(
                         safe(displayBatchId)));
 
-        // =====================================================
-        // SCAN DATE
-        // =====================================================
-
         item.appendChild(
                 new Listcell(
                         formatDate(
                                 scanBatch.getUploadedAt())));
-
-        // =====================================================
-        // TOTAL CHEQUES
-        // =====================================================
 
         item.appendChild(
                 new Listcell(
                         String.valueOf(
                                 actualChequeCount)));
 
-        // =====================================================
-        // MICR ERRORS
-        // =====================================================
-
         item.appendChild(
                 new Listcell(
                         String.valueOf(
                                 micrRepairCount)));
-
-        // =====================================================
-        // STATUS
-        // =====================================================
 
         String status =
                 scanBatch.getBatchStatus();
@@ -862,99 +987,430 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                 new Listcell(status));
 
         // =====================================================
-        // ACTION
+        // BATCH ACTION = VIEW CHEQUES
         // =====================================================
 
         Listcell actionCell =
                 new Listcell();
 
-        // =====================================================
-        // MICR REPAIR
-        // =====================================================
+        final String selectedBatchId =
+                displayBatchId;
 
-        if (micrRepairCount > 0) {
+        Button viewChequesButton =
+                new Button("View Cheques");
 
-            Button micrRepairButton =
-                    new Button("MICR Repair");
+        viewChequesButton.setSclass(
+                "btn-batch-action");
 
-            micrRepairButton.setSclass(
-                    "btn-batch-action");
+        viewChequesButton.addEventListener(
+                Events.ON_CLICK,
+                new EventListener<Event>() {
 
-            final String selectedBatchId =
-                    displayBatchId;
+                    @Override
+                    public void onEvent(Event event) {
 
-            micrRepairButton.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
+                        if (chequeDetailsGroup.isVisible()) {
 
-                        @Override
-                        public void onEvent(
-                                Event event) {
+                            chequeDetailsGroup
+                                    .setVisible(false);
 
-                            openMicrRepair(
-                                    "SCAN",
-                                    selectedBatchId);
+                            viewChequesButton
+                                    .setLabel(
+                                            "View Cheques");
+
+                        } else {
+
+                            if (currentChequeList == null
+                                    || currentChequeList.isEmpty()) {
+
+                                showErrorMessage(
+                                        "No cheque information is available for batch "
+                                                + selectedBatchId
+                                                + ".");
+
+                                return;
+                            }
+
+                            currentChequePage = 0;
+
+                            displayChequeDetails();
+
+                            chequeDetailsGroup
+                                    .setVisible(true);
+
+                            viewChequesButton
+                                    .setLabel(
+                                            "Hide Cheques");
                         }
-                    });
+                    }
+                });
 
-            actionCell.appendChild(
-                    micrRepairButton);
-
-        } else {
-
-            // =================================================
-            // DATA ENTRY
-            // =================================================
-
-            Button dataEntryButton =
-                    new Button("Data Entry");
-
-            dataEntryButton.setSclass(
-                    "btn-batch-action");
-
-            final String selectedBatchId =
-                    displayBatchId;
-
-            dataEntryButton.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(
-                                Event event) {
-
-                            System.out.println(
-                                    "Data Entry clicked for batch: "
-                                            + selectedBatchId);
-                        }
-                    });
-
-            actionCell.appendChild(
-                    dataEntryButton);
-        }
-
-        // =====================================================
-        // ADD ACTION
-        // =====================================================
+        actionCell.appendChild(
+                viewChequesButton);
 
         item.appendChild(
                 actionCell);
-
-        // =====================================================
-        // ADD ROW
-        // =====================================================
 
         lstBatchDetails.appendChild(
                 item);
     }
 
     // =========================================================
-    // OPEN MICR REPAIR
+    // DISPLAY CHEQUE DETAILS
+    // =========================================================
+
+    private void displayChequeDetails() {
+
+        if (currentChequeList == null) {
+
+            currentChequeList =
+                    new ArrayList<ScanCheque>();
+        }
+
+        lstCheques.getItems().clear();
+
+        List<ScanCheque> filteredList =
+                getFilteredChequeList();
+
+        int totalCheques =
+                filteredList.size();
+
+        int totalPages =
+                getTotalPages(totalCheques);
+
+        if (totalPages == 0) {
+
+            currentChequePage = 0;
+
+            lblTotalCheques.setValue(
+                    "Total Cheques: 0");
+
+            lblChequePage.setValue(
+                    "Page 1");
+
+            btnChequePrevious.setDisabled(true);
+
+            btnChequeNext.setDisabled(true);
+
+            chequeDetailsGroup.setVisible(true);
+
+            return;
+        }
+
+        if (currentChequePage >= totalPages) {
+
+            currentChequePage =
+                    totalPages - 1;
+        }
+
+        int startIndex =
+                currentChequePage
+                        * CHEQUES_PER_PAGE;
+
+        int endIndex =
+                Math.min(
+                        startIndex + CHEQUES_PER_PAGE,
+                        totalCheques);
+
+        for (int index = startIndex;
+                index < endIndex;
+                index++) {
+
+            ScanCheque cheque =
+                    filteredList.get(index);
+
+            if (cheque == null) {
+                continue;
+            }
+
+            Listitem item =
+                    new Listitem();
+
+            // =================================================
+            // CHEQUE ID
+            // =================================================
+
+            item.appendChild(
+                    new Listcell(
+                            safe(
+                                    cheque.getScannedChequeId())));
+
+            // =================================================
+            // CHEQUE NUMBER
+            // =================================================
+
+            item.appendChild(
+                    new Listcell(
+                            safe(
+                                    cheque.getChequeNumber())));
+
+            // =================================================
+            // AMOUNT
+            // =================================================
+
+            item.appendChild(
+                    new Listcell(
+                            formatAmount(
+                                    cheque.getChequeAmount())));
+
+            // =================================================
+            // STATUS
+            // =================================================
+
+            String status =
+                    cheque.getChequeStatus();
+
+            if (status == null
+                    || status.trim().isEmpty()) {
+
+                status = "-";
+            }
+
+            item.appendChild(
+                    new Listcell(status));
+
+            // =================================================
+            // MICR CODE
+            // =================================================
+
+            item.appendChild(
+                    new Listcell(
+                            safe(
+                                    cheque.getMicrCode())));
+
+            // =================================================
+            // CHEQUE-LEVEL ACTION
+            // =================================================
+
+            Listcell actionCell =
+                    new Listcell();
+
+            final ScanCheque selectedCheque =
+                    cheque;
+
+            final String selectedBatchId =
+                    batchId;
+
+            boolean micrRepairRequired =
+                    "PENDING_MICR_REPAIR"
+                            .equalsIgnoreCase(status);
+
+            // =================================================
+            // MICR REPAIR
+            // =================================================
+
+            if (micrRepairRequired) {
+
+                Button micrRepairButton =
+                        new Button("MICR Repair");
+
+                micrRepairButton.setSclass(
+                        "btn-batch-action");
+
+                micrRepairButton.addEventListener(
+                        Events.ON_CLICK,
+                        new EventListener<Event>() {
+
+                            @Override
+                            public void onEvent(
+                                    Event event) {
+
+                                openMicrRepair(
+                                        "SCAN",
+                                        selectedBatchId, selectedCheque.getScannedChequeId());
+                            }
+                        });
+
+                actionCell.appendChild(
+                        micrRepairButton);
+
+            } else {
+
+                // =================================================
+                // DATA ENTRY
+                // =================================================
+
+                Button dataEntryButton =
+                        new Button("Data Entry");
+
+                dataEntryButton.setSclass(
+                        "btn-batch-action");
+
+                // Data Entry is enabled for every cheque
+                // that does not require MICR repair.
+                dataEntryButton.setDisabled(false);
+
+                dataEntryButton.addEventListener(
+                        Events.ON_CLICK,
+                        new EventListener<Event>() {
+
+                            @Override
+                            public void onEvent(
+                                    Event event) {
+
+                                if (!dataEntryButton
+                                        .isDisabled()) {
+
+                                    openDataEntry(
+                                            selectedCheque,
+                                            selectedBatchId);
+                                }
+                            }
+                        });
+
+                actionCell.appendChild(
+                        dataEntryButton);
+            }
+
+            item.appendChild(
+                    actionCell);
+
+            lstCheques.appendChild(
+                    item);
+        }
+
+        // =====================================================
+        // PAGINATION DISPLAY
+        // =====================================================
+
+        lblTotalCheques.setValue(
+                "Total Cheques: "
+                        + totalCheques);
+
+        lblChequePage.setValue(
+                "Page "
+                        + (currentChequePage + 1)
+                        + " of "
+                        + totalPages);
+
+        btnChequePrevious.setDisabled(
+                currentChequePage <= 0);
+
+        btnChequeNext.setDisabled(
+                currentChequePage >= totalPages - 1);
+
+        chequeDetailsGroup.setVisible(true);
+    }
+
+    // =========================================================
+    // FILTER CHEQUES
+    // =========================================================
+
+    private List<ScanCheque> getFilteredChequeList() {
+
+        List<ScanCheque> filteredList =
+                new ArrayList<ScanCheque>();
+
+        String filter = "ALL";
+
+        if (cmbChequeFilter != null
+                && cmbChequeFilter.getSelectedItem() != null) {
+
+            Object filterValue =
+                    cmbChequeFilter
+                            .getSelectedItem()
+                            .getValue();
+
+            if (filterValue != null) {
+
+                filter =
+                        filterValue.toString();
+            }
+        }
+
+        for (ScanCheque cheque :
+                currentChequeList) {
+
+            if (cheque == null) {
+                continue;
+            }
+
+            String status =
+                    cheque.getChequeStatus();
+
+            if ("MICR_REPAIR"
+                    .equalsIgnoreCase(filter)) {
+
+                if ("PENDING_MICR_REPAIR"
+                        .equalsIgnoreCase(status)) {
+
+                    filteredList.add(cheque);
+                }
+
+            } else if ("NORMAL"
+                    .equalsIgnoreCase(filter)) {
+
+                if (!"PENDING_MICR_REPAIR"
+                        .equalsIgnoreCase(status)) {
+
+                    filteredList.add(cheque);
+                }
+
+            } else {
+
+                // ALL
+
+                filteredList.add(cheque);
+            }
+        }
+
+        return filteredList;
+    }
+
+    // =========================================================
+    // PAGINATION HELPERS
+    // =========================================================
+
+    private int getTotalPages(
+            int totalCheques) {
+
+        if (totalCheques <= 0) {
+            return 0;
+        }
+
+        return (totalCheques
+                + CHEQUES_PER_PAGE
+                - 1)
+                / CHEQUES_PER_PAGE;
+    }
+
+    private int getTotalChequePages() {
+
+        return getTotalPages(
+                getFilteredChequeList()
+                        .size());
+    }
+
+    // =========================================================
+    // DATA ENTRY
+    // =========================================================
+
+    private void openDataEntry(
+            ScanCheque cheque,
+            String selectedBatchId) {
+
+        // The current project does not define a
+        // Data Entry route in this controller.
+        // Keep the cheque-level action here without
+        // inventing a route that may not exist.
+
+        System.out.println(
+                "Data Entry clicked for cheque: "
+                        + (cheque == null
+                                ? "null"
+                                : cheque.getScannedChequeId())
+                        + ", batch: "
+                        + selectedBatchId);
+    }
+
+    // =========================================================
+    // MICR REPAIR
     // =========================================================
 
     private void openMicrRepair(
             String source,
-            String batchId) {
+            String batchId,
+            String chequeId) {
 
         // =====================================================
         // CHECK SOURCE
@@ -972,6 +1428,16 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
         if (batchId == null
                 || batchId.trim().isEmpty()) {
+
+            return;
+        }
+
+        // =====================================================
+        // CHECK CHEQUE ID
+        // =====================================================
+
+        if (chequeId == null
+                || chequeId.trim().isEmpty()) {
 
             return;
         }
@@ -1004,16 +1470,40 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             Include include =
                     (Include) mainContentArea;
 
+            // =================================================
+            // SEND SOURCE
+            // =================================================
+
             include.setAttribute(
                     "MICR_REPAIR_SOURCE",
                     source.trim());
+
+            // =================================================
+            // SEND BATCH ID
+            // =================================================
 
             include.setAttribute(
                     "MICR_REPAIR_BATCH_ID",
                     batchId.trim());
 
+            // =================================================
+            // SEND CHEQUE ID
+            // =================================================
+
+            include.setAttribute(
+                    "MICR_REPAIR_CHEQUE_ID",
+                    chequeId.trim());
+
+            // =================================================
+            // LOAD MICR REPAIR PAGE
+            // =================================================
+
             include.setSrc(
                     "/outward/maker/micr-repair/micr-repair.zul");
+
+            // =================================================
+            // LOG DETAILS
+            // =================================================
 
             System.out.println(
                     "MICR REPAIR SOURCE = "
@@ -1022,14 +1512,32 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             System.out.println(
                     "MICR REPAIR BATCH ID = "
                             + batchId);
+
+            System.out.println(
+                    "MICR REPAIR CHEQUE ID = "
+                            + chequeId);
         }
+    }
+    // =========================================================
+    // FORMAT AMOUNT
+    // =========================================================
+
+    private String formatAmount(
+            BigDecimal amount) {
+
+        if (amount == null) {
+            return "-";
+        }
+
+        return amount.toPlainString();
     }
 
     // =========================================================
     // FORMAT DATE
     // =========================================================
 
-    private String formatDate(Date date) {
+    private String formatDate(
+            Date date) {
 
         if (date == null) {
             return "-";
@@ -1046,7 +1554,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
     // SAFE VALUE
     // =========================================================
 
-    private String safe(String value) {
+    private String safe(
+            String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
@@ -1057,3 +1566,4 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         return value.trim();
     }
 }
+
