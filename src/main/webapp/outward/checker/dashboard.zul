@@ -53,8 +53,7 @@
                             hflex="1"
                             vflex="1">
 
-                            <div
-                                sclass="outward-checker-welcome-section">
+                            <div sclass="outward-checker-welcome-section">
 
                                 <label
                                     value="Dashboard"

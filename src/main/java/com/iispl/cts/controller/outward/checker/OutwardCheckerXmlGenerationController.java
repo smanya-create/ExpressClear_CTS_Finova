@@ -71,14 +71,11 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 				item.appendChild(new Listcell(verifiedBatch.getOutwardBatchId()));
 
-				item.appendChild(new Listcell(
-						String.valueOf(verifiedBatch.getActualChequeCount())));
+				item.appendChild(new Listcell(String.valueOf(verifiedBatch.getActualChequeCount())));
 
-				item.appendChild(new Listcell(
-						String.valueOf(verifiedBatch.getActualTotalAmount())));
+				item.appendChild(new Listcell(String.valueOf(verifiedBatch.getActualTotalAmount())));
 
-				item.appendChild(new Listcell(
-						verifiedBatch.getBatchStatus()));
+				item.appendChild(new Listcell(verifiedBatch.getBatchStatus()));
 
 				Listcell actionCell = new Listcell();
 
@@ -94,8 +91,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 				generateXmlButton.addEventListener(Events.ON_CLICK, event -> {
 
-					if ("COMPLETED".equalsIgnoreCase(
-							verifiedBatch.getBatchStatus())) {
+					if ("COMPLETED".equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
 						return;
 					}
 
@@ -115,104 +111,67 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 			String batchId = batch.getOutwardBatchId();
 
-			List<OutwardCheque> cheques =
-					outwardChequeService.getChequesByBatchId(batchId);
+			List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId);
 
 			if (cheques == null || cheques.isEmpty()) {
 
-				Messagebox.show(
-						"No cheques found for batch " + batchId,
-						"XML Generation",
-						Messagebox.OK,
+				Messagebox.show("No cheques found for batch " + batchId, "XML Generation", Messagebox.OK,
 						Messagebox.EXCLAMATION);
 
 				return;
 			}
 
-			String outputDirectory = Paths.get(
-					System.getProperty("user.home"),
-					"Downloads/xml-output").toString();
+			String outputDirectory = Paths.get(System.getProperty("user.home"), "Downloads/xml-output").toString();
 
-			Path xmlFile = OutwardXmlGenerator.generateXml(
-					batch,
-					cheques,
-					outputDirectory);
+			Path xmlFile = OutwardXmlGenerator.generateXml(batch, cheques, outputDirectory);
 
 			if (xmlFile == null) {
 
-				Messagebox.show(
-						"XML file was not generated.",
-						"XML Generation",
-						Messagebox.OK,
-						Messagebox.ERROR);
+				Messagebox.show("XML file was not generated.", "XML Generation", Messagebox.OK, Messagebox.ERROR);
 
 				return;
 			}
 
-			outwardBatchService.updateBatchStatus(
-					batchId,
-					"COMPLETED");
+			outwardBatchService.updateBatchStatus(batchId, "COMPLETED");
 
-			Sessions.getCurrent().setAttribute(
-					"XML_GENERATED_BATCH_ID",
-					batchId);
+			Sessions.getCurrent().setAttribute("XML_GENERATED_BATCH_ID", batchId);
 
-			Sessions.getCurrent().setAttribute(
-					"XML_GENERATED_FILE",
-					xmlFile.toString());
+			Sessions.getCurrent().setAttribute("XML_GENERATED_FILE", xmlFile.toString());
 
-			lblXmlFileName.setValue(
-					xmlFile.getFileName().toString());
+			lblXmlFileName.setValue(xmlFile.getFileName().toString());
 
-			lblXmlFileDescription.setValue(
-					"XML generated successfully - Ready to send to NPCI.");
+			lblXmlFileDescription.setValue("XML generated successfully - Ready to send to NPCI.");
 
 			generatedXmlRow.setVisible(true);
 
 			btnSendToNPCI.setVisible(true);
 
-			btnSendToNPCI.setAttribute(
-					"xmlFile",
-					xmlFile);
+			btnSendToNPCI.setAttribute("xmlFile", xmlFile);
 
-			btnSendToNPCI.setAttribute(
-					"batchId",
-					batchId);
+			btnSendToNPCI.setAttribute("batchId", batchId);
 
 			xmlInfoMessage.setVisible(false);
 
-			System.out.println(
-					"XML FILE LOCATION: "
-					+ xmlFile.toAbsolutePath());
+			System.out.println("XML FILE LOCATION: " + xmlFile.toAbsolutePath());
 
 			loadVerifiedBatches();
 
-			Filedownload.save(
-					xmlFile.toFile(),
-					"application/xml");
+			Filedownload.save(xmlFile.toFile(), "application/xml");
 
 		} catch (Exception e) {
 
 			e.printStackTrace();
 
-			Messagebox.show(
-					"XML generation failed.\n\n"
-					+ e.getMessage(),
-					"XML Generation",
-					Messagebox.OK,
+			Messagebox.show("XML generation failed.\n\n" + e.getMessage(), "XML Generation", Messagebox.OK,
 					Messagebox.ERROR);
 		}
 	}
 
 	private void restoreGeneratedXmlState() {
 
-		String batchId =
-				(String) Sessions.getCurrent()
-						.getAttribute("XML_GENERATED_BATCH_ID");
+		String batchId = (String) Sessions.getCurrent().getAttribute("XML_GENERATED_BATCH_ID");
 
-		String xmlFilePath =
-				(String) Sessions.getCurrent()
-						.getAttribute("XML_GENERATED_FILE");
+		String xmlFilePath = (String) Sessions.getCurrent().getAttribute("XML_GENERATED_FILE");
 
 		if (batchId == null || xmlFilePath == null) {
 
@@ -225,57 +184,41 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 		Path xmlFile = Paths.get(xmlFilePath);
 
-		lblXmlFileName.setValue(
-				xmlFile.getFileName().toString());
+		lblXmlFileName.setValue(xmlFile.getFileName().toString());
 
-		lblXmlFileDescription.setValue(
-				"XML generated successfully - Ready to send to NPCI.");
+		lblXmlFileDescription.setValue("XML generated successfully - Ready to send to NPCI.");
 
 		generatedXmlRow.setVisible(true);
 
 		btnSendToNPCI.setVisible(true);
 
-		btnSendToNPCI.setAttribute(
-				"xmlFile",
-				xmlFile);
+		btnSendToNPCI.setAttribute("xmlFile", xmlFile);
 
-		btnSendToNPCI.setAttribute(
-				"batchId",
-				batchId);
+		btnSendToNPCI.setAttribute("batchId", batchId);
 
 		xmlInfoMessage.setVisible(false);
 	}
 
 	public void onClickSendToNPCI() {
 
-		Path xmlFile =
-				(Path) btnSendToNPCI.getAttribute("xmlFile");
+		Path xmlFile = (Path) btnSendToNPCI.getAttribute("xmlFile");
 
-		String batchId =
-				(String) btnSendToNPCI.getAttribute("batchId");
+		String batchId = (String) btnSendToNPCI.getAttribute("batchId");
 
 		if (xmlFile == null || batchId == null) {
 
-			Messagebox.show(
-					"Please generate XML first.",
-					"NPCI",
-					Messagebox.OK,
-					Messagebox.EXCLAMATION);
+			Messagebox.show("Please generate XML first.", "NPCI", Messagebox.OK, Messagebox.EXCLAMATION);
 
 			return;
 		}
 
 		try {
 
-			outwardBatchService.updateBatchStatus(
-					batchId,
-					"SENT_TO_NPCI");
+			outwardBatchService.updateBatchStatus(batchId, "SENT_TO_NPCI");
 
-			Sessions.getCurrent().removeAttribute(
-					"XML_GENERATED_BATCH_ID");
+			Sessions.getCurrent().removeAttribute("XML_GENERATED_BATCH_ID");
 
-			Sessions.getCurrent().removeAttribute(
-					"XML_GENERATED_FILE");
+			Sessions.getCurrent().removeAttribute("XML_GENERATED_FILE");
 
 			generatedXmlRow.setVisible(false);
 
@@ -290,10 +233,8 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 			arguments.put("batchId", batchId);
 			arguments.put("fileName", xmlFile.getFileName().toString());
 
-			Window popup = (Window) Executions.createComponents(
-			        "/outward/checker/npci-success-popup.zul",
-			        null,
-			        arguments);
+			Window popup = (Window) Executions.createComponents("/outward/checker/npci-success-popup.zul", null,
+					arguments);
 
 			popup.doModal();
 
@@ -301,11 +242,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 			e.printStackTrace();
 
-			Messagebox.show(
-					"Unable to send XML to NPCI.\n\n"
-					+ e.getMessage(),
-					"NPCI",
-					Messagebox.OK,
+			Messagebox.show("Unable to send XML to NPCI.\n\n" + e.getMessage(), "NPCI", Messagebox.OK,
 					Messagebox.ERROR);
 		}
 	}
