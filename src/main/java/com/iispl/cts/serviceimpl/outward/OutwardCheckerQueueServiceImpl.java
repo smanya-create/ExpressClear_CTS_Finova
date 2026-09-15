@@ -78,12 +78,14 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 	public void rejectCheque(
 	        String chequeNo,
 	        String username,
+	        String reasonId,
 	        String remarks)
 	        throws SQLException {
 
 	    outwardCheckerQueueDAO.rejectCheque(
 	            chequeNo,
 	            username,
+	            reasonId,
 	            remarks);
 	}
 
