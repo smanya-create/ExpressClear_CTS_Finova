@@ -236,17 +236,25 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		} else {
 
-		    // No batch selected
-		    currentBatchId = null;
+		    // No URL batchId.
+		    // Check whether an active verification batch already exists in session.
+		    String sessionBatch =
+		            (String) Sessions.getCurrent()
+		                    .getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-		    Sessions.getCurrent()
-		            .removeAttribute("ACTIVE_VERIFICATION_BATCH_ID");
+		    if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
 
-		    showNoChequesToVerify();
-		    return;
+		        currentBatchId = sessionBatch.trim();
+
+		    } else {
+
+		        // Nothing selected yet
+		        currentBatchId = null;
+
+		        showNoChequesToVerify();
+		        return;
+		    }
 		}
-
-		System.out.println("Selected Verification Batch: " + currentBatchId);
 
 		loadSelectedBatch();
 	}
@@ -2108,13 +2116,13 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			currentBatchId = null;
 
 			Sessions.getCurrent()
-			        .removeAttribute(ACTIVE_VERIFICATION_BATCH_ID);
+	        .removeAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-			Sessions.getCurrent()
-			        .removeAttribute(ACTIVE_VERIFICATION_CHEQUE_ID);
+	Sessions.getCurrent()
+	        .removeAttribute("ACTIVE_VERIFICATION_CHEQUE_ID");
 
-			currentChequeIndex = 0;
-			verificationOrderInitialized = false;
+	currentChequeIndex = 0;
+	verificationOrderInitialized = false;
 
 			if (btnSubmitVerification != null) {
 				btnSubmitVerification.setVisible(false);
