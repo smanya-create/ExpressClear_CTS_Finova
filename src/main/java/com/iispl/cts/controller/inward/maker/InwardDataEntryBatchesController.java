@@ -151,29 +151,37 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
         // 1. Batch ID Link
         Label lblBatchId = new Label(batch.getBatchId());
-        lblBatchId.setSclass("micr-repair-batch-id");
+        lblBatchId.setSclass("data-entry-batch-id");
         lblBatchId.addEventListener("onClick", event -> processBatch(batch));
 
-        // 2. Total Items
+        // 2. Total Cheques
         Label lblTotal = new Label(String.valueOf(batch.getTotalCheques()));
-        lblTotal.setSclass("micr-repair-count-text");
+        lblTotal.setSclass("data-entry-count-text");
 
-        // 3. Pending Items (Highlighted amber)
+        // 3. Pending Cheques
         Label lblPending = new Label(String.valueOf(batch.getPendingCheques()));
-        lblPending.setSclass("micr-repair-pending-count");
+        lblPending.setSclass("data-entry-pending-count");
 
         // 4. Total Amount
         Label lblAmount = new Label(batch.getFormattedAmount());
-        lblAmount.setSclass("micr-repair-cell-text");
-        lblAmount.setStyle("font-weight: 700; color: #0f172a;");
+        lblAmount.setSclass("data-entry-amount-text");
 
-        // 5. Status Badge
-        Label lblStatus = new Label("PENDING_MAKER_PROCESS");
-        lblStatus.setSclass("micr-repair-status");
+        // 5. Dynamic Status Badge
+        Label lblStatus = new Label();
+        String bStatus = batch.getBatchStatus() != null ? batch.getBatchStatus().trim().toUpperCase() : "";
+        boolean isReturned = bStatus.contains("SEND_BACK") || bStatus.contains("SENT_BACK") || bStatus.contains("RETURN");
+
+        if (isReturned) {
+            lblStatus.setValue("Checker Returned");
+            lblStatus.setSclass("data-entry-status-returned");
+        } else {
+            lblStatus.setValue("Pending Maker");
+            lblStatus.setSclass("data-entry-status-pending");
+        }
 
         // 6. Action Button
         Button btnAction = new Button("OPEN");
-        btnAction.setSclass("btn-action-repair");
+        btnAction.setSclass("btn-action-data-entry");
         btnAction.addEventListener("onClick", event -> processBatch(batch));
 
         row.appendChild(lblBatchId);
@@ -189,7 +197,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
         List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-        // Retains batches that need Data Entry OR batches where all cheques are approved and awaiting "Submit to Checker"
         String sql = "SELECT " +
                      "    b.inward_batch_id, " +
                      "    b.actual_cheque_count, " +

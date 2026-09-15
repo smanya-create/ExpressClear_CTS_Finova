@@ -136,10 +136,21 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 		// MICR Errors / Pending
 		Label micrErrorsLabel = new Label(String.valueOf(batch.getMicrRepairPendingCount()));
 		micrErrorsLabel.setSclass("micr-repair-pending-count");
+		
 
 		// Status Pill
-		Label statusLabel = new Label("PENDING_MAKER_PROCESS");
-		statusLabel.setSclass("micr-repair-status");
+				Label statusLabel = new Label();
+				String bStatus = batch.getBatchStatus() != null ? batch.getBatchStatus().trim().toUpperCase() : "";
+				boolean isReturned = bStatus.contains("SEND_BACK") || bStatus.contains("SENT_BACK") || bStatus.contains("RETURN");
+
+				if (isReturned) {
+					statusLabel.setValue("Checker Returned");
+					statusLabel.setSclass("micr-repair-status-returned");
+				} else {
+					statusLabel.setValue("Pending Maker");
+					statusLabel.setSclass("micr-repair-status-pending");
+				}
+				
 
 		// Action Button (Outward Style: OPEN)
 		Button actionButton = new Button("OPEN");
