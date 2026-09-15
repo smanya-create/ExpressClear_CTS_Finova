@@ -20,9 +20,8 @@
 
 				<space hflex="1" />
 
-				<button id="dashboardButton" label="← BACK TO DASHBOARD"
-					sclass="view-button" />
-
+				<button id="dashboardButton" label="BACK TO DASHBOARD"
+					sclass="view-button batch-dashboard-button" />
 			</hlayout>
 
 			<!-- 2. Main Section Card -->

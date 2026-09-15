@@ -535,3 +535,48 @@
 	white-space: normal !important;
 	text-align: left !important;
 }
+
+.batch-dashboard-button.z-button {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+    width: 178px !important;
+    min-width: 178px !important;
+    max-width: 178px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    line-height: 36px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
+    border-radius: 4px !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
+}
+
+.batch-dashboard-button.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
+}
+
+.batch-validation-title {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    line-height: 20px !important;
+    letter-spacing: 0.2px !important;
+    text-align: left !important;
+}
