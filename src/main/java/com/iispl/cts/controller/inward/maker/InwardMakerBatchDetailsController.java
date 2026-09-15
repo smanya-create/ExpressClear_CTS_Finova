@@ -314,17 +314,42 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 	}
 
 	private String getDisplayStatus(String status) {
-		if (isMicrRepairStatus(status)) return "PENDING_MICR_REPAIR";
-		if (isDataEntryStatus(status)) return "PENDING_DATA_ENTRY";
-		if ("SEND_BACK_TO_MAKER".equals(status) || "ON_HOLD".equals(status)) return "ON_HOLD";
-		return getValue(status);
+		if (status == null || status.trim().isEmpty()) return "-";
+		String s = normalizeStatus(status);
+
+		if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) {
+			return "CHECKER PENDING";
+		}
+		if (isMicrRepairStatus(s)) {
+			return "PENDING MICR REPAIR";
+		}
+		if (isDataEntryStatus(s)) {
+			return "PENDING DATA ENTRY";
+		}
+		if ("REJECTION_REQUESTED".equals(s)) {
+			return "REJECTION REQUESTED";
+		}
+		if ("REJECTED".equals(s)) {
+			return "REJECTED";
+		}
+		if ("COMPLETED".equals(s)) {
+			return "COMPLETED";
+		}
+		if ("SEND_BACK_TO_MAKER".equals(s) || "ON_HOLD".equals(s)) {
+			return "ON HOLD";
+		}
+
+		// Fallback: strip underscores and format with clean spaces
+		return s.replace("_", " ").trim();
 	}
 
 	private String getStatusClass(String status) {
-		if (isMicrRepairStatus(status)) return "pending-micr-repair";
-		if (isDataEntryStatus(status)) return "pending-data-entry";
-		if ("SEND_BACK_TO_MAKER".equals(status) || "ON_HOLD".equals(status)) return "on-hold";
-		return "pending-data-entry";
+		String s = normalizeStatus(status);
+		if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) return "status-checker-pending";
+		if ("REJECTED".equals(s) || "REJECTION_REQUESTED".equals(s)) return "status-rejected";
+		if (isMicrRepairStatus(s)) return "status-pending-work";
+		if (isDataEntryStatus(s)) return "status-pending-work";
+		return "status-pending-work";
 	}
 
 	private void goToFirstPage() {
