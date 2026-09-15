@@ -20,47 +20,9 @@ import com.iispl.cts.enums.inward.InwardBatchStatus;
 
 public class InwardBatchDAOImpl implements InwardBatchDAO {
 
-	// Static in-memory storage (replace with JDBC ResultSet later)
-//    private final List<InwardBatch> batchTable = new ArrayList<>();
-
 	public InwardBatchDAOImpl() {
-//        initStaticBatches();
+
 	}
-
-//    private void initStaticBatches() {
-//        batchTable.add(new InwardBatch(
-//            "BAT1001", 
-//            "REF-BATCH-2026-001", 
-//            2, 
-//            new BigDecimal("3775000.00"), 
-//            "Processing", 
-//            "USR1001", 
-//            Timestamp.valueOf("2026-08-31 15:14:01")
-//        ));
-//
-//        batchTable.add(new InwardBatch(
-//            "BAT1002", 
-//            "REF-BATCH-2026-002", 
-//            3, 
-//            new BigDecimal("697500.00"), 
-//            "Processing", 
-//            "USR1001", 
-//            Timestamp.valueOf("2026-08-31 15:14:01")
-//        ));
-//    }
-
-//    @Override
-//    public List<InwardBatch> findAllActiveBatches() {
-//        return new ArrayList<>(batchTable);
-//    }
-
-//    @Override
-//    public InwardBatch findById(String batchId) {
-//        return batchTable.stream()
-//                .filter(b -> b.getInwardBatchId().equalsIgnoreCase(batchId))
-//                .findFirst()
-//                .orElse(null);
-//    }
 
 	@Override
 	public boolean updateStatus(String batchId, String status) {
@@ -301,7 +263,10 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 				+ "     'SEND_BACK_TO_MAKER_MICR', " + "     'MICR_REPAIR_COMPLETED', " + "     'REJECTION_REQUESTED') "
 				+ ") "
 
-				+ "ORDER BY ib.uploaded_at DESC";
+				+ "ORDER BY CASE " + "WHEN EXISTS ( " + "    SELECT 1 " + "    FROM inward_cheque priority_ic "
+				+ "    WHERE priority_ic.inward_batch_id = ib.inward_batch_id "
+				+ "    AND priority_ic.cheque_status = 'SEND_BACK_TO_MAKER_MICR' " + ") THEN 0 " + "ELSE 1 " + "END, "
+				+ "ib.uploaded_at DESC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql);

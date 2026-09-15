@@ -41,6 +41,8 @@ public interface InwardChequeDAO {
 	boolean saveRejectionRequest(InwardChequeRejectionRequest request);
 
 	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
+	
+	boolean submitMicrRepairBatchToDataEntry(String inwardBatchId);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
 
