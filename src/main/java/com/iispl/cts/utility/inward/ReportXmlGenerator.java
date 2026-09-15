@@ -14,17 +14,15 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import com.iispl.cts.dto.InwardReportChequeDTO;
+import com.iispl.cts.enums.inward.InwardChequeStatus;
 
 public class ReportXmlGenerator {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     private ReportXmlGenerator() {
     }
 
-    // ============================================================
-    // RRF XML GENERATION
-    // ============================================================
 
     public static String generateRrfXml(String batchId, List<InwardReportChequeDTO> rejectedCheques, String generatedBy) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -36,17 +34,9 @@ public class ReportXmlGenerator {
 
             writer.writeStartDocument(StandardCharsets.UTF_8.name(), "1.0");
             writer.writeCharacters("\n");
-
-            // ====================================================
-            // RRF REPORT
-            // ====================================================
-
+       
             writer.writeStartElement("RRFReport");
-
-            // ====================================================
-            // REPORT INFORMATION
-            // ====================================================
-
+   
             writer.writeCharacters("\n    ");
             writer.writeStartElement("ReportInformation");
 
@@ -57,10 +47,6 @@ public class ReportXmlGenerator {
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
-
-            // ====================================================
-            // SUMMARY
-            // ====================================================
 
             int totalRejectedCheques = rejectedCheques == null ? 0 : rejectedCheques.size();
             BigDecimal totalRejectedAmount = BigDecimal.ZERO;
@@ -82,10 +68,6 @@ public class ReportXmlGenerator {
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
 
-            // ====================================================
-            // REJECTED CHEQUES
-            // ====================================================
-
             writer.writeCharacters("\n    ");
             writer.writeStartElement("RejectedCheques");
 
@@ -100,9 +82,6 @@ public class ReportXmlGenerator {
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
 
-            // ====================================================
-            // CLOSE RRF REPORT
-            // ====================================================
 
             writer.writeCharacters("\n");
             writer.writeEndElement();
@@ -120,9 +99,7 @@ public class ReportXmlGenerator {
         }
     }
 
-    // ============================================================
-    // BATCH SUMMARY XML GENERATION
-    // ============================================================
+    
 
     public static String generateBatchSummaryXml(String batchId, List<InwardReportChequeDTO> cheques, String generatedBy) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -135,15 +112,7 @@ public class ReportXmlGenerator {
             writer.writeStartDocument(StandardCharsets.UTF_8.name(), "1.0");
             writer.writeCharacters("\n");
 
-            // ====================================================
-            // BATCH SUMMARY REPORT
-            // ====================================================
-
             writer.writeStartElement("BatchSummaryReport");
-
-            // ====================================================
-            // REPORT INFORMATION
-            // ====================================================
 
             writer.writeCharacters("\n    ");
             writer.writeStartElement("ReportInformation");
@@ -154,10 +123,6 @@ public class ReportXmlGenerator {
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
-
-            // ====================================================
-            // SUMMARY CALCULATION
-            // ====================================================
 
             int totalCheques = 0;
             int approvedCheques = 0;
@@ -181,20 +146,18 @@ public class ReportXmlGenerator {
 
                     String status = cheque.getChequeStatus();
 
-                    if ("ACCEPTED".equalsIgnoreCase(status)) {
+                    if (InwardChequeStatus.ACCEPTED.toString().equalsIgnoreCase(status)) {
                         approvedCheques++;
                         approvedAmount = approvedAmount.add(amount);
 
-                    } else if ("REJECTED".equalsIgnoreCase(status)) {
+                    } else if (InwardChequeStatus.REJECTED.toString().equalsIgnoreCase(status)) {
                         rejectedCheques++;
                         rejectedAmount = rejectedAmount.add(amount);
                     }
                 }
             }
 
-            // ====================================================
-            // SUMMARY
-            // ====================================================
+         
 
             writer.writeCharacters("\n    ");
             writer.writeStartElement("Summary");
@@ -209,10 +172,6 @@ public class ReportXmlGenerator {
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
 
-            // ====================================================
-            // APPROVED CHEQUES
-            // ====================================================
-
             writer.writeCharacters("\n    ");
             writer.writeStartElement("ApprovedCheques");
 
@@ -223,7 +182,7 @@ public class ReportXmlGenerator {
                         continue;
                     }
 
-                    if ("ACCEPTED".equalsIgnoreCase(cheque.getChequeStatus())) {
+                    if (InwardChequeStatus.ACCEPTED.toString().equalsIgnoreCase(cheque.getChequeStatus())) {
                         writeCheque(writer, cheque, false);
                     }
                 }
@@ -232,9 +191,6 @@ public class ReportXmlGenerator {
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
 
-            // ====================================================
-            // REJECTED CHEQUES
-            // ====================================================
 
             writer.writeCharacters("\n    ");
             writer.writeStartElement("RejectedCheques");
@@ -246,7 +202,7 @@ public class ReportXmlGenerator {
                         continue;
                     }
 
-                    if ("REJECTED".equalsIgnoreCase(cheque.getChequeStatus())) {
+                    if (InwardChequeStatus.REJECTED.toString().equalsIgnoreCase(cheque.getChequeStatus())) {
                         writeCheque(writer, cheque, true);
                     }
                 }
@@ -254,10 +210,6 @@ public class ReportXmlGenerator {
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
-
-            // ====================================================
-            // CLOSE BATCH SUMMARY REPORT
-            // ====================================================
 
             writer.writeCharacters("\n");
             writer.writeEndElement();
@@ -274,10 +226,6 @@ public class ReportXmlGenerator {
             closeWriter(writer);
         }
     }
-
-    // ============================================================
-    // WRITE CHEQUE
-    // ============================================================
 
     private static void writeCheque(XMLStreamWriter writer, InwardReportChequeDTO cheque, boolean includeRejection) throws XMLStreamException {
 
@@ -316,10 +264,6 @@ public class ReportXmlGenerator {
         writer.writeEndElement();
     }
 
-    // ============================================================
-    // WRITE XML ELEMENT
-    // ============================================================
-
     private static void writeElement(XMLStreamWriter writer, String elementName, Object value, int indentation) throws XMLStreamException {
 
         writer.writeCharacters("\n");
@@ -333,10 +277,6 @@ public class ReportXmlGenerator {
         writer.writeEndElement();
     }
 
-    // ============================================================
-    // FORMAT AMOUNT
-    // ============================================================
-
     private static String formatAmount(BigDecimal amount) {
 
         if (amount == null) {
@@ -345,10 +285,6 @@ public class ReportXmlGenerator {
 
         return amount.setScale(2).toPlainString();
     }
-
-    // ============================================================
-    // FORMAT DATE
-    // ============================================================
 
     private static String formatDate(LocalDateTime dateTime) {
 
@@ -359,25 +295,14 @@ public class ReportXmlGenerator {
         return dateTime.toLocalDate().format(DATE_FORMATTER);
     }
 
-    // ============================================================
-    // GENERATE RRF REFERENCE NUMBER
-    // ============================================================
 
     private static String generateRrfReferenceNo(String batchId) {
         return "RRF-" + safe(batchId);
     }
 
-    // ============================================================
-    // NULL SAFE VALUE
-    // ============================================================
-
     private static String safe(String value) {
         return value == null ? "" : value;
     }
-
-    // ============================================================
-    // CREATE SPACES
-    // ============================================================
 
     private static String spaces(int count) {
 
@@ -390,10 +315,6 @@ public class ReportXmlGenerator {
         return builder.toString();
     }
 
-    // ============================================================
-    // CLOSE XML WRITER
-    // ============================================================
-
     private static void closeWriter(XMLStreamWriter writer) {
 
         if (writer == null) {
@@ -404,7 +325,7 @@ public class ReportXmlGenerator {
             writer.close();
 
         } catch (XMLStreamException e) {
-            // Ignore close exception
+           e.printStackTrace();
         }
     }
 }

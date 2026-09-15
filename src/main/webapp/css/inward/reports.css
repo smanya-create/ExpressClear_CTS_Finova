@@ -16,24 +16,14 @@ body {
     padding: 0 !important;
     width: 100% !important;
     height: 100% !important;
+    background-color: #EBF3FA !important;
 }
 
-.checker-reports-center,
-.checker-reports-content,
-.report-card,
-.compact-report-listbox,
-.compact-report-listbox .z-listbox-body,
-.compact-report-listbox .z-listbox-body-inner,
-.compact-report-listbox .z-listbox-footer,
-.compact-report-listbox .z-listbox-paging,
-.compact-report-listbox .z-paging,
-.compact-report-listbox .z-paging-body {
-    background: #fff !important;
-}
-
+/* Page Containers - Light Blue */
 .checker-reports-center,
 .checker-reports-content,
 .report-card {
+    background: #EBF3FA !important;
     border: none !important;
 }
 
@@ -41,6 +31,15 @@ body {
     width: 100% !important;
     min-height: 100% !important;
     box-sizing: border-box !important;
+}
+
+/* Outer Table Container with Rounded Corners */
+.compact-report-listbox,
+.z-listbox {
+    border-radius: 8px !important;
+    overflow: hidden !important; /* Clips sharp inner content corners */
+    background: #FFFFFF !important;
+    border: none !important;
 }
 
 /* Table Header */
@@ -52,6 +51,17 @@ body {
     border-bottom: 1px solid #163D73 !important;
 }
 
+/* Curve Top Corners of the Header Row */
+.compact-report-listbox .z-listheader:first-child,
+.listbox-header .z-listheader:first-child {
+    border-top-left-radius: 8px !important;
+}
+
+.compact-report-listbox .z-listheader:last-child,
+.listbox-header .z-listheader:last-child {
+    border-top-right-radius: 8px !important;
+}
+
 .compact-report-listbox .z-listheader-content,
 .listbox-header .z-listheader-content {
     color: #fff !important;
@@ -60,16 +70,19 @@ body {
     text-align: center !important;
 }
 
-/* Rows */
+/* Table Content Rows & Cells - Pure White */
+.compact-report-listbox .z-listbox-body,
+.compact-report-listbox .z-listbox-body-inner,
+.compact-report-listbox .z-listbox-footer,
 .compact-report-listbox .z-listitem,
 .compact-report-listbox .z-listcell {
     height: 42px !important;
     min-height: 42px !important;
-    background: #fff !important;
+    background: #FFFFFF !important;
 }
 
 .compact-report-listbox .z-listitem:hover {
-    background: #fff !important;
+    background: #F4F7FA !important; /* Slight tint on hover */
 }
 
 .compact-report-listbox .z-listcell {
@@ -118,14 +131,21 @@ body {
 }
 
 /* ==========================================================================
-   PAGINATION STYLES (CENTERED, BORDERLESS & SMALL SIZE)
+   PAGINATION STYLES (CENTERED, BORDERLESS & LIGHT BLUE CONTAINER)
    ========================================================================== */
+
+/* Curve Bottom Corners of Pagination Area */
+.compact-report-listbox .z-listbox-paging,
+.compact-report-listbox .z-paging-footer {
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
 
 .z-listbox-paging,
 .z-paging,
 .z-paging-body {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+    background: #EBF3FA !important;
+    background-color: #EBF3FA !important;
     border: none !important;
     border-top: none !important;
     border-bottom: none !important;
@@ -136,8 +156,8 @@ body {
 }
 
 .z-listbox-paging .z-paging {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+    background: #EBF3FA !important;
+    background-color: #EBF3FA !important;
     border: none !important;
     box-shadow: none !important;
 }
@@ -151,8 +171,8 @@ body {
     padding: 0 6px !important;
     position: relative !important;
     box-sizing: border-box !important;
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+    background: #EBF3FA !important;
+    background-color: #EBF3FA !important;
     border: 0 !important;
 }
 
@@ -166,15 +186,16 @@ body {
     line-height: 20px !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+    background: #EBF3FA !important;
+    background-color: #EBF3FA !important;
     border: none !important;
     box-shadow: none !important;
+    border-radius: 4px !important;
 }
 
 .z-paging-button:hover {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+    background: #DCE8F5 !important;
+    background-color: #DCE8F5 !important;
 }
 
 .z-paging-input {
@@ -190,6 +211,7 @@ body {
     background: #FFFFFF !important;
     background-color: #FFFFFF !important;
     border: 1px solid #D0D7DE !important;
+    border-radius: 3px !important;
 }
 
 .z-paging-text {
@@ -214,18 +236,7 @@ body {
     display: block !important;
 }
 
-
-.z-listbox,
-.z-listbox-body,
-.z-listbox-footer,
-.z-listbox-paging,
-.z-paging,
-.z-paging-body {
-    background-color: #FFFFFF !important;
-    background-image: none !important;
-    border: none !important;
-}
-/* Keep table header blue */
+/* Keep Table Header Blue Specific Overrides */
 .checker-reports-center .compact-report-listbox .z-listhead,
 .checker-reports-center .compact-report-listbox .z-listheader {
     background: #1B4A8F !important;

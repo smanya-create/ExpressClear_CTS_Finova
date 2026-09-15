@@ -80,10 +80,9 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
                 .orElse(null);
 
         batchListbox.getItems().clear();
-
-        
+   
         if(batch!=null)
-        renderBatchRow(batch);
+        	renderBatchRow(batch);
     }
     private void performClear() {
 
@@ -94,9 +93,6 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         loadSubmittedBatches();
     }
 
-    /**
-     * Renders a single dashboard row.
-     */
     private void renderBatchRow(DashboardSummaryDTO batch) {
 
         String batchStatus = batch.getBatchStatus();
@@ -137,19 +133,12 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
 
         Listcell statusCell = new Listcell();
         Label statusLabel = new Label(batchStatus);
-
-        if (InwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(batchStatus)) {
-            statusLabel.setSclass("batch-status batch-status-completed");
-        } else {
-            statusLabel.setSclass("batch-status batch-status-pending");
-        }
-
+        statusLabel.setSclass("batch-status batch-status-pending");
         statusCell.setStyle("text-align:center;vertical-align:middle;");
         statusCell.appendChild(statusLabel);
         item.appendChild(statusCell);
 
         Listcell actionCell = new Listcell();
-
         String actionLabel;
         String buttonStyle;
 
@@ -173,14 +162,11 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         btnVerify.addEventListener(Events.ON_CLICK, e -> {
 
             boolean updated = batchService.updateProcessingBatchStatus(
-                    batchId,
-                    InwardBatchStatus.CHECKER_PROCESSING
-            );
+                    batchId,InwardBatchStatus.CHECKER_PROCESSING);
 
             if (updated) {
                 Executions.getCurrent().sendRedirect(
-                        "/inward/checker/verification.zul?batchId=" + batchId
-                );
+                        "/inward/checker/verification.zul?batchId=" + batchId);
             } else {
                 Messagebox.show("Unable to proceed");
             }

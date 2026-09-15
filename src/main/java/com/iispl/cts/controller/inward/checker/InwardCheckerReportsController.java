@@ -44,16 +44,22 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 public class InwardCheckerReportsController extends GenericForwardComposer<Component> {
 
     private Listbox reportListbox;
-    private InwardBatchService service;
     private Textbox txtSearchBatchId;
     private Button btnSearch;
     private Button btnClear;
+    
+    private InwardBatchService service;
+    
     List<ReportSummaryRow> summaryList = new ArrayList<ReportSummaryRow>();
     @Override
     public void doAfterCompose(Component comp) throws Exception {
-        super.doAfterCompose(comp);
+        
+    	super.doAfterCompose(comp);
+    	
         service = new InwardBatchServiceImpl();
+        
         loadBatchSummary();
+        
         if (btnSearch != null) {
             btnSearch.addEventListener(Events.ON_CLICK, e -> performSearch());
         }
@@ -68,19 +74,18 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
             List<InwardReportChequeDTO> chequeList = service.getChequesByBatch();
             
             if (chequeList == null || chequeList.isEmpty()) {
-                System.out.println("No cheque data returned from service.");
                 return;
             }
-            System.out.println("Cheque records received: " + chequeList.size());
 
             Map<String, ReportSummaryRow> batchMap = new LinkedHashMap<String, ReportSummaryRow>();
+            
             for (InwardReportChequeDTO cheque : chequeList) {
-                if (cheque == null) {
+               
+            	if (cheque == null) {
                     continue;
                 }
                 String batchId = cheque.getInwardBatchId();
                 String chequeStatus = cheque.getChequeStatus();
-                System.out.println("Batch ID: " + batchId + " | Status: " + chequeStatus);
 
                 if (batchId == null || batchId.trim().isEmpty()) {
                     continue;
@@ -101,7 +106,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
                 }
                 summaryList.add(summary);
             }
-            System.out.println("Batches prepared: " + batchMap.size());
+            
             for (ReportSummaryRow summary : batchMap.values()) {
                 renderBatchRow(summary);
             }
@@ -163,26 +168,26 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         // ---- RRF button ----
         Listcell rrfCell = new Listcell();
-        Button generateRrfButton = new Button("Export RRF(XML)");
-        generateRrfButton.setIconSclass("z-icon-reply");
+        Button exportRrfButton = new Button("Export RRF(XML)");
+        exportRrfButton.setIconSclass("z-icon-reply");
         boolean hasRejected = summary != null && summary.getRejectedCheques() != 0;
 
         if (hasRejected) {
-            generateRrfButton.setStyle(
+        	exportRrfButton.setStyle(
                 "background-color: #8F5C29; color: white; border-radius: 4px; cursor: pointer;");
         } else {
-            generateRrfButton.setStyle(
+        	exportRrfButton.setStyle(
                 "background-color: #ABA2A1; color: white; cursor: not-allowed;");
         }
 
         String rrfBatchId = (summary != null && summary.getBatchId() != null) ? summary.getBatchId() : "";
-        generateRrfButton.setAttribute("batchId", rrfBatchId);
+        exportRrfButton.setAttribute("batchId", rrfBatchId);
 
-        generateRrfButton.addEventListener("onClick", event -> {
-            String clickedBatchId = (String) generateRrfButton.getAttribute("batchId");
+        exportRrfButton.addEventListener("onClick", event -> {
+            String clickedBatchId = (String) exportRrfButton.getAttribute("batchId");
             if (hasRejected && clickedBatchId != null && !clickedBatchId.isEmpty()) {
                 try {
-                    generateRrfXml(clickedBatchId);
+                    generateRrf(clickedBatchId);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Messagebox.show("Failed to generate RRF report: " + e.getMessage(),
@@ -194,10 +199,10 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
             }
         });
 
-        rrfCell.appendChild(generateRrfButton);
+        rrfCell.appendChild(exportRrfButton);
         item.appendChild(rrfCell);
 
-        // ---- Export button ----
+        // ---- BSF button ----
         Listcell exportBSFCell = new Listcell();
         Button bsfButton = new Button("Export BSF(XML)");
         bsfButton.setIconSclass("z-icon-file-text");
@@ -209,7 +214,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         bsfButton.addEventListener("onClick", event -> {
             String clickedBatchId = (String) bsfButton.getAttribute("batchId");
-            generateBatchSummaryXml(clickedBatchId);
+            generateBatchSummary(clickedBatchId);
         });
 
         exportBSFCell.appendChild(bsfButton);
@@ -221,11 +226,11 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
     private List<InwardReportChequeDTO> getRejectedCheques(String batchId) {
         return service.getChequesByBatch().stream()
                 .filter(cheque -> batchId.equals(cheque.getInwardBatchId())
-                        && "REJECTED".equalsIgnoreCase(cheque.getChequeStatus())
+                        && InwardChequeStatus.REJECTED.toString().equalsIgnoreCase(cheque.getChequeStatus())
                         && cheque.getRejectionId() != null)
                 .collect(Collectors.toList());
     }
-    public void generateRrfXml(String batchId) throws Exception {
+    public void generateRrf(String batchId) throws Exception {
 
         List<InwardReportChequeDTO> rejectedCheques = getRejectedCheques(batchId);
 
@@ -252,7 +257,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
                 "RRF_" + batchId + ".xml");
     }
     
-    public void generateBatchSummaryXml(String batchId) throws Exception {
+    public void generateBatchSummary(String batchId) throws Exception {
 
         List<InwardReportChequeDTO> batchCheques = service.getChequesByBatch().stream()
                 .filter(c -> c != null && batchId.equals(c.getInwardBatchId()))

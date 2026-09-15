@@ -1,293 +1,260 @@
 body {
-    background-color: #FFFFFF !important;
+  background-color: #EBF3FA !important;
 }
 
-.checker-reports-center {
-    background-color: #FFFFFF !important;
-    --zk-paging-background-color: transparent !important;
+.checker-dashboard-center {
+  background-color: #EBF3FA !important;
+  --zk-paging-background-color: #EBF3FA !important;
 }
 
-.checker-reports-center .z-center-body {
-    background-color: #FFFFFF !important;
+.checker-dashboard-center .z-center-body {
+  background-color: #EBF3FA !important;
 }
 
-.checker-reports-content {
-    background-color: #FFFFFF !important;
-    min-height: 100% !important;
+.checker-dashboard-content {
+  background-color: #EBF3FA !important;
+  min-height: 100% !important;
 }
 
-
-/* =========================================================
-   REPORT TABLE HEADER
-   ========================================================= */
+/* Outer Table Container with Rounded Corners */
+.listbox-header .z-listbox,
+.z-listbox {
+  border-radius: 8px !important;
+  overflow: hidden !important; /* Clips sharp corners of internal headers/cells */
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  border: none !important;
+}
 
 .listbox-header .z-listhead {
-    height: 46px !important;
+  height: 46px !important;
+}
+
+/* Curve Top Corners of the Header Row */
+.listbox-header .z-listheader:first-child {
+  border-top-left-radius: 8px !important;
+}
+
+.listbox-header .z-listheader:last-child {
+  border-top-right-radius: 8px !important;
 }
 
 .listbox-header .z-listheader {
-    background: #1C3673 !important;
-    border-bottom: 1px solid #E0E6ED !important;
-    border-right: 1px solid #3D6BB5 !important;
-    padding: 0 !important;
-    vertical-align: middle !important;
-    text-align: center !important;
+  background: #1C3673 !important;
+  border-bottom: 1px solid #E0E6ED !important;
+  border-right: 1px solid #3D6BB5 !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
+  text-align: center !important;
 }
 
 .listbox-header .z-listheader-content {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    min-height: 46px !important;
-    padding: 4px 5px !important;
-    box-sizing: border-box !important;
-    color: white !important;
-    font-weight: bold !important;
-    font-size: 11px !important;
-    line-height: 14px !important;
-    text-align: center !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 46px !important;
+  padding: 4px 5px !important;
+  box-sizing: border-box !important;
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
+  line-height: 14px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
 }
 
-
-/* =========================================================
-   REPORT TABLE ROWS
-   ========================================================= */
-
+/* Table Content Rows & Cells - Pure White */
 .listbox-header .z-listitem {
-    height: 40px !important;
-    min-height: 40px !important;
-    background: #FFFFFF !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  background: #FFFFFF !important;
 }
 
 .listbox-header .z-listcell {
-    height: 40px !important;
-    min-height: 40px !important;
-    padding: 0 !important;
-    vertical-align: middle !important;
-    text-align: center !important;
-    background: #FFFFFF !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  background: #FFFFFF !important;
 }
 
 .listbox-header .z-listcell-content {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    height: 40px !important;
-    padding: 0 5px !important;
-    box-sizing: border-box !important;
-    font-size: 11px !important;
-    line-height: 14px !important;
-    text-align: center !important;
-    white-space: nowrap !important;
-    color: black !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 40px !important;
+  padding: 0 5px !important;
+  box-sizing: border-box !important;
+  font-size: 11px !important;
+  line-height: 14px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  color: black !important;
 }
 
 .listbox-header .z-listitem:hover {
-    background: #FFFFFF !important;
+  background: #F4F7FA !important; /* Slight off-white tint on hover */
 }
 
 .listbox-header .z-listcell-content > * {
-    margin-left: auto !important;
-    margin-right: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
-
-/* =========================================================
-   BATCH STATUS
-   ========================================================= */
-
 .batch-status {
-    display: inline-block !important;
-    padding: 2px 4px !important;
-    border-radius: 12px !important;
-    font-weight: bold !important;
-    font-size: 7px !important;
-    text-align: center !important;
-    line-height: 16px !important;
-    white-space: nowrap !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
+  display: inline-block !important;
+  padding: 2px 4px !important;
+  border-radius: 12px !important;
+  font-weight: bold !important;
+  font-size: 7px !important;
+  text-align: center !important;
+  line-height: 16px !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .batch-status-completed {
-    background: #28A745 !important;
-    color: white !important;
-    border: 1px solid #28A745 !important;
-    padding: 2px 8px !important;
-    border-radius: 15px !important;
-    font-size: 9px !important;
-    font-weight: bold !important;
-    line-height: 18px !important;
-    min-width: 65px !important;
-    text-align: center !important;
-    display: inline-block !important;
-    box-sizing: border-box !important;
+  background: #28A745 !important;
+  color: white !important;
+  border: 1px solid #28A745 !important;
+  padding: 2px 8px !important;
+  border-radius: 15px !important;
+  font-size: 9px !important;
+  font-weight: bold !important;
+  line-height: 18px !important;
+  min-width: 65px !important;
+  text-align: center !important;
+  display: inline-block !important;
+  box-sizing: border-box !important;
 }
 
 .batch-status-pending {
-    background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
-    border: 1px solid #F5A900 !important;
-    color: #7A4500 !important;
+  background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
+  border: 1px solid #F5A900 !important;
+  color: #7A4500 !important;
 }
-
-
-/* =========================================================
-   REPORT BUTTONS
-   ========================================================= */
-
-.rrf-button,
-.bsf-button {
-    background: #1B4A8F !important;
-    color: white !important;
-    border: 1px solid #163D73 !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    font-size: 11px !important;
-    font-weight: bold !important;
-    padding: 2px 8px !important;
-    height: 22px !important;
-    line-height: 18px !important;
-    min-width: 60px !important;
-    text-align: center !important;
-    display: inline-block !important;
-    box-sizing: border-box !important;
-    box-shadow: none !important;
-}
-
-.rrf-button:hover,
-.bsf-button:hover {
-    background: #163D73 !important;
-}
-
-
-/* =========================================================
-   LISTBOX WHITE BACKGROUND
-   ========================================================= */
 
 .listbox-header,
 .listbox-header .z-listbox-body,
 .listbox-header .z-listbox-footer {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
 }
 
-
-/* =========================================================
-   PAGINATION
-   Same as checker-dashboard.css
-   ========================================================= */
+/* ==========================================================================
+PAGINATION STYLES (CENTERED & NO BORDERS)
+========================================================================== */
+.z-listbox-paging,
+.z-paging-footer {
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
 
 .z-listbox-paging,
 .z-paging,
 .z-paging-body {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: none !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    border-left: none !important;
-    border-right: none !important;
-    box-shadow: none !important;
-    outline: none !important;
+  background: #EBF3FA !important;
+  background-color: #EBF3FA !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .z-listbox-paging .z-paging {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: none !important;
-    box-shadow: none !important;
+  background: #EBF3FA !important;
+  background-color: #EBF3FA !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .z-paging {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 28px !important;
-    min-height: 28px !important;
-    padding: 0 6px !important;
-    position: relative !important;
-    box-sizing: border-box !important;
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 6px !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  background: #EBF3FA !important;
+  background-color: #EBF3FA !important;
+  border: 0 !important;
 }
 
 .z-paging-button {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-    padding: 0 !important;
-    margin: 1px 1px !important;
-    line-height: 20px !important;
-    vertical-align: middle !important;
-    box-sizing: border-box !important;
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: none !important;
-    box-shadow: none !important;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  padding: 0 !important;
+  margin: 1px 1px !important;
+  line-height: 20px !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  background: #EBF3FA !important;
+  background-color: #EBF3FA !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 4px !important;
 }
 
 .z-paging-button:hover {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+  background: #DCE8F5 !important;
+  background-color: #DCE8F5 !important;
 }
 
 .z-paging-input {
-    width: 30px !important;
-    height: 22px !important;
-    min-height: 22px !important;
-    padding: 0 3px !important;
-    margin: 1px 3px !important;
-    line-height: 20px !important;
-    font-size: 11px !important;
-    vertical-align: middle !important;
-    box-sizing: border-box !important;
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
-    border: 1px solid #D0D7DE !important;
+  width: 30px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  padding: 0 3px !important;
+  margin: 1px 3px !important;
+  line-height: 20px !important;
+  font-size: 11px !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #D0D7DE !important;
+  border-radius: 3px !important;
 }
 
 .z-paging-text {
-    height: 22px !important;
-    line-height: 22px !important;
-    font-size: 11px !important;
-    vertical-align: middle !important;
-    margin: 1px 2px !important;
+  height: 22px !important;
+  line-height: 22px !important;
+  font-size: 11px !important;
+  vertical-align: middle !important;
+  margin: 1px 2px !important;
 }
 
 .z-paging-info {
-    position: absolute !important;
-    right: 12px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    height: auto !important;
-    line-height: normal !important;
-    font-size: 11px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    white-space: nowrap !important;
-    display: block !important;
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  height: auto !important;
+  line-height: normal !important;
+  font-size: 11px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  display: block !important;
 }
 
-
-/* =========================================================
-   FINAL LISTBOX OVERRIDES
-   ========================================================= */
-
-.z-listbox,
 .z-listbox-body,
-.z-listbox-footer,
-.z-listbox-paging,
-.z-paging,
-.z-paging-body {
-    background-color: #FFFFFF !important;
-    background-image: none !important;
-    border: none !important;
+.z-listbox-footer {
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  border: none !important;
 }
