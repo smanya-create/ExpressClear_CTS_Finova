@@ -98,13 +98,24 @@
 								</vlayout>
 
 								<!-- CHEQUE STATUS -->
-								<vlayout hflex="1" sclass="batch-info-item">
+								<!-- CHEQUE STATUS -->
+<!-- CHEQUE STATUS -->
+<vlayout hflex="1"
+         sclass="batch-info-item"
+         style="padding-left:5px; padding-right:5px;">
 
-									<label value="CHEQUE STATUS" sclass="info-label" />
+    <label value="CHEQUE STATUS"
+           sclass="info-label" />
 
-									<label value="" id="lblChequeStatus"
-										sclass="status-badge mismatch" />
-								</vlayout>
+    <label value=""
+           id="lblChequeStatus"
+           sclass="status-badge mismatch"
+           style="white-space:nowrap;
+                  font-size:8px;
+                  padding:3px 5px;
+                  box-sizing:border-box;" />
+
+</vlayout>
 
 								<!-- RECEIVED DATE -->
 								<vlayout hflex="1" sclass="batch-info-item">

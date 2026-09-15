@@ -179,6 +179,12 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	private InwardChequeImageDAOImpl inwardChequeImageDAO;
 	private boolean verificationOrderInitialized = false;
+	
+	private static final String ACTIVE_VERIFICATION_BATCH_ID =
+	        "ACTIVE_VERIFICATION_BATCH_ID";
+
+	private static final String ACTIVE_VERIFICATION_CHEQUE_ID =
+	        "ACTIVE_VERIFICATION_CHEQUE_ID";
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -263,39 +269,118 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	private void loadSelectedBatch() {
 
-		if (currentBatchId == null || currentBatchId.trim().isEmpty()) {
+	    if (currentBatchId == null || currentBatchId.trim().isEmpty()) {
 
-			Messagebox.show("No batch selected for verification.", "Verification", Messagebox.OK,
-					Messagebox.EXCLAMATION);
+	        Messagebox.show(
+	                "No batch selected for verification.",
+	                "Verification",
+	                Messagebox.OK,
+	                Messagebox.EXCLAMATION);
 
-			return;
-		}
+	        return;
+	    }
 
-		verificationOrderInitialized = false;
+	    verificationOrderInitialized = false;
 
-		currentBatchCheques = inwardChequeService.getChequesByBatchAndStatus(currentBatchId, null);
+	    currentBatchCheques =
+	            inwardChequeService.getChequesByBatchAndStatus(
+	                    currentBatchId,
+	                    null);
 
-		if (currentBatchCheques == null || currentBatchCheques.isEmpty()) {
+	    if (currentBatchCheques == null
+	            || currentBatchCheques.isEmpty()) {
 
-			Messagebox.show("No cheques found for batch: " + currentBatchId, "Verification", Messagebox.OK,
-					Messagebox.EXCLAMATION);
+	        Messagebox.show(
+	                "No cheques found for batch: "
+	                        + currentBatchId,
+	                "Verification",
+	                Messagebox.OK,
+	                Messagebox.EXCLAMATION);
 
-			return;
-		}
+	        return;
+	    }
 
-		currentBatchCheques = prioritizeRejectionRequests(currentBatchCheques);
+	    currentBatchCheques =
+	            prioritizeRejectionRequests(currentBatchCheques);
 
-		verificationOrderInitialized = true;
-		currentChequeIndex = 0;
+	    /*
+	     * Safety check after applying the verification order.
+	     */
+	    if (currentBatchCheques == null
+	            || currentBatchCheques.isEmpty()) {
 
-		currentChequeId = currentBatchCheques.get(currentChequeIndex).getInwardChequeId();
+	        Messagebox.show(
+	                "No cheques available for verification.",
+	                "Verification",
+	                Messagebox.OK,
+	                Messagebox.EXCLAMATION);
 
-		loadChequeDetails(currentChequeId);
+	        return;
+	    }
 
-		updateChequePosition();
-		updateVerificationCount();
+	    verificationOrderInitialized = true;
+
+	    /*
+	     * Try to restore the last cheque viewed by the Checker.
+	     */
+	    String savedChequeId =
+	            (String) Sessions.getCurrent()
+	                    .getAttribute(
+	                            ACTIVE_VERIFICATION_CHEQUE_ID);
+
+	    int savedIndex = -1;
+
+	    if (savedChequeId != null
+	            && !savedChequeId.trim().isEmpty()) {
+
+	        for (int i = 0;
+	                i < currentBatchCheques.size();
+	                i++) {
+
+	            InwardCheque cheque =
+	                    currentBatchCheques.get(i);
+
+	            if (cheque != null
+	                    && savedChequeId.equalsIgnoreCase(
+	                            cheque.getInwardChequeId())) {
+
+	                savedIndex = i;
+	                break;
+	            }
+	        }
+	    }
+
+	    /*
+	     * Restore previous cheque if it still exists.
+	     * Otherwise start from the first cheque.
+	     */
+	    if (savedIndex >= 0) {
+
+	        currentChequeIndex = savedIndex;
+
+	    } else {
+
+	        currentChequeIndex = 0;
+	    }
+
+	    currentChequeId =
+	            currentBatchCheques
+	                    .get(currentChequeIndex)
+	                    .getInwardChequeId();
+
+	    /*
+	     * Save the cheque that is currently displayed.
+	     */
+	    Sessions.getCurrent().setAttribute(
+	            ACTIVE_VERIFICATION_CHEQUE_ID,
+	            currentChequeId);
+
+	    loadChequeDetails(currentChequeId);
+
+	    updateChequePosition();
+
+	    updateVerificationCount();
 	}
-
 	private void loadChequeDetails(String inwardChequeId) {
 
 		try {
@@ -1368,6 +1453,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 
 			currentChequeId = nextCheque.getInwardChequeId();
+			
+			Sessions.getCurrent().setAttribute(
+			        ACTIVE_VERIFICATION_CHEQUE_ID,
+			        currentChequeId);
 
 			loadChequeDetails(currentChequeId);
 
@@ -1527,6 +1616,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		InwardCheque nextCheque = currentBatchCheques.get(currentChequeIndex);
 
 		currentChequeId = nextCheque.getInwardChequeId();
+		
+		Sessions.getCurrent().setAttribute(
+		        ACTIVE_VERIFICATION_CHEQUE_ID,
+		        currentChequeId);
 
 		loadChequeDetails(currentChequeId);
 
@@ -1548,6 +1641,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		InwardCheque previousCheque = currentBatchCheques.get(currentChequeIndex);
 
 		currentChequeId = previousCheque.getInwardChequeId();
+		
+		Sessions.getCurrent().setAttribute(
+		        ACTIVE_VERIFICATION_CHEQUE_ID,
+		        currentChequeId);
 
 		loadChequeDetails(currentChequeId);
 
