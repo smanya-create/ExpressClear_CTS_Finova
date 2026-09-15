@@ -141,16 +141,16 @@
 								<hlayout width="100%" valign="middle"
 									sclass="cheque-image-header">
 
-									<vlayout spacing="3px" hflex="1">
+									<vlayout spacing="3px" hflex="1"
+         style="margin-bottom: 8px;">
 
-										<label value="CHEQUE IMAGE" sclass="card-title" />
+    <label value="CHEQUE IMAGE" sclass="card-title" />
 
-										<label
-											value="Review the scanned cheque before making your verification decision."
-											sclass="card-description" />
+    <label
+        value="Review the scanned cheque before making your verification decision."
+        sclass="card-description" />
 
-									</vlayout>
-
+</vlayout>
 									<hlayout valign="middle" spacing="5px"
 										style="margin-left:10px;margin-right:5px;">
 
