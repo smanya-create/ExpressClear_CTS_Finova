@@ -2,7 +2,7 @@
 <?page title="CTS - Inward MICR Repair" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-	<style src="/css/inward/micr-repair-queue.css" />
+	<style src="/css/inward/micr-repair-queue.css?v=2" />
 
 	<div id="micrRepairQueueRoot"
 		width="100%"
