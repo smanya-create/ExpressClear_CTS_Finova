@@ -580,3 +580,174 @@
     letter-spacing: 0.2px !important;
     text-align: left !important;
 }
+
+.batch-validation-window {
+    width: 500px !important;
+}
+
+.batch-validation-window .z-window-content {
+    background: #ffffff !important;
+    padding: 22px 24px 20px 24px !important;
+    box-sizing: border-box !important;
+}
+
+.batch-validation-window .z-window-header {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 22px !important;
+    padding: 14px 18px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.batch-validation-window .z-window-close {
+    color: #64748b !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+}
+
+.batch-validation-title {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 0 4px 0 !important;
+    padding: 0 !important;
+    color: #0f172a !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 22px !important;
+    letter-spacing: 0.2px !important;
+    text-align: left !important;
+}
+
+.batch-validation-label {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 2px 0 0 0 !important;
+    padding: 0 !important;
+    color: #334155 !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    line-height: 18px !important;
+    text-align: left !important;
+}
+
+.batch-validation-window .z-intbox,
+.batch-validation-window .z-textbox {
+    width: 100% !important;
+    height: 36px !important;
+    box-sizing: border-box !important;
+    padding: 0 11px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    color: #0f172a !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+.batch-validation-window .z-intbox:focus,
+.batch-validation-window .z-textbox:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12) !important;
+    outline: none !important;
+}
+
+.batch-validation-window .z-intbox::placeholder,
+.batch-validation-window .z-textbox::placeholder {
+    color: #94a3b8 !important;
+    font-size: 11.5px !important;
+}
+
+.batch-validation-message {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 6px 10px !important;
+    margin: 2px 0 0 0 !important;
+    background: #fee2e2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fca5a5 !important;
+    border-radius: 6px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 16px !important;
+    white-space: normal !important;
+    text-align: left !important;
+    overflow-wrap: anywhere !important;
+}
+
+.batch-validation-actual {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 2px 0 0 0 !important;
+    color: #64748b !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    line-height: 16px !important;
+}
+
+.batch-validation-success {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 6px 10px !important;
+    margin: 2px 0 0 0 !important;
+    background: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #86efac !important;
+    border-radius: 6px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 16px !important;
+    white-space: normal !important;
+    text-align: left !important;
+}
+
+.batch-validation-window .view-button.z-button {
+    min-width: 88px !important;
+    height: 34px !important;
+    line-height: 32px !important;
+    padding: 0 16px !important;
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
+    border-radius: 5px !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.2px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12) !important;
+}
+
+.batch-validation-window .view-button.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
+}
+
+.batch-validation-window .batch-btn-clear.z-button {
+    min-width: 72px !important;
+    height: 34px !important;
+    line-height: 32px !important;
+    padding: 0 14px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    color: #475569 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+}
+
+.batch-validation-window .batch-btn-clear.z-button:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
