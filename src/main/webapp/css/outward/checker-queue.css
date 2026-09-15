@@ -121,34 +121,31 @@
    SUMMARY CARD
    ========================================================= */
 
+/* =========================================================
+   SUMMARY CARD
+   ========================================================= */
+
 .summary-card {
     width: 100%;
     height: 50px;
     min-height: 50px;
-
     background: #ffffff;
     border: 1px solid #d2ddea;
     border-radius: 6px;
-
     display: flex;
     overflow: hidden;
     box-sizing: border-box;
-
     margin-bottom: 7px;
 }
 
 .summary-item {
     flex: 1;
     min-width: 0;
-
     padding: 7px 12px;
-
     border-right: 1px solid #d2ddea;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
-
     box-sizing: border-box;
 }
 
@@ -156,21 +153,24 @@
     border-right: none;
 }
 
+/* INCREASED */
 .summary-label {
-    font-size: 7px;
+    font-size: 9px;
     font-weight: 600;
     color: #748aa4;
     margin-bottom: 3px;
 }
 
+/* INCREASED */
 .summary-value {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     color: #173b63;
 }
 
+/* INCREASED */
 .remaining-value {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #173b63;
 }
@@ -183,16 +183,15 @@
 .status-pending {
     display: inline-block;
     padding: 4px 12px;
-
     border: 1px solid #f0a329;
     border-radius: 15px;
-
     background: #fffaf1;
     color: #d88a00;
 
-    font-size: 7px;
-    font-weight: 700;
+    /* INCREASED */
+    font-size: 9px;
 
+    font-weight: 700;
     text-align: center;
 }
 
@@ -265,18 +264,17 @@
    ========================================================= */
 
 .card-title {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 700;
     color: #173b63;
 }
 
 .card-description {
     display: block;
-    font-size: 8px;
+    font-size: 9px;
     color: #8c9bad;
     margin-top: 3px;
 }
-
 
 /* =========================================================
    ZOOM CONTROLS
@@ -284,17 +282,12 @@
 
 .zoom-controls {
     width: 100%;
-
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: flex-end;
-
-    gap: 5px;
-
-    margin-top: 5px;
-    margin-bottom: 6px;
-
-    box-sizing: border-box;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 2px 0 0 0;
 }
 
 
@@ -507,12 +500,9 @@
 
 .two-column-fields {
     width: 100%;
-
     display: flex;
     gap: 10px;
-
-    margin-bottom: 7px;
-
+    margin-bottom: 8px;
     box-sizing: border-box;
 }
 
@@ -521,40 +511,35 @@
     min-width: 0;
 }
 
+/* =========================================================
+   FIELD LABEL
+   ========================================================= */
+
 .field-label {
     display: block;
-
-    font-size: 7px;
+    font-size: 9px;
     font-weight: 700;
-
     color: #71869e;
-
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
-
-
 /* =========================================================
    READ ONLY FIELD
    ========================================================= */
 
 .readonly-field {
     width: 100%;
-    height: 30px;
-
+    height: 32px;
     background: #f5f7fa;
-
     border: 1px solid #d0dbe6;
     border-radius: 4px;
 
     color: #304f6e;
+    font-size: 12px;
+    font-weight: 500;
 
-    font-size: 10px;
-
-    padding: 0 8px;
-
+    padding: 0 9px;
     box-sizing: border-box;
 }
-
 
 /* =========================================================
    MAKER REJECTION REQUEST
@@ -563,8 +548,9 @@
 .maker-rejection-request {
     width: 100%;
     box-sizing: border-box;
-}
 
+    font-size: 11px;
+}
 
 /* =========================================================
    REJECTION DETAILS
@@ -729,37 +715,41 @@
     background: #19794c;
 }
 
-
 /* =========================================================
-   XML DISABLED
+   XML GENERATION - DISABLED
    ========================================================= */
 
 .xml-generation-button {
-    background: #dddddd;
-
-    border: 1px solid #dddddd;
-
-    color: #a8a8a8;
+    background: #DDDDDD !important;
+    border: 1px solid #DDDDDD !important;
+    color: #A8A8A8 !important;
+    box-shadow: none !important;
 }
 
 
 /* =========================================================
-   XML ENABLED
+   XML GENERATION - ENABLED
+   Same dark blue as sidebar
    ========================================================= */
-
-.xml-generation-button {
-    background: #ddd !important;
-    border: 1px solid #ddd !important;
-    color: #a8a8a8 !important;
-}
 
 .xml-generation-button-enabled {
-    background: #078bd2 !important;
-    border: 1px solid #078bd2 !important;
-    color: #fff !important;
+    background: #0F2747 !important;
+    border: 1px solid #0F2747 !important;
+    color: #FFFFFF !important;
+    box-shadow: none !important;
 }
 
 
+/*
+ * ZK adds its own disabled class.
+ * Keep the enabled colour when the button is enabled.
+ */
+
+.xml-generation-button-enabled.z-button-disd {
+    background: #0F2747 !important;
+    border: 1px solid #0F2747 !important;
+    color: #FFFFFF !important;
+}
 /* =========================================================
    RETURN TO MAKER
    ========================================================= */
@@ -907,6 +897,26 @@
         padding: 0 5px;
         font-size: 6px;
     }
+}
+
+.status-verified {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 12px;
+    background: #DCFCE7;
+    color: #15803D;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-pending {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 12px;
+    background: #FEF3C7;
+    color: #B45309;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 

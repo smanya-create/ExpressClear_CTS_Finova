@@ -52,14 +52,22 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		outwardCheckerQueueDAO.updateChequeStatus(chequeNo, "VERIFIED");
 	}
 
+
 	// ============================================================
 	// RETURN TO MAKER
 	// ============================================================
 
 	@Override
-	public void returnChequeToMaker(String chequeNo) throws SQLException {
+	public void returnChequeToMaker(
+	        String chequeNo,
+	        String reasonId,
+	        String remarks)
+	        throws SQLException {
 
-		outwardCheckerQueueDAO.updateChequeStatus(chequeNo, "RETURN_TO_MAKER");
+	    outwardCheckerQueueDAO.returnChequeToMaker(
+	            chequeNo,
+	            reasonId,
+	            remarks);
 	}
 
 	// ============================================================
