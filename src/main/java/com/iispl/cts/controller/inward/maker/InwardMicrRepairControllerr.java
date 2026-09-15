@@ -72,6 +72,10 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private Button btnViewFront;
 	private Button btnViewBack;
 
+	private Button btnSaveAndNext;
+	private Button btnRejectRequest;
+	private Button btnSubmitToDataEntry;
+
 	private Label lblChequeImageTitle;
 
 	private double zoomLevel = 1.0;
@@ -303,6 +307,19 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			micrRepairCompletedState.setVisible(false);
 		}
 
+		String currentStatus = currentCheque.getChequeStatus() != null ? currentCheque.getChequeStatus().trim() : "";
+
+		boolean actionAlreadyCompleted = "MICR_REPAIR_COMPLETED".equalsIgnoreCase(currentStatus)
+				|| "REJECTION_REQUESTED".equalsIgnoreCase(currentStatus);
+
+		if (btnSaveAndNext != null) {
+			btnSaveAndNext.setDisabled(actionAlreadyCompleted);
+		}
+
+		if (btnRejectRequest != null) {
+			btnRejectRequest.setDisabled(actionAlreadyCompleted);
+		}
+
 		loadBatchSummary(currentCheque);
 		populateChequeFields(currentCheque);
 		loadChequeAlertReason(currentCheque);
@@ -405,8 +422,18 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
 		if (lblHeaderChequeNo != null)
 			lblHeaderChequeNo.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "-");
-		if (lblHeaderItemStatus != null)
-			lblHeaderItemStatus.setValue(cheque.getChequeStatus() != null ? cheque.getChequeStatus() : "MICR_REPAIR");
+		if (lblHeaderItemStatus != null) {
+
+			String status = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim() : "MICR_REPAIR";
+
+			lblHeaderItemStatus.setValue(status);
+
+			if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)) {
+				lblHeaderItemStatus.setSclass("cts-badge-micr-completed");
+			} else {
+				lblHeaderItemStatus.setSclass("cts-badge-micr");
+			}
+		}
 		if (lblReceivedDate != null && batch.getUploadedAt() != null) {
 			lblReceivedDate.setValue(new java.text.SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
 		}
@@ -470,6 +497,40 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		if (progressMeter != null) {
 			progressMeter.setValue(progress);
 		}
+
+		updateSubmitButtonState();
+	}
+
+	private void updateSubmitButtonState() {
+
+		if (btnSubmitToDataEntry == null) {
+			return;
+		}
+
+		boolean allCompleted = repairCheques != null && !repairCheques.isEmpty();
+
+		if (allCompleted) {
+
+			for (InwardCheque cheque : repairCheques) {
+
+				if (cheque == null || cheque.getChequeStatus() == null) {
+					allCompleted = false;
+					break;
+				}
+
+				String status = cheque.getChequeStatus().trim();
+
+				boolean completed = "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+						|| "REJECTION_REQUESTED".equalsIgnoreCase(status);
+
+				if (!completed) {
+					allCompleted = false;
+					break;
+				}
+			}
+		}
+
+		btnSubmitToDataEntry.setDisabled(!allCompleted);
 	}
 
 	private void loadChequeImage(String inwardChequeId) {
@@ -658,6 +719,17 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	public void onClick$btnSaveAndNext() {
+
+		if (currentCheque != null && currentCheque.getChequeStatus() != null) {
+
+			String status = currentCheque.getChequeStatus().trim();
+
+			if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status) || "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+
+				return;
+			}
+		}
+
 		String nextMicrRepairStatus = getNextMicrRepairStatus();
 
 		if (totalRecords == 0 || currentCheque == null) {
@@ -1074,5 +1146,32 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		} else {
 			txtCorrectedMicr.setValue("");
 		}
+	}
+
+	public void onClick$btnSubmitToDataEntry() {
+
+		if (currentCheque == null || currentCheque.getInwardBatchId() == null) {
+			Messagebox.show("No MICR repair batch is available for submission.", "Submit to Data Entry", Messagebox.OK,
+					Messagebox.INFORMATION);
+			return;
+		}
+
+		String batchId = currentCheque.getInwardBatchId();
+
+		boolean submitted = inwardChequeService.submitMicrRepairBatchToDataEntry(batchId);
+
+		if (!submitted) {
+
+			Messagebox.show(
+					"The MICR Repair batch cannot be submitted yet. " + "Please complete all MICR repair actions.",
+					"Submit to Data Entry", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			return;
+		}
+
+		Messagebox.show("MICR Repair batch submitted successfully to Data Entry.", "Submit to Data Entry",
+				Messagebox.OK, Messagebox.INFORMATION, event -> {
+					Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + batchId);
+				});
 	}
 }

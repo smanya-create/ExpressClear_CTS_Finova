@@ -823,6 +823,73 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	}
 
 	@Override
+	public boolean submitMicrRepairBatchToDataEntry(String inwardBatchId) {
+
+		String validationSql = "SELECT " + "COUNT(*) FILTER (WHERE cheque_status IN (" + "    'MICR_REPAIR_PENDING', "
+				+ "    'MICR_REPAIR_IN_PROGRESS', " + "    'MICR_REPAIR_REQUIRED', " + "    'SEND_BACK_TO_MAKER_MICR', "
+				+ "    'MICR_REPAIR_COMPLETED', " + "    'REJECTION_REQUESTED'" + ")) AS total_micr_cheques, "
+
+				+ "COUNT(*) FILTER (WHERE cheque_status IN (" + "    'MICR_REPAIR_COMPLETED', "
+				+ "    'REJECTION_REQUESTED'" + ")) AS completed_micr_cheques "
+
+				+ "FROM inward_cheque " + "WHERE inward_batch_id = ?";
+
+		String updateSql = "UPDATE inward_cheque " + "SET cheque_status = 'DATA_ENTRY_PENDING' "
+				+ "WHERE inward_batch_id = ? " + "AND cheque_status = 'MICR_REPAIR_COMPLETED'";
+
+		try (Connection conn = DBConnection.getConnection()) {
+
+			conn.setAutoCommit(false);
+
+			try (PreparedStatement ps = conn.prepareStatement(validationSql)) {
+
+				ps.setString(1, inwardBatchId);
+
+				try (ResultSet rs = ps.executeQuery()) {
+
+					if (!rs.next()) {
+						conn.rollback();
+						return false;
+					}
+
+					int totalMicrCheques = rs.getInt("total_micr_cheques");
+
+					int completedMicrCheques = rs.getInt("completed_micr_cheques");
+
+					
+					if (totalMicrCheques == 0 || totalMicrCheques != completedMicrCheques) {
+
+						conn.rollback();
+						return false;
+					}
+				}
+			}
+
+			int updatedRows;
+
+			try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+
+				ps.setString(1, inwardBatchId);
+
+				updatedRows = ps.executeUpdate();
+			}
+
+			conn.commit();
+
+			System.out.println("MICR Repair submitted to Data Entry. Batch: " + inwardBatchId
+					+ ", repaired cheques moved: " + updatedRows);
+
+			return true;
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			return false;
+		}
+	}
+
+	@Override
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
 		String sql = "SELECT " + "    a.account_number, " + "    a.account_holder_name, " + "    a.account_balance, "
 				+ "    a.account_status, " + "    mc.cheque_number AS master_cheque_number, " + "    mc.sort_code, "
