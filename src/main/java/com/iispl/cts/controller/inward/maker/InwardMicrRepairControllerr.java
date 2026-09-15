@@ -218,7 +218,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
 							|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
+							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+							|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 						repairCheques.add(cheque);
 					}
 				}
@@ -518,7 +519,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 				String status = cheque.getChequeStatus().trim();
 
-				boolean completed = "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status);
+				boolean completed = "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+						|| "REJECTION_REQUESTED".equalsIgnoreCase(status);
 
 				if (!completed) {
 					allCompleted = false;
@@ -788,7 +790,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status) || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
+						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 					repairCheques.add(cheque);
 				}
 			}

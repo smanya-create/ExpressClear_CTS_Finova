@@ -798,9 +798,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		try {
-			if (!this.isReworkBatch) {
+			
 				batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
-			}
+			
 
 			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
