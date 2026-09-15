@@ -185,4 +185,14 @@ public class OutwardMakerServiceImpl
         return outwardMakerDAO
                 .getRejectedReasons();
     }
+
+    @Override
+    public boolean existsChequeNumberAndAccount(
+            String chequeNumber,
+            String accountNumber) {
+
+        return outwardMakerDAO.existsChequeNumberAndAccount(
+                chequeNumber,
+                accountNumber);
+    }
 }
