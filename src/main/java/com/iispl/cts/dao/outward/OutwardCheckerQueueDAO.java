@@ -70,6 +70,13 @@ public interface OutwardCheckerQueueDAO {
 
     List<SendBackReason> getSendBackReasons()
             throws SQLException;
+    
+    
+    // Return cheque to maker
+    void returnChequeToMaker(
+            String chequeNo,
+            String reasonId,
+            String remarks) throws SQLException;
 
 
     // ============================================================
@@ -107,4 +114,6 @@ public interface OutwardCheckerQueueDAO {
     
     RejectRequestDTO getRejectRequestByChequeId(
             String chequeId) throws SQLException;
+    
+    
 }
