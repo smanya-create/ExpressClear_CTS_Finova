@@ -320,35 +320,34 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		if (lblChequePosition != null)
 			lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
 
-		String status = item.getChequeStatus();
+		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
 		if (lblDataStatus != null) {
+			String baseStyle = "display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; ";
+
 			if (isSentBackStatus(status)) {
 				lblDataStatus.setValue("SENT BACK");
-				lblDataStatus.setStyle(
-						"background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-weight: 700;");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #e0e7ff 0%, #c7d2fe 55%, #a5b4fc 100%) !important; color: #1e1b4b !important; border: 1px solid #818cf8 !important; box-shadow: 0 1px 3px rgba(129, 140, 248, 0.3) !important;");
 			} else if (InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status)) {
 				lblDataStatus.setValue("RETURNED TO CHECKER");
-				lblDataStatus.setStyle(
-						"background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 700;");
-			} else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("REJECT REQ");
-				lblDataStatus.setStyle(
-						"background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-weight: 700;");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+			} else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status) || "REJECTION REQUESTED".equalsIgnoreCase(status) || "REJECT REQ".equalsIgnoreCase(status)) {
+				lblDataStatus.setValue("REJECTION REQUESTED");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #ffe4e6 0%, #fecdd3 55%, #fda4af 100%) !important; color: #9f1239 !important; border: 1px solid #fb7185 !important; box-shadow: 0 1px 3px rgba(251, 113, 133, 0.25) !important;");
+			} else if (InwardChequeStatus.REJECTED.name().equalsIgnoreCase(status)) {
+				lblDataStatus.setValue("REJECTED");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #ffe4e6 0%, #fecdd3 55%, #fda4af 100%) !important; color: #9f1239 !important; border: 1px solid #fb7185 !important; box-shadow: 0 1px 3px rgba(251, 113, 133, 0.25) !important;");
 			} else if (InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(status)) {
 				lblDataStatus.setValue("IN PROGRESS");
-				lblDataStatus.setStyle(
-						"background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-weight: 700;");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
 			} else if (InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(status)
 					|| InwardChequeStatus.COMPLETED.name().equalsIgnoreCase(status)
 					|| "ACCEPTED".equalsIgnoreCase(status)
 					|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("COMPLETED");
-				lblDataStatus.setStyle(
-						"background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 700;");
+				lblDataStatus.setValue("CHECKER PENDING");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
 			} else {
 				lblDataStatus.setValue("PENDING");
-				lblDataStatus.setStyle(
-						"background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; font-weight: 700;");
+				lblDataStatus.setStyle(baseStyle + "background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
 			}
 		}
 

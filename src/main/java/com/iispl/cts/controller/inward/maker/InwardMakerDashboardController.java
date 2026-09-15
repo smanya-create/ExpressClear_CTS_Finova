@@ -296,6 +296,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
         Label statusLabel = new Label(displayStatus);
         statusLabel.setSclass("inward-maker-status");
+        
+        if ("RESOLVED".equalsIgnoreCase(displayStatus)) {
+            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+        }
 
         Label reasonLabel = new Label(getValue(reasonRemarks));
         reasonLabel.setSclass("inward-maker-reason");
@@ -590,7 +594,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private boolean isSentBackStatus(String status) {
         if (status == null) return false;
         String s = status.trim().toUpperCase();
-        return s.contains("SEND_BACK") || s.contains("SENT_BACK") || s.contains("RETURN");
+        return s.contains("SEND_BACK") || s.contains("SENT_BACK") || s.contains("RETURN") || "MAKER_RETURNED".equals(s);
     }
 
     private String formatIndianAmount(BigDecimal amount) {
@@ -614,6 +618,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
     private String getDisplayStatus(InwardCheque chq) {
         if (chq == null) return "PENDING_MAKER_PROCESS";
         String s = normalizeStatus(chq.getChequeStatus());
+        
+        if ("MAKER_RETURNED".equals(s)) {
+            return "RESOLVED";
+        }
 
         if ("SEND_BACK_TO_MAKER_MICR".equals(s) 
                 || "MICR_REPAIR_REQUIRED".equals(s) 

@@ -58,6 +58,7 @@
 							value="REPAIR_MICR" />
 						<comboitem label="Needs Rework"
 							value="NEEDS_REWORK" />
+						<comboitem label="Resolved" value="RESOLVED" />
 					</combobox>
 
 					<!-- Action Buttons -->
