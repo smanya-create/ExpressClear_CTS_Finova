@@ -15,20 +15,15 @@
 			<!-- 1. Unified Page Title -->
 			<hlayout width="100%" valign="middle"
 				sclass="batch-title-section">
-
 				<label value="BATCH INTAKE" sclass="batch-page-title" />
-
 				<space hflex="1" />
-
 				<button id="dashboardButton" label="BACK TO DASHBOARD"
 					sclass="view-button batch-dashboard-button" />
 			</hlayout>
 
 			<!-- 2. Main Section Card -->
 			<div sclass="batch-section-card" width="100%">
-
 				<vlayout width="100%" spacing="12px">
-
 					<!-- Section Header & Count -->
 					<hlayout width="100%" valign="middle"
 						sclass="batch-card-header">

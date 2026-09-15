@@ -2168,175 +2168,96 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private InputStream getResourceStream(String resourcePath) {
-
 		String normalizedPath = resourcePath;
-
 		if (normalizedPath == null)
-
 			return null;
-
 		normalizedPath = normalizedPath.trim();
-
 		while (normalizedPath.startsWith("/")) {
-
 			normalizedPath = normalizedPath.substring(1);
-
 		}
-
 		try {
-
 			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-
 			if (contextClassLoader != null) {
-
 				InputStream stream = contextClassLoader.getResourceAsStream(normalizedPath);
-
 				if (stream != null)
-
 					return stream;
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		try {
-
 			ClassLoader classLoader = InwardBatchController.class.getClassLoader();
-
 			if (classLoader != null) {
-
 				InputStream stream = classLoader.getResourceAsStream(normalizedPath);
-
 				if (stream != null)
-
 					return stream;
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		try {
-
 			String realPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + normalizedPath);
-
 			if (realPath != null) {
-
 				File file = new File(realPath);
-
 				if (file.isFile()) {
-
 					return java.nio.file.Files.newInputStream(file.toPath());
-
 				}
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
 
 		try {
-
 			String realPath = currentWindow.getDesktop().getWebApp().getRealPath("/WEB-INF/classes/" + normalizedPath);
-
 			if (realPath != null) {
-
 				File file = new File(realPath);
-
 				if (file.isFile()) {
-
 					return java.nio.file.Files.newInputStream(file.toPath());
-
 				}
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		return null;
-
 	}
 
 	private void filterCheques() {
-
 		String searchValue = chequeSearchTextbox.getValue();
-
 		if (searchValue == null)
-
 			searchValue = "";
-
 		searchValue = searchValue.trim().toLowerCase();
-
 		if (searchValue.isEmpty()) {
-
 			displayCheques(allCheques);
-
 			return;
-
 		}
-
 		List<InwardCheque> filteredCheques = new ArrayList<InwardCheque>();
-
 		for (InwardCheque cheque : allCheques) {
-
 			String chequeNumber = valueOrEmpty(cheque.getChequeNumber()).toLowerCase();
-
 			String accountNumber = valueOrEmpty(cheque.getDraweeAccountNumber()).toLowerCase();
-
 			if (chequeNumber.contains(searchValue) || accountNumber.contains(searchValue)) {
-
 				filteredCheques.add(cheque);
-
 			}
-
 		}
 
 		displayCheques(filteredCheques);
-
 	}
 
 	private void updateChequeCount(int count) {
-
 		if (count == 0) {
-
 			chequeCountLabel.setValue("No cheque records found");
-
 			return;
-
 		}
-
 		chequeCountLabel.setValue("Showing 1 to " + count + " of " + count + " cheques");
-
 	}
-
 	private String valueOrEmpty(String value) {
-
 		return value == null ? "" : value;
 
 	}
 
 	private static class ParseResult {
-
 		private final String batchId;
-
 		private final ParsedBatchData parsedBatchData;
-
 		private final String status;
-
 		private final String message;
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
