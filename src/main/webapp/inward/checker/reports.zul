@@ -24,7 +24,7 @@
 
                 <north height="70px"
                        border="0">
-                    <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=rrf"/>
+                    <include src="/components/header.zul?pageTitle=Generate Reports&amp;pageSubtitle=Inward Checker"/>
                 </north>
 
                 <center border="none"
