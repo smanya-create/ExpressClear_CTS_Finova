@@ -218,8 +218,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
 							|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-							|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
 						repairCheques.add(cheque);
 					}
 				}
@@ -481,8 +480,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 				String status = cheque.getChequeStatus().trim();
 
-				if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
-						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+				if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)) {
 					completedRecords++;
 				}
 			}
@@ -520,8 +518,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 				String status = cheque.getChequeStatus().trim();
 
-				boolean completed = "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
-						|| "REJECTION_REQUESTED".equalsIgnoreCase(status);
+				boolean completed = "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status);
 
 				if (!completed) {
 					allCompleted = false;
@@ -791,8 +788,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status) || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
 					repairCheques.add(cheque);
 				}
 			}
@@ -1028,6 +1024,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		String expectedBranch = safe(cheque != null ? cheque.getBranchCode() : "");
 		String expectedSortCode = expectedCity + expectedBank + expectedBranch;
 
+		boolean completed = InwardChequeStatus.MICR_REPAIR_COMPLETED.name().equalsIgnoreCase(cheque.getChequeStatus());
+
 		if (ocrSortCode == null || ocrSortCode.trim().isEmpty()) {
 			ocrSortCode = safe(cheque != null ? cheque.getMicrCode() : "");
 		}
@@ -1065,12 +1063,34 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		String bankDisplay = getMicrPart(ocrSortCode, 3, 6);
 		String branchDisplay = getMicrPart(ocrSortCode, 6, 9);
 
-		txtCityCode.setValue(cityDisplay);
-		txtBankCode.setValue(bankDisplay);
-		txtBranchCode.setValue(branchDisplay);
+		if (completed) {
+			txtCityCode.setValue(expectedCity);
+			txtBankCode.setValue(expectedBank);
+			txtBranchCode.setValue(expectedBranch);
+		} else {
+			txtCityCode.setValue(cityDisplay);
+			txtBankCode.setValue(bankDisplay);
+			txtBranchCode.setValue(branchDisplay);
+		}
 
 		boolean checkerReturnedMicr = InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name()
 				.equalsIgnoreCase(cheque.getChequeStatus());
+
+		boolean micrHasError = cityCodeError || bankCodeError || branchCodeError;
+
+		if (lblRepairStatus != null) {
+			if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(cheque.getChequeStatus())
+					|| (checkerReturnedMicr && !micrHasError)) {
+
+				lblRepairStatus.setValue("MICR OK");
+				lblRepairStatus.setSclass("cts-badge-micr-completed");
+
+			} else {
+
+				lblRepairStatus.setValue("MICR ERROR");
+				lblRepairStatus.setSclass("cts-badge-micr");
+			}
+		}
 
 		boolean cityEditable = cityCodeError || checkerReturnedMicr;
 		boolean bankEditable = bankCodeError || checkerReturnedMicr;
@@ -1084,10 +1104,15 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		txtBankCode.setSclass(bankEditable ? "repair-editable-field" : "ocr-field");
 		txtBranchCode.setSclass(branchEditable ? "repair-editable-field" : "ocr-field");
 
-		txtCurrentMicr.setValue(ocrSortCode);
+		txtCurrentMicr.setValue(completed ? expectedSortCode : ocrSortCode);
 		txtCurrentMicr.setSclass("error-field");
 
-		txtCorrectedMicr.setValue("");
+		if (!cityCodeError && !bankCodeError && !branchCodeError) {
+			txtCorrectedMicr.setValue(expectedSortCode);
+		} else {
+			txtCorrectedMicr.setValue("");
+		}
+
 		txtCorrectedMicr.clearErrorMessage();
 
 		txtTransactionCode.setReadonly(true);

@@ -547,8 +547,8 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				+ "corrected_micr, repaired_by, repaired_at, repair_status, remarks) "
 				+ "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
 
-		String updateSql = "UPDATE inward_cheque " + "SET micr_code = ?, cheque_status = ? "
-				+ "WHERE inward_cheque_id = ?";
+		String updateSql = "UPDATE inward_cheque " + "SET micr_code = ?, " + "city_code = ?, " + "bank_code = ?, "
+				+ "branch_code = ?, " + "cheque_status = ? " + "WHERE inward_cheque_id = ?";
 
 		Connection connection = null;
 
@@ -594,10 +594,11 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 			try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
 
 				updateStatement.setString(1, correctedMicrCode.trim());
-
-				updateStatement.setString(2, chequeStatus.trim());
-
-				updateStatement.setString(3, inwardChequeId.trim());
+				updateStatement.setString(2, correctedMicrCode.trim().substring(0, 3));
+				updateStatement.setString(3, correctedMicrCode.trim().substring(3, 6));
+				updateStatement.setString(4, correctedMicrCode.trim().substring(6, 9));
+				updateStatement.setString(5, chequeStatus.trim());
+				updateStatement.setString(6, inwardChequeId.trim());
 
 				int rowsUpdated = updateStatement.executeUpdate();
 
@@ -827,10 +828,9 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 		String validationSql = "SELECT " + "COUNT(*) FILTER (WHERE cheque_status IN (" + "    'MICR_REPAIR_PENDING', "
 				+ "    'MICR_REPAIR_IN_PROGRESS', " + "    'MICR_REPAIR_REQUIRED', " + "    'SEND_BACK_TO_MAKER_MICR', "
-				+ "    'MICR_REPAIR_COMPLETED', " + "    'REJECTION_REQUESTED'" + ")) AS total_micr_cheques, "
+				+ "    'MICR_REPAIR_COMPLETED'" + ")) AS total_micr_cheques, "
 
-				+ "COUNT(*) FILTER (WHERE cheque_status IN (" + "    'MICR_REPAIR_COMPLETED', "
-				+ "    'REJECTION_REQUESTED'" + ")) AS completed_micr_cheques "
+				+ "COUNT(*) FILTER (WHERE cheque_status = 'MICR_REPAIR_COMPLETED') " + "AS completed_micr_cheques "
 
 				+ "FROM inward_cheque " + "WHERE inward_batch_id = ?";
 
