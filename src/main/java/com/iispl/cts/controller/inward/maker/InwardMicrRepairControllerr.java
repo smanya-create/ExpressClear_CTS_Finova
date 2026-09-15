@@ -160,9 +160,11 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	private void loadRejectedReasons() {
 		rejectedReasons = rejectedReasonService.getAllRejectedReasons();
-		if (cmbRejectReason == null) return;
+		if (cmbRejectReason == null)
+			return;
 		cmbRejectReason.getItems().clear();
-		if (rejectedReasons == null) return;
+		if (rejectedReasons == null)
+			return;
 
 		for (RejectedReason reason : rejectedReasons) {
 			Comboitem item = new Comboitem();
@@ -177,11 +179,13 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			String batchId = Executions.getCurrent().getParameter("batchId");
 			if (batchId == null || batchId.trim().isEmpty()) {
 				Object sessionBatchId = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_BATCH_ID");
-				if (sessionBatchId != null) batchId = String.valueOf(sessionBatchId);
+				if (sessionBatchId != null)
+					batchId = String.valueOf(sessionBatchId);
 			}
 
 			if (batchId == null || batchId.trim().isEmpty()) {
-				Messagebox.show("No MICR repair batch was selected.", "MICR Repair", Messagebox.OK, Messagebox.EXCLAMATION);
+				Messagebox.show("No MICR repair batch was selected.", "MICR Repair", Messagebox.OK,
+						Messagebox.EXCLAMATION);
 				return;
 			}
 
@@ -189,9 +193,11 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			InwardBatch batch = inwardBatchService.getBatchById(batchId);
 			if (batch != null && "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(batch.getBatchStatus())) {
-				Messagebox.show("This batch is currently under Checker review. MICR repair is locked in view-only mode.", 
+				Messagebox.show(
+						"This batch is currently under Checker review. MICR repair is locked in view-only mode.",
 						"Batch Locked", Messagebox.OK, Messagebox.INFORMATION, evt -> {
-							Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + batch.getInwardBatchId());
+							Executions.sendRedirect(
+									"/inward/maker/index.zul?page=batch-details&batchId=" + batch.getInwardBatchId());
 						});
 				return;
 			}
@@ -201,12 +207,15 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 			if (batchCheques != null) {
 				for (InwardCheque cheque : batchCheques) {
-					if (cheque == null) continue;
+					if (cheque == null)
+						continue;
 					String status = cheque.getChequeStatus();
 					if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status)
 							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+							|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
+							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+							|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 						repairCheques.add(cheque);
 					}
 				}
@@ -231,9 +240,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				}
 				if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
 					Object sessChq = Executions.getCurrent().getSession().getAttribute("TARGET_CHEQUE_ID");
-					if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_CHEQUE_ID");
-					if (sessChq == null) sessChq = Executions.getCurrent().getSession().getAttribute("chequeId");
-					if (sessChq != null) targetChequeId = String.valueOf(sessChq).trim();
+					if (sessChq == null)
+						sessChq = Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_CHEQUE_ID");
+					if (sessChq == null)
+						sessChq = Executions.getCurrent().getSession().getAttribute("chequeId");
+					if (sessChq != null)
+						targetChequeId = String.valueOf(sessChq).trim();
 				}
 
 				int targetIndex = -1;
@@ -257,8 +269,10 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				initialTargetResolved = true;
 			}
 
-			if (currentRecord < 0) currentRecord = 0;
-			if (currentRecord >= totalRecords) currentRecord = totalRecords - 1;
+			if (currentRecord < 0)
+				currentRecord = 0;
+			if (currentRecord >= totalRecords)
+				currentRecord = totalRecords - 1;
 
 			displayCurrentCheque();
 
@@ -275,10 +289,13 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private void displayCurrentCheque() {
-		if (repairCheques == null || repairCheques.isEmpty()) return;
+		if (repairCheques == null || repairCheques.isEmpty())
+			return;
 
-		if (currentRecord < 0) currentRecord = 0;
-		if (currentRecord >= repairCheques.size()) currentRecord = repairCheques.size() - 1;
+		if (currentRecord < 0)
+			currentRecord = 0;
+		if (currentRecord >= repairCheques.size())
+			currentRecord = repairCheques.size() - 1;
 
 		currentCheque = repairCheques.get(currentRecord);
 
@@ -294,21 +311,30 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private void loadChequeAlertReason(InwardCheque item) {
-		if (micrAlertBox == null || item == null) return;
+		if (micrAlertBox == null || item == null)
+			return;
 
 		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
 
 		// 1. Case: Checker Return / Send-Back
 		if (status.contains("SEND_BACK") || status.contains("SENT_BACK") || "MAKER_RETURNED".equals(status)) {
 			try {
-				InwardSendBackRequestDTO dto = sendBackRequestService.getLatestPendingByChequeId(item.getInwardChequeId());
+				InwardSendBackRequestDTO dto = sendBackRequestService
+						.getLatestPendingByChequeId(item.getInwardChequeId());
 				if (dto != null) {
-					if (lblMicrAlertTitle != null) lblMicrAlertTitle.setValue("CHECKER SEND BACK");
-					if (lblMicrCodeTitle != null) lblMicrCodeTitle.setValue("Reason Code:");
-					if (lblMicrReasonCode != null) lblMicrReasonCode.setValue(dto.getReasonCode() != null ? dto.getReasonCode().trim() : "-");
-					if (lblMicrNameTitle != null) lblMicrNameTitle.setValue("Reason:");
-					if (lblMicrReasonName != null) lblMicrReasonName.setValue(dto.getReasonName() != null ? dto.getReasonName().trim() : "Send Back to Maker");
-					if (lblMicrRemarksTitle != null) lblMicrRemarksTitle.setValue("Remarks:");
+					if (lblMicrAlertTitle != null)
+						lblMicrAlertTitle.setValue("CHECKER SEND BACK");
+					if (lblMicrCodeTitle != null)
+						lblMicrCodeTitle.setValue("Reason Code:");
+					if (lblMicrReasonCode != null)
+						lblMicrReasonCode.setValue(dto.getReasonCode() != null ? dto.getReasonCode().trim() : "-");
+					if (lblMicrNameTitle != null)
+						lblMicrNameTitle.setValue("Reason:");
+					if (lblMicrReasonName != null)
+						lblMicrReasonName.setValue(
+								dto.getReasonName() != null ? dto.getReasonName().trim() : "Send Back to Maker");
+					if (lblMicrRemarksTitle != null)
+						lblMicrRemarksTitle.setValue("Remarks:");
 					if (lblMicrRemarks != null) {
 						String rem = dto.getRemarks();
 						lblMicrRemarks.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
@@ -316,7 +342,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 					micrAlertBox.setVisible(true);
 					return;
 				}
-			} catch (Exception ignored) {}
+			} catch (Exception ignored) {
+			}
 		}
 
 		// 2. Case: Maker Rejection Request
@@ -324,28 +351,38 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			String sql = "SELECT rr.rejected_reason_code, rr.rejected_reason_name, r.remarks "
 					+ "FROM inward_cheque_rejection_request r "
 					+ "LEFT JOIN rejected_reasons rr ON rr.rejected_reason_id::text = r.rejected_reason_id::text "
-					+ "WHERE r.inward_cheque_id = ? "
-					+ "ORDER BY r.requested_at DESC LIMIT 1";
-			try (Connection conn = DBConnection.getConnection();
-				 PreparedStatement ps = conn.prepareStatement(sql)) {
+					+ "WHERE r.inward_cheque_id = ? " + "ORDER BY r.requested_at DESC LIMIT 1";
+			try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 				ps.setString(1, item.getInwardChequeId());
 				try (ResultSet rs = ps.executeQuery()) {
 					if (rs.next()) {
-						if (lblMicrAlertTitle != null) lblMicrAlertTitle.setValue("MAKER REJECTION REQUEST");
-						if (lblMicrCodeTitle != null) lblMicrCodeTitle.setValue("Reason Code:");
-						if (lblMicrReasonCode != null) lblMicrReasonCode.setValue(rs.getString("rejected_reason_code") != null ? rs.getString("rejected_reason_code") : "-");
-						if (lblMicrNameTitle != null) lblMicrNameTitle.setValue("Reason:");
-						if (lblMicrReasonName != null) lblMicrReasonName.setValue(rs.getString("rejected_reason_name") != null ? rs.getString("rejected_reason_name") : "Rejection Requested");
-						if (lblMicrRemarksTitle != null) lblMicrRemarksTitle.setValue("Remarks:");
+						if (lblMicrAlertTitle != null)
+							lblMicrAlertTitle.setValue("MAKER REJECTION REQUEST");
+						if (lblMicrCodeTitle != null)
+							lblMicrCodeTitle.setValue("Reason Code:");
+						if (lblMicrReasonCode != null)
+							lblMicrReasonCode.setValue(
+									rs.getString("rejected_reason_code") != null ? rs.getString("rejected_reason_code")
+											: "-");
+						if (lblMicrNameTitle != null)
+							lblMicrNameTitle.setValue("Reason:");
+						if (lblMicrReasonName != null)
+							lblMicrReasonName.setValue(
+									rs.getString("rejected_reason_name") != null ? rs.getString("rejected_reason_name")
+											: "Rejection Requested");
+						if (lblMicrRemarksTitle != null)
+							lblMicrRemarksTitle.setValue("Remarks:");
 						if (lblMicrRemarks != null) {
 							String rem = rs.getString("remarks");
-							lblMicrRemarks.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
+							lblMicrRemarks
+									.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
 						}
 						micrAlertBox.setVisible(true);
 						return;
 					}
 				}
-			} catch (Exception ignored) {}
+			} catch (Exception ignored) {
+			}
 		}
 
 		if (micrAlertBox != null) {
@@ -354,44 +391,83 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private void loadBatchSummary(InwardCheque cheque) {
-		if (cheque == null) return;
+		if (cheque == null)
+			return;
 		InwardBatch batch = inwardBatchService.getBatchById(cheque.getInwardBatchId());
-		if (batch == null) return;
+		if (batch == null)
+			return;
 
-		if (lblBatchId != null) lblBatchId.setValue(String.valueOf(batch.getInwardBatchId()));
-		if (lblBatchSource != null) lblBatchSource.setValue("CHI");
-		if (lblTotalCheques != null) lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
-		if (lblHeaderChequeNo != null) lblHeaderChequeNo.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "-");
-		if (lblHeaderItemStatus != null) lblHeaderItemStatus.setValue(cheque.getChequeStatus() != null ? cheque.getChequeStatus() : "MICR_REPAIR");
+		if (lblBatchId != null)
+			lblBatchId.setValue(String.valueOf(batch.getInwardBatchId()));
+		if (lblBatchSource != null)
+			lblBatchSource.setValue("CHI");
+		if (lblTotalCheques != null)
+			lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
+		if (lblHeaderChequeNo != null)
+			lblHeaderChequeNo.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "-");
+		if (lblHeaderItemStatus != null)
+			lblHeaderItemStatus.setValue(cheque.getChequeStatus() != null ? cheque.getChequeStatus() : "MICR_REPAIR");
 		if (lblReceivedDate != null && batch.getUploadedAt() != null) {
 			lblReceivedDate.setValue(new java.text.SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
 		}
 	}
 
 	private void clearRecordFields() {
-		if (lblBatchId != null) lblBatchId.setValue("-");
-		if (txtChequeNumber != null) txtChequeNumber.setValue("");
-		if (txtCityCode != null) txtCityCode.setValue("");
-		if (txtBankCode != null) txtBankCode.setValue("");
-		if (txtBranchCode != null) txtBranchCode.setValue("");
-		if (txtCurrentMicr != null) txtCurrentMicr.setValue("");
-		if (txtTransactionCode != null) txtTransactionCode.setValue("");
-		if (txtCorrectedMicr != null) txtCorrectedMicr.setValue("");
-		if (txtRemarks != null) txtRemarks.setValue("");
-		if (lblRepairStatus != null) lblRepairStatus.setValue("MICR ERROR");
-		if (micrAlertBox != null) micrAlertBox.setVisible(false);
+		if (lblBatchId != null)
+			lblBatchId.setValue("-");
+		if (txtChequeNumber != null)
+			txtChequeNumber.setValue("");
+		if (txtCityCode != null)
+			txtCityCode.setValue("");
+		if (txtBankCode != null)
+			txtBankCode.setValue("");
+		if (txtBranchCode != null)
+			txtBranchCode.setValue("");
+		if (txtCurrentMicr != null)
+			txtCurrentMicr.setValue("");
+		if (txtTransactionCode != null)
+			txtTransactionCode.setValue("");
+		if (txtCorrectedMicr != null)
+			txtCorrectedMicr.setValue("");
+		if (txtRemarks != null)
+			txtRemarks.setValue("");
+		if (lblRepairStatus != null)
+			lblRepairStatus.setValue("MICR ERROR");
+		if (micrAlertBox != null)
+			micrAlertBox.setVisible(false);
 	}
 
 	private void updateNavigation() {
+
 		if (lblRecordPosition != null) {
 			lblRecordPosition.setValue(totalRecords == 0 ? "0 of 0" : (currentRecord + 1) + " of " + totalRecords);
 		}
-		if (lblProgress != null) {
-			int pct = totalRecords == 0 ? 0 : (int) Math.round(((double) (currentRecord + 1) / totalRecords) * 100);
-			lblProgress.setValue((totalRecords == 0 ? 0 : currentRecord + 1) + "/" + totalRecords + " (" + pct + "%)");
+
+		int completedRecords = 0;
+
+		if (repairCheques != null) {
+			for (InwardCheque cheque : repairCheques) {
+
+				if (cheque == null || cheque.getChequeStatus() == null) {
+					continue;
+				}
+
+				String status = cheque.getChequeStatus().trim();
+
+				if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+					completedRecords++;
+				}
+			}
 		}
+
+		int progress = totalRecords == 0 ? 0 : (completedRecords * 100) / totalRecords;
+
+		if (lblProgress != null) {
+			lblProgress.setValue(completedRecords + "/" + totalRecords + " (" + progress + "%)");
+		}
+
 		if (progressMeter != null) {
-			int progress = totalRecords == 0 ? 0 : ((currentRecord + 1) * 100) / totalRecords;
 			progressMeter.setValue(progress);
 		}
 	}
@@ -412,12 +488,14 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			lblChequeImageTitle.setValue("Front and back scans captured by clearing house.");
 		}
 
-		if (emptyImageState != null) emptyImageState.setVisible(true);
+		if (emptyImageState != null)
+			emptyImageState.setVisible(true);
 
 		setImageControlsEnabled(false);
 		applyImageTransform();
 
-		if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) return;
+		if (inwardChequeId == null || inwardChequeId.trim().isEmpty())
+			return;
 
 		try {
 			InwardChequeImage image = inwardChequeService.getFrontImage(inwardChequeId);
@@ -429,75 +507,92 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			chequeImage.setSrc(imageSrc);
 			chequeImage.setVisible(true);
 
-			if (emptyImageState != null) emptyImageState.setVisible(false);
+			if (emptyImageState != null)
+				emptyImageState.setVisible(false);
 
 			setImageControlsEnabled(true);
 			applyImageTransform();
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (chequeImage != null) chequeImage.setVisible(false);
-			if (emptyImageState != null) emptyImageState.setVisible(true);
+			if (chequeImage != null)
+				chequeImage.setVisible(false);
+			if (emptyImageState != null)
+				emptyImageState.setVisible(true);
 			setImageControlsEnabled(false);
 		}
 	}
 
 	private void updateSideButtonStyles() {
 		if (btnViewFront != null) {
-			btnViewFront.setStyle(showingBackImage ? "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 400;" 
-			                                       : "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 700;");
+			btnViewFront.setStyle(showingBackImage ? "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 400;"
+					: "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 700;");
 		}
 		if (btnViewBack != null) {
-			btnViewBack.setStyle(showingBackImage ? "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 700;" 
-			                                      : "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 400;");
+			btnViewBack.setStyle(showingBackImage ? "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 700;"
+					: "height: 26px; padding: 0 8px; font-size: 11px; font-weight: 400;");
 		}
 	}
 
 	private void setImageControlsEnabled(boolean enabled) {
-		if (btnZoom != null) btnZoom.setDisabled(!enabled);
-		if (btnZoomOut != null) btnZoomOut.setDisabled(!enabled);
-		if (btnZoomReset != null) btnZoomReset.setDisabled(!enabled);
-		if (btnRotate != null) btnRotate.setDisabled(!enabled);
-		if (btnViewFront != null) btnViewFront.setDisabled(!enabled);
-		if (btnViewBack != null) btnViewBack.setDisabled(!enabled);
+		if (btnZoom != null)
+			btnZoom.setDisabled(!enabled);
+		if (btnZoomOut != null)
+			btnZoomOut.setDisabled(!enabled);
+		if (btnZoomReset != null)
+			btnZoomReset.setDisabled(!enabled);
+		if (btnRotate != null)
+			btnRotate.setDisabled(!enabled);
+		if (btnViewFront != null)
+			btnViewFront.setDisabled(!enabled);
+		if (btnViewBack != null)
+			btnViewBack.setDisabled(!enabled);
 	}
 
 	public void onClick$btnZoom() {
-		if (chequeImage == null || !chequeImage.isVisible()) return;
+		if (chequeImage == null || !chequeImage.isVisible())
+			return;
 		zoomLevel += 0.25;
-		if (zoomLevel > 3.0) zoomLevel = 3.0;
+		if (zoomLevel > 3.0)
+			zoomLevel = 3.0;
 		applyImageTransform();
 	}
 
 	public void onClick$btnZoomOut() {
-		if (chequeImage == null || !chequeImage.isVisible()) return;
+		if (chequeImage == null || !chequeImage.isVisible())
+			return;
 		zoomLevel -= 0.25;
-		if (zoomLevel < 0.6) zoomLevel = 0.6;
+		if (zoomLevel < 0.6)
+			zoomLevel = 0.6;
 		applyImageTransform();
 	}
 
 	public void onClick$btnZoomReset() {
-		if (chequeImage == null || !chequeImage.isVisible()) return;
+		if (chequeImage == null || !chequeImage.isVisible())
+			return;
 		zoomLevel = 1.0;
 		rotation = 0;
 		applyImageTransform();
 	}
 
 	public void onClick$btnRotate() {
-		if (chequeImage == null || !chequeImage.isVisible()) return;
+		if (chequeImage == null || !chequeImage.isVisible())
+			return;
 		rotation = (rotation + 90) % 360;
 		applyImageTransform();
 	}
 
 	public void onClick$btnViewFront() {
-		if (currentCheque == null) return;
+		if (currentCheque == null)
+			return;
 		showingBackImage = false;
 		updateSideButtonStyles();
 		loadChequeImageSide(currentCheque.getInwardChequeId(), false);
 	}
 
 	public void onClick$btnViewBack() {
-		if (currentCheque == null) return;
+		if (currentCheque == null)
+			return;
 		showingBackImage = true;
 		updateSideButtonStyles();
 		loadChequeImageSide(currentCheque.getInwardChequeId(), true);
@@ -510,11 +605,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		}
 
 		try {
-			InwardChequeImage image = back ? inwardChequeService.getBackImage(inwardChequeId) 
-			                               : inwardChequeService.getFrontImage(inwardChequeId);
+			InwardChequeImage image = back ? inwardChequeService.getBackImage(inwardChequeId)
+					: inwardChequeService.getFrontImage(inwardChequeId);
 
 			if (image == null || image.getImagePath() == null || image.getImagePath().trim().isEmpty()) {
-				if (emptyImageState != null) emptyImageState.setVisible(true);
+				if (emptyImageState != null)
+					emptyImageState.setVisible(true);
 				return;
 			}
 
@@ -522,68 +618,76 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			chequeImage.setSrc(imageSrc);
 			chequeImage.setVisible(true);
 
-			if (emptyImageState != null) emptyImageState.setVisible(false);
+			if (emptyImageState != null)
+				emptyImageState.setVisible(false);
 
 			applyImageTransform();
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (chequeImage != null) chequeImage.setVisible(false);
-			if (emptyImageState != null) emptyImageState.setVisible(true);
+			if (chequeImage != null)
+				chequeImage.setVisible(false);
+			if (emptyImageState != null)
+				emptyImageState.setVisible(true);
 		}
 	}
 
 	private void applyImageTransform() {
-		if (chequeImage == null) return;
-		chequeImage.setStyle("transform: scale(" + zoomLevel + ") rotate(" + rotation + "deg); transform-origin: center center; transition: transform 0.2s ease, width 0.2s ease; max-height: 100%; object-fit: contain;");
+		if (chequeImage == null)
+			return;
+		chequeImage.setStyle("transform: scale(" + zoomLevel + ") rotate(" + rotation
+				+ "deg); transform-origin: center center; transition: transform 0.2s ease, width 0.2s ease; max-height: 100%; object-fit: contain;");
 	}
 
 	public void onClick$btnPrevious() {
-		if (totalRecords == 0 || currentRecord <= 0) return;
+		if (totalRecords == 0 || currentRecord <= 0)
+			return;
 		currentRecord--;
 		displayCurrentCheque();
 	}
 
 	public void onClick$btnNext() {
-		if (totalRecords == 0 || currentRecord >= totalRecords - 1) return;
+		if (totalRecords == 0 || currentRecord >= totalRecords - 1)
+			return;
 		currentRecord++;
 		displayCurrentCheque();
 	}
 
-	private String getNextDataEntryStatus() {
-		if (currentCheque != null && InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name()
-				.equalsIgnoreCase(currentCheque.getChequeStatus())) {
-			return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name();
-		}
-		return InwardChequeStatus.DATA_ENTRY_PENDING.name();
+	private String getNextMicrRepairStatus() {
+		return InwardChequeStatus.MICR_REPAIR_COMPLETED.name();
 	}
 
 	public void onClick$btnSaveAndNext() {
-		String nextDataEntryStatus = getNextDataEntryStatus();
+		String nextMicrRepairStatus = getNextMicrRepairStatus();
 
 		if (totalRecords == 0 || currentCheque == null) {
-			Messagebox.show("No MICR repair record is available.", "MICR Repair", Messagebox.OK, Messagebox.INFORMATION);
+			Messagebox.show("No MICR repair record is available.", "MICR Repair", Messagebox.OK,
+					Messagebox.INFORMATION);
 			return;
 		}
 
 		String correctedMicr = txtCorrectedMicr != null ? txtCorrectedMicr.getValue() : "";
 		if (correctedMicr == null || correctedMicr.trim().isEmpty()) {
-			if (txtCorrectedMicr != null) txtCorrectedMicr.setErrorMessage("Corrected MICR code is required.");
+			if (txtCorrectedMicr != null)
+				txtCorrectedMicr.setErrorMessage("Corrected MICR code is required.");
 			return;
 		}
 
 		correctedMicr = correctedMicr.trim();
 		if (!micrValidator.isValid(correctedMicr)) {
-			if (txtCorrectedMicr != null) txtCorrectedMicr.setErrorMessage("MICR code must contain exactly 9 digits.");
+			if (txtCorrectedMicr != null)
+				txtCorrectedMicr.setErrorMessage("MICR code must contain exactly 9 digits.");
 			return;
 		}
 
-		String expectedMicr = safe(currentCheque.getCityCode()) + safe(currentCheque.getBankCode()) + safe(currentCheque.getBranchCode());
+		String expectedMicr = safe(currentCheque.getCityCode()) + safe(currentCheque.getBankCode())
+				+ safe(currentCheque.getBranchCode());
 		expectedMicr = expectedMicr.replaceAll("\\s+", "");
 
 		if (!correctedMicr.equals(expectedMicr)) {
 			if (txtCorrectedMicr != null) {
-				txtCorrectedMicr.setErrorMessage("Incorrect MICR code. Please enter the MICR exactly as shown on the cheque.");
+				txtCorrectedMicr
+						.setErrorMessage("Incorrect MICR code. Please enter the MICR exactly as shown on the cheque.");
 			}
 			return;
 		}
@@ -593,7 +697,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		String remarks = txtRemarks != null ? txtRemarks.getValue() : "";
 
 		boolean updated = inwardChequeService.updateMicrRepair(currentCheque.getInwardChequeId(),
-				currentCheque.getInwardBatchId(), originalMicr, correctedMicr, nextDataEntryStatus, repairedBy, remarks);
+				currentCheque.getInwardBatchId(), originalMicr, correctedMicr, nextMicrRepairStatus, repairedBy,
+				remarks);
 
 		if (!updated) {
 			Messagebox.show("Unable to save MICR correction.", "MICR Repair", Messagebox.OK, Messagebox.ERROR);
@@ -604,7 +709,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		if (InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(currentCheque.getChequeStatus())) {
 			try {
-				new InwardSendBackRequestServiceImpl().markRequestResolved(currentCheque.getInwardChequeId(), repairedBy);
+				new InwardSendBackRequestServiceImpl().markRequestResolved(currentCheque.getInwardChequeId(),
+						repairedBy);
 			} catch (Exception ex) {
 				System.err.println("WARN: Failed to mark MICR send-back request resolved: " + ex.getMessage());
 			}
@@ -616,10 +722,14 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		if (batchCheques != null) {
 			for (InwardCheque cheque : batchCheques) {
-				if (cheque == null) continue;
+				if (cheque == null)
+					continue;
 				String status = cheque.getChequeStatus();
 				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status) || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
-						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status) || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)) {
+						|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
+						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 					repairCheques.add(cheque);
 				}
 			}
@@ -633,15 +743,22 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			String completedBatchId = batchId;
 
 			clearRecordFields();
-			if (lblBatchId != null) lblBatchId.setValue(completedBatchId);
-			if (lblHeaderItemStatus != null) lblHeaderItemStatus.setValue("COMPLETED");
-			if (lblRepairStatus != null) lblRepairStatus.setValue("REPAIRED");
-			if (lblCompletedBatchId != null) lblCompletedBatchId.setValue("Batch ID: " + completedBatchId);
+			if (lblBatchId != null)
+				lblBatchId.setValue(completedBatchId);
+			if (lblHeaderItemStatus != null)
+				lblHeaderItemStatus.setValue("COMPLETED");
+			if (lblRepairStatus != null)
+				lblRepairStatus.setValue("REPAIRED");
+			if (lblCompletedBatchId != null)
+				lblCompletedBatchId.setValue("Batch ID: " + completedBatchId);
 
 			updateNavigation();
-			if (chequeImage != null) chequeImage.setVisible(false);
-			if (emptyImageState != null) emptyImageState.setVisible(false);
-			if (micrRepairCompletedState != null) micrRepairCompletedState.setVisible(true);
+			if (chequeImage != null)
+				chequeImage.setVisible(false);
+			if (emptyImageState != null)
+				emptyImageState.setVisible(false);
+			if (micrRepairCompletedState != null)
+				micrRepairCompletedState.setVisible(true);
 			return;
 		}
 
@@ -682,7 +799,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		}
 
 		if (cmbRejectReason == null || cmbRejectReason.getSelectedItem() == null) {
-			Messagebox.show("Please select a rejection reason.", "Reject Request", Messagebox.OK, Messagebox.EXCLAMATION);
+			Messagebox.show("Please select a rejection reason.", "Reject Request", Messagebox.OK,
+					Messagebox.EXCLAMATION);
 			return;
 		}
 
@@ -697,7 +815,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		String requestedBy = (String) Executions.getCurrent().getSession().getAttribute("USER_ID");
 		if (requestedBy == null || requestedBy.trim().isEmpty()) {
-			Messagebox.show("Unable to identify the logged-in Maker.", "Reject Request", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show("Unable to identify the logged-in Maker.", "Reject Request", Messagebox.OK,
+					Messagebox.ERROR);
 			return;
 		}
 
@@ -705,53 +824,55 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		request.setInwardChequeId(currentCheque.getInwardChequeId());
 		request.setInwardBatchId(currentCheque.getInwardBatchId());
 		request.setRejectedReasonId(rejectedReasonId);
-		
+
 		String modalRemark = (txtModalRejectionRemark != null && !txtModalRejectionRemark.getValue().trim().isEmpty())
 				? txtModalRejectionRemark.getValue().trim()
 				: (txtRemarks != null ? txtRemarks.getValue() : "");
 		request.setRemarks(modalRemark);
-		
+
 		request.setRequestedBy(requestedBy);
 		request.setRequestStage("MICR_REPAIR");
 		request.setRequestStatus("PENDING");
 
 		boolean requestSaved = inwardChequeService.saveRejectionRequest(request);
 		if (!requestSaved) {
-			Messagebox.show("Unable to submit the rejection request. Please try again.", "Reject Request", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show("Unable to submit the rejection request. Please try again.", "Reject Request",
+					Messagebox.OK, Messagebox.ERROR);
 			return;
 		}
 
-		boolean statusUpdated = inwardChequeService.updateChequeStatus(currentCheque.getInwardChequeId(), InwardChequeStatus.REJECTION_REQUESTED.name());
+		boolean statusUpdated = inwardChequeService.updateChequeStatus(currentCheque.getInwardChequeId(),
+				InwardChequeStatus.REJECTION_REQUESTED.name());
 		if (!statusUpdated) {
-			Messagebox.show("The rejection request was saved, but the cheque status could not be updated.", "Reject Request", Messagebox.OK, Messagebox.ERROR);
+			Messagebox.show("The rejection request was saved, but the cheque status could not be updated.",
+					"Reject Request", Messagebox.OK, Messagebox.ERROR);
 			return;
 		}
 
-		String chequeNumber = currentCheque.getChequeNumber() != null ? currentCheque.getChequeNumber() : currentCheque.getInwardChequeId();
-		String message = "Rejection request raised by Maker for cheque " + chequeNumber + " in batch " + currentCheque.getInwardBatchId() + ". Reason: " + selectedItem.getLabel() + ". Stage: MICR Repair.";
+		String chequeNumber = currentCheque.getChequeNumber() != null ? currentCheque.getChequeNumber()
+				: currentCheque.getInwardChequeId();
+		String message = "Rejection request raised by Maker for cheque " + chequeNumber + " in batch "
+				+ currentCheque.getInwardBatchId() + ". Reason: " + selectedItem.getLabel() + ". Stage: MICR Repair.";
 		notificationService.sendNotification("INWARD_CHECKER", null, message);
 
-		if (cmbRejectReason != null) cmbRejectReason.setSelectedItem(null);
-		if (txtModalRejectionRemark != null) txtModalRejectionRemark.setValue("");
-		if (rejectRequestWindow != null) rejectRequestWindow.setVisible(false);
+		if (cmbRejectReason != null)
+			cmbRejectReason.setSelectedItem(null);
+		if (txtModalRejectionRemark != null)
+			txtModalRejectionRemark.setValue("");
+		if (rejectRequestWindow != null)
+			rejectRequestWindow.setVisible(false);
 
-		Messagebox.show("Reject request submitted successfully to the Checker.", "Reject Request", Messagebox.OK, Messagebox.INFORMATION);
-		
-		repairCheques.remove(currentRecord);
-		totalRecords = repairCheques.size();
-		if (totalRecords == 0) {
-			currentRecord = 0;
-			currentCheque = null;
-			clearRecordFields();
-			updateNavigation();
-			loadChequeImage(null);
-			if (micrRepairCompletedState != null) micrRepairCompletedState.setVisible(true);
-			return;
+		Messagebox.show("Reject request submitted successfully to the Checker.", "Reject Request", Messagebox.OK,
+				Messagebox.INFORMATION);
+
+		updateNavigation();
+
+		if (currentRecord < totalRecords - 1) {
+			currentRecord++;
+			displayCurrentCheque();
+		} else {
+			displayCurrentCheque();
 		}
-		if (currentRecord >= totalRecords) {
-			currentRecord = totalRecords - 1;
-		}
-		displayCurrentCheque();
 	}
 
 	public void onClick$btnBackToList() {
@@ -759,14 +880,18 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private String loadOcrSortCode(InwardCheque cheque) {
-		if (cheque == null || cheque.getInwardBatchId() == null || cheque.getItemSequenceNumber() == null) return "";
+		if (cheque == null || cheque.getInwardBatchId() == null || cheque.getItemSequenceNumber() == null)
+			return "";
 		try {
 			InwardBatch batch = inwardBatchService.getBatchById(cheque.getInwardBatchId());
-			if (batch == null || batch.getBatchReferenceId() == null || batch.getBatchReferenceId().trim().isEmpty()) return "";
+			if (batch == null || batch.getBatchReferenceId() == null || batch.getBatchReferenceId().trim().isEmpty())
+				return "";
 
 			String resourcePath = "/Inward-data/" + batch.getBatchReferenceId().trim() + "/OCR_Mock.xml";
-			InputStream inputStream = Executions.getCurrent().getDesktop().getWebApp().getResourceAsStream(resourcePath);
-			if (inputStream == null) return "";
+			InputStream inputStream = Executions.getCurrent().getDesktop().getWebApp()
+					.getResourceAsStream(resourcePath);
+			if (inputStream == null)
+				return "";
 
 			try (InputStream stream = inputStream) {
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
@@ -775,13 +900,16 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				for (int i = 0; i < chequeNodes.getLength(); i++) {
 					Element ocrCheque = (Element) chequeNodes.item(i);
 					String sequenceText = getXmlValue(ocrCheque, "ItemSequenceNumber");
-					if (sequenceText == null || sequenceText.trim().isEmpty()) continue;
+					if (sequenceText == null || sequenceText.trim().isEmpty())
+						continue;
 
 					int sequence = Integer.parseInt(sequenceText.trim());
-					if (sequence != cheque.getItemSequenceNumber()) continue;
+					if (sequence != cheque.getItemSequenceNumber())
+						continue;
 
 					Element rawMicr = getChildElement(ocrCheque, "RawMICRRead");
-					if (rawMicr == null) return "";
+					if (rawMicr == null)
+						return "";
 					String sortCode = getXmlValue(rawMicr, "SortCode");
 					return sortCode != null ? sortCode.trim() : "";
 				}
@@ -793,16 +921,20 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private String getXmlValue(Element parent, String tagName) {
-		if (parent == null) return "";
+		if (parent == null)
+			return "";
 		NodeList nodes = parent.getElementsByTagName(tagName);
-		if (nodes.getLength() == 0 || nodes.item(0).getTextContent() == null) return "";
+		if (nodes.getLength() == 0 || nodes.item(0).getTextContent() == null)
+			return "";
 		return nodes.item(0).getTextContent().trim();
 	}
 
 	private Element getChildElement(Element parent, String tagName) {
-		if (parent == null) return null;
+		if (parent == null)
+			return null;
 		NodeList nodes = parent.getElementsByTagName(tagName);
-		if (nodes.getLength() == 0) return null;
+		if (nodes.getLength() == 0)
+			return null;
 		return (Element) nodes.item(0);
 	}
 
@@ -812,9 +944,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		if (txtChequeNumber != null) txtChequeNumber.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "");
-		if (txtTransactionCode != null) txtTransactionCode.setValue(cheque.getTransactionCode() != null ? cheque.getTransactionCode() : "");
-		if (txtRemarks != null) txtRemarks.setValue("");
+		if (txtChequeNumber != null)
+			txtChequeNumber.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "");
+		if (txtTransactionCode != null)
+			txtTransactionCode.setValue(cheque.getTransactionCode() != null ? cheque.getTransactionCode() : "");
+		if (txtRemarks != null)
+			txtRemarks.setValue("");
 
 		prepareMicrRepairFields(cheque);
 	}
@@ -845,7 +980,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 					normalized.append('?');
 				} else {
 					normalized.append(ocrChar);
-					if (ocrChar != expectedChar) markMicrPositionError(i);
+					if (ocrChar != expectedChar)
+						markMicrPositionError(i);
 				}
 			} else {
 				normalized.append('?');
@@ -854,10 +990,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		}
 
 		ocrSortCode = normalized.toString();
-		if (ocrSortCode.length() > 9) ocrSortCode = ocrSortCode.substring(0, 9);
+		if (ocrSortCode.length() > 9)
+			ocrSortCode = ocrSortCode.substring(0, 9);
 
 		for (int i = 0; i < ocrSortCode.length() && i < 9; i++) {
-			if (ocrSortCode.charAt(i) == '?') markMicrPositionError(i);
+			if (ocrSortCode.charAt(i) == '?')
+				markMicrPositionError(i);
 		}
 
 		String cityDisplay = getMicrPart(ocrSortCode, 0, 3);
@@ -887,16 +1025,21 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private void markMicrPositionError(int position) {
-		if (position >= 0 && position < 3) cityCodeError = true;
-		else if (position >= 3 && position < 6) bankCodeError = true;
-		else if (position >= 6 && position < 9) branchCodeError = true;
+		if (position >= 0 && position < 3)
+			cityCodeError = true;
+		else if (position >= 3 && position < 6)
+			bankCodeError = true;
+		else if (position >= 6 && position < 9)
+			branchCodeError = true;
 	}
 
 	private String getMicrPart(String value, int start, int end) {
 		StringBuilder result = new StringBuilder();
 		for (int i = start; i < end; i++) {
-			if (value != null && i < value.length()) result.append(value.charAt(i));
-			else result.append('?');
+			if (value != null && i < value.length())
+				result.append(value.charAt(i));
+			else
+				result.append('?');
 		}
 		return result.toString();
 	}
@@ -918,7 +1061,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	private void updateCorrectedMicr(String cityOverride, String bankOverride, String branchOverride) {
-		if (currentCheque == null) return;
+		if (currentCheque == null)
+			return;
 
 		String city = safe(cityOverride != null ? cityOverride : txtCityCode.getValue());
 		String bank = safe(bankOverride != null ? bankOverride : txtBankCode.getValue());
