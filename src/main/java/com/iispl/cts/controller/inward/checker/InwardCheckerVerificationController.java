@@ -188,6 +188,11 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		proceedButton.addEventListener(Events.ON_CLICK, event -> onClick$btnProceedReject());
 
 		cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
+		
+		window.addEventListener(Events.ON_CLOSE, event -> {
+		    event.stopPropagation();
+		    window.setVisible(false);
+		});
 
 		Window sendBackWindow = sendBackReasonWindow;
 
@@ -782,6 +787,16 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			
+			if (isChequeSentBackToMaker(cheque)) {
+			    Messagebox.show(
+			            "This cheque has already been sent back to Maker and cannot be accepted.",
+			            "Verification",
+			            Messagebox.OK,
+			            Messagebox.EXCLAMATION
+			    );
+			    return;
+			}
 
 			CbsValidationResult cbsResult = runCbsValidation(cheque);
 
@@ -1125,6 +1140,16 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 						Messagebox.EXCLAMATION);
 
 				return;
+			}
+			
+			if (isChequeSentBackToMaker(cheque)) {
+			    Messagebox.show(
+			            "This cheque has already been sent back to Maker and cannot be rejected.",
+			            "Verification",
+			            Messagebox.OK,
+			            Messagebox.EXCLAMATION
+			    );
+			    return;
 			}
 			Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
@@ -1579,6 +1604,18 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			
+			if ("SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+			        || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
+
+			    Messagebox.show(
+			            "This cheque has already been sent back to Maker.",
+			            "Send Back",
+			            Messagebox.OK,
+			            Messagebox.EXCLAMATION
+			    );
+			    return;
+			}
 
 			Window window = sendBackReasonWindow;
 
@@ -1648,24 +1685,37 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			String sendBackStatus;
 
-			if ("SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode) || "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
-					|| "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)) {
+			if ("39".equalsIgnoreCase(reasonCode)
+			        || "SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
+			        || "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
+			        || "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)
+			        || "SBN_RESCAN_REQUIRED".equalsIgnoreCase(reasonCode)) {
 
-				sendBackStatus = "SEND_BACK_TO_MAKER_MICR";
+			    sendBackStatus = "SEND_BACK_TO_MAKER_MICR";
 
-			} else if ("SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
-					|| "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
-					|| "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
-					|| "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)) {
+			} else if ("40".equalsIgnoreCase(reasonCode)
+			        || "35".equalsIgnoreCase(reasonCode)
+			        || "53".equalsIgnoreCase(reasonCode)
+			        || "54".equalsIgnoreCase(reasonCode)
+			        || "66".equalsIgnoreCase(reasonCode)
+			        || "67".equalsIgnoreCase(reasonCode)
+			        || "76".equalsIgnoreCase(reasonCode)
+			        || "87".equalsIgnoreCase(reasonCode)
+			        || "SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
+			        || "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
+			        || "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
+			        || "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)
+			        || "SBN_REMARKS_MISSING".equalsIgnoreCase(reasonCode)
+			        || "SBN_OTHER_INTERNAL".equalsIgnoreCase(reasonCode)) {			   
+			    sendBackStatus = "SEND_BACK_TO_MAKER_DATA_ENTRY";
 
-				sendBackStatus = "SEND_BACK_TO_MAKER_DATA_ENTRY";
-
-			} else {
-
-				Messagebox.show("This send back reason has not been mapped to a Maker queue yet.", "Send Back",
-						Messagebox.OK, Messagebox.EXCLAMATION);
-
-				return;
+			} else {			   
+			    Messagebox.show(
+			            "Invalid send back reason.",
+			            "Send Back",
+			            Messagebox.OK,
+			            Messagebox.ERROR);
+			    return;
 			}
 
 			Object userObject = Sessions.getCurrent().getAttribute("CTS_USERNAME");
@@ -2100,6 +2150,18 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	public void onClick$btnGoToDashboard() {
 		Executions.getCurrent().sendRedirect("/inward/checker/dashboard.zul");
+	}
+	
+	private boolean isChequeSentBackToMaker(InwardCheque cheque) {
+
+	    if (cheque == null || cheque.getChequeStatus() == null) {
+	        return false;
+	    }
+
+	    String status = cheque.getChequeStatus();
+
+	    return "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+	            || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status);
 	}
 
 	private void enableMouseWheelZoom() {
