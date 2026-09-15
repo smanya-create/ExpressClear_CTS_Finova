@@ -209,7 +209,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                      + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques, " +
                      "    COUNT(CASE WHEN c.cheque_status IN ('" 
                      + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS sent_back_cheques " +
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', 'MAKER_RETURNED') THEN 1 END) AS sent_back_cheques " +
                      "FROM inward_batch b " +
                      "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
                      "WHERE b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'REJECTED') " +
