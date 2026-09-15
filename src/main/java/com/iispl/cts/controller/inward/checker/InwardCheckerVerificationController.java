@@ -229,22 +229,25 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		if (batchId != null && !batchId.trim().isEmpty()) {
 
-			currentBatchId = batchId.trim();
+		    currentBatchId = batchId.trim();
 
-			Sessions.getCurrent().setAttribute("ACTIVE_VERIFICATION_BATCH_ID", currentBatchId);
+		    Sessions.getCurrent()
+		            .setAttribute("ACTIVE_VERIFICATION_BATCH_ID", currentBatchId);
+
 		} else {
-			String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-			if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
+		    // No batch selected
+		    currentBatchId = null;
 
-				currentBatchId = sessionBatch.trim();
+		    Sessions.getCurrent()
+		            .removeAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-			} else {
-				showNoChequesToVerify();
-				return;
-			}
+		    showNoChequesToVerify();
+		    return;
 		}
+
 		System.out.println("Selected Verification Batch: " + currentBatchId);
+
 		loadSelectedBatch();
 	}
 
@@ -642,12 +645,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			imagePath = imagePath.trim();
 
-			// Remove leading slash if DB already contains one
 			if (imagePath.startsWith("/")) {
 				imagePath = imagePath.substring(1);
 			}
 
-			// MICR uses this exact URL structure
 			String imageSrc = "/Inward-data/" + imagePath;
 
 			System.out.println("Verification: Loading image URL -> " + imageSrc);
@@ -2105,6 +2106,13 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			currentBatchCheques.clear();
 			currentChequeId = null;
 			currentBatchId = null;
+
+			Sessions.getCurrent()
+			        .removeAttribute(ACTIVE_VERIFICATION_BATCH_ID);
+
+			Sessions.getCurrent()
+			        .removeAttribute(ACTIVE_VERIFICATION_CHEQUE_ID);
+
 			currentChequeIndex = 0;
 			verificationOrderInitialized = false;
 
