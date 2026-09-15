@@ -15,7 +15,7 @@
 
             <!-- PAGE TITLE -->
             <vlayout spacing="4px" sclass="data-entry-view-title-section">
-                <label value="DATA ENTRY" sclass="data-entry-view-title" />
+                <label value="Data Entry" sclass="data-entry-view-title" />
             </vlayout>
 
             <!-- MAIN SECTION CARD -->
@@ -50,12 +50,12 @@
                     <!-- Data Entry Grid -->
                     <grid id="grdDataEntryBatches" width="100%" sclass="data-entry-grid">
                         <columns sizable="false">
-                            <column label="BATCH" width="18%" align="center" />
-                            <column label="TOTAL ITEMS" width="15%" align="center" />
-                            <column label="PENDING ITEMS" width="15%" align="center" />
-                            <column label="TOTAL AMOUNT (INR)" width="20%" align="center" />
-                            <column label="STATUS" width="16%" align="center" />
-                            <column label="ACTION" width="16%" align="center" />
+                            <column label="Batch" width="18%" align="center" />
+                            <column label="Total Items" width="15%" align="center" />
+                            <column label="Pending Items" width="15%" align="center" />
+                            <column label="Total Amount (INR)" width="20%" align="center" />
+                            <column label="Status" width="16%" align="center" />
+                            <column label="Action" width="16%" align="center" />
                         </columns>
                         <rows id="rowsDataEntryBatches" />
                     </grid>

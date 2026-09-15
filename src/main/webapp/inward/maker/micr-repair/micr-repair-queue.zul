@@ -17,7 +17,7 @@
 			<!-- PAGE TITLE (Outward Header Style) -->
 			<!-- ================================================= -->
 			<vlayout spacing="4px" sclass="micr-repair-view-title-section">
-				<label value="MICR REPAIR" sclass="micr-repair-view-title" />
+				<label value="MICR Repair" sclass="micr-repair-view-title" />
 			</vlayout>
 
 			<!-- ================================================= -->
@@ -54,12 +54,12 @@
 					<!-- Single Outward-style Grid -->
 					<grid id="grdMicrRepairBatches" width="100%" sclass="micr-repair-grid">
 						<columns sizable="false">
-							<column label="BATCH" width="18%" align="center" />
-							<column label="RECEIVED DATE" width="18%" align="center" />
-							<column label="TOTAL CHEQUES" width="16%" align="center" />
-							<column label="MICR ERRORS" width="16%" align="center" />
-							<column label="STATUS" width="16%" align="center" />
-							<column label="ACTION" width="16%" align="center" />
+							<column label="Batch" width="18%" align="center" />
+							<column label="Received Date" width="18%" align="center" />
+							<column label="Total Cheques" width="16%" align="center" />
+							<column label="MICR Errors" width="16%" align="center" />
+							<column label="Status" width="16%" align="center" />
+							<column label="Action" width="16%" align="center" />
 						</columns>
 						<rows id="rowsMicrRepairBatches" />
 					</grid>
