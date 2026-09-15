@@ -248,7 +248,12 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 		List<InwardBatch> batches = new ArrayList<>();
 
 		String sql = "SELECT ib.inward_batch_id, " + "ib.batch_reference_id, " + "ib.actual_cheque_count, "
-				+ "ib.actual_total_amount, " + "ib.batch_status, " + "ib.uploaded_by, " + "ib.uploaded_at, "
+				+ "ib.actual_total_amount, " + "CASE " + "    WHEN EXISTS ( " + "        SELECT 1 "
+				+ "        FROM inward_cheque returned_ic "
+				+ "        WHERE returned_ic.inward_batch_id = ib.inward_batch_id "
+				+ "        AND returned_ic.cheque_status = 'SEND_BACK_TO_MAKER_MICR' "
+				+ "    ) THEN 'CHECKER_RETURNED' " + "    ELSE ib.batch_status " + "END AS batch_status, "
+				+ "ib.uploaded_by, " + "ib.uploaded_at, "
 
 				+ "(SELECT COUNT(*) " + " FROM inward_cheque ic2 " + " WHERE ic2.inward_batch_id = ib.inward_batch_id "
 				+ " AND ic2.cheque_status IN " + " ('MICR_REPAIR_PENDING', " + "  'MICR_REPAIR_IN_PROGRESS', "
