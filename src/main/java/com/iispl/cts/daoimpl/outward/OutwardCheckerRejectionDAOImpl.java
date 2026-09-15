@@ -24,7 +24,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		List<OutwardRejectedCheques> rejectedCheques = new ArrayList<>();
 
 		String sql = "SELECT " + "outward_rejected_cheque_id, " + "outward_cheque_id, " + "rejected_by, "
-				+ "rejected_date, " + "remarks, " + "outward_batch_id, " + "cheque_amount "
+				+ "rejected_date, " + "remarks, " + "outward_batch_id, " + "cheque_amount, " + "reason_id, " + "reason "
 				+ "FROM public.outward_rejected_cheques " + "ORDER BY rejected_date DESC " + "LIMIT ? OFFSET ?";
 
 		try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -59,7 +59,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		StringBuilder sql = new StringBuilder();
 
 		sql.append("SELECT " + "outward_rejected_cheque_id, " + "outward_cheque_id, " + "rejected_by, "
-				+ "rejected_date, " + "remarks, " + "outward_batch_id, " + "cheque_amount "
+				+ "rejected_date, " + "remarks, " + "outward_batch_id, " + "cheque_amount, " + "reason_id, " + "reason "
 				+ "FROM public.outward_rejected_cheques " + "WHERE 1=1 ");
 
 		List<Object> parameters = new ArrayList<>();
@@ -72,10 +72,12 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 			sql.append("AND (" + "LOWER(outward_rejected_cheque_id) LIKE ? " + "OR LOWER(outward_cheque_id) LIKE ? "
 					+ "OR LOWER(outward_batch_id) LIKE ? " + "OR LOWER(rejected_by) LIKE ? "
-					+ "OR LOWER(remarks) LIKE ?" + ") ");
+					+ "OR LOWER(reason_id) LIKE ? " + "OR LOWER(reason) LIKE ? " + "OR LOWER(remarks) LIKE ?" + ") ");
 
 			String searchPattern = "%" + searchValue.trim().toLowerCase() + "%";
 
+			parameters.add(searchPattern);
+			parameters.add(searchPattern);
 			parameters.add(searchPattern);
 			parameters.add(searchPattern);
 			parameters.add(searchPattern);
@@ -167,10 +169,12 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 			sql.append("AND (" + "LOWER(outward_rejected_cheque_id) LIKE ? " + "OR LOWER(outward_cheque_id) LIKE ? "
 					+ "OR LOWER(outward_batch_id) LIKE ? " + "OR LOWER(rejected_by) LIKE ? "
-					+ "OR LOWER(remarks) LIKE ?" + ") ");
+					+ "OR LOWER(reason_id) LIKE ? " + "OR LOWER(reason) LIKE ? " + "OR LOWER(remarks) LIKE ?" + ") ");
 
 			String searchPattern = "%" + searchValue.trim().toLowerCase() + "%";
 
+			parameters.add(searchPattern);
+			parameters.add(searchPattern);
 			parameters.add(searchPattern);
 			parameters.add(searchPattern);
 			parameters.add(searchPattern);
@@ -209,26 +213,49 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 	}
 
 	// =========================================================
-	// SAVE
+	// SAVE REJECTED CHEQUE
 	// =========================================================
 
 	@Override
 	public boolean saveRejectedCheque(OutwardRejectedCheques rejectedCheque) throws Exception {
 
+		/*
+		 * outward_rejected_cheque_id is NOT included here.
+		 *
+		 * PostgreSQL will automatically generate it using:
+		 *
+		 * 'RCH' || nextval('outward_rejected_cheque_id_seq')
+		 *
+		 * rejected_date is also not included because the database has DEFAULT
+		 * CURRENT_TIMESTAMP.
+		 */
+
 		String sql = "INSERT INTO public.outward_rejected_cheques " + "(" + "outward_cheque_id, " + "rejected_by, "
-				+ "remarks, " + "outward_batch_id, " + "cheque_amount" + ") " + "VALUES (?, ?, ?, ?, ?)";
+				+ "remarks, " + "outward_batch_id, " + "cheque_amount, " + "reason_id, " + "reason" + ") "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 		try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
+			// 1. Cheque ID
 			ps.setString(1, rejectedCheque.getOutwardChequeId());
 
+			// 2. User ID
 			ps.setString(2, rejectedCheque.getRejectedBy());
 
+			// 3. Checker remarks
 			ps.setString(3, rejectedCheque.getRemarks());
 
+			// 4. Batch ID
 			ps.setString(4, rejectedCheque.getOutwardBatchId());
 
+			// 5. Amount
 			ps.setBigDecimal(5, rejectedCheque.getChequeAmount());
+
+			// 6. Rejection reason ID/code
+			ps.setString(6, rejectedCheque.getRejectedReasonId());
+
+			// 7. Rejection reason name
+			ps.setString(7, rejectedCheque.getRejectedReasonName());
 
 			return ps.executeUpdate() > 0;
 		}
@@ -257,6 +284,11 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		BigDecimal amount = rs.getBigDecimal("cheque_amount");
 
 		rejectedCheque.setChequeAmount(amount);
+
+		// Rejection reason
+		rejectedCheque.setRejectedReasonId(rs.getString("reason_id"));
+
+		rejectedCheque.setRejectedReasonName(rs.getString("reason"));
 
 		return rejectedCheque;
 	}

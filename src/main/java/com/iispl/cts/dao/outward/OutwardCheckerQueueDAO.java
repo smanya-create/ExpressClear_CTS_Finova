@@ -53,6 +53,7 @@ public interface OutwardCheckerQueueDAO {
     void rejectCheque(
             String chequeNo,
             String username,
+            String reasonId,
             String remarks) throws SQLException;
 
 

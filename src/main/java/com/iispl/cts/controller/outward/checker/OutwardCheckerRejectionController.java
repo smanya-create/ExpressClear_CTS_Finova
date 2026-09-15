@@ -147,7 +147,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
                 // 4. Rejection Reason (Left, Italicized Warning)
                 Listcell cellReason = new Listcell();
                 cellReason.setStyle("text-align: left; vertical-align: middle; padding-left: 14px;");
-                Label lblReason = new Label(safe(cheque.getRemarks()));
+                Label lblReason = new Label(safe(cheque.getRejectedReasonName()));
                 lblReason.setStyle("font-size: 12px; font-style: italic; color: #b91c1c; display: block; word-break: break-word;");
                 cellReason.appendChild(lblReason);
 
@@ -313,9 +313,32 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
                 lblRejectedDate.setValue(rejectedDate);
             }
 
-            Label lblReason = (Label) window.getFellowIfAny("lblReason");
-            if (lblReason != null) lblReason.setValue(safe(cheque.getRemarks()));
+            
+            // ---------------------------------------------------------
+            // REJECTION REASON
+            // ---------------------------------------------------------
 
+            Label lblReason =
+                    (Label) window.getFellowIfAny("lblReason");
+
+            if (lblReason != null) {
+                lblReason.setValue(
+                        safe(cheque.getRejectedReasonName())
+                );
+            }
+
+            // ---------------------------------------------------------
+            // REMARKS
+            // ---------------------------------------------------------
+
+            Label lblRemarks =
+                    (Label) window.getFellowIfAny("lblRemarks");
+
+            if (lblRemarks != null) {
+                lblRemarks.setValue(
+                        safe(cheque.getRemarks())
+                );
+            }
             window.doModal();
 
         } catch (Exception e) {
