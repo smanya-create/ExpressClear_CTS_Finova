@@ -834,8 +834,15 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 				+ "FROM inward_cheque " + "WHERE inward_batch_id = ?";
 
-		String updateSql = "UPDATE inward_cheque " + "SET cheque_status = 'DATA_ENTRY_PENDING' "
-				+ "WHERE inward_batch_id = ? " + "AND cheque_status = 'MICR_REPAIR_COMPLETED'";
+		String updateSql = "UPDATE inward_cheque ic " + "SET cheque_status = CASE " + "    WHEN EXISTS ( "
+				+ "        SELECT 1 " + "        FROM inward_cheque_send_back_request s "
+				+ "        INNER JOIN send_back_reason r " + "            ON s.reason_id = r.reason_id "
+				+ "        WHERE s.inward_cheque_id = ic.inward_cheque_id "
+				+ "          AND s.request_status = 'PENDING' " + "          AND r.reason_code IN ( "
+				+ "              'SBN_MICR_CHEQUE_NO', " + "              'SBN_MICR_SORT_CODE', "
+				+ "              'SBN_MICR_SAN_TC' " + "          ) " + "    ) THEN 'SEND_BACK_TO_MAKER_DATA_ENTRY' "
+				+ "    ELSE 'DATA_ENTRY_PENDING' " + "END " + "WHERE ic.inward_batch_id = ? "
+				+ "AND ic.cheque_status = 'MICR_REPAIR_COMPLETED'";
 
 		try (Connection conn = DBConnection.getConnection()) {
 
@@ -856,7 +863,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 					int completedMicrCheques = rs.getInt("completed_micr_cheques");
 
-					
 					if (totalMicrCheques == 0 || totalMicrCheques != completedMicrCheques) {
 
 						conn.rollback();

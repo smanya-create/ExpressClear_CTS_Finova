@@ -779,15 +779,6 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 		Messagebox.show("MICR correction saved successfully.", "MICR Repair", Messagebox.OK, Messagebox.INFORMATION);
 
-		if (InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(currentCheque.getChequeStatus())) {
-			try {
-				new InwardSendBackRequestServiceImpl().markRequestResolved(currentCheque.getInwardChequeId(),
-						repairedBy);
-			} catch (Exception ex) {
-				System.err.println("WARN: Failed to mark MICR send-back request resolved: " + ex.getMessage());
-			}
-		}
-
 		String batchId = (String) Executions.getCurrent().getSession().getAttribute("MICR_REPAIR_BATCH_ID");
 		List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(batchId, null);
 		repairCheques = new ArrayList<>();
@@ -1078,13 +1069,20 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		txtBankCode.setValue(bankDisplay);
 		txtBranchCode.setValue(branchDisplay);
 
-		txtCityCode.setReadonly(!cityCodeError);
-		txtBankCode.setReadonly(!bankCodeError);
-		txtBranchCode.setReadonly(!branchCodeError);
+		boolean checkerReturnedMicr = InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name()
+				.equalsIgnoreCase(cheque.getChequeStatus());
 
-		txtCityCode.setSclass(cityCodeError ? "repair-editable-field" : "ocr-field");
-		txtBankCode.setSclass(bankCodeError ? "repair-editable-field" : "ocr-field");
-		txtBranchCode.setSclass(branchCodeError ? "repair-editable-field" : "ocr-field");
+		boolean cityEditable = cityCodeError || checkerReturnedMicr;
+		boolean bankEditable = bankCodeError || checkerReturnedMicr;
+		boolean branchEditable = branchCodeError || checkerReturnedMicr;
+
+		txtCityCode.setReadonly(!cityEditable);
+		txtBankCode.setReadonly(!bankEditable);
+		txtBranchCode.setReadonly(!branchEditable);
+
+		txtCityCode.setSclass(cityEditable ? "repair-editable-field" : "ocr-field");
+		txtBankCode.setSclass(bankEditable ? "repair-editable-field" : "ocr-field");
+		txtBranchCode.setSclass(branchEditable ? "repair-editable-field" : "ocr-field");
 
 		txtCurrentMicr.setValue(ocrSortCode);
 		txtCurrentMicr.setSclass("error-field");
