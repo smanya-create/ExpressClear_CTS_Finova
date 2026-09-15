@@ -13,12 +13,17 @@
 		<vlayout width="100%" spacing="16px">
 
 			<!-- 1. Unified Page Title -->
-			<vlayout spacing="4px" sclass="batch-title-section">
+			<hlayout width="100%" valign="middle"
+				sclass="batch-title-section">
+
 				<label value="BATCH INTAKE" sclass="batch-page-title" />
-				<label
-					value="Validate each batch before it enters MICR Repair or Data entry."
-					sclass="batch-page-subtitle" />
-			</vlayout>
+
+				<space hflex="1" />
+
+				<button id="dashboardButton" label="← BACK TO DASHBOARD"
+					sclass="view-button" />
+
+			</hlayout>
 
 			<!-- 2. Main Section Card -->
 			<div sclass="batch-section-card" width="100%">
@@ -31,10 +36,8 @@
 						<vlayout spacing="3px">
 							<label value="Received Inward Batches"
 								sclass="batch-section-title" />
-							<label
-								value="Inward batch packages detected in the intake directory."
-								sclass="batch-section-subtitle" />
 						</vlayout>
+
 						<label id="batchCountLabel" value="0 Batches"
 							sclass="batch-result-count" />
 					</hlayout>
