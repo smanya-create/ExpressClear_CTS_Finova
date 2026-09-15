@@ -51,6 +51,7 @@ import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
+import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
@@ -176,6 +177,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		pageRoot = comp.getPage().getFirstRoot();
 		inwardChequeService = new InwardChequeServiceImpl();
 		sendBackReasonService = new SendBackReasonServiceImpl();
+		inwardBatchService = new InwardBatchServiceImpl();
 
 		Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
