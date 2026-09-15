@@ -485,3 +485,49 @@
     opacity: 0.65 !important;
     box-shadow: none !important;
 }
+
+
+/* =========================================================
+   UNIFIED STATUS PILLS - IDENTICAL SHAPES & DIMENSIONS
+   ========================================================= */
+
+.inward-maker-cheque-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 130px !important;
+    height: 24px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    border-radius: 9999px !important;
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+/* 1. Pending Maker Work (The Golden Reference Pill) */
+.inward-maker-cheque-status.status-pending-work {
+    background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important;
+    color: #172554 !important;
+    border: 1px solid #ffb000 !important;
+    box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
+}
+
+/* 2. Checker Pending (Identical shape & gradient, Sky Blue tone) */
+.inward-maker-cheque-status.status-checker-pending {
+    background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important;
+    color: #0369a1 !important;
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+/* 3. Rejected (Identical shape & gradient, Crimson Rose tone) */
+.inward-maker-cheque-status.status-rejected {
+    background: linear-gradient(90deg, #ffe4e6 0%, #fecdd3 55%, #fda4af 100%) !important;
+    color: #9f1239 !important;
+    border: 1px solid #fb7185 !important;
+    box-shadow: 0 1px 3px rgba(251, 113, 133, 0.25) !important;
+}
