@@ -1154,227 +1154,119 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void validateBatch(Listitem item, InwardBatch batch, Intbox expectedCount, Textbox expectedAmount,
-
 			Label actualLabel, Label messageLabel, Button validateButton, Button cancelButton,
-
 			Window validationWindow) {
-
 		if (expectedCount.getValue() == null) {
-
 			messageLabel.setValue("Please enter the expected cheque count.");
-
 			messageLabel.setVisible(true);
-
 			actualLabel.setVisible(false);
-
 			return;
-
 		}
-
 		String expectedAmountText = expectedAmount.getValue();
-
 		if (expectedAmountText == null || expectedAmountText.trim().isEmpty()) {
-
 			messageLabel.setValue("Please enter the expected amount.");
-
 			messageLabel.setVisible(true);
-
 			actualLabel.setVisible(false);
-
 			return;
-
 		}
-
 		BigDecimal expectedAmountValue;
-
 		try {
-
 			String cleanedAmount = expectedAmountText.trim().replace(",", "");
-
 			expectedAmountValue = new BigDecimal(cleanedAmount);
-
 		} catch (NumberFormatException e) {
-
 			messageLabel.setValue("Please enter a valid expected amount.");
-
 			messageLabel.setVisible(true);
-
 			actualLabel.setVisible(false);
-
 			return;
-
 		}
-
 		int actualCount = batch.getActualChequeCount();
-
 		BigDecimal actualAmount = batch.getActualTotalAmount() == null ? BigDecimal.ZERO : batch.getActualTotalAmount();
-
 		boolean countMatches = expectedCount.getValue() == actualCount;
-
 		boolean amountMatches = expectedAmountValue.compareTo(actualAmount) == 0;
-
 		if (!countMatches || !amountMatches) {
-
 			StringBuilder reason = new StringBuilder("VALIDATION FAILED. ");
-
 			if (!countMatches && !amountMatches) {
-
 				reason.append("Expected count and expected amount do not match the actual batch values.");
-
 			} else if (!countMatches) {
-
 				reason.append("Expected count does not match the actual cheque count.");
-
 			} else {
-
 				reason.append("Expected amount does not match the actual batch amount.");
-
 			}
-
 			messageLabel.setValue(reason.toString());
-
 			messageLabel.setVisible(true);
-
 			actualLabel.setValue(
-
 					"Actual Count: " + actualCount + "    Actual Amount: ₹ " + CURRENCY_FORMAT.format(actualAmount));
-
 			actualLabel.setVisible(true);
-
 			return;
-
 		}
-
 		ParsedBatchData parsedBatchData = getParsedBatchData(batch.getInwardBatchId());
-
 		if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
-
 			messageLabel.setValue("Parsed batch data is not available. Please parse the batch again.");
-
 			messageLabel.setVisible(true);
-
 			actualLabel.setVisible(false);
-
 			return;
-
 		}
-
 		try {
-
 			parsedBatchData.getInwardBatch().setBatchStatus("PROCESSING");
-
 			boolean saved = inwardBatchService.saveParsedBatch(parsedBatchData);
-
 			if (!saved) {
-
 				messageLabel.setValue("Validation succeeded, but the batch could not be saved.");
-
 				messageLabel.setVisible(true);
-
 				actualLabel.setVisible(false);
-
 				return;
-
 			}
-
 			removeParsedBatchData(batch.getInwardBatchId());
-
 			batch.setBatchStatus("PROCESSING");
-
 			updateProcessingAfterValidationRow(item, batch);
-
 			messageLabel.setValue("Validation Successful. Batch validation completed successfully.");
-
 			messageLabel.setVisible(true);
-
 			messageLabel.setSclass("batch-validation-success");
-
 			actualLabel.setVisible(false);
-
 			expectedCount.setReadonly(true);
-
 			expectedAmount.setReadonly(true);
-
 			validateButton.setVisible(false);
-
 			cancelButton.setLabel("OK");
-
 			cancelButton.addEventListener("onClick", event -> validationWindow.detach());
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			messageLabel.setValue("Validation succeeded, but the batch could not be saved: " + e.getMessage());
-
 			messageLabel.setVisible(true);
-
 			actualLabel.setVisible(false);
-
 		}
-
 	}
 
 	private void showValidationFailure(Label messageLabel, String message) {
-
 		messageLabel.setVisible(true);
-
 		messageLabel.setValue(message);
-
 		messageLabel.setSclass("status-pill-failed");
-
 	}
 
 	private void updateValidatedRow(Listitem item, InwardBatch batch) {
-
 		Listcell statusCell = (Listcell) item.getChildren().get(3);
-
 		statusCell.getChildren().clear();
-
 		Label statusLabel = new Label("VALIDATED");
-
 		setStatusStyle(statusLabel, "VALIDATED");
-
 		statusCell.appendChild(statusLabel);
-
 		Listcell actionCell = (Listcell) item.getChildren().get(4);
-
 		actionCell.getChildren().clear();
-
 		addNextActionButton(item, actionCell, batch);
-
 	}
 
 	private void addNextActionButton(Listitem item, Listcell actionCell, InwardBatch batch) {
-
 		String batchId = batch.getInwardBatchId();
-
 		boolean micrRepairRequired = false;
-
 		try {
-
 			if (inwardChequeDAO == null)
-
 				inwardChequeDAO = InwardChequeDAOImpl.getInstance();
-
 			List<InwardCheque> micrRepairCheques = inwardChequeDAO.findByBatchAndStatus(batchId, "MICR_REPAIR_PENDING");
-
 			micrRepairRequired = micrRepairCheques != null && !micrRepairCheques.isEmpty();
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		Button nextButton = new Button(micrRepairRequired ? "OPEN MICR REPAIR" : "OPEN DATA ENTRY");
-
 		nextButton.setSclass("view-button");
-
 		nextButton.addEventListener("onClick", event -> openNextStep(batch));
-
 		actionCell.appendChild(nextButton);
-
 	}
 
 	private void openNextStep(InwardBatch batch) {
@@ -2276,175 +2168,96 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private InputStream getResourceStream(String resourcePath) {
-
 		String normalizedPath = resourcePath;
-
 		if (normalizedPath == null)
-
 			return null;
-
 		normalizedPath = normalizedPath.trim();
-
 		while (normalizedPath.startsWith("/")) {
-
 			normalizedPath = normalizedPath.substring(1);
-
 		}
-
 		try {
-
 			ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-
 			if (contextClassLoader != null) {
-
 				InputStream stream = contextClassLoader.getResourceAsStream(normalizedPath);
-
 				if (stream != null)
-
 					return stream;
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		try {
-
 			ClassLoader classLoader = InwardBatchController.class.getClassLoader();
-
 			if (classLoader != null) {
-
 				InputStream stream = classLoader.getResourceAsStream(normalizedPath);
-
 				if (stream != null)
-
 					return stream;
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		try {
-
 			String realPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + normalizedPath);
-
 			if (realPath != null) {
-
 				File file = new File(realPath);
-
 				if (file.isFile()) {
-
 					return java.nio.file.Files.newInputStream(file.toPath());
-
 				}
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
 
 		try {
-
 			String realPath = currentWindow.getDesktop().getWebApp().getRealPath("/WEB-INF/classes/" + normalizedPath);
-
 			if (realPath != null) {
-
 				File file = new File(realPath);
-
 				if (file.isFile()) {
-
 					return java.nio.file.Files.newInputStream(file.toPath());
-
 				}
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 		}
-
 		return null;
-
 	}
 
 	private void filterCheques() {
-
 		String searchValue = chequeSearchTextbox.getValue();
-
 		if (searchValue == null)
-
 			searchValue = "";
-
 		searchValue = searchValue.trim().toLowerCase();
-
 		if (searchValue.isEmpty()) {
-
 			displayCheques(allCheques);
-
 			return;
-
 		}
-
 		List<InwardCheque> filteredCheques = new ArrayList<InwardCheque>();
-
 		for (InwardCheque cheque : allCheques) {
-
 			String chequeNumber = valueOrEmpty(cheque.getChequeNumber()).toLowerCase();
-
 			String accountNumber = valueOrEmpty(cheque.getDraweeAccountNumber()).toLowerCase();
-
 			if (chequeNumber.contains(searchValue) || accountNumber.contains(searchValue)) {
-
 				filteredCheques.add(cheque);
-
 			}
-
 		}
 
 		displayCheques(filteredCheques);
-
 	}
 
 	private void updateChequeCount(int count) {
-
 		if (count == 0) {
-
 			chequeCountLabel.setValue("No cheque records found");
-
 			return;
-
 		}
-
 		chequeCountLabel.setValue("Showing 1 to " + count + " of " + count + " cheques");
-
 	}
-
 	private String valueOrEmpty(String value) {
-
 		return value == null ? "" : value;
 
 	}
 
 	private static class ParseResult {
-
 		private final String batchId;
-
 		private final ParsedBatchData parsedBatchData;
-
 		private final String status;
-
 		private final String message;
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
