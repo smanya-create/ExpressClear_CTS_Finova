@@ -202,25 +202,24 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
                      "    b.actual_cheque_count, " +
                      "    b.actual_total_amount, " +
                      "    b.batch_status, " +
-                     "    COUNT(CASE WHEN c.cheque_status IN ('" 
-                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
-                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', '" 
-                     + InwardChequeStatus.CHECKER_PROCESSING_PENDING.name() + "') THEN 1 END) AS pending_cheques, " +
+                     "    COUNT(CASE WHEN c.cheque_status IN ('"
+                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '"
+                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '"
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '"
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques, " +
                      "    COUNT(CASE WHEN c.cheque_status IN ('" 
                      + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
                      + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', 'MAKER_RETURNED') THEN 1 END) AS sent_back_cheques " +
                      "FROM inward_batch b " +
                      "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-                     "WHERE b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'REJECTED') " +
+                     "WHERE b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING','CHECKER_PROCESSING', 'COMPLETED', 'REJECTED') " +
                      "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status " +
-                     "HAVING COUNT(CASE WHEN c.cheque_status IN ('" 
-                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '" 
-                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '" 
-                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', '" 
-                     + InwardChequeStatus.CHECKER_PROCESSING_PENDING.name() + "') THEN 1 END) > 0 " +
+                     "HAVING COUNT(CASE WHEN c.cheque_status IN ('"
+                     + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '"
+                     + InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '"
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '"
+                     + InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', '"
+                     + "DATA_ENTRY_COMPLETED" + "') THEN 1 END) > 0 " +
                      "ORDER BY b.inward_batch_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
