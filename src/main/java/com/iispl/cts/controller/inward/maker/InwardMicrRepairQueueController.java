@@ -11,8 +11,10 @@ import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Include;
@@ -36,6 +38,7 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 	private Div divMicrRepairEmpty;
 
 	private Textbox batchIdFilter;
+	private Combobox cmbStatusFilter;
 	private Label batchResultCount;
 
 	private InwardBatchService inwardBatchService;
@@ -47,6 +50,11 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 		super.doAfterCompose(comp);
 
 		this.inwardBatchService = new InwardBatchServiceImpl();
+
+		// Default dropdown selection to index 0 ("All Statuses")
+		if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
+			cmbStatusFilter.setSelectedIndex(0);
+		}
 
 		if (pagingMicrRepair != null) {
 			pagingMicrRepair.addEventListener("onPaging", new EventListener<Event>() {
@@ -69,7 +77,56 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 			this.allBatches = new ArrayList<>(batches);
 		}
 
-		this.filteredBatches = new ArrayList<>(this.allBatches);
+		applyCombinedFilter(null, null);
+	}
+
+	private void applyCombinedFilter(String searchText, String statusFilter) {
+		if (searchText == null) {
+			searchText = (batchIdFilter != null && batchIdFilter.getValue() != null)
+					? batchIdFilter.getValue().trim().toLowerCase() : "";
+		} else {
+			searchText = searchText.trim().toLowerCase();
+		}
+
+		if (statusFilter == null) {
+			if (cmbStatusFilter != null && cmbStatusFilter.getSelectedItem() != null
+					&& cmbStatusFilter.getSelectedItem().getValue() != null) {
+				statusFilter = cmbStatusFilter.getSelectedItem().getValue().toString();
+			} else {
+				statusFilter = "ALL";
+			}
+		}
+
+		this.filteredBatches = new ArrayList<>();
+
+		for (InwardBatch batch : allBatches) {
+			if (batch == null) continue;
+
+			// 1. Check Batch ID Filter
+			boolean matchesSearch = true;
+			if (!searchText.isEmpty()) {
+				matchesSearch = batch.getInwardBatchId() != null
+						&& batch.getInwardBatchId().toLowerCase().contains(searchText);
+			}
+
+			// 2. Check Status Filter
+			boolean matchesStatus = true;
+			if (!"ALL".equalsIgnoreCase(statusFilter)) {
+				String bStatus = batch.getBatchStatus() != null ? batch.getBatchStatus().trim().toUpperCase() : "";
+				boolean isReturned = bStatus.contains("SEND_BACK") || bStatus.contains("SENT_BACK") || bStatus.contains("RETURN");
+
+				if ("CHECKER_RETURNED".equalsIgnoreCase(statusFilter)) {
+					matchesStatus = isReturned;
+				} else if ("PENDING_MAKER".equalsIgnoreCase(statusFilter)) {
+					matchesStatus = !isReturned;
+				}
+			}
+
+			if (matchesSearch && matchesStatus) {
+				this.filteredBatches.add(batch);
+			}
+		}
+
 		setupPagination();
 	}
 
@@ -136,23 +193,21 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 		// MICR Errors / Pending
 		Label micrErrorsLabel = new Label(String.valueOf(batch.getMicrRepairPendingCount()));
 		micrErrorsLabel.setSclass("micr-repair-pending-count");
-		
 
 		// Status Pill
-				Label statusLabel = new Label();
-				String bStatus = batch.getBatchStatus() != null ? batch.getBatchStatus().trim().toUpperCase() : "";
-				boolean isReturned = bStatus.contains("SEND_BACK") || bStatus.contains("SENT_BACK") || bStatus.contains("RETURN");
+		Label statusLabel = new Label();
+		String bStatus = batch.getBatchStatus() != null ? batch.getBatchStatus().trim().toUpperCase() : "";
+		boolean isReturned = bStatus.contains("SEND_BACK") || bStatus.contains("SENT_BACK") || bStatus.contains("RETURN");
 
-				if (isReturned) {
-					statusLabel.setValue("Checker Returned");
-					statusLabel.setSclass("micr-repair-status-returned");
-				} else {
-					statusLabel.setValue("Pending Maker");
-					statusLabel.setSclass("micr-repair-status-pending");
-				}
-				
+		if (isReturned) {
+			statusLabel.setValue("Checker Returned");
+			statusLabel.setSclass("micr-repair-status-returned");
+		} else {
+			statusLabel.setValue("Pending Maker");
+			statusLabel.setSclass("micr-repair-status-pending");
+		}
 
-		// Action Button (Outward Style: OPEN)
+		// Action Button
 		Button actionButton = new Button("OPEN");
 		actionButton.setSclass("btn-action-repair");
 		actionButton.addEventListener("onClick", event -> openBatch(batch.getInwardBatchId()));
@@ -172,32 +227,34 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 	}
 
 	public void onChanging$batchIdFilter(InputEvent event) {
-		String searchText = event.getValue();
-		if (searchText == null) searchText = "";
-		searchText = searchText.trim().toLowerCase();
+		applyCombinedFilter(event.getValue(), null);
+	}
 
-		if (searchText.isEmpty()) {
-			this.filteredBatches = new ArrayList<>(this.allBatches);
-		} else {
-			this.filteredBatches = new ArrayList<>();
-			for (InwardBatch batch : allBatches) {
-				if (batch != null && batch.getInwardBatchId() != null) {
-					if (batch.getInwardBatchId().toLowerCase().contains(searchText)) {
-						this.filteredBatches.add(batch);
-					}
-				}
-			}
-		}
+	public void onChange$batchIdFilter(Event event) {
+		applyCombinedFilter(null, null);
+	}
 
-		setupPagination();
+	// Overloaded event handlers to satisfy runtime SelectEvent & generic Event
+	public void onSelect$cmbStatusFilter(SelectEvent<?, ?> event) {
+		applyCombinedFilter(null, null);
+	}
+
+	public void onSelect$cmbStatusFilter(Event event) {
+		applyCombinedFilter(null, null);
+	}
+
+	public void onSelect$cmbStatusFilter() {
+		applyCombinedFilter(null, null);
 	}
 
 	public void clearBatchFilter() {
 		if (batchIdFilter != null) {
 			batchIdFilter.setValue("");
 		}
-		this.filteredBatches = new ArrayList<>(this.allBatches);
-		setupPagination();
+		if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
+			cmbStatusFilter.setSelectedIndex(0);
+		}
+		applyCombinedFilter("", "ALL");
 	}
 
 	public void openBatch(Object batchId) {
