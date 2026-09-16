@@ -216,22 +216,22 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				String st = c.getChequeStatus().trim();
 
 				if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
-				        || InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-				        || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
+						|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
+						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
 
-				    this.activeQueue.add(c);
-				    continue;
+					this.activeQueue.add(c);
+					continue;
 				}
 
 				if (isSentBackStatus(st)) {
-				    this.activeQueue.add(c);
-				    continue;
+					this.activeQueue.add(c);
+					continue;
 				}
 
 				if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
-				        && isDataEntryRejectionRequest(c)) {
+						&& isDataEntryRejectionRequest(c)) {
 
-				    this.activeQueue.add(c);
+					this.activeQueue.add(c);
 				}
 			}
 		}
@@ -298,8 +298,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		String sql = "SELECT EXISTS (" + "SELECT 1 " + "FROM inward_cheque_rejection_request "
-				+ "WHERE inward_cheque_id = ? " + "AND request_stage = 'DATA_ENTRY' " + "AND request_status = 'PENDING'"
-				+ ")";
+				+ "WHERE inward_cheque_id = ? " + "AND request_stage IN ('DATA_ENTRY', 'MICR_REPAIR') "
+				+ "AND request_status = 'PENDING'" + ")";
 
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
