@@ -569,81 +569,57 @@ public class InwardBatchController extends SelectorComposer<Window> {
 				result.append(" ");
 
 			result.append(Character.toUpperCase(word.charAt(0)));
-
 			if (word.length() > 1)
-
 				result.append(word.substring(1));
-
 		}
-
 		return result.toString();
-
 	}
 
 	private void setStatusStyle(Label label, String status) {
-
-		if ("VALIDATED".equalsIgnoreCase(status) || "Completed".equalsIgnoreCase(status)) {
-
-			label.setSclass("status-pill-completed");
-
-		} else if ("Validation Failed".equalsIgnoreCase(status) || "Rejected".equalsIgnoreCase(status)
-
-				|| "Failed".equalsIgnoreCase(status)) {
-
-			label.setSclass("status-pill-failed");
-
-		} else if (status.toUpperCase().contains("SENT BACK") || status.toUpperCase().contains("REWORK")) {
-
-			label.setSclass("status-pill-sentback");
-
-		} else {
-
-			label.setSclass("status-pill-gold");
-
+		if (label == null) {
+			return;
 		}
-
+		if (status == null || status.trim().isEmpty()) {
+			label.setSclass("status-pill-gold");
+			return;
+		}
+		String normalizedStatus = status.trim().toUpperCase();
+		if ("VALIDATED".equals(normalizedStatus) || "COMPLETED".equals(normalizedStatus)
+				|| "CHECKER PROCESSING".equals(normalizedStatus)) {
+			label.setSclass("status-pill-completed");
+		} else if ("VALIDATION FAILED".equals(normalizedStatus) || "REJECTED".equals(normalizedStatus)
+				|| "FAILED".equals(normalizedStatus) || "HOLD".equals(normalizedStatus)) {
+			label.setSclass("status-pill-failed");
+		} else if ("PARSING".equals(normalizedStatus) || "CHECKER PROCESSING PENDING".equals(normalizedStatus)
+				|| "IN VERIFICATION".equals(normalizedStatus)) {
+			label.setSclass("status-pill-blue");
+		} else if (normalizedStatus.contains("SENT BACK") || normalizedStatus.contains("REWORK")) {
+			label.setSclass("status-pill-sentback");
+		} else {
+			label.setSclass("status-pill-gold");
+		}
 	}
 
 	private void parseBatch(Event event) {
-
 		try {
-
 			Button clickedButton = (Button) event.getTarget();
-
 			Listcell actionCell = (Listcell) clickedButton.getParent();
-
 			Listitem item = (Listitem) actionCell.getParent();
-
 			InwardBatch batch = (InwardBatch) item.getValue();
-
 			if (batch == null) {
-
 				Messagebox.show("Batch information not found.", "Parse Failed", Messagebox.OK, Messagebox.ERROR);
-
 				return;
-
 			}
-
 			String batchId = batch.getInwardBatchId();
-
 			if (batchId == null || batchId.trim().isEmpty()) {
-
 				Messagebox.show("Batch number is missing.", "Parse Failed", Messagebox.OK, Messagebox.ERROR);
-
 				return;
-
 			}
-
 			String folderName = getBatchFolderName(batchId);
-
 			if (folderName == null) {
-
 				Messagebox.show("Batch folder not found for: " + batchId, "Parse Failed", Messagebox.OK,
-
 						Messagebox.ERROR);
-
 				return;
-
 			}
 
 			String npciXml = "Inward-data/" + folderName + "/NPCI_Inward.xml";
@@ -2249,6 +2225,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 		chequeCountLabel.setValue("Showing 1 to " + count + " of " + count + " cheques");
 	}
+
 	private String valueOrEmpty(String value) {
 		return value == null ? "" : value;
 
@@ -2259,21 +2236,26 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		private final ParsedBatchData parsedBatchData;
 		private final String status;
 		private final String message;
+
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
 			this.parsedBatchData = parsedBatchData;
 			this.status = status;
 			this.message = message;
 		}
+
 		String getBatchId() {
 			return batchId;
 		}
+
 		ParsedBatchData getParsedBatchData() {
 			return parsedBatchData;
 		}
+
 		String getStatus() {
 			return status;
 		}
+
 		String getMessage() {
 			return message;
 		}
