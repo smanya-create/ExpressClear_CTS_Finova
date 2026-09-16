@@ -345,7 +345,6 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 		}
 	}
 
-
 	@Override
 	public boolean saveDataEntry(OutwardCheque cheque) {
 
@@ -537,8 +536,8 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
 				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
 				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
-				+ "FROM outward_cheque " + "WHERE outward_batch_id = ? " + "AND UPPER(TRIM(cheque_status)) IN (?, ?) "
-				+ "ORDER BY outward_cheque_id";
+				+ "FROM outward_cheque " + "WHERE outward_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) IN (?, ?, ?) " + "ORDER BY outward_cheque_id";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -546,6 +545,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 			preparedStatement.setString(1, outwardBatchId.trim());
 			preparedStatement.setString(2, "PENDING_DATA_ENTRY");
 			preparedStatement.setString(3, "PENDING_MICR_REPAIR");
+			preparedStatement.setString(4, "ON_HOLD");
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -560,5 +560,114 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 		}
 
 		return chequeList;
+	}
+
+	@Override
+	public boolean updateChequeStatus(Connection connection, String outwardChequeId, String chequeStatus) {
+
+		if (connection == null) {
+			throw new IllegalArgumentException("Connection cannot be null");
+		}
+
+		if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
+
+			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
+		}
+
+		if (chequeStatus == null || chequeStatus.trim().isEmpty()) {
+
+			throw new IllegalArgumentException("Cheque status cannot be null or empty");
+		}
+
+		String sql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE outward_cheque_id = ?";
+
+		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, chequeStatus.trim());
+
+			preparedStatement.setString(2, outwardChequeId.trim());
+
+			return preparedStatement.executeUpdate() > 0;
+
+		} catch (SQLException exception) {
+
+			String message = exception.getMessage();
+
+			throw new RuntimeException("Unable to update cheque status for outward cheque ID: " + outwardChequeId
+					+ ". Cause: " + (message == null ? "Unknown database error" : message), exception);
+		}
+	}
+
+	@Override
+	public List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId) {
+
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+
+			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
+		}
+
+		List<OutwardCheque> chequeList = new ArrayList<>();
+
+		String sql = "SELECT " + "oc.outward_cheque_id, " + "oc.outward_batch_id, " + "oc.cheque_number, "
+				+ "oc.micr_code, " + "oc.drawee_name, " + "oc.drawee_account_number, " + "oc.payee_name, "
+				+ "oc.payee_account_number, " + "oc.cheque_amount, " + "oc.cheque_date, " + "oc.cheque_status, "
+				+ "oc.account_id, " + "oc.created_at, " + "oc.city_code, " + "oc.bank_code, " + "oc.branch_code, "
+				+ "oc.cheque_image_front, " + "oc.cheque_image_back " + "FROM outward_cheque oc "
+				+ "WHERE oc.outward_batch_id = ? " + "AND UPPER(TRIM(oc.cheque_status)) = " + "'PENDING_DATA_ENTRY' "
+				+ "ORDER BY oc.outward_cheque_id";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, outwardBatchId.trim());
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
+				while (resultSet.next()) {
+
+					chequeList.add(mapOutwardCheque(resultSet));
+				}
+			}
+
+		} catch (SQLException exception) {
+
+			throw new RuntimeException(
+					"Unable to fetch Maker data entry cheques " + "for outward batch: " + outwardBatchId, exception);
+		}
+
+		return chequeList;
+	}
+
+	@Override
+	public int getCompletedMakerChequeCountByBatchId(String outwardBatchId) {
+
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+
+			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
+		}
+
+		String sql = "SELECT COUNT(outward_cheque_id) " + "FROM outward_cheque " + "WHERE outward_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) IN (" + "'PENDING_VERIFICATION', " + "'REJECTION_REQUEST'" + ")";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, outwardBatchId.trim());
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
+				if (resultSet.next()) {
+					return resultSet.getInt(1);
+				}
+			}
+
+		} catch (SQLException exception) {
+
+			throw new RuntimeException(
+					"Unable to fetch completed Maker cheque count " + "for outward batch: " + outwardBatchId,
+					exception);
+		}
+
+		return 0;
 	}
 }

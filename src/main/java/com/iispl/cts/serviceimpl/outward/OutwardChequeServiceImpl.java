@@ -3,37 +3,54 @@ package com.iispl.cts.serviceimpl.outward;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.dao.outward.OutwardChequeDAO;
+import com.iispl.cts.dao.outward.OutwardChequeRequestDAO;
 import com.iispl.cts.daoimpl.outward.OutwardBatchDAOImpl;
 import com.iispl.cts.daoimpl.outward.OutwardChequeDAOImpl;
+import com.iispl.cts.daoimpl.outward.OutwardChequeRequestDAOImpl;
 import com.iispl.cts.entity.outward.OutwardCheque;
+import com.iispl.cts.entity.outward.OutwardChequeRequest;
 import com.iispl.cts.service.outward.OutwardChequeService;
 
 public class OutwardChequeServiceImpl implements OutwardChequeService {
 
 	private final OutwardChequeDAO outwardChequeDAO;
+
 	private final OutwardBatchDAO outwardBatchDAO;
 
+	private final OutwardChequeRequestDAO outwardChequeRequestDAO;
+
 	public OutwardChequeServiceImpl() {
+
 		this.outwardChequeDAO = new OutwardChequeDAOImpl();
+
 		this.outwardBatchDAO = new OutwardBatchDAOImpl();
+
+		this.outwardChequeRequestDAO = new OutwardChequeRequestDAOImpl();
 	}
 
 	public OutwardChequeServiceImpl(OutwardChequeDAO outwardChequeDAO, OutwardBatchDAO outwardBatchDAO) {
+
 		if (outwardChequeDAO == null) {
+
 			throw new IllegalArgumentException("OutwardChequeDAO cannot be null");
 		}
 
 		if (outwardBatchDAO == null) {
+
 			throw new IllegalArgumentException("OutwardBatchDAO cannot be null");
 		}
 
 		this.outwardChequeDAO = outwardChequeDAO;
+
 		this.outwardBatchDAO = outwardBatchDAO;
+
+		this.outwardChequeRequestDAO = new OutwardChequeRequestDAOImpl();
 	}
 
 	@Override
@@ -110,8 +127,6 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 	public boolean updateChequeStatus(String outwardChequeId, String chequeStatus) {
 		return outwardChequeDAO.updateChequeStatus(outwardChequeId, chequeStatus);
 	}
-
-	
 
 	@Override
 	public OutwardCheque saveMakerCheque(String scannedBatchId, OutwardCheque cheque) {
@@ -205,4 +220,218 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 		}
 	}
 
+	@Override
+	public boolean saveMakerRejectionRequest(String scannedBatchId, OutwardCheque cheque, String reasonId,
+			String reason, String remarks) {
+
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
+		}
+
+		if (cheque == null) {
+			throw new IllegalArgumentException("Outward cheque cannot be null");
+		}
+
+		if (cheque.getOutwardChequeId() == null || cheque.getOutwardChequeId().trim().isEmpty()) {
+			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
+		}
+
+		if (cheque.getOutwardBatchId() == null || cheque.getOutwardBatchId().trim().isEmpty()) {
+			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
+		}
+
+		if (remarks == null || remarks.trim().isEmpty()) {
+			throw new IllegalArgumentException("Rejection remarks are required");
+		}
+
+		Connection connection = null;
+
+		try {
+			connection = DBConnection.getConnection();
+			connection.setAutoCommit(false);
+
+			String chequeId = cheque.getOutwardChequeId().trim();
+			String batchId = cheque.getOutwardBatchId().trim();
+
+			if (outwardChequeRequestDAO.existsByChequeId(connection, chequeId)) {
+				connection.rollback();
+				return false;
+			}
+
+			cheque.setOutwardChequeId(chequeId);
+			cheque.setOutwardBatchId(batchId);
+			cheque.setChequeStatus("REJECTION_REQUEST");
+
+			boolean chequeUpdated = outwardChequeDAO.saveDataEntry(connection, cheque);
+
+			if (!chequeUpdated) {
+				throw new IllegalStateException("Unable to save cheque data for rejection request: " + chequeId);
+			}
+
+			OutwardChequeRequest request = new OutwardChequeRequest();
+
+			request.setChequeId(chequeId);
+			request.setBatchId(batchId);
+			request.setRemarks(remarks.trim());
+
+			if (reasonId != null && !reasonId.trim().isEmpty()) {
+				request.setReasonId(reasonId.trim());
+			}
+
+			if (reason != null && !reason.trim().isEmpty()) {
+				request.setReason(reason.trim());
+			}
+
+			boolean requestSaved = outwardChequeRequestDAO.saveRequest(connection, request);
+
+			if (!requestSaved) {
+				throw new IllegalStateException("Unable to save outward cheque rejection request: " + chequeId);
+			}
+
+			connection.commit();
+
+			cheque.setChequeStatus("REJECTION_REQUEST");
+
+			return true;
+
+		} catch (Exception exception) {
+
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException rollbackException) {
+					rollbackException.printStackTrace();
+				}
+			}
+
+			String errorMessage = exception.getMessage();
+
+			if (errorMessage == null || errorMessage.trim().isEmpty()) {
+				errorMessage = exception.getClass().getSimpleName();
+			}
+
+			throw new RuntimeException("Unable to save Maker rejection request. Cause: " + errorMessage, exception);
+
+		} finally {
+
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException closeException) {
+					closeException.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	public OutwardChequeRequest getRejectionRequestByChequeId(String chequeId) {
+
+		if (chequeId == null || chequeId.trim().isEmpty()) {
+			return null;
+		}
+
+		return outwardChequeRequestDAO.getRequestByChequeId(chequeId.trim());
+	}
+
+	@Override
+	public List<OutwardChequeRequest> getRejectionRequestsByBatchId(String batchId) {
+
+		if (batchId == null || batchId.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return outwardChequeRequestDAO.getRequestsByBatchId(batchId.trim());
+	}
+
+	@Override
+	public int getCompletedMakerChequeCountByBatchId(String outwardBatchId) {
+
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+			return 0;
+		}
+
+		return outwardChequeDAO.getCompletedMakerChequeCountByBatchId(outwardBatchId.trim());
+	}
+
+	@Override
+	public boolean submitMakerBatchToChecker(String scannedBatchId) {
+
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
+		}
+
+		String batchId = scannedBatchId.trim();
+		Connection connection = null;
+
+		try {
+			connection = DBConnection.getConnection();
+			connection.setAutoCommit(false);
+
+			String outwardBatchId = outwardBatchDAO.createOutwardBatchFromScan(connection, batchId);
+
+			if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+				throw new IllegalStateException("Unable to create/find outward batch for scanned batch: " + batchId);
+			}
+
+			outwardBatchId = outwardBatchId.trim();
+
+			int totalChequeCount = outwardChequeDAO.getTotalChequeCountByBatchId(outwardBatchId);
+
+			int completedChequeCount = outwardChequeDAO.getCompletedMakerChequeCountByBatchId(outwardBatchId);
+
+			if (totalChequeCount <= 0) {
+				throw new IllegalStateException("No cheques are available for submission");
+			}
+
+			if (completedChequeCount != totalChequeCount) {
+
+				int pendingChequeCount = totalChequeCount - completedChequeCount;
+
+				throw new IllegalStateException("Batch cannot be submitted. " + pendingChequeCount
+						+ " cheques are still pending Maker processing.");
+			}
+
+			boolean updated = outwardBatchDAO.updateOutWardBatchStatus(connection, outwardBatchId,
+					"PENDING_CHECKER_PROCESS");
+
+			if (!updated) {
+				throw new IllegalStateException(
+						"Unable to update batch status to PENDING_CHECKER_PROCESS: " + outwardBatchId);
+			}
+
+			connection.commit();
+
+			return true;
+
+		} catch (Exception exception) {
+
+			if (connection != null) {
+				try {
+					connection.rollback();
+				} catch (SQLException rollbackException) {
+					rollbackException.printStackTrace();
+				}
+			}
+
+			String errorMessage = exception.getMessage();
+
+			if (errorMessage == null || errorMessage.trim().isEmpty()) {
+				errorMessage = exception.getClass().getSimpleName();
+			}
+
+			throw new RuntimeException(
+					"Unable to submit Maker batch to Checker: " + batchId + ". Cause: " + errorMessage, exception);
+
+		} finally {
+
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException closeException) {
+					closeException.printStackTrace();
+				}
+			}
+		}
+	}
 }

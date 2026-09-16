@@ -31,5 +31,12 @@ public interface OutwardChequeDAO {
 
 	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
 
+	boolean updateChequeStatus(Connection connection, String outwardChequeId, String chequeStatus);
+
 	List<OutwardCheque> getOnHoldCheques(String outwardBatchId);
+
+	List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId);
+
+	int getCompletedMakerChequeCountByBatchId(String outwardBatchId);
+
 }

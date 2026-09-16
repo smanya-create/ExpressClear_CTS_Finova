@@ -132,9 +132,10 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 
 		String sql = "SELECT " + "ob.outward_batch_id, " + "ob.batch_reference_id, " + "ob.actual_cheque_count, "
 				+ "ob.actual_total_amount, " + "ob.batch_status, " + "ob.uploaded_by, " + "ob.uploaded_at "
-				+ "FROM outward_batch ob " + "WHERE UPPER(TRIM(ob.batch_status)) = 'ON_HOLD' " + "AND EXISTS ("
-				+ "SELECT 1 " + "FROM outward_cheque oc " + "WHERE oc.outward_batch_id = ob.outward_batch_id "
-				+ "AND UPPER(TRIM(oc.cheque_status)) = 'PENDING_DATA_ENTRY'" + ") " + "ORDER BY ob.uploaded_at ASC";
+				+ "FROM outward_batch ob " + "WHERE UPPER(TRIM(ob.batch_status)) IN "
+				+ "('PENDING_DATA_ENTRY', 'ON_HOLD') " + "AND EXISTS (" + "SELECT 1 " + "FROM outward_cheque oc "
+				+ "WHERE oc.outward_batch_id = ob.outward_batch_id " + "AND UPPER(TRIM(oc.cheque_status)) = "
+				+ "'PENDING_DATA_ENTRY'" + ") " + "ORDER BY ob.uploaded_at ASC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -145,7 +146,7 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			}
 
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch outward batches returned for data entry", exception);
+			throw new RuntimeException("Unable to fetch outward batches ready for data entry", exception);
 		}
 
 		return batches;
@@ -183,7 +184,6 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 		}
 
 		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
 			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
 		}
 
@@ -198,19 +198,20 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (resultSet.next()) {
+
 					return resultSet.getString("outward_batch_id");
 				}
 			}
 
 		} catch (SQLException exception) {
+
 			throw new RuntimeException("Unable to check existing outward batch: " + batchId, exception);
 		}
 
-		String insertSql = "INSERT INTO outward_batch (" + "outward_batch_id, " + "batch_reference_id, "
-				+ "actual_cheque_count, " + "actual_total_amount, " + "batch_status, " + "uploaded_by" + ") "
-				+ "SELECT " + "scanned_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
-				+ "actual_total_amount, " + "'PENDING_CHECKER_PROCESS', " + "uploaded_by " + "FROM scan_batch "
-				+ "WHERE scanned_batch_id = ?";
+		String insertSql = "INSERT INTO outward_batch " + "(outward_batch_id, " + "batch_reference_id, "
+				+ "actual_cheque_count, " + "actual_total_amount, " + "batch_status, " + "uploaded_by) " + "SELECT "
+				+ "scanned_batch_id, " + "batch_reference_id, " + "actual_cheque_count, " + "actual_total_amount, "
+				+ "'PENDING_DATA_ENTRY', " + "uploaded_by " + "FROM scan_batch " + "WHERE scanned_batch_id = ?";
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(insertSql)) {
 
@@ -219,12 +220,14 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 			int rowsInserted = preparedStatement.executeUpdate();
 
 			if (rowsInserted == 0) {
+
 				throw new IllegalStateException("Scan batch not found: " + batchId);
 			}
 
 			return batchId;
 
 		} catch (SQLException exception) {
+
 			throw new RuntimeException("Unable to create outward batch from scan batch: " + batchId, exception);
 		}
 	}

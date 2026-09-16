@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardCheque;
+import com.iispl.cts.entity.outward.OutwardChequeRequest;
 
 public interface OutwardChequeService {
 
@@ -31,4 +32,15 @@ public interface OutwardChequeService {
 	boolean updateChequeStatus(String outwardChequeId, String chequeStatus);
 
 	List<OutwardCheque> getOnHoldCheques(String outwardBatchId);
+
+	boolean saveMakerRejectionRequest(String scannedBatchId, OutwardCheque cheque, String reasonId, String reason,
+			String remarks);
+
+	OutwardChequeRequest getRejectionRequestByChequeId(String chequeId);
+
+	List<OutwardChequeRequest> getRejectionRequestsByBatchId(String batchId);
+
+	int getCompletedMakerChequeCountByBatchId(String outwardBatchId);
+
+	boolean submitMakerBatchToChecker(String scannedBatchId);
 }
