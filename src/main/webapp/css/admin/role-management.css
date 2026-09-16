@@ -25,7 +25,7 @@
 
 /* --- Card Panel --- */
 .card-panel {
-   display: flex !important;
+    display: flex !important;
     flex-direction: column !important;
     background: #ffffff;
     border-radius: 10px;
@@ -111,48 +111,46 @@
 }
 
 /* --- Action Buttons --- */
+/* --- Action Buttons (Download CSV & PDF) --- */
 .btn-primary {
     background-color: #173b61 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
     font-size: 11.5px !important;
-    letter-spacing: 0.6px !important;
-    border: 1px solid #173b61 !important;
+    letter-spacing: 0.5px !important;
+    border: 1px solid #102d4f !important;
     border-radius: 6px !important;
-    padding: 0 22px !important;
+    padding: 0 18px !important;
     cursor: pointer !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
+    transition: all 0.15s ease-in-out !important;
+    text-transform: none !important;
 }
 
 .btn-primary:hover {
     background-color: #0f2844 !important;
     border-color: #0f2844 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15) !important;
-}
-
-.btn-primary:active {
-    background-color: #081a2f !important;
-    transform: translateY(0);
 }
 
 .btn-outline {
     background-color: #ffffff !important;
-    color: #334155 !important;
+    color: #173b61 !important;
     font-weight: 700 !important;
     font-size: 11.5px !important;
-    letter-spacing: 0.6px !important;
+    letter-spacing: 0.5px !important;
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 6px !important;
-    padding: 0 20px !important;
+    padding: 0 18px !important;
     cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     transition: all 0.15s ease-in-out !important;
+    text-transform: none !important;
 }
 
 .btn-outline:hover {
-    background-color: #f1f5f9 !important;
-    border-color: #94a3b8 !important;
+    background-color: #f8fafc !important;
+    border-color: #173b61 !important;
+    color: #0f2844 !important;
 }
 
 .btn-secondary {
@@ -175,7 +173,6 @@
 /* ==========================================================================
    ROLE GRID - SLIM NAVY HEADERS & STYLING
    ========================================================================== */
-/* Keep your outer grid styling intact */
 .role-grid.z-grid {
     border: 1px solid #cbd5e1 !important;
     border-radius: 6px !important;
@@ -183,12 +180,10 @@
     overflow: hidden !important;
 }
 
-/* This is where the scrolling actually happens */
 .role-grid .z-grid-body {
     overflow-y: auto !important;
 }
 
-/* Paint all grid header containers, layers, and scrollbar gutters Navy Blue */
 .role-grid .z-grid-header,
 .role-grid .z-grid-header-bg,
 .role-grid .z-grid-header table,
@@ -202,7 +197,6 @@
     border-color: #0f2742 !important;
 }
 
-/* Slim column header dimensions */
 .role-grid th.z-column {
     height: 32px !important;
     padding: 4px 10px !important;
@@ -210,7 +204,6 @@
     border-bottom: 1px solid #0f2742 !important;
 }
 
-/* Gutter spacer next to Actions */
 .role-grid th.z-columns-bar,
 .role-grid .z-columns-bar {
     border-bottom: 1px solid #0f2742 !important;
@@ -228,7 +221,6 @@
     text-transform: uppercase !important;
 }
 
-/* Row & Cell Styling */
 .role-grid .z-row .z-row-inner,
 .role-grid .z-row .z-cell {
     border-bottom: 1px solid #f1f5f9 !important;
@@ -250,22 +242,28 @@
     color: #334155 !important;
 }
 
-/* --- Dark Navy Blue Modify Button in Grid --- */
+/* --- Dark Navy Blue Modify Button with Pencil Icon --- */
 .role-grid .btn-action-modify,
 .role-grid .z-row .z-button {
     background: #173b61 !important;
     background-color: #173b61 !important;
     color: #ffffff !important;
-    border: 1px solid #173b61 !important;
+    border: 1px solid #102d4f !important;
     border-radius: 4px !important;
     font-size: 11.5px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.4px !important;
+    letter-spacing: 0.3px !important;
     height: 28px !important;
-    padding: 0 16px !important;
+    padding: 0 14px !important;
     cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
-    transition: all 0.15s ease-in-out !important;
+    transition: background-color 0.15s ease, transform 0.05s ease !important;
+    line-height: 1 !important;
+    text-transform: none !important; /* Preserves "Modify" casing */
 }
 
 .role-grid .btn-action-modify:hover,
@@ -282,6 +280,21 @@
 .role-grid .z-row .z-button:active {
     background: #081a2f !important;
     transform: translateY(0);
+}
+
+/* Font Awesome icon alignment inside Modify button */
+.role-grid .btn-action-modify i,
+.role-grid .z-row .z-button i {
+    font-size: 11px !important;
+    color: #ffffff !important;
+    margin-right: 2px !important;
+}
+
+/* Inline SVG pencil alignment */
+.role-grid .btn-action-modify .cts-btn-pencil-icon {
+    display: inline-block;
+    flex-shrink: 0;
+    margin-top: -1px;
 }
 
 /* ==========================================================================
@@ -352,6 +365,7 @@
     margin: 0 8px 0 2px !important;
     display: inline-block !important;
 }
+
 /* ==========================================================================
    ASSIGNED OPERATORS - NAVY BLUE SLIM LISTBOX
    ========================================================================== */
@@ -362,7 +376,6 @@
     overflow: hidden !important;
 }
 
-/* 1. Force Deep Navy Blue across all header layers and spacer gutters */
 .custom-listbox .z-listbox-header,
 .custom-listbox .z-listbox-header-bg,
 .custom-listbox .z-listbox-header table,
@@ -376,7 +389,6 @@
     border-color: #0f2742 !important;
 }
 
-/* 2. Slim Header Height & White Text */
 .custom-listbox th.z-listheader {
     height: 32px !important;
     padding: 4px 10px !important;
@@ -401,7 +413,6 @@
     text-transform: uppercase !important;
 }
 
-/* 3. Table Rows & Clean Borders */
 .custom-listbox .z-listitem {
     background: #ffffff !important;
     border-bottom: 1px solid #f1f5f9 !important;
@@ -422,12 +433,11 @@
     line-height: 1.4 !important;
 }
 
-/* Listbox internal body scroll */
 .custom-listbox .z-listbox-body {
     overflow-y: auto !important;
     max-height: 220px !important;
 }
-/* Target the Listbox scrollbar gutter directly */
+
 .custom-listbox th.z-listhead-bar,
 .custom-listbox .z-listhead-bar,
 .custom-listbox .z-listbox-header-bg,
@@ -442,12 +452,12 @@
     box-shadow: none !important;
 }
 
-/* Fallback catch-all for any TH in the listbox header */
 .custom-listbox .z-listbox-header th {
     background: #173b61 !important;
     background-color: #173b61 !important;
     background-image: none !important;
 }
+
 /* 1. All Column Headers Center Aligned */
 .z-listheader, 
 .z-column {
@@ -478,6 +488,7 @@
     text-align: left !important;
     justify-content: flex-start !important;
 }
+
 /* Unprocessed Listbox Header - Theme Match */
 .z-listbox-header-bg {
     background: #173B61 !important;
@@ -499,7 +510,6 @@
     padding: 10px 8px !important;
 }
 
-/* Ensure row cells have clean height and separation */
 .z-listitem {
     height: 52px !important;
     border-bottom: 1px solid #f1f5f9 !important;

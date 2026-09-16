@@ -51,7 +51,7 @@
 
 .cts-main-title {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 800;
     color: #1e293b;
     letter-spacing: -0.3px;
     display: block;
@@ -392,7 +392,7 @@
     background-color: #f8fafc !important;
 }
 
-/* 3. Navy Blue Modify Button with White Text */
+/* 3. Navy Blue Modify Button with White Text & Pencil Icon */
 .cts-btn-modify-row,
 .cts-custom-grid .cts-btn-modify-row,
 .cts-custom-grid .z-row .z-button {
@@ -403,12 +403,17 @@
     font-weight: 700 !important;
     letter-spacing: 0.5px !important;
     height: 28px !important;
-    padding: 0 16px !important;
+    padding: 0 14px !important;
     border: none !important;
     border-radius: 4px !important;
     cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
     transition: background-color 0.15s ease !important;
+    line-height: 1 !important;
 }
 
 .cts-btn-modify-row:hover,
@@ -417,6 +422,21 @@
     background: #0f2742 !important;
     background-color: #0f2742 !important;
     color: #ffffff !important;
+}
+
+/* Font Awesome icon inside Modify button */
+.cts-btn-modify-row i,
+.cts-custom-grid .cts-btn-modify-row i {
+    font-size: 11px !important;
+    color: #ffffff !important;
+    margin-right: 2px !important;
+}
+
+/* SVG pencil icon inside Modify button */
+.cts-btn-modify-row .cts-btn-pencil-icon {
+    display: inline-block;
+    flex-shrink: 0;
+    margin-top: -1px;
 }
 
 /* ==========================================================================
@@ -566,6 +586,7 @@
     font-size: 11.5px;
     color: #94a3b8;
 }
+
 /* 1. All Column Headers Center Aligned */
 .z-listheader, 
 .z-column {

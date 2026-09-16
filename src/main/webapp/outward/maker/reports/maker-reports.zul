@@ -19,11 +19,10 @@
 
         <vlayout spacing="4px">
 
-            <label value="OPERATIONAL REPORTS"
+            <label value="Reports"
                    sclass="page-title" />
 
-            <label value="Generate and download maker daily balancing, exception handling, and audit logs."
-                   sclass="page-subtitle" />
+            
 
         </vlayout>
 
@@ -78,37 +77,7 @@
 
             <!-- Report Details Description Section -->
 
-            <vlayout spacing="8px"
-                     hflex="1">
-
-                <label value="REPORT DETAILS"
-                       sclass="field-label" />
-
-                <label value="Select a clearing date range to generate the consolidated 4-part Maker audit report covering:"
-                       sclass="page-subtitle" />
-
-                <vlayout spacing="4px"
-                         style="padding-left:8px;">
-
-                    <label value="• Section 1: Batches with manual MICR repairs"
-                           sclass="page-subtitle"
-                           style="color:#334155;" />
-
-                    <label value="• Section 2: Batches pending Courtesy / Legal Amount data entry"
-                           sclass="page-subtitle"
-                           style="color:#334155;" />
-
-                    <label value="• Section 3: Cheques blocked due to scan defects or unread codelines"
-                           sclass="page-subtitle"
-                           style="color:#334155;" />
-
-                    <label value="• Section 4: Balanced batches cleared and submitted to Checker"
-                           sclass="page-subtitle"
-                           style="color:#334155;" />
-
-                </vlayout>
-
-            </vlayout>
+    
 
 
             <!-- Export Buttons -->
@@ -119,20 +88,15 @@
                             margin-top:12px;">
 
                 <button id="btnExportCsv"
-                        label="DOWNLOAD CSV"
+                        label="Download CSV"
                         height="38px"
-                        style="background-color:#0F766E;
-                               color:#FFFFFF;
-                               font-weight:600;
-                               border-radius:4px;
-                               padding:0 18px;"
-                        iconSclass="z-icon-file-text-o" />
+                        sclass="btn-primary" />
 
                 <button id="btnExportPdf"
-                        label="DOWNLOAD PDF REPORT"
+                        label="Download PDF"
                         height="38px"
-                        sclass="btn-primary"
-                        iconSclass="z-icon-file-pdf-o" />
+                        sclass="btn-outline"
+                        />
 
             </hlayout>
 
