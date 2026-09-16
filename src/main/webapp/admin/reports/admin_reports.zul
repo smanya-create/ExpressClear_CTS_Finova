@@ -65,8 +65,8 @@
                         <vlayout spacing="8px">
                             <label value="DOWNLOAD FORMAT" sclass="field-label" />
                             <hlayout spacing="14px">
-                                <button id="btnExportCsv" label="DOWNLOAD CSV REPORT" sclass="btn-primary" height="38px" />
-                                <button id="btnExportPdf" label="DOWNLOAD PDF REPORT" sclass="btn-outline" height="38px" />
+                                <button id="btnExportCsv" label="Download CSV" sclass="btn-primary" height="38px" />
+                                <button id="btnExportPdf" label="Download PDF" sclass="btn-outline" height="38px" />
                             </hlayout>
                         </vlayout>
 

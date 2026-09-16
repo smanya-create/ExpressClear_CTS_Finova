@@ -111,48 +111,46 @@
 }
 
 /* --- Action Buttons --- */
+/* --- Action Buttons (Download CSV & PDF) --- */
 .btn-primary {
     background-color: #173b61 !important;
     color: #ffffff !important;
     font-weight: 700 !important;
     font-size: 11.5px !important;
-    letter-spacing: 0.6px !important;
-    border: 1px solid #173b61 !important;
+    letter-spacing: 0.5px !important;
+    border: 1px solid #102d4f !important;
     border-radius: 6px !important;
-    padding: 0 22px !important;
+    padding: 0 18px !important;
     cursor: pointer !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
+    transition: all 0.15s ease-in-out !important;
+    text-transform: none !important;
 }
 
 .btn-primary:hover {
     background-color: #0f2844 !important;
     border-color: #0f2844 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.15) !important;
-}
-
-.btn-primary:active {
-    background-color: #081a2f !important;
-    transform: translateY(0);
 }
 
 .btn-outline {
     background-color: #ffffff !important;
-    color: #334155 !important;
+    color: #173b61 !important;
     font-weight: 700 !important;
     font-size: 11.5px !important;
-    letter-spacing: 0.6px !important;
+    letter-spacing: 0.5px !important;
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 6px !important;
-    padding: 0 20px !important;
+    padding: 0 18px !important;
     cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     transition: all 0.15s ease-in-out !important;
+    text-transform: none !important;
 }
 
 .btn-outline:hover {
-    background-color: #f1f5f9 !important;
-    border-color: #94a3b8 !important;
+    background-color: #f8fafc !important;
+    border-color: #173b61 !important;
+    color: #0f2844 !important;
 }
 
 .btn-secondary {
