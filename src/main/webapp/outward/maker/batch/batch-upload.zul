@@ -1,128 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?page title="CTS - Outward Processing" contentType="text/html;charset=UTF-8"?>
+
 <zk>
-	    <style src="/css/outward/batch-upload.css"/>
-	
+
+    <style src="/css/outward/batch-upload.css"/>
+
     <window id="winBatchUpload"
             apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchUploadController"
-            title="Batch Upload"
             width="100%"
             height="100%"
             border="none"
             sclass="batch-upload-window">
 
-        <style src="/outward/maker/batch-upload/batch-upload.css"/>
+        <vlayout width="100%"
+                 spacing="15px"
+                 sclass="batch-upload-page">
 
-        <div width="100%"
-             height="100%"
-             style="overflow:auto;">
+            <!-- BATCH UPLOAD SECTION -->
+            <groupbox id="grpBatchUpload"
+                      width="100%"
+                      closable="false">
+                <caption label="Batch Upload"/>
+                <vlayout width="100%" spacing="10px">
+                    <hlayout width="100%" spacing="10px">
+                        <vlayout width="250px">
+                            <label value="Expected Total Cheques"/>
+                            <intbox id="txtExpectedTotalCheques" width="100%"/>
+                        </vlayout>
+                        <vlayout width="250px">
+                            <label value="Expected Total Cheque Amount"/>
+                            <decimalbox id="txtExpectedTotalChequeAmount" width="100%"/>
+                        </vlayout>
+                    </hlayout>
+                    <hlayout width="100%" spacing="10px">
+                    <label value = "Browse Zip Folder"/>
+                        <textbox id="txtChequeFolder" width="500px" readonly="true"/>
+                        <button id="btnBrowse"
+                                label="Browse"
+                                sclass="btn-browse"
+                                upload="true,maxsize=104857600"/>
+                        <button id="btnValidateBatch"
+                                label="Validate Batch"
+                                disabled="true"/>
+                    </hlayout>
+                </vlayout>
+            </groupbox>
 
-            <vlayout width="100%"
-                     spacing="15px"
-                     sclass="batch-upload-page">
+            <!-- SUCCESS MESSAGE BANNER -->
+            <div id="divSuccessMessage" visible="false" width="100%">
+                <label id="lblSuccessText" value="" width="100%"/>
+            </div>
 
-                <groupbox id="grpBatchUpload"
-                          width="100%"
-                          closable="false">
-                    <caption label="Batch Upload"/>
-                    <vlayout width="100%" spacing="10px">
-                        <hlayout width="100%" spacing="10px">
-                            <vlayout width="250px">
-                                <label value="Expected Total Cheques"/>
-                                <intbox id="txtExpectedTotalCheques" width="100%"/>
-                            </vlayout>
-                            <vlayout width="250px">
-                                <label value="Expected Total Cheque Amount"/>
-                                <decimalbox id="txtExpectedTotalChequeAmount" width="100%"/>
-                            </vlayout>
-                        </hlayout>
-                        <hlayout width="100%" spacing="10px">
-                            <textbox id="txtChequeFolder" width="500px" readonly="true"/>
-                            <button id="btnBrowse"
-                                    label="Browse"
-                                    sclass="btn-browse"
-                                    upload="true,maxsize=104857600"/>
-                            <button id="btnValidateBatch"
-                                    label="Validate Batch"
-                                    disabled="true"/>
-                        </hlayout>
-                    </vlayout>
-                </groupbox>
+            <!-- BATCH DETAILS TABLE -->
+            <groupbox id="batchDetailsGroup"
+                      width="100%"
+                      visible="false"
+                      closable="false">
+                <caption label="Batch Details"/>
+                <listbox id="lstBatchDetails" width="100%">
+                    <listhead>
+                        <listheader label="Batch ID" width="15%" align="left"/>
+                        <listheader label="Scan Date" width="15%" align="center"/>
+                        <listheader label="Total Cheques" width="15%" align="center"/>
+                        <listheader label="MICR Errors" width="15%" align="center"/>
+                        <listheader label="Status" width="15%" align="center"/>
+                        <listheader label="Action" width="25%" align="center"/>
+                    </listhead>
+                </listbox>
+            </groupbox>
 
-                <div id="divSuccessMessage" visible="false" width="100%">
-                    <label id="lblSuccessText" value="" width="100%"/>
-                </div>
+            <!-- CHEQUE DETAILS TABLE -->
+            <groupbox id="grpChequeDetails"
+                      width="100%"
+                      visible="false"
+                      closable="false">
+                <caption label="Cheque Details"/>
+                <vlayout width="100%" spacing="10px">
 
-                <groupbox id="batchDetailsGroup"
-                          width="100%"
-                          visible="false"
-                          closable="false">
-                    <caption label="Batch Details"/>
-                    <listbox id="lstBatchDetails"
+                    <hlayout width="100%" spacing="10px">
+                        <label id="lblChequeFilter" value="Filter:"/>
+                        <combobox id="cmbChequeFilter"
+                                  width="220px"
+                                  readonly="true">
+                            <comboitem label="All Cheques" value="ALL"/>
+                            <comboitem label="Normal Cheques" value="NORMAL"/>
+                            <comboitem label="MICR Repair Cheques" value="MICR_REPAIR"/>
+                        </combobox>
+                        <label id="lblTotalCheques" value="Total Cheques: 0"/>
+                    </hlayout>
+
+                    <listbox id="lstCheques"
                              width="100%"
-                             height="220px">
+                             sclass="cheque-listbox">
                         <listhead>
-                            <listheader label="Batch ID" width="15%"/>
-                            <listheader label="Scan Date" width="15%"/>
-                            <listheader label="Total Cheques" width="15%"/>
-                            <listheader label="MICR Errors" width="15%"/>
-                            <listheader label="Status" width="15%"/>
-                            <listheader label="Action" width="25%"/>
+                            <listheader label="Cheque ID" width="15%" align="left"/>
+                            <listheader label="Cheque Number" width="15%" align="center"/>
+                            <listheader label="Amount" width="15%" align="center"/>
+                            <listheader label="Status" width="15%" align="center"/>
+                            <listheader label="MICR" width="10%" align="center"/>
+                            <listheader label="Action" width="30%" align="center"/>
                         </listhead>
                     </listbox>
-                </groupbox>
 
-                <groupbox id="grpChequeDetails"
-                          width="100%"
-                          visible="false"
-                          closable="false">
-                    <caption label="Cheque Details"/>
-                    <vlayout width="100%" spacing="10px">
+                    <hlayout width="100%"
+                             spacing="10px"
+                             sclass="cheque-pagination">
+                        <button id="btnChequePrevious"
+                                label="Previous"
+                                disabled="true"/>
+                        <label id="lblChequePage" value="Page 1"/>
+                        <button id="btnChequeNext"
+                                label="Next"
+                                disabled="true"/>
+                    </hlayout>
 
-                        <hlayout width="100%" spacing="10px">
-                            <label id="lblChequeFilter" value="Filter:"/>
-                            <combobox id="cmbChequeFilter"
-                                      width="220px"
-                                      readonly="true">
-                                <comboitem label="All Cheques" value="ALL"/>
-                                <comboitem label="Normal Cheques" value="NORMAL"/>
-                                <comboitem label="MICR Repair Cheques" value="MICR_REPAIR"/>
-                            </combobox>
-                            <label id="lblTotalCheques" value="Total Cheques: 0"/>
-                        </hlayout>
+                </vlayout>
+            </groupbox>
 
-                        <listbox id="lstCheques"
-                                 width="100%"
-                                 height="230px"
-                                 sclass="cheque-listbox">
-                            <listhead>
-                                <listheader label="Cheque ID" width="15%"/>
-                                <listheader label="Cheque Number" width="15%"/>
-                                <listheader label="Amount" width="15%"/>
-                                <listheader label="Status" width="15%"/>
-                                <listheader label="MICR" width="10%"/>
-                                <listheader label="Action" width="30%"/>
-                            </listhead>
-                        </listbox>
-
-                        <hlayout width="100%"
-                                 spacing="10px"
-                                 sclass="cheque-pagination">
-                            <button id="btnChequePrevious"
-                                    label="Previous"
-                                    disabled="true"/>
-                            <label id="lblChequePage" value="Page 1"/>
-                            <button id="btnChequeNext"
-                                    label="Next"
-                                    disabled="true"/>
-                        </hlayout>
-
-                    </vlayout>
-                </groupbox>
-
-            </vlayout>
-        </div>
+        </vlayout>
     </window>
-
 </zk>
