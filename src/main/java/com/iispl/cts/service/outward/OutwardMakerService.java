@@ -5,6 +5,8 @@ import java.util.List;
 import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.dto.MicrRepairChequeDTO;
 import com.iispl.cts.entity.outward.RejectedReason;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
 
 public interface OutwardMakerService {
 
@@ -35,5 +37,9 @@ public interface OutwardMakerService {
 	List<RejectedReason> getRejectedReasons();
 
 	boolean existsChequeNumberAndAccount(String chequeNumber, String accountNumber);
+	
+	ScanBatch getMakerBatch(String batchId);
+
+	List<ScanCheque> getMakerBatchCheques(String batchId);
 
 }

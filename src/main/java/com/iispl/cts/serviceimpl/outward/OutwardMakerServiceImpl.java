@@ -9,190 +9,158 @@ import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.dto.MicrRepairChequeDTO;
 
 import com.iispl.cts.entity.outward.RejectedReason;
-
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
 import com.iispl.cts.service.outward.OutwardMakerService;
 
-public class OutwardMakerServiceImpl
-        implements OutwardMakerService {
+public class OutwardMakerServiceImpl implements OutwardMakerService {
 
-    // =========================================================
-    // DAO
-    // =========================================================
+	// =========================================================
+	// DAO
+	// =========================================================
 
-    private final OutwardMakerDAO outwardMakerDAO;
+	private final OutwardMakerDAO outwardMakerDAO;
 
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
+	// =========================================================
+	// CONSTRUCTOR
+	// =========================================================
 
-    public OutwardMakerServiceImpl() {
+	public OutwardMakerServiceImpl() {
 
-        outwardMakerDAO =
-                new OutwardMakerDAOImpl();
-    }
+		outwardMakerDAO = new OutwardMakerDAOImpl();
+	}
 
-    // =========================================================
-    // SCAN MICR REPAIR BATCHES
-    // =========================================================
+	// =========================================================
+	// SCAN MICR REPAIR BATCHES
+	// =========================================================
 
-    @Override
-    public List<MicrRepairBatch>
-            getScanMicrRepairBatches() {
+	@Override
+	public List<MicrRepairBatch> getScanMicrRepairBatches() {
 
-        System.out.println(
-                "========== SCAN MICR REPAIR SERVICE CALLED ==========");
+		System.out.println("========== SCAN MICR REPAIR SERVICE CALLED ==========");
 
-        List<MicrRepairBatch> batches =
-                outwardMakerDAO
-                        .getScanMicrRepairBatches();
+		List<MicrRepairBatch> batches = outwardMakerDAO.getScanMicrRepairBatches();
 
-        System.out.println(
-                "========== SCAN MICR REPAIR DAO RETURNED ==========");
+		System.out.println("========== SCAN MICR REPAIR DAO RETURNED ==========");
 
-        System.out.println(
-                "Batch count = "
-                + (batches == null
-                        ? "NULL"
-                        : batches.size()));
+		System.out.println("Batch count = " + (batches == null ? "NULL" : batches.size()));
 
-        return batches;
-    }
+		return batches;
+	}
 
-    // =========================================================
-    // SCAN MICR REPAIR CHEQUES
-    // =========================================================
+	// =========================================================
+	// SCAN MICR REPAIR CHEQUES
+	// =========================================================
 
-    @Override
-    public List<MicrRepairChequeDTO>
-            getScanMicrRepairCheques(
-                    String scannedBatchId) {
+	@Override
+	public List<MicrRepairChequeDTO> getScanMicrRepairCheques(String scannedBatchId) {
 
-        return outwardMakerDAO
-                .getScanMicrRepairCheques(
-                        scannedBatchId);
-    }
+		return outwardMakerDAO.getScanMicrRepairCheques(scannedBatchId);
+	}
 
-    // =========================================================
-    // SAVE SCAN MICR REPAIR
-    // =========================================================
+	// =========================================================
+	// SAVE SCAN MICR REPAIR
+	// =========================================================
 
-    @Override
-    public void saveScanMicrRepair(
-            MicrRepairChequeDTO cheque) {
+	@Override
+	public void saveScanMicrRepair(MicrRepairChequeDTO cheque) {
 
-        if (cheque == null) {
+		if (cheque == null) {
 
-            throw new IllegalArgumentException(
-                    "Scan MICR repair cheque cannot be null");
-        }
+			throw new IllegalArgumentException("Scan MICR repair cheque cannot be null");
+		}
 
-        outwardMakerDAO
-                .saveScanMicrRepair(cheque);
-    }
+		outwardMakerDAO.saveScanMicrRepair(cheque);
+	}
 
-    // =========================================================
-    // SUBMIT SCAN MICR REPAIR
-    // =========================================================
+	// =========================================================
+	// SUBMIT SCAN MICR REPAIR
+	// =========================================================
 
-    @Override
-    public void submitScanMicrRepair(
-            List<MicrRepairChequeDTO> cheques) {
+	@Override
+	public void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques) {
 
-        if (cheques == null
-                || cheques.isEmpty()) {
+		if (cheques == null || cheques.isEmpty()) {
 
-            throw new IllegalArgumentException(
-                    "Scan MICR repair cheque list "
-                    + "cannot be null or empty");
-        }
+			throw new IllegalArgumentException("Scan MICR repair cheque list " + "cannot be null or empty");
+		}
 
-        outwardMakerDAO
-                .submitScanMicrRepair(cheques);
-    }
+		outwardMakerDAO.submitScanMicrRepair(cheques);
+	}
 
-    // =========================================================
-    // OUTWARD MICR REPAIR BATCHES
-    // =========================================================
+	// =========================================================
+	// OUTWARD MICR REPAIR BATCHES
+	// =========================================================
 
-    @Override
-    public List<MicrRepairBatch>
-            getOutwardMicrRepairBatches() {
+	@Override
+	public List<MicrRepairBatch> getOutwardMicrRepairBatches() {
 
-        return outwardMakerDAO
-                .getOutwardMicrRepairBatches();
-    }
+		return outwardMakerDAO.getOutwardMicrRepairBatches();
+	}
 
-    // =========================================================
-    // OUTWARD MICR REPAIR CHEQUES
-    // =========================================================
+	// =========================================================
+	// OUTWARD MICR REPAIR CHEQUES
+	// =========================================================
 
-    @Override
-    public List<MicrRepairChequeDTO>
-            getOutwardMicrRepairCheques(
-                    String outwardBatchId) {
+	@Override
+	public List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(String outwardBatchId) {
 
-        return outwardMakerDAO
-                .getOutwardMicrRepairCheques(
-                        outwardBatchId);
-    }
+		return outwardMakerDAO.getOutwardMicrRepairCheques(outwardBatchId);
+	}
 
-    // =========================================================
-    // SAVE OUTWARD MICR REPAIR
-    // =========================================================
+	// =========================================================
+	// SAVE OUTWARD MICR REPAIR
+	// =========================================================
 
-    @Override
-    public void saveOutwardMicrRepair(
-            MicrRepairChequeDTO cheque) {
+	@Override
+	public void saveOutwardMicrRepair(MicrRepairChequeDTO cheque) {
 
-        if (cheque == null) {
+		if (cheque == null) {
 
-            throw new IllegalArgumentException(
-                    "Outward MICR repair cheque cannot be null");
-        }
+			throw new IllegalArgumentException("Outward MICR repair cheque cannot be null");
+		}
 
-        outwardMakerDAO
-                .saveOutwardMicrRepair(cheque);
-    }
+		outwardMakerDAO.saveOutwardMicrRepair(cheque);
+	}
 
-    // =========================================================
-    // SUBMIT OUTWARD MICR REPAIR
-    // =========================================================
+	// =========================================================
+	// SUBMIT OUTWARD MICR REPAIR
+	// =========================================================
 
-    @Override
-    public void submitOutwardMicrRepair(
-            List<MicrRepairChequeDTO> cheques) {
+	@Override
+	public void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques) {
 
-        if (cheques == null
-                || cheques.isEmpty()) {
+		if (cheques == null || cheques.isEmpty()) {
 
-            throw new IllegalArgumentException(
-                    "Outward MICR repair cheque list "
-                    + "cannot be null or empty");
-        }
+			throw new IllegalArgumentException("Outward MICR repair cheque list " + "cannot be null or empty");
+		}
 
-        outwardMakerDAO
-                .submitOutwardMicrRepair(cheques);
-    }
+		outwardMakerDAO.submitOutwardMicrRepair(cheques);
+	}
 
-    // =========================================================
-    // GET REJECTED REASONS
-    // =========================================================
+	// =========================================================
+	// GET REJECTED REASONS
+	// =========================================================
 
-    @Override
-    public List<RejectedReason>
-            getRejectedReasons() {
+	@Override
+	public List<RejectedReason> getRejectedReasons() {
 
-        return outwardMakerDAO
-                .getRejectedReasons();
-    }
+		return outwardMakerDAO.getRejectedReasons();
+	}
 
-    @Override
-    public boolean existsChequeNumberAndAccount(
-            String chequeNumber,
-            String accountNumber) {
+	@Override
+	public boolean existsChequeNumberAndAccount(String chequeNumber, String accountNumber) {
 
-        return outwardMakerDAO.existsChequeNumberAndAccount(
-                chequeNumber,
-                accountNumber);
-    }
+		return outwardMakerDAO.existsChequeNumberAndAccount(chequeNumber, accountNumber);
+	}
+
+	@Override
+	public ScanBatch getMakerBatch(String batchId) {
+		return outwardMakerDAO.getMakerBatch(batchId);
+	}
+
+	@Override
+	public List<ScanCheque> getMakerBatchCheques(String batchId) {
+		return outwardMakerDAO.getMakerBatchCheques(batchId);
+	}
 }

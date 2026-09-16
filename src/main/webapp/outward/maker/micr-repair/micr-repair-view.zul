@@ -2,12 +2,9 @@
 
 <?page title="CTS - MICR Repair" contentType="text/html;charset=UTF-8"?>
 
-
 <zk>
-	<style src="/css/outward/micr-repair-view.css"/>
-    
-    
 
+    <style src="/css/outward/micr-repair-view.css"/>
 
 
     <div id="micrRepairViewMain"
@@ -29,17 +26,17 @@
 
                 <label id="lblMicrRepairViewTitle"
                        value="MICR REPAIR"
-                       sclass="micr-repair-view-title" />
+                       sclass="micr-repair-view-title"/>
 
                 <label id="lblMicrRepairViewSubtitle"
-                       value="Select a batch requiring MICR repair."
-                       sclass="micr-repair-view-subtitle" />
+                       value="View and manage batches that contain cheques requiring MICR repair."
+                       sclass="micr-repair-view-subtitle"/>
 
             </vlayout>
 
 
             <!-- ================================================= -->
-            <!-- SCANNING BATCHES -->
+            <!-- UNIFIED MICR REPAIR SECTION -->
             <!-- ================================================= -->
 
             <div id="divMicrRepairScanSection"
@@ -47,67 +44,179 @@
                  sclass="micr-repair-section-card"
                  visible="false">
 
-                <vlayout width="100%" spacing="8px">
-
-                    <vlayout spacing="3px">
-
-                        <label id="lblMicrRepairScanTitle"
-                               value="Scanning Batches"
-                               sclass="micr-repair-section-title" />
-
-                        <label id="lblMicrRepairScanSubtitle"
-                               value="Batches from scanning that contain cheques requiring MICR repair."
-                               sclass="micr-repair-section-subtitle" />
-
-                    </vlayout>
+                <vlayout width="100%" spacing="12px">
 
 
-                    <!-- SCAN BATCH TABLE -->
+                    <!-- ================================================= -->
+                    <!-- SEARCH / FILTER AREA -->
+                    <!-- ================================================= -->
 
-                    <grid id="grdMicrRepairScanBatches"
+                    <hlayout id="divMicrRepairFilterBar"
+                             width="100%"
+                             spacing="10px"
+                             valign="bottom"
+                             sclass="micr-repair-filter-bar">
+
+
+                        <!-- SEARCH -->
+
+                        <textbox id="txtMicrRepairSearch"
+                                 hflex="1"
+                                 height="40px"
+                                 placeholder="Search by Batch No, Scan Date, Cheque No, etc..."
+                                 sclass="micr-repair-search"/>
+
+
+                        <!-- SEARCH BUTTON -->
+
+                        <button id="btnMicrRepairSearch"
+                                label="Search"
+                                iconSclass="z-icon-search"
+                                width="120px"
+                                height="40px"
+                                sclass="micr-repair-search-button"/>
+
+
+                        <!-- CLEAR BUTTON -->
+
+                        <button id="btnMicrRepairClear"
+                                label="Clear"
+                                iconSclass="z-icon-refresh"
+                                width="115px"
+                                height="40px"
+                                sclass="micr-repair-clear-button"/>
+
+
+                        <!-- BATCH TYPE -->
+
+                        <vlayout width="200px"
+                                 spacing="3px"
+                                 sclass="micr-repair-batch-type-container">
+
+                            <label id="lblMicrRepairBatchType"
+                                   value="Batch Type"
+                                   sclass="micr-repair-filter-label"/>
+
+                            <combobox id="cmbMicrRepairBatchType"
+                                      width="100%"
+                                      height="40px"
+                                      readonly="true"
+                                      autodrop="true"
+                                      sclass="micr-repair-batch-type">
+
+                                <comboitem label="All Batches"
+                                           value="ALL"/>
+
+                                <comboitem label="Returned by Checker"
+                                           value="RETURNED_BY_CHECKER"/>
+
+                                <comboitem label="Pending Maker Process"
+                                           value="PENDING_MAKER_PROCESS"/>
+
+                            </combobox>
+
+                        </vlayout>
+
+                    </hlayout>
+
+
+                    <!-- ================================================= -->
+                    <!-- UNIFIED BATCH TABLE -->
+                    <!-- ================================================= -->
+
+                    <grid id="grdMicrRepairBatches"
                           width="100%"
                           sclass="micr-repair-grid">
 
                         <columns sizable="false">
 
-                            <column id="colMicrRepairScanBatch"
-                                    label="BATCH"
-                                    width="18%" />
+                            <column id="colMicrRepairBatch"
+                                    label="BATCH NO"
+                                    width="18%"/>
 
-                            <column id="colMicrRepairScanDate"
+                            <column id="colMicrRepairDate"
                                     label="SCAN DATE"
-                                    width="16%" />
+                                    width="16%"/>
 
-                            <column id="colMicrRepairScanTotal"
+                            <column id="colMicrRepairTotal"
                                     label="TOTAL CHEQUES"
-                                    width="18%" />
+                                    width="18%"/>
 
-                            <column id="colMicrRepairScanErrors"
+                            <column id="colMicrRepairErrors"
                                     label="MICR ERRORS"
-                                    width="16%" />
+                                    width="16%"/>
 
-                            <column id="colMicrRepairScanStatus"
+                            <column id="colMicrRepairStatus"
                                     label="STATUS"
-                                    width="16%" />
+                                    width="16%"/>
 
-                            <column id="colMicrRepairScanAction"
+                            <column id="colMicrRepairAction"
                                     label="ACTION"
-                                    width="16%" />
+                                    width="16%"/>
 
                         </columns>
 
-                        <rows id="rowsMicrRepairScanBatches" />
+                        <!--
+                            Existing controller currently populates
+                            rowsMicrRepairScanBatches.
+
+                            This remains the main rows component so
+                            existing OPEN functionality can be retained.
+                        -->
+
+                        <rows id="rowsMicrRepairScanBatches"/>
 
                     </grid>
 
 
-                    <!-- SCAN PAGINATION -->
+                    <!-- ================================================= -->
+                    <!-- PAGINATION -->
+                    <!-- ================================================= -->
 
-                    <paging id="pagingMicrRepairScan"
-                            pageSize="5"
-                            detailed="true"
-                            visible="false"
-                            sclass="micr-repair-paging" />
+                    <hlayout id="divMicrRepairPagination"
+                             width="100%"
+                             valign="middle"
+                             spacing="10px"
+                             sclass="micr-repair-pagination-container">
+
+                        <label id="lblMicrRepairShowing"
+                               value="Showing 1 - 0 of 0 batches"
+                               hflex="1"
+                               sclass="micr-repair-showing-text"/>
+
+                        <paging id="pagingMicrRepairScan"
+                                pageSize="10"
+                                detailed="true"
+                                visible="false"
+                                sclass="micr-repair-paging"/>
+
+                        <hlayout spacing="5px"
+                                 valign="middle"
+                                 sclass="micr-repair-rows-per-page">
+
+                            <label value="Rows per page:"
+                                   sclass="micr-repair-rows-label"/>
+
+                            <combobox id="cmbMicrRepairRowsPerPage"
+                                      width="85px"
+                                      readonly="true"
+                                      autodrop="true"
+                                      sclass="micr-repair-page-size">
+
+                                <comboitem label="5"
+                                           value="5"/>
+
+                                <comboitem label="10"
+                                           value="10"/>
+
+                                <comboitem label="20"
+                                           value="20"/>
+
+                            </combobox>
+
+                        </hlayout>
+
+                    </hlayout>
 
                 </vlayout>
 
@@ -115,75 +224,59 @@
 
 
             <!-- ================================================= -->
-            <!-- CHECKER RETURNED BATCHES -->
+            <!-- CHECKER SECTION - COMPATIBILITY COMPONENTS -->
             <!-- ================================================= -->
+            <!--
+                The existing controller currently expects these
+                components to exist.
+
+                They are kept here so the current controller does
+                not fail with "Fellow component not found".
+
+                They are not displayed as a second table.
+                Later, the controller will combine scan batches
+                and checker-returned batches into the single grid
+                above.
+            -->
 
             <div id="divMicrRepairCheckerSection"
                  width="100%"
-                 sclass="micr-repair-section-card"
                  visible="false">
 
-                <vlayout width="100%" spacing="8px">
+                <vlayout width="100%">
 
-                    <vlayout spacing="3px">
+                    <label id="lblMicrRepairCheckerTitle"
+                           value="Batches Returned by Checker"
+                           visible="false"/>
 
-                        <label id="lblMicrRepairCheckerTitle"
-                               value="Batches Returned by Checker"
-                               sclass="micr-repair-section-title" />
+                    <label id="lblMicrRepairCheckerSubtitle"
+                           value="Batches returned by Checker to Maker that require MICR repair."
+                           visible="false"/>
 
-                        <label id="lblMicrRepairCheckerSubtitle"
-                               value="Batches returned by Checker to Maker that require MICR repair."
-                               sclass="micr-repair-section-subtitle" />
-
-                    </vlayout>
-
-
-                    <!-- CHECKER RETURNED TABLE -->
+                    <!-- Hidden compatibility rows -->
 
                     <grid id="grdMicrRepairCheckerBatches"
-                          width="100%"
-                          sclass="micr-repair-grid">
+                          visible="false"
+                          width="1px"
+                          height="1px">
 
-                        <columns sizable="false">
-
-                            <column id="colMicrRepairCheckerBatch"
-                                    label="BATCH"
-                                    width="18%" />
-
-                            <column id="colMicrRepairCheckerDate"
-                                    label="SCAN DATE"
-                                    width="16%" />
-
-                            <column id="colMicrRepairCheckerTotal"
-                                    label="TOTAL CHEQUES"
-                                    width="18%" />
-
-                            <column id="colMicrRepairCheckerErrors"
-                                    label="MICR ERRORS"
-                                    width="16%" />
-
-                            <column id="colMicrRepairCheckerStatus"
-                                    label="STATUS"
-                                    width="16%" />
-
-                            <column id="colMicrRepairCheckerAction"
-                                    label="ACTION"
-                                    width="16%" />
-
+                        <columns>
+                            <column label="BATCH"/>
+                            <column label="SCAN DATE"/>
+                            <column label="TOTAL CHEQUES"/>
+                            <column label="MICR ERRORS"/>
+                            <column label="STATUS"/>
+                            <column label="ACTION"/>
                         </columns>
 
-                        <rows id="rowsMicrRepairCheckerBatches" />
+                        <rows id="rowsMicrRepairCheckerBatches"/>
 
                     </grid>
 
 
-                    <!-- CHECKER PAGINATION -->
-
                     <paging id="pagingMicrRepairChecker"
-                            pageSize="5"
-                            detailed="true"
-                            visible="false"
-                            sclass="micr-repair-paging" />
+                            pageSize="10"
+                            visible="false"/>
 
                 </vlayout>
 
@@ -204,11 +297,11 @@
 
                     <label id="lblMicrRepairEmptyTitle"
                            value="No MICR repair required"
-                           sclass="micr-repair-empty-title" />
+                           sclass="micr-repair-empty-title"/>
 
                     <label id="lblMicrRepairEmptyMessage"
                            value="There are currently no batches requiring MICR repair."
-                           sclass="micr-repair-empty-message" />
+                           sclass="micr-repair-empty-message"/>
 
                 </vlayout>
 

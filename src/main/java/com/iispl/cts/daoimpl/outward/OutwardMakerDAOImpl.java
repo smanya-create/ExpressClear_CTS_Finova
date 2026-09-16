@@ -12,6 +12,8 @@ import com.iispl.cts.dao.outward.OutwardMakerDAO;
 import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.dto.MicrRepairChequeDTO;
 import com.iispl.cts.entity.outward.RejectedReason;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
 
 public class OutwardMakerDAOImpl implements OutwardMakerDAO {
 
@@ -37,8 +39,9 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "ON sc.scanned_batch_id = sb.scanned_batch_id "
               + "WHERE UPPER(TRIM(sc.cheque_status)) IN ("
               + "'PENDING_MICR_REPAIR', "
-              + "'MICR_REPAIRED', "
-              + "'MICR_REJECTED'"
+                        + "'MICR_REJECTION_PENDING', "
+              + "'MICR_REPAIRED' "
+        
               + ") "
               + "GROUP BY "
               + "sb.scanned_batch_id, "
@@ -147,8 +150,9 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "WHERE sc.scanned_batch_id = ? "
               + "AND UPPER(TRIM(sc.cheque_status)) IN ("
               + "'PENDING_MICR_REPAIR', "
-              + "'MICR_REPAIRED', "
-              + "'MICR_REJECTED'"
+                        + "'MICR_REJECTION_PENDING', "
+              + "'MICR_REPAIRED'"
+            
               + ") "
               + "ORDER BY sc.scanned_cheque_id";
 
@@ -333,7 +337,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
                 // INSERT REJECTION REQUEST
                 // =================================================
 
-                if ("MICR_REJECTED".equalsIgnoreCase(
+                if ("MICR_REJECTION_PENDING".equalsIgnoreCase(
                         cheque.getChequeStatus())) {
 
                     try (PreparedStatement statement =
@@ -513,6 +517,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "ON oc.outward_batch_id = ob.outward_batch_id "
               + "WHERE UPPER(TRIM(oc.cheque_status)) IN ("
               + "'PENDING_MICR_REPAIR', "
+                        + "'MICR_REJECTION_PENDING', "
               + "'MICR_REPAIRED', "
               + "'MICR_REJECTED'"
               + ") "
@@ -629,6 +634,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "WHERE oc.outward_batch_id = ? "
               + "AND UPPER(TRIM(oc.cheque_status)) IN ("
               + "'PENDING_MICR_REPAIR', "
+                        + "'MICR_REJECTION_PENDING', "
               + "'MICR_REPAIRED', "
               + "'MICR_REJECTED'"
               + ") "
@@ -815,7 +821,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
                 // INSERT REJECTION REQUEST
                 // =================================================
 
-                if ("MICR_REJECTED".equalsIgnoreCase(
+                if ("MICR_REJECTION_PENDING".equalsIgnoreCase(
                         cheque.getChequeStatus())) {
 
                     try (PreparedStatement statement =
@@ -1104,5 +1110,243 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
         }
 
         return false;
+    }
+
+    @Override
+    public ScanBatch getMakerBatch(String batchId) {
+
+        if (batchId == null
+                || batchId.trim().isEmpty()) {
+
+            return null;
+        }
+
+        String sql =
+                "SELECT "
+              + "sb.scanned_batch_id, "
+              + "sb.batch_reference_id, "
+              + "sb.actual_cheque_count, "
+              + "sb.actual_total_amount, "
+              + "sb.staging_status, "
+              + "sb.batch_status, "
+              + "sb.uploaded_by, "
+              + "sb.uploaded_at "
+              + "FROM scan_batch sb "
+              + "WHERE sb.scanned_batch_id = ? "
+              + "AND NOT EXISTS ("
+              + "    SELECT 1 "
+              + "    FROM outward_batch ob "
+              + "    WHERE ob.outward_batch_id = sb.scanned_batch_id"
+              + ")";
+
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
+
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            preparedStatement.setString(
+                    1,
+                    batchId.trim());
+
+            try (ResultSet resultSet =
+                    preparedStatement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    ScanBatch batch =
+                            new ScanBatch();
+
+                    batch.setScannedBatchId(
+                            resultSet.getString(
+                                    "scanned_batch_id"));
+
+                    batch.setBatchReferenceId(
+                            resultSet.getString(
+                                    "batch_reference_id"));
+
+                    batch.setActualChequeCount(
+                            resultSet.getInt(
+                                    "actual_cheque_count"));
+
+                    batch.setActualTotalAmount(
+                            resultSet.getBigDecimal(
+                                    "actual_total_amount"));
+
+                    batch.setStagingStatus(
+                            resultSet.getString(
+                                    "staging_status"));
+
+                    batch.setBatchStatus(
+                            resultSet.getString(
+                                    "batch_status"));
+
+                    batch.setUploadedBy(
+                            resultSet.getString(
+                                    "uploaded_by"));
+
+                    batch.setUploadedAt(
+                            resultSet.getTimestamp(
+                                    "uploaded_at"));
+
+                    return batch;
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Unable to fetch maker batch: "
+                  + batchId,
+                    e);
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<ScanCheque> getMakerBatchCheques(String batchId) {
+
+        if (batchId == null
+                || batchId.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Batch ID cannot be null or empty");
+        }
+
+        List<ScanCheque> chequeList =
+                new ArrayList<ScanCheque>();
+
+        String sql =
+                "SELECT "
+              + "sc.scanned_cheque_id, "
+              + "sc.scanned_batch_id, "
+              + "sc.cheque_number, "
+              + "sc.micr_code, "
+              + "sc.drawee_name, "
+              + "sc.drawee_account_number, "
+              + "sc.payee_name, "
+              + "sc.payee_account_number, "
+              + "sc.cheque_amount, "
+              + "sc.cheque_date, "
+              + "sc.cheque_status, "
+              + "sc.account_id, "
+              + "sc.created_at, "
+              + "sc.city_code, "
+              + "sc.bank_code, "
+              + "sc.branch_code, "
+              + "sc.cheque_image_front, "
+              + "sc.cheque_image_back "
+              + "FROM scan_cheque sc "
+              + "WHERE sc.scanned_batch_id = ? "
+              + "ORDER BY sc.scanned_cheque_id";
+
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
+
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            preparedStatement.setString(
+                    1,
+                    batchId.trim());
+
+            try (ResultSet resultSet =
+                    preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+
+                    ScanCheque cheque =
+                            new ScanCheque();
+
+                    cheque.setScannedChequeId(
+                            resultSet.getString(
+                                    "scanned_cheque_id"));
+
+                    cheque.setScannedBatchId(
+                            resultSet.getString(
+                                    "scanned_batch_id"));
+
+                    cheque.setChequeNumber(
+                            resultSet.getString(
+                                    "cheque_number"));
+
+                    cheque.setMicrCode(
+                            resultSet.getString(
+                                    "micr_code"));
+
+                    cheque.setDraweeName(
+                            resultSet.getString(
+                                    "drawee_name"));
+
+                    cheque.setDraweeAccountNumber(
+                            resultSet.getString(
+                                    "drawee_account_number"));
+
+                    cheque.setPayeeName(
+                            resultSet.getString(
+                                    "payee_name"));
+
+                    cheque.setPayeeAccountNumber(
+                            resultSet.getString(
+                                    "payee_account_number"));
+
+                    cheque.setChequeAmount(
+                            resultSet.getBigDecimal(
+                                    "cheque_amount"));
+
+                    cheque.setChequeDate(
+                            resultSet.getDate(
+                                    "cheque_date"));
+
+                    cheque.setChequeStatus(
+                            resultSet.getString(
+                                    "cheque_status"));
+
+                    cheque.setAccountId(
+                            resultSet.getString(
+                                    "account_id"));
+
+                    cheque.setCreatedAt(
+                            resultSet.getTimestamp(
+                                    "created_at"));
+
+                    cheque.setCityCode(
+                            resultSet.getString(
+                                    "city_code"));
+
+                    cheque.setBankCode(
+                            resultSet.getString(
+                                    "bank_code"));
+
+                    cheque.setBranchCode(
+                            resultSet.getString(
+                                    "branch_code"));
+
+                    cheque.setChequeImageFront(
+                            resultSet.getString(
+                                    "cheque_image_front"));
+
+                    cheque.setChequeImageBack(
+                            resultSet.getString(
+                                    "cheque_image_back"));
+
+                    chequeList.add(cheque);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Unable to fetch maker batch cheques "
+                  + "for batch: " + batchId,
+                    e);
+        }
+
+        return chequeList;
     }
 }

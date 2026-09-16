@@ -1,4 +1,3 @@
-
 package com.iispl.cts.controller.outward.maker;
 
 import java.io.File;
@@ -13,6 +12,8 @@ import java.util.List;
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -40,13 +41,23 @@ import com.iispl.cts.entity.outward.ScanCheque;
 import com.iispl.cts.outward.batchvalidator.MicrCodeHelper;
 import com.iispl.cts.parser.BatchXmlParser;
 import com.iispl.cts.service.outward.BatchValidationService;
+import com.iispl.cts.service.outward.OutwardMakerService;
 import com.iispl.cts.service.outward.ScanService;
 import com.iispl.cts.serviceimpl.outward.BatchValidationServiceImpl;
+import com.iispl.cts.serviceimpl.outward.OutwardMakerServiceImpl;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
 
-public class OutwardMakerBatchUploadController implements Composer<Component> {
+public class OutwardMakerBatchUploadController
+        implements Composer<Component> {
 
     private static final long serialVersionUID = 1L;
+
+    // =========================================================
+    // SESSION
+    // =========================================================
+
+    private static final String SESSION_CURRENT_BATCH_ID =
+            "OUTWARD_MAKER_CURRENT_BATCH_ID";
 
     // =========================================================
     // ZUL COMPONENTS
@@ -109,6 +120,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     private BatchValidationService batchValidationService;
 
+    private OutwardMakerService outwardMakerService;
+
     // =========================================================
     // UPLOADED ZIP
     // =========================================================
@@ -126,13 +139,15 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
     // =========================================================
 
     @Override
-    public void doAfterCompose(Component component) throws Exception {
+    public void doAfterCompose(
+            Component component) throws Exception {
 
         // =====================================================
         // STORE PAGE ROOT
         // =====================================================
 
-        pageRoot = component.getPage().getFirstRoot();
+        pageRoot =
+                component.getPage().getFirstRoot();
 
         // =====================================================
         // GET ZUL COMPONENTS
@@ -212,6 +227,9 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         batchValidationService =
                 new BatchValidationServiceImpl();
 
+        outwardMakerService =
+                new OutwardMakerServiceImpl();
+
         // =====================================================
         // INITIAL PAGE STATE
         // =====================================================
@@ -237,6 +255,12 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         btnChequePrevious.setDisabled(true);
 
         btnChequeNext.setDisabled(true);
+
+        // =====================================================
+        // LOAD CURRENT SESSION BATCH
+        // =====================================================
+
+        loadCurrentSessionBatch();
 
         // =====================================================
         // CHEQUE FILTER
@@ -328,6 +352,93 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                         validateBatch();
                     }
                 });
+    }
+
+    // =========================================================
+    // LOAD CURRENT SESSION BATCH
+    // =========================================================
+
+    private void loadCurrentSessionBatch() {
+
+        Session session =
+                Sessions.getCurrent();
+
+        if (session == null) {
+            return;
+        }
+
+        Object sessionBatchId =
+                session.getAttribute(
+                        SESSION_CURRENT_BATCH_ID);
+
+        if (sessionBatchId == null) {
+            return;
+        }
+
+        String currentSessionBatchId =
+                sessionBatchId.toString();
+
+        if (currentSessionBatchId == null
+                || currentSessionBatchId.trim().isEmpty()) {
+
+            return;
+        }
+
+        currentSessionBatchId =
+                currentSessionBatchId.trim();
+
+        ScanBatch makerBatch =
+                outwardMakerService.getMakerBatch(
+                        currentSessionBatchId);
+
+        // =====================================================
+        // BATCH ALREADY MOVED TO OUTWARD
+        // =====================================================
+
+        if (makerBatch == null) {
+
+            batchId = null;
+
+            batchDetailsGroup.setVisible(false);
+
+            chequeDetailsGroup.setVisible(false);
+
+            lstBatchDetails
+                    .getItems()
+                    .clear();
+
+            return;
+        }
+
+        // =====================================================
+        // CURRENT MAKER BATCH FOUND
+        // =====================================================
+
+        batchId =
+                currentSessionBatchId;
+
+        int actualChequeCount =
+                makerBatch.getActualChequeCount();
+
+        /*
+         * Fetch cheques only to calculate the MICR repair
+         * count for the batch row.
+         *
+         * The cheque list is NOT stored in the session.
+         */
+        List<ScanCheque> batchCheques =
+                outwardMakerService
+                        .getMakerBatchCheques(
+                                batchId);
+
+        int micrRepairCount =
+                countMicrRepairCheques(
+                        batchCheques);
+
+        displayBatchDetails(
+                makerBatch,
+                actualChequeCount,
+                micrRepairCount);
     }
 
     // =========================================================
@@ -460,18 +571,17 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                 fileName);
 
         // =====================================================
-        // RESET PREVIOUS RESULT
+        // RESET ONLY CURRENT UPLOAD INPUT
         // =====================================================
 
-        batchId = null;
+        /*
+         * Do NOT remove the current batch from session here.
+         *
+         * The session batch is replaced only after the new
+         * batch is successfully validated and saved.
+         */
 
         divSuccessMessage.setVisible(false);
-
-        batchDetailsGroup.setVisible(false);
-
-        lstBatchDetails
-                .getItems()
-                .clear();
 
         chequeDetailsGroup.setVisible(false);
 
@@ -648,8 +758,11 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
             if (!validationResult.isValid()) {
 
-                batchDetailsGroup.setVisible(false);
-
+                /*
+                 * Do not remove the previous session batch.
+                 *
+                 * The new batch has not been saved yet.
+                 */
                 showErrorMessage(
                         validationResult.getMessage());
 
@@ -685,6 +798,21 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
             // =================================================
             // STEP 9
+            // STORE ONLY CURRENT BATCH ID IN SESSION
+            // =================================================
+
+            Session session =
+                    Sessions.getCurrent();
+
+            if (session != null) {
+
+                session.setAttribute(
+                        SESSION_CURRENT_BATCH_ID,
+                        batchId);
+            }
+
+            // =================================================
+            // STEP 10
             // COUNT MICR REPAIR
             // =================================================
 
@@ -692,6 +820,12 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                     countMicrRepairCheques(
                             chequeList);
 
+            /*
+             * This list is kept only for the current controller
+             * until the user opens another batch/page.
+             *
+             * It is NOT stored in the session.
+             */
             currentChequeList =
                     new ArrayList<ScanCheque>(
                             chequeList);
@@ -703,7 +837,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             lstCheques.getItems().clear();
 
             // =================================================
-            // STEP 10
+            // STEP 11
             // SUCCESS MESSAGE
             // =================================================
 
@@ -714,8 +848,8 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                             + " has been uploaded successfully.");
 
             // =================================================
-            // STEP 11
-            // DISPLAY BATCH DETAILS
+            // STEP 12
+            // DISPLAY ONLY NEW CURRENT BATCH
             // =================================================
 
             displayBatchDetails(
@@ -724,7 +858,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                     micrRepairCount);
 
             // =================================================
-            // STEP 12
+            // STEP 13
             // CLEAR INPUTS
             // =================================================
 
@@ -747,11 +881,10 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
             e.printStackTrace();
 
-            // =================================================
-            // HIDE DETAILS
-            // =================================================
-
-            batchDetailsGroup.setVisible(false);
+            /*
+             * Do not remove the previous batch from the screen
+             * or session when the new batch fails.
+             */
 
             // =================================================
             // ERROR MESSAGE
@@ -781,7 +914,12 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
         int count = 0;
 
-        for (ScanCheque cheque : chequeList) {
+        if (chequeList == null) {
+            return count;
+        }
+
+        for (ScanCheque cheque :
+                chequeList) {
 
             if (cheque == null) {
                 continue;
@@ -1009,6 +1147,10 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                     @Override
                     public void onEvent(Event event) {
 
+                        // =================================================
+                        // HIDE CHEQUES
+                        // =================================================
+
                         if (chequeDetailsGroup.isVisible()) {
 
                             chequeDetailsGroup
@@ -1018,30 +1160,50 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                                     .setLabel(
                                             "View Cheques");
 
-                        } else {
-
-                            if (currentChequeList == null
-                                    || currentChequeList.isEmpty()) {
-
-                                showErrorMessage(
-                                        "No cheque information is available for batch "
-                                                + selectedBatchId
-                                                + ".");
-
-                                return;
-                            }
-
-                            currentChequePage = 0;
-
-                            displayChequeDetails();
-
-                            chequeDetailsGroup
-                                    .setVisible(true);
-
-                            viewChequesButton
-                                    .setLabel(
-                                            "Hide Cheques");
+                            return;
                         }
+
+                        // =================================================
+                        // GET CHEQUES FROM DB
+                        // =================================================
+
+                        List<ScanCheque> chequeList =
+                                outwardMakerService
+                                        .getMakerBatchCheques(
+                                                selectedBatchId);
+
+                        if (chequeList == null
+                                || chequeList.isEmpty()) {
+
+                            showErrorMessage(
+                                    "No cheque information is available for batch "
+                                            + selectedBatchId
+                                            + ".");
+
+                            return;
+                        }
+
+                        /*
+                         * Cheques are retrieved from DB.
+                         * They are not stored in session.
+                         */
+                        currentChequeList =
+                                new ArrayList<ScanCheque>(
+                                        chequeList);
+
+                        batchId =
+                                selectedBatchId;
+
+                        currentChequePage = 0;
+
+                        displayChequeDetails();
+
+                        chequeDetailsGroup
+                                .setVisible(true);
+
+                        viewChequesButton
+                                .setLabel(
+                                        "Hide Cheques");
                     }
                 });
 
@@ -1217,7 +1379,9 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
                                 openMicrRepair(
                                         "SCAN",
-                                        selectedBatchId, selectedCheque.getScannedChequeId());
+                                        selectedBatchId,
+                                        selectedCheque
+                                                .getScannedChequeId());
                             }
                         });
 
@@ -1518,6 +1682,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
                             + chequeId);
         }
     }
+
     // =========================================================
     // FORMAT AMOUNT
     // =========================================================
@@ -1566,4 +1731,3 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
         return value.trim();
     }
 }
-

@@ -349,6 +349,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
 
+
+	private static final String STATUS_MICR_REJECTION_PENDING = "MICR_REJECTION_PENDING";
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 
 	private static final String STATUS_REJECT_REQUESTED = "REJECT_REQUESTED";
@@ -2330,7 +2332,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 		 * 
 		 */
 
-		cheque.setChequeStatus(STATUS_MICR_REJECTED);
+		cheque.setChequeStatus(STATUS_MICR_REJECTION_PENDING);
+
+		// Update the visible status immediately without waiting for Front/Back navigation.
+		if (lblChequeStatus != null) {
+			lblChequeStatus.setValue(STATUS_MICR_REJECTION_PENDING);
+		}
 
 		try {
 
@@ -2390,6 +2397,11 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 			cheque.setChequeStatus(STATUS_PENDING_MICR_REPAIR);
 
+			// Restore the visible status if saving the rejection failed.
+			if (lblChequeStatus != null) {
+				lblChequeStatus.setValue(STATUS_PENDING_MICR_REPAIR);
+			}
+
 			updateProgress();
 
 			updateSubmitButton();
@@ -2441,11 +2453,11 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 		 *
 		 * 
 		 * 
-		 * MICR_REPAIR -> PENDING_DATA_ENTRY
+		 * MICR_REPAIRED -> PENDING_DATA_ENTRY
 		 *
 		 * 
 		 * 
-		 * MICR_REJECTED -> REJECT_REQUESTED
+		 * MICR_REJECTION_PENDING -> MICR_REJECTED
 		 * 
 		 * -----------------------------------------------------
 		 * 
@@ -2461,14 +2473,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 			String status = safe(cheque.getChequeStatus());
 
-			if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
-
-				cheque.setChequeStatus(STATUS_REJECT_REQUESTED);
-
+			if (STATUS_MICR_REJECTION_PENDING.equalsIgnoreCase(status)) {
+				// Temporary rejection status becomes the final rejection status on Submit.
+				cheque.setChequeStatus(STATUS_MICR_REJECTED);
 			} else {
-
+				// Repaired cheque moves to Data Entry on Submit.
 				cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
-
 			}
 
 		}
@@ -2523,10 +2533,10 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 					cheque.setChequeStatus(STATUS_MICR_REPAIRED);
 
-				} else if (STATUS_REJECT_REQUESTED.equalsIgnoreCase(status)) {
-
-					cheque.setChequeStatus(STATUS_MICR_REJECTED);
-
+				} else if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
+					// Final rejection was assigned in memory before Submit; restore the
+					// temporary status when the final Submit fails.
+					cheque.setChequeStatus(STATUS_MICR_REJECTION_PENDING);
 				}
 
 			}
