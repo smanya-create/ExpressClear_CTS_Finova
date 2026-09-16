@@ -29,7 +29,7 @@
                     <!-- Fixed Page Title Header -->
                     <vlayout spacing="2px" style="flex: 0 0 auto;">
                         <label value="Role Management" sclass="page-title"/>
-                        <label value="Manage system access levels, operational permissions, and CTS queue assignments." sclass="page-subtitle"/>
+                        
                     </vlayout>
 
                     <!-- 3. Roles Table Card (Locked to ~420px to match Audit Trail card height) -->
@@ -44,7 +44,7 @@
                             </hlayout>
                             <space hflex="1" />
 
-                            <button id="btnAddRole" label="+ ADD ROLE" sclass="btn-primary" height="34px"/>
+                            <button id="btnAddRole" label="+ Add Role" sclass="btn-primary" height="34px"/>
                         </hlayout>
 
                         <!-- Scrollable Grid Body -->

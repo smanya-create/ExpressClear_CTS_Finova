@@ -87,6 +87,7 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
 
             // 5. Modify Action Link
             Button btnModify = new Button("Modify");
+            btnModify.setIconSclass("z-icon-pencil");
             btnModify.setSclass("btn-action-modify");
             btnModify.addEventListener("onClick", e -> {
                 Executions.sendRedirect("/admin/role/modify-role.zul?roleId=" + role.getRoleId());

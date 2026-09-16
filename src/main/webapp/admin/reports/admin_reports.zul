@@ -26,16 +26,15 @@
                     
                     <!-- Page Title -->
                     <vlayout spacing="3px" style="flex: 0 0 auto;">
-                        <label value="CONSOLIDATED SYSTEM &amp; AUDIT REPORT" sclass="page-title" />
-                        <label value="Select a date range to generate and download the full administrative report, covering outward clearing batches and complete user audit activity." 
-                               sclass="page-subtitle" />
+                        <label value="Consolidated System &amp; Audit Report" sclass="page-title" />
+                        
                     </vlayout>
 
                     <!-- Parameters Card Container -->
                     <vlayout sclass="card-panel" spacing="20px" 
                              style="padding: 26px 30px; margin-top: 8px; max-width: 820px; flex: 0 0 auto;">
                         
-                        <label value="REPORT PARAMETERS" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 0.5px;" />
+                        <label value="Report Parameters" style="font-size: 14px; font-weight: 800; color: #1e293b; letter-spacing: 0.5px;" />
                         
                         <!-- Report Type Selector -->
                         <vlayout spacing="6px" hflex="1">
