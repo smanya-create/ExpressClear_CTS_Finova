@@ -850,8 +850,9 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		if (currentRecord >= totalRecords) {
-			currentRecord = totalRecords - 1;
+		
+		if (currentRecord < totalRecords - 1) {
+		    currentRecord++;
 		}
 
 		displayCurrentCheque();
