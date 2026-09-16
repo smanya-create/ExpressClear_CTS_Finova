@@ -1,4 +1,4 @@
-page {
+.batch-page {
 	width: 100% !important;
 	height: 100% !important;
 	box-sizing: border-box !important;
@@ -8,14 +8,31 @@ page {
 	overflow: hidden !important;
 }
 
-html:has(.batch-page), body:has(.batch-page) {
+html:has(.batch-page),
+body:has(.batch-page) {
 	overflow: hidden !important;
 	height: 100% !important;
 }
 
-body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
-	body:has(.batch-page) [id$="mainContentArea"] {
+body:has(.batch-page) .z-center,
+body:has(.batch-page) .z-center-body,
+body:has(.batch-page) [id$="mainContentArea"] {
 	overflow: hidden !important;
+}
+
+.batch-page {
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: hidden !important;
+}
+
+.batch-page > .z-window-content {
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: hidden !important;
+	background: #f8fafc !important;
 }
 
 .batch-page {
@@ -172,7 +189,7 @@ body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
 
 .batch-listbox {
 	width: 100% !important;
-	height: clamp(360px, calc(100vh - 420px), 560px) !important;
+	height: clamp(360px, calc(100vh - 410px), 560px) !important;
 	min-height: 360px !important;
 	max-height: 560px !important;
 	box-sizing: border-box !important;
@@ -200,11 +217,12 @@ body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
 .batch-listbox .z-listheader, .cheque-listbox .z-listheader {
 	background: #18275c !important;
 	background-color: #18275c !important;
-	border-right: 1px solid #3b82f6 !important; /* Bright blue divider */
+	border-right: 1px solid #3b82f6 !important;
 	border-top: none !important;
 	border-left: none !important;
 	border-bottom: 1px solid #18275c !important;
 	padding: 0 !important;
+	border-top: none !important;
 }
 
 .batch-listbox .z-listheader\:last-child, .cheque-listbox .z-listheader\:last-child
@@ -256,11 +274,10 @@ body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
 .batch-listbox .z-listcell, .cheque-listbox .z-listcell {
 	height: 48px !important;
 	padding: 0 8px !important;
-	border-right: none !important; /* No vertical dividers in data rows */
+	border-right: none !important;
 	border-left: none !important;
 	border-top: none !important;
 	border-bottom: 1px solid #edf2f7 !important;
-	/* Clean horizontal row border */
 	vertical-align: middle !important;
 	text-align: center !important;
 }
@@ -313,6 +330,25 @@ body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
 	box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
 }
 
+.status-pill-blue {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 115px !important;
+	height: 24px !important;
+	padding: 0 12px !important;
+	box-sizing: border-box !important;
+	background: #d9f0ff !important;
+	color: #087ea4 !important;
+	border: 1px solid #69c9f5 !important;
+	border-radius: 9999px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
+}
+
 .status-pill-sentback {
 	display: inline-flex !important;
 	align-items: center !important;
@@ -359,9 +395,9 @@ body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
 	height: 24px !important;
 	padding: 0 12px !important;
 	box-sizing: border-box !important;
-	background: #fee2e2 !important;
-	color: #991b1b !important;
-	border: 1px solid #fca5a5 !important;
+	background: #ffe1e8 !important;
+	color: #c2185b !important;
+	border: 1px solid #ff8fa3 !important;
 	border-radius: 9999px !important;
 	font-size: 8.5px !important;
 	font-weight: 800 !important;
@@ -777,6 +813,7 @@ body:has(.batch-page) .z-center, body:has(.batch-page) .z-center-body,
 	font-weight: 700 !important;
 	text-align: center !important;
 }
+
 .batch-validation-window .batch-btn-clear.z-button\:hover {
 	background: #f8fafc !important;
 	border-color: #94a3b8 !important;
