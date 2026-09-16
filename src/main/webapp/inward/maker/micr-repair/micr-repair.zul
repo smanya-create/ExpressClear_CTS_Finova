@@ -28,18 +28,18 @@
 		<div sclass="cts-metadata-card">
 
 			<div sclass="cts-meta-col">
-				<label value="BATCH NO." sclass="cts-meta-header" />
+				<label value="Batch No." sclass="cts-meta-header" />
 				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
 			</div>
 
 			<div sclass="cts-meta-col">
-				<label value="TOTAL CHEQUES" sclass="cts-meta-header" />
+				<label value="Total Cheques" sclass="cts-meta-header" />
 				<label id="lblTotalCheques" value="0"
 					sclass="cts-meta-val" />
 			</div>
 
 			<div sclass="cts-meta-col cts-progress-meta-col">
-				<label value="PROGRESS" sclass="cts-meta-header" />
+				<label value="Progress" sclass="cts-meta-header" />
 				<hlayout spacing="8px" valign="middle">
 					<progressmeter id="progressMeter" value="0"
 						sclass="cts-compact-progress" />
