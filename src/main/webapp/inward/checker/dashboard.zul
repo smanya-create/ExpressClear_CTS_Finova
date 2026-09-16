@@ -52,7 +52,7 @@
 
                             <div sclass="inward-checker-filter-title-box">
 
-                                <label value="Search &amp; Filter"
+                                <label value="Search"
                                        sclass="inward-checker-filter-heading"/>
 
                             </div>
@@ -66,12 +66,12 @@
                                          sclass="inward-checker-input"/>
 
                                 <button id="btnSearch"
-                                        label="SEARCH"
+                                        label="Search"
                                         iconSclass="z-icon-search"
                                         sclass="inward-checker-btn-action-search"/>
 
                                 <button id="btnClear"
-                                        label="CLEAR"
+                                        label="Clear"
                                         iconSclass="z-icon-undo"
                                         sclass="inward-checker-btn-action-clear"/>
 
@@ -92,31 +92,31 @@
 
                             <listhead>
 
-                                <listheader label="BATCH ID"
+                                <listheader label="Batch Id"
                                             align="center"
                                             width="13%"/>
 
-                                <listheader label="TOTAL CHEQUES"
+                                <listheader label="Total Cheques"
                                             align="center"
                                             width="13%"/>
 
-                                <listheader label="NORMAL CHEQUES"
+                                <listheader label="Maker Approved"
                                             align="center"
                                             width="14%"/>
 
-                                <listheader label="REJECTION REQUESTS"
+                                <listheader label="Rejection Requests"
                                             align="center"
                                             width="17%"/>
 
-                                <listheader label="MAKER RETURNED"
+                                <listheader label="Maker Returned"
                                             align="center"
                                             width="14%"/>
 
-                                <listheader label="BATCH STATUS"
+                                <listheader label="Batch Status"
                                             align="center"
                                             width="14%"/>
 
-                                <listheader label="ACTION"
+                                <listheader label="Action"
                                             align="center"
                                             width="15%"/>
 
