@@ -2,7 +2,7 @@
 <?page title="CTS - Inward Data Entry" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-    <style src="/css/inward/data-entry-batches.css?v=2" />
+    <style src="/css/inward/data-entry-batches.css?v=3" />
 
     <div id="dataEntryBatchesRoot"
          width="100%"
