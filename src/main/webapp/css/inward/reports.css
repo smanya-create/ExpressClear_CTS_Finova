@@ -78,14 +78,14 @@ body {
 }
 
 .inward-checker-btn-action-search:hover {
-    background-color: #142956 !important;
+    background-color: #294575 !important;
 }
 
 
 .inward-checker-btn-action-clear {
     height: 38px !important;
-    background-color: #FFFFFF !important;
-    color: #1C3673 !important;
+    background-color: #1C2D4A !important;
+    color: #FFFFFF !important;
     border: 1px solid #C9D5E3 !important;
     border-radius: 5px !important;
     font-size: 12px !important;
@@ -94,7 +94,7 @@ body {
 }
 
 .inward-checker-btn-action-clear:hover {
-    background-color: #F4F7FA !important;
+    background-color: #294575 !important;
 }
 
 
