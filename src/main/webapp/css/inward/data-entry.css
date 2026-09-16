@@ -1,258 +1,480 @@
-/* SPA Content Container */
+/* =========================================================
+   INWARD CHEQUE DATA ENTRY - UNIFIED CTS PORTAL STYLING
+   ========================================================= */
+
+/* Root Page Container - Soft Blue-Grey Portal Background */
 .cts-data-entry-wrapper {
-    padding: 24px 32px 40px 32px;
-    background-color: #f1f5f9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: #1e293b;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    box-sizing: border-box;
-    width: 100%;
+    padding: 16px 24px 28px 24px !important;
+    background-color: #f0f4f8 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    color: #1e293b !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
 }
 
-/* Page Section Titles */
+/* Header Section */
 .cts-title-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 .cts-main-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1e293b;
-    display: block;
-    line-height: 1.2;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    display: block !important;
+    line-height: 1.2 !important;
 }
 
 .cts-main-subtitle {
-    font-size: 13px;
-    color: #64748b;
-    display: block;
-    margin-top: 4px;
-}
-
-/* 7-Column Metadata KPI Summary Card */
-.cts-metadata-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 16px 20px;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.cts-meta-col {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-}
-
-.cts-meta-header {
-    font-size: 10px;
-    font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.cts-meta-val {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1e293b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.cts-badge-data-entry {
-    display: inline-block;
-    background: #fffbeb;
-    color: #b45309;
-    border: 1px solid #fef08a;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    font-size: 11px;
-    font-weight: 700;
-    width: fit-content;
-}
-
-/* Two-Column Workspace Layout */
-.cts-data-entry-grid {
-    display: flex;
-    gap: 18px;
-    width: 100%;
-}
-
-.cts-work-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 20px 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.cts-card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #2563eb;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    display: block;
-}
-
-.cts-card-tagline {
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 2px;
-    margin-bottom: 14px;
-    display: block;
-}
-
-/* Cheque Viewer Placeholder */
-.cts-cheque-box-placeholder {
-    background: #0f172a;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    height: 330px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    margin-bottom: 12px;
-}
-
-/* Form Input Layout */
-.cts-form-row {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 12px;
-    width: 100%;
-}
-
-.cts-form-field {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.cts-field-lbl {
-    font-size: 11px;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 4px;
-    display: block;
-}
-
-.cts-input-text {
-    width: 100%;
-    height: 36px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    color: #1e293b;
-    background: #ffffff;
-    box-sizing: border-box;
-}
-
-.cts-input-highlight {
-    border: 1.5px solid #2563eb !important;
-    background: #eff6ff !important;
-    font-weight: 700 !important;
-    color: #1e3a8a !important;
-}
-
-.cts-textarea {
-    width: 100%;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 12px;
-    color: #1e293b;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-/* Buttons */
-.cts-btn-secondary {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #334155 !important;
     font-size: 12px !important;
-    font-weight: 600 !important;
-    border-radius: 6px !important;
-    height: 36px !important;
-    padding: 0 14px !important;
-    cursor: pointer;
+    color: #64748b !important;
+    display: block !important;
+    margin-top: 3px !important;
 }
 
-.cts-btn-icon-sq {
-    width: 36px !important;
-    padding: 0 !important;
-}
-
-.cts-btn-outline-primary {
-    background: #ffffff !important;
-    border: 1px solid #2563eb !important;
-    color: #2563eb !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    border-radius: 6px !important;
-    height: 36px !important;
-    padding: 0 16px !important;
-    cursor: pointer;
-}
-
-.cts-btn-outline-danger {
-    background: #ffffff !important;
-    border: 1px solid #ef4444 !important;
-    color: #dc2626 !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    border-radius: 6px !important;
-    height: 36px !important;
-    padding: 0 16px !important;
-    cursor: pointer;
-}
-
-.cts-btn-solid-primary {
-    background: #1b3d68 !important;
-    border: none !important;
+/* Top Back Button (Solid Deep Navy #18275c) */
+.cts-btn-top-back.z-button {
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
     color: #ffffff !important;
     font-size: 12px !important;
     font-weight: 700 !important;
-    border-radius: 6px !important;
-    height: 36px !important;
+    height: 34px !important;
     padding: 0 18px !important;
-    cursor: pointer;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
 }
 
-/* Portal Footer */
-.cts-portal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 16px;
-    margin-top: 6px;
+.cts-btn-top-back.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
 }
 
-.cts-footer-left,
-.cts-footer-right {
-    font-size: 11px;
-    color: #94a3b8;
+.cts-btn-top-back.z-button:focus,
+.cts-btn-top-back.z-button:active {
+    background: #0c1535 !important;
+    border-color: #0c1535 !important;
+    color: #ffffff !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* =========================================================
+   METADATA CARD & TOP CONTROLS
+   ========================================================= */
+.cts-metadata-card-compact {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 12px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+.cts-meta-col-item {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.cts-meta-header-compact {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    display: block !important;
+    margin-bottom: 2px !important;
+}
+
+.cts-meta-val-compact {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+}
+
+.cts-progress-percentage-label {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+}
+
+.cts-progress-subtext {
+    font-size: 10.5px !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    margin-top: 4px !important;
+    display: block !important;
+}
+
+/* Progress Meter (Strict Solid Navy #18275c) */
+.cts-compact-progress.z-progressmeter,
+.z-progressmeter.cts-compact-progress {
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    height: 8px !important;
+}
+
+.cts-compact-progress .z-progressmeter-img,
+.cts-compact-progress .z-progressmeter-image,
+.cts-compact-progress .z-progressmeter-inner,
+.cts-compact-progress span {
+    background: #18275c !important;
+    background-color: #18275c !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 4px !important;
+    transition: width 0.3s ease-in-out !important;
+}
+
+.cts-cheque-page-counter {
+    min-width: 50px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+}
+
+/* =========================================================
+   WORKSPACE GRID (2-Column Strict Enforcement)
+   ========================================================= */
+.cts-data-entry-grid {
+    display: grid !important;
+    grid-template-columns: 1.05fr 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+    align-items: stretch !important;
+}
+
+.cts-work-card {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 16px 18px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+}
+
+.cts-card-title-main {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    display: block !important;
+}
+
+.cts-card-subtitle-main {
+    font-size: 11px !important;
+    color: #64748b !important;
+    margin-top: 2px !important;
+    margin-bottom: 12px !important;
+    display: block !important;
+}
+
+/* =========================================================
+   PEACH / CORAL STATUS PILL (Matching 2nd Image Exactly)
+   ========================================================= */
+#lblDataStatus,
+.cts-status-pill-peach {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 24px !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    background: #ffedd5 !important;
+    background-color: #ffedd5 !important;
+    background-image: none !important;
+    color: #c2410c !important;
+    border: 1px solid #fed7aa !important;
+    border-radius: 9999px !important;
+    font-size: 9.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.4px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+}
+
+/* =========================================================
+   CHEQUE IMAGE CONTAINER (Zooming & Native Scroll)
+   ========================================================= */
+.cts-cheque-image-wrapper {
+    width: 100% !important;
+    height: 310px !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    overflow: auto !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.cts-cheque-img-display {
+    cursor: grab !important;
+    user-select: none !important;
+    display: block !important;
+    margin: auto !important;
+    transition: transform 0.2s ease !important;
+}
+
+.cts-cheque-img-display:active {
+    cursor: grabbing !important;
+}
+
+/* Image Toolbar Buttons */
+.cts-btn-img-tool.z-button {
+    width: 38px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #18275c !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+}
+
+.cts-btn-img-tool.z-button:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+}
+
+.cts-btn-img-action.z-button {
+    flex: 1 !important;
+    height: 30px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #18275c !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+}
+
+.cts-btn-img-action.z-button:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+}
+
+/* =========================================================
+   FORM INPUTS
+   ========================================================= */
+.cts-form-row {
+    display: flex !important;
+    gap: 12px !important;
+    margin-bottom: 8px !important;
+    width: 100% !important;
+}
+
+.cts-form-field {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.cts-field-lbl {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 3px !important;
+    display: block !important;
+}
+
+.cts-input-text {
+    width: 100% !important;
+    height: 32px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+}
+
+.cts-input-text:focus {
+    border-color: #18275c !important;
+    outline: none !important;
+}
+
+.cts-input-readonly {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    font-style: italic !important;
+    border-color: #e2e8f0 !important;
+}
+
+/* =========================================================
+   ACTION BUTTONS (Consistent Palette)
+   ========================================================= */
+.cts-form-action-area {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+/* Neutral Bordered Button (Previous, Next, Reset Item, Front, Back) */
+.cts-btn-secondary.z-button {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #18275c !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 5px !important;
+    height: 34px !important;
+    padding: 0 14px !important;
+    cursor: pointer !important;
+}
+
+.cts-btn-secondary.z-button:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+}
+
+.cts-btn-secondary.z-button:focus,
+.cts-btn-secondary.z-button:active {
+    background: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+    color: #18275c !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Request Rejection Button */
+.cts-btn-outline-danger.z-button {
+    background: #ffffff !important;
+    border: 1.5px solid #ef4444 !important;
+    color: #dc2626 !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 5px !important;
+    height: 34px !important;
+    cursor: pointer !important;
+}
+
+.cts-btn-outline-danger.z-button:hover {
+    background: #fef2f2 !important;
+}
+
+/* Approve Cheque Button */
+.cts-btn-solid-primary.z-button {
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
+    color: #ffffff !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 5px !important;
+    height: 34px !important;
+    cursor: pointer !important;
+}
+
+.cts-btn-solid-primary.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
+}
+
+/* Submit Batch to Checker */
+.cts-btn-submit-batch.z-button {
+    background: #059669 !important;
+    border: 1px solid #059669 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    height: 34px !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2) !important;
+}
+
+.cts-btn-submit-batch.z-button[disabled] {
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+/* =========================================================
+   MODAL WINDOW & BACKDROP (Fixes Screen Dimming Bug)
+   ========================================================= */
+.cts-modal-backdrop { 
+    position: fixed !important; 
+    top: 0 !important; 
+    left: 0 !important; 
+    width: 100vw !important; 
+    height: 100vh !important; 
+    background: rgba(15, 23, 42, 0.65) !important; 
+    z-index: 10000 !important; 
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: center !important; 
+} 
+
+.cts-modal-backdrop[style*="display: none"],
+.cts-modal-backdrop[style*="display:none"] {
+    display: none !important;
+}
+
+.cts-modal-box {
+    background: #ffffff !important; 
+    width: 460px !important; 
+    border-radius: 8px !important; 
+    padding: 20px !important; 
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3) !important; 
+}
+
+/* Checker Return Alert Box */
+.cts-alert-box-return {
+    background: #fffdf5 !important;
+    border: 1px solid #fef08a !important;
+    border-left: 3px solid #f59e0b !important;
+    border-radius: 4px !important;
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+}
+
+.cts-alert-title-return {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    color: #b45309 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 4px !important;
+    display: block !important;
+}
+
+.cts-alert-lbl {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #78350f !important;
+    width: 85px !important;
+    min-width: 85px !important;
+    white-space: nowrap !important;
+}
+
+.cts-alert-val {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
 }
