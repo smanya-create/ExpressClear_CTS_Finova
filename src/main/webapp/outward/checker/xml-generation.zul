@@ -22,8 +22,7 @@
 
         </west>
 
-
-        <center>
+         <center>
 
             <borderlayout
                 hflex="1"
@@ -40,8 +39,8 @@
 
                 </north>
 
-
-                <center>
+                <center
+                    sclass="outward-checker-xml-center">
 
                     <include
                         id="MainXmlContentArea"

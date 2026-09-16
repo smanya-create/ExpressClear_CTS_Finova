@@ -1,6 +1,7 @@
 package com.iispl.cts.serviceimpl.outward;
 
 import java.math.BigDecimal;
+
 import java.util.List;
 
 import com.iispl.cts.dto.BatchValidationData;
@@ -15,9 +16,11 @@ import com.iispl.cts.outward.batchvalidator.DuplicateChequeValidation;
 import com.iispl.cts.outward.batchvalidator.TotalAmountValidation;
 import com.iispl.cts.outward.batchvalidator.ValidateBatch;
 import com.iispl.cts.service.outward.BatchValidationService;
+import com.iispl.cts.service.outward.OutwardMakerService;
 
 public class BatchValidationServiceImpl
         implements BatchValidationService {
+	private OutwardMakerService outwardMakerService;
 
     private ValidateBatch duplicateBatchValidation;
     private ValidateBatch chequeDataValidation;
@@ -28,6 +31,9 @@ public class BatchValidationServiceImpl
 
     public BatchValidationServiceImpl() {
 
+        outwardMakerService =
+                new OutwardMakerServiceImpl();
+
         duplicateBatchValidation =
                 new DuplicateBatchValidation();
 
@@ -35,7 +41,8 @@ public class BatchValidationServiceImpl
                 new ChequeDataValidation();
 
         duplicateChequeValidation =
-                new DuplicateChequeValidation();
+                new DuplicateChequeValidation(
+                        outwardMakerService);
 
         chequeCountValidation =
                 new ChequeCountValidation();
@@ -50,20 +57,24 @@ public class BatchValidationServiceImpl
     // =========================================================
     // MAIN BATCH VALIDATION
     // =========================================================
-
     @Override
     public ValidationResult validateBatch(
             BatchValidationData data) {
+
+        StringBuilder errorMessages =
+                new StringBuilder();
+
+        ValidationResult result;
 
         // =====================================================
         // 1. DUPLICATE BATCH
         // =====================================================
 
-        ValidationResult result =
+        result =
                 duplicateBatchValidation.validate(data);
 
         if (!result.isValid()) {
-            return result;
+            errorMessages.append(result.getMessage());
         }
 
         // =====================================================
@@ -74,7 +85,12 @@ public class BatchValidationServiceImpl
                 chequeDataValidation.validate(data);
 
         if (!result.isValid()) {
-            return result;
+
+            if (errorMessages.length() > 0) {
+                errorMessages.append("\n\n");
+            }
+
+            errorMessages.append(result.getMessage());
         }
 
         // =====================================================
@@ -85,7 +101,12 @@ public class BatchValidationServiceImpl
                 duplicateChequeValidation.validate(data);
 
         if (!result.isValid()) {
-            return result;
+
+            if (errorMessages.length() > 0) {
+                errorMessages.append("\n\n");
+            }
+
+            errorMessages.append(result.getMessage());
         }
 
         // =====================================================
@@ -96,7 +117,12 @@ public class BatchValidationServiceImpl
                 chequeCountValidation.validate(data);
 
         if (!result.isValid()) {
-            return result;
+
+            if (errorMessages.length() > 0) {
+                errorMessages.append("\n\n");
+            }
+
+            errorMessages.append(result.getMessage());
         }
 
         // =====================================================
@@ -107,10 +133,24 @@ public class BatchValidationServiceImpl
                 totalAmountValidation.validate(data);
 
         if (!result.isValid()) {
-            return result;
+
+            if (errorMessages.length() > 0) {
+                errorMessages.append("\n\n");
+            }
+
+            errorMessages.append(result.getMessage());
         }
 
-       
+        // =====================================================
+        // RETURN ALL VALIDATION ERRORS
+        // =====================================================
+
+        if (errorMessages.length() > 0) {
+
+            return new ValidationResult(
+                    false,
+                    errorMessages.toString());
+        }
 
         // =====================================================
         // ALL VALIDATIONS PASSED
@@ -120,7 +160,6 @@ public class BatchValidationServiceImpl
                 true,
                 null);
     }
-
     // =========================================================
     // DUPLICATE CHEQUE
     // =========================================================

@@ -59,10 +59,9 @@
             <vlayout spacing="4px">
                 <hlayout valign="middle" style="display: flex; justify-content: space-between; width: 100%;">
                     <vlayout spacing="2px">
-                        <label value="Forced EOD Unprocessed Cheques" 
+                        <label value="Unprocessed Cheques" 
                                style="font-size: 18px; font-weight: 700; color: #173B61;"/>
-                        <label value="Rollover instruments requiring Maker MICR Repair or Data Entry to re-enter outward clearing." 
-                               style="font-size: 13px; color: #64748b;"/>
+                        
                     </vlayout>
 
                     <button id="btnRefresh"

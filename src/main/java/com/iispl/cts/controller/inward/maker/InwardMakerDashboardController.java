@@ -176,7 +176,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         }
     }
 
- // =========================================================
+    // =========================================================
     // 1. RETURN FROM CHECKER SECTION
     // =========================================================
     private void loadReturnedCheques() {
@@ -205,14 +205,17 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
                             for (InwardCheque chq : batchCheques) {
                                 String status = chq.getChequeStatus();
                                 if (isSentBackStatus(status)) {
-                                    String displayStatus = getDisplayStatus(chq);
+                                	String displayStatus = getDisplayStatus(chq);
 
-                                    // Filter by Status
-                                    if (!"ALL".equalsIgnoreCase(currentStatus) && !displayStatus.equalsIgnoreCase(currentStatus)) {
-                                        continue;
+                                    // Filter by Status (handles spaces or underscores)
+                                    if (!"ALL".equalsIgnoreCase(currentStatus)) {
+                                        String normalizedCurrent = currentStatus.replace("_", " ").trim();
+                                        String normalizedDisplay = displayStatus.replace("_", " ").trim();
+                                        if (!normalizedDisplay.equalsIgnoreCase(normalizedCurrent)) {
+                                            continue;
+                                        }
                                     }
 
-                                    // Extract joined reason_name and checker remarks
                                     InwardSendBackRequestDTO req = (pendingRequests != null) ? pendingRequests.get(chq.getInwardChequeId()) : null;
                                     String displayReason = "-";
 
@@ -293,6 +296,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
         Label statusLabel = new Label(displayStatus);
         statusLabel.setSclass("inward-maker-status");
+        
+        if ("RESOLVED".equalsIgnoreCase(displayStatus)) {
+            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+        }
 
         Label reasonLabel = new Label(getValue(reasonRemarks));
         reasonLabel.setSclass("inward-maker-reason");
@@ -310,7 +317,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         inwardMakerRowsReturnedBatches.appendChild(row);
     }
 
-    // Return Pagination Navigation
     private void goToFirstReturnPage() {
         if (currentReturnPage > 1) {
             currentReturnPage = 1;
@@ -370,7 +376,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
                 for (InwardDashboardBatchDTO b : allBatches) {
                     if (b.getBackToMakerCheques() == 0 && !"SENT_BACK".equalsIgnoreCase(b.getDisplayStatus())) {
                         
-                        // Filter by Search Keyword (Batch ID only)
+                        // Filter by Search Keyword
                         if (!currentSearchKeyword.isEmpty()) {
                             String bId = b.getBatchId() != null ? b.getBatchId().toLowerCase() : "";
                             if (!bId.contains(currentSearchKeyword)) {
@@ -378,14 +384,26 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
                             }
                         }
 
-                        // Determine Status
-                        String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
-                        String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
-                                ? "PENDING_MICR_REPAIR" : "PENDING_DATA_ENTRY";
+                     // Check true status
+                        InwardBatch fullBatch = batchService.getBatchById(b.getBatchId());
+                        String bStatus = fullBatch != null ? fullBatch.getBatchStatus() : "";
 
-                        // Filter by Status
-                        if (!"ALL".equalsIgnoreCase(currentStatus) && !trueStatus.equalsIgnoreCase(currentStatus)) {
-                            continue;
+                        String trueStatus;
+                        if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus)) {
+                            trueStatus = "SUBMITTED_TO_CHECKER";
+                        } else {
+                            String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
+                            trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
+                                    ? "PENDING_MICR_REPAIR" : "PENDING_DATA_ENTRY";
+                        }
+
+                        // Filter by Status dropdown (handles spaces or underscores)
+                        if (!"ALL".equalsIgnoreCase(currentStatus)) {
+                            String normalizedCurrent = currentStatus.replace(" ", "_").toUpperCase();
+                            String normalizedTrue = trueStatus.replace(" ", "_").toUpperCase();
+                            if (!normalizedTrue.equalsIgnoreCase(normalizedCurrent)) {
+                                continue;
+                            }
                         }
 
                         this.batchList.add(b);
@@ -441,8 +459,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
         Label batchIdLabel = new Label(getValue(batch.getBatchId()));
         batchIdLabel.setSclass("inward-maker-batch-id");
-        batchIdLabel.setStyle("cursor: pointer;");
-        batchIdLabel.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
 
         Label chequeCountLabel = new Label(String.valueOf(batch.getTotalCheques()));
         chequeCountLabel.setSclass("inward-maker-cheque-count");
@@ -453,13 +469,24 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         Label totalAmountLabel = new Label(formatIndianAmount(totalAmt));
         totalAmountLabel.setSclass("inward-maker-total-amount");
 
-        String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
-        String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
-                ? "PENDING_MICR_REPAIR" : "PENDING_DATA_ENTRY";
+        String bStatus = fullBatch != null ? fullBatch.getBatchStatus() : "";
+        boolean isCheckerPending = "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus);
 
-        Label statusLabel = new Label(getDisplayStatus(trueStatus));
+        Label statusLabel = new Label();
         statusLabel.setSclass("inward-maker-status");
 
+        if (isCheckerPending) {
+            statusLabel.setValue("SUBMITTED TO CHECKER");
+            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
+        } else {
+            String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
+            String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
+                    ? "PENDING MICR REPAIR" : "PENDING DATA ENTRY";
+            statusLabel.setValue(trueStatus);
+            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 130px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
+        }
+
+        // Action Column: ALWAYS renders the VIEW DETAILS button so Maker can view cheques
         Button viewButton = new Button("VIEW DETAILS");
         viewButton.setSclass("inward-maker-view-button");
         viewButton.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
@@ -517,9 +544,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + trimmedBatchId);
     }
 
-    // =========================================================
-    // PROCESSING PAGINATION LOGIC
-    // =========================================================
     private void goToFirstPage() {
         if (currentPage > 1) {
             currentPage = 1;
@@ -567,13 +591,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         if (inwardMakerBtnLast != null) inwardMakerBtnLast.setDisabled(currentPage >= totalPages);
     }
 
-    // =========================================================
-    // FORMATTING & LABEL HELPERS
-    // =========================================================
     private boolean isSentBackStatus(String status) {
         if (status == null) return false;
         String s = status.trim().toUpperCase();
-        return s.contains("SEND_BACK") || s.contains("SENT_BACK") || s.contains("RETURN");
+        return s.contains("SEND_BACK") || s.contains("SENT_BACK") || s.contains("RETURN") || "MAKER_RETURNED".equals(s);
     }
 
     private String formatIndianAmount(BigDecimal amount) {
@@ -594,10 +615,13 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         return (status != null) ? status.trim().toUpperCase() : "";
     }
 
-    // Overload for InwardCheque inspection
     private String getDisplayStatus(InwardCheque chq) {
         if (chq == null) return "PENDING_MAKER_PROCESS";
         String s = normalizeStatus(chq.getChequeStatus());
+        
+        if ("MAKER_RETURNED".equals(s)) {
+            return "RESOLVED";
+        }
 
         if ("SEND_BACK_TO_MAKER_MICR".equals(s) 
                 || "MICR_REPAIR_REQUIRED".equals(s) 
@@ -617,33 +641,32 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
         return getDisplayStatus(s);
     }
 
-    // Overload for String values (Batch row status)
     private String getDisplayStatus(String status) {
-        if (status == null || status.trim().isEmpty()) return "PENDING_MAKER_PROCESS";
+        if (status == null || status.trim().isEmpty()) return "PENDING MAKER";
 
         String s = status.trim().replace(" ", "_").toUpperCase();
 
+        if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) return "CHECKER PENDING";
         if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equals(s)) return "FIX DATA ENTRY";
         if ("SEND_BACK_TO_MAKER_MICR".equals(s)) return "REPAIR MICR";
         if ("SEND_BACK_TO_MAKER".equals(s) || "SENT_BACK".equals(s)) return "NEEDS REWORK";
 
         if ("PENDING_MICR_REPAIR".equals(s) || "MICR_REPAIR_PENDING".equals(s) || "MICR_REPAIR".equals(s)) {
-            return "PENDING_MICR_REPAIR";
+            return "PENDING MICR REPAIR";
         }
         
         if ("PENDING_DATA_ENTRY".equals(s) || "DATA_ENTRY_PENDING".equals(s) 
                 || "PARTIALLY_PROCESSED".equals(s) || "DATA_ENTRY".equals(s)) {
-            return "PENDING_DATA_ENTRY";
+            return "PENDING DATA ENTRY";
         }
 
         if ("PENDING_MAKER_PROCESS".equals(s) || "PROCESSING".equals(s) || "RAW".equals(s)) {
-            return "PENDING_MAKER_PROCESS";
+            return "PENDING MAKER";
         }
 
-        return s;
+        return s.replace("_", " ").trim();
     }
 
-    // Helper wrapper for paginating returned cheques with reasons
     private static class ReturnedChequeDisplayItem {
         final String batchId;
         final InwardCheque cheque;

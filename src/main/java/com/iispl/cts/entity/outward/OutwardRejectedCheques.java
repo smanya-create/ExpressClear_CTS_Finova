@@ -15,12 +15,15 @@ public class OutwardRejectedCheques implements Serializable {
     private String remarks;
     private String outwardBatchId;       
     private BigDecimal chequeAmount; 
+    private String rejectedReasonId;
+    private String rejectedReasonName;
 
     public OutwardRejectedCheques() {
     }
 
     public OutwardRejectedCheques(String outwardRejectedChequeId, String outwardChequeId, 
-                                  String rejectedBy, Timestamp rejectedDate, String remarks, String outwardBatchId, BigDecimal chequeAmount) {
+                                  String rejectedBy, Timestamp rejectedDate, String remarks, String outwardBatchId, BigDecimal chequeAmount, String rejectedReasonId,
+                                  String rejectedReasonName) {
         this.outwardRejectedChequeId = outwardRejectedChequeId;
         this.outwardChequeId = outwardChequeId;
         this.rejectedBy = rejectedBy;
@@ -28,6 +31,8 @@ public class OutwardRejectedCheques implements Serializable {
         this.remarks = remarks;
         this.outwardBatchId = outwardBatchId;
         this.chequeAmount = chequeAmount;
+        this.rejectedReasonId = rejectedReasonId;
+        this.rejectedReasonName = rejectedReasonName;
 
     }
 
@@ -61,4 +66,20 @@ public class OutwardRejectedCheques implements Serializable {
 
     public String getRemarks() { return remarks; }
     public void setRemarks(String remarks) { this.remarks = remarks; }
+    
+    public String getRejectedReasonId() {
+        return rejectedReasonId;
+    }
+
+    public void setRejectedReasonId(String rejectedReasonId) {
+        this.rejectedReasonId = rejectedReasonId;
+    }
+
+    public String getRejectedReasonName() {
+        return rejectedReasonName;
+    }
+
+    public void setRejectedReasonName(String rejectedReasonName) {
+        this.rejectedReasonName = rejectedReasonName;
+    }
 }

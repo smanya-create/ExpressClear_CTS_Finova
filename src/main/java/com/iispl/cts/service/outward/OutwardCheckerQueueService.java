@@ -36,11 +36,15 @@ public interface OutwardCheckerQueueService {
 
 	void verifyCheque(String chequeNo) throws SQLException;
 
-	void returnChequeToMaker(String chequeNo) throws SQLException;
-
+	void returnChequeToMaker(
+	        String chequeNo,
+	        String reasonId,
+	        String remarks) throws SQLException;
+	
 	void rejectCheque(
 	        String chequeNo,
 	        String username,
+	        String reasonId,
 	        String remarks)
 	        throws SQLException;
 	// ============================================================

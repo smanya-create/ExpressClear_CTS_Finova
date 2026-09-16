@@ -51,7 +51,7 @@ public class OutwardCheckerQueueDAOImpl
               + "       cheque_image_back "
               + "FROM outward_cheque "
               + "WHERE outward_batch_id = ? "
-              + "AND cheque_status IN ('PENDING_VERIFICATION', 'REJECT_REQUEST') "
+              + "AND cheque_status IN ('PENDING_VERIFICATION', 'REJECT_REQUEST', 'VERIFIED_BY_CHECKER') "
               + "ORDER BY outward_cheque_id";
 
         try (Connection con = DBConnection.getConnection();
@@ -274,6 +274,7 @@ public class OutwardCheckerQueueDAOImpl
     public void rejectCheque(
             String chequeNo,
             String username,
+            String reasonId,
             String remarks)
             throws SQLException {
 
@@ -281,18 +282,30 @@ public class OutwardCheckerQueueDAOImpl
 
         try {
 
+            // ====================================================
+            // 1. GET CONNECTION
+            // ====================================================
+
             con = DBConnection.getConnection();
 
-            // ====================================================
-            // START TRANSACTION
-            // ====================================================
+            if (con == null) {
+                throw new SQLException(
+                        "Database connection is null.");
+            }
 
             con.setAutoCommit(false);
 
+            System.out.println("=================================");
+            System.out.println("REJECT CHEQUE");
+            System.out.println("Cheque Number = " + chequeNo);
+            System.out.println("Username      = " + username);
+            System.out.println("Reason ID     = " + reasonId);
+            System.out.println("Remarks       = " + remarks);
+            System.out.println("=================================");
+
 
             // ====================================================
-            // STEP 1
-            // GET USER ID FROM USERNAME
+            // 2. GET USER ID FROM USERNAME
             // ====================================================
 
             String userSql =
@@ -319,11 +332,6 @@ public class OutwardCheckerQueueDAOImpl
                 }
             }
 
-
-            // ====================================================
-            // USER NOT FOUND
-            // ====================================================
-
             if (userId == null ||
                 userId.trim().isEmpty()) {
 
@@ -332,26 +340,12 @@ public class OutwardCheckerQueueDAOImpl
                         + username);
             }
 
-
-            System.out.println(
-                    "=================================");
-
-            System.out.println(
-                    "REJECT CHEQUE - USER");
-
-            System.out.println(
-                    "Username = " + username);
-
-            System.out.println(
-                    "User ID = " + userId);
-
-            System.out.println(
-                    "=================================");
+            System.out.println("Rejected By User ID = "
+                    + userId);
 
 
             // ====================================================
-            // STEP 2
-            // GET CHEQUE DETAILS
+            // 3. GET CHEQUE DETAILS
             // ====================================================
 
             String chequeSql =
@@ -390,11 +384,6 @@ public class OutwardCheckerQueueDAOImpl
                 }
             }
 
-
-            // ====================================================
-            // CHEQUE NOT FOUND
-            // ====================================================
-
             if (outwardChequeId == null ||
                 outwardChequeId.trim().isEmpty()) {
 
@@ -404,48 +393,84 @@ public class OutwardCheckerQueueDAOImpl
             }
 
 
-            System.out.println(
-                    "=================================");
+            // ====================================================
+            // 4. GET REJECTION REASON
+            //
+            // reason_id in outward_rejected_cheques
+            // references rejected_reasons.rejected_reason_code
+            // ====================================================
 
-            System.out.println(
-                    "REJECT CHEQUE - CHEQUE DATA");
+            String reasonSql =
+                    "SELECT rejected_reason_code, "
+                  + "       rejected_reason_name "
+                  + "FROM rejected_reasons "
+                  + "WHERE rejected_reason_code = ?";
 
-            System.out.println(
-                    "Cheque Number = "
-                    + chequeNo);
+            String rejectedReasonCode = null;
+            String rejectedReasonName = null;
 
-            System.out.println(
-                    "Outward Cheque ID = "
-                    + outwardChequeId);
+            try (PreparedStatement ps =
+                         con.prepareStatement(reasonSql)) {
 
-            System.out.println(
-                    "Outward Batch ID = "
-                    + outwardBatchId);
+                ps.setString(1, reasonId);
 
-            System.out.println(
-                    "Cheque Amount = "
-                    + chequeAmount);
+                try (ResultSet rs =
+                             ps.executeQuery()) {
 
-            System.out.println(
-                    "=================================");
+                    if (rs.next()) {
+
+                        rejectedReasonCode =
+                                rs.getString(
+                                        "rejected_reason_code");
+
+                        rejectedReasonName =
+                                rs.getString(
+                                        "rejected_reason_name");
+                    }
+                }
+            }
+
+            // ====================================================
+            // VALIDATE REASON
+            // ====================================================
+
+            if (rejectedReasonCode == null ||
+                rejectedReasonCode.trim().isEmpty()) {
+
+                throw new SQLException(
+                        "Invalid rejection reason code: "
+                        + reasonId);
+            }
+
+            if (rejectedReasonName == null ||
+                rejectedReasonName.trim().isEmpty()) {
+
+                throw new SQLException(
+                        "Rejection reason name not found for code: "
+                        + reasonId);
+            }
+
+            System.out.println("Reason Code = "
+                    + rejectedReasonCode);
+
+            System.out.println("Reason Name = "
+                    + rejectedReasonName);
 
 
             // ====================================================
-            // STEP 3
-            // INSERT INTO OUTWARD_REJECTED_CHEQUES
-            //
-            // rejected_date is NOT included because PostgreSQL
-            // automatically uses CURRENT_TIMESTAMP.
+            // 5. INSERT INTO outward_rejected_cheques
             // ====================================================
 
             String insertSql =
-                    "INSERT INTO outward_rejected_cheques "
+                    "INSERT INTO public.outward_rejected_cheques "
                   + "(outward_cheque_id, "
                   + " rejected_by, "
                   + " remarks, "
                   + " outward_batch_id, "
-                  + " cheque_amount) "
-                  + "VALUES (?, ?, ?, ?, ?)";
+                  + " cheque_amount, "
+                  + " reason_id, "
+                  + " reason) "
+                  + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement ps =
                          con.prepareStatement(insertSql)) {
@@ -454,8 +479,6 @@ public class OutwardCheckerQueueDAOImpl
                         1,
                         outwardChequeId);
 
-                // IMPORTANT:
-                // This is USR1003, not ochecker.
                 ps.setString(
                         2,
                         userId);
@@ -472,22 +495,56 @@ public class OutwardCheckerQueueDAOImpl
                         5,
                         chequeAmount);
 
+                // IMPORTANT
+                // reason_id is rejected_reason_code
+                ps.setString(
+                        6,
+                        rejectedReasonCode);
+
+                // reason is rejected_reason_name
+                ps.setString(
+                        7,
+                        rejectedReasonName);
+
                 int rowsInserted =
                         ps.executeUpdate();
+
+                if (rowsInserted != 1) {
+
+                    throw new SQLException(
+                            "Failed to insert rejected cheque: "
+                            + chequeNo);
+                }
 
                 System.out.println(
                         "=================================");
 
                 System.out.println(
-                        "REJECTED CHEQUE INSERT");
+                        "REJECTED CHEQUE INSERTED");
+
+                System.out.println(
+                        "Cheque ID = "
+                        + outwardChequeId);
+
+                System.out.println(
+                        "User ID = "
+                        + userId);
+
+                System.out.println(
+                        "Reason ID = "
+                        + rejectedReasonCode);
+
+                System.out.println(
+                        "Reason = "
+                        + rejectedReasonName);
+
+                System.out.println(
+                        "Remarks = "
+                        + remarks);
 
                 System.out.println(
                         "Rows Inserted = "
                         + rowsInserted);
-
-                System.out.println(
-                        "Rejected By User ID = "
-                        + userId);
 
                 System.out.println(
                         "=================================");
@@ -495,8 +552,7 @@ public class OutwardCheckerQueueDAOImpl
 
 
             // ====================================================
-            // STEP 4
-            // CHANGE OUTWARD CHEQUE STATUS
+            // 6. UPDATE OUTWARD CHEQUE STATUS
             // ====================================================
 
             String updateSql =
@@ -543,8 +599,7 @@ public class OutwardCheckerQueueDAOImpl
 
 
             // ====================================================
-            // STEP 5
-            // COMMIT
+            // 7. COMMIT
             // ====================================================
 
             con.commit();
@@ -556,13 +611,24 @@ public class OutwardCheckerQueueDAOImpl
                     "REJECT TRANSACTION SUCCESS");
 
             System.out.println(
-                    "Cheque = " + chequeNo);
+                    "Cheque = "
+                    + chequeNo);
 
             System.out.println(
-                    "User = " + username);
+                    "User = "
+                    + username);
 
             System.out.println(
-                    "User ID = " + userId);
+                    "User ID = "
+                    + userId);
+
+            System.out.println(
+                    "Reason ID = "
+                    + rejectedReasonCode);
+
+            System.out.println(
+                    "Reason = "
+                    + rejectedReasonName);
 
             System.out.println(
                     "Status = REJECTED");
@@ -594,6 +660,7 @@ public class OutwardCheckerQueueDAOImpl
 
             throw e;
 
+
         } finally {
 
             // ====================================================
@@ -605,7 +672,6 @@ public class OutwardCheckerQueueDAOImpl
                 try {
 
                     con.setAutoCommit(true);
-
                     con.close();
 
                 } catch (SQLException closeException) {
@@ -615,7 +681,6 @@ public class OutwardCheckerQueueDAOImpl
             }
         }
     }
-
 
     // ============================================================
     // GET FRONT / BACK IMAGES
@@ -754,7 +819,369 @@ public class OutwardCheckerQueueDAOImpl
 
         return reasons;
     }
+    
+    
+ // ============================================================
+ // RETURN CHEQUE TO MAKER
+ //
+ // 1. Get cheque ID and batch ID
+ // 2. Get reason name
+ // 3. Insert request into outward_cheque_request
+ // 4. Change cheque status to RETURN_TO_MAKER
+ // 5. Commit everything
+ //
+ // ============================================================
 
+ // ============================================================
+ // RETURN CHEQUE TO MAKER
+ //
+ // 1. Get cheque ID and batch ID
+ // 2. Get reason name
+ // 3. Insert request into outward_cheque_request
+ // 4. Change cheque status
+ // 5. Commit everything
+ //
+ // ============================================================
+
+ @Override
+ public void returnChequeToMaker(
+         String chequeNo,
+         String reasonId,
+         String remarks)
+         throws SQLException {
+
+     Connection con = null;
+
+     try {
+
+         // ========================================================
+         // 1. GET CONNECTION
+         // ========================================================
+
+         con = DBConnection.getConnection();
+
+         // Start transaction
+         con.setAutoCommit(false);
+
+         System.out.println("=================================");
+         System.out.println("RETURN CHEQUE TO MAKER");
+         System.out.println("Cheque Number = " + chequeNo);
+         System.out.println("Reason ID = " + reasonId);
+         System.out.println("Remarks = " + remarks);
+         System.out.println("=================================");
+
+
+         // ========================================================
+         // 2. GET CHEQUE ID AND BATCH ID
+         // ========================================================
+
+         String chequeSql =
+                 "SELECT outward_cheque_id, "
+               + "       outward_batch_id "
+               + "FROM outward_cheque "
+               + "WHERE cheque_number = ?";
+
+         String outwardChequeId = null;
+         String outwardBatchId = null;
+
+         try (PreparedStatement ps =
+                      con.prepareStatement(chequeSql)) {
+
+             ps.setString(1, chequeNo);
+
+             try (ResultSet rs =
+                          ps.executeQuery()) {
+
+                 if (rs.next()) {
+
+                     outwardChequeId =
+                             rs.getString("outward_cheque_id");
+
+                     outwardBatchId =
+                             rs.getString("outward_batch_id");
+                 }
+             }
+         }
+
+
+         // ========================================================
+         // 3. VALIDATE CHEQUE
+         // ========================================================
+
+         if (outwardChequeId == null ||
+             outwardChequeId.trim().isEmpty()) {
+
+             throw new SQLException(
+                     "Cheque not found: " + chequeNo);
+         }
+
+         if (outwardBatchId == null ||
+             outwardBatchId.trim().isEmpty()) {
+
+             throw new SQLException(
+                     "Batch ID not found for cheque: "
+                     + chequeNo);
+         }
+
+
+         System.out.println(
+                 "Outward Cheque ID = "
+                 + outwardChequeId);
+
+         System.out.println(
+                 "Outward Batch ID = "
+                 + outwardBatchId);
+
+
+         // ========================================================
+         // 4. GET REASON NAME
+         // ========================================================
+
+         String reasonSql =
+                 "SELECT reason_name "
+               + "FROM send_back_reason "
+               + "WHERE reason_id = ?";
+
+         String reasonName = null;
+
+         try (PreparedStatement ps =
+                      con.prepareStatement(reasonSql)) {
+
+             ps.setString(1, reasonId);
+
+             try (ResultSet rs =
+                          ps.executeQuery()) {
+
+                 if (rs.next()) {
+
+                     reasonName =
+                             rs.getString("reason_name");
+                 }
+             }
+         }
+
+
+         // ========================================================
+         // 5. VALIDATE REASON
+         // ========================================================
+
+         if (reasonName == null ||
+             reasonName.trim().isEmpty()) {
+
+             throw new SQLException(
+                     "Send back reason not found for reason ID: "
+                     + reasonId);
+         }
+
+
+         System.out.println(
+                 "Reason Name = " + reasonName);
+
+
+         // ========================================================
+         // 6. INSERT INTO outward_cheque_request
+         //
+         // Table columns:
+         //
+         // request_id  -> generated automatically by PostgreSQL
+         // cheque_id   -> outward_cheque.outward_cheque_id
+         // batch_id    -> outward_cheque.outward_batch_id
+         // remarks     -> checker remarks
+         // reason_id   -> selected reason ID
+         // reason      -> reason_name
+         //
+         // ========================================================
+
+         String insertSql =
+                 "INSERT INTO outward_cheque_request "
+               + "(cheque_id, "
+               + " batch_id, "
+               + " remarks, "
+               + " reason_id, "
+               + " reason) "
+               + "VALUES (?, ?, ?, ?, ?)";
+
+         try (PreparedStatement ps =
+                      con.prepareStatement(insertSql)) {
+
+             ps.setString(1, outwardChequeId);
+             ps.setString(2, outwardBatchId);
+             ps.setString(3, remarks);
+             ps.setString(4, reasonId);
+             ps.setString(5, reasonName);
+
+             int rowsInserted =
+                     ps.executeUpdate();
+
+             if (rowsInserted != 1) {
+
+                 throw new SQLException(
+                         "Failed to insert outward cheque request "
+                         + "for cheque: " + chequeNo);
+             }
+
+             System.out.println(
+                     "=================================");
+
+             System.out.println(
+                     "OUTWARD CHEQUE REQUEST INSERTED");
+
+             System.out.println(
+                     "Cheque ID = " + outwardChequeId);
+
+             System.out.println(
+                     "Batch ID = " + outwardBatchId);
+
+             System.out.println(
+                     "Reason ID = " + reasonId);
+
+             System.out.println(
+                     "Reason = " + reasonName);
+
+             System.out.println(
+                     "Remarks = " + remarks);
+
+             System.out.println(
+                     "Rows Inserted = " + rowsInserted);
+
+             System.out.println(
+                     "=================================");
+         }
+
+      // ========================================================
+      // 7. UPDATE CHEQUE STATUS
+      // ========================================================
+
+      String chequeStatus;
+
+      if ("11".equals(reasonId) || "12".equals(reasonId)) {
+          chequeStatus = "PENDING_MICR_REPAIR";
+      } else {
+          chequeStatus = "PENDING_DATA_ENTRY";
+      }
+
+      System.out.println("Cheque Status = " + chequeStatus);
+      System.out.println("Updating using Outward Cheque ID = " + outwardChequeId);
+
+      String updateSql =
+              "UPDATE outward_cheque "
+            + "SET cheque_status = ? "
+            + "WHERE outward_cheque_id = ?";
+
+      try (PreparedStatement ps =
+                   con.prepareStatement(updateSql)) {
+
+          ps.setString(1, chequeStatus);
+          ps.setString(2, outwardChequeId);
+
+          int rowsUpdated = ps.executeUpdate();
+
+          System.out.println("Rows Updated = " + rowsUpdated);
+
+          if (rowsUpdated != 1) {
+              throw new SQLException(
+                      "Failed to update cheque status "
+                      + "for cheque: " + chequeNo
+                      + ". Outward cheque ID: "
+                      + outwardChequeId
+              );
+          }
+
+          System.out.println(
+                  "================================="
+          );
+
+          System.out.println(
+                  "CHEQUE STATUS UPDATED"
+          );
+
+          System.out.println(
+                  "Cheque Number = " + chequeNo
+          );
+
+          System.out.println(
+                  "Outward Cheque ID = " + outwardChequeId
+          );
+
+          System.out.println(
+                  "New Status = " + chequeStatus
+          );
+
+          System.out.println(
+                  "Rows Updated = " + rowsUpdated
+          );
+
+          System.out.println(
+                  "================================="
+          );
+      }
+
+         // ========================================================
+         // 8. COMMIT TRANSACTION
+         // ========================================================
+
+         con.commit();
+
+         System.out.println(
+                 "=================================");
+
+         System.out.println(
+                 "RETURN TO MAKER SUCCESS");
+
+         System.out.println(
+                 "Cheque = " + chequeNo);
+
+         System.out.println(
+                 "Status = RETURN_TO_MAKER");
+
+         System.out.println(
+                 "=================================");
+
+
+     } catch (SQLException e) {
+
+         // ========================================================
+         // 9. ROLLBACK
+         // ========================================================
+
+         if (con != null) {
+
+             try {
+
+                 con.rollback();
+
+                 System.out.println(
+                         "Return-to-maker transaction rolled back.");
+
+             } catch (SQLException rollbackException) {
+
+                 rollbackException.printStackTrace();
+             }
+         }
+
+         throw e;
+
+
+     } finally {
+
+         // ========================================================
+         // 10. CLOSE CONNECTION
+         // ========================================================
+
+         if (con != null) {
+
+             try {
+
+                 con.setAutoCommit(true);
+                 con.close();
+
+             } catch (SQLException closeException) {
+
+                 closeException.printStackTrace();
+             }
+         }
+     }
+ }
 
     // ============================================================
     // CHECK PAYEE ACCOUNT
@@ -907,132 +1334,74 @@ public class OutwardCheckerQueueDAOImpl
  // SAVE REJECTED CHEQUE
  // ============================================================
 
- @Override
- public void saveRejectedCheque(
-         OutwardRejectedCheques rejectedCheque)
-         throws SQLException {
+    @Override
+    public void saveRejectedCheque(OutwardRejectedCheques rejectedCheque)
+            throws SQLException {
 
-     /*
-      * rejectedCheque.getRejectedBy() contains USERNAME
-      *
-      * Example:
-      *     ochecker
-      *
-      * But outward_rejected_cheques.rejected_by
-      * references users.user_id.
-      *
-      * Therefore we get user_id from users using username.
-      */
+    	String sql =
+    	        "INSERT INTO public.outward_rejected_cheques "
+    	      + "(outward_cheque_id, "
+    	      + " rejected_by, "
+    	      + " rejected_date, "
+    	      + " remarks, "
+    	      + " outward_batch_id, "
+    	      + " cheque_amount, "
+    	      + " reason_id, "
+    	      + " reason) "
+    	      + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-     String sql =
-             "INSERT INTO outward_rejected_cheques "
-           + "(outward_cheque_id, "
-           + " rejected_by, "
-           + " rejected_date, "
-           + " remarks, "
-           + " outward_batch_id, "
-           + " cheque_amount) "
-           + "SELECT ?, "
-           + "       user_id, "
-           + "       ?, "
-           + "       ?, "
-           + "       ?, "
-           + "       ? "
-           + "FROM users "
-           + "WHERE username = ? "
-           + "AND UPPER(status) = 'ACTIVE'";
+        Connection connection = null;
+        PreparedStatement ps = null;
 
-     try (Connection con = DBConnection.getConnection();
-          PreparedStatement ps = con.prepareStatement(sql)) {
+        try {
 
-         // --------------------------------------------------------
-         // 1. OUTWARD CHEQUE ID
-         // --------------------------------------------------------
+            connection = DBConnection.getConnection();
 
-         ps.setString(
-                 1,
-                 rejectedCheque.getOutwardChequeId()
-         );
+            if (connection == null) {
+                throw new SQLException("Database connection is null.");
+            }
 
-         // --------------------------------------------------------
-         // 2. REJECTED DATE
-         // --------------------------------------------------------
+            ps = connection.prepareStatement(sql);
 
-         ps.setTimestamp(
-                 2,
-                 rejectedCheque.getRejectedDate()
-         );
+            // Existing fields
+            ps.setString(1, rejectedCheque.getOutwardChequeId());
+            ps.setString(2, rejectedCheque.getRejectedBy());
+            ps.setTimestamp(3, rejectedCheque.getRejectedDate());
+            ps.setString(4, rejectedCheque.getRemarks());
+            ps.setString(5, rejectedCheque.getOutwardBatchId());
+            ps.setBigDecimal(6, rejectedCheque.getChequeAmount());
+            ps.setString(7, rejectedCheque.getRejectedReasonId());
+            ps.setString(8, rejectedCheque.getRejectedReasonName());
 
-         // --------------------------------------------------------
-         // 3. REMARKS
-         // --------------------------------------------------------
+            ps.executeUpdate();
 
-         ps.setString(
-                 3,
-                 rejectedCheque.getRemarks()
-         );
+            System.out.println(
+                    "Rejected cheque saved successfully."
+            );
 
-         // --------------------------------------------------------
-         // 4. OUTWARD BATCH ID
-         // --------------------------------------------------------
+            System.out.println(
+                    "Reason ID   : "
+                    + rejectedCheque.getRejectedReasonId()
+            );
 
-         ps.setString(
-                 4,
-                 rejectedCheque.getOutwardBatchId()
-         );
+            System.out.println(
+                    "Reason Name : "
+                    + rejectedCheque.getRejectedReasonName()
+            );
 
-         // --------------------------------------------------------
-         // 5. CHEQUE AMOUNT
-         // --------------------------------------------------------
+        } finally {
 
-         ps.setBigDecimal(
-                 5,
-                 rejectedCheque.getChequeAmount()
-         );
+            if (ps != null) {
+                ps.close();
+            }
 
-         // --------------------------------------------------------
-         // 6. USERNAME
-         // --------------------------------------------------------
-
-         ps.setString(
-                 6,
-                 rejectedCheque.getRejectedBy()
-         );
-
-         System.out.println("=================================");
-         System.out.println("SAVE REJECTED CHEQUE");
-         System.out.println("Cheque ID = "
-                 + rejectedCheque.getOutwardChequeId());
-         System.out.println("Username = "
-                 + rejectedCheque.getRejectedBy());
-         System.out.println("Batch ID = "
-                 + rejectedCheque.getOutwardBatchId());
-         System.out.println("Amount = "
-                 + rejectedCheque.getChequeAmount());
-         System.out.println("=================================");
-
-         int rows = ps.executeUpdate();
-
-         // --------------------------------------------------------
-         // CHECK WHETHER USER WAS FOUND
-         // --------------------------------------------------------
-
-         if (rows == 0) {
-
-             throw new SQLException(
-                     "Unable to save rejected cheque. "
-                   + "No ACTIVE user found for username: "
-                   + rejectedCheque.getRejectedBy()
-             );
-         }
-
-         System.out.println(
-                 "Rejected cheque saved successfully. Rows = "
-                 + rows
-         );
-     }
- }
- 
+            if (connection != null) {
+                connection.close();
+            }
+        }
+    }
+    
+    
  @Override
  public RejectRequestDTO getRejectRequestByChequeId(
          String chequeId) throws SQLException {

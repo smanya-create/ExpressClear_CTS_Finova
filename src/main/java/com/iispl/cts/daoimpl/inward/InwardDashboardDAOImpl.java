@@ -90,6 +90,10 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
     public List<InwardDashboardBatchDTO> getRecentBatches() {
         List<InwardDashboardBatchDTO> batches = new ArrayList<>();
 
+        // Retains ALL non-completed/non-rejected batches:
+        // 1. Batches actively being processed (even if all cheques are approved and awaiting submit)
+        // 2. Batches submitted to Checker (CHECKER_PROCESSING_PENDING)
+        // 3. Batches with sent-back cheques (CHECKER_PROCESSING)
         String sql = 
             "SELECT * FROM ( " +
             "    SELECT " +
@@ -106,8 +110,6 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             "    WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
             "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count " +
             ") sub " +
-            "WHERE sub.back_to_maker_count > 0 " +
-            "   OR (sub.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') AND sub.maker_work_count > 0) " +
             "ORDER BY sub.uploaded_at DESC";
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
@@ -129,7 +131,10 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
                 dto.setBackToMakerCheques(rs.getInt("back_to_maker_count"));
                 dto.setReturnRequestCheques(rs.getInt("return_request_count"));
 
-                if (dto.getBackToMakerCheques() > 0) {
+                String batchStatus = rs.getString("batch_status");
+                if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(batchStatus)) {
+                    dto.setDisplayStatus("CHECKER_PROCESSING_PENDING");
+                } else if (dto.getBackToMakerCheques() > 0) {
                     dto.setDisplayStatus("Sent Back");
                 } else {
                     dto.setDisplayStatus("Partially Processed");

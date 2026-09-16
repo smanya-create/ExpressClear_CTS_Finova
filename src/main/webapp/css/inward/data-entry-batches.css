@@ -1,5 +1,5 @@
 /* =========================================================
-   INWARD DATA ENTRY QUEUE - OUTWARD & MICR REPAIR DESIGN
+   INWARD DATA ENTRY BATCH QUEUE - DEDICATED STYLES
    ========================================================= */
 
 .data-entry-view-page {
@@ -9,16 +9,15 @@
     margin: 0;
     background: #f8fafc !important;
     overflow-x: hidden;
-    overflow-y: auto;
 }
 
-/* 1. Page Title */
-.data-entry-title-section {
+/* Page Title */
+.data-entry-view-title-section {
     padding: 0;
     margin: 0 0 4px 0;
 }
 
-.data-entry-title {
+.data-entry-view-title {
     font-size: 22px !important;
     font-weight: 800 !important;
     color: #0f172a !important;
@@ -26,7 +25,7 @@
     letter-spacing: 0.2px;
 }
 
-/* 2. Main Section Card */
+/* Section Card */
 .data-entry-section-card {
     width: 100%;
     box-sizing: border-box;
@@ -35,12 +34,6 @@
     border-radius: 8px !important;
     padding: 16px 20px 14px 20px;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-}
-
-.data-entry-card-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
 }
 
 .data-entry-section-title {
@@ -59,7 +52,7 @@
     font-weight: 700;
 }
 
-/* 3. Filter Bar */
+/* Filter Bar */
 .data-entry-filter-bar {
     width: 100%;
     box-sizing: border-box;
@@ -76,117 +69,228 @@
 }
 
 .data-entry-filter-input {
-    height: 32px !important;
-    padding: 0 10px !important;
-    box-sizing: border-box !important;
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 5px !important;
-    color: #1e293b !important;
-    font-size: 11.5px !important;
+    height: 32px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    color: #1e293b;
+    font-size: 11.5px;
 }
 
 .data-entry-filter-input:focus {
+    border-color: #172554;
+    outline: none;
+}
+
+/* =========================================================
+   STATUS COMBOBOX - VERTICALLY CENTERED & CLEAN
+   ========================================================= */
+.batch-status-filter {
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+}
+
+.batch-status-filter .z-combobox-input {
+    height: 32px !important;
+    line-height: 30px !important;
+    box-sizing: border-box !important;
+    padding: 0 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-right: none !important;
+    border-radius: 5px 0 0 5px !important;
+    color: #1e293b !important;
+    background: #ffffff !important;
+}
+
+.batch-status-filter .z-combobox-button {
+    height: 32px !important;
+    line-height: 30px !important;
+    width: 28px !important;
+    box-sizing: border-box !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: none !important;
+    border-radius: 0 5px 5px 0 !important;
+    background: #ffffff !important;
+    color: #475569 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.batch-status-filter .z-combobox-input:focus {
     border-color: #172554 !important;
     outline: none !important;
 }
 
-.data-entry-filter-btn.z-button {
+.batch-status-filter:hover .z-combobox-input,
+.batch-status-filter:hover .z-combobox-button {
+    border-color: #94a3b8 !important;
+}
+
+/* Combobox Dropdown Popup (Fits all items without inner scroll) */
+.z-combobox-popup {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.1) !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: hidden !important;
+    padding: 4px 0 !important;
+}
+
+.z-combobox-popup .z-combobox-content {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Individual Dropdown Item Alignment */
+.z-comboitem {
     height: 32px !important;
-    padding: 0 16px !important;
+    line-height: 32px !important;
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+}
+
+.z-comboitem-text {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    line-height: 32px !important;
+    vertical-align: middle !important;
+}
+
+.z-comboitem:hover,
+.z-comboitem-selected {
+    background: #f1f5f9 !important;
+    color: #172554 !important;
+}
+
+/* Clear Filter Button */
+.data-entry-clear-button.z-button {
+    height: 32px;
+    padding: 0 16px;
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 5px !important;
     color: #475569 !important;
     font-size: 10.5px !important;
     font-weight: 700 !important;
-    cursor: pointer !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
-.data-entry-filter-btn.z-button:hover {
+.data-entry-clear-button.z-button:hover {
     background: #f1f5f9 !important;
     border-color: #94a3b8 !important;
     color: #0f172a !important;
 }
 
-/* 4. Table Wrapper */
-.data-entry-table-wrapper {
-    width: 100%;
+/* Grid Container */
+.data-entry-grid {
+    width: 100% !important;
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 6px !important;
     overflow: hidden !important;
+    border-collapse: separate !important;
 }
 
-/* 5. Listbox & Dark Navy Header */
-.data-entry-listbox {
-    border: none !important;
-    background: transparent !important;
-    width: 100% !important;
-}
-
-.data-entry-listbox .z-listhead,
-.data-entry-listbox .z-listhead-bar,
-.data-entry-listbox .z-listheader,
-.data-entry-listbox .z-listheader-content {
+/* Grid Header */
+.data-entry-grid .z-grid-header {
     background: #18275c !important;
-    background-color: #18275c !important;
-    background-image: none !important;
-    color: #ffffff !important;
     border: none !important;
-    border-bottom: 1px solid #30406f !important;
-    font-size: 10px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
+}
+
+.data-entry-grid .z-columns {
+    background: #18275c !important;
+}
+
+.data-entry-grid .z-column {
+    background: #18275c !important;
+    border-right: 1px solid #30406f !important;
+    border-bottom: none !important;
+}
+
+.data-entry-grid .z-column:last-child {
+    border-right: none !important;
+}
+
+.data-entry-grid .z-column-content {
     height: 38px !important;
     line-height: 38px !important;
     padding: 0 8px !important;
+    background: #18275c !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px;
     text-align: center !important;
-    white-space: nowrap !important;
+    white-space: nowrap;
 }
 
-.data-entry-listbox .z-listheader {
-    border-right: 1px solid #30406f !important;
-}
-
-.data-entry-listbox .z-listheader:last-child {
-    border-right: none !important;
-}
-
-/* 6. Rows & Cells */
-.data-entry-listbox .z-listitem {
+/* Grid Rows */
+.data-entry-grid .z-row {
     height: 48px !important;
     background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
 }
 
-.data-entry-listbox .z-listitem:hover {
-    background: #f8fafc !important;
+.data-entry-grid .z-row:last-child {
+    border-bottom: none !important;
 }
 
-.data-entry-listbox .z-listcell {
+.data-entry-grid .z-row-inner {
+    height: 48px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.data-entry-grid .z-cell {
     height: 48px !important;
     padding: 0 8px !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    background: #ffffff !important;
     border-right: none !important;
+    border-bottom: 1px solid #e5e7eb !important;
     vertical-align: middle !important;
     text-align: center !important;
 }
 
-.data-entry-listbox .z-listcell-content {
-    padding: 0 6px !important;
+.data-entry-grid .z-row-content {
     text-align: center !important;
-    white-space: nowrap !important;
+    white-space: nowrap;
+    padding: 0 6px !important;
 }
 
-/* 7. Typography inside table */
-.data-entry-batch-id-link {
+.data-entry-grid .z-row:hover,
+.data-entry-grid .z-row:hover .z-cell,
+.data-entry-grid .z-row:hover .z-row-inner {
+    background: #f8fafc !important;
+}
+
+/* Batch ID Link */
+.data-entry-batch-id {
     color: #075bd3 !important;
     font-size: 11px !important;
     font-weight: 800 !important;
-    cursor: pointer !important;
+    cursor: pointer;
     text-align: center !important;
+}
+
+/* Cell Text Typography */
+.data-entry-cell-text {
+    font-size: 11px !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
 }
 
 .data-entry-count-text {
@@ -207,8 +311,8 @@
     color: #0f172a !important;
 }
 
-/* 8. Status Badges (Golden Gradient Outward Pill) */
-.data-entry-status-pill {
+/* Status Badges */
+.data-entry-status-pending {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -226,9 +330,10 @@
     text-transform: uppercase !important;
     text-align: center !important;
     box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
+    white-space: nowrap !important;
 }
 
-.data-entry-status-sentback {
+.data-entry-status-returned {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -236,25 +341,27 @@
     height: 24px !important;
     padding: 0 12px !important;
     box-sizing: border-box !important;
-    background: #ffedd5 !important;
-    color: #9a3412 !important;
-    border: 1px solid #fdba74 !important;
+    background: linear-gradient(90deg, #e0e7ff 0%, #c7d2fe 55%, #a5b4fc 100%) !important;
+    color: #1e1b4b !important;
+    border: 1px solid #818cf8 !important;
     border-radius: 9999px !important;
     font-size: 8.5px !important;
     font-weight: 800 !important;
     letter-spacing: 0.3px !important;
     text-transform: uppercase !important;
     text-align: center !important;
+    box-shadow: 0 1px 3px rgba(129, 140, 248, 0.3) !important;
+    white-space: nowrap !important;
 }
 
-/* 9. Action Buttons */
-.data-entry-btn-action {
+/* Action Button */
+.btn-action-data-entry {
     display: inline-block !important;
     vertical-align: middle !important;
-    min-width: 82px !important;
+    width: 80px !important;
     height: 28px !important;
     line-height: 26px !important;
-    padding: 0 10px !important;
+    padding: 0 !important;
     background: #18275c !important;
     border: 1px solid #18275c !important;
     border-radius: 4px !important;
@@ -267,61 +374,56 @@
     box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
 }
 
-.data-entry-btn-action:hover {
+.btn-action-data-entry:hover {
     background: #101c46 !important;
     border-color: #101c46 !important;
 }
 
-.data-entry-btn-submit {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    min-width: 82px !important;
-    height: 28px !important;
-    line-height: 26px !important;
-    padding: 0 10px !important;
-    background: #15803d !important;
-    border: 1px solid #15803d !important;
-    border-radius: 4px !important;
-    color: #ffffff !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
+/* Paging Bar */
+.data-entry-paging {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 10px 0 2px 0 !important;
     text-align: center !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2) !important;
+    background: transparent !important;
 }
 
-.data-entry-btn-submit:hover {
-    background: #166534 !important;
-    border-color: #166534 !important;
-}
-
-/* 10. Paging Bar */
-.data-entry-listbox .z-paging {
-    border: none !important;
-    border-top: 1px solid #e2e8f0 !important;
-    background: #ffffff !important;
-    padding: 10px 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-}
-
-.data-entry-listbox .z-paging-info {
-    display: none !important;
-}
-
-.data-entry-listbox .z-paging-btn {
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
-    border-radius: 4px !important;
-    margin: 0 3px !important;
+.data-entry-paging .z-paging-button {
     min-width: 32px !important;
     height: 30px !important;
-    cursor: pointer !important;
+    line-height: 28px !important;
+    margin: 0 2px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
     color: #1e293b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
 }
 
-.data-entry-listbox .z-paging-btn:hover {
+.data-entry-paging .z-paging-button:hover {
     background: #f1f5f9 !important;
+}
+
+/* Empty State Card */
+.data-entry-empty-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff !important;
+    border: 1px solid #d9dee7 !important;
+    border-radius: 8px !important;
+    padding: 24px !important;
+    text-align: center;
+}
+
+.data-entry-empty-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+}
+
+.data-entry-empty-message {
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    color: #6b7280 !important;
 }

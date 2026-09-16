@@ -23,7 +23,7 @@
 
 				<!-- Non-Scrollable Content Area -->
 				<center border="none" autoscroll="false"
-					style="overflow: hidden; background-color: #f1f5f9;">
+					style="overflow: hidden; ">
 					<vlayout sclass="cts-content-wrapper" vflex="1"
 						hflex="1" spacing="0">
 
@@ -37,12 +37,10 @@
 								<vlayout spacing="2px" hflex="1">
 									<label value="User Management"
 										sclass="cts-main-title" style="font-size: 20px;" />
-									<label
-										value="Manage system users, roles and access."
-										sclass="cts-main-subtitle" style="margin-top: 2px;" />
+									
 								</vlayout>
 								<button id="btnAddUser"
-									label="+ ADD USER" sclass="cts-btn-add-user" />
+									label="+ Add User" sclass="cts-btn-add-user" />
 							</hlayout>
 
 							<!-- Fixed Search & Filter Card (Does NOT scroll) -->

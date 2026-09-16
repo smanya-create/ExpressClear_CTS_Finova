@@ -13,28 +13,25 @@
 		<vlayout width="100%" spacing="16px">
 
 			<!-- 1. Unified Page Title -->
-			<vlayout spacing="4px" sclass="batch-title-section">
-				<label value="BATCH INTAKE" sclass="batch-page-title" />
-				<label
-					value="Validate each batch before it enters MICR Repair or Data entry."
-					sclass="batch-page-subtitle" />
-			</vlayout>
+			<hlayout width="100%" valign="middle"
+				sclass="batch-title-section">
+				<label value="Batch Intake" sclass="batch-page-title" />
+				<space hflex="1" />
+				<button id="dashboardButton" label="BACK TO DASHBOARD"
+					sclass="view-button batch-dashboard-button" />
+			</hlayout>
 
 			<!-- 2. Main Section Card -->
 			<div sclass="batch-section-card" width="100%">
-
 				<vlayout width="100%" spacing="12px">
-
 					<!-- Section Header & Count -->
 					<hlayout width="100%" valign="middle"
 						sclass="batch-card-header">
 						<vlayout spacing="3px">
 							<label value="Received Inward Batches"
 								sclass="batch-section-title" />
-							<label
-								value="Inward batch packages detected in the intake directory."
-								sclass="batch-section-subtitle" />
 						</vlayout>
+
 						<label id="batchCountLabel" value="0 Batches"
 							sclass="batch-result-count" />
 					</hlayout>
@@ -89,15 +86,15 @@
 							mold="paging" pageSize="10" sclass="batch-listbox"
 							emptyMessage="No inward batches found">
 							<listhead sizable="false">
-								<listheader label="BATCH NO."
+								<listheader label="Batch"
 									width="20%" align="center" />
-								<listheader label="RECEIVED ON"
+								<listheader label="Received Date"
 									width="22%" align="center" />
-								<listheader label="AMOUNT (INR)"
+								<listheader label="Amount (INR)"
 									width="20%" align="center" />
-								<listheader label="STATUS" width="20%"
+								<listheader label="Status" width="20%"
 									align="center" />
-								<listheader label="ACTION" width="18%"
+								<listheader label="Action" width="18%"
 									align="center" />
 							</listhead>
 						</listbox>

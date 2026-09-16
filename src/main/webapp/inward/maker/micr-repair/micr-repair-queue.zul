@@ -2,7 +2,7 @@
 <?page title="CTS - Inward MICR Repair" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-	<style src="/css/inward/micr-repair-queue.css" />
+	<style src="/css/inward/micr-repair-queue.css?v=4" />
 
 	<div id="micrRepairQueueRoot"
 		width="100%"
@@ -17,7 +17,7 @@
 			<!-- PAGE TITLE (Outward Header Style) -->
 			<!-- ================================================= -->
 			<vlayout spacing="4px" sclass="micr-repair-view-title-section">
-				<label value="MICR REPAIR" sclass="micr-repair-view-title" />
+				<label value="MICR Repair" sclass="micr-repair-view-title" />
 			</vlayout>
 
 			<!-- ================================================= -->
@@ -41,9 +41,21 @@
 							<label value="Search Batch ID" sclass="filter-label" />
 							<textbox id="batchIdFilter"
 								placeholder="Enter full or partial Batch ID"
-								width="360px"
+								width="340px"
 								sclass="batch-filter-input"
 								onChanging="$composer.onChanging$batchIdFilter(event)" />
+
+							<!-- Status Filter Combobox -->
+							<combobox id="cmbStatusFilter"
+								readonly="true"
+								width="170px"
+								sclass="batch-status-filter"
+								placeholder="Filter by Status">
+								<comboitem label="All Statuses" value="ALL" />
+								<comboitem label="Pending Maker" value="PENDING_MAKER" />
+								<comboitem label="Checker Returned" value="CHECKER_RETURNED" />
+							</combobox>
+
 							<button id="btnClearFilter"
 								label="Clear"
 								sclass="clear-filter-button"
@@ -54,12 +66,12 @@
 					<!-- Single Outward-style Grid -->
 					<grid id="grdMicrRepairBatches" width="100%" sclass="micr-repair-grid">
 						<columns sizable="false">
-							<column label="BATCH" width="18%" align="center" />
-							<column label="RECEIVED DATE" width="18%" align="center" />
-							<column label="TOTAL CHEQUES" width="16%" align="center" />
-							<column label="MICR ERRORS" width="16%" align="center" />
-							<column label="STATUS" width="16%" align="center" />
-							<column label="ACTION" width="16%" align="center" />
+							<column label="Batch" width="18%" align="center" />
+							<column label="Received Date" width="18%" align="center" />
+							<column label="Total Cheques" width="16%" align="center" />
+							<column label="MICR Errors" width="16%" align="center" />
+							<column label="Status" width="16%" align="center" />
+							<column label="Action" width="16%" align="center" />
 						</columns>
 						<rows id="rowsMicrRepairBatches" />
 					</grid>

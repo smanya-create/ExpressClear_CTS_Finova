@@ -6,10 +6,12 @@
 
     <zscript>
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
-        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
+        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Admin");
     </zscript>
 
-    <borderlayout width="100%" height="100%" apply="com.iispl.cts.controller.inward.checker.InwardCheckerDashboardController">
+    <borderlayout width="100%"
+                  height="100%"
+                  apply="com.iispl.cts.controller.inward.checker.InwardCheckerDashboardController">
 
         <west width="220px" border="0">
             <include src="/components/sidebar.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash"/>
@@ -20,75 +22,108 @@
             <borderlayout width="100%" height="100%">
 
                 <north height="70px" border="0">
-                    <include src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash"/>
+
+                    <include src="/components/header.zul?pageTitle=Checker Dashboard&amp;pageSubtitle=Inward Checker"/>
+
                 </north>
 
                 <center border="none"
-        sclass="checker-dashboard-center">
+                        sclass="checker-dashboard-center">
 
-    <vlayout spacing="6px"
-             width="100%"
-             height="100%"
-             style="padding:10px;box-sizing:border-box;"
-             sclass="checker-dashboard-content">
+                    <vlayout spacing="6px"
+                             width="100%"
+                             height="100%"
+                             style="padding:10px;box-sizing:border-box;"
+                             sclass="checker-dashboard-content">
+
                         <vlayout spacing="0px">
 
                             <label value="Checker Dashboard"
                                    style="font-size:24px;font-weight:bold;color:black"/>
 
+                            <label value="Monitor batches submitted by maker"
+                                   style="font-size:10px;color:#807977"/>
+
                         </vlayout>
 
-                        <separator style="border-top:2px solid black;"/>
+                        <!-- SEARCH CARD -->
 
-                        <label value="Batch Search"
-                               style="font-weight:bold;font-size:16px"/>
+                        <div sclass="inward-checker-filter-card">
 
-                        <hlayout spacing="6px" style="align-items:center">
+                            <div sclass="inward-checker-filter-title-box">
 
-                            <textbox id="txtSearchBatchId"
-                                     hflex="1"
-                                     height="30px"
-                                     placeholder="Enter Batch ID"
-                                     style="font-size:13px;padding:2px 8px"/>
+                                <label value="Search Batch"
+                                       sclass="inward-checker-filter-heading"/>
 
-                            <button id="btnClear"
-                                    label="Clear"
-                                    height="30px"
-                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+                            </div>
 
-                            <button id="btnSearch"
-                                    label="Search"
-                                    height="30px"
-                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+                            <hlayout spacing="12px"
+                                     sclass="inward-checker-filter-controls z-valign-middle">
 
-                        </hlayout>
+                                <textbox id="txtSearchBatchId"
+                                         placeholder="Search by Batch ID..."
+                                         width="240px"
+                                         sclass="inward-checker-input"/>
 
-                        <separator style="height:2px;"/>
+                                <button id="btnSearch"
+                                        label="Search"
+                                        iconSclass="z-icon-search"
+                                        sclass="inward-checker-btn-action-search"/>
+
+                                <button id="btnClear"
+                                        label="Clear"
+                                        iconSclass="z-icon-undo"
+                                        sclass="inward-checker-btn-action-clear"/>
+
+                            </hlayout>
+
+                        </div>
 
                         <label value="All Batches"
                                style="font-weight:bold;font-size:16px"/>
 
                         <listbox id="batchListbox"
-         sclass="listbox-header"
-         mold="paging"
-         pageSize="1"
-         width="100%"
-         nonselectableTags="*"
-         emptyMessage="No batch details found">
+                                 sclass="listbox-header"
+                                 mold="paging"
+                                 pageSize="4"
+                                 width="100%"
+                                 nonselectableTags="*"
+                                 emptyMessage="No batch details found">
 
-                           <listhead>
-    <listheader label="BATCH ID" align="center" width="13%"/>
-    <listheader label="TOTAL CHEQUES" align="center" width="13%"/>
-    <listheader label="NORMAL CHEQUES" align="center" width="14%"/>
-    <listheader label="REJECTION REQUESTS" align="center" width="17%"/>
-    <listheader label="MAKER RETURNED" align="center" width="14%"/>
-    <listheader label="BATCH STATUS" align="center" width="14%"/>
-    <listheader label="ACTION" align="center" width="15%"/>
-</listhead>
+                            <listhead>
+
+                                <listheader label="Batch Id"
+                                            align="center"
+                                            width="13%"/>
+
+                                <listheader label="Total Cheques"
+                                            align="center"
+                                            width="13%"/>
+
+                                <listheader label="Maker Approved"
+                                            align="center"
+                                            width="14%"/>
+
+                                <listheader label="Rejection Requests"
+                                            align="center"
+                                            width="17%"/>
+
+                                <listheader label="Maker Returned"
+                                            align="center"
+                                            width="14%"/>
+
+                                <listheader label="Batch Status"
+                                            align="center"
+                                            width="14%"/>
+
+                                <listheader label="Action"
+                                            align="center"
+                                            width="15%"/>
+
+                            </listhead>
 
                         </listbox>
 
-                      
                     </vlayout>
 
                 </center>

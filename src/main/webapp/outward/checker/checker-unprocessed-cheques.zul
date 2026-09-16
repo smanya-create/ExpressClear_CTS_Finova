@@ -33,8 +33,8 @@
                             <vlayout spacing="4px">
                                 <hlayout valign="middle" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                     <vlayout spacing="2px">
-                                        <label value="Checker Forced EOD Rollover Cheques" sclass="page-heading"/>
-                                        <label value="Rollover instruments requiring Checker verification before inclusion in the outward clearing session." sclass="page-subheading"/>
+                                        <label value="Unprocessed Cheques" sclass="page-heading"/>
+                                        
                                     </vlayout>
                                     
                                     <button id="btnRefreshQueue" 

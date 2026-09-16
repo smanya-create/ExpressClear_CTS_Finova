@@ -30,10 +30,14 @@ public interface InwardChequeService {
 	boolean saveRejectionRequest(InwardChequeRejectionRequest request);
 
 	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
+	
+	boolean submitMicrRepairBatchToDataEntry(String inwardBatchId);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
 
 	BigDecimal getAccountBalance(String accountNumber);
+	
+	String findAccountIdByAccountNumber(String accountNumber);
 
 	String getBankNameByCode(String bankCode);
 

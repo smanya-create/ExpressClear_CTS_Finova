@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?page title="Checker Queue" contentType="text/html;charset=UTF-8"?>
+
+<?page title="ExpressClear CTS-Checker Queue" contentType="text/html;charset=UTF-8"?>
+
 <?link rel="stylesheet" type="text/css" href="/css/outward/checker-queue.css"?>
 
 <zk>
@@ -26,13 +28,10 @@
                 splittable="false"
                 collapsible="false">
 
-                <include src="/components/sidebar.zul">
-
-                    <custom-attributes
-                        role="OUTWARD_CHECKER"
-                        activeTab="checker-queue" />
-
-                </include>
+                <include
+                    src="/components/sidebar.zul"
+                    role="OUTWARD_CHECKER"
+                    activeTab="checker-queue" />
 
             </west>
 
@@ -193,20 +192,20 @@
                                         </div>
 
 
-                                        <!-- BATCH STATUS -->
+                                        <!-- CHEQUE STATUS -->
 
-                                        <div sclass="summary-item">
+                                      <div sclass="summary-item">
 
-                                            <label
-                                                value="BATCH STATUS"
-                                                sclass="summary-label" />
+    <label
+        value="CHEQUE STATUS"
+        sclass="summary-label" />
 
-                                            <label
-                                                id="lblQueueStatus"
-                                                value="-"
-                                                sclass="status-pending" />
+    <label
+        id="lblQueueStatus"
+        value="-"
+        sclass="status-pending" />
 
-                                        </div>
+</div>
 
 
                                         <!-- CURRENT CHEQUE -->
@@ -265,7 +264,23 @@
                                                 sclass="card-description" />
 
 
-                                            <!-- ZOOM CONTROLS -->
+                                            <!-- =================================================
+                                                 CHEQUE IMAGE
+                                                 ================================================= -->
+
+                                            <div sclass="cheque-image-container">
+
+                                                <image
+                                                    id="imgCheque"
+                                                    sclass="cheque-image" />
+
+                                            </div>
+
+
+                                            <!-- =================================================
+                                                 ZOOM + IMAGE SIDE CONTROLS
+                                                 BELOW IMAGE
+                                                 ================================================= -->
 
                                             <div sclass="zoom-controls">
 
@@ -299,17 +314,6 @@
 
                                             </div>
 
-
-                                            <!-- CHEQUE IMAGE -->
-
-                                            <div sclass="cheque-image-container">
-
-                                                <image
-                                                    id="imgCheque"
-                                                    sclass="cheque-image" />
-
-                                            </div>
-
                                         </div>
 
 
@@ -320,7 +324,9 @@
                                         <div sclass="details-card">
 
 
-                                            <!-- DETAILS HEADER -->
+                                            <!-- =================================================
+                                                 DETAILS HEADER
+                                                 ================================================= -->
 
                                             <div sclass="details-card-header">
 
@@ -345,6 +351,64 @@
                                                     sclass="validation-pending-badge" />
 
                                             </div>
+
+
+                                            <!-- =================================================
+                                                 MAKER STATUS MESSAGE
+
+                                                 THIS IS BEFORE CHEQUE DETAILS
+                                                 ================================================= -->
+
+                                            <vlayout
+                                                id="makerRejectionRequestSection"
+                                                visible="false"
+                                                spacing="3px"
+                                                style="margin:6px 0 10px 0;
+                                                       padding:8px 10px;
+                                                       background:#FFF7ED;
+                                                       border-left:3px solid #F59E0B;
+                                                       border-radius:3px;">
+
+                                                <!-- DYNAMIC HEADING -->
+
+                                                <label
+                                                    id="lblMakerStatusHeading"
+                                                    value=""
+                                                    style="font-size:10px;
+                                                           font-weight:700;
+                                                           color:#B45309;" />
+
+
+                                                <!-- REASON CODE / APPROVED MESSAGE -->
+
+                                                <label
+                                                    id="lblMakerRejectionReasonCode"
+                                                    value=""
+                                                    style="font-size:11px;
+                                                           color:#475569;
+                                                           white-space:normal;" />
+
+
+                                                <!-- REASON NAME -->
+
+                                                <label
+                                                    id="lblMakerRejectionReasonName"
+                                                    value=""
+                                                    style="font-size:11px;
+                                                           color:#475569;
+                                                           white-space:normal;" />
+
+
+                                                <!-- REMARKS -->
+
+                                                <label
+                                                    id="lblMakerRejectionRemarks"
+                                                    value=""
+                                                    style="font-size:11px;
+                                                           color:#475569;
+                                                           white-space:normal;" />
+
+                                            </vlayout>
 
 
                                             <!-- =================================================
@@ -460,89 +524,6 @@
 
                                             </div>
 
-
-                                            <!-- =================================================
-                                                 MAKER REJECTION REQUEST
-                                                 INSIDE CHEQUE DETAILS
-                                                 ================================================= -->
-
-                                            <vlayout
-                                                id="makerRejectionRequestSection"
-                                                visible="false"
-                                                spacing="3px"
-                                                style="margin:6px 0 6px 0;
-                                                       padding:7px 9px;
-                                                       background:#FFF7ED;
-                                                       border-left:3px solid #F59E0B;
-                                                       border-radius:3px;">
-
-                                                <label
-                                                    value="MAKER REJECTION REQUEST"
-                                                    style="font-size:10px;
-                                                           font-weight:700;
-                                                           color:#B45309;" />
-
-                                                <label
-                                                    id="lblMakerRejectionReasonCode"
-                                                    value=""
-                                                    style="font-size:11px;
-                                                           color:#475569;
-                                                           white-space:normal;" />
-
-                                                <label
-                                                    id="lblMakerRejectionReasonName"
-                                                    value=""
-                                                    style="font-size:11px;
-                                                           color:#475569;
-                                                           white-space:normal;" />
-
-                                                <label
-                                                    id="lblMakerRejectionRemarks"
-                                                    value=""
-                                                    style="font-size:11px;
-                                                           color:#475569;
-                                                           white-space:normal;" />
-
-                                            </vlayout>
-                                          <vlayout
-    id="rejectionDetailsSection"
-    visible="false"
-    spacing="3px"
-    style="margin:6px 0 6px 0;
-           padding:7px 9px;
-           background:#FFF1F2;
-           border-left:3px solid #DC2626;
-           border-radius:3px;">
-
-    <label
-        value="REJECTION DETAILS"
-        style="font-size:10px;
-               font-weight:700;
-               color:#B91C1C;" />
-
-    <label
-        id="lblRejectedReasonCode"
-        value=""
-        style="font-size:11px;
-               color:#475569;
-               white-space:normal;" />
-
-    <label
-        id="lblRejectedReasonName"
-        value=""
-        style="font-size:11px;
-               color:#475569;
-               white-space:normal;" />
-
-    <label
-        id="lblRejectedReasonRemarks"
-        value=""
-        style="font-size:11px;
-               color:#475569;
-               white-space:normal;" />
-
-</vlayout>
-                                          
                                         </div>
 
                                     </div>
@@ -591,12 +572,11 @@
                                                 label="VERIFY"
                                                 sclass="verified-button" />
 
-                                            <button
-                                                id="btnXmlGeneration"
-                                                label="XML GENERATION"
-                                                visible="true"
-                                                disabled="true"
-                                                sclass="xml-generation-button" />
+                                       <button id="btnXmlGeneration"
+        label="APPROVE BATCH"
+        sclass="xml-generation-button"
+        disabled="true"
+        onClick="@command('xmlGeneration')" />
 
                                             <button
                                                 id="btnReturn"
@@ -629,11 +609,18 @@
 
                                     </div>
 
+
                                 </div>
+                                <!-- END main-content -->
+
 
                             </div>
+                            <!-- END checkerQueueContent -->
+
 
                         </div>
+                        <!-- END content-wrapper -->
+
 
                     </center>
 

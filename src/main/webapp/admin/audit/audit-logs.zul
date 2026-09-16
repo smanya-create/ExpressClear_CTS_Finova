@@ -30,7 +30,7 @@
                     <!-- Fixed Page Title Header -->
                     <vlayout spacing="2px" style="flex: 0 0 auto;">
                         <label value="System Audit Logs" sclass="page-title"/>
-                        <label value="Track all security events, user logins, batch submissions, and operational activities." sclass="page-subtitle"/>
+                        
                     </vlayout>
 
                     <!-- Fixed Filter Controls Card -->

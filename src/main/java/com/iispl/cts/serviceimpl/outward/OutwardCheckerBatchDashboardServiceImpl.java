@@ -15,14 +15,13 @@ public class OutwardCheckerBatchDashboardServiceImpl implements OutwardCheckerBa
 	}
 
 	@Override
-	public List<OutwardBatch> searchPendingBatches(int pageNumber, int pageSize, String batchId, Date fromDate,
-			Date toDate) {
-		return outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId, fromDate, toDate);
+	public List<OutwardBatch> searchPendingBatches(int pageNumber, int pageSize, String batchId) {
+		return outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId);
 	}
 
 	@Override
-	public int getSearchPendingBatchCount(String batchId, Date fromDate, Date toDate) {
-		return outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId, fromDate, toDate);
+	public int getSearchPendingBatchCount(String batchId) {
+		return outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId);
 	}
 
 }

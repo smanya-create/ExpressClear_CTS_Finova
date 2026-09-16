@@ -9,6 +9,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.MouseEvent;
 
 import org.zkoss.zk.ui.Executions;
 
@@ -108,10 +109,6 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 	@Wire
 
-	private Label lblImageRecordPosition;
-
-	@Wire
-
 	private Label lblImagePosition;
 
 	@Wire
@@ -179,6 +176,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 	@Wire
 
 	private Textbox txtCorrectedMicr;
+	
+	
 
 	@Wire
 
@@ -350,6 +349,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
 
+
+	private static final String STATUS_MICR_REJECTION_PENDING = "MICR_REJECTION_PENDING";
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 
 	private static final String STATUS_REJECT_REQUESTED = "REJECT_REQUESTED";
@@ -365,6 +366,25 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 	private double zoomLevel = 1.0;
 
 	private int rotation = 0;
+
+	/*
+	 * Image pan / drag state
+	 */
+	private boolean draggingImage = false;
+
+	private int lastMouseX = 0;
+
+	private int lastMouseY = 0;
+
+	private int imageX = 0;
+
+	private int imageY = 0;
+
+	/*
+	 * MICR two-way synchronization guard.
+	 * Prevents City/Bank/Branch <-> Corrected MICR updates from looping.
+	 */
+	private boolean syncingMicrFields = false;
 
 	/*
 	 * 
@@ -945,10 +965,19 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 		rotation = 0;
 
+		draggingImage = false;
+
+		lastMouseX = 0;
+
+		lastMouseY = 0;
+
+		imageX = 0;
+
+		imageY = 0;
+
 		frontImagePath = "";
 
 		backImagePath = "";
-
 		System.out.println("[MICR-TRACE] 02. Screen state reset COMPLETE");
 
 		System.out.println("[MICR-TRACE] 03. Reading DTO");
@@ -1060,6 +1089,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 		System.out.println("6. Setting corrected MICR");
 
 		txtCorrectedMicr.setValue(currentMicr);
+		refreshMicrValidationHighlight();
 
 		System.out.println("6. corrected MICR COMPLETE = [" + currentMicr + "]");
 
@@ -1219,7 +1249,6 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 		}
 
-		lblImageRecordPosition.setValue("Record " + (currentIndex + 1) + " of " + getTotalCheques());
 
 	}
 
@@ -1230,6 +1259,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 	// =========================================================
 
 	public void onClick$btnImageToggle(Event event) {
+
+		draggingImage = false;
+
+		imageX = 0;
+		imageY = 0;
+		syncingMicrFields = false;
 
 		if (showingBackImage) {
 
@@ -1250,9 +1285,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 			showBackImage();
 
 			btnImageToggle.setLabel("View Front");
-
 		}
-
 	}
 
 	public void onClick$btnZoom(Event event) {
@@ -1289,8 +1322,13 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 		rotation = 0;
 
-		applyImageTransform();
+		imageX = 0;
 
+		imageY = 0;
+
+		draggingImage = false;
+
+		applyImageTransform();
 	}
 
 	public void onClick$btnRotate(Event event) {
@@ -1309,12 +1347,68 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 	private void applyImageTransform() {
 
-		String transform = "transform: scale(" + zoomLevel + ") rotate(" + rotation + "deg);"
-
+		String transform =
+				"transform: translate("
+				+ imageX
+				+ "px, "
+				+ imageY
+				+ "px) "
+				+ "scale("
+				+ zoomLevel
+				+ ") "
+				+ "rotate("
+				+ rotation
+				+ "deg);"
 				+ "transform-origin:center center;";
 
 		imgCheque.setStyle(transform);
+	}
 
+	// =========================================================
+	// IMAGE DRAG / PAN
+	// =========================================================
+
+	public void onMouseDown$divChequeImageContainer(MouseEvent event) {
+
+		if (!imgCheque.isVisible()) {
+			return;
+		}
+
+		draggingImage = true;
+
+		lastMouseX = event.getX();
+
+		lastMouseY = event.getY();
+	}
+
+	public void onMouseMove$divChequeImageContainer(MouseEvent event) {
+
+		if (!draggingImage || !imgCheque.isVisible()) {
+			return;
+		}
+
+		int currentMouseX = event.getX();
+
+		int currentMouseY = event.getY();
+
+		int deltaX = currentMouseX - lastMouseX;
+
+		int deltaY = currentMouseY - lastMouseY;
+
+		imageX += deltaX;
+
+		imageY += deltaY;
+
+		lastMouseX = currentMouseX;
+
+		lastMouseY = currentMouseY;
+
+		applyImageTransform();
+	}
+
+	public void onMouseUp$divChequeImageContainer(MouseEvent event) {
+
+		draggingImage = false;
 	}
 
 	public void onClick$btnImagePrevious(Event event) {
@@ -1324,6 +1418,9 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 			zoomLevel = 1.0;
 
 			rotation = 0;
+			imageX = 0;
+			imageY = 0;
+			draggingImage = false;
 
 			showFrontImage();
 
@@ -1340,6 +1437,9 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 			zoomLevel = 1.0;
 
 			rotation = 0;
+			imageX = 0;
+			imageY = 0;
+			draggingImage = false;
 
 			showBackImage();
 
@@ -1807,134 +1907,205 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 		System.out.println("[MICR-TRACE] private boolean validateMicrFields ENTER");
 
-		String city = safe(txtCityCode.getValue()).trim();
+		String city = safe(txtCityCode.getValue()).trim().toUpperCase();
+		String bank = safe(txtBankCode.getValue()).trim().toUpperCase();
+		String branch = safe(txtBranchCode.getValue()).trim().toUpperCase();
+		String micr = safe(txtCorrectedMicr.getValue()).trim().toUpperCase();
 
-		String bank = safe(txtBankCode.getValue()).trim();
+		boolean cityValid = isValidMicrPart(city);
+		boolean bankValid = isValidMicrPart(bank);
+		boolean branchValid = isValidMicrPart(branch);
+		boolean micrFormatValid = isValidCorrectedMicrFormat(micr);
+		boolean micrMatchesParts = cityValid && bankValid && branchValid
+				&& micrFormatValid && micr.equals(city + bank + branch);
 
-		String branch = safe(txtBranchCode.getValue()).trim();
-
-		String micr = safe(txtCorrectedMicr.getValue()).trim();
+		setMicrFieldError(txtCityCode, !cityValid);
+		setMicrFieldError(txtBankCode, !bankValid);
+		setMicrFieldError(txtBranchCode, !branchValid);
+		setMicrFieldError(txtCorrectedMicr, !micrMatchesParts);
 
 		lblMicrValidationMessage.setVisible(false);
-
 		lblMicrValidationMessage.setValue("");
 
-		// -----------------------------------------------------
-
-		// City
-
-		// -----------------------------------------------------
-
 		if (city.isEmpty()) {
-
 			showValidationMessage("City Code is required.");
-
 			txtCityCode.setFocus(true);
-
 			return false;
-
 		}
-
-		if (!isValidMicrPart(city)) {
-
-			showValidationMessage("City Code must contain exactly 3 " + "alphanumeric characters and cannot be 000.");
-
+		if (!cityValid) {
+			showValidationMessage("City Code must contain exactly 3 numeric characters and cannot be 000.");
 			txtCityCode.setFocus(true);
-
 			return false;
-
 		}
-
-		// -----------------------------------------------------
-
-		// Bank
-
-		// -----------------------------------------------------
 
 		if (bank.isEmpty()) {
-
 			showValidationMessage("Bank Code is required.");
-
 			txtBankCode.setFocus(true);
-
 			return false;
-
 		}
-
-		if (!isValidMicrPart(bank)) {
-
-			showValidationMessage("Bank Code must contain exactly 3 " + "alphanumeric characters and cannot be 000.");
-
+		if (!bankValid) {
+			showValidationMessage("Bank Code must contain exactly 3 numeric characters and cannot be 000.");
 			txtBankCode.setFocus(true);
-
 			return false;
-
 		}
-
-		// -----------------------------------------------------
-
-		// Branch
-
-		// -----------------------------------------------------
 
 		if (branch.isEmpty()) {
-
 			showValidationMessage("Branch Code is required.");
-
 			txtBranchCode.setFocus(true);
-
 			return false;
-
 		}
-
-		if (!isValidMicrPart(branch)) {
-
-			showValidationMessage("Branch Code must contain exactly 3 " + "alphanumeric characters and cannot be 000.");
-
+		if (!branchValid) {
+			showValidationMessage("Branch Code must contain exactly 3 numeric characters and cannot be 000.");
 			txtBranchCode.setFocus(true);
-
 			return false;
-
 		}
-
-		// -----------------------------------------------------
-
-		// Corrected MICR
-
-		// -----------------------------------------------------
 
 		if (micr.isEmpty()) {
-
 			showValidationMessage("Corrected MICR Code is required.");
-
 			txtCorrectedMicr.setFocus(true);
-
 			return false;
-
 		}
-
-		if (!micr.matches("[A-Za-z0-9]{9}")) {
-
-			showValidationMessage("Corrected MICR Code must contain exactly 9 " + "alphanumeric characters.");
-
+		if (!micrFormatValid) {
+			showValidationMessage("Corrected MICR Code must contain exactly 9 numeric characters.");
 			txtCorrectedMicr.setFocus(true);
-
 			return false;
-
 		}
-
-		if (!micr.equals(city + bank + branch)) {
-
-			showValidationMessage("Corrected MICR Code must match " + "City Code + Bank Code + Branch Code.");
-
+		if (!micrMatchesParts) {
+			showValidationMessage("Corrected MICR Code must match City Code + Bank Code + Branch Code.");
 			txtCorrectedMicr.setFocus(true);
-
 			return false;
-
 		}
 
 		return true;
+	}
 
+	// =========================================================
+	// MICR TWO-WAY FIELD SYNCHRONIZATION
+	// =========================================================
+
+	public void onChange$txtCityCode(Event event) {
+		if (syncingMicrFields) {
+			return;
+		}
+		syncCorrectedMicrFromParts();
+	}
+
+	public void onChange$txtBankCode(Event event) {
+		if (syncingMicrFields) {
+			return;
+		}
+		syncCorrectedMicrFromParts();
+	}
+
+	public void onChange$txtBranchCode(Event event) {
+		if (syncingMicrFields) {
+			return;
+		}
+		syncCorrectedMicrFromParts();
+	}
+
+	public void onChange$txtCorrectedMicr(Event event) {
+		if (syncingMicrFields) {
+			return;
+		}
+		syncPartsFromCorrectedMicr();
+	}
+
+	/**
+	 * City + Bank + Branch are the source for Corrected MICR when all three
+	 * component values are valid. Invalid component values are never used to
+	 * create a malformed MICR value.
+	 */
+	private void syncCorrectedMicrFromParts() {
+		if (syncingMicrFields) {
+			return;
+		}
+
+		syncingMicrFields = true;
+		try {
+			String city = normalizeMicrValue(txtCityCode.getValue());
+			String bank = normalizeMicrValue(txtBankCode.getValue());
+			String branch = normalizeMicrValue(txtBranchCode.getValue());
+
+			if (isValidMicrPart(city) && isValidMicrPart(bank) && isValidMicrPart(branch)) {
+				txtCorrectedMicr.setValue(city + bank + branch);
+			}
+		} finally {
+			syncingMicrFields = false;
+		}
+
+		refreshMicrValidationHighlight();
+	}
+
+	/**
+	 * Corrected MICR is the source for City + Bank + Branch when it is exactly
+	 * nine alphanumeric characters. The value is split into 3 + 3 + 3.
+	 */
+	private void syncPartsFromCorrectedMicr() {
+		if (syncingMicrFields) {
+			return;
+		}
+
+		String micr = normalizeMicrValue(txtCorrectedMicr.getValue());
+
+		syncingMicrFields = true;
+		try {
+			if (isValidCorrectedMicrFormat(micr)) {
+				txtCityCode.setValue(micr.substring(0, 3));
+				txtBankCode.setValue(micr.substring(3, 6));
+				txtBranchCode.setValue(micr.substring(6, 9));
+			}
+		} finally {
+			syncingMicrFields = false;
+		}
+
+		refreshMicrValidationHighlight();
+	}
+
+	private void refreshMicrValidationHighlight() {
+		String city = normalizeMicrValue(txtCityCode.getValue());
+		String bank = normalizeMicrValue(txtBankCode.getValue());
+		String branch = normalizeMicrValue(txtBranchCode.getValue());
+		String micr = normalizeMicrValue(txtCorrectedMicr.getValue());
+
+		boolean cityValid = isValidMicrPart(city);
+		boolean bankValid = isValidMicrPart(bank);
+		boolean branchValid = isValidMicrPart(branch);
+		boolean micrFormatValid = isValidCorrectedMicrFormat(micr);
+		boolean micrMatchesParts = cityValid && bankValid && branchValid
+				&& micrFormatValid && micr.equals(city + bank + branch);
+
+		setMicrFieldError(txtCityCode, !cityValid);
+		setMicrFieldError(txtBankCode, !bankValid);
+		setMicrFieldError(txtBranchCode, !branchValid);
+		setMicrFieldError(txtCorrectedMicr, !micrMatchesParts);
+	}
+
+	private void setMicrFieldError(Textbox textbox, boolean error) {
+		if (textbox == null) {
+			return;
+		}
+
+		if (textbox == txtCorrectedMicr) {
+			textbox.setSclass(error
+					? "cts-input-text correction-field micr-code-field error-field"
+					: "cts-input-text correction-field micr-code-field");
+		} else {
+			textbox.setSclass(error
+					? "cts-input-text error-field"
+					: "cts-input-text");
+		}
+	}
+
+	private String normalizeMicrValue(String value) {
+		return safe(value).trim().toUpperCase();
+	}
+
+	private boolean isValidCorrectedMicrFormat(String value) {
+		if (value == null || value.length() != 9) {
+			return false;
+		}
+		return value.matches("[0-9]{9}");
 	}
 
 	private void showValidationMessage(String message) {
@@ -1965,7 +2136,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 		}
 
-		if (!value.matches("[A-Za-z0-9]{3}")) {
+		if (!value.matches("[0-9]{3}")) {
 
 			return false;
 
@@ -2161,7 +2332,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 		 * 
 		 */
 
-		cheque.setChequeStatus(STATUS_MICR_REJECTED);
+		cheque.setChequeStatus(STATUS_MICR_REJECTION_PENDING);
+
+		// Update the visible status immediately without waiting for Front/Back navigation.
+		if (lblChequeStatus != null) {
+			lblChequeStatus.setValue(STATUS_MICR_REJECTION_PENDING);
+		}
 
 		try {
 
@@ -2221,6 +2397,11 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 			cheque.setChequeStatus(STATUS_PENDING_MICR_REPAIR);
 
+			// Restore the visible status if saving the rejection failed.
+			if (lblChequeStatus != null) {
+				lblChequeStatus.setValue(STATUS_PENDING_MICR_REPAIR);
+			}
+
 			updateProgress();
 
 			updateSubmitButton();
@@ -2272,11 +2453,11 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 		 *
 		 * 
 		 * 
-		 * MICR_REPAIR -> PENDING_DATA_ENTRY
+		 * MICR_REPAIRED -> PENDING_DATA_ENTRY
 		 *
 		 * 
 		 * 
-		 * MICR_REJECTED -> REJECT_REQUESTED
+		 * MICR_REJECTION_PENDING -> MICR_REJECTED
 		 * 
 		 * -----------------------------------------------------
 		 * 
@@ -2292,14 +2473,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 			String status = safe(cheque.getChequeStatus());
 
-			if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
-
-				cheque.setChequeStatus(STATUS_REJECT_REQUESTED);
-
+			if (STATUS_MICR_REJECTION_PENDING.equalsIgnoreCase(status)) {
+				// Temporary rejection status becomes the final rejection status on Submit.
+				cheque.setChequeStatus(STATUS_MICR_REJECTED);
 			} else {
-
+				// Repaired cheque moves to Data Entry on Submit.
 				cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
-
 			}
 
 		}
@@ -2354,10 +2533,10 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Win
 
 					cheque.setChequeStatus(STATUS_MICR_REPAIRED);
 
-				} else if (STATUS_REJECT_REQUESTED.equalsIgnoreCase(status)) {
-
-					cheque.setChequeStatus(STATUS_MICR_REJECTED);
-
+				} else if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
+					// Final rejection was assigned in memory before Submit; restore the
+					// temporary status when the final Submit fails.
+					cheque.setChequeStatus(STATUS_MICR_REJECTION_PENDING);
 				}
 
 			}

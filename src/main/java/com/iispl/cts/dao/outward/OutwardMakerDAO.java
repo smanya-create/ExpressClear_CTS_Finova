@@ -5,42 +5,48 @@ import java.util.List;
 import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.dto.MicrRepairChequeDTO;
 import com.iispl.cts.entity.outward.RejectedReason;
+import com.iispl.cts.entity.outward.ScanBatch;
+import com.iispl.cts.entity.outward.ScanCheque;
 
 public interface OutwardMakerDAO {
 
-    // =========================================================
-    // SCAN MICR REPAIR
-    // =========================================================
+	// =========================================================
+	// SCAN MICR REPAIR
+	// =========================================================
 
-    List<MicrRepairBatch> getScanMicrRepairBatches();
+	List<MicrRepairBatch> getScanMicrRepairBatches();
 
-    List<MicrRepairChequeDTO> getScanMicrRepairCheques(
-            String scannedBatchId);
+	List<MicrRepairChequeDTO> getScanMicrRepairCheques(String scannedBatchId);
 
-    void saveScanMicrRepair(
-            MicrRepairChequeDTO cheque);
+	void saveScanMicrRepair(MicrRepairChequeDTO cheque);
 
-    void submitScanMicrRepair(
-            List<MicrRepairChequeDTO> cheques);
+	void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques);
 
-    // =========================================================
-    // OUTWARD MICR REPAIR
-    // =========================================================
+	// =========================================================
+	// OUTWARD MICR REPAIR
+	// =========================================================
 
-    List<MicrRepairBatch> getOutwardMicrRepairBatches();
+	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 
-    List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(
-            String outwardBatchId);
+	List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(String outwardBatchId);
 
-    void saveOutwardMicrRepair(
-            MicrRepairChequeDTO cheque);
+	void saveOutwardMicrRepair(MicrRepairChequeDTO cheque);
 
-    void submitOutwardMicrRepair(
-            List<MicrRepairChequeDTO> cheques);
+	void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques);
 
-    // =========================================================
-    // COMMON
-    // =========================================================
+	// =========================================================
+	// COMMON
+	// =========================================================
 
-    List<RejectedReason> getRejectedReasons();
+	List<RejectedReason> getRejectedReasons();
+
+	boolean existsChequeNumberAndAccount(String chequeNumber, String accountNumber);
+	
+	// =========================================================
+	// BATCH UPLOAD
+	// =========================================================
+
+	ScanBatch getMakerBatch(String batchId);
+
+	List<ScanCheque> getMakerBatchCheques(String batchId);
 }

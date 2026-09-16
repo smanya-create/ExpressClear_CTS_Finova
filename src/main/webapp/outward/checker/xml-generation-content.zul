@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <?page title="ExpressClear CTS-XML Generation" contentType="text/html;charset=UTF-8"?>
 
 <zk>
@@ -8,7 +10,7 @@
         sclass="xml-generation-content"
         hflex="1"
         vflex="1"
-        spacing="20px"
+        spacing="12px"
         apply="com.iispl.cts.controller.outward.checker.OutwardCheckerXmlGenerationController">
 
         <vlayout
@@ -24,7 +26,6 @@
                 sclass="outward-maker-welcome-subtitle"/>
 
         </vlayout>
-
 
         <hlayout
             sclass="summary-card"
@@ -46,7 +47,6 @@
 
             </vlayout>
 
-
             <vlayout
                 sclass="summary-item"
                 spacing="5px">
@@ -63,11 +63,11 @@
 
         </hlayout>
 
-
         <listbox
             id="lstVerifiedBatches"
             sclass="xml-batch-table"
-            hflex="1">
+            hflex="1"
+            vflex="min">
 
             <listhead>
 
@@ -95,7 +95,6 @@
 
         </listbox>
 
-
         <vlayout
             sclass="generated-section"
             spacing="10px">
@@ -103,7 +102,6 @@
             <label
                 value="AFTER XML GENERATION"
                 sclass="generated-title"/>
-
 
             <hlayout
                 id="generatedXmlRow"
@@ -116,7 +114,6 @@
                 <label
                     value="XML"
                     sclass="xml-icon"/>
-
 
                 <vlayout
                     sclass="xml-file-info"
@@ -135,7 +132,6 @@
 
                 </vlayout>
 
-
                 <button
                     id="btnSendToNPCI"
                     label="SEND TO NPCI"
@@ -144,7 +140,6 @@
                     onClick="$composer.onClickSendToNPCI()"/>
 
             </hlayout>
-
 
             <hlayout
                 id="xmlInfoMessage"

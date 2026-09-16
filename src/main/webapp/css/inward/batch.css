@@ -1,544 +1,821 @@
-/* =========================================================
-   INWARD BATCH INTAKE & BATCH VIEW - COMPLETE UNIFIED THEME
-   ========================================================= */
+.batch-page {
+	width: 100% !important;
+	height: 100% !important;
+	box-sizing: border-box !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	background: #f8fafc !important;
+	overflow: hidden !important;
+}
+
+html:has(.batch-page),
+body:has(.batch-page) {
+	overflow: hidden !important;
+	height: 100% !important;
+}
+
+body:has(.batch-page) .z-center,
+body:has(.batch-page) .z-center-body,
+body:has(.batch-page) [id$="mainContentArea"] {
+	overflow: hidden !important;
+}
 
 .batch-page {
-    width: 100% !important;
-    height: 100% !important;
-    box-sizing: border-box !important;
-    padding: 0 !important;      /* Removes the double outer padding */
-    margin: 0 !important;
-    background: transparent !important;
-    overflow: hidden !important;
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: hidden !important;
 }
 
-/* ---------------------------------------------------------
-   1. Page Titles & Headers
-   --------------------------------------------------------- */
-.batch-title-section,
-.view-header {
-    padding: 0;
-    margin: 0 0 4px 0;
+.batch-page > .z-window-content {
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: hidden !important;
+	background: #f8fafc !important;
 }
 
-.batch-page-title,
-.view-page-title {
-    font-size: 22px !important;
-    font-weight: 800 !important;
-    color: #0f172a !important;
-    line-height: 28px !important;
-    letter-spacing: 0.2px;
+.batch-page {
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: hidden !important;
 }
 
-.batch-page-subtitle,
-.view-page-subtitle {
-    font-size: 12px !important;
-    font-weight: 400 !important;
-    color: #64748b !important;
-    line-height: 16px !important;
+.batch-page>.z-window-content {
+	height: auto !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	overflow: hidden !important;
 }
 
-/* ---------------------------------------------------------
-   2. Main Container Cards
-   --------------------------------------------------------- */
-.batch-section-card,
-.information-card,
-.cheque-card {
-    width: 100%;
-    box-sizing: border-box;
-    background: #ffffff !important;
-    border: 1px solid #d9dee7 !important;
-    border-radius: 8px !important;
-    padding: 16px 20px 14px 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+.batch-title-section, .view-header {
+	padding: 0;
+	margin: 0 0 4px 0;
+}
+
+.batch-page-title, .view-page-title {
+	font-size: 22px !important;
+	font-weight: 800 !important;
+	color: #0f172a !important;
+	line-height: 28px !important;
+	letter-spacing: 0.2px;
+}
+
+.batch-page-subtitle, .view-page-subtitle {
+	font-size: 12px !important;
+	font-weight: 400 !important;
+	color: #64748b !important;
+	line-height: 16px !important;
+}
+
+.batch-section-card, .information-card, .cheque-card {
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff !important;
+	border: 1px solid #d9dee7 !important;
+	border-radius: 8px !important;
+	padding: 16px 20px 14px 20px;
+	margin-bottom: 16px;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .batch-card-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
 }
 
-.batch-section-title,
-.view-section-title {
-    font-size: 15px !important;
-    font-weight: 750 !important;
-    color: #0f172a !important;
-    line-height: 20px !important;
+.batch-section-title, .view-section-title {
+	font-size: 15px !important;
+	font-weight: 750 !important;
+	color: #0f172a !important;
+	line-height: 20px !important;
 }
 
 .batch-section-subtitle {
-    font-size: 11px !important;
-    font-weight: 400 !important;
-    color: #64748b !important;
-    line-height: 15px !important;
+	font-size: 11px !important;
+	font-weight: 400 !important;
+	color: #64748b !important;
+	line-height: 15px !important;
 }
 
 .batch-result-count {
-    padding: 4px 12px;
-    border-radius: 9999px;
-    background: #eaf2fb;
-    color: #172554;
-    font-size: 10.5px;
-    font-weight: 700;
+	padding: 4px 12px;
+	border-radius: 9999px;
+	background: #eaf2fb;
+	color: #172554;
+	font-size: 10.5px;
+	font-weight: 700;
 }
 
-/* ---------------------------------------------------------
-   3. Filter Bar & Controls
-   --------------------------------------------------------- */
 .batch-filter-bar {
-    width: 100%;
-    box-sizing: border-box;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 10px 14px;
+	width: 100%;
+	box-sizing: border-box;
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 6px;
+	padding: 10px 14px;
 }
 
 .filter-label {
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    color: #334155 !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+	color: #334155 !important;
 }
 
-.batch-filter-input,
-.batch-filter-combobox .z-combobox-input,
-.batch-filter-datebox .z-datebox-input,
-.cheque-search {
-    height: 32px !important;
-    padding: 0 10px !important;
-    box-sizing: border-box !important;
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 5px !important;
-    color: #1e293b !important;
-    font-size: 11.5px !important;
+.batch-filter-input, .batch-filter-combobox .z-combobox-input,
+	.batch-filter-datebox .z-datebox-input, .cheque-search {
+	height: 32px !important;
+	padding: 0 10px !important;
+	box-sizing: border-box !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	color: #1e293b !important;
+	font-size: 11.5px !important;
 }
 
-.batch-filter-combobox .z-combobox-button,
-.batch-filter-datebox .z-datebox-button {
-    height: 32px !important;
-    border: 1px solid #cbd5e1 !important;
-    border-left: none !important;
-    background: #ffffff !important;
+.batch-filter-combobox .z-combobox-button, .batch-filter-datebox .z-datebox-button
+	{
+	height: 32px !important;
+	border: 1px solid #cbd5e1 !important;
+	border-left: none !important;
+	background: #ffffff !important;
 }
 
-.batch-btn-search.z-button,
-.filter-button.z-button {
-    height: 32px !important;
-    padding: 0 16px !important;
-    background: #18275c !important;
-    border: 1px solid #18275c !important;
-    border-radius: 5px !important;
-    color: #ffffff !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
+.batch-btn-search.z-button, .filter-button.z-button {
+	height: 32px !important;
+	padding: 0 16px !important;
+	background: #18275c !important;
+	border: 1px solid #18275c !important;
+	border-radius: 5px !important;
+	color: #ffffff !important;
+	font-size: 10.5px !important;
+	font-weight: 700 !important;
+	cursor: pointer !important;
 }
 
-.batch-btn-search.z-button:hover,
-.filter-button.z-button:hover {
-    background: #101c46 !important;
-    border-color: #101c46 !important;
+.batch-btn-search.z-button\:hover, .filter-button.z-button\:hover {
+	background: #101c46 !important;
+	border-color: #101c46 !important;
 }
 
-.batch-btn-clear.z-button,
-.back-button.z-button {
-    height: 32px !important;
-    padding: 0 16px !important;
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 5px !important;
-    color: #475569 !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
+.batch-btn-clear.z-button, .back-button.z-button {
+	height: 32px !important;
+	padding: 0 16px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	color: #475569 !important;
+	font-size: 10.5px !important;
+	font-weight: 700 !important;
+	cursor: pointer !important;
 }
 
-.batch-btn-clear.z-button:hover,
-.back-button.z-button:hover {
-    background: #f1f5f9 !important;
-    border-color: #94a3b8 !important;
-    color: #0f172a !important;
+.batch-btn-clear.z-button\:hover, .back-button.z-button\:hover {
+	background: #f1f5f9 !important;
+	border-color: #94a3b8 !important;
+	color: #0f172a !important;
 }
 
-/* ---------------------------------------------------------
-   4. Table Wrapper, MICR-Style Header & Internal Scroll
-   --------------------------------------------------------- */
 .batch-table-wrapper {
-    width: 100%;
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    overflow: hidden !important;
+	width: 100%;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	overflow: hidden !important;
 }
 
-.batch-listbox,
-.cheque-listbox {
-    border: none !important;
-    background: transparent !important;
-    width: 100% !important;
+.batch-listbox {
+	width: 100% !important;
+	height: clamp(360px, calc(100vh - 410px), 560px) !important;
+	min-height: 360px !important;
+	max-height: 560px !important;
+	box-sizing: border-box !important;
+	border: none !important;
+	background: transparent !important;
+	overflow: hidden !important;
 }
 
-/* Header Container */
-.batch-listbox .z-listhead,
-.batch-listbox .z-listhead-bar,
-.cheque-listbox .z-listhead,
-.cheque-listbox .z-listhead-bar {
-    background: #18275c !important;
-    background-color: #18275c !important;
-    border: none !important;
-}
-
-/* Header Cells: Bright distinct vertical separators like MICR Repair */
-.batch-listbox .z-listheader,
-.cheque-listbox .z-listheader {
-    background: #18275c !important;
-    background-color: #18275c !important;
-    border-right: 1px solid #3b82f6 !important; /* Bright blue divider */
-    border-top: none !important;
-    border-left: none !important;
-    border-bottom: 1px solid #18275c !important;
-    padding: 0 !important;
-}
-
-.batch-listbox .z-listheader:last-child,
-.cheque-listbox .z-listheader:last-child {
-    border-right: none !important;
-}
-
-.batch-listbox .z-listheader-content,
-.cheque-listbox .z-listheader-content {
-    background: transparent !important;
-    color: #ffffff !important;
-    font-size: 10.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.5px !important;
-    text-transform: uppercase !important;
-    height: 40px !important;
-    line-height: 40px !important;
-    text-align: center !important;
-    padding: 0 8px !important;
-    white-space: nowrap !important;
-}
-
-/* Allow internal scrolling without locking fixed pixel height */
 .batch-listbox .z-listbox-body {
-    overflow-y: scroll !important; /* Force internal vertical scrollbar */
-    overflow-x: hidden !important;
-    height: 240px !important;      /* Fits ~5 rows, remaining 5 scroll inside */
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+	height: calc(100% - 82px) !important;
+	min-height: 0 !important;
+	max-height: none !important;
+	box-sizing: border-box !important;
 }
 
-/* Custom modern scrollbar styling */
+.batch-listbox .z-listhead, .batch-listbox .z-listhead-bar,
+	.cheque-listbox .z-listhead, .cheque-listbox .z-listhead-bar {
+	background: #18275c !important;
+	background-color: #18275c !important;
+	border: none !important;
+}
+
+.batch-listbox .z-listheader, .cheque-listbox .z-listheader {
+	background: #18275c !important;
+	background-color: #18275c !important;
+	border-right: 1px solid #3b82f6 !important;
+	border-top: none !important;
+	border-left: none !important;
+	border-bottom: 1px solid #18275c !important;
+	padding: 0 !important;
+	border-top: none !important;
+}
+
+.batch-listbox .z-listheader\:last-child, .cheque-listbox .z-listheader\:last-child
+	{
+	border-right: none !important;
+}
+
+.batch-listbox .z-listheader-content, .cheque-listbox .z-listheader-content
+	{
+	background: transparent !important;
+	color: #ffffff !important;
+	font-size: 10.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.5px !important;
+	text-transform: uppercase !important;
+	height: 40px !important;
+	line-height: 40px !important;
+	text-align: center !important;
+	padding: 0 8px !important;
+	white-space: nowrap !important;
+}
+
 .batch-listbox .z-listbox-body::-webkit-scrollbar {
-    width: 6px;
+	width: 6px;
 }
 
 .batch-listbox .z-listbox-body::-webkit-scrollbar-track {
-    background: #f1f5f9;
+	background: #f1f5f9;
 }
 
 .batch-listbox .z-listbox-body::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
+	background: #cbd5e1;
+	border-radius: 4px;
 }
 
-.batch-listbox .z-listbox-body::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+.batch-listbox .z-listbox-body::-webkit-scrollbar-thumb\:hover {
+	background: #94a3b8;
 }
 
-.batch-listbox .z-listitem,
-.cheque-listbox .z-listitem {
-    height: 48px !important;
-    background: #ffffff !important;
+.batch-listbox .z-listitem, .cheque-listbox .z-listitem {
+	height: 48px !important;
+	background: #ffffff !important;
 }
 
-.batch-listbox .z-listitem:hover,
-.cheque-listbox .z-listitem:hover {
-    background: #f8fafc !important;
+.batch-listbox .z-listitem\:hover, .cheque-listbox .z-listitem\:hover {
+	background: #f8fafc !important;
 }
 
-/* Data Row Cells: NO vertical separators, clean horizontal underline */
-.batch-listbox .z-listcell,
-.cheque-listbox .z-listcell {
-    height: 48px !important;
-    padding: 0 8px !important;
-    border-right: none !important;  /* No vertical dividers in data rows */
-    border-left: none !important;
-    border-top: none !important;
-    border-bottom: 1px solid #edf2f7 !important; /* Clean horizontal row border */
-    vertical-align: middle !important;
-    text-align: center !important;
+.batch-listbox .z-listcell, .cheque-listbox .z-listcell {
+	height: 48px !important;
+	padding: 0 8px !important;
+	border-right: none !important;
+	border-left: none !important;
+	border-top: none !important;
+	border-bottom: 1px solid #edf2f7 !important;
+	vertical-align: middle !important;
+	text-align: center !important;
 }
 
-.batch-listbox .z-listcell-content,
-.cheque-listbox .z-listcell-content {
-    padding: 0 6px !important;
-    text-align: center !important;
-    white-space: nowrap !important;
+.batch-listbox .z-listcell-content, .cheque-listbox .z-listcell-content
+	{
+	padding: 0 6px !important;
+	text-align: center !important;
+	white-space: nowrap !important;
 }
 
-/* Cell Elements */
 .batch-id-link {
-    color: #075bd3 !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    cursor: pointer !important;
-    text-align: center !important;
+	color: #075bd3 !important;
+	font-size: 11px !important;
+	font-weight: 800 !important;
+	cursor: pointer !important;
+	text-align: center !important;
 }
 
 .batch-cell-text {
-    font-size: 11.5px !important;
-    font-weight: 600 !important;
-    color: #334155 !important;
+	font-size: 11.5px !important;
+	font-weight: 600 !important;
+	color: #334155 !important;
 }
 
 .batch-cell-amount {
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    color: #0f172a !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+	color: #0f172a !important;
 }
 
-/* ---------------------------------------------------------
-   5. Status Badges
-   --------------------------------------------------------- */
 .status-pill-gold {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 115px !important;
-    height: 24px !important;
-    padding: 0 12px !important;
-    box-sizing: border-box !important;
-    background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important;
-    color: #172554 !important;
-    border: 1px solid #ffb000 !important;
-    border-radius: 9999px !important;
-    font-size: 8.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
-    box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 115px !important;
+	height: 24px !important;
+	padding: 0 12px !important;
+	box-sizing: border-box !important;
+	background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%)
+		!important;
+	color: #172554 !important;
+	border: 1px solid #ffb000 !important;
+	border-radius: 9999px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
+	box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
+}
+
+.status-pill-blue {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 115px !important;
+	height: 24px !important;
+	padding: 0 12px !important;
+	box-sizing: border-box !important;
+	background: #d9f0ff !important;
+	color: #087ea4 !important;
+	border: 1px solid #69c9f5 !important;
+	border-radius: 9999px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
 }
 
 .status-pill-sentback {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 115px !important;
-    height: 24px !important;
-    padding: 0 12px !important;
-    box-sizing: border-box !important;
-    background: #ffedd5 !important;
-    color: #9a3412 !important;
-    border: 1px solid #fdba74 !important;
-    border-radius: 9999px !important;
-    font-size: 8.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 115px !important;
+	height: 24px !important;
+	padding: 0 12px !important;
+	box-sizing: border-box !important;
+	background: #ffedd5 !important;
+	color: #9a3412 !important;
+	border: 1px solid #fdba74 !important;
+	border-radius: 9999px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
 }
 
 .status-pill-completed {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 115px !important;
-    height: 24px !important;
-    padding: 0 12px !important;
-    box-sizing: border-box !important;
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #86efac !important;
-    border-radius: 9999px !important;
-    font-size: 8.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 115px !important;
+	height: 24px !important;
+	padding: 0 12px !important;
+	box-sizing: border-box !important;
+	background: #dcfce7 !important;
+	color: #166534 !important;
+	border: 1px solid #86efac !important;
+	border-radius: 9999px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
 }
 
 .status-pill-failed {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 115px !important;
-    height: 24px !important;
-    padding: 0 12px !important;
-    box-sizing: border-box !important;
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-    border: 1px solid #fca5a5 !important;
-    border-radius: 9999px !important;
-    font-size: 8.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-width: 115px !important;
+	height: 24px !important;
+	padding: 0 12px !important;
+	box-sizing: border-box !important;
+	background: #ffe1e8 !important;
+	color: #c2185b !important;
+	border: 1px solid #ff8fa3 !important;
+	border-radius: 9999px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
 }
 
-/* Support for Batch View badges */
 .status-badge.status-success {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 2px 10px !important;
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #86efac !important;
-    border-radius: 9999px !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 2px 10px !important;
+	background: #dcfce7 !important;
+	color: #166534 !important;
+	border: 1px solid #86efac !important;
+	border-radius: 9999px !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
 }
 
 .status-badge.status-hold {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 2px 10px !important;
-    background: #fff8d6 !important;
-    color: #172554 !important;
-    border: 1px solid #ffb000 !important;
-    border-radius: 9999px !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 2px 10px !important;
+	background: #fff8d6 !important;
+	color: #172554 !important;
+	border: 1px solid #ffb000 !important;
+	border-radius: 9999px !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
 }
 
-/* ---------------------------------------------------------
-   6. Action Buttons
-   --------------------------------------------------------- */
 .view-button.z-button {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    min-width: 82px !important;
-    height: 28px !important;
-    line-height: 26px !important;
-    padding: 0 10px !important;
-    background: #18275c !important;
-    border: 1px solid #18275c !important;
-    border-radius: 4px !important;
-    color: #ffffff !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
+	display: inline-block !important;
+	vertical-align: middle !important;
+	min-width: 82px !important;
+	height: 28px !important;
+	line-height: 26px !important;
+	padding: 0 10px !important;
+	background: #18275c !important;
+	border: 1px solid #18275c !important;
+	border-radius: 4px !important;
+	color: #ffffff !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
+	cursor: pointer !important;
+	box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
 }
 
-.view-button.z-button:hover {
-    background: #101c46 !important;
-    border-color: #101c46 !important;
+.view-button.z-button\:hover {
+	background: #101c46 !important;
+	border-color: #101c46 !important;
 }
 
 .parse-button.z-button {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    min-width: 82px !important;
-    height: 28px !important;
-    line-height: 26px !important;
-    padding: 0 10px !important;
-    background: #d97706 !important;
-    border: 1px solid #d97706 !important;
-    border-radius: 4px !important;
-    color: #ffffff !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
-    cursor: pointer !important;
+	display: inline-block !important;
+	vertical-align: middle !important;
+	min-width: 82px !important;
+	height: 28px !important;
+	line-height: 26px !important;
+	padding: 0 10px !important;
+	background: #d97706 !important;
+	border: 1px solid #d97706 !important;
+	border-radius: 4px !important;
+	color: #ffffff !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
+	cursor: pointer !important;
 }
 
-.parse-button.z-button:hover {
-    background: #b45309 !important;
-    border-color: #b45309 !important;
+.parse-button.z-button\:hover {
+	background: #b45309 !important;
+	border-color: #b45309 !important;
 }
 
 .parsing-button.z-button {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    min-width: 82px !important;
-    height: 28px !important;
-    line-height: 26px !important;
-    padding: 0 10px !important;
-    background: #94a3b8 !important;
-    border: 1px solid #94a3b8 !important;
-    border-radius: 4px !important;
-    color: #ffffff !important;
-    font-size: 9px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-align: center !important;
+	display: inline-block !important;
+	vertical-align: middle !important;
+	min-width: 82px !important;
+	height: 28px !important;
+	line-height: 26px !important;
+	padding: 0 10px !important;
+	background: #94a3b8 !important;
+	border: 1px solid #94a3b8 !important;
+	border-radius: 4px !important;
+	color: #ffffff !important;
+	font-size: 9px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-align: center !important;
 }
 
-/* ---------------------------------------------------------
-   7. Native Paging Bar
-   --------------------------------------------------------- */
-.batch-listbox .z-paging,
-.cheque-listbox .z-paging {
-    border: none !important;
-    border-top: 1px solid #e2e8f0 !important;
-    background: #ffffff !important;
-    padding: 8px 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    height: 42px !important;
+.batch-listbox .z-paging, .cheque-listbox .z-paging {
+	border: none !important;
+	border-top: 1px solid #e2e8f0 !important;
+	background: #ffffff !important;
+	padding: 8px 0 !important;
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
+	height: 42px !important;
 }
 
-.batch-listbox .z-paging-info,
-.cheque-listbox .z-paging-info {
-    display: none !important;
+.batch-listbox .z-paging-info, .cheque-listbox .z-paging-info {
+	display: none !important;
 }
 
-.batch-listbox .z-paging-btn,
-.cheque-listbox .z-paging-btn {
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
-    border-radius: 4px !important;
-    margin: 0 3px !important;
-    min-width: 30px !important;
-    height: 28px !important;
-    cursor: pointer !important;
-    color: #1e293b !important;
+.batch-listbox .z-paging-btn, .cheque-listbox .z-paging-btn {
+	border: 1px solid #cbd5e1 !important;
+	background: #ffffff !important;
+	border-radius: 4px !important;
+	margin: 0 3px !important;
+	min-width: 30px !important;
+	height: 28px !important;
+	cursor: pointer !important;
+	color: #1e293b !important;
 }
 
-.batch-listbox .z-paging-btn:hover,
-.cheque-listbox .z-paging-btn:hover {
-    background: #f1f5f9 !important;
+.batch-listbox .z-paging-btn\:hover, .cheque-listbox .z-paging-btn\:hover
+	{
+	background: #f1f5f9 !important;
 }
 
-/* ---------------------------------------------------------
-   8. Batch View Metadata Grid
-   --------------------------------------------------------- */
 .batch-information-grid {
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 6px !important;
-    overflow: hidden;
+	border: 1px solid #e2e8f0 !important;
+	border-radius: 6px !important;
+	overflow: hidden;
 }
 
 .batch-information-grid .z-row {
-    background: #ffffff !important;
+	background: #ffffff !important;
 }
 
 .batch-information-grid .z-row-inner {
-    padding: 8px 12px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+	padding: 8px 12px !important;
+	border-bottom: 1px solid #f1f5f9 !important;
 }
 
 .information-label {
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    color: #475569 !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+	color: #475569 !important;
 }
 
 .information-value {
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    color: #0f172a !important;
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	color: #0f172a !important;
+}
+
+.batch-validation-message {
+	display: inline-block !important;
+	width: auto !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	padding: 5px 10px !important;
+	margin: 2px 0 0 0 !important;
+	background: #fee2e2 !important;
+	color: #dc2626 !important;
+	border: 1px solid #fca5a5 !important;
+	border-radius: 9999px !important;
+	font-size: 10.5px !important;
+	font-weight: 700 !important;
+	line-height: 16px !important;
+	white-space: normal !important;
+	text-align: left !important;
+	overflow-wrap: anywhere !important;
+}
+
+.batch-validation-actual {
+	display: block !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+	color: #64748b !important;
+	font-size: 10.5px !important;
+	font-weight: 600 !important;
+	line-height: 16px !important;
+}
+
+.batch-validation-success {
+	display: inline-block !important;
+	width: auto !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	padding: 5px 10px !important;
+	margin: 2px 0 0 0 !important;
+	background: #dcfce7 !important;
+	color: #166534 !important;
+	border: 1px solid #86efac !important;
+	border-radius: 9999px !important;
+	font-size: 10.5px !important;
+	font-weight: 700 !important;
+	line-height: 16px !important;
+	white-space: normal !important;
+	text-align: left !important;
+}
+
+.batch-dashboard-button.z-button {
+	display: inline-block !important;
+	vertical-align: middle !important;
+	box-sizing: border-box !important;
+	width: 178px !important;
+	min-width: 178px !important;
+	max-width: 178px !important;
+	height: 38px !important;
+	min-height: 38px !important;
+	max-height: 38px !important;
+	line-height: 36px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	background: #18275c !important;
+	border: 1px solid #18275c !important;
+	border-radius: 4px !important;
+	color: #ffffff !important;
+	font-size: 10px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.3px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
+	cursor: pointer !important;
+	box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
+}
+
+.batch-dashboard-button.z-button\:hover {
+	background: #101c46 !important;
+	border-color: #101c46 !important;
+}
+
+.batch-validation-title {
+	display: block !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	color: #0f172a !important;
+	font-size: 15px !important;
+	font-weight: 800 !important;
+	line-height: 20px !important;
+	letter-spacing: 0.2px !important;
+	text-align: left !important;
+}
+
+.batch-validation-window {
+	width: 500px !important;
+}
+
+.batch-validation-window .z-window-content {
+	background: #ffffff !important;
+	padding: 22px 24px 20px 24px !important;
+	box-sizing: border-box !important;
+}
+
+.batch-validation-window .z-window-header {
+	background: #ffffff !important;
+	color: #0f172a !important;
+	font-size: 16px !important;
+	font-weight: 800 !important;
+	line-height: 22px !important;
+	padding: 14px 18px !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.batch-validation-window .z-window-close {
+	color: #64748b !important;
+	font-size: 18px !important;
+	font-weight: 700 !important;
+}
+
+.batch-validation-title {
+	display: block !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 0 4px 0 !important;
+	padding: 0 !important;
+	color: #0f172a !important;
+	font-size: 16px !important;
+	font-weight: 800 !important;
+	line-height: 22px !important;
+	letter-spacing: 0.2px !important;
+	text-align: left !important;
+}
+
+.batch-validation-label {
+	display: block !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 2px 0 0 0 !important;
+	padding: 0 !important;
+	color: #334155 !important;
+	font-size: 11.5px !important;
+	font-weight: 700 !important;
+	line-height: 18px !important;
+	text-align: left !important;
+}
+
+.batch-validation-window .z-intbox, .batch-validation-window .z-textbox
+	{
+	width: 100% !important;
+	height: 36px !important;
+	box-sizing: border-box !important;
+	padding: 0 11px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	color: #0f172a !important;
+	font-size: 12px !important;
+	font-weight: 500 !important;
+}
+
+.batch-validation-window .z-intbox\:focus, .batch-validation-window .z-textbox\:focus
+	{
+	border-color: #3b82f6 !important;
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12) !important;
+	outline: none !important;
+}
+
+.batch-validation-window .z-intbox::placeholder,
+	.batch-validation-window .z-textbox::placeholder {
+	color: #94a3b8 !important;
+	font-size: 11.5px !important;
+}
+
+.batch-validation-message {
+	display: inline-block !important;
+	width: auto !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	padding: 6px 10px !important;
+	margin: 2px 0 0 0 !important;
+	background: #fee2e2 !important;
+	color: #dc2626 !important;
+	border: 1px solid #fca5a5 !important;
+	border-radius: 6px !important;
+	font-size: 10.5px !important;
+	font-weight: 700 !important;
+	line-height: 16px !important;
+	white-space: normal !important;
+	text-align: left !important;
+	overflow-wrap: anywhere !important;
+}
+
+.batch-validation-actual {
+	display: block !important;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	margin: 0 !important;
+	padding: 2px 0 0 0 !important;
+	color: #64748b !important;
+	font-size: 10.5px !important;
+	font-weight: 600 !important;
+	line-height: 16px !important;
+}
+
+.batch-validation-success {
+	display: inline-block !important;
+	width: auto !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	padding: 6px 10px !important;
+	margin: 2px 0 0 0 !important;
+	background: #dcfce7 !important;
+	color: #166534 !important;
+	border: 1px solid #86efac !important;
+	border-radius: 6px !important;
+	font-size: 10.5px !important;
+	font-weight: 700 !important;
+	line-height: 16px !important;
+	white-space: normal !important;
+	text-align: left !important;
+}
+
+.batch-validation-window .view-button.z-button {
+	min-width: 88px !important;
+	height: 34px !important;
+	line-height: 32px !important;
+	padding: 0 16px !important;
+	background: #18275c !important;
+	border: 1px solid #18275c !important;
+	border-radius: 5px !important;
+	color: #ffffff !important;
+	font-size: 10px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.2px !important;
+	text-transform: uppercase !important;
+	text-align: center !important;
+	box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12) !important;
+}
+
+.batch-validation-window .view-button.z-button\:hover {
+	background: #101c46 !important;
+	border-color: #101c46 !important;
+}
+
+.batch-validation-window .batch-btn-clear.z-button {
+	min-width: 72px !important;
+	height: 34px !important;
+	line-height: 32px !important;
+	padding: 0 14px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	color: #475569 !important;
+	font-size: 10px !important;
+	font-weight: 700 !important;
+	text-align: center !important;
+}
+
+.batch-validation-window .batch-btn-clear.z-button\:hover {
+	background: #f8fafc !important;
+	border-color: #94a3b8 !important;
+	color: #0f172a !important;
 }

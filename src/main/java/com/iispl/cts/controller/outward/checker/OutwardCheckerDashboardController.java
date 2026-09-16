@@ -1,20 +1,16 @@
 package com.iispl.cts.controller.outward.checker;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
@@ -37,8 +33,6 @@ import com.iispl.cts.serviceimpl.outward.OutwardCheckerQueueServiceImpl;
 public class OutwardCheckerDashboardController extends GenericForwardComposer<Component> {
 
 	private Textbox txtBatchId;
-	private Datebox fromDate;
-	private Datebox toDate;
 
 	private Button btnSearch;
 	private Button btnClear;
@@ -64,8 +58,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	public void doAfterCompose(Component comp) throws Exception {
 
 		super.doAfterCompose(comp);
-
-		String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
 
 		btnPrevious.addEventListener(Events.ON_CLICK, event -> {
 
@@ -117,8 +109,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		btnClear.addEventListener(Events.ON_CLICK, event -> {
 
 			txtBatchId.setValue("");
-			fromDate.setValue(null);
-			toDate.setValue(null);
 
 			pageNumber = 1;
 
@@ -132,16 +122,15 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 		String batchId = txtBatchId.getValue();
 
-		return (batchId != null && !batchId.trim().isEmpty()) || fromDate.getValue() != null
-				|| toDate.getValue() != null;
+		return batchId != null && !batchId.trim().isEmpty();
 	}
 
 	private int getTotalBatchCount() {
 
 		if (isSearchActive()) {
 
-			return outwardBatchDashboardDAO.getSearchPendingBatchCount(txtBatchId.getValue(), fromDate.getValue(),
-					toDate.getValue());
+			return outwardBatchDashboardDAO.getSearchPendingBatchCount(
+					txtBatchId.getValue());
 		}
 
 		return outwardBatchService.getPendingBatchCount();
@@ -158,19 +147,19 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 				String batchId = txtBatchId.getValue();
 
-				Date searchFromDate = fromDate.getValue();
+				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(
+						pageNumber,
+						pageSize,
+						batchId);
 
-				Date searchToDate = toDate.getValue();
-
-				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId,
-						searchFromDate, searchToDate);
-
-				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId, searchFromDate,
-						searchToDate);
+				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(
+						batchId);
 
 			} else {
 
-				pendingBatches = outwardBatchService.getPendingBatches(pageNumber, pageSize);
+				pendingBatches = outwardBatchService.getPendingBatches(
+						pageNumber,
+						pageSize);
 
 				totalBatches = outwardBatchService.getPendingBatchCount();
 			}
@@ -201,110 +190,150 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 				lblPage.setValue(pageNumber + "/" + totalPages);
 
 				btnFirst.setDisabled(pageNumber == 1);
-
 				btnPrevious.setDisabled(pageNumber == 1);
-
 				btnNext.setDisabled(pageNumber == totalPages);
-
 				btnLast.setDisabled(pageNumber == totalPages);
 			}
 
-			ListModelList<OutwardBatch> model = new ListModelList<>(pendingBatches);
+			ListModelList<OutwardBatch> model =
+					new ListModelList<>(pendingBatches);
 
 			lstBatches.setModel(model);
 
 			lstBatches.setItemRenderer(new ListitemRenderer<OutwardBatch>() {
 
 				@Override
-				public void render(Listitem item, OutwardBatch batch, int index) throws Exception {
+				public void render(
+						Listitem item,
+						OutwardBatch batch,
+						int index) throws Exception {
 
 					item.setValue(batch);
 
-					item.appendChild(new Listcell(batch.getOutwardBatchId()));
+					item.appendChild(
+							new Listcell(batch.getOutwardBatchId()));
 
-					Map<String, Integer> chequeCounts = getChequeCounts(batch.getOutwardBatchId());
+					Map<String, Integer> chequeCounts =
+							getChequeCounts(batch.getOutwardBatchId());
 
-					int totalCheques = chequeCounts.get("total");
+					int totalCheques =
+							chequeCounts.get("total");
 
-					int normalCheques = chequeCounts.get("normal");
-					int makerReturned = chequeCounts.get("makerReturned");
+					int normalCheques =
+							chequeCounts.get("normal");
 
-					int rejectionRequests = chequeCounts.get("rejection");
+					int makerReturned =
+							chequeCounts.get("makerReturned");
 
-					
+					int rejectionRequests =
+							chequeCounts.get("rejection");
 
-					item.appendChild(new Listcell(String.valueOf(totalCheques)));
+					item.appendChild(
+							new Listcell(
+									String.valueOf(totalCheques)));
 
-					item.appendChild(new Listcell(String.valueOf(normalCheques)));
+					item.appendChild(
+							new Listcell(
+									String.valueOf(normalCheques)));
+
 					Listcell makerReturnedCell =
-					        new Listcell(
-					                String.valueOf(makerReturned));
+							new Listcell(
+									String.valueOf(makerReturned));
 
 					makerReturnedCell.setSclass(
-					        "maker-returned-count");
+							"maker-returned-count");
 
 					item.appendChild(makerReturnedCell);
 
 					Listcell rejectionCell =
-					        new Listcell(
-					                String.valueOf(rejectionRequests));
+							new Listcell(
+									String.valueOf(rejectionRequests));
 
 					rejectionCell.setSclass(
-					        "rejection-request-count");
+							"rejection-request-count");
 
 					item.appendChild(rejectionCell);
-
-					
-					
 
 					String submittedAt = "-";
 
 					if (batch.getUploadedAt() != null) {
 
-						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						SimpleDateFormat formatter =
+								new SimpleDateFormat(
+										"yyyy-MM-dd HH:mm:ss");
 
-						submittedAt = formatter.format(batch.getUploadedAt());
+						submittedAt =
+								formatter.format(
+										batch.getUploadedAt());
 					}
 
-					item.appendChild(new Listcell(submittedAt));
+					item.appendChild(
+							new Listcell(submittedAt));
 
-					Listcell statusCell = new Listcell();
+					Listcell statusCell =
+							new Listcell();
 
-					statusCell.setStyle("text-align:center;" + "vertical-align:middle;");
+					statusCell.setStyle(
+							"text-align:center;"
+							+ "vertical-align:middle;");
 
-					Label statusLabel = new Label(batch.getBatchStatus());
+					Label statusLabel =
+							new Label("Pending");
 
-					statusLabel.setSclass("status-pending");
+					statusLabel.setSclass(
+							"status-pending");
 
-					statusLabel.setStyle("display:inline-block;" + "background:#fff7ed;" + "color:#b45309;"
-							+ "border:1px solid #f59e0b;" + "border-radius:16px;" + "font-size:8px;"
-							+ "font-weight:800;" + "text-align:center;" + "white-space:nowrap;");
+					statusLabel.setStyle(
+							"display:inline-block;"
+							+ "background:#fff7ed;"
+							+ "color:#b45309;"
+							+ "border:1px solid #f59e0b;"
+							+ "border-radius:16px;"
+							+ "font-size:8px;"
+							+ "font-weight:800;"
+							+ "text-align:center;"
+							+ "white-space:nowrap;");
 
 					statusCell.appendChild(statusLabel);
 
 					item.appendChild(statusCell);
 
-					Listcell actionCell = new Listcell();
+					Listcell actionCell =
+							new Listcell();
 
-					Button queueButton = new Button("QUEUE");
+					Button queueButton =
+							new Button("QUEUE");
 
-					queueButton.setSclass("queue-button");
+					queueButton.setSclass(
+							"queue-button");
 
-					queueButton.addEventListener(Events.ON_CLICK, event -> {
+					queueButton.addEventListener(
+							Events.ON_CLICK,
+							event -> {
 
-						OutwardBatch selectedBatch = item.getValue();
+								OutwardBatch selectedBatch =
+										item.getValue();
 
-						Map<String, Object> args = new HashMap<>();
+								Map<String, Object> args =
+										new HashMap<>();
 
-						args.put("batchId", selectedBatch.getOutwardBatchId());
+								args.put(
+										"batchId",
+										selectedBatch
+												.getOutwardBatchId());
 
-						Window popup = (Window) Executions.createComponents("/outward/checker/batch-proceed-popup.zul",
-								null, args);
+								Window popup =
+										(Window) Executions
+												.createComponents(
+														"/outward/checker/batch-proceed-popup.zul",
+														null,
+														args);
 
-						popup.doModal();
-					});
+								popup.doModal();
+							});
 
-					actionCell.appendChild(queueButton);
+					actionCell.appendChild(
+							queueButton);
 
 					item.appendChild(actionCell);
 				}
@@ -314,21 +343,29 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 			e.printStackTrace();
 
-			Messagebox.show("Unable to load Checker Dashboard.\n\n" + e.getMessage(), "Dashboard Error", Messagebox.OK,
+			Messagebox.show(
+					"Unable to load Checker Dashboard.\n\n"
+							+ e.getMessage(),
+					"Dashboard Error",
+					Messagebox.OK,
 					Messagebox.ERROR);
 		}
 	}
 
-	private Map<String, Integer> getChequeCounts(String batchId) throws SQLException {
+	private Map<String, Integer> getChequeCounts(
+			String batchId) throws SQLException {
 
-		Map<String, Integer> countedCheques = new HashMap<>();
+		Map<String, Integer> countedCheques =
+				new HashMap<>();
 
 		int totalCheques = 0;
 		int normalCheques = 0;
 		int rejectionRequests = 0;
 		int makerReturned = 0;
 
-		List<OutwardCheque> cheques = outwardCheckerQueueService.getChequesByBatchId(batchId);
+		List<OutwardCheque> cheques =
+				outwardCheckerQueueService
+						.getChequesByBatchId(batchId);
 
 		if (cheques != null) {
 
@@ -340,13 +377,16 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 					continue;
 				}
 
-				String status = cheque.getChequeStatus();
+				String status =
+						cheque.getChequeStatus();
 
-				if ("MAKER_RETURNED".equalsIgnoreCase(status)) {
+				if ("MAKER_RETURNED"
+						.equalsIgnoreCase(status)) {
 
 					makerReturned++;
 
-				} else if ("REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+				} else if ("REJECT_REQUEST"
+						.equalsIgnoreCase(status)) {
 
 					rejectionRequests++;
 
@@ -357,10 +397,21 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 			}
 		}
 
-		countedCheques.put("total", totalCheques);
-		countedCheques.put("normal", normalCheques);
-		countedCheques.put("rejection", rejectionRequests);
-		countedCheques.put("makerReturned", makerReturned);
+		countedCheques.put(
+				"total",
+				totalCheques);
+
+		countedCheques.put(
+				"normal",
+				normalCheques);
+
+		countedCheques.put(
+				"rejection",
+				rejectionRequests);
+
+		countedCheques.put(
+				"makerReturned",
+				makerReturned);
 
 		return countedCheques;
 	}

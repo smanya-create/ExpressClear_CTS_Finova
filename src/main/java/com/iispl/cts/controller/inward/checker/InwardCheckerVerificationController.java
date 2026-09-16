@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.text.SimpleDateFormat;
 
 import org.zkoss.image.AImage;
@@ -41,12 +43,15 @@ import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
+import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.service.RejectedReasonService;
 import com.iispl.cts.service.SendBackReasonService;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.service.inward.InwardChequeService;
+import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.RejectedReasonServiceImpl;
 import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
+import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
@@ -89,6 +94,9 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private InwardChequeService inwardChequeService;
 	private RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 	private List<InwardCheque> currentBatchCheques = new ArrayList<>();
+	private final NotificationService notificationService = NotificationServiceImpl.getInstance();
+	private final ExecutorService notificationExecutor =
+	        Executors.newSingleThreadExecutor();
 	private String currentChequeId;
 	private String currentBatchId;
 	private int currentChequeIndex = 0;
@@ -122,12 +130,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private Groupbox emptyImageState;
 	@Wire
 	private Window sendBackReasonWindow;
-
 	@Wire
 	private Combobox cmbSendBackReason;
 	@Wire
 	private Component noChequesContainer;
-
 	@Wire
 	private Textbox txtSendBackRemarks;
 	private double zoomScale = 1.0;
@@ -136,71 +142,58 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private double panY = 0;
 	@Wire
 	private Div batchInfoCard;
-
 	@Wire
 	private Hlayout verificationContent;
-
 	@Wire
 	private Hlayout verificationNavigation;
-
 	@Wire
 	private Label lblNoCheques;
-
 	@Wire
 	private Combobox cmbChequeStatus;
-
 	@Wire
 	private Button btnFilterCheque;
-
 	@Wire
 	private Button btnResetFilter;
-
 	@Wire
 	private Vlayout rejectionDetailsSection;
-
 	@Wire
 	private Label lblRejectedReasonCode;
-
 	@Wire
 	private Label lblRejectedReasonName;
-
 	@Wire
 	private Label lblRejectedReasonRemarks;
-	
 	@Wire
 	private Label lblMakerRejectionReasonCode;
-
 	@Wire
 	private Label lblMakerRejectionReasonName;
-
 	private InwardChequeImageDAOImpl inwardChequeImageDAO;
 	private boolean verificationOrderInitialized = false;
+	private static final String ACTIVE_VERIFICATION_BATCH_ID = "ACTIVE_VERIFICATION_BATCH_ID";
+	private static final String ACTIVE_VERIFICATION_CHEQUE_ID = "ACTIVE_VERIFICATION_CHEQUE_ID";
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-
 		super.doAfterCompose(comp);
-
 		pageRoot = comp.getPage().getFirstRoot();
-
 		inwardChequeService = new InwardChequeServiceImpl();
-
 		sendBackReasonService = new SendBackReasonServiceImpl();
+		inwardBatchService = new InwardBatchServiceImpl();
 
-		// Get reject popup
 		Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
-		// Get Proceed button from popup ID space
 		Button proceedButton = (Button) window.getFellow("btnProceedReject");
 
-		// Get Cancel button from popup ID space
 		Button cancelButton = (Button) window.getFellow("btnCancelReject");
 
-		// Manually register events because popup has its own ID space
 		proceedButton.addEventListener(Events.ON_CLICK, event -> onClick$btnProceedReject());
 
 		cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
 		
+		window.addEventListener(Events.ON_CLOSE, event -> {
+		    event.stopPropagation();
+		    window.setVisible(false);
+		});
+
 		Window sendBackWindow = sendBackReasonWindow;
 
 		Button proceedSendBackButton = (Button) sendBackWindow.getFellow("btnProceedSendBack");
@@ -210,13 +203,11 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		proceedSendBackButton.addEventListener(Events.ON_CLICK, event -> proceedSendBack());
 
 		cancelSendBackButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelSendBack());
-		
-		sendBackWindow.addEventListener(
-		        Events.ON_CLOSE,
-		        event -> {
-		            event.stopPropagation();
-		            sendBackWindow.setVisible(false);
-		        });
+
+		sendBackWindow.addEventListener(Events.ON_CLOSE, event -> {
+			event.stopPropagation();
+			sendBackWindow.setVisible(false);
+		});
 
 		verificationSummaryWindow = (Window) pageRoot.getFellow("verificationSummaryWindow");
 
@@ -238,22 +229,33 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		if (batchId != null && !batchId.trim().isEmpty()) {
 
-			currentBatchId = batchId.trim();
+		    currentBatchId = batchId.trim();
 
-			Sessions.getCurrent().setAttribute("ACTIVE_VERIFICATION_BATCH_ID", currentBatchId);
+		    Sessions.getCurrent()
+		            .setAttribute("ACTIVE_VERIFICATION_BATCH_ID", currentBatchId);
+
 		} else {
-			String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-			if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
+		    // No URL batchId.
+		    // Check whether an active verification batch already exists in session.
+		    String sessionBatch =
+		            (String) Sessions.getCurrent()
+		                    .getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-				currentBatchId = sessionBatch.trim();
+		    if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
 
-			} else {
-				showNoChequesToVerify();
-				return;
-			}
+		        currentBatchId = sessionBatch.trim();
+
+		    } else {
+
+		        // Nothing selected yet
+		        currentBatchId = null;
+
+		        showNoChequesToVerify();
+		        return;
+		    }
 		}
-		System.out.println("Selected Verification Batch: " + currentBatchId);
+
 		loadSelectedBatch();
 	}
 
@@ -263,32 +265,55 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			Messagebox.show("No batch selected for verification.", "Verification", Messagebox.OK,
 					Messagebox.EXCLAMATION);
-
 			return;
 		}
-
 		verificationOrderInitialized = false;
-
 		currentBatchCheques = inwardChequeService.getChequesByBatchAndStatus(currentBatchId, null);
-
 		if (currentBatchCheques == null || currentBatchCheques.isEmpty()) {
-
 			Messagebox.show("No cheques found for batch: " + currentBatchId, "Verification", Messagebox.OK,
 					Messagebox.EXCLAMATION);
-
 			return;
 		}
 
 		currentBatchCheques = prioritizeRejectionRequests(currentBatchCheques);
 
+		if (currentBatchCheques == null || currentBatchCheques.isEmpty()) {
+
+			Messagebox.show("No cheques available for verification.", "Verification", Messagebox.OK,
+					Messagebox.EXCLAMATION);
+			return;
+		}
 		verificationOrderInitialized = true;
-		currentChequeIndex = 0;
+
+		String savedChequeId = (String) Sessions.getCurrent().getAttribute(ACTIVE_VERIFICATION_CHEQUE_ID);
+		int savedIndex = -1;
+		if (savedChequeId != null && !savedChequeId.trim().isEmpty()) {
+			for (int i = 0; i < currentBatchCheques.size(); i++) {
+				InwardCheque cheque = currentBatchCheques.get(i);
+				if (cheque != null && savedChequeId.equalsIgnoreCase(cheque.getInwardChequeId())) {
+					savedIndex = i;
+					break;
+				}
+			}
+		}
+
+		if (savedIndex >= 0) {
+
+			currentChequeIndex = savedIndex;
+
+		} else {
+
+			currentChequeIndex = 0;
+		}
 
 		currentChequeId = currentBatchCheques.get(currentChequeIndex).getInwardChequeId();
+
+		Sessions.getCurrent().setAttribute(ACTIVE_VERIFICATION_CHEQUE_ID, currentChequeId);
 
 		loadChequeDetails(currentChequeId);
 
 		updateChequePosition();
+
 		updateVerificationCount();
 	}
 
@@ -426,7 +451,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 
 			if (lblVerificationStatus != null) {
-
 				String status = cheque.getChequeStatus();
 
 				if ("ACCEPTED".equalsIgnoreCase(status) || "REJECTED".equalsIgnoreCase(status)) {
@@ -440,8 +464,13 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				} else {
 
 					lblVerificationStatus.setValue("PENDING");
-					lblVerificationStatus.setSclass("verification-status-badge");
-					lblVerificationStatus.setStyle("");
+
+					lblVerificationStatus.setStyle("background:#FFF8E9;" + "color:#C57A00;"
+							+ "border:1px solid #F5C96B;" + "border-radius:12px;" + "display:inline-flex;"
+							+ "align-items:center;" + "justify-content:center;" + "width:72px;" + "height:24px;"
+							+ "box-sizing:border-box;" + "white-space:nowrap;" + "text-align:center;" + "flex-shrink:0;"
+							+ "padding:2px 8px;" + "font-size:10px;" + "font-weight:600;" + "line-height:18px;"
+							+ "margin-right:10px;");
 				}
 			}
 			updateChequePosition();
@@ -457,271 +486,196 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	private void loadMakerRejectionRemarks(InwardCheque cheque) {
 
-	    if (makerRejectionRequestSection != null) {
-	        makerRejectionRequestSection.setVisible(false);
-	    }
+		if (makerRejectionRequestSection != null) {
+			makerRejectionRequestSection.setVisible(false);
+		}
 
-	    if (lblMakerRejectionReasonCode != null) {
-	        lblMakerRejectionReasonCode.setValue("");
-	    }
+		if (lblMakerRejectionReasonCode != null) {
+			lblMakerRejectionReasonCode.setValue("");
+		}
 
-	    if (lblMakerRejectionReasonName != null) {
-	        lblMakerRejectionReasonName.setValue("");
-	    }
+		if (lblMakerRejectionReasonName != null) {
+			lblMakerRejectionReasonName.setValue("");
+		}
 
-	    if (lblMakerRejectionRemarks != null) {
-	        lblMakerRejectionRemarks.setValue("");
-	    }
+		if (lblMakerRejectionRemarks != null) {
+			lblMakerRejectionRemarks.setValue("");
+		}
 
-	    if (cheque == null) {
-	        return;
-	    }
+		if (cheque == null) {
+			return;
+		}
 
-	    String status = cheque.getChequeStatus();
+		String status = cheque.getChequeStatus();
 
-	    // Show only for Maker rejection-requested cheques
-	    if (!"REJECTION_REQUESTED".equalsIgnoreCase(status)) {
-	        return;
-	    }
+		if (!"REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+			return;
+		}
 
-	    String chequeId = cheque.getInwardChequeId();
+		String chequeId = cheque.getInwardChequeId();
 
-	    if (chequeId == null || chequeId.trim().isEmpty()) {
-	        return;
-	    }
+		if (chequeId == null || chequeId.trim().isEmpty()) {
+			return;
+		}
+		try {
+			String details = inwardChequeService.getMakerRejectionRequestDetails(chequeId.trim());
 
-	    try {
+			if (details == null || details.trim().isEmpty()) {
 
-	        // Get details from Service -> DAO
-	        String details =
-	                inwardChequeService.getMakerRejectionRequestDetails(
-	                        chequeId.trim());
+				System.out.println("DEBUG: No pending Maker rejection request for cheque: " + chequeId);
+				return;
+			}
+			String[] parts = details.split("\\|\\|", -1);
 
-	        if (details == null || details.trim().isEmpty()) {
+			String rejectedReasonId = parts.length > 0 ? parts[0].trim() : "";
+			String remarks = parts.length > 1 ? parts[1].trim() : "";
+			RejectedReason reason = null;
+			List<RejectedReason> reasons = rejectedReasonService.getAllRejectedReasons();
+			if (reasons != null) {
+				for (RejectedReason r : reasons) {
+					if (r != null && r.getRejectedReasonId() != null
+							&& r.getRejectedReasonId().equals(rejectedReasonId)) {
+						reason = r;
+						break;
+					}
+				}
+			}
+			if (lblMakerRejectionReasonCode != null) {
 
-	            System.out.println(
-	                    "DEBUG: No pending Maker rejection request for cheque: "
-	                    + chequeId);
+				if (reason != null) {
+					lblMakerRejectionReasonCode.setValue("Reason Code: " + reason.getRejectedReasonCode());
+				} else {
+					lblMakerRejectionReasonCode.setValue("Reason Code: " + rejectedReasonId);
+				}
+			}
 
-	            return;
-	        }
+			if (lblMakerRejectionReasonName != null) {
 
-	        /*
-	         * DAO returns:
-	         *
-	         * rejectedReasonId||remarks
-	         *
-	         * Example:
-	         * 6||check again
-	         */
+				if (reason != null) {
+					lblMakerRejectionReasonName.setValue("Reason: " + reason.getRejectedReasonName());
+				} else {
+					lblMakerRejectionReasonName.setValue("Reason: Reason not found");
+				}
+			}
 
-	        String[] parts = details.split("\\|\\|", -1);
+			if (lblMakerRejectionRemarks != null) {
 
-	        String rejectedReasonId =
-	                parts.length > 0 ? parts[0].trim() : "";
+				if (remarks != null && !remarks.isEmpty()) {
 
-	        String remarks =
-	                parts.length > 1 ? parts[1].trim() : "";
+					lblMakerRejectionRemarks.setValue("Remarks: " + remarks);
 
-	        // Find reason using existing RejectedReasonService
-	        RejectedReason reason = null;
+				} else {
 
-	        List<RejectedReason> reasons =
-	                rejectedReasonService.getAllRejectedReasons();
+					lblMakerRejectionRemarks.setValue("Remarks: No remarks provided");
+				}
+			}
+			if (makerRejectionRequestSection != null) {
+				makerRejectionRequestSection.setVisible(true);
+			}
 
-	        if (reasons != null) {
+			System.out.println("DEBUG: Maker rejection request loaded for cheque: " + chequeId);
 
-	            for (RejectedReason r : reasons) {
+			System.out.println("DEBUG: Rejected Reason ID: " + rejectedReasonId);
 
-	                if (r != null
-	                        && r.getRejectedReasonId() != null
-	                        && r.getRejectedReasonId()
-	                                .equals(rejectedReasonId)) {
+			System.out.println("DEBUG: Rejected Reason: "
+					+ (reason != null ? reason.getRejectedReasonCode() + " - " + reason.getRejectedReasonName()
+							: "NOT FOUND"));
 
-	                    reason = r;
-	                    break;
-	                }
-	            }
-	        }
+			System.out.println("DEBUG: Maker Remarks: " + remarks);
 
-	        // Reason Code
-	        if (lblMakerRejectionReasonCode != null) {
+		} catch (Exception e) {
 
-	            if (reason != null) {
-	                lblMakerRejectionReasonCode.setValue(
-	                        "Reason Code: "
-	                        + reason.getRejectedReasonCode());
-	            } else {
-	                lblMakerRejectionReasonCode.setValue(
-	                        "Reason Code: " + rejectedReasonId);
-	            }
-	        }
+			e.printStackTrace();
 
-	        // Reason Name
-	        if (lblMakerRejectionReasonName != null) {
+			if (makerRejectionRequestSection != null) {
+				makerRejectionRequestSection.setVisible(false);
+			}
 
-	            if (reason != null) {
-	                lblMakerRejectionReasonName.setValue(
-	                        "Reason: "
-	                        + reason.getRejectedReasonName());
-	            } else {
-	                lblMakerRejectionReasonName.setValue(
-	                        "Reason: Reason not found");
-	            }
-	        }
+			if (lblMakerRejectionReasonCode != null) {
+				lblMakerRejectionReasonCode.setValue("");
+			}
 
-	        // Remarks
-	        if (lblMakerRejectionRemarks != null) {
+			if (lblMakerRejectionReasonName != null) {
+				lblMakerRejectionReasonName.setValue("");
+			}
 
-	            if (remarks != null && !remarks.isEmpty()) {
-
-	                lblMakerRejectionRemarks.setValue(
-	                        "Remarks: " + remarks);
-
-	            } else {
-
-	                lblMakerRejectionRemarks.setValue(
-	                        "Remarks: No remarks provided");
-	            }
-	        }
-
-	        // Show Maker Rejection Request section
-	        if (makerRejectionRequestSection != null) {
-	            makerRejectionRequestSection.setVisible(true);
-	        }
-
-	        System.out.println(
-	                "DEBUG: Maker rejection request loaded for cheque: "
-	                + chequeId);
-
-	        System.out.println(
-	                "DEBUG: Rejected Reason ID: "
-	                + rejectedReasonId);
-
-	        System.out.println(
-	                "DEBUG: Rejected Reason: "
-	                + (reason != null
-	                    ? reason.getRejectedReasonCode()
-	                        + " - "
-	                        + reason.getRejectedReasonName()
-	                    : "NOT FOUND"));
-
-	        System.out.println(
-	                "DEBUG: Maker Remarks: " + remarks);
-
-	    } catch (Exception e) {
-
-	        e.printStackTrace();
-
-	        if (makerRejectionRequestSection != null) {
-	            makerRejectionRequestSection.setVisible(false);
-	        }
-
-	        if (lblMakerRejectionReasonCode != null) {
-	            lblMakerRejectionReasonCode.setValue("");
-	        }
-
-	        if (lblMakerRejectionReasonName != null) {
-	            lblMakerRejectionReasonName.setValue("");
-	        }
-
-	        if (lblMakerRejectionRemarks != null) {
-	            lblMakerRejectionRemarks.setValue("");
-	        }
-	    }
+			if (lblMakerRejectionRemarks != null) {
+				lblMakerRejectionRemarks.setValue("");
+			}
+		}
 	}
-	
+
 	private void loadChequeImage(InwardCheque cheque, String imageType) {
 
-	    if (chequeImage == null) {
-	        return;
-	    }
+		if (chequeImage == null) {
+			return;
+		}
+		chequeImage.setVisible(false);
+		chequeImage.setSrc(null);
 
-	    // Reset image state
-	    chequeImage.setVisible(false);
-	    chequeImage.setSrc(null);
+		if (cheque == null) {
+			return;
+		}
+		try {
 
-	    if (cheque == null) {
-	        return;
-	    }
+			String inwardChequeId = cheque.getInwardChequeId();
 
-	    try {
+			if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
+				System.out.println("Verification: Cheque ID is empty.");
+				return;
+			}
+			InwardChequeImage image;
 
-	        String inwardChequeId = cheque.getInwardChequeId();
+			if ("BACK".equalsIgnoreCase(imageType)) {
 
-	        if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
-	            System.out.println("Verification: Cheque ID is empty.");
-	            return;
-	        }
+				image = inwardChequeService.getBackImage(inwardChequeId);
 
-	        InwardChequeImage image;
+			} else {
 
-	        if ("BACK".equalsIgnoreCase(imageType)) {
+				image = inwardChequeService.getFrontImage(inwardChequeId);
+			}
 
-	            image = inwardChequeService.getBackImage(inwardChequeId);
+			if (image == null) {
 
-	        } else {
+				System.out.println("Verification: No " + imageType + " image found for cheque -> " + inwardChequeId);
 
-	            image = inwardChequeService.getFrontImage(inwardChequeId);
-	        }
+				return;
+			}
 
-	        if (image == null) {
+			String imagePath = image.getImagePath();
 
-	            System.out.println(
-	                "Verification: No "
-	                + imageType
-	                + " image found for cheque -> "
-	                + inwardChequeId
-	            );
+			if (imagePath == null || imagePath.trim().isEmpty()) {
 
-	            return;
-	        }
+				System.out.println("Verification: Image path is empty for cheque -> " + inwardChequeId);
 
-	        String imagePath = image.getImagePath();
+				return;
+			}
 
-	        if (imagePath == null || imagePath.trim().isEmpty()) {
+			imagePath = imagePath.trim();
 
-	            System.out.println(
-	                "Verification: Image path is empty for cheque -> "
-	                + inwardChequeId
-	            );
+			if (imagePath.startsWith("/")) {
+				imagePath = imagePath.substring(1);
+			}
 
-	            return;
-	        }
+			String imageSrc = "/Inward-data/" + imagePath;
 
-	        imagePath = imagePath.trim();
+			System.out.println("Verification: Loading image URL -> " + imageSrc);
 
-	        // Remove leading slash if DB already contains one
-	        if (imagePath.startsWith("/")) {
-	            imagePath = imagePath.substring(1);
-	        }
+			chequeImage.setSrc(imageSrc);
+			chequeImage.setVisible(true);
 
-	        // MICR uses this exact URL structure
-	        String imageSrc = "/Inward-data/" + imagePath;
+		} catch (Exception e) {
 
-	        System.out.println(
-	            "Verification: Loading image URL -> "
-	            + imageSrc
-	        );
+			System.err.println(
+					"Verification: Failed to load " + imageType + " image for cheque -> " + cheque.getInwardChequeId());
 
-	        chequeImage.setSrc(imageSrc);
-	        chequeImage.setVisible(true);
+			e.printStackTrace();
 
-	    } catch (Exception e) {
+			chequeImage.setVisible(false);
+			chequeImage.setSrc(null);
+		}
+	}
 
-	        System.err.println(
-	            "Verification: Failed to load "
-	            + imageType
-	            + " image for cheque -> "
-	            + cheque.getInwardChequeId()
-	        );
-
-	        e.printStackTrace();
-
-	        chequeImage.setVisible(false);
-	        chequeImage.setSrc(null);
-	    }
-	}	
 	private List<InwardCheque> prioritizeRejectionRequests(List<InwardCheque> cheques) {
 
 		if (cheques == null || cheques.isEmpty()) {
@@ -746,12 +700,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				makerReturnedCheques.add(cheque);
 
-			}
-
-			else if ("REJECTION_REQUESTED".equalsIgnoreCase(status) || "REJECTED_REQUESTED".equalsIgnoreCase(status)) {
+			} else if ("REJECTION_REQUESTED".equalsIgnoreCase(status)
+					|| "REJECTED_REQUESTED".equalsIgnoreCase(status)) {
 
 				rejectionRequests.add(cheque);
-
 			}
 
 			else {
@@ -759,7 +711,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				normalCheques.add(cheque);
 			}
 		}
-
 		List<InwardCheque> finalOrder = new ArrayList<>();
 
 		finalOrder.addAll(makerReturnedCheques);
@@ -811,242 +762,166 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	public void onClick$btnAccept() {
 
-	    Messagebox.show(
-	            "Are you sure you want to accept this cheque?",
-	            "Confirm Acceptance",
-	            Messagebox.YES | Messagebox.NO,
-	            Messagebox.QUESTION,
-	            event -> {
+		Messagebox.show("Are you sure you want to accept this cheque?", "Confirm Acceptance",
+				Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, event -> {
 
-	                if (Messagebox.ON_YES.equals(event.getName())) {
-	                    processAcceptCheque();
-	                }
+					if (Messagebox.ON_YES.equals(event.getName())) {
+						processAcceptCheque();
+					}
 
-	            });
+				});
 	}
-	
+
 	private void processAcceptCheque() {
 
-	    try {
+		try {
 
-	        clearCbsFieldHighlights();
+			clearCbsFieldHighlights();
 
-	        InwardCheque cheque = inwardChequeService.findById(currentChequeId);
+			InwardCheque cheque = inwardChequeService.findById(currentChequeId);
 
-	        if (cheque == null) {
+			if (cheque == null) {
 
-	            Messagebox.show(
-	                    "Cheque not found.",
-	                    "Verification",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
+				Messagebox.show("Cheque not found.", "Verification", Messagebox.OK, Messagebox.ERROR);
 
-	            return;
-	        }
+				return;
+			}
 
-	        String currentStatus = cheque.getChequeStatus();
+			String currentStatus = cheque.getChequeStatus();
 
-	        if ("ACCEPTED".equalsIgnoreCase(currentStatus)
-	                || "REJECTED".equalsIgnoreCase(currentStatus)) {
+			if ("ACCEPTED".equalsIgnoreCase(currentStatus) || "REJECTED".equalsIgnoreCase(currentStatus)) {
 
-	            Messagebox.show(
-	                    "This cheque is already verified.",
-	                    "Verification",
-	                    Messagebox.OK,
-	                    Messagebox.EXCLAMATION);
+				Messagebox.show("This cheque is already verified.", "Verification", Messagebox.OK,
+						Messagebox.EXCLAMATION);
 
-	            return;
-	        }
+				return;
+			}
+			
+			if (isChequeSentBackToMaker(cheque)) {
+			    Messagebox.show(
+			            "This cheque has already been sent back to Maker and cannot be accepted.",
+			            "Verification",
+			            Messagebox.OK,
+			            Messagebox.EXCLAMATION
+			    );
+			    return;
+			}
 
-	        // ---------------------------------------------------------
-	        // CBS VALIDATION
-	        // ---------------------------------------------------------
+			CbsValidationResult cbsResult = runCbsValidation(cheque);
 
-	        CbsValidationResult cbsResult = runCbsValidation(cheque);
+			if (!cbsResult.isPassed()) {
 
-	        if (!cbsResult.isPassed()) {
+				String failureReason = cbsResult.getReason();
 
-	            String failureReason = cbsResult.getReason();
+				highlightFailedCbsField(failureReason);
 
-	            highlightFailedCbsField(failureReason);
+				String cbsReasonId = getCbsRejectedReasonId();
 
-	            String cbsReasonId = getCbsRejectedReasonId();
+				if (cbsReasonId == null) {
 
-	            if (cbsReasonId == null) {
+					Messagebox.show("CBS validation failed, but " + "CBS rejection reason is not configured "
+							+ "in rejected_reasons.", "CBS Validation", Messagebox.OK, Messagebox.ERROR);
 
-	                Messagebox.show(
-	                        "CBS validation failed, but "
-	                                + "CBS rejection reason is not configured "
-	                                + "in rejected_reasons.",
-	                        "CBS Validation",
-	                        Messagebox.OK,
-	                        Messagebox.ERROR);
+					return;
+				}
 
-	                return;
-	            }
+				Object userObject = Sessions.getCurrent().getAttribute("CTS_USERNAME");
 
-	            Object userObject =
-	                    Sessions.getCurrent().getAttribute("CTS_USERNAME");
+				String rejectedBy;
 
-	            String rejectedBy;
+				if (userObject != null) {
+					rejectedBy = userObject.toString();
+				} else {
+					rejectedBy = "SYSTEM";
+				}
 
-	            if (userObject != null) {
-	                rejectedBy = userObject.toString();
-	            } else {
-	                rejectedBy = "SYSTEM";
-	            }
+				boolean rejectionSaved = inwardChequeService.saveRejection(cheque.getInwardChequeId(), cbsReasonId,
+						failureReason, rejectedBy);
 
-	            boolean rejectionSaved =
-	                    inwardChequeService.saveRejection(
-	                            cheque.getInwardChequeId(),
-	                            cbsReasonId,
-	                            failureReason,
-	                            rejectedBy);
+				if (!rejectionSaved) {
 
-	            if (!rejectionSaved) {
+					Messagebox.show("CBS validation failed, but " + "rejection details could not be saved.",
+							"CBS Validation", Messagebox.OK, Messagebox.ERROR);
 
-	                Messagebox.show(
-	                        "CBS validation failed, but "
-	                                + "rejection details could not be saved.",
-	                        "CBS Validation",
-	                        Messagebox.OK,
-	                        Messagebox.ERROR);
+					return;
+				}
 
-	                return;
-	            }
+				cheque.setChequeStatus("REJECTED");
 
-	            cheque.setChequeStatus("REJECTED");
+				boolean updated = inwardChequeService.updateChequeDetails(cheque);
 
-	            boolean updated =
-	                    inwardChequeService.updateChequeDetails(cheque);
+				if (!updated) {
 
-	            if (!updated) {
+					Messagebox.show("CBS validation failed and " + "cheque status could not be updated.",
+							"CBS Validation", Messagebox.OK, Messagebox.ERROR);
 
-	                Messagebox.show(
-	                        "CBS validation failed and "
-	                                + "cheque status could not be updated.",
-	                        "CBS Validation",
-	                        Messagebox.OK,
-	                        Messagebox.ERROR);
+					return;
+				}
 
-	                return;
-	            }
+				if (lblChequeStatus != null) {
 
-	            // ---------------------------------------------------------
-	            // UPDATE UI
-	            // ---------------------------------------------------------
+					lblChequeStatus.setValue("REJECTED");
+					lblChequeStatus.setSclass("status-badge mismatch");
+				}
 
-	            if (lblChequeStatus != null) {
+				if (lblVerificationStatus != null) {
 
-	                lblChequeStatus.setValue("REJECTED");
-	                lblChequeStatus.setSclass("status-badge mismatch");
-	            }
+					lblVerificationStatus.setValue("VERIFIED");
 
-	            if (lblVerificationStatus != null) {
+					lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;"
+							+ "border:1px solid #198754;" + "border-radius:12px;" + "padding:3px 10px;"
+							+ "font-size:11px;" + "font-weight:600;");
+				}
 
-	                lblVerificationStatus.setValue("VERIFIED");
+				updateVerificationCount();
 
-	                lblVerificationStatus.setStyle(
-	                        "background:#E8F5E9;"
-	                                + "color:#198754;"
-	                                + "border:1px solid #198754;"
-	                                + "border-radius:12px;"
-	                                + "padding:3px 10px;"
-	                                + "font-size:11px;"
-	                                + "font-weight:600;");
-	            }
+				Messagebox.show(
+						"CBS validation failed.\n\n" + "Cheque has been rejected.\n\n" + "Reason: " + failureReason,
+						"CBS Validation Failed", Messagebox.OK, Messagebox.ERROR);
 
-	            updateVerificationCount();
+				return;
+			}
 
-	            // ---------------------------------------------------------
-	            // CBS FAILURE POPUP
-	            // ---------------------------------------------------------
+			cheque.setChequeStatus("ACCEPTED");
 
-	            Messagebox.show(
-	                    "CBS validation failed.\n\n"
-	                            + "Cheque has been rejected.\n\n"
-	                            + "Reason: " + failureReason,
-	                    "CBS Validation Failed",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
+			boolean updated = inwardChequeService.updateChequeDetails(cheque);
 
-	            return;
-	        }
+			if (!updated) {
 
-	        // ---------------------------------------------------------
-	        // CBS VALIDATION PASSED
-	        // ---------------------------------------------------------
+				Messagebox.show("CBS validation passed, " + "but cheque status could not be updated.", "Verification",
+						Messagebox.OK, Messagebox.ERROR);
 
-	        cheque.setChequeStatus("ACCEPTED");
+				return;
+			}
 
-	        boolean updated =
-	                inwardChequeService.updateChequeDetails(cheque);
+			if (lblChequeStatus != null) {
 
-	        if (!updated) {
+				lblChequeStatus.setValue("ACCEPTED");
+				lblChequeStatus.setSclass("status-badge");
+			}
 
-	            Messagebox.show(
-	                    "CBS validation passed, "
-	                            + "but cheque status could not be updated.",
-	                    "Verification",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
+			if (lblVerificationStatus != null) {
 
-	            return;
-	        }
+				lblVerificationStatus.setValue("VERIFIED");
 
-	        // ---------------------------------------------------------
-	        // UPDATE UI
-	        // ---------------------------------------------------------
+				lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;" + "border:1px solid #198754;"
+						+ "border-radius:12px;" + "padding:3px 10px;" + "font-size:11px;" + "font-weight:600;");
+			}
 
-	        if (lblChequeStatus != null) {
+			updateVerificationCount();
 
-	            lblChequeStatus.setValue("ACCEPTED");
-	            lblChequeStatus.setSclass("status-badge");
-	        }
+			Messagebox.show("Cheque accepted successfully.", "Verification", Messagebox.OK, Messagebox.INFORMATION,
+					event -> moveToNextCheque());
 
-	        if (lblVerificationStatus != null) {
+		} catch (Exception e) {
 
-	            lblVerificationStatus.setValue("VERIFIED");
+			e.printStackTrace();
 
-	            lblVerificationStatus.setStyle(
-	                    "background:#E8F5E9;"
-	                            + "color:#198754;"
-	                            + "border:1px solid #198754;"
-	                            + "border-radius:12px;"
-	                            + "padding:3px 10px;"
-	                            + "font-size:11px;"
-	                            + "font-weight:600;");
-	        }
-
-	        updateVerificationCount();
-
-	        // ---------------------------------------------------------
-	        // SUCCESS POPUP
-	        // ---------------------------------------------------------
-
-	        Messagebox.show(
-	                "Cheque accepted successfully.",
-	                "Verification",
-	                Messagebox.OK,
-	                Messagebox.INFORMATION,
-	                event -> moveToNextCheque());
-
-	    } catch (Exception e) {
-
-	        e.printStackTrace();
-
-	        Messagebox.show(
-	                "Unable to complete verification.\n"
-	                        + e.getMessage(),
-	                "Verification Error",
-	                Messagebox.OK,
-	                Messagebox.ERROR);
-	    }
+			Messagebox.show("Unable to complete verification.\n" + e.getMessage(), "Verification Error", Messagebox.OK,
+					Messagebox.ERROR);
+		}
 	}
-	
-	
-	
-	
+
 	private void highlightCbsField(Label field) {
 
 		if (field == null) {
@@ -1275,6 +1150,16 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			
+			if (isChequeSentBackToMaker(cheque)) {
+			    Messagebox.show(
+			            "This cheque has already been sent back to Maker and cannot be rejected.",
+			            "Verification",
+			            Messagebox.OK,
+			            Messagebox.EXCLAMATION
+			    );
+			    return;
+			}
 			Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
 			Combobox comboBox = (Combobox) window.getFellow("cmbRejectedReason");
@@ -1299,11 +1184,9 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	}
 
 	private void loadChequeStatusFilter() {
-
 		if (cmbChequeStatus == null) {
 			return;
 		}
-
 		cmbChequeStatus.getItems().clear();
 
 		Comboitem allItem = new Comboitem();
@@ -1374,6 +1257,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 
 			currentChequeId = nextCheque.getInwardChequeId();
+
+			Sessions.getCurrent().setAttribute(ACTIVE_VERIFICATION_CHEQUE_ID, currentChequeId);
 
 			loadChequeDetails(currentChequeId);
 
@@ -1534,6 +1419,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		currentChequeId = nextCheque.getInwardChequeId();
 
+		Sessions.getCurrent().setAttribute(ACTIVE_VERIFICATION_CHEQUE_ID, currentChequeId);
+
 		loadChequeDetails(currentChequeId);
 
 		updateChequePosition();
@@ -1554,6 +1441,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		InwardCheque previousCheque = currentBatchCheques.get(currentChequeIndex);
 
 		currentChequeId = previousCheque.getInwardChequeId();
+
+		Sessions.getCurrent().setAttribute(ACTIVE_VERIFICATION_CHEQUE_ID, currentChequeId);
 
 		loadChequeDetails(currentChequeId);
 
@@ -1724,21 +1613,25 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			
+			if ("SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+			        || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
+
+			    Messagebox.show(
+			            "This cheque has already been sent back to Maker.",
+			            "Send Back",
+			            Messagebox.OK,
+			            Messagebox.EXCLAMATION
+			    );
+			    return;
+			}
 
 			Window window = sendBackReasonWindow;
 
-			Combobox comboBox =
-			        (Combobox) window.getFellow("cmbSendBackReason");
+			Combobox comboBox = (Combobox) window.getFellow("cmbSendBackReason");
 
-			Textbox remarks =
-			        (Textbox) window.getFellow("txtSendBackRemarks");
+			Textbox remarks = (Textbox) window.getFellow("txtSendBackRemarks");
 
-			loadSendBackReasons(comboBox);
-
-			comboBox.setSelectedItem(null);
-			remarks.setValue("");
-
-			window.doModal();
 			loadSendBackReasons(comboBox);
 
 			comboBox.setSelectedItem(null);
@@ -1757,203 +1650,147 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	public void proceedSendBack() {
 
-	    try {
+		try {
 
-	        Window window =
-	                (Window) pageRoot.getFellow("sendBackReasonWindow");
+			Window window = (Window) pageRoot.getFellow("sendBackReasonWindow");
 
-	        Combobox comboBox =
-	                (Combobox) window.getFellow("cmbSendBackReason");
+			Combobox comboBox = (Combobox) window.getFellow("cmbSendBackReason");
 
-	        Textbox remarksBox =
-	                (Textbox) window.getFellow("txtSendBackRemarks");
+			Textbox remarksBox = (Textbox) window.getFellow("txtSendBackRemarks");
 
-	        Comboitem selectedItem =
-	                comboBox.getSelectedItem();
+			Comboitem selectedItem = comboBox.getSelectedItem();
 
-	        // ---------------------------------------------------------
-	        // VALIDATE REASON
-	        // ---------------------------------------------------------
+			if (selectedItem == null) {
 
-	        if (selectedItem == null) {
+				Messagebox.show("Please select a send back reason.", "Validation", Messagebox.OK,
+						Messagebox.EXCLAMATION);
 
-	            Messagebox.show(
-	                    "Please select a send back reason.",
-	                    "Validation",
-	                    Messagebox.OK,
-	                    Messagebox.EXCLAMATION);
+				return;
+			}
 
-	            return;
-	        }
+			InwardCheque cheque = inwardChequeService.findById(currentChequeId);
 
-	        // ---------------------------------------------------------
-	        // GET CHEQUE
-	        // ---------------------------------------------------------
+			if (cheque == null) {
 
-	        InwardCheque cheque =
-	                inwardChequeService.findById(currentChequeId);
+				Messagebox.show("Cheque not found.", "Send Back", Messagebox.OK, Messagebox.ERROR);
 
-	        if (cheque == null) {
+				return;
+			}
 
-	            Messagebox.show(
-	                    "Cheque not found.",
-	                    "Send Back",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
+			SendBackReason selectedReason = (SendBackReason) selectedItem.getValue();
 
-	            return;
-	        }
+			if (selectedReason == null) {
 
-	        // ---------------------------------------------------------
-	        // GET SELECTED SEND BACK REASON
-	        // ---------------------------------------------------------
+				Messagebox.show("Invalid send back reason.", "Send Back", Messagebox.OK, Messagebox.ERROR);
 
-	        SendBackReason selectedReason =
-	                (SendBackReason) selectedItem.getValue();
+				return;
+			}
 
-	        if (selectedReason == null) {
+			String reasonId = String.valueOf(selectedReason.getReasonId());
 
-	            Messagebox.show(
-	                    "Invalid send back reason.",
-	                    "Send Back",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
+			String reasonCode = selectedReason.getReasonCode();
 
-	            return;
-	        }
+			String remarks = remarksBox != null ? remarksBox.getValue() : "";
 
-	        String reasonId =
-	                String.valueOf(selectedReason.getReasonId());
+			String sendBackStatus;
 
-	        String reasonCode =
-	                selectedReason.getReasonCode();
+			if ("39".equalsIgnoreCase(reasonCode)
+			        || "SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
+			        || "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
+			        || "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)
+			        || "SBN_RESCAN_REQUIRED".equalsIgnoreCase(reasonCode)) {
 
-	        String remarks =
-	                remarksBox != null
-	                        ? remarksBox.getValue()
-	                        : "";
+			    sendBackStatus = "SEND_BACK_TO_MAKER_MICR";
 
-	        // ---------------------------------------------------------
-	        // DETERMINE MAKER QUEUE
-	        // ---------------------------------------------------------
+			} else if ("40".equalsIgnoreCase(reasonCode)
+			        || "35".equalsIgnoreCase(reasonCode)
+			        || "53".equalsIgnoreCase(reasonCode)
+			        || "54".equalsIgnoreCase(reasonCode)
+			        || "66".equalsIgnoreCase(reasonCode)
+			        || "67".equalsIgnoreCase(reasonCode)
+			        || "76".equalsIgnoreCase(reasonCode)
+			        || "87".equalsIgnoreCase(reasonCode)
+			        || "SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
+			        || "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
+			        || "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
+			        || "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)
+			        || "SBN_REMARKS_MISSING".equalsIgnoreCase(reasonCode)
+			        || "SBN_OTHER_INTERNAL".equalsIgnoreCase(reasonCode)) {			   
+			    sendBackStatus = "SEND_BACK_TO_MAKER_DATA_ENTRY";
 
-	        String sendBackStatus;
+			} else {			   
+			    Messagebox.show(
+			            "Invalid send back reason.",
+			            "Send Back",
+			            Messagebox.OK,
+			            Messagebox.ERROR);
+			    return;
+			}
 
-	        if ("SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
-	                || "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
-	                || "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)) {
+			Object userObject = Sessions.getCurrent().getAttribute("CTS_USERNAME");
 
-	            sendBackStatus =
-	                    "SEND_BACK_TO_MAKER_MICR";
+			String sentBackBy;
 
-	        } else if ("SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
-	                || "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
-	                || "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
-	                || "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)) {
+			if (userObject != null) {
+				sentBackBy = userObject.toString();
+			} else {
+				sentBackBy = "SYSTEM";
+			}
 
-	            sendBackStatus =
-	                    "SEND_BACK_TO_MAKER_DATA_ENTRY";
+			boolean requestSaved = inwardChequeService.saveSendBackRequest(cheque.getInwardChequeId(),
+					cheque.getInwardBatchId(), reasonId, remarks, sentBackBy);
 
-	        } else {
+			if (!requestSaved) {
 
-	            Messagebox.show(
-	                    "This send back reason has not been mapped to a Maker queue yet.",
-	                    "Send Back",
-	                    Messagebox.OK,
-	                    Messagebox.EXCLAMATION);
+				Messagebox.show("Unable to save Send Back request.", "Send Back", Messagebox.OK, Messagebox.ERROR);
 
-	            return;
-	        }
+				return;
+			}
 
-	        // ---------------------------------------------------------
-	        // GET CURRENT USER
-	        // ---------------------------------------------------------
+			cheque.setChequeStatus(sendBackStatus);
 
-	        Object userObject =
-	                Sessions.getCurrent()
-	                        .getAttribute("CTS_USERNAME");
+			boolean updated = inwardChequeService.updateChequeDetails(cheque);
 
-	        String sentBackBy;
+			if (!updated) {
 
-	        if (userObject != null) {
-	            sentBackBy = userObject.toString();
-	        } else {
-	            sentBackBy = "SYSTEM";
-	        }
+				Messagebox.show("Send Back request was saved, but cheque status " + "could not be updated.",
+						"Send Back", Messagebox.OK, Messagebox.ERROR);
 
-	        // ---------------------------------------------------------
-	        // SAVE SEND BACK REQUEST FIRST
-	        // ---------------------------------------------------------
+				return;
+			}
 
-	        boolean requestSaved =
-	                inwardChequeService.saveSendBackRequest(
-	                        cheque.getInwardChequeId(),
-	                        cheque.getInwardBatchId(),
-	                        reasonId,
-	                        remarks,
-	                        sentBackBy);
+			String notificationMessage = "Cheque #" + cheque.getChequeNumber() + " has been sent back to Maker."
+					+ " Batch: " + cheque.getInwardBatchId() + ". Reason: " + selectedReason.getReasonCode() + " - "
+					+ selectedReason.getReasonName();
 
-	        if (!requestSaved) {
+			notificationExecutor.submit(() -> {
+			    try {
+			        boolean notificationSent =
+			                notificationService.sendNotification(
+			                        "INWARD_MAKER",
+			                        null,
+			                        notificationMessage);
 
-	            Messagebox.show(
-	                    "Unable to save Send Back request.",
-	                    "Send Back",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
+			        if (!notificationSent) {
+			            System.out.println(
+			                    "WARNING: Send Back notification failed.");
+			        }
 
-	            return;
-	        }
+			    } catch (Exception e) {
+			        e.printStackTrace();
+			    }
+			});
 
-	        // ---------------------------------------------------------
-	        // UPDATE CHEQUE STATUS
-	        // ---------------------------------------------------------
-
-	        cheque.setChequeStatus(sendBackStatus);
-
-	        boolean updated =
-	                inwardChequeService.updateChequeDetails(cheque);
-
-	        if (!updated) {
-
-	            Messagebox.show(
-	                    "Send Back request was saved, but cheque status "
-	                    + "could not be updated.",
-	                    "Send Back",
-	                    Messagebox.OK,
-	                    Messagebox.ERROR);
-
-	            return;
-	        }
-
-	        // ---------------------------------------------------------
-	        // CLOSE POPUP
-	        // ---------------------------------------------------------
-
-	        window.setVisible(false);
-
-	        // ---------------------------------------------------------
-	        // SUCCESS
-	        // ---------------------------------------------------------
-
-	        Messagebox.show(
-	                "Cheque has been sent back to Maker successfully.",
-	                "Send Back",
-	                Messagebox.OK,
-	                Messagebox.INFORMATION,
-	                event -> moveToNextCheque());
-
-	    } catch (Exception e) {
-
-	        e.printStackTrace();
-
-	        Messagebox.show(
-	                "Unable to process Send Back.\n"
-	                        + e.getMessage(),
-	                "Send Back Error",
-	                Messagebox.OK,
-	                Messagebox.ERROR);
-	    }
+			window.setVisible(false);
+			Messagebox.show("Cheque has been sent back to Maker successfully.", "Send Back", Messagebox.OK,
+					Messagebox.INFORMATION, event -> moveToNextCheque());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Messagebox.show("Unable to process Send Back.\n" + e.getMessage(), "Send Back Error", Messagebox.OK,
+					Messagebox.ERROR);
+		}
 	}
+
 	public void onClick$btnCancelSendBack() {
 
 		sendBackReasonWindow.setVisible(false);
@@ -2175,7 +2012,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			int verified = accepted + rejected;
 
-			// Safety check
 			if (total == 0 || verified != total) {
 
 				Messagebox.show("All cheques must be verified before submitting the batch.", "Verification",
@@ -2278,8 +2114,15 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			currentBatchCheques.clear();
 			currentChequeId = null;
 			currentBatchId = null;
-			currentChequeIndex = 0;
-			verificationOrderInitialized = false;
+
+			Sessions.getCurrent()
+	        .removeAttribute("ACTIVE_VERIFICATION_BATCH_ID");
+
+	Sessions.getCurrent()
+	        .removeAttribute("ACTIVE_VERIFICATION_CHEQUE_ID");
+
+	currentChequeIndex = 0;
+	verificationOrderInitialized = false;
 
 			if (btnSubmitVerification != null) {
 				btnSubmitVerification.setVisible(false);
@@ -2323,6 +2166,18 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	public void onClick$btnGoToDashboard() {
 		Executions.getCurrent().sendRedirect("/inward/checker/dashboard.zul");
+	}
+	
+	private boolean isChequeSentBackToMaker(InwardCheque cheque) {
+
+	    if (cheque == null || cheque.getChequeStatus() == null) {
+	        return false;
+	    }
+
+	    String status = cheque.getChequeStatus();
+
+	    return "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+	            || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status);
 	}
 
 	private void enableMouseWheelZoom() {

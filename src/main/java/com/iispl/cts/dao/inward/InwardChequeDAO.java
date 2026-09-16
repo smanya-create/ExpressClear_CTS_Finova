@@ -18,6 +18,8 @@ public interface InwardChequeDAO {
 	List<InwardCheque> getAllCheques();
 
 	BigDecimal getAccountBalance(String accountNumber);
+	
+	String findAccountIdByAccountNumber(String accountNumber);
 
 	String getBankNameByCode(String bankCode);
 
@@ -39,6 +41,8 @@ public interface InwardChequeDAO {
 	boolean saveRejectionRequest(InwardChequeRejectionRequest request);
 
 	boolean updateChequeStatus(String inwardChequeId, String chequeStatus);
+	
+	boolean submitMicrRepairBatchToDataEntry(String inwardBatchId);
 
 	CbsValidationResult validateCbs(InwardCheque cheque);
 

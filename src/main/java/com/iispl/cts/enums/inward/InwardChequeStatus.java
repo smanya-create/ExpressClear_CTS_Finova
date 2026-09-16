@@ -7,8 +7,12 @@ public enum InwardChequeStatus {
 	    MICR_REPAIR_PENDING,
 
 	    MICR_REPAIR_IN_PROGRESS,
+	    
+	    MICR_REPAIR_COMPLETED,
 
 	    DATA_ENTRY_PENDING,
+	    
+	    DATA_ENTRY_COMPLETED,
 
 	    DATA_ENTRY_IN_PROGRESS,
 

@@ -223,46 +223,80 @@
                     </row>
 
 
-                    <!-- =================================================
-                         ROW 4 - REJECTION REASON
-                         ================================================= -->
+                   <!-- =================================================
+     ROW 4 - REJECTION REASON + REMARKS
+     ================================================= -->
 
-                    <row sclass="reason-row">
+<row sclass="reason-row">
 
-                        <cell colspan="2"
-                              sclass="reason-cell">
+    <!-- =================================================
+         REJECTION REASON - LEFT SIDE
+         ================================================= -->
 
-                            <vlayout sclass="reason-container">
+    <cell sclass="reason-cell">
 
-                                <!-- REJECTION REASON HEADING -->
+        <vlayout sclass="reason-container"
+                 spacing="6px">
 
-                                <label value="Rejection Reason"
-                                       sclass="reason-title"
-                                       style="font-size:15px;
-                                              font-weight:bold;
-                                              color:#173f68;
-                                              display:block;"/>
+            <label value="Rejection Reason"
+                   sclass="reason-title"
+                   style="font-size:15px;
+                          font-weight:bold;
+                          color:#173f68;
+                          display:block;"/>
+
+            <div sclass="reason-box">
+
+                <label id="lblReason"
+                       value="-"
+                       sclass="reason-value"
+                       style="font-size:13px;
+                              font-weight:400;
+                              color:#704545;
+                              display:block;"/>
+
+            </div>
+
+        </vlayout>
+
+    </cell>
 
 
-                                <!-- REASON -->
+    <!-- =================================================
+         REMARKS - RIGHT SIDE
+         ================================================= -->
 
-                                <div sclass="reason-box">
+    <cell sclass="reason-cell">
 
-                                    <label id="lblReason"
-                                           value="-"
-                                           sclass="reason-value"
-                                           style="font-size:13px;
-                                                  font-weight:400;
-                                                  color:#704545;
-                                                  display:block;"/>
+        <vlayout sclass="reason-container"
+                 spacing="6px">
 
-                                </div>
+            <label value="Remarks"
+                   sclass="reason-title"
+                   style="font-size:15px;
+                          font-weight:bold;
+                          color:#173f68;
+                          display:block;"/>
 
-                            </vlayout>
+            <div sclass="reason-box">
 
-                        </cell>
+                <label id="lblRemarks"
+                       value="-"
+                       sclass="reason-value"
+                       style="font-size:13px;
+                              font-weight:400;
+                              color:#526b84;
+                              display:block;"/>
 
-                    </row>
+            </div>
+
+        </vlayout>
+
+    </cell>
+
+</row>
+
+                        
 
 
                 </rows>

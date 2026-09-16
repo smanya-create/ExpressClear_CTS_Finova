@@ -80,10 +80,9 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
                 .orElse(null);
 
         batchListbox.getItems().clear();
-
-        
+   
         if(batch!=null)
-        renderBatchRow(batch);
+        	renderBatchRow(batch);
     }
     private void performClear() {
 
@@ -94,9 +93,6 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         loadSubmittedBatches();
     }
 
-    /**
-     * Renders a single dashboard row.
-     */
     private void renderBatchRow(DashboardSummaryDTO batch) {
 
         String batchStatus = batch.getBatchStatus();
@@ -136,31 +132,25 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         item.appendChild(cellReturned);
 
         Listcell statusCell = new Listcell();
-        Label statusLabel = new Label(batchStatus);
-
-        if (InwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(batchStatus)) {
-            statusLabel.setSclass("batch-status batch-status-completed");
-        } else {
-            statusLabel.setSclass("batch-status batch-status-pending");
-        }
-
+        String status=(batchStatus.equalsIgnoreCase(InwardBatchStatus.CHECKER_PROCESSING_PENDING.toString()))?"Pending":"Processing";
+        Label statusLabel = new Label(status);
+        statusLabel.setSclass("batch-status batch-status-pending");
         statusCell.setStyle("text-align:center;vertical-align:middle;");
         statusCell.appendChild(statusLabel);
         item.appendChild(statusCell);
 
         Listcell actionCell = new Listcell();
-
         String actionLabel;
         String buttonStyle;
 
         if (InwardBatchStatus.CHECKER_PROCESSING.toString().equalsIgnoreCase(batchStatus)) {
 
             actionLabel = "Process";
-            buttonStyle = "background:#F5A900; color:#7A4500; border:1px solid #F5A900; border-radius:15px; cursor:pointer; font-size:9px; font-weight:bold; padding:2px 10px; line-height:16px;";
+            buttonStyle = "background:#D97706; color: black; border:1px solid #F5A900; border-radius:4px; cursor:pointer; font-size:9px; font-weight:bold; padding:2px 10px; line-height:16px;";
         } else if (InwardBatchStatus.CHECKER_PROCESSING_PENDING.toString().equalsIgnoreCase(batchStatus)) {
 
             actionLabel = "Proceed Verification";
-            buttonStyle = "background:#242F82; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 8px;";
+            buttonStyle = "background:#1C2D4A; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 8px;";
 
         } else {
 
@@ -173,14 +163,11 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         btnVerify.addEventListener(Events.ON_CLICK, e -> {
 
             boolean updated = batchService.updateProcessingBatchStatus(
-                    batchId,
-                    InwardBatchStatus.CHECKER_PROCESSING
-            );
+                    batchId,InwardBatchStatus.CHECKER_PROCESSING);
 
             if (updated) {
                 Executions.getCurrent().sendRedirect(
-                        "/inward/checker/verification.zul?batchId=" + batchId
-                );
+                        "/inward/checker/verification.zul?batchId=" + batchId);
             } else {
                 Messagebox.show("Unable to proceed");
             }

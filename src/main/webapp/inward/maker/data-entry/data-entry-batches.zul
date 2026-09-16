@@ -2,80 +2,87 @@
 <?page title="CTS - Inward Data Entry" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-    <!-- Use the exact same stylesheet as MICR Repair -->
-    <style src="/css/inward/micr-repair-queue.css" />
+    <style src="/css/inward/data-entry-batches.css?v=2" />
 
     <div id="dataEntryBatchesRoot"
          width="100%"
          height="100%"
          apply="com.iispl.cts.controller.inward.maker.InwardDataEntryBatchesController"
-         sclass="micr-repair-view-page"
+         sclass="data-entry-view-page"
          style="overflow-y: auto; overflow-x: hidden;">
 
         <vlayout width="100%" spacing="16px">
 
-            <!-- ================================================= -->
-            <!-- 1. PAGE TITLE (Identical to MICR Repair)          -->
-            <!-- ================================================= -->
-            <vlayout spacing="4px" sclass="micr-repair-view-title-section">
-                <label value="DATA ENTRY" sclass="micr-repair-view-title" />
+            <!-- PAGE TITLE -->
+            <vlayout spacing="4px" sclass="data-entry-view-title-section">
+                <label value="Data Entry" sclass="data-entry-view-title" />
             </vlayout>
 
-            <!-- ================================================= -->
-            <!-- 2. MAIN SECTION CARD                             -->
-            <!-- ================================================= -->
-            <div sclass="micr-repair-section-card" width="100%">
+            <!-- MAIN SECTION CARD -->
+            <div sclass="data-entry-section-card" width="100%">
 
                 <vlayout width="100%" spacing="12px">
 
-                    <!-- Section Header & Count -->
+                    <!-- Section Header & Result Count -->
                     <hlayout width="100%" valign="middle" style="display: flex; justify-content: space-between; align-items: center;">
                         <vlayout spacing="3px">
-                            <label value="Batches Ready for Data Entry" sclass="micr-repair-section-title" />
+                            <label value="Batches Ready for Data Entry" sclass="data-entry-section-title" />
                         </vlayout>
-                        <label id="lblBatchResultCount" value="0 Batches" sclass="batch-result-count" />
+                        <label id="lblBatchResultCount" value="0 Batches" sclass="data-entry-result-count" />
                     </hlayout>
 
-                    <!-- Filter Toolbar (Matches MICR Repair filter layout) -->
-                    <div sclass="micr-repair-filter-bar">
+                    <!-- Filter Toolbar -->
+                    <div sclass="data-entry-filter-bar">
                         <hlayout valign="middle" spacing="12px">
-                            <label value="Search Batch ID" sclass="filter-label" />
+                            <label value="Search Batch ID" sclass="data-entry-filter-label" />
                             <textbox id="txtSearchBatch"
                                      placeholder="Enter full or partial Batch ID"
-                                     width="360px"
-                                     sclass="batch-filter-input"
+                                     width="340px"
+                                     sclass="data-entry-filter-input"
                                      onChanging="$composer.onChanging$txtSearchBatch(event)" />
+
+                            <!-- Status Filter Combobox -->
+                            <combobox id="cmbStatusFilter"
+                                      readonly="true"
+                                      width="170px"
+                                      sclass="batch-status-filter"
+                                      placeholder="Filter by Status">
+                                <comboitem label="All Statuses" value="ALL" />
+                                <comboitem label="Pending Maker" value="PENDING_MAKER" />
+                                <comboitem label="Checker Returned" value="CHECKER_RETURNED" />
+                            </combobox>
+
                             <button id="btnClearSearch"
                                     label="Clear"
-                                    sclass="clear-filter-button"
+                                    sclass="data-entry-clear-button"
                                     onClick="$composer.onClick$btnClearSearch()" />
                         </hlayout>
                     </div>
 
-                    <!-- Single Grid identical to MICR Repair -->
-                    <grid id="grdDataEntryBatches" width="100%" sclass="micr-repair-grid">
+                    <!-- Data Entry Grid -->
+                    <grid id="grdDataEntryBatches" width="100%" sclass="data-entry-grid">
                         <columns sizable="false">
-                            <column label="BATCH" width="18%" align="center" />
-                            <column label="TOTAL ITEMS" width="15%" align="center" />
-                            <column label="PENDING ITEMS" width="15%" align="center" />
-                            <column label="TOTAL AMOUNT (INR)" width="20%" align="center" />
-                            <column label="STATUS" width="16%" align="center" />
-                            <column label="ACTION" width="16%" align="center" />
+                            <column label="Batch" width="18%" align="center" />
+                            <column label="Total Items" width="15%" align="center" />
+                            <column label="Pending Items" width="15%" align="center" />
+                            <column label="Total Amount (INR)" width="20%" align="center" />
+                            <column label="Status" width="16%" align="center" />
+                            <column label="Action" width="16%" align="center" />
                         </columns>
                         <rows id="rowsDataEntryBatches" />
                     </grid>
 
-                    <!-- Outward / MICR Repair Pagination -->
+                    <!-- Pagination -->
                     <paging id="pagingDataEntry"
                             pageSize="10"
                             detailed="true"
-                            sclass="micr-repair-paging" />
+                            sclass="data-entry-paging" />
 
-                    <!-- Empty Message Card -->
-                    <div id="divDataEntryEmpty" width="100%" visible="false" sclass="micr-repair-empty-card">
+                    <!-- Empty State Card -->
+                    <div id="divDataEntryEmpty" width="100%" visible="false" sclass="data-entry-empty-card">
                         <vlayout width="100%" spacing="6px">
-                            <label value="No Data Entry Required" sclass="micr-repair-empty-title" />
-                            <label value="There are currently no batches requiring data entry." sclass="micr-repair-empty-message" />
+                            <label value="No Data Entry Required" sclass="data-entry-empty-title" />
+                            <label value="There are currently no batches requiring data entry." sclass="data-entry-empty-message" />
                         </vlayout>
                     </div>
 

@@ -271,7 +271,8 @@ public class UserManagementController extends GenericForwardComposer<Component> 
                     : "color: #c62828; font-weight: 700; font-size: 12px;");
             row.appendChild(lblStatus);
 
-            Button btnModify = new Button("MODIFY");
+            Button btnModify = new Button("Modify");
+            btnModify.setIconSclass("z-icon-pencil");
             btnModify.setSclass("cts-btn-modify-row");
             btnModify.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
                 @Override

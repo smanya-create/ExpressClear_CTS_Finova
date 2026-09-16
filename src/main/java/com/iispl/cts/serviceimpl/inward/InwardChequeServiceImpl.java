@@ -48,6 +48,12 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	}
 
 	@Override
+	public boolean submitMicrRepairBatchToDataEntry(String inwardBatchId) {
+
+		return inwardChequeDAO.submitMicrRepairBatchToDataEntry(inwardBatchId);
+	}
+
+	@Override
 	public InwardChequeImage getFrontImage(String inwardChequeId) {
 		return InwardChequeImageDAOImpl.getInstance().findFrontImageByChequeId(inwardChequeId);
 	}
@@ -78,6 +84,11 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 	@Override
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
 		return inwardChequeDAO.validateCbs(cheque);
+	}
+
+	@Override
+	public String findAccountIdByAccountNumber(String accountNumber) {
+		return inwardChequeDAO.findAccountIdByAccountNumber(accountNumber);
 	}
 
 	@Override
