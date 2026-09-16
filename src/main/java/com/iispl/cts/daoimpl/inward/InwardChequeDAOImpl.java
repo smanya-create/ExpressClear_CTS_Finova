@@ -899,19 +899,18 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	@Override
 	public CbsValidationResult validateCbs(InwardCheque cheque) {
 		String sql = "SELECT " + "    a.account_number, " + "    a.account_holder_name, " + "    a.account_balance, "
-				+ "    a.account_status, " + "    mc.cheque_number AS master_cheque_number, " + "    mc.sort_code, "
+				+ "    a.account_status, " + "    mc.cheque_number AS master_cheque_number, "
 				+ "    b.branch_code AS master_branch_code, " + "    b.micr_code AS master_micr_code, "
 				+ "    b.status AS branch_status, " + "    bk.bank_code AS master_bank_code, "
 				+ "    bk.status AS bank_status " + "FROM master_account a " + "LEFT JOIN master_cheque mc "
-				+ "    ON mc.account_number = a.account_number " + "   AND mc.cheque_number = ? "
-				+ "LEFT JOIN branch b " + "    ON b.branch_code = ? " + "LEFT JOIN bank bk "
-				+ "    ON bk.bank_id = b.bank_id " + "WHERE a.account_number = ?";
+				+ "    ON mc.account_id = a.account_id " + "   AND mc.cheque_number = ? " + "LEFT JOIN branch b "
+				+ "    ON b.branch_id = a.branch_id " + "LEFT JOIN bank bk " + "    ON bk.bank_id = b.bank_id "
+				+ "WHERE a.account_number = ?";
 
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
 			ps.setString(1, cheque.getChequeNumber());
-			ps.setString(2, cheque.getBranchCode());
-			ps.setString(3, cheque.getDraweeAccountNumber());
+			ps.setString(2, cheque.getDraweeAccountNumber());
 
 			try (ResultSet rs = ps.executeQuery()) {
 
@@ -963,17 +962,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 							"Bank code mismatch. " + "Cheque: " + cheque.getBankCode() + ", Master: " + masterBankCode);
 				}
 
-				String masterBranchCode = rs.getString("master_branch_code");
-
-				if (masterBranchCode == null || cheque.getBranchCode() == null
-						|| !cheque.getBranchCode().trim().equalsIgnoreCase(masterBranchCode.trim())) {
-
-					System.out.println("CBS Validation Failed: Branch code mismatch.");
-
-					return new CbsValidationResult(false, "Branch code mismatch. " + "Cheque: " + cheque.getBranchCode()
-							+ ", Master: " + masterBranchCode);
-				}
-
 				String masterMicrCode = rs.getString("master_micr_code");
 
 				if (masterMicrCode == null || cheque.getMicrCode() == null
@@ -983,6 +971,17 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 					return new CbsValidationResult(false,
 							"MICR code mismatch. " + "Cheque: " + cheque.getMicrCode() + ", Master: " + masterMicrCode);
+				}
+
+				String masterBranchComponent = masterMicrCode.trim().substring(masterMicrCode.trim().length() - 3);
+
+				if (cheque.getBranchCode() == null
+						|| !cheque.getBranchCode().trim().equalsIgnoreCase(masterBranchComponent)) {
+
+					System.out.println("CBS Validation Failed: Branch code mismatch.");
+
+					return new CbsValidationResult(false, "Branch code mismatch. " + "Cheque: " + cheque.getBranchCode()
+							+ ", Master MICR Branch: " + masterBranchComponent);
 				}
 
 				String branchStatus = rs.getString("branch_status");
