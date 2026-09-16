@@ -152,15 +152,21 @@
 	border-radius: 5px;
 	color: #334963;
 	font-size: 11px;
-	height: 35px;
+	height: 36px !important;
+	box-sizing: border-box;
 }
 
+/* Verification image control buttons */
 .image-control-btn {
-	width: 32px;
+    width: 60px !important;
+    min-width: 60px !important;
+    height: 32px !important;
 }
 
 .image-control-wide {
-	padding: 0 13px;
+    width: 110px !important;
+    min-width: 110px !important;
+    height: 32px !important;
 }
 
 .image-control-btn:hover, .image-control-wide:hover {
@@ -621,4 +627,67 @@
     font-weight: 600;
     line-height: 16px;
 
+}
+
+
+/* =====================================================
+   VERIFICATION ACTION BUTTONS
+   ===================================================== */
+
+/* Common */
+.verification-action-btn.z-button {
+    height: 34px !important;
+    border-radius: 5px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    box-sizing: border-box !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* ACCEPT - WHITE WITH GREEN BORDER */
+.z-button.accept-action-btn {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+
+    color: #16834B !important;
+
+    border: 1px solid #16834B !important;
+    border-color: #16834B !important;
+}
+
+/* ACCEPT HOVER */
+.z-button.accept-action-btn:hover {
+    background: #EAF7F0 !important;
+    background-color: #EAF7F0 !important;
+    background-image: none !important;
+
+    color: #16834B !important;
+
+    border-color: #16834B !important;
+}
+
+
+/* REJECT - WHITE WITH RED BORDER */
+.z-button.return-action-btn {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+
+    color: #C83A32 !important;
+
+    border: 1px solid #C83A32 !important;
+    border-color: #C83A32 !important;
+}
+
+/* REJECT HOVER */
+.z-button.return-action-btn:hover {
+    background: #FFF1F1 !important;
+    background-color: #FFF1F1 !important;
+    background-image: none !important;
+
+    color: #C83A32 !important;
+
+    border-color: #C83A32 !important;
 }
