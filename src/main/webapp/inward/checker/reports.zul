@@ -46,29 +46,39 @@
 
                         </vlayout>
 
-                        <label value="Batch Search"
-                               style="font-weight:bold;font-size:16px"/>
+                         <!-- SEARCH CARD -->
 
-                        <hlayout spacing="6px"
-                                 style="align-items:center">
+                        <div sclass="inward-checker-filter-card">
 
-                            <textbox id="txtSearchBatchId"
-                                     hflex="1"
-                                     height="30px"
-                                     placeholder="Enter Batch ID"
-                                     style="font-size:13px;padding:2px 8px"/>
+                            <div sclass="inward-checker-filter-title-box">
 
-                            <button id="btnClear"
-                                    label="Clear"
-                                    height="30px"
-                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+                                <label value="Search Batch"
+                                       sclass="inward-checker-filter-heading"/>
 
-                            <button id="btnSearch"
-                                    label="Search"
-                                    height="30px"
-                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+                            </div>
 
-                        </hlayout>
+                            <hlayout spacing="12px"
+                                     sclass="inward-checker-filter-controls z-valign-middle">
+
+                                <textbox id="txtSearchBatchId"
+                                         placeholder="Search by Batch ID..."
+                                         width="240px"
+                                         sclass="inward-checker-input"/>
+
+                                <button id="btnSearch"
+                                        label="Search"
+                                        iconSclass="z-icon-search"
+                                        sclass="inward-checker-btn-action-search"/>
+
+                                <button id="btnClear"
+                                        label="Clear"
+                                        iconSclass="z-icon-undo"
+                                        sclass="inward-checker-btn-action-clear"/>
+
+                            </hlayout>
+
+                        </div>
+
 
                         <separator style="height:4px"/>
 
@@ -78,7 +88,7 @@
                         <listbox id="reportListbox"
                                  width="100%"
                                  mold="paging"
-                                 pageSize="1"
+                                 pageSize="4"
                                  nonselectableTags="*"
                                  emptyMessage="No report data available"
                                  sclass="compact-report-listbox">

@@ -6,10 +6,12 @@
 
     <zscript>
         org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
-        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", "Alex");
+        org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Admin");
     </zscript>
 
-    <borderlayout width="100%" height="100%" apply="com.iispl.cts.controller.inward.checker.InwardCheckerDashboardController">
+    <borderlayout width="100%"
+                  height="100%"
+                  apply="com.iispl.cts.controller.inward.checker.InwardCheckerDashboardController">
 
         <west width="220px" border="0">
             <include src="/components/sidebar.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash"/>
@@ -20,10 +22,13 @@
             <borderlayout width="100%" height="100%">
 
                 <north height="70px" border="0">
+
                     <include src="/components/header.zul?pageTitle=Checker Dashboard&amp;pageSubtitle=Inward Checker"/>
+
                 </north>
 
-                <center border="none" sclass="checker-dashboard-center">
+                <center border="none"
+                        sclass="checker-dashboard-center">
 
                     <vlayout spacing="6px"
                              width="100%"
@@ -41,31 +46,38 @@
 
                         </vlayout>
 
-                        <label value="Batch Search"
-                               style="font-weight:bold;font-size:16px"/>
+                        <!-- SEARCH CARD -->
 
-                        <hlayout spacing="6px"
-                                 style="align-items:center">
+                        <div sclass="inward-checker-filter-card">
 
-                            <textbox id="txtSearchBatchId"
-                                     hflex="1"
-                                     height="30px"
-                                     placeholder="Enter Batch ID"
-                                     style="font-size:13px;padding:2px 8px"/>
+                            <div sclass="inward-checker-filter-title-box">
 
-                            <button id="btnClear"
-                                    label="Clear"
-                                    height="30px"
-                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+                                <label value="Search &amp; Filter"
+                                       sclass="inward-checker-filter-heading"/>
 
-                            <button id="btnSearch"
-                                    label="Search"
-                                    height="30px"
-                                    style="background:#1B4A8F;color:white;border:0;font-size:16px;padding:0 14px;border-radius:4px"/>
+                            </div>
 
-                        </hlayout>
+                            <hlayout spacing="12px"
+                                     sclass="inward-checker-filter-controls z-valign-middle">
 
-                        <separator style="height:2px;"/>
+                                <textbox id="txtSearchBatchId"
+                                         placeholder="Search by Batch ID..."
+                                         width="240px"
+                                         sclass="inward-checker-input"/>
+
+                                <button id="btnSearch"
+                                        label="SEARCH"
+                                        iconSclass="z-icon-search"
+                                        sclass="inward-checker-btn-action-search"/>
+
+                                <button id="btnClear"
+                                        label="CLEAR"
+                                        iconSclass="z-icon-undo"
+                                        sclass="inward-checker-btn-action-clear"/>
+
+                            </hlayout>
+
+                        </div>
 
                         <label value="All Batches"
                                style="font-weight:bold;font-size:16px"/>
@@ -73,7 +85,7 @@
                         <listbox id="batchListbox"
                                  sclass="listbox-header"
                                  mold="paging"
-                                 pageSize="1"
+                                 pageSize="4"
                                  width="100%"
                                  nonselectableTags="*"
                                  emptyMessage="No batch details found">
