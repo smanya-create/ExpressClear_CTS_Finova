@@ -525,8 +525,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			return "Validation Failed";
 
 		if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status))
-
-			return "Checker Processing Pending";
+			return "Checker Pending";	
 
 		if ("CHECKER_PROCESSING".equalsIgnoreCase(status))
 

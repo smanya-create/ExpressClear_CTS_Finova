@@ -54,8 +54,7 @@
 								<comboitem label="Received" />
 								<comboitem label="Parsing" />
 								<comboitem label="Processing" />
-								<comboitem
-									label="Checker Processing Pending" />
+								<comboitem label="Checker Pending" />
 								<comboitem label="Checker Processing" />
 								<comboitem
 									label="Send Back To Maker Micr" />
