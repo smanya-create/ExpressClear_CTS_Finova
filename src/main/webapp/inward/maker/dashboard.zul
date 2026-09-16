@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk>
 
-	<style src="/css/inward/maker-dashboard.css" />
+	<style src="/css/inward/maker-dashboard.css?v=110" />
 
 	<div id="inwardMakerDivDashboard" width="100%" height="100%"
 		apply="com.iispl.cts.controller.inward.maker.InwardMakerDashboardController"
@@ -23,9 +23,9 @@
 				<hlayout spacing="12px"
 					sclass="inward-maker-filter-controls z-valign-middle">
 
-					<!-- Search by Batch ID only -->
+					<!-- Search by Batch ID -->
 					<textbox id="inwardMakerTxtSearch"
-						placeholder="Search by Batch ID..." width="240px"
+						placeholder="Search by Batch ID..." width="250px"
 						sclass="inward-maker-input" />
 
 					<!-- Module Dropdown -->
@@ -39,8 +39,10 @@
 							value="BATCH_PROCESSING" />
 					</combobox>
 
+					<!-- Status Dropdown (Fixed missing sclass) -->
 					<combobox id="inwardMakerCmbStatus" readonly="true"
-						width="180px">
+						placeholder="All Statuses" width="180px"
+						sclass="inward-maker-combobox">
 						<comboitem label="All Statuses" value="ALL" />
 
 						<!-- Batches Processing Statuses -->
