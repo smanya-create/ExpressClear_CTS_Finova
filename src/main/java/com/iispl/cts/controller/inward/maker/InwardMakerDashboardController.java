@@ -329,18 +329,18 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 		Label chequeNumberLabel = new Label(getValue(cheque.getChequeNumber()));
 		chequeNumberLabel.setSclass("inward-maker-cheque-number");
 
-		Label statusLabel = new Label(displayStatus);
+		Label statusLabel = new Label(displayStatus != null ? displayStatus.toLowerCase().replace('_', ' ') : "-");
 		statusLabel.setSclass("inward-maker-status");
 
 		if ("RESOLVED".equalsIgnoreCase(displayStatus)) {
 			statusLabel.setStyle(
-					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
 		}
 
 		Label reasonLabel = new Label(getValue(reasonRemarks));
 		reasonLabel.setSclass("inward-maker-reason");
 
-		Button viewButton = new Button("VIEW DETAILS");
+		Button viewButton = new Button("View Details");
 		viewButton.setSclass("inward-maker-view-button");
 		viewButton.addEventListener("onClick", event -> openBatchWorkflow(batchId));
 
@@ -404,6 +404,9 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 			inwardMakerBtnReturnLast.setDisabled(currentReturnPage >= totalPages);
 	}
 
+	// =========================================================
+	// 2. BATCHES PROCESSING SECTION
+	// =========================================================
 	private void loadBatches() {
 		try {
 			List<InwardDashboardBatchDTO> allBatches = dashboardService.getRecentBatches("");
@@ -527,21 +530,21 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 		statusLabel.setSclass("inward-maker-status");
 
 		if (isCheckerPending) {
-			statusLabel.setValue("SUBMITTED TO CHECKER");
+			statusLabel.setValue("submitted to checker");
 			statusLabel.setStyle(
-					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
 		} else {
 			String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
-			String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) ? "PENDING MICR REPAIR"
-					: "PENDING DATA ENTRY";
+			String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
+					? "pending micr repair"
+					: "pending data entry";
 			statusLabel.setValue(trueStatus);
 			statusLabel.setStyle(
-					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 130px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 130px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
 		}
 
-		// Action Column: ALWAYS renders the VIEW DETAILS button so Maker can view
-		// cheques
-		Button viewButton = new Button("VIEW DETAILS");
+		// Action Column: ALWAYS renders the VIEW DETAILS button so Maker can view cheques
+		Button viewButton = new Button("View Details");
 		viewButton.setSclass("inward-maker-view-button");
 		viewButton.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
 

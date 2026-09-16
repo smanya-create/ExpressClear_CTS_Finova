@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk>
 
-	<style src="/css/inward/maker-dashboard.css?v=111" />
+	<style src="/css/inward/maker-dashboard.css?v=113" />
 
 	<div id="inwardMakerDivDashboard" width="100%" height="100%"
 		apply="com.iispl.cts.controller.inward.maker.InwardMakerDashboardController"
@@ -9,6 +9,20 @@
 
 		<div sclass="inward-maker-dashboard-scroll" width="100%"
 			height="100%">
+			
+			<div sclass="inward-maker-dashboard-header">
+
+				<div sclass="inward-maker-dashboard-title-section">
+
+					<label value="Maker Dashboard"
+						sclass="inward-maker-dashboard-title" />
+
+					<label value=""
+						sclass="inward-maker-dashboard-subtitle" />
+
+				</div>
+
+			</div>
 
 			<!-- Filter Card: Title on top line, Controls on next line -->
 			<div sclass="inward-maker-filter-card">
