@@ -21,8 +21,10 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+
     margin: 0;
     padding: 20px 28px 30px 28px;
+
     overflow-y: auto;
     overflow-x: hidden;
 
@@ -52,7 +54,9 @@
 }
 
 
-/* Groupbox Header */
+/* =========================================================
+   GROUPBOX HEADER
+   ========================================================= */
 
 .batch-upload-page .z-groupbox-header {
     background: #ffffff !important;
@@ -63,7 +67,9 @@
 }
 
 
-/* Groupbox Caption */
+/* =========================================================
+   GROUPBOX CAPTION
+   ========================================================= */
 
 .batch-upload-page .z-caption {
     color: #17365d !important;
@@ -77,7 +83,9 @@
 }
 
 
-/* Groupbox Content */
+/* =========================================================
+   GROUPBOX CONTENT
+   ========================================================= */
 
 .batch-upload-page .z-groupbox-content {
     background: #ffffff !important;
@@ -108,6 +116,7 @@
 .batch-upload-page .z-intbox,
 .batch-upload-page .z-decimalbox,
 .batch-upload-page .z-combobox-input {
+
     height: 34px !important;
 
     box-sizing: border-box;
@@ -125,12 +134,15 @@
 }
 
 
-/* Focus */
+/* =========================================================
+   INPUT FOCUS
+   ========================================================= */
 
 .batch-upload-page .z-textbox:focus,
 .batch-upload-page .z-intbox:focus,
 .batch-upload-page .z-decimalbox:focus,
 .batch-upload-page .z-combobox-input:focus {
+
     border-color: #4285c5 !important;
 
     outline: none;
@@ -139,9 +151,12 @@
 }
 
 
-/* Readonly File Name */
+/* =========================================================
+   READONLY FILE NAME
+   ========================================================= */
 
 .batch-upload-page .z-textbox[readonly] {
+
     background: #f5f8fc !important;
 
     color: #60758c !important;
@@ -169,6 +184,7 @@
 
 .batch-upload-page .btn-browse,
 .batch-upload-page #btnValidateBatch {
+
     height: 34px !important;
 
     min-width: 105px !important;
@@ -193,37 +209,49 @@
 }
 
 
-/* Button Hover */
+/* =========================================================
+   MAIN BUTTON HOVER
+   ========================================================= */
 
 .batch-upload-page .btn-browse:hover,
 .batch-upload-page #btnValidateBatch:hover {
+
     background: #245181 !important;
 
     border-color: #245181 !important;
 }
 
 
-/* Validate Button */
+/* =========================================================
+   VALIDATE BUTTON
+   ========================================================= */
 
 .batch-upload-page #btnValidateBatch {
+
     background: #1688d8 !important;
 
     border-color: #1688d8 !important;
 }
 
 
-/* Validate Hover */
+/* =========================================================
+   VALIDATE HOVER
+   ========================================================= */
 
 .batch-upload-page #btnValidateBatch:hover {
+
     background: #0f73bb !important;
 
     border-color: #0f73bb !important;
 }
 
 
-/* Disabled Validate */
+/* =========================================================
+   DISABLED VALIDATE
+   ========================================================= */
 
 .batch-upload-page #btnValidateBatch:disabled {
+
     background: #cbd5e1 !important;
 
     border-color: #cbd5e1 !important;
@@ -241,11 +269,13 @@
    ========================================================= */
 
 .batch-upload-page #divSuccessMessage {
+
     box-sizing: border-box;
 
     background: #f0faf4 !important;
 
     border: 1px solid #b7dfc4 !important;
+
     border-left: 4px solid #28a745 !important;
 
     border-radius: 6px !important;
@@ -257,6 +287,7 @@
 
 
 .batch-upload-page #lblSuccessText {
+
     color: #207a3c !important;
 
     font-size: 11px !important;
@@ -266,10 +297,11 @@
 
 
 /* =========================================================
-   8. TABLE / LISTBOX
+   8. ALL LISTBOXES
    ========================================================= */
 
 .batch-upload-page .z-listbox {
+
     width: 100% !important;
 
     box-sizing: border-box;
@@ -280,24 +312,63 @@
 
     border-radius: 6px !important;
 
+    margin: 0 !important;
+
     overflow: hidden !important;
 }
 
 
 /* =========================================================
-   9. TABLE HEADER
+   9. CHEQUE LISTBOX
+   Proper placement inside Cheque Details card
+   ========================================================= */
+
+.batch-upload-page .cheque-listbox {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box;
+
+    display: block !important;
+}
+
+
+/* =========================================================
+   CHEQUE LISTBOX BODY
+   ========================================================= */
+
+.batch-upload-page .cheque-listbox .z-listbox-body {
+
+    width: 100% !important;
+
+    box-sizing: border-box;
+
+    background: #ffffff !important;
+
+    overflow-x: hidden !important;
+}
+
+
+/* =========================================================
+   10. TABLE HEADER
    ========================================================= */
 
 .batch-upload-page .z-listbox-header {
+
     background: #17365d !important;
 
     border: none !important;
 }
 
 
-/* Individual Header */
+/* =========================================================
+   INDIVIDUAL HEADER
+   ========================================================= */
 
 .batch-upload-page .z-listheader {
+
     height: 40px !important;
 
     box-sizing: border-box;
@@ -310,16 +381,22 @@
 }
 
 
-/* Last Header */
+/* =========================================================
+   LAST HEADER
+   ========================================================= */
 
 .batch-upload-page .z-listheader:last-child {
+
     border-right: none !important;
 }
 
 
-/* Header Text */
+/* =========================================================
+   HEADER TEXT
+   ========================================================= */
 
 .batch-upload-page .z-listheader-content {
+
     box-sizing: border-box;
 
     background: #17365d !important;
@@ -341,10 +418,11 @@
 
 
 /* =========================================================
-   10. TABLE ROWS
+   11. TABLE ROWS
    ========================================================= */
 
 .batch-upload-page .z-listitem {
+
     height: 48px !important;
 
     background: #ffffff !important;
@@ -353,32 +431,42 @@
 }
 
 
-/* Alternate Rows */
+/* =========================================================
+   ALTERNATE ROWS
+   ========================================================= */
 
 .batch-upload-page .z-listitem:nth-child(even) {
+
     background: #f8fbfe !important;
 }
 
 
-/* Row Hover */
+/* =========================================================
+   ROW HOVER
+   ========================================================= */
 
 .batch-upload-page .z-listitem:hover {
+
     background: #edf5fd !important;
 }
 
 
-/* Last Row */
+/* =========================================================
+   LAST ROW
+   ========================================================= */
 
 .batch-upload-page .z-listitem:last-child {
+
     border-bottom: none !important;
 }
 
 
 /* =========================================================
-   11. TABLE CELLS
+   12. TABLE CELLS
    ========================================================= */
 
 .batch-upload-page .z-listcell {
+
     box-sizing: border-box;
 
     background: transparent !important;
@@ -388,17 +476,23 @@
     border-right: 1px solid #e5edf5 !important;
 
     vertical-align: middle !important;
+
+    padding: 0 !important;
 }
 
 
 .batch-upload-page .z-listcell:last-child {
+
     border-right: none !important;
 }
 
 
-/* Cell Content */
+/* =========================================================
+   CELL CONTENT
+   ========================================================= */
 
 .batch-upload-page .z-listcell-content {
+
     box-sizing: border-box;
 
     color: #34495e !important;
@@ -414,48 +508,324 @@
     white-space: normal !important;
 
     word-break: break-word !important;
+
+    vertical-align: middle !important;
 }
 
 
 /* =========================================================
-   12. STATUS
+   13. BATCH TABLE DATA ALIGNMENT
    ========================================================= */
 
-.batch-upload-page #lstBatchDetails .z-listitem > .z-listcell:nth-child(5) .z-listcell-content,
-.batch-upload-page #lstCheques .z-listitem > .z-listcell:nth-child(4) .z-listcell-content {
+
+/* Batch ID */
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(1) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(1)
+.z-listcell-content {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* Scan Date */
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(2) {
+
+    text-align: center !important;
+}
+
+
+/* Total Cheques */
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(3) {
+
+    text-align: center !important;
+}
+
+
+/* MICR Errors */
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(4) {
+
+    text-align: center !important;
+}
+
+
+/* =========================================================
+   14. CHEQUE TABLE DATA ALIGNMENT
+   ========================================================= */
+
+
+/* Cheque ID */
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(1) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(1)
+.z-listcell-content {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* Cheque Number */
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(2) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* Amount */
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(3) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* MICR */
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(5) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* =========================================================
+   15. STATUS CELL
+   ========================================================= */
+
+
+/*
+   IMPORTANT:
+   ZK normally renders the value as a Label component.
+
+   Therefore we target:
+       .z-listcell:nth-child(X) .z-label
+
+   instead of only .z-listcell-content.
+*/
+
+
+/* -------------------------
+   BATCH STATUS CELL
+   ------------------------- */
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(5) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+    padding: 0 !important;
+}
+
+
+/* Batch Status Label */
+
+.batch-upload-page
+.z-listbox:not(.cheque-listbox)
+.z-listitem
+.z-listcell:nth-child(5)
+.z-label {
+
     display: inline-block !important;
 
-    min-width: 80px !important;
+    width: auto !important;
+
+    min-width: 0 !important;
+
+    height: auto !important;
 
     box-sizing: border-box;
 
-    padding: 5px 12px !important;
+    padding: 6px 13px !important;
 
     margin: 0 auto !important;
 
-    background: #fff7df !important;
+    background: #f6a000 !important;
 
-    border: 1px solid #f0d58a !important;
+    border: 1px solid #ed9500 !important;
 
-    border-radius: 12px !important;
+    border-radius: 20px !important;
 
-    color: #8a6800 !important;
+    color: #ffffff !important;
 
     font-size: 9px !important;
+
+    line-height: 13px !important;
 
     font-weight: bold !important;
 
     text-align: center !important;
 
     white-space: nowrap !important;
+
+    word-break: normal !important;
+}
+
+
+/* -------------------------
+   CHEQUE STATUS CELL
+   ------------------------- */
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(4) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+    padding: 0 !important;
+}
+
+
+/* Cheque Status Label */
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(4)
+.z-label {
+
+    display: inline-block !important;
+
+    width: auto !important;
+
+    min-width: 0 !important;
+
+    height: auto !important;
+
+    box-sizing: border-box;
+
+    padding: 6px 13px !important;
+
+    margin: 0 auto !important;
+
+    background: #f6a000 !important;
+
+    border: 1px solid #ed9500 !important;
+
+    border-radius: 20px !important;
+
+    color: #ffffff !important;
+
+    font-size: 9px !important;
+
+    line-height: 13px !important;
+
+    font-weight: bold !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+
+    word-break: normal !important;
 }
 
 
 /* =========================================================
-   13. TABLE ACTION BUTTONS
+   16. STATUS LABEL OVERRIDE
+   Prevent generic .z-label styling from overriding pill
+   ========================================================= */
+
+.batch-upload-page
+.z-listbox
+.z-listitem
+.z-listcell:nth-child(5)
+.z-label,
+
+.batch-upload-page
+.cheque-listbox
+.z-listitem
+.z-listcell:nth-child(4)
+.z-label {
+
+    color: #ffffff !important;
+
+    font-weight: bold !important;
+}
+
+
+/* =========================================================
+   17. TABLE ACTION CELL
+   ========================================================= */
+
+.batch-upload-page
+.z-listitem
+.z-listcell:last-child {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* =========================================================
+   18. TABLE ACTION BUTTON
    ========================================================= */
 
 .batch-upload-page .btn-batch-action {
+
     width: 100px !important;
 
     min-width: 100px !important;
@@ -482,9 +852,12 @@
 }
 
 
-/* Action Hover */
+/* =========================================================
+   ACTION HOVER
+   ========================================================= */
 
 .batch-upload-page .btn-batch-action:hover {
+
     background: #245181 !important;
 
     border-color: #245181 !important;
@@ -492,10 +865,11 @@
 
 
 /* =========================================================
-   14. CHEQUE FILTER AREA
+   19. CHEQUE FILTER AREA
    ========================================================= */
 
 .batch-upload-page #lblChequeFilter {
+
     color: #40566f !important;
 
     font-size: 11px !important;
@@ -505,6 +879,7 @@
 
 
 .batch-upload-page #lblTotalCheques {
+
     color: #17365d !important;
 
     font-size: 11px !important;
@@ -516,10 +891,11 @@
 
 
 /* =========================================================
-   15. PAGINATION
+   20. CHEQUE PAGINATION
    ========================================================= */
 
 .batch-upload-page .cheque-pagination {
+
     width: 100%;
 
     box-sizing: border-box;
@@ -536,10 +912,13 @@
 }
 
 
-/* Previous / Next */
+/* =========================================================
+   PREVIOUS / NEXT
+   ========================================================= */
 
 .batch-upload-page #btnChequePrevious,
 .batch-upload-page #btnChequeNext {
+
     min-width: 75px !important;
 
     height: 30px !important;
@@ -564,20 +943,26 @@
 }
 
 
-/* Pagination Hover */
+/* =========================================================
+   PAGINATION HOVER
+   ========================================================= */
 
 .batch-upload-page #btnChequePrevious:hover,
 .batch-upload-page #btnChequeNext:hover {
+
     background: #edf5fd !important;
 
     border-color: #8eabc7 !important;
 }
 
 
-/* Disabled Pagination */
+/* =========================================================
+   DISABLED PAGINATION
+   ========================================================= */
 
 .batch-upload-page #btnChequePrevious:disabled,
 .batch-upload-page #btnChequeNext:disabled {
+
     background: #f3f6f9 !important;
 
     border-color: #d5dee8 !important;
@@ -588,9 +973,12 @@
 }
 
 
-/* Page Number */
+/* =========================================================
+   PAGE NUMBER
+   ========================================================= */
 
 .batch-upload-page #lblChequePage {
+
     min-width: 65px;
 
     text-align: center;
@@ -604,30 +992,81 @@
 
 
 /* =========================================================
-   16. RESPONSIVE
+   21. CHEQUE DETAILS INTERNAL SPACING
+   ========================================================= */
+
+.batch-upload-page
+#grpChequeDetails
+.z-groupbox-content {
+
+    padding: 16px !important;
+}
+
+
+/*
+   Keep the filter area separated from the listbox,
+   but don't push the listbox unnecessarily downward.
+*/
+
+.batch-upload-page
+.cheque-listbox {
+
+    margin-top: 0 !important;
+
+    margin-bottom: 0 !important;
+}
+
+
+/* =========================================================
+   22. RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1100px) {
 
     .batch-upload-page {
+
         padding-left: 20px;
+
         padding-right: 20px;
     }
-
 }
 
 
 @media (max-width: 750px) {
 
     .batch-upload-page {
+
         padding: 15px 12px 25px 12px;
     }
 
+
     .batch-upload-page .btn-batch-action {
+
         width: 82px !important;
+
         min-width: 82px !important;
+
         height: 28px !important;
+
         font-size: 8px !important;
+    }
+
+
+    .batch-upload-page
+    .z-listbox
+    .z-listitem
+    .z-listcell:nth-child(5)
+    .z-label,
+
+    .batch-upload-page
+    .cheque-listbox
+    .z-listitem
+    .z-listcell:nth-child(4)
+    .z-label {
+
+        font-size: 8px !important;
+
+        padding: 5px 9px !important;
     }
 
 }

@@ -34,7 +34,7 @@
                         </vlayout>
                     </hlayout>
                     <hlayout width="100%" spacing="10px">
-                    <label value = "Browse Zip Folder"/>
+                   		<label value = "Browse Zip Folder"/>
                         <textbox id="txtChequeFolder" width="500px" readonly="true"/>
                         <button id="btnBrowse"
                                 label="Browse"

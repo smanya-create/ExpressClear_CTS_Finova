@@ -518,8 +518,8 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "WHERE UPPER(TRIM(oc.cheque_status)) IN ("
               + "'PENDING_MICR_REPAIR', "
                         + "'MICR_REJECTION_PENDING', "
-              + "'MICR_REPAIRED', "
-              + "'MICR_REJECTED'"
+              + "'MICR_REPAIRED'"
+         
               + ") "
               + "GROUP BY "
               + "ob.outward_batch_id, "
@@ -635,8 +635,8 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "AND UPPER(TRIM(oc.cheque_status)) IN ("
               + "'PENDING_MICR_REPAIR', "
                         + "'MICR_REJECTION_PENDING', "
-              + "'MICR_REPAIRED', "
-              + "'MICR_REJECTED'"
+              + "'MICR_REPAIRED'"
+
               + ") "
               + "ORDER BY oc.outward_cheque_id";
 
