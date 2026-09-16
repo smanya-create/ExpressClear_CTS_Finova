@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk xmlns:h="xhtml">
-	<style src="/css/inward/data-entry.css?v=305" />
+	<style src="/css/inward/data-entry.css?v=601" />
 
 	<div id="dataEntryRootDiv" sclass="cts-data-entry-wrapper"
 		apply="com.iispl.cts.controller.inward.maker.InwardDataEntryController">
@@ -17,45 +17,47 @@
 					sclass="cts-btn-top-back" />
 		</div>
 
-		<!-- Simplified Metadata Card with Compact Progress -->
-		<div id="metadataCardDiv" sclass="cts-metadata-card-compact">
+		<!-- Metadata Card with Grid Spacing -->
+		<div id="metadataCardDiv" sclass="cts-metadata-card">
 			
 			<!-- Col 1: Batch No -->
-			<div sclass="cts-meta-col-item" style="width: 140px;">
-				<label value="Batch No." sclass="cts-meta-header-compact" />
-				<label id="lblBatchId" value="-" sclass="cts-meta-val-compact" />
+			<div sclass="cts-meta-col">
+				<label value="Batch No." sclass="cts-meta-header" />
+				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
 			</div>
 
 			<!-- Col 2: Total Cheques -->
-			<div sclass="cts-meta-col-item" style="width: 120px;">
-				<label value="Total Cheques" sclass="cts-meta-header-compact" />
-				<label id="lblTotalCheques" value="0" sclass="cts-meta-val-compact" />
+			<div sclass="cts-meta-col">
+				<label value="Total Cheques" sclass="cts-meta-header" />
+				<label id="lblTotalCheques" value="0" sclass="cts-meta-val" />
 			</div>
 
-			<!-- Col 3: Inline Compact Progress -->
-			<div sclass="cts-meta-col-item" style="width: 240px; margin-right: auto; padding-right: 16px;">
-				<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
-					<label value="Progress" sclass="cts-meta-header-compact" />
-					<label id="lblProgressPercentage" value="0%" sclass="cts-progress-percentage-label" />
-				</div>
-				<progressmeter id="pmBatchProgress" value="0" width="100%" sclass="cts-compact-progress" />
-				<label id="lblProgressText" value="0 of 0 completed" sclass="cts-progress-subtext" />
+			<!-- Col 3: Distributed Progress Bar -->
+			<div sclass="cts-meta-col cts-progress-meta-col">
+				<label value="Progress" sclass="cts-meta-header" />
+				<hlayout spacing="8px" valign="middle">
+					<progressmeter id="pmBatchProgress" value="0" sclass="cts-compact-progress" />
+					<label id="lblProgressText" value="0/0" sclass="cts-data-entry-progress-text" />
+				</hlayout>
 			</div>
 
-			<!-- Col 4: Top Pagination Controls with Page Counter in Between -->
-			<hlayout spacing="8px" valign="middle">
-				<button id="btnPrevCheque" label="Previous" iconSclass="z-icon-chevron-left" 
-						sclass="cts-btn-secondary" />
-				<label id="lblChequePosition" value="1 of 1" sclass="cts-cheque-page-counter" />
-				<button id="btnNextCheque" label="Next" iconSclass="z-icon-chevron-right" dir="reverse" 
-						sclass="cts-btn-secondary" />
-			</hlayout>
+			<!-- Col 4: Pagination Controls Aligned to Right -->
+			<div sclass="cts-meta-col cts-navigation-meta-col">
+				<hlayout spacing="6px" valign="middle">
+					<button id="btnPrevCheque" label="Previous" iconSclass="z-icon-chevron-left" 
+							sclass="cts-btn-secondary cts-data-entry-btn-nav" />
+					<label id="lblChequePosition" value="1 of 1" sclass="cts-data-entry-nav-counter" />
+					<button id="btnNextCheque" label="Next" iconSclass="z-icon-chevron-right" dir="reverse" 
+							sclass="cts-btn-secondary cts-data-entry-btn-nav" />
+				</hlayout>
+			</div>
 
 			<!-- Hidden fields preserved to avoid NullPointerException in controller -->
 			<div visible="false">
 				<label id="lblSource" value="CHI" />
 				<label id="lblChequeNo" value="-" />
 				<label id="lblReceivedDate" value="-" />
+				<label id="lblProgressPercentage" value="" visible="false" />
 			</div>
 		</div>
 
@@ -92,7 +94,7 @@
 				<!-- Header Row with Status Pill beside Transaction Data -->
 				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
 					<label value="Transaction Data" sclass="cts-card-title-main" />
-					<label id="lblDataStatus" value="PENDING" sclass="cts-status-pill-peach" />
+					<label id="lblDataStatus" value="Pending" sclass="cts-status-pill-peach" />
 				</div>
 				<label value="Enter the cheque details required for verification" sclass="cts-card-subtitle-main" />
 				
@@ -119,11 +121,11 @@
 				<!-- Row 1: Cheque Number & Cheque Date -->
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
-						<label value="Cheque Number *" sclass="cts-field-lbl" />
+						<label value="Cheque Number" sclass="cts-field-lbl" />
 						<textbox id="txtChequeNumber" sclass="cts-input-text" width="100%" />
 					</div>
 					<div sclass="cts-form-field">
-						<label value="Cheque Date *" sclass="cts-field-lbl" />
+						<label value="Cheque Date" sclass="cts-field-lbl" />
 						<textbox id="txtChequeDate" sclass="cts-input-text" width="100%" />
 					</div>
 				</div>
@@ -131,7 +133,7 @@
 				<!-- Row 2: Amount & Amount in Words -->
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
-						<label value="Amount *" sclass="cts-field-lbl" />
+						<label value="Amount" sclass="cts-field-lbl" />
 						<textbox id="txtAmount" sclass="cts-input-text" instant="true" width="100%" />
 					</div>
 					<div sclass="cts-form-field">
@@ -144,7 +146,7 @@
 				<!-- Row 3: Drawee Account Number & Drawee Customer Name -->
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
-						<label value="Drawee Account Number *" sclass="cts-field-lbl" />
+						<label value="Drawee Account Number" sclass="cts-field-lbl" />
 						<textbox id="txtDraweeAccount" sclass="cts-input-text" width="100%" />
 					</div>
 					<div sclass="cts-form-field">
@@ -153,16 +155,17 @@
 					</div>
 				</div>
 
-				<!-- Row 4: Payee Name & Maker Remarks -->
+				<!-- Row 4: Payee Name (Full Width) -->
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
 						<label value="Payee Name" sclass="cts-field-lbl" />
 						<textbox id="txtPayeeName" sclass="cts-input-text" width="100%" />
 					</div>
-					<div sclass="cts-form-field">
-						<label value="Maker Remarks" sclass="cts-field-lbl" />
-						<textbox id="txtEntryRemark" sclass="cts-input-text" placeholder="Reason for correction..." width="100%" />
-					</div>
+				</div>
+
+				<!-- Hidden field preserved so controller field injection does not break -->
+				<div visible="false">
+					<textbox id="txtEntryRemark" />
 				</div>
 
 				<!-- Action Buttons Row -->
@@ -212,7 +215,7 @@
 					<div style="border-top: 1px solid #e2e8f0; padding-top: 10px; display: flex; justify-content: flex-end; gap: 8px;">
 						<button id="btnCancelModalReject" label="Cancel" sclass="cts-btn-secondary" style="height: 32px; font-size: 12px;" />
 						<button id="btnConfirmModalReject" label="Confirm Rejection" sclass="cts-btn-solid-primary"
-							style="background: #dc2626 !important; border-color: #dc2626 !important; height: 32px; font-size: 12px;" />
+							style="height: 32px; font-size: 12px;" />
 					</div>
 				</vlayout>
 			</div>
