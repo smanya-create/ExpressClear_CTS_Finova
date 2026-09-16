@@ -132,7 +132,8 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         item.appendChild(cellReturned);
 
         Listcell statusCell = new Listcell();
-        Label statusLabel = new Label(batchStatus);
+        String status=(batchStatus.equalsIgnoreCase(InwardBatchStatus.CHECKER_PROCESSING_PENDING.toString()))?"Pending":"Processing";
+        Label statusLabel = new Label(status);
         statusLabel.setSclass("batch-status batch-status-pending");
         statusCell.setStyle("text-align:center;vertical-align:middle;");
         statusCell.appendChild(statusLabel);
