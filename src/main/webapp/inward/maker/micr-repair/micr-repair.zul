@@ -3,7 +3,7 @@
 
 <zk xmlns:h="xhtml">
 
-	<style src="/css/inward/micr-repair.css?v=29" />
+	<style src="/css/inward/micr-repair.css?v=30" />
 
 	<div id="inwardMicrRepairRoot" sclass="cts-data-entry-wrapper"
 		apply="com.iispl.cts.controller.inward.maker.InwardMicrRepairControllerr">
@@ -17,19 +17,35 @@
 					value="Review and correct individual cheque MICR details."
 					sclass="cts-main-subtitle" />
 			</div>
+		</div>
 
-			<hlayout spacing="10px" valign="middle"
-				sclass="micr-nav-pill-box">
-				<hlayout spacing="6px" valign="middle">
+
+		<div sclass="cts-metadata-card">
+
+			<div sclass="cts-meta-col">
+				<label value="BATCH NO." sclass="cts-meta-header" />
+				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
+			</div>
+
+			<div sclass="cts-meta-col">
+				<label value="TOTAL CHEQUES" sclass="cts-meta-header" />
+				<label id="lblTotalCheques" value="0"
+					sclass="cts-meta-val" />
+			</div>
+
+			<div sclass="cts-meta-col cts-progress-meta-col">
+				<label value="PROGRESS" sclass="cts-meta-header" />
+				<hlayout spacing="8px" valign="middle">
 					<progressmeter id="progressMeter" value="0"
 						sclass="cts-compact-progress" />
 					<label id="lblProgress" value="0/0 (0%)"
 						sclass="micr-progress-text" />
 				</hlayout>
-				<separator orient="vertical" bar="true"
-					sclass="micr-divider" />
+			</div>
+
+			<div sclass="cts-meta-col cts-navigation-meta-col">
 				<hlayout spacing="6px" valign="middle">
-					<button id="btnPrevious" label="Prev"
+					<button id="btnPrevious" label="Previous"
 						iconSclass="z-icon-chevron-left"
 						sclass="cts-btn-secondary micr-btn-compact-nav" />
 					<label id="lblRecordPosition" value="1 of 1"
@@ -38,39 +54,16 @@
 						iconSclass="z-icon-chevron-right"
 						sclass="cts-btn-secondary micr-btn-compact-nav" />
 				</hlayout>
-			</hlayout>
-		</div>
-
-
-		<div sclass="cts-metadata-card">
-			<div sclass="cts-meta-col">
-				<label value="BATCH ID" sclass="cts-meta-header" />
-				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
 			</div>
-			<div sclass="cts-meta-col">
-				<label value="SOURCE" sclass="cts-meta-header" />
+
+
+			<div visible="false">
 				<label id="lblBatchSource" value="CHI"
 					sclass="cts-meta-val" />
-			</div>
-			<div sclass="cts-meta-col">
-				<label value="TOTAL CHEQUES" sclass="cts-meta-header" />
-				<label id="lblTotalCheques" value="0"
-					sclass="cts-meta-val" />
-			</div>
-			<div sclass="cts-meta-col">
-				<label value="CHEQUE NO." sclass="cts-meta-header" />
 				<label id="lblHeaderChequeNo" value="-"
 					sclass="cts-meta-val" />
-			</div>
-			<div sclass="cts-meta-col">
-				<label value="ITEM STATUS" sclass="cts-meta-header" />
-				<div>
-					<label id="lblHeaderItemStatus"
-						value="SEND_BACK_TO_MAKER_MICR" sclass="cts-badge-micr" />
-				</div>
-			</div>
-			<div sclass="cts-meta-col">
-				<label value="RECEIVED DATE" sclass="cts-meta-header" />
+				<label id="lblHeaderItemStatus"
+					value="MICR_REPAIR_PENDING" sclass="cts-badge-micr" />
 				<label id="lblReceivedDate" value="-"
 					sclass="cts-meta-val" />
 			</div>
@@ -129,7 +122,6 @@
 					</div>
 				</div>
 
-
 				<hlayout spacing="6px" width="100%" valign="middle">
 					<button id="btnZoomOut" iconSclass="z-icon-minus"
 						sclass="cts-btn-secondary cts-btn-icon-sq" tooltiptext="Zoom Out" />
@@ -158,39 +150,34 @@
 						sclass="cts-badge-micr" />
 				</div>
 
-
 				<div id="micrAlertBox" visible="false"
-					style="background: #fffdf5; border: 1px solid #fef08a; border-left: 3px solid #f59e0b; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px;">
+					style="background:#fffdf5; border:1px solid #fef08a; border-left:3px solid #f59e0b; border-radius:4px; padding:8px 12px; margin-bottom:8px;">
 					<label id="lblMicrAlertTitle"
 						value="CHECKER SEND BACK"
-						style="font-size: 10px; font-weight: 800; color: #b45309; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; display: block;" />
-
+						style="font-size:10px; font-weight:800; color:#b45309; letter-spacing:.5px; text-transform:uppercase; margin-bottom:4px; display:block;" />
 					<hlayout spacing="8px"
-						style="align-items: center; margin-bottom: 2px;">
+						style="align-items:center; margin-bottom:2px;">
 						<label id="lblMicrCodeTitle"
 							value="Reason Code:"
-							style="font-size: 11px; font-weight: 600; color: #78350f; width: 85px; min-width: 85px; white-space: nowrap;" />
+							style="font-size:11px; font-weight:600; color:#78350f; width:85px; min-width:85px; white-space:nowrap;" />
 						<label id="lblMicrReasonCode" value="-"
-							style="font-size: 11px; font-weight: 700; color: #0f172a;" />
+							style="font-size:11px; font-weight:700; color:#0f172a;" />
 					</hlayout>
-
 					<hlayout spacing="8px"
-						style="align-items: baseline; margin-bottom: 2px;">
+						style="align-items:baseline; margin-bottom:2px;">
 						<label id="lblMicrNameTitle" value="Reason:"
-							style="font-size: 11px; font-weight: 600; color: #78350f; width: 85px; min-width: 85px; white-space: nowrap;" />
+							style="font-size:11px; font-weight:600; color:#78350f; width:85px; min-width:85px; white-space:nowrap;" />
 						<label id="lblMicrReasonName" value="-"
-							style="font-size: 11px; font-weight: 500; color: #1e293b;" />
+							style="font-size:11px; font-weight:500; color:#1e293b;" />
 					</hlayout>
-
 					<hlayout spacing="8px"
-						style="align-items: baseline;">
+						style="align-items:baseline;">
 						<label id="lblMicrRemarksTitle" value="Remarks:"
-							style="font-size: 11px; font-weight: 600; color: #78350f; width: 85px; min-width: 85px; white-space: nowrap;" />
+							style="font-size:11px; font-weight:600; color:#78350f; width:85px; min-width:85px; white-space:nowrap;" />
 						<label id="lblMicrRemarks" value="-"
-							style="font-size: 11px; font-weight: 400; color: #334155;" />
+							style="font-size:11px; font-weight:400; color:#334155;" />
 					</hlayout>
 				</div>
-
 
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
@@ -207,7 +194,6 @@
 					</div>
 				</div>
 
-
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
 						<label value="Bank Code *"
@@ -222,7 +208,6 @@
 							sclass="cts-input-text ocr-field" />
 					</div>
 				</div>
-
 
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
@@ -239,7 +224,6 @@
 					</div>
 				</div>
 
-
 				<div sclass="micr-form-group">
 					<label value="Corrected MICR Code *"
 						sclass="cts-field-lbl" />
@@ -249,7 +233,8 @@
 				</div>
 
 
-				<div sclass="micr-form-group micr-remarks-wrap">
+				<div sclass="micr-form-group micr-remarks-wrap"
+					visible="false">
 					<label value="Remarks" sclass="cts-field-lbl" />
 					<textbox id="txtRemarks" rows="2"
 						placeholder="Reason for correction or remarks..."
@@ -257,23 +242,25 @@
 				</div>
 
 
-				<hlayout width="100%" spacing="8px" valign="middle"
+
+				<hlayout width="100%" spacing="10px" valign="middle"
 					sclass="micr-action-footer">
 
 					<button id="btnRejectRequest"
 						label="Request Rejection" iconSclass="z-icon-times-circle"
-						sclass="cts-btn-outline-danger" />
+						hflex="1" sclass="cts-btn-outline-danger micr-action-btn" />
 
 					<button id="btnSaveAndNext" label="Save &amp; Next"
-						iconSclass="z-icon-check" sclass="cts-btn-solid-primary" />
+						iconSclass="z-icon-check" hflex="1"
+						sclass="cts-btn-solid-primary micr-action-btn" />
 
 					<button id="btnSubmitToDataEntry"
-						label="Submit to Data Entry" iconSclass="z-icon-check-circle"
-						disabled="true" sclass="cts-btn-submit-data-entry" />
+						label="Proceed to Data Entry" iconSclass="z-icon-arrow-right"
+						hflex="1" disabled="true"
+						sclass="cts-btn-submit-data-entry micr-action-btn" />
 
 				</hlayout>
 			</div>
-
 		</div>
 
 		<window id="rejectRequestWindow" mode="modal" visible="false"
@@ -284,18 +271,15 @@
 						<label value="Request Instrument Rejection"
 							sclass="cts-modal-heading" />
 					</div>
-
 					<label
 						value="Please specify the CTS return reason and any remarks for the checker:"
 						sclass="cts-modal-desc" />
-
 					<vlayout spacing="4px">
 						<label value="Rejection Reason / Return Code *"
 							sclass="cts-field-lbl-bold" />
 						<combobox id="cmbRejectReason" readonly="true"
 							placeholder="Select return reason..." width="100%" />
 					</vlayout>
-
 					<vlayout spacing="4px">
 						<label value="Rejection Remark"
 							sclass="cts-field-lbl-bold" />
@@ -303,7 +287,6 @@
 							placeholder="Enter reason details..." width="100%"
 							sclass="cts-textarea" />
 					</vlayout>
-
 					<div sclass="cts-modal-footer-bar">
 						<button id="btnCancelReject" label="Cancel"
 							sclass="cts-btn-secondary cts-btn-modal-cancel" />
@@ -314,7 +297,5 @@
 				</vlayout>
 			</div>
 		</window>
-
 	</div>
-
 </zk>
