@@ -828,9 +828,10 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 		String validationSql = "SELECT " + "COUNT(*) FILTER (WHERE cheque_status IN (" + "    'MICR_REPAIR_PENDING', "
 				+ "    'MICR_REPAIR_IN_PROGRESS', " + "    'MICR_REPAIR_REQUIRED', " + "    'SEND_BACK_TO_MAKER_MICR', "
-				+ "    'MICR_REPAIR_COMPLETED'" + ")) AS total_micr_cheques, "
+				+ "    'MICR_REPAIR_COMPLETED', " + "    'REJECTION_REQUESTED'" + ")) AS total_micr_cheques, "
 
-				+ "COUNT(*) FILTER (WHERE cheque_status = 'MICR_REPAIR_COMPLETED') " + "AS completed_micr_cheques "
+				+ "COUNT(*) FILTER (WHERE cheque_status IN (" + "    'MICR_REPAIR_COMPLETED', "
+				+ "    'REJECTION_REQUESTED'" + ")) AS completed_micr_cheques "
 
 				+ "FROM inward_cheque " + "WHERE inward_batch_id = ?";
 
@@ -901,7 +902,7 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				+ "    a.account_status, " + "    mc.cheque_number AS master_cheque_number, " + "    mc.sort_code, "
 				+ "    b.branch_code AS master_branch_code, " + "    b.micr_code AS master_micr_code, "
 				+ "    b.status AS branch_status, " + "    bk.bank_code AS master_bank_code, "
-				+ "    bk.status AS bank_status " + "FROM master_account_new a " + "LEFT JOIN master_cheque_new mc "
+				+ "    bk.status AS bank_status " + "FROM master_account a " + "LEFT JOIN master_cheque mc "
 				+ "    ON mc.account_number = a.account_number " + "   AND mc.cheque_number = ? "
 				+ "LEFT JOIN branch b " + "    ON b.branch_code = ? " + "LEFT JOIN bank bk "
 				+ "    ON bk.bank_id = b.bank_id " + "WHERE a.account_number = ?";
