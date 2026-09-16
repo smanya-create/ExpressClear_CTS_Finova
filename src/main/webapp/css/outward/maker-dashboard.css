@@ -42,10 +42,38 @@
 	color: #64748b !important;
 }
 
+.outward-maker-dashboard-header {
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 18px;
+}
+
+.outward-maker-dashboard-title-section {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.outward-maker-dashboard-title {
+	display: block;
+	font-size: 22px !important;
+	font-weight: 700 !important;
+	color: #16223d !important;
+	line-height: 1.25 !important;
+}
+
+.outward-maker-dashboard-subtitle {
+	display: block;
+	font-size: 11px !important;
+	font-weight: 400 !important;
+	color: #64748b !important;
+	line-height: 1.4 !important;
+}
+
 .outward-maker-return-section {
 	width: 100%;
 	box-sizing: border-box;
-	margin: 0 0 38px 0 !important;
+	margin: 0 !important;
 	padding: 0 !important;
 }
 
@@ -225,7 +253,20 @@
 	font-weight: 800 !important;
 	color: #1d4ed8 !important;
 	text-align: center !important;
-	white-space: nowrap !important;
+	white-space: nowrap;
+}
+
+.outward-maker-return-batch-id {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: 11px !important;
+	line-height: 18px !important;
+	font-weight: 800 !important;
+	color: #1d4ed8 !important;
+	text-align: left !important;
+	white-space: nowrap;
+	padding-left: 12px !important;
 }
 
 .outward-maker-cheque-number {
@@ -236,7 +277,7 @@
 	font-weight: 700 !important;
 	color: #334155 !important;
 	text-align: center !important;
-	white-space: nowrap !important;
+	white-space: nowrap;
 }
 
 .outward-maker-cheque-count {
@@ -257,7 +298,7 @@
 	font-weight: 700 !important;
 	color: #334155 !important;
 	text-align: center !important;
-	white-space: nowrap !important;
+	white-space: nowrap;
 }
 
 .outward-maker-reason {
@@ -269,6 +310,23 @@
 	text-align: center !important;
 	white-space: normal !important;
 	word-break: break-word !important;
+}
+
+.outward-maker-return-reason {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0 12px !important;
+	font-size: 12px !important;
+	line-height: 18px !important;
+	font-weight: 600 !important;
+	color: #334155 !important;
+	text-align: left !important;
+	white-space: normal !important;
+	word-break: break-word !important;
+	overflow-wrap: anywhere !important;
+	background: transparent !important;
+	border: none !important;
 }
 
 .outward-maker-status {
@@ -329,6 +387,14 @@
 	color: #8a6200 !important;
 }
 
+.outward-maker-status.micr-rejected {
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%,
+		rgba(254, 242, 242, 0.84) 100%) !important;
+	background-color: rgba(254, 242, 242, 0.72) !important;
+	border: 1px solid rgba(248, 113, 113, 0.38) !important;
+	color: #b91c1c !important;
+}
+
 .outward-maker-status.pending-checker-process {
 	background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%,
 		rgba(239, 246, 255, 0.80) 100%) !important;
@@ -354,14 +420,14 @@
 }
 
 .outward-maker-view-button {
-	width: 108px;
-	min-width: 108px;
-	height: 34px;
+	width: 108px !important;
+	min-width: 108px !important;
+	height: 34px !important;
 	box-sizing: border-box;
-	padding: 0 8px;
+	padding: 0 8px !important;
 	background: #172554 !important;
 	border: 1px solid #172554 !important;
-	border-radius: 6px;
+	border-radius: 6px !important;
 	color: #ffffff !important;
 	font-size: 10px !important;
 	font-weight: 800 !important;
@@ -386,20 +452,21 @@
 }
 
 .outward-maker-return-action {
-	width: 108px;
-	min-width: 108px;
-	height: 34px;
+	width: 108px !important;
+	min-width: 108px !important;
+	height: 36px !important;
 	box-sizing: border-box;
-	padding: 0 8px;
+	padding: 0 12px !important;
 	background: #172554 !important;
 	border: 1px solid #172554 !important;
-	border-radius: 6px;
+	border-radius: 6px !important;
 	color: #ffffff !important;
 	font-size: 10px !important;
 	font-weight: 800 !important;
-	line-height: 32px !important;
+	line-height: 34px !important;
 	white-space: nowrap !important;
 	cursor: pointer !important;
+	text-align: center !important;
 	box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14) !important;
 }
 
@@ -415,6 +482,11 @@
 
 .outward-maker-return-action:focus {
 	outline: none !important;
+}
+
+.outward-maker-return-action .z-icon {
+	margin-right: 6px !important;
+	font-size: 10px !important;
 }
 
 .outward-maker-empty-state {
@@ -494,6 +566,107 @@
 	line-height: 32px !important;
 }
 
+.outward-maker-filter-card {
+	background: #ffffff;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	padding: 14px 20px;
+	margin-bottom: 24px;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.outward-maker-filter-title-box {
+	width: 100%;
+}
+
+.outward-maker-filter-heading {
+	font-size: 14px !important;
+	font-weight: 800 !important;
+	color: #172554 !important;
+	letter-spacing: 0.2px;
+}
+
+.outward-maker-filter-controls {
+	display: flex !important;
+	align-items: center !important;
+	white-space: nowrap !important;
+}
+
+.outward-maker-input.z-textbox, .outward-maker-combobox .z-combobox-input
+	{
+	height: 34px !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 4px !important;
+	font-size: 12.5px !important;
+	color: #1e293b !important;
+	padding: 0 10px !important;
+	background: #ffffff !important;
+	box-sizing: border-box !important;
+}
+
+.outward-maker-input.z-textbox:focus, .outward-maker-combobox .z-combobox-input:focus
+	{
+	border-color: #172554 !important;
+	outline: none !important;
+}
+
+.outward-maker-combobox .z-combobox-button {
+	height: 34px !important;
+	border: 1px solid #cbd5e1 !important;
+	border-left: none !important;
+	border-radius: 0 4px 4px 0 !important;
+	background: #f8fafc !important;
+}
+
+.outward-maker-btn-action-search.z-button {
+	height: 34px !important;
+	padding: 0 18px !important;
+	background: #172554 !important;
+	border: 1px solid #172554 !important;
+	border-radius: 6px !important;
+	color: #ffffff !important;
+	font-size: 10px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.5px !important;
+	cursor: pointer !important;
+	box-shadow: 0 2px 6px rgba(15, 23, 42, 0.14) !important;
+	transition: background 0.15s ease-in-out;
+}
+
+.outward-maker-btn-action-search.z-button:hover {
+	background: #0f1b3d !important;
+	border-color: #0f1b3d !important;
+}
+
+.outward-maker-btn-action-search.z-button:active {
+	background: #0b1530 !important;
+	border-color: #0b1530 !important;
+}
+
+.outward-maker-btn-action-clear.z-button {
+	height: 34px !important;
+	padding: 0 16px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	color: #475569 !important;
+	font-size: 10px !important;
+	font-weight: 800 !important;
+	letter-spacing: 0.5px !important;
+	cursor: pointer !important;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+	transition: all 0.15s ease-in-out;
+}
+
+.outward-maker-btn-action-clear.z-button:hover {
+	background: #f1f5f9 !important;
+	color: #0f172a !important;
+	border-color: #94a3b8 !important;
+}
+
 @media ( max-width : 1100px) {
 	.outward-maker-dashboard-scroll {
 		padding-left: 20px;
@@ -517,12 +690,22 @@
 		padding-right: 8px !important;
 		font-size: 10px !important;
 	}
+	.outward-maker-return-reason {
+		font-size: 11px !important;
+		line-height: 17px !important;
+		padding-left: 8px !important;
+		padding-right: 8px !important;
+	}
 }
 
 @media ( max-width : 750px) {
 	.outward-maker-dashboard-scroll {
 		padding: 4px 12px 24px 12px;
-		overflow-x: auto;
+		overflow: hidden;
+	}
+	.outward-maker-filter-controls {
+		flex-wrap: wrap !important;
+		white-space: normal !important;
 	}
 	.outward-maker-welcome-section {
 		padding-bottom: 18px;
@@ -563,10 +746,124 @@
 		font-size: 8px !important;
 	}
 	.outward-maker-view-button, .outward-maker-return-action {
-		width: 82px;
-		min-width: 82px;
-		height: 30px;
+		width: 82px !important;
+		min-width: 82px !important;
+		height: 30px !important;
 		font-size: 8px !important;
 		line-height: 28px !important;
+	}
+	.outward-maker-return-reason {
+		font-size: 10px !important;
+		line-height: 15px !important;
+		padding-left: 5px !important;
+		padding-right: 5px !important;
+	}
+	.outward-maker-dashboard-header {
+		width: 100%;
+		box-sizing: border-box;
+		margin-bottom: 18px;
+	}
+	.outward-maker-dashboard-title-section {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.outward-maker-dashboard-title {
+		font-size: 22px !important;
+		font-weight: 700 !important;
+		color: #16223d !important;
+		line-height: 1.25 !important;
+	}
+	.outward-maker-dashboard-subtitle {
+		font-size: 11px !important;
+		font-weight: 400 !important;
+		color: #64748b !important;
+		line-height: 1.4 !important;
+	}
+}
+
+/* Dashboard fixed viewport and list-only scrolling */
+.outward-maker-dashboard, .outward-maker-dashboard-scroll {
+	min-height: 0 !important;
+	max-height: 100% !important;
+	overflow: hidden !important;
+}
+
+.outward-maker-dashboard-scroll {
+	box-sizing: border-box !important;
+	height: 100% !important;
+	padding: 4px 28px 8px 28px !important;
+}
+
+.outward-maker-table-card {
+	min-height: 0 !important;
+	overflow: hidden !important;
+}
+
+.outward-maker-batch-grid {
+	height: 190px !important;
+	min-height: 190px !important;
+	max-height: 190px !important;
+	overflow: hidden !important;
+}
+
+.outward-maker-batch-grid .z-grid-body {
+	max-height: 158px !important;
+	min-height: 0 !important;
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+	scrollbar-width: thin !important;
+	scrollbar-color: #94a3b8 #f1f5f9 !important;
+}
+
+.outward-maker-batch-grid .z-grid-body::-webkit-scrollbar {
+	width: 7px;
+}
+
+.outward-maker-batch-grid .z-grid-body::-webkit-scrollbar-track {
+	background: #f1f5f9;
+}
+
+.outward-maker-batch-grid .z-grid-body::-webkit-scrollbar-thumb {
+	background: #94a3b8;
+	border-radius: 8px;
+}
+
+.outward-maker-batch-grid .z-grid-body::-webkit-scrollbar-thumb:hover {
+	background: #64748b;
+}
+
+.outward-maker-pagination {
+	padding-top: 5px !important;
+	padding-bottom: 5px !important;
+}
+
+@media ( max-width : 1100px) {
+	.outward-maker-batch-grid {
+		height: 185px !important;
+		min-height: 185px !important;
+		max-height: 185px !important;
+	}
+	.outward-maker-batch-grid .z-grid-body {
+		max-height: 153px !important;
+	}
+}
+
+@media ( max-width : 750px) {
+	.outward-maker-dashboard-scroll {
+		padding-left: 10px !important;
+		padding-right: 10px !important;
+		overflow: hidden !important;
+	}
+	.outward-maker-batch-grid {
+		min-width: 850px !important;
+		height: 180px !important;
+		min-height: 180px !important;
+		max-height: 180px !important;
+	}
+	.outward-maker-batch-grid .z-grid-body {
+		max-height: 148px !important;
+		overflow-y: auto !important;
+		overflow-x: auto !important;
 	}
 }

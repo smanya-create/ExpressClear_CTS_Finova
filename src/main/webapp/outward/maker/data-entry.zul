@@ -7,15 +7,17 @@
 	<style src="/css/outward/data-entry.css" />
 
 	<window id="outwardDataEntryMain" border="none" width="100%"
+		height="100%"
 		apply="com.iispl.cts.controller.outward.maker.OutwardDataEntryController">
 
 		<vlayout id="outwardDataEntryPage"
-			sclass="outward-data-entry-page" width="100%" spacing="0">
+			sclass="outward-data-entry-page" width="100%" vflex="1"
+			spacing="0">
 
 			<vlayout id="outwardDataEntryHeading"
 				sclass="outward-data-entry-heading" width="100%" spacing="3px">
 
-				<label id="outwardDataEntryLblTitle" value="DATA ENTRY"
+				<label id="outwardDataEntryLblTitle" value="Data Entry"
 					sclass="outward-data-entry-title" />
 
 				<label id="outwardDataEntryLblSubtitle"
@@ -27,22 +29,45 @@
 			<groupbox id="outwardDataEntryTableCard"
 				sclass="outward-data-entry-table-card" width="100%" mold="3d">
 
+				<caption id="outwardDataEntryTableCaption">
+
+					<hlayout id="outwardDataEntryCaptionLayout"
+						sclass="outward-data-entry-caption-layout" width="100%"
+						valign="middle" spacing="0">
+
+						<label id="outwardDataEntryLblTableTitle"
+							value="Batches Ready For Data Entry"
+							sclass="outward-data-entry-card-title" />
+
+						<label id="outwardDataEntryLblCaptionSpacer"
+							value="" hflex="1" sclass="outward-data-entry-caption-spacer" />
+
+						<label id="outwardDataEntryLblBatchCount"
+							value="0 Batches" sclass="outward-data-entry-batch-count" />
+
+					</hlayout>
+
+				</caption>
+
 				<grid id="outwardDataEntryGridBatch" width="100%"
 					sclass="outward-data-entry-grid">
 
-					<columns sizable="true">
+					<columns sizable="false">
 
-						<column label="BATCH NO." width="20%" />
+						<column label="Batch No." width="20%"
+							align="center" />
 
-						<column label="TOTAL NO. OF CHEQUES"
-							width="22%" />
+						<column label="Total No. Of Cheques" width="22%"
+							align="center" />
 
-						<column label="NO. OF CHEQUES DATA ENTERED"
-							width="25%" />
+						<column label="Pending Data Entry" width="25%"
+							align="center" />
 
-						<column label="STATUS" width="16%" />
+						<column label="Status" width="16%"
+							align="center" />
 
-						<column label="ACTION" width="17%" />
+						<column label="Action" width="17%"
+							align="center" />
 
 					</columns>
 
@@ -55,11 +80,11 @@
 					spacing="5px">
 
 					<label id="outwardDataEntryLblEmptyTitle"
-						value="No batches ready for data entry"
+						value="No Batches Ready For Data Entry"
 						sclass="outward-data-entry-empty-title" />
 
 					<label id="outwardDataEntryLblEmptySubtitle"
-						value="There are currently no batches available for data entry."
+						value="There Are Currently No Batches Available For Data Entry."
 						sclass="outward-data-entry-empty-subtitle" />
 
 				</vlayout>

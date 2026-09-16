@@ -11,18 +11,94 @@
 		<div sclass="outward-maker-dashboard-scroll" width="100%"
 			height="100%">
 
-			<div sclass="outward-maker-welcome-section">
+			<div sclass="outward-maker-dashboard-header">
 
-				<label value="Welcome, Maker"
-					sclass="outward-maker-welcome-title" />
+				<div sclass="outward-maker-dashboard-title-section">
 
-				<label
-					value="Manage and process outward cheque batches."
-					sclass="outward-maker-welcome-subtitle" />
+					<label value="Maker Dashboard"
+						sclass="outward-maker-dashboard-title" />
+
+					<label value=""
+						sclass="outward-maker-dashboard-subtitle" />
+
+				</div>
 
 			</div>
 
-			<div sclass="outward-maker-return-section">
+			<div sclass="outward-maker-filter-card">
+
+				<div sclass="outward-maker-filter-title-box">
+
+					<label value="Search &amp; Filter"
+						sclass="outward-maker-filter-heading" />
+
+				</div>
+
+				<hlayout spacing="12px"
+					sclass="outward-maker-filter-controls z-valign-middle">
+
+					<textbox id="outwardMakerTxtSearch"
+						placeholder="Search by Batch ID..." width="240px"
+						sclass="outward-maker-input" />
+
+					<combobox id="outwardMakerCmbModule"
+						placeholder="All Modules" readonly="true" width="190px"
+						sclass="outward-maker-combobox">
+
+						<comboitem label="All Modules" value="ALL" />
+
+						<comboitem label="Return from Checker"
+							value="RETURN_FROM_CHECKER" />
+
+						<comboitem label="Batches Processing"
+							value="BATCH_PROCESSING" />
+
+					</combobox>
+
+					<combobox id="outwardMakerCmbStatus"
+						placeholder="All Status" readonly="true" width="200px"
+						sclass="outward-maker-combobox">
+
+						<comboitem label="All Status" value="ALL" />
+
+						<comboitem label="Pending Maker Process"
+							value="PENDING_MAKER_PROCESS" />
+
+						<comboitem label="Pending Data Entry"
+							value="PENDING_DATA_ENTRY" />
+
+						<comboitem label="Pending MICR Repair"
+							value="PENDING_MICR_REPAIR" />
+
+						<comboitem label="MICR Rejected"
+							value="MICR_REJECTED" />
+
+						<comboitem label="On Hold" value="ON_HOLD" />
+
+						<comboitem label="Pending Checker Process"
+							value="PENDING_CHECKER_PROCESS" />
+
+						<comboitem label="Pending Verification"
+							value="PENDING_VERIFICATION" />
+
+						<comboitem label="Rejection Request"
+							value="REJECTION_REQUEST" />
+
+					</combobox>
+
+					<button id="outwardMakerBtnSearch" label="SEARCH"
+						iconSclass="z-icon-search"
+						sclass="outward-maker-btn-action-search" />
+
+					<button id="outwardMakerBtnClear" label="CLEAR"
+						iconSclass="z-icon-undo" sclass="outward-maker-btn-action-clear" />
+
+				</hlayout>
+
+			</div>
+
+			<div id="outwardMakerReturnSection"
+				sclass="outward-maker-return-section">
 
 				<div sclass="outward-maker-section-header">
 
@@ -41,27 +117,32 @@
 
 				<div sclass="outward-maker-table-card">
 
-					<grid id="outwardMakerGridReturnedBatches"
-						width="100%" sclass="outward-maker-batch-grid">
+					<div sclass="outward-maker-list-scroll">
 
-						<columns sizable="true">
+						<grid id="outwardMakerGridReturnedBatches"
+							width="100%" sclass="outward-maker-batch-grid">
 
-							<column label="Batch ID" width="20%" />
+							<columns sizable="true">
 
-							<column label="Cheque Number" width="20%" />
+								<column label="Batch ID" width="18%" />
 
-							<column label="Status" width="25%" />
+								<column label="Cheque Number"
+									width="20%" />
 
-							<column label="Reason / Remarks"
-								width="20%" />
+								<column label="Status" width="24%" />
 
-							<column label="Action" width="15%" />
+								<column label="Reason / Remarks"
+									width="28%" />
 
-						</columns>
+								<column label="Action" width="10%" />
 
-						<rows id="outwardMakerRowsReturnedBatches" />
+							</columns>
 
-					</grid>
+							<rows id="outwardMakerRowsReturnedBatches" />
+
+						</grid>
+
+					</div>
 
 					<vlayout id="outwardMakerVlayoutReturnedEmptyState"
 						visible="false" sclass="outward-maker-empty-state">
@@ -77,11 +158,32 @@
 
 				</div>
 
+				<div id="outwardMakerReturnPaginationBar"
+					sclass="outward-maker-pagination">
+
+					<button id="outwardMakerBtnReturnFirst"
+						label="&lt;&lt;" sclass="outward-maker-pagination-button" />
+
+					<button id="outwardMakerBtnReturnPrevious"
+						label="&lt;" sclass="outward-maker-pagination-button" />
+
+					<label id="outwardMakerLblReturnCurrentPage"
+						value="1 / 1" sclass="outward-maker-pagination-label" />
+
+					<button id="outwardMakerBtnReturnNext" label="&gt;"
+						sclass="outward-maker-pagination-button" />
+
+					<button id="outwardMakerBtnReturnLast"
+						label="&gt;&gt;" sclass="outward-maker-pagination-button" />
+
+				</div>
+
 			</div>
 
 			<space height="38px" />
 
-			<div sclass="outward-maker-processing-section">
+			<div id="outwardMakerProcessingSection"
+				sclass="outward-maker-processing-section">
 
 				<div sclass="outward-maker-section-header">
 
@@ -100,26 +202,32 @@
 
 				<div sclass="outward-maker-table-card">
 
-					<grid id="outwardMakerGridBatchDetails" width="100%"
-						sclass="outward-maker-batch-grid">
+					<div sclass="outward-maker-list-scroll">
 
-						<columns sizable="true">
+						<grid id="outwardMakerGridBatchDetails"
+							width="100%" sclass="outward-maker-batch-grid">
 
-							<column label="Batch ID" width="20%" />
+							<columns sizable="true">
 
-							<column label="No. of Cheques" width="20%" />
+								<column label="Batch ID" width="20%" />
 
-							<column label="Total Amount" width="20%" />
+								<column label="No. of Cheques"
+									width="20%" />
 
-							<column label="Status" width="20%" />
+								<column label="Total Amount"
+									width="20%" />
 
-							<column label="Action" width="20%" />
+								<column label="Status" width="20%" />
 
-						</columns>
+								<column label="Action" width="20%" />
 
-						<rows id="outwardMakerRowsBatchDetails" />
+							</columns>
 
-					</grid>
+							<rows id="outwardMakerRowsBatchDetails" />
+
+						</grid>
+
+					</div>
 
 					<vlayout id="outwardMakerVlayoutEmptyState"
 						visible="false" sclass="outward-maker-empty-state">
@@ -135,7 +243,8 @@
 
 				</div>
 
-				<div sclass="outward-maker-pagination">
+				<div id="outwardMakerPaginationBar"
+					sclass="outward-maker-pagination">
 
 					<button id="outwardMakerBtnFirst" label="&lt;&lt;"
 						sclass="outward-maker-pagination-button" />

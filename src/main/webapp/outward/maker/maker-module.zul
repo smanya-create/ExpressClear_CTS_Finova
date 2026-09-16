@@ -37,8 +37,8 @@
 						style="margin:0 !important; padding:0 !important; overflow:hidden;">
 
 						<include id="headerInclude"
-							src="/components/header.zul" pageTitle="Maker Dashboard"
-							pageSubtitle="Outward Processing" hflex="1" vflex="1" />
+							src="/components/header.zul" pageTitle="Outward Processing"
+							hflex="1" vflex="1" />
 
 					</north>
 
