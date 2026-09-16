@@ -22,9 +22,12 @@
 			<borderlayout width="100%" height="100%">
 
 				<north height="70px" border="0">
-					<include
-						src="/components/header.zul?role=INWARD_CHECKER&amp;activeTab=inward-checker-dash" />
-				</north>
+    <include src="/components/header.zul">
+        <attribute name="pageTitle">Verification</attribute>
+        <attribute name="pageSubtitle">Inward Processing</attribute>
+    </include>
+</north>
+
 				<!-- PAGE CONTENT -->
 				<center border="0" autoscroll="false" vflex="1"
 					style="background:#EAF6FF !important;">
@@ -33,8 +36,7 @@
 						<!-- BREADCRUMB -->
 						<hlayout spacing="8px" valign="middle" sclass="breadcrumb">
 
-							<label value="Verification" />
-
+						
 						</hlayout>
 
 						<!--PAGE TITLE -->
@@ -438,18 +440,18 @@
 
 										<vlayout spacing="7px" sclass="verification-section">
 
-											<label value="DRAWER DETAILS"
+											<label value="DRAWEE DETAILS"
 												sclass="verification-section-title" />
 										
 											<hlayout width="100%">
-												<label value="Drawer Name"
+												<label value="Drawee Name"
 													sclass="verification-field-label" hflex="1" />
 												<label value="" id="lblDraweeName"
 													sclass="verification-field-value" />
 											</hlayout>
 										
 											<hlayout width="100%">
-												<label value="Drawer Account No."
+												<label value="Drawee Account No."
 													sclass="verification-field-label" hflex="1" />
 												<label value="" id="lblDraweeAccountNumber"
 													sclass="verification-field-value" />
