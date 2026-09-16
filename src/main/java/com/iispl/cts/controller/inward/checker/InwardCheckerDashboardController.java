@@ -146,11 +146,11 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         if (InwardBatchStatus.CHECKER_PROCESSING.toString().equalsIgnoreCase(batchStatus)) {
 
             actionLabel = "Process";
-            buttonStyle = "background:#F5A900; color:#7A4500; border:1px solid #F5A900; border-radius:15px; cursor:pointer; font-size:9px; font-weight:bold; padding:2px 10px; line-height:16px;";
+            buttonStyle = "background:#D97706; color: black; border:1px solid #F5A900; border-radius:4px; cursor:pointer; font-size:9px; font-weight:bold; padding:2px 10px; line-height:16px;";
         } else if (InwardBatchStatus.CHECKER_PROCESSING_PENDING.toString().equalsIgnoreCase(batchStatus)) {
 
             actionLabel = "Proceed Verification";
-            buttonStyle = "background:#242F82; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 8px;";
+            buttonStyle = "background:#1C2D4A; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 8px;";
 
         } else {
 
