@@ -215,12 +215,13 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 						continue;
 					String status = cheque.getChequeStatus();
 					if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status)
-							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
-							|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
-							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-							|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
-						repairCheques.add(cheque);
+					        || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+					        || "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+					        || "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
+					        || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+					        || isMicrRejectionRequest(cheque)) {
+
+					    repairCheques.add(cheque);
 					}
 				}
 			}
@@ -289,6 +290,31 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			updateNavigation();
 			loadChequeImage(null);
 			Messagebox.show("Unable to load MICR repair records.", "Error", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
+
+	private boolean isMicrRejectionRequest(InwardCheque cheque) {
+
+		if (cheque == null || cheque.getInwardChequeId() == null
+				|| !InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(cheque.getChequeStatus())) {
+			return false;
+		}
+
+		String sql = "SELECT EXISTS (" + "SELECT 1 " + "FROM inward_cheque_rejection_request "
+				+ "WHERE inward_cheque_id = ? " + "AND request_stage = 'MICR_REPAIR' "
+				+ "AND request_status = 'PENDING'" + ")";
+
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, cheque.getInwardChequeId());
+
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next() && rs.getBoolean(1);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 
@@ -791,7 +817,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 						|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
 						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
+						|| isMicrRejectionRequest(cheque)) {
 					repairCheques.add(cheque);
 				}
 			}
