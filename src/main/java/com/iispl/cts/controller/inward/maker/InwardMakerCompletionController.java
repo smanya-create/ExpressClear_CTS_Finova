@@ -344,7 +344,7 @@ public class InwardMakerCompletionController extends GenericForwardComposer<Comp
         }
 
         // Transition status to Checker Queue
-        batchService.updateBatchStatus(currentBatchId, "READY_FOR_VERIFICATION");
+        batchService.updateBatchStatus(currentBatchId, "CHECKER_PROCESSING_PENDING");
 
         // Audit Trail Record
         String remarks = (txtMakerSignoffRemarks != null && txtMakerSignoffRemarks.getValue() != null)
