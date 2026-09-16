@@ -13,8 +13,10 @@ import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Include;
@@ -40,6 +42,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     private Div divDataEntryEmpty;
 
     private Textbox txtSearchBatch;
+    private Combobox cmbStatusFilter;
     private Button btnClearSearch;
     private Label lblBatchResultCount;
 
@@ -49,6 +52,11 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
+
+        // Default dropdown selection to index 0 ("All Statuses")
+        if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
+            cmbStatusFilter.setSelectedIndex(0);
+        }
 
         if (pagingDataEntry != null) {
             pagingDataEntry.addEventListener("onPaging", new EventListener<Event>() {
@@ -62,40 +70,86 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
         loadBatches();
     }
 
+    private void loadBatches() {
+        this.allBatches = fetchEligibleBatches();
+        applyCombinedFilter(null, null);
+    }
+
     public void onChanging$txtSearchBatch(InputEvent event) {
-        applyFilter(event.getValue());
+        applyCombinedFilter(event.getValue(), null);
     }
 
     public void onChange$txtSearchBatch() {
-        applyFilter(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
+        applyCombinedFilter(null, null);
+    }
+
+    // Overloaded onSelect methods to satisfy ZK forward and runtime SelectEvent
+    public void onSelect$cmbStatusFilter(SelectEvent<?, ?> event) {
+        applyCombinedFilter(null, null);
+    }
+
+    public void onSelect$cmbStatusFilter(Event event) {
+        applyCombinedFilter(null, null);
+    }
+
+    public void onSelect$cmbStatusFilter() {
+        applyCombinedFilter(null, null);
     }
 
     public void onClick$btnClearSearch() {
         if (txtSearchBatch != null) {
             txtSearchBatch.setValue("");
         }
-        applyFilter("");
+        if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
+            cmbStatusFilter.setSelectedIndex(0);
+        }
+        applyCombinedFilter("", "ALL");
     }
 
-    private void loadBatches() {
-        this.allBatches = fetchEligibleBatches();
-        applyFilter(txtSearchBatch != null ? txtSearchBatch.getValue() : "");
-    }
-
-    private void applyFilter(String rawQuery) {
-        String query = (rawQuery != null) ? rawQuery.trim().toLowerCase() : "";
-
-        if (query.isEmpty()) {
-            this.filteredBatches = new ArrayList<>(allBatches);
+    private void applyCombinedFilter(String searchText, String statusFilter) {
+        if (searchText == null) {
+            searchText = (txtSearchBatch != null && txtSearchBatch.getValue() != null)
+                    ? txtSearchBatch.getValue().trim().toLowerCase() : "";
         } else {
-            this.filteredBatches = new ArrayList<>();
-            for (DataEntryBatchItemDTO item : allBatches) {
-                boolean matchesId = item.getBatchId() != null && item.getBatchId().toLowerCase().contains(query);
-                boolean matchesStatus = item.getDisplayStatus() != null && item.getDisplayStatus().toLowerCase().contains(query);
+            searchText = searchText.trim().toLowerCase();
+        }
 
-                if (matchesId || matchesStatus) {
-                    this.filteredBatches.add(item);
+        if (statusFilter == null) {
+            if (cmbStatusFilter != null && cmbStatusFilter.getSelectedItem() != null
+                    && cmbStatusFilter.getSelectedItem().getValue() != null) {
+                statusFilter = cmbStatusFilter.getSelectedItem().getValue().toString();
+            } else {
+                statusFilter = "ALL";
+            }
+        }
+
+        this.filteredBatches = new ArrayList<>();
+
+        for (DataEntryBatchItemDTO item : allBatches) {
+            if (item == null) continue;
+
+            // 1. Check Batch ID Filter
+            boolean matchesSearch = true;
+            if (!searchText.isEmpty()) {
+                matchesSearch = item.getBatchId() != null
+                        && item.getBatchId().toLowerCase().contains(searchText);
+            }
+
+            // 2. Check Status Filter
+            boolean matchesStatus = true;
+            if (!"ALL".equalsIgnoreCase(statusFilter)) {
+                String bStatus = item.getBatchStatus() != null ? item.getBatchStatus().trim().toUpperCase() : "";
+                boolean isReturned = bStatus.contains("SEND_BACK") || bStatus.contains("SENT_BACK") || bStatus.contains("RETURN");
+
+                if ("CHECKER_RETURNED".equalsIgnoreCase(statusFilter)) {
+                    matchesStatus = isReturned;
+                } else if ("PENDING_MAKER".equalsIgnoreCase(statusFilter)) {
+                    matchesStatus = !isReturned;
                 }
+            }
+
+            if (matchesSearch && matchesStatus) {
+                this.filteredBatches.add(item);
             }
         }
 

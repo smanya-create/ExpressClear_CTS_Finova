@@ -2,7 +2,7 @@
 <?page title="CTS - Inward Data Entry" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-    <style src="/css/inward/data-entry-batches.css" />
+    <style src="/css/inward/data-entry-batches.css?v=2" />
 
     <div id="dataEntryBatchesRoot"
          width="100%"
@@ -37,9 +37,21 @@
                             <label value="Search Batch ID" sclass="data-entry-filter-label" />
                             <textbox id="txtSearchBatch"
                                      placeholder="Enter full or partial Batch ID"
-                                     width="360px"
+                                     width="340px"
                                      sclass="data-entry-filter-input"
                                      onChanging="$composer.onChanging$txtSearchBatch(event)" />
+
+                            <!-- Status Filter Combobox -->
+                            <combobox id="cmbStatusFilter"
+                                      readonly="true"
+                                      width="170px"
+                                      sclass="batch-status-filter"
+                                      placeholder="Filter by Status">
+                                <comboitem label="All Statuses" value="ALL" />
+                                <comboitem label="Pending Maker" value="PENDING_MAKER" />
+                                <comboitem label="Checker Returned" value="CHECKER_RETURNED" />
+                            </combobox>
+
                             <button id="btnClearSearch"
                                     label="Clear"
                                     sclass="data-entry-clear-button"
