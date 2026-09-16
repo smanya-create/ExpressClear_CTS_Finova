@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -448,18 +449,21 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
 		if (lblHeaderChequeNo != null)
 			lblHeaderChequeNo.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "-");
+		
 		if (lblHeaderItemStatus != null) {
-
-			String status = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim() : "MICR_REPAIR";
-
-			lblHeaderItemStatus.setValue(status);
-
-			if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)) {
-				lblHeaderItemStatus.setSclass("cts-badge-micr-completed");
-			} else {
-				lblHeaderItemStatus.setSclass("cts-badge-micr");
+			String rawStatus = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim() : "MICR_REPAIR";
+			
+			// Replace underscores with spaces and convert to Title Case
+			String[] parts = rawStatus.replace('_', ' ').toLowerCase().split("\\s+");
+			StringBuilder titleCaseStatus = new StringBuilder();
+			for (String p : parts) {
+				if (!p.isEmpty()) {
+					titleCaseStatus.append(Character.toUpperCase(p.charAt(0))).append(p.substring(1)).append(" ");
+				}
 			}
+			lblHeaderItemStatus.setValue(titleCaseStatus.toString().trim());
 		}
+		
 		if (lblReceivedDate != null && batch.getUploadedAt() != null) {
 			lblReceivedDate.setValue(new java.text.SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
 		}
@@ -516,7 +520,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		int progress = totalRecords == 0 ? 0 : (completedRecords * 100) / totalRecords;
 
 		if (lblProgress != null) {
-			lblProgress.setValue(completedRecords + "/" + totalRecords + " (" + progress + "%)");
+			lblProgress.setValue(completedRecords + "/" + totalRecords);
 		}
 
 		if (progressMeter != null) {
