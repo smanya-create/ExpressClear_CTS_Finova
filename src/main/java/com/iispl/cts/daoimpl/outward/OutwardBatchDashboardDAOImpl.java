@@ -5,11 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.iispl.cts.common.config.DBConnection;
-import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.dao.outward.OutwardBatchDashboardDAO;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
@@ -17,191 +15,180 @@ public class OutwardBatchDashboardDAOImpl implements OutwardBatchDashboardDAO {
 
 	@Override
 	public List<OutwardBatch> searchPendingBatches(
-	        int pageNumber,
-	        int pageSize,
-	        String batchId,
-	        java.util.Date fromDate,
-	        java.util.Date toDate) {
+			int pageNumber,
+			int pageSize,
+			String batchId) {
 
-	    List<OutwardBatch> batches = new ArrayList<>();
+		List<OutwardBatch> batches = new ArrayList<>();
 
-	    if (pageNumber < 1) {
-	        pageNumber = 1;
-	    }
+		if (pageNumber < 1) {
+			pageNumber = 1;
+		}
 
-	    if (pageSize < 1) {
-	        pageSize = 5;
-	    }
+		if (pageSize < 1) {
+			pageSize = 5;
+		}
 
-	    StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder();
 
-	    sql.append("SELECT outward_batch_id, batch_reference_id, actual_cheque_count, ")
-	       .append("actual_total_amount, batch_status, uploaded_by, uploaded_at ")
-	       .append("FROM outward_batch ")
-	       .append("WHERE UPPER(TRIM(batch_status)) IN (?, ?) ");
+		sql.append("SELECT outward_batch_id, batch_reference_id, ");
+		sql.append("actual_cheque_count, actual_total_amount, ");
+		sql.append("batch_status, uploaded_by, uploaded_at ");
+		sql.append("FROM outward_batch ");
+		sql.append("WHERE UPPER(TRIM(batch_status)) IN (?, ?) ");
 
-	    List<Object> parameters = new ArrayList<>();
+		if (batchId != null && !batchId.trim().isEmpty()) {
 
-	    parameters.add("PENDING_CHECKER_PROCESS");
-	    parameters.add("ON_HOLD");
+			sql.append("AND UPPER(outward_batch_id) LIKE UPPER(?) ");
+		}
 
-	    if (batchId != null && !batchId.trim().isEmpty()) {
-	        sql.append("AND UPPER(outward_batch_id) LIKE UPPER(?) ");
-	        parameters.add("%" + batchId.trim() + "%");
-	    }
+		sql.append("ORDER BY uploaded_at DESC ");
+		sql.append("LIMIT ? OFFSET ?");
 
-	    if (fromDate != null) {
-	        sql.append("AND uploaded_at >= ? ");
-	        parameters.add(new java.sql.Timestamp(fromDate.getTime()));
-	    }
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement preparedStatement =
+						connection.prepareStatement(sql.toString())) {
 
-	    if (toDate != null) {
-	        java.util.Calendar calendar = java.util.Calendar.getInstance();
-	        calendar.setTime(toDate);
-	        calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
+			int parameterIndex = 1;
 
-	        sql.append("AND uploaded_at < ? ");
-	        parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
-	    }
+			preparedStatement.setString(
+					parameterIndex++,
+					"PENDING_CHECKER_PROCESS");
 
-	    sql.append("ORDER BY uploaded_at DESC ");
-	    sql.append("LIMIT ? OFFSET ?");
+			preparedStatement.setString(
+					parameterIndex++,
+					"ON_HOLD");
 
-	    int offset = (pageNumber - 1) * pageSize;
+			if (batchId != null && !batchId.trim().isEmpty()) {
 
-	    parameters.add(pageSize);
-	    parameters.add(offset);
+				preparedStatement.setString(
+						parameterIndex++,
+						"%" + batchId.trim() + "%");
+			}
 
-	    try (Connection connection = DBConnection.getConnection();
-	            PreparedStatement preparedStatement =
-	                    connection.prepareStatement(sql.toString())) {
+			int offset =
+					(pageNumber - 1) * pageSize;
 
-	        for (int index = 0; index < parameters.size(); index++) {
+			preparedStatement.setInt(
+					parameterIndex++,
+					pageSize);
 
-	            Object parameter = parameters.get(index);
+			preparedStatement.setInt(
+					parameterIndex++,
+					offset);
 
-	            if (parameter instanceof Integer) {
-	                preparedStatement.setInt(index + 1, (Integer) parameter);
-	            } else if (parameter instanceof java.sql.Timestamp) {
-	                preparedStatement.setTimestamp(
-	                        index + 1, (java.sql.Timestamp) parameter);
-	            } else {
-	                preparedStatement.setString(
-	                        index + 1, parameter.toString());
-	            }
-	        }
+			try (ResultSet resultSet =
+					preparedStatement.executeQuery()) {
 
-	        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
 
-	            while (resultSet.next()) {
-	                batches.add(mapOutwardBatch(resultSet));
-	            }
-	        }
+					batches.add(
+							mapOutwardBatch(resultSet));
+				}
+			}
 
-	    } catch (SQLException exception) {
-	        throw new RuntimeException(
-	                "Unable to search outward batches", exception);
-	    }
+		} catch (SQLException exception) {
 
-	    return batches;
+			throw new RuntimeException(
+					"Unable to search pending checker batches",
+					exception);
+		}
+
+		return batches;
 	}
-	
-	 private OutwardBatch mapOutwardBatch(ResultSet resultSet)
-	            throws SQLException {
 
-	        OutwardBatch outwardBatch = new OutwardBatch();
+	private OutwardBatch mapOutwardBatch(
+			ResultSet resultSet) throws SQLException {
 
-	        outwardBatch.setOutwardBatchId(
-	                resultSet.getString("outward_batch_id"));
+		OutwardBatch outwardBatch =
+				new OutwardBatch();
 
-	        outwardBatch.setBatchReferenceId(
-	                resultSet.getString("batch_reference_id"));
+		outwardBatch.setOutwardBatchId(
+				resultSet.getString(
+						"outward_batch_id"));
 
-	        outwardBatch.setActualChequeCount(
-	                resultSet.getInt("actual_cheque_count"));
+		outwardBatch.setBatchReferenceId(
+				resultSet.getString(
+						"batch_reference_id"));
 
-	        outwardBatch.setActualTotalAmount(
-	                resultSet.getBigDecimal("actual_total_amount"));
+		outwardBatch.setActualChequeCount(
+				resultSet.getInt(
+						"actual_cheque_count"));
 
-	        outwardBatch.setBatchStatus(
-	                resultSet.getString("batch_status"));
+		outwardBatch.setActualTotalAmount(
+				resultSet.getBigDecimal(
+						"actual_total_amount"));
 
-	        outwardBatch.setUploadedBy(
-	                resultSet.getString("uploaded_by"));
+		outwardBatch.setBatchStatus(
+				resultSet.getString(
+						"batch_status"));
 
-	        outwardBatch.setUploadedAt(
-	                resultSet.getTimestamp("uploaded_at"));
+		outwardBatch.setUploadedBy(
+				resultSet.getString(
+						"uploaded_by"));
 
-	        return outwardBatch;
-	    }
+		outwardBatch.setUploadedAt(
+				resultSet.getTimestamp(
+						"uploaded_at"));
 
-	 @Override
-	 public int getSearchPendingBatchCount(
-	         String batchId,
-	         java.util.Date fromDate,
-	         java.util.Date toDate) {
+		return outwardBatch;
+	}
 
-	     StringBuilder sql = new StringBuilder();
+	@Override
+	public int getSearchPendingBatchCount(
+			String batchId) {
 
-	     sql.append("SELECT COUNT(*) ")
-	        .append("FROM outward_batch ")
-	        .append("WHERE UPPER(TRIM(batch_status)) IN (?, ?) ");
+		StringBuilder sql =
+				new StringBuilder(
+						"SELECT COUNT(*) "
+						+ "FROM outward_batch "
+						+ "WHERE UPPER(TRIM(batch_status)) IN (?, ?) ");
 
-	     List<Object> parameters = new ArrayList<>();
+		if (batchId != null && !batchId.trim().isEmpty()) {
 
-	     parameters.add("PENDING_CHECKER_PROCESS");
-	     parameters.add("ON_HOLD");
+			sql.append(
+					"AND UPPER(outward_batch_id) LIKE UPPER(?) ");
+		}
 
-	     if (batchId != null && !batchId.trim().isEmpty()) {
-	         sql.append("AND UPPER(outward_batch_id) LIKE UPPER(?) ");
-	         parameters.add("%" + batchId.trim() + "%");
-	     }
+		try (Connection connection =
+				DBConnection.getConnection();
+				PreparedStatement preparedStatement =
+						connection.prepareStatement(
+								sql.toString())) {
 
-	     if (fromDate != null) {
-	         sql.append("AND uploaded_at >= ? ");
-	         parameters.add(new java.sql.Timestamp(fromDate.getTime()));
-	     }
+			int parameterIndex = 1;
 
-	     if (toDate != null) {
-	         java.util.Calendar calendar = java.util.Calendar.getInstance();
-	         calendar.setTime(toDate);
-	         calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
+			preparedStatement.setString(
+					parameterIndex++,
+					"PENDING_CHECKER_PROCESS");
 
-	         sql.append("AND uploaded_at < ? ");
-	         parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
-	     }
+			preparedStatement.setString(
+					parameterIndex++,
+					"ON_HOLD");
 
-	     try (Connection connection = DBConnection.getConnection();
-	             PreparedStatement preparedStatement =
-	                     connection.prepareStatement(sql.toString())) {
+			if (batchId != null && !batchId.trim().isEmpty()) {
 
-	         for (int index = 0; index < parameters.size(); index++) {
+				preparedStatement.setString(
+						parameterIndex++,
+						"%" + batchId.trim() + "%");
+			}
 
-	             Object parameter = parameters.get(index);
+			try (ResultSet resultSet =
+					preparedStatement.executeQuery()) {
 
-	             if (parameter instanceof java.sql.Timestamp) {
-	                 preparedStatement.setTimestamp(
-	                         index + 1, (java.sql.Timestamp) parameter);
-	             } else {
-	                 preparedStatement.setString(
-	                         index + 1, parameter.toString());
-	             }
-	         }
+				if (resultSet.next()) {
 
-	         try (ResultSet resultSet = preparedStatement.executeQuery()) {
+					return resultSet.getInt(1);
+				}
+			}
 
-	             if (resultSet.next()) {
-	                 return resultSet.getInt(1);
-	             }
-	         }
+		} catch (SQLException exception) {
 
-	     } catch (SQLException exception) {
-	         throw new RuntimeException(
-	                 "Unable to count searched outward batches", exception);
-	     }
+			throw new RuntimeException(
+					"Unable to count searched checker batches",
+					exception);
+		}
 
-	     return 0;
-	 }
-
-	
+		return 0;
+	}
 }

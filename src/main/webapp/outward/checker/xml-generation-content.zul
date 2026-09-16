@@ -10,7 +10,7 @@
         sclass="xml-generation-content"
         hflex="1"
         vflex="1"
-        spacing="20px"
+        spacing="12px"
         apply="com.iispl.cts.controller.outward.checker.OutwardCheckerXmlGenerationController">
 
         <vlayout
