@@ -47,10 +47,7 @@
 
 								<label value="CHEQUE VERIFICATION" sclass="page-title" />
 
-								<label
-									value="Review the selected cheque and record the Checker decision."
-									sclass="page-description" />
-
+								
 							</vlayout>
 
 							<hlayout id="verificationNavigation" valign="middle"
@@ -472,11 +469,16 @@
 						
 						</hlayout>
 
-						<div id="noChequesContainer" visible="false" width="100%"
-							style="display:flex;
+					<div id="noChequesContainer"
+     visible="false"
+     hflex="1"
+     vflex="1"
+     style="display:flex;
             justify-content:center;
             align-items:center;
-            min-height:430px;">
+            width:100%;
+            min-height:430px;
+            box-sizing:border-box;">
 
 							<div width="650px"
 								style="background:#FFFFFF;
@@ -648,9 +650,15 @@
 
 
 						<window id="verificationSummaryWindow"
-							title="Complete Verification" width="520px" closable="true"
-							sizable="false" mode="modal" visible="false" border="normal">
-
+        title="Complete Verification"
+        width="440px"
+        closable="true"
+        sizable="false"
+        mode="modal"
+        visible="false"
+        border="normal"
+        sclass="verification-summary-modal">
+        
 							<vlayout width="100%" spacing="15px"
 								style="padding:20px;">
 
@@ -710,7 +718,7 @@
 									style="justify-content:center;">
 
 									<button id="btnStayVerification"
-										label="Stay in Verification" width="150px" height="34px" />
+										label="Stay in Verification" sclass="stay-verification-btn" width="150px" height="34px" />
 
 									<button id="btnSubmitBatch" label="✓ Submit"
 										width="110px" height="34px"

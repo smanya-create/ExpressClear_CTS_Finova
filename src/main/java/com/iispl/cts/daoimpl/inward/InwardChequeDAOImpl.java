@@ -286,7 +286,7 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 			return null;
 		}
 
-		String sql = "SELECT account_balance " + "FROM master_account_new " + "WHERE account_number = ?";
+		String sql = "SELECT account_balance " + "FROM master_account " + "WHERE account_number = ?";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
