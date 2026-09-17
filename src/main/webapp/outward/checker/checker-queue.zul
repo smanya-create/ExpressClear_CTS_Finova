@@ -1,592 +1,380 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?page title="ExpressClear CTS-Checker Queue" contentType="text/html;charset=UTF-8"?>
+<?page
+    title="Express Clear CTS - Checker Queue"
+    contentType="text/html;charset=UTF-8"
+?>
 
-<?link rel="stylesheet" type="text/css" href="/css/outward/checker-queue.css"?>
+<?link
+    rel="stylesheet"
+    type="text/css"
+    href="/css/outward/checker-queue.css"
+/?>
 
 <zk>
 
-    <window
-        id="checkerQueueWindow"
-        border="none"
+    <borderlayout
+        id="checkerQueueRoot"
         width="100%"
         height="100%"
-        sclass="checker-queue-window"
-        apply="com.iispl.cts.controller.outward.checker.OutwardCheckerQueueController">
+        apply="com.iispl.cts.controller.outward.checker.OutwardCheckerQueueController"
+        sclass="checker-queue-root">
 
-        <borderlayout
-            width="100%"
-            height="100%">
+        <!-- =====================================================
+             SIDEBAR
+             ===================================================== -->
 
-            <!-- =====================================================
-                 LEFT SIDEBAR
-                 ===================================================== -->
+        <west
+            size="220px"
+            border="none"
+            splittable="false"
+            collapsible="false">
 
-            <west
-                size="220px"
-                border="none"
-                splittable="false"
-                collapsible="false">
+            <include
+                src="/components/sidebar.zul"
+                role="OUTWARD_CHECKER"
+                activeTab="checker-queue"/>
 
-                <include
-                    src="/components/sidebar.zul"
-                    role="OUTWARD_CHECKER"
-                    activeTab="checker-queue" />
-
-            </west>
+        </west>
 
 
-            <!-- =====================================================
-                 RIGHT SIDE
-                 ===================================================== -->
+        <!-- =====================================================
+             MAIN AREA
+             ===================================================== -->
 
-            <center border="none">
+        <center
+            border="none"
+            autoscroll="false">
 
-                <borderlayout
-                    width="100%"
-                    height="100%">
+            <borderlayout
+                width="100%"
+                height="100%">
 
-                    <!-- =================================================
-                         HEADER
-                         ================================================= -->
+                <!-- =================================================
+                     COMMON HEADER
+                     ================================================= -->
 
-                    <north
-                        height="90px"
-                        border="none">
+                <north
+                    id="checkerQueueHeaderArea"
+                    size="84px"
+                    border="none"
+                    style="margin:0 !important;
+                           padding:0 !important;
+                           overflow:hidden;">
 
-                        <div sclass="page-header">
+                    <include
+                        id="headerInclude"
+                        src="/components/header.zul"
+                        pageTitle="Outward Process"
+                        hflex="1"
+                        vflex="1"/>
 
-                            <div sclass="header-left-content">
-
-                                <label
-                                    value="Cheque Verification"
-                                    sclass="header-page-title" />
-
-                                <label
-                                    value="Review the cheque and verify the read-only details submitted by Maker."
-                                    sclass="header-page-description" />
-
-                            </div>
-
-
-                            <div sclass="header-right-content">
-
-                                <include
-                                    src="/components/header.zul" />
-
-                            </div>
-
-                        </div>
-
-                    </north>
+                </north>
 
 
-                    <!-- =================================================
-                         MAIN CONTENT
-                         ================================================= -->
+                <!-- =================================================
+                     CONTENT
+                     ================================================= -->
 
-                    <center
-                        border="none"
-                        autoscroll="false">
+                <center
+                    border="none"
+                    autoscroll="false">
 
-                        <div
+                    <div
+                        width="100%"
+                        height="100%"
+                        sclass="content-wrapper">
+
+
+                        <!-- =================================================
+                             NO BATCH MESSAGE
+                             ================================================= -->
+
+                        <vlayout
+                            id="noBatchMessage"
+                            visible="false"
                             width="100%"
                             height="100%"
-                            sclass="content-wrapper">
-
-
-                            <!-- =================================================
-                                 NO BATCH MESSAGE
-                                 ================================================= -->
+                            style="align-items:center;
+                                   justify-content:center;">
 
                             <vlayout
-                                id="noBatchMessage"
-                                visible="false"
-                                width="100%"
-                                height="100%"
-                                style="align-items:center; justify-content:center;">
+                                spacing="15px"
+                                style="text-align:center;">
 
-                                <vlayout
-                                    spacing="15px"
-                                    style="text-align:center;">
+                                <label
+                                    value="No batch has been selected."
+                                    style="font-size:24px;
+                                           font-weight:bold;"/>
 
-                                    <label
-                                        value="No batch has been selected."
-                                        style="font-size:24px; font-weight:bold;" />
+                                <label
+                                    value="Please select a batch from the Checker Dashboard."
+                                    style="font-size:15px;"/>
 
-                                    <label
-                                        value="Please select a batch from the Checker Dashboard."
-                                        style="font-size:15px;" />
-
-                                    <button
-                                        id="btnBackToDashboard"
-                                        label="BACK TO DASHBOARD"
-                                        sclass="back-dashboard-button" />
-
-                                </vlayout>
+                                <button
+                                    id="btnBackToDashboard"
+                                    label="BACK TO DASHBOARD"
+                                    sclass="back-dashboard-button"/>
 
                             </vlayout>
 
-
-                            <!-- =================================================
-                                 CHECKER QUEUE CONTENT
-                                 ================================================= -->
-
-                            <div
-                                id="checkerQueueContent"
-                                sclass="main-page"
-                                visible="false">
-
-                                <div sclass="main-content">
+                        </vlayout>
 
 
-                                    <!-- =================================================
-                                         HEADING
-                                         ================================================= -->
+                        <!-- =================================================
+                             CHECKER QUEUE CONTENT
+                             ================================================= -->
+
+                        <div
+                            id="checkerQueueContent"
+                            sclass="main-page"
+                            visible="false">
+
+                            <div sclass="main-content">
+
+
+                                <!-- =================================================
+                                     VERIFICATION HEADER + PAGINATION
+                                     ================================================= -->
+
+                                <div sclass="queue-header-row">
 
                                     <div sclass="section-heading">
 
                                         <label
-                                            value="Cheque Queue"
-                                            sclass="main-title" />
+                                            value="VERIFICATION"
+                                            sclass="main-title"/>
 
                                     </div>
 
 
-                                    <!-- =================================================
-                                         SUMMARY CARD
-                                         ================================================= -->
+                                    <!-- PAGINATION -->
 
-                                    <div sclass="summary-card">
+                                    <div sclass="pagination-card">
 
+                                        <div sclass="progress-section">
 
-                                        <!-- BATCH -->
-
-                                        <div sclass="summary-item">
-
-                                            <label
-                                                value="BATCH"
-                                                sclass="summary-label" />
+                                            <progressmeter
+                                                id="progressBar"
+                                                value="0"
+                                                sclass="queue-progress-bar"/>
 
                                             <label
-                                                id="lblBatchNo"
-                                                value="-"
-                                                sclass="summary-value" />
+                                                id="lblProgress"
+                                                value="0/0 (0%)"
+                                                sclass="progress-text"/>
 
                                         </div>
 
 
-                                        <!-- CHEQUE -->
+                                        <div sclass="pagination-divider"/>
 
-                                        <div sclass="summary-item">
-
-                                            <label
-                                                value="CHEQUE"
-                                                sclass="summary-label" />
-
-                                            <label
-                                                id="lblChequeNo"
-                                                value="-"
-                                                sclass="summary-value" />
-
-                                        </div>
-
-
-                                        <!-- CHEQUE STATUS -->
-
-                                      <div sclass="summary-item">
-
-    <label
-        value="CHEQUE STATUS"
-        sclass="summary-label" />
-
-    <label
-        id="lblQueueStatus"
-        value="-"
-        sclass="status-pending" />
-
-</div>
-
-
-                                        <!-- CURRENT CHEQUE -->
-
-                                        <div sclass="summary-item">
-
-                                            <label
-                                                value="CURRENT CHEQUE"
-                                                sclass="summary-label" />
-
-                                            <label
-                                                id="lblCurrentCheque"
-                                                value="-"
-                                                sclass="summary-value" />
-
-                                        </div>
-
-
-                                        <!-- REMAINING -->
-
-                                        <div sclass="summary-item last">
-
-                                            <label
-                                                value="REMAINING"
-                                                sclass="summary-label" />
-
-                                            <label
-                                                id="lblRemaining"
-                                                value="-"
-                                                sclass="remaining-value" />
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <!-- =================================================
-                                         IMAGE + DETAILS ROW
-                                         ================================================= -->
-
-                                    <div sclass="verification-row">
-
-
-                                        <!-- =================================================
-                                             CHEQUE IMAGE CARD
-                                             ================================================= -->
-
-                                        <div sclass="image-card">
-
-                                            <label
-                                                value="Cheque Image"
-                                                sclass="card-title" />
-
-                                            <label
-                                                value="Read-only image for visual verification"
-                                                sclass="card-description" />
-
-
-                                            <!-- =================================================
-                                                 CHEQUE IMAGE
-                                                 ================================================= -->
-
-                                            <div sclass="cheque-image-container">
-
-                                                <image
-                                                    id="imgCheque"
-                                                    sclass="cheque-image" />
-
-                                            </div>
-
-
-                                            <!-- =================================================
-                                                 ZOOM + IMAGE SIDE CONTROLS
-                                                 BELOW IMAGE
-                                                 ================================================= -->
-
-                                            <div sclass="zoom-controls">
-
-                                                <button
-                                                    id="btnZoomOut"
-                                                    label="−"
-                                                    sclass="zoom-button"
-                                                    tooltiptext="Zoom Out" />
-
-                                                <label
-                                                    id="lblZoom"
-                                                    value="100%"
-                                                    sclass="zoom-level" />
-
-                                                <button
-                                                    id="btnZoomIn"
-                                                    label="+"
-                                                    sclass="zoom-button"
-                                                    tooltiptext="Zoom In" />
-
-                                                <button
-                                                    id="btnZoomReset"
-                                                    label="Reset"
-                                                    sclass="zoom-reset-button"
-                                                    tooltiptext="Reset Zoom" />
-
-                                                <button
-                                                    id="btnImageSide"
-                                                    label="BACK SIDE"
-                                                    sclass="image-side-button" />
-
-                                            </div>
-
-                                        </div>
-
-
-                                        <!-- =================================================
-                                             CHEQUE DETAILS CARD
-                                             ================================================= -->
-
-                                        <div sclass="details-card">
-
-
-                                            <!-- =================================================
-                                                 DETAILS HEADER
-                                                 ================================================= -->
-
-                                            <div sclass="details-card-header">
-
-                                                <div sclass="details-card-title-area">
-
-                                                    <label
-                                                        value="Cheque Details"
-                                                        sclass="card-title" />
-
-                                                    <label
-                                                        value="Read-only · Submitted by Maker"
-                                                        sclass="card-description" />
-
-                                                </div>
-
-
-                                                <!-- ACCOUNT VALIDATION -->
-
-                                                <label
-                                                    id="lblAccountValidation"
-                                                    value="NOT VERIFIED"
-                                                    sclass="validation-pending-badge" />
-
-                                            </div>
-
-
-                                            <!-- =================================================
-                                                 MAKER STATUS MESSAGE
-
-                                                 THIS IS BEFORE CHEQUE DETAILS
-                                                 ================================================= -->
-
-                                            <vlayout
-                                                id="makerRejectionRequestSection"
-                                                visible="false"
-                                                spacing="3px"
-                                                style="margin:6px 0 10px 0;
-                                                       padding:8px 10px;
-                                                       background:#FFF7ED;
-                                                       border-left:3px solid #F59E0B;
-                                                       border-radius:3px;">
-
-                                                <!-- DYNAMIC HEADING -->
-
-                                                <label
-                                                    id="lblMakerStatusHeading"
-                                                    value=""
-                                                    style="font-size:10px;
-                                                           font-weight:700;
-                                                           color:#B45309;" />
-
-
-                                                <!-- REASON CODE / APPROVED MESSAGE -->
-
-                                                <label
-                                                    id="lblMakerRejectionReasonCode"
-                                                    value=""
-                                                    style="font-size:11px;
-                                                           color:#475569;
-                                                           white-space:normal;" />
-
-
-                                                <!-- REASON NAME -->
-
-                                                <label
-                                                    id="lblMakerRejectionReasonName"
-                                                    value=""
-                                                    style="font-size:11px;
-                                                           color:#475569;
-                                                           white-space:normal;" />
-
-
-                                                <!-- REMARKS -->
-
-                                                <label
-                                                    id="lblMakerRejectionRemarks"
-                                                    value=""
-                                                    style="font-size:11px;
-                                                           color:#475569;
-                                                           white-space:normal;" />
-
-                                            </vlayout>
-
-
-                                            <!-- =================================================
-                                                 ROW 1
-                                                 ================================================= -->
-
-                                            <div sclass="two-column-fields">
-
-                                                <div sclass="field-group">
-
-                                                    <label
-                                                        value="CHEQUE NUMBER"
-                                                        sclass="field-label" />
-
-                                                    <textbox
-                                                        id="txtChequeNo"
-                                                        readonly="true"
-                                                        width="100%"
-                                                        sclass="readonly-field" />
-
-                                                </div>
-
-
-                                                <div sclass="field-group">
-
-                                                    <label
-                                                        value="MICR"
-                                                        sclass="field-label" />
-
-                                                    <textbox
-                                                        id="txtMicr"
-                                                        readonly="true"
-                                                        width="100%"
-                                                        sclass="readonly-field" />
-
-                                                </div>
-
-                                            </div>
-
-
-                                            <!-- =================================================
-                                                 ROW 2
-                                                 ================================================= -->
-
-                                            <div sclass="two-column-fields">
-
-                                                <div sclass="field-group">
-
-                                                    <label
-                                                        value="PAYEE NAME"
-                                                        sclass="field-label" />
-
-                                                    <textbox
-                                                        id="txtpayeeName"
-                                                        readonly="true"
-                                                        width="100%"
-                                                        sclass="readonly-field" />
-
-                                                </div>
-
-
-                                                <div sclass="field-group">
-
-                                                    <label
-                                                        value="PAYEE ACCOUNT NUMBER"
-                                                        sclass="field-label" />
-
-                                                    <textbox
-                                                        id="txtAccountNo"
-                                                        readonly="true"
-                                                        width="100%"
-                                                        sclass="readonly-field" />
-
-                                                </div>
-
-                                            </div>
-
-
-                                            <!-- =================================================
-                                                 ROW 3
-                                                 ================================================= -->
-
-                                            <div sclass="two-column-fields">
-
-                                                <div sclass="field-group">
-
-                                                    <label
-                                                        value="AMOUNT"
-                                                        sclass="field-label" />
-
-                                                    <textbox
-                                                        id="txtAmount"
-                                                        readonly="true"
-                                                        width="100%"
-                                                        sclass="readonly-field" />
-
-                                                </div>
-
-
-                                                <div sclass="field-group">
-
-                                                    <label
-                                                        value="CHEQUE DATE"
-                                                        sclass="field-label" />
-
-                                                    <textbox
-                                                        id="txtChequeDate"
-                                                        readonly="true"
-                                                        width="100%"
-                                                        sclass="readonly-field" />
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <!-- =================================================
-                                         NAVIGATION
-                                         BELOW BOTH CARDS
-                                         ================================================= -->
-
-                                    <div sclass="navigation-row">
 
                                         <button
                                             id="btnPrevious"
-                                            label="‹  PREVIOUS"
+                                            label="‹ Prev"
                                             disabled="true"
-                                            sclass="navigation-button" />
+                                            sclass="pagination-button"/>
+
 
                                         <label
                                             id="lblCurrentChequeNavigation"
-                                            value="Cheque 1 of 1 · 0 remaining"
-                                            sclass="navigation-label" />
+                                            value="0 of 0"
+                                            sclass="pagination-count"/>
+
 
                                         <button
                                             id="btnNext"
-                                            label="NEXT  ›"
-                                            sclass="navigation-button" />
+                                            label="Next ›"
+                                            sclass="pagination-button"/>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- =================================================
+                                     SUMMARY
+                                     ================================================= -->
+
+                                <div sclass="summary-card">
+
+                                    <!-- BATCH ID -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="BATCH ID"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblBatchNo"
+                                            value="-"
+                                            sclass="summary-value"/>
 
                                     </div>
 
 
-                                    <!-- =================================================
-                                         CHECKER ACTION
-                                         ================================================= -->
+                                    <!-- CHEQUE COUNT -->
 
-                                    <div sclass="action-card">
+                                    <div sclass="summary-item">
 
                                         <label
-                                            value="CHECKER ACTION"
-                                            sclass="action-title" />
+                                            value="CHEQUE COUNT"
+                                            sclass="summary-label"/>
 
-                                        <div sclass="action-buttons">
+                                        <label
+                                            id="lblChequeCount"
+                                            value="0"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- CHEQUE NUMBER -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CHEQUE NUMBER"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblChequeNo"
+                                            value="-"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- CHEQUE STATUS -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CHEQUE STATUS"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblQueueStatus"
+                                            value="-"
+                                            sclass="status-pending"/>
+
+                                    </div>
+
+
+                                    <!-- CURRENT CHEQUE -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CURRENT CHEQUE"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblCurrentCheque"
+                                            value="-"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- REMAINING -->
+
+                                    <div sclass="summary-item last">
+
+                                        <label
+                                            value="REMAINING"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblRemaining"
+                                            value="0"
+                                            sclass="remaining-value"/>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- =================================================
+                                     VERIFICATION ROW
+                                     ================================================= -->
+
+                                <div sclass="verification-row">
+
+
+                                    <!-- =================================================
+                                         CHEQUE IMAGE CARD
+                                         ================================================= -->
+
+                                    <div sclass="image-card">
+
+                                        <!-- IMAGE HEADER -->
+
+                                        <div sclass="image-card-header">
+
+                                            <div sclass="image-title-area">
+
+                                                <label
+                                                    value="Cheque Image"
+                                                    sclass="card-title"/>
+
+                                                <label
+                                                    value="Read-only image for visual verification"
+                                                    sclass="card-description"/>
+
+                                            </div>
+
 
                                             <button
-                                                id="btnVerified"
-                                                label="VERIFY"
-                                                sclass="verified-button" />
+                                                id="btnImageSide"
+                                                label="BACK SIDE"
+                                                sclass="image-side-button"/>
 
-                                       <button id="btnXmlGeneration"
-        label="APPROVE BATCH"
-        sclass="xml-generation-button"
-        disabled="true"
-        onClick="@command('xmlGeneration')" />
+                                        </div>
+
+
+                                        <!-- CHEQUE IMAGE -->
+
+                                        <div sclass="cheque-image-container">
+
+                                            <image
+                                                id="imgCheque"
+                                                sclass="cheque-image"/>
+
+                                        </div>
+
+
+                                        <!-- ZOOM CONTROLS -->
+
+                                        <div sclass="zoom-controls">
 
                                             <button
-                                                id="btnReturn"
-                                                label="RETURN TO MAKER"
-                                                sclass="return-button" />
+                                                id="btnZoomOut"
+                                                label="−"
+                                                sclass="zoom-button"
+                                                tooltiptext="Zoom Out"/>
+
+
+                                            <label
+                                                id="lblZoom"
+                                                value="100%"
+                                                sclass="zoom-level"/>
+
 
                                             <button
-                                                id="btnReject"
-                                                label="REJECT"
-                                                sclass="reject-button" />
+                                                id="btnZoomIn"
+                                                label="+"
+                                                sclass="zoom-button"
+                                                tooltiptext="Zoom In"/>
+
+
+                                            <button
+                                                id="btnZoomReset"
+                                                label="Reset"
+                                                sclass="zoom-reset-button"
+                                                tooltiptext="Reset Zoom"/>
 
                                         </div>
 
@@ -594,42 +382,297 @@
 
 
                                     <!-- =================================================
-                                         FOOTER
+                                         CHEQUE DETAILS CARD
                                          ================================================= -->
 
-                                    <div sclass="page-footer">
+                                    <div sclass="details-card">
 
-                                        <label
-                                            value="Express Clear CTS · Checker Portal"
-                                            sclass="footer-left" />
 
-                                        <label
-                                            value="Cheque Verification"
-                                            sclass="footer-right" />
+                                        <!-- =================================================
+                                             DETAILS HEADER
+                                             ================================================= -->
+
+                                        <div sclass="details-card-header">
+
+                                            <div sclass="details-card-title-area">
+
+                                                <label
+                                                    value="Cheque Details"
+                                                    sclass="card-title"/>
+
+                                                <label
+                                                    value="Read-only · Submitted by Maker"
+                                                    sclass="card-description"/>
+
+                                            </div>
+
+
+                                            <label
+                                                id="lblAccountValidation"
+                                                value="NOT VERIFIED"
+                                                sclass="validation-pending-badge"/>
+
+                                        </div>
+
+
+                                        <!-- =================================================
+                                             FIXED MAKER REJECTION / WARNING AREA
+
+                                             IMPORTANT:
+                                             Keep visible="true".
+                                             This reserves fixed space so the
+                                             action buttons do not move when
+                                             clicking NEXT/PREV.
+                                             ================================================= -->
+
+                                        <vlayout
+                                            id="makerRejectionRequestSection"
+                                            visible="true"
+                                            spacing="3px"
+                                            style="width:100%;
+                                                   height:85px;
+                                                   min-height:85px;
+                                                   max-height:85px;
+                                                   margin:3px 0 7px 0;
+                                                   padding:7px 9px;
+                                                   background:#FFF7ED;
+                                                   border-left:3px solid #F59E0B;
+                                                   border-radius:3px;
+                                                   box-sizing:border-box;
+                                                   overflow:hidden;
+                                                   flex-shrink:0;">
+
+                                            <label
+                                                id="lblMakerStatusHeading"
+                                                value=""
+                                                style="font-size:10px;
+                                                       font-weight:700;
+                                                       color:#B45309;"/>
+
+
+                                            <label
+                                                id="lblMakerRejectionReasonCode"
+                                                value=""
+                                                style="font-size:10px;
+                                                       color:#475569;
+                                                       white-space:normal;"/>
+
+
+                                            <label
+                                                id="lblMakerRejectionReasonName"
+                                                value=""
+                                                style="font-size:10px;
+                                                       color:#475569;
+                                                       white-space:normal;"/>
+
+
+                                            <label
+                                                id="lblMakerRejectionRemarks"
+                                                value=""
+                                                style="font-size:10px;
+                                                       color:#475569;
+                                                       white-space:normal;"/>
+
+                                        </vlayout>
+
+
+                                        <!-- =================================================
+                                             CHEQUE NUMBER + MICR
+                                             ================================================= -->
+
+                                        <div sclass="two-column-fields">
+
+                                            <div sclass="field-group">
+
+                                                <label
+                                                    value="CHEQUE NUMBER"
+                                                    sclass="field-label"/>
+
+                                                <textbox
+                                                    id="txtChequeNo"
+                                                    readonly="true"
+                                                    width="100%"
+                                                    sclass="readonly-field"/>
+
+                                            </div>
+
+
+                                            <div sclass="field-group">
+
+                                                <label
+                                                    value="MICR"
+                                                    sclass="field-label"/>
+
+                                                <textbox
+                                                    id="txtMicr"
+                                                    readonly="true"
+                                                    width="100%"
+                                                    sclass="readonly-field"/>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- =================================================
+                                             PAYEE + ACCOUNT
+                                             ================================================= -->
+
+                                        <div sclass="two-column-fields">
+
+                                            <div sclass="field-group">
+
+                                                <label
+                                                    value="PAYEE NAME"
+                                                    sclass="field-label"/>
+
+                                                <textbox
+                                                    id="txtpayeeName"
+                                                    readonly="true"
+                                                    width="100%"
+                                                    sclass="readonly-field"/>
+
+                                            </div>
+
+
+                                            <div sclass="field-group">
+
+                                                <label
+                                                    value="PAYEE ACCOUNT NUMBER"
+                                                    sclass="field-label"/>
+
+                                                <textbox
+                                                    id="txtAccountNo"
+                                                    readonly="true"
+                                                    width="100%"
+                                                    sclass="readonly-field"/>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- =================================================
+                                             AMOUNT + DATE
+                                             ================================================= -->
+
+                                        <div sclass="two-column-fields">
+
+                                            <div sclass="field-group">
+
+                                                <label
+                                                    value="AMOUNT"
+                                                    sclass="field-label"/>
+
+                                                <textbox
+                                                    id="txtAmount"
+                                                    readonly="true"
+                                                    width="100%"
+                                                    sclass="readonly-field"/>
+
+                                            </div>
+
+
+                                            <div sclass="field-group">
+
+                                                <label
+                                                    value="CHEQUE DATE"
+                                                    sclass="field-label"/>
+
+                                                <textbox
+                                                    id="txtChequeDate"
+                                                    readonly="true"
+                                                    width="100%"
+                                                    sclass="readonly-field"/>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- =================================================
+                                             CHECKER ACTION AREA
+                                             ================================================= -->
+
+                                        <div sclass="details-action-area">
+
+                                            <label
+                                                value="CHECKER ACTION"
+                                                sclass="details-action-title"/>
+
+
+                                            <div sclass="details-action-buttons">
+
+                                                <!-- VERIFY -->
+
+                                                <button
+                                                    id="btnVerified"
+                                                    label="VERIFY"
+                                                    sclass="verified-button"/>
+
+
+                                                <!-- RETURN TO MAKER -->
+
+                                                <button
+                                                    id="btnReturn"
+                                                    label="RETURN TO MAKER"
+                                                    sclass="return-button"/>
+
+
+                                                <!-- REJECT -->
+
+                                                <button
+                                                    id="btnReject"
+                                                    label="REJECT"
+                                                    sclass="reject-button"/>
+
+                                            </div>
+
+
+                                            <!-- APPROVE BATCH -->
+
+                                            <button
+                                                id="btnXmlGeneration"
+                                                label="APPROVE BATCH"
+                                                sclass="xml-generation-button"
+                                                disabled="true"/>
+
+                                        </div>
 
                                     </div>
 
+                                </div>
+
+
+                                <!-- =================================================
+                                     FOOTER
+                                     ================================================= -->
+
+                                <div sclass="page-footer">
+
+                                    <label
+                                        value="Express Clear CTS · Checker Portal"
+                                        sclass="footer-left"/>
+
+
+                                    <label
+                                        value="Cheque Verification"
+                                        sclass="footer-right"/>
 
                                 </div>
-                                <!-- END main-content -->
-
 
                             </div>
-                            <!-- END checkerQueueContent -->
-
 
                         </div>
-                        <!-- END content-wrapper -->
 
+                    </div>
 
-                    </center>
+                </center>
 
-                </borderlayout>
+            </borderlayout>
 
-            </center>
+        </center>
 
-        </borderlayout>
-
-    </window>
+    </borderlayout>
 
 </zk>

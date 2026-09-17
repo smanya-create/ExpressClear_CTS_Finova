@@ -21,6 +21,7 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
@@ -68,6 +69,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	 * ============================================================
 	 */
 
+	private Label lblChequeCount;
 	private Label lblBatchNo;
 	private Label lblChequeNo;
 	private Label lblQueueStatus;
@@ -107,6 +109,9 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	 * ============================================================ NAVIGATION
 	 * ============================================================
 	 */
+	
+	private Progressmeter progressBar;
+	private Label lblProgress;
 
 	private Button btnPrevious;
 	private Button btnNext;
@@ -181,10 +186,11 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	// REJECT CHEQUE POPUP
 	// ============================================================
 
+	
+
 	private Window rejectWindow;
 
 	private Label lblRejectBatch;
-
 	private Label lblRejectCheque;
 
 	private Combobox cmbRejectReason;
@@ -192,9 +198,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	private Textbox txtRejectRemarks;
 
 	private Button btnRejectConfirm;
-
 	private Button btnRejectCancel;
-
+	
 	private Vlayout makerRejectionRequestSection;
 
 	private Label lblMakerStatusHeading;
@@ -378,6 +383,9 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		 */
 
 		createReturnMakerWindow();
+		
+		
+		
 
 		/*
 		 * ============================================================ LOAD CHEQUES
@@ -385,6 +393,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		 */
 
 		loadCheques();
+		
+		updatePaginationProgress();
 
 		/*
 		 * ============================================================ TARGET CHEQUE
@@ -443,8 +453,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		 * ============================================================ CREATE REJECT
 		 * WINDOW ============================================================
 		 */
-
 		createRejectWindow();
+
 	}
 
 	private void loadRejectRequestDetails(OutwardCheque cheque) {
@@ -674,6 +684,60 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			makerRejectionRequestSection.setVisible(false);
 		}
 	}
+	
+	
+	
+	/*
+	 * ============================================================
+	 * UPDATE PAGINATION + PROGRESS BAR
+	 * ============================================================
+	 */
+	private void updatePaginationProgress() {
+
+	    if (cheques == null || cheques.isEmpty()) {
+
+	        progressBar.setValue(0);
+
+	        lblProgress.setValue("0/0 (0%)");
+
+	        lblCurrentChequeNavigation.setValue("0 of 0");
+
+	        btnPrevious.setDisabled(true);
+
+	        btnNext.setDisabled(true);
+
+	        return;
+	    }
+
+	    int total = cheques.size();
+
+	    // currentIndex starts from 0
+	    // So add 1 for user display
+	    int current = currentIndex + 1;
+
+	    // Calculate percentage
+	    int percentage = (current * 100) / total;
+
+	    // Update blue progress bar
+	    progressBar.setValue(percentage);
+
+	    // Update text beside progress bar
+	    lblProgress.setValue(
+	        current + "/" + total + " (" + percentage + "%)"
+	    );
+
+	    // Update center pagination text
+	    lblCurrentChequeNavigation.setValue(
+	        current + " of " + total
+	    );
+
+	    // Previous button
+	    btnPrevious.setDisabled(currentIndex <= 0);
+
+	    // Next button
+	    btnNext.setDisabled(currentIndex >= total - 1);
+	}
+	
 	// ============================================================
 	// LOAD REJECTED REASONS
 	// ============================================================
@@ -717,52 +781,158 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	private void createReturnMakerWindow() {
 
-		try {
+	    try {
 
-			if (returnMakerWindow != null) {
+	        /*
+	         * If an old window exists, safely remove it first.
+	         */
+	        if (returnMakerWindow != null) {
 
-				return;
-			}
+	            try {
 
-			returnMakerWindow = (Window) Executions.createComponents("/outward/checker/return-to-maker.zul", null,
-					null);
+	                if (returnMakerWindow.getPage() != null) {
+	                    returnMakerWindow.detach();
+	                }
 
-			lblReturnBatch = (Label) returnMakerWindow.getFellowIfAny("lblReturnBatch");
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
 
-			lblReturnCheque = (Label) returnMakerWindow.getFellowIfAny("lblReturnCheque");
+	            returnMakerWindow = null;
+	        }
 
-			cmbSendBackReason = (Combobox) returnMakerWindow.getFellowIfAny("cmbSendBackReason");
+	        /*
+	         * ============================================================
+	         * CREATE NEW RETURN TO MAKER WINDOW
+	         * ============================================================
+	         */
+	        returnMakerWindow = (Window) Executions.createComponents(
+	                "/outward/checker/return-to-maker.zul",
+	                null,
+	                null
+	        );
 
-			txtReturnRemarks = (Textbox) returnMakerWindow.getFellowIfAny("txtReturnRemarks");
+	        /*
+	         * ============================================================
+	         * IMPORTANT
+	         * Attach the window to the CURRENT PAGE.
+	         * ============================================================
+	         */
+	        if (self != null && self.getPage() != null) {
 
-			btnReturnConfirm = (Button) returnMakerWindow.getFellowIfAny("btnReturnConfirm");
+	            returnMakerWindow.setPage(self.getPage());
 
-			btnReturnCancel = (Button) returnMakerWindow.getFellowIfAny("btnReturnCancel");
+	        } else {
 
-			if (btnReturnConfirm != null) {
+	            throw new IllegalStateException(
+	                    "Current page is not available."
+	            );
+	        }
 
-				btnReturnConfirm.addEventListener("onClick", event -> confirmReturnToMaker());
-			}
+	        /*
+	         * ============================================================
+	         * GET COMPONENTS
+	         * ============================================================
+	         */
+	        lblReturnBatch =
+	                (Label) returnMakerWindow.getFellowIfAny("lblReturnBatch");
 
-			if (btnReturnCancel != null) {
+	        lblReturnCheque =
+	                (Label) returnMakerWindow.getFellowIfAny("lblReturnCheque");
 
-				btnReturnCancel.addEventListener("onClick", event -> {
+	        cmbSendBackReason =
+	                (Combobox) returnMakerWindow.getFellowIfAny(
+	                        "cmbSendBackReason"
+	                );
 
-					if (returnMakerWindow != null) {
+	        txtReturnRemarks =
+	                (Textbox) returnMakerWindow.getFellowIfAny(
+	                        "txtReturnRemarks"
+	                );
 
-						returnMakerWindow.setVisible(false);
-					}
-				});
-			}
+	        btnReturnConfirm =
+	                (Button) returnMakerWindow.getFellowIfAny(
+	                        "btnReturnConfirm"
+	                );
 
-			returnMakerWindow.setVisible(false);
+	        btnReturnCancel =
+	                (Button) returnMakerWindow.getFellowIfAny(
+	                        "btnReturnCancel"
+	                );
 
-		} catch (Exception e) {
+	        /*
+	         * ============================================================
+	         * CONFIRM BUTTON
+	         * ============================================================
+	         */
+	        if (btnReturnConfirm != null) {
 
-			e.printStackTrace();
-		}
+	            btnReturnConfirm.addEventListener(
+	                    "onClick",
+	                    event -> confirmReturnToMaker()
+	            );
+	        }
+
+	        /*
+	         * ============================================================
+	         * CANCEL BUTTON
+	         * ============================================================
+	         */
+	        if (btnReturnCancel != null) {
+
+	            btnReturnCancel.addEventListener(
+	                    "onClick",
+	                    event -> closeReturnMakerWindow()
+	            );
+	        }
+
+	        /*
+	         * Initially hidden.
+	         */
+	        returnMakerWindow.setVisible(false);
+
+	        System.out.println(
+	                "Return to Maker window created and attached."
+	        );
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        returnMakerWindow = null;
+
+	        Messagebox.show(
+	                "Unable to create Return to Maker window.\n\n"
+	                        + e.getMessage(),
+	                "Return to Maker",
+	                Messagebox.OK,
+	                Messagebox.ERROR
+	        );
+	    }
 	}
+	
+	private void closeReturnMakerWindow() {
 
+	    try {
+
+	        if (returnMakerWindow != null) {
+
+	            if (returnMakerWindow.getPage() != null) {
+
+	                returnMakerWindow.detach();
+
+	            }
+
+	            returnMakerWindow = null;
+	        }
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        returnMakerWindow = null;
+	    }
+	}
 	/*
 	 * ============================================================ LOAD CHEQUES
 	 * ============================================================
@@ -1412,153 +1582,262 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	 * VALIDATION POPUP ============================================================
 	 */
 
+	
+	/**
+	 * ============================================================
+	 * ACCOUNT VALIDATION POPUP
+	 * ============================================================
+	 */
 	private void showAccountValidationPopup(boolean valid, String message) {
 
-		try {
+	    try {
 
-			/*
-			 * Remove previous popup if any.
-			 */
-			if (accountValidationWindow != null) {
+	        System.out.println("==========================================");
+	        System.out.println("OPEN ACCOUNT VALIDATION POPUP");
+	        System.out.println("Valid  = " + valid);
+	        System.out.println("Message = " + message);
+	        System.out.println("==========================================");
 
-				accountValidationWindow.detach();
+	        /*
+	         * --------------------------------------------------------
+	         * REMOVE PREVIOUS POPUP
+	         * --------------------------------------------------------
+	         */
+	        if (accountValidationWindow != null) {
 
-				accountValidationWindow = null;
-			}
+	            try {
+	                accountValidationWindow.detach();
+	            } catch (Exception ex) {
+	                ex.printStackTrace();
+	            }
 
-			/*
-			 * ==================================================== CREATE WINDOW
-			 * ====================================================
-			 */
+	            accountValidationWindow = null;
+	        }
 
-			accountValidationWindow = new Window();
+	        /*
+	         * --------------------------------------------------------
+	         * CREATE WINDOW
+	         * --------------------------------------------------------
+	         */
+	        accountValidationWindow = new Window();
 
-			accountValidationWindow.setWidth("430px");
+	        accountValidationWindow.setWidth("430px");
+	        accountValidationWindow.setHeight("250px");
+	        accountValidationWindow.setBorder("none");
+	        accountValidationWindow.setClosable(false);
+	        accountValidationWindow.setSizable(false);
+	        accountValidationWindow.setPosition("center");
 
-			accountValidationWindow.setHeight("250px");
+	        accountValidationWindow.setStyle(
+	                "background:#ffffff;"
+	                + "border-radius:12px;"
+	                + "box-shadow:0 10px 35px rgba(0,0,0,0.20);"
+	        );
 
-			accountValidationWindow.setBorder("none");
+	        /*
+	         * --------------------------------------------------------
+	         * MAIN CONTAINER
+	         * --------------------------------------------------------
+	         */
+	        Div container = new Div();
 
-			accountValidationWindow.setClosable(false);
+	        container.setStyle(
+	                "width:100%;"
+	                + "height:100%;"
+	                + "box-sizing:border-box;"
+	                + "padding:25px 30px;"
+	                + "text-align:center;"
+	        );
 
-			accountValidationWindow.setSizable(false);
+	        /*
+	         * --------------------------------------------------------
+	         * ICON
+	         * --------------------------------------------------------
+	         */
+	        lblAccountValidationPopupIcon = new Label();
 
-			accountValidationWindow.setPosition("center");
+	        lblAccountValidationPopupIcon.setValue(
+	                valid ? "✓" : "!"
+	        );
 
-			accountValidationWindow.setStyle("background:#ffffff;" + "border-radius:12px;" + "box-shadow:"
-					+ "0 10px 35px " + "rgba(0,0,0,0.20);");
+	        lblAccountValidationPopupIcon.setStyle(
+	                "display:block;"
+	                + "width:52px;"
+	                + "height:52px;"
+	                + "line-height:52px;"
+	                + "margin:0 auto 14px;"
+	                + "border-radius:50%;"
+	                + (valid
+	                    ? "background:#dcfce7;color:#16a34a;"
+	                    : "background:#fee2e2;color:#dc2626;")
+	                + "font-size:28px;"
+	                + "font-weight:bold;"
+	        );
 
-			/*
-			 * ==================================================== CONTAINER
-			 * ====================================================
-			 */
+	        /*
+	         * --------------------------------------------------------
+	         * TITLE
+	         * --------------------------------------------------------
+	         */
+	        lblAccountValidationPopupTitle = new Label();
 
-			Div container = new Div();
+	        lblAccountValidationPopupTitle.setValue(
+	                valid
+	                    ? "Account Number Valid"
+	                    : "Invalid Account Number"
+	        );
 
-			container.setStyle("width:100%;" + "height:100%;" + "box-sizing:border-box;" + "padding:25px 30px;"
-					+ "text-align:center;");
+	        lblAccountValidationPopupTitle.setStyle(
+	                "display:block;"
+	                + "margin-bottom:10px;"
+	                + "font-size:20px;"
+	                + "font-weight:700;"
+	                + "color:#1f2937;"
+	        );
 
-			/*
-			 * ==================================================== ICON
-			 * ====================================================
-			 */
+	        /*
+	         * --------------------------------------------------------
+	         * MESSAGE
+	         * --------------------------------------------------------
+	         */
+	        lblAccountValidationPopupMessage = new Label();
 
-			lblAccountValidationPopupIcon = new Label();
+	        lblAccountValidationPopupMessage.setValue(message);
 
-			lblAccountValidationPopupIcon.setStyle("display:block;" + "width:52px;" + "height:52px;"
-					+ "line-height:52px;" + "margin:0 auto 14px;" + "border-radius:50%;"
-					+ (valid ? "background:#dcfce7;" + "color:#16a34a;" : "background:#fee2e2;" + "color:#dc2626;")
-					+ "font-size:28px;" + "font-weight:bold;");
+	        lblAccountValidationPopupMessage.setStyle(
+	                "display:block;"
+	                + "width:100%;"
+	                + "margin-bottom:22px;"
+	                + "font-size:14px;"
+	                + "line-height:22px;"
+	                + "color:#6b7280;"
+	                + "text-align:center;"
+	        );
 
-			lblAccountValidationPopupIcon.setValue(valid ? "✓" : "!");
+	        /*
+	         * --------------------------------------------------------
+	         * OK BUTTON
+	         * --------------------------------------------------------
+	         */
+	        btnAccountValidationOk = new Button("OK");
 
-			/*
-			 * ==================================================== TITLE
-			 * ====================================================
-			 */
+	        btnAccountValidationOk.setStyle(
+	                "width:90px;"
+	                + "height:36px;"
+	                + "border:none;"
+	                + "border-radius:6px;"
+	                + "background:#2563eb;"
+	                + "color:#ffffff;"
+	                + "font-size:14px;"
+	                + "font-weight:600;"
+	                + "cursor:pointer;"
+	        );
 
-			lblAccountValidationPopupTitle = new Label();
+	        btnAccountValidationOk.addEventListener(
+	                "onClick",
+	                event -> {
 
-			lblAccountValidationPopupTitle.setValue(valid ? "Account Number Valid" : "Invalid Account Number");
+	                    if (accountValidationWindow != null) {
 
-			lblAccountValidationPopupTitle.setStyle("display:block;" + "margin-bottom:10px;" + "font-size:20px;"
-					+ "font-weight:700;" + "color:#1f2937;");
+	                        accountValidationWindow.detach();
+	                        accountValidationWindow = null;
+	                    }
 
-			/*
-			 * ==================================================== MESSAGE
-			 * ====================================================
-			 */
+	                    /*
+	                     * If account is VALID,
+	                     * check whether all cheques are valid.
+	                     */
+	                    if (accountValidationPassed) {
+	                        checkAllAccountsValid();
+	                    }
+	                }
+	        );
 
-			lblAccountValidationPopupMessage = new Label();
+	        /*
+	         * --------------------------------------------------------
+	         * ADD COMPONENTS TO CONTAINER
+	         * --------------------------------------------------------
+	         */
+	        container.appendChild(lblAccountValidationPopupIcon);
+	        container.appendChild(lblAccountValidationPopupTitle);
+	        container.appendChild(lblAccountValidationPopupMessage);
+	        container.appendChild(btnAccountValidationOk);
 
-			lblAccountValidationPopupMessage.setValue(message);
+	        /*
+	         * --------------------------------------------------------
+	         * ADD CONTAINER TO WINDOW
+	         * --------------------------------------------------------
+	         */
+	        accountValidationWindow.appendChild(container);
 
-			lblAccountValidationPopupMessage.setStyle("display:block;" + "width:100%;" + "margin-bottom:22px;"
-					+ "font-size:14px;" + "line-height:22px;" + "color:#6b7280;" + "text-align:center;");
+	        /*
+	         * ========================================================
+	         * IMPORTANT FIX
+	         * ========================================================
+	         *
+	         * DO NOT DO:
+	         *
+	         * self.appendChild(accountValidationWindow);
+	         *
+	         * because self is the checkerQueueRoot borderlayout.
+	         *
+	         * Instead attach the Window directly to the current Page.
+	         * This makes it a top-level Window.
+	         * ========================================================
+	         */
 
-			/*
-			 * ==================================================== OK BUTTON
-			 * ====================================================
-			 */
+	        if (self == null || self.getPage() == null) {
 
-			btnAccountValidationOk = new Button("OK");
+	            System.out.println(
+	                    "ERROR: self or self.getPage() is NULL"
+	            );
 
-			btnAccountValidationOk.setStyle(
-					"width:90px;" + "height:36px;" + "border:none;" + "border-radius:6px;" + "background:#2563eb;"
-							+ "color:#ffffff;" + "font-size:14px;" + "font-weight:600;" + "cursor:pointer;");
+	            Messagebox.show(
+	                    "Unable to open account validation popup.",
+	                    "Error",
+	                    Messagebox.OK,
+	                    Messagebox.ERROR
+	            );
 
-			btnAccountValidationOk.addEventListener("onClick", e -> {
+	            return;
+	        }
 
-				if (accountValidationWindow != null) {
+	        /*
+	         * Attach Window directly to current page.
+	         */
+	        accountValidationWindow.setPage(self.getPage());
 
-					accountValidationWindow.detach();
+	        /*
+	         * --------------------------------------------------------
+	         * OPEN MODAL WINDOW
+	         * --------------------------------------------------------
+	         */
+	        accountValidationWindow.doModal();
 
-					accountValidationWindow = null;
-				}
+	        System.out.println(
+	                "Account validation popup opened successfully."
+	        );
 
-				/*
-				 * If account is VALID, check whether ALL cheques are now VALID.
-				 */
-				if (accountValidationPassed) {
+	    } catch (Exception e) {
 
-					checkAllAccountsValid();
-				}
-			});
+	        System.out.println(
+	                "ERROR WHILE DISPLAYING ACCOUNT VALIDATION POPUP"
+	        );
 
-			/*
-			 * ==================================================== APPEND COMPONENTS
-			 * ====================================================
-			 */
+	        e.printStackTrace();
 
-			container.appendChild(lblAccountValidationPopupIcon);
+	        accountValidationWindow = null;
 
-			container.appendChild(lblAccountValidationPopupTitle);
-
-			container.appendChild(lblAccountValidationPopupMessage);
-
-			container.appendChild(btnAccountValidationOk);
-
-			accountValidationWindow.appendChild(container);
-
-			/*
-			 * IMPORTANT:
-			 *
-			 * self.appendChild() is used instead of an undefined variable.
-			 */
-			if (self != null) {
-
-				self.appendChild(accountValidationWindow);
-			}
-
-			accountValidationWindow.doModal();
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-			Messagebox.show("Unable to display account validation popup.", "Error", Messagebox.OK, Messagebox.ERROR);
-		}
+	        Messagebox.show(
+	                "Unable to display account validation popup.\n"
+	                + "Please check the server console for details.",
+	                "Error",
+	                Messagebox.OK,
+	                Messagebox.ERROR
+	        );
+	    }
 	}
+	
 
 	/*
 	 * ============================================================ CHECK ALL
@@ -1924,81 +2203,170 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	private void updateNavigation() {
 
-		if (cheques == null || cheques.isEmpty()) {
+	    if (cheques == null || cheques.isEmpty()) {
+	        return;
+	    }
 
-			return;
-		}
+	    // Total number of cheques in the batch
+	    int total = cheques.size();
 
-		int total = cheques.size();
+	    // Current cheque position
+	    int current = currentIndex + 1;
 
-		int current = currentIndex + 1;
+	    // Remaining cheques
+	    int remaining = total - current;
 
-		int remaining = total - current;
 
-		if (lblCurrentCheque != null) {
+	    /*
+	     * ============================================================
+	     * CHEQUE COUNT
+	     * Example: 4
+	     * ============================================================
+	     */
+	    if (lblChequeCount != null) {
 
-			lblCurrentCheque.setValue(String.valueOf(current));
-		}
+	        lblChequeCount.setValue(
+	                String.valueOf(total)
+	        );
+	    }
 
-		if (lblRemaining != null) {
 
-			lblRemaining.setValue(String.valueOf(remaining));
-		}
+	    /*
+	     * ============================================================
+	     * CHEQUE NUMBER
+	     * Example: 501234
+	     * ============================================================
+	     */
+	    if (lblChequeNo != null
+	            && currentIndex >= 0
+	            && currentIndex < cheques.size()) {
 
-		if (lblCurrentChequeNavigation != null) {
+	        OutwardCheque cheque = cheques.get(currentIndex);
 
-			lblCurrentChequeNavigation.setValue(current + " / " + total);
-		}
+	        if (cheque != null) {
 
-		if (btnPrevious != null) {
+	        	lblChequeNo.setValue(
+	                    nullSafe(cheque.getChequeNumber())
+	            );
+	        }
+	    }
 
-			btnPrevious.setDisabled(currentIndex <= 0);
-		}
 
-		if (btnNext != null) {
+	    /*
+	     * ============================================================
+	     * CURRENT CHEQUE
+	     * Example: 1
+	     * ============================================================
+	     */
+	    if (lblCurrentCheque != null) {
 
-			btnNext.setDisabled(currentIndex >= total - 1);
-		}
+	        lblCurrentCheque.setValue(
+	                String.valueOf(current)
+	        );
+	    }
+
+
+	    /*
+	     * ============================================================
+	     * REMAINING
+	     * Example: 3
+	     * ============================================================
+	     */
+	    if (lblRemaining != null) {
+
+	        lblRemaining.setValue(
+	                String.valueOf(remaining)
+	        );
+	    }
+
+
+	    /*
+	     * ============================================================
+	     * PAGINATION
+	     * Example: 1 / 4
+	     * ============================================================
+	     */
+	    if (lblCurrentChequeNavigation != null) {
+
+	        lblCurrentChequeNavigation.setValue(
+	                current + " / " + total
+	        );
+	    }
+
+
+	    /*
+	     * ============================================================
+	     * PREVIOUS BUTTON
+	     * ============================================================
+	     */
+	    if (btnPrevious != null) {
+
+	        btnPrevious.setDisabled(
+	                currentIndex <= 0
+	        );
+	    }
+
+
+	    /*
+	     * ============================================================
+	     * NEXT BUTTON
+	     * ============================================================
+	     */
+	    if (btnNext != null) {
+
+	        btnNext.setDisabled(
+	                currentIndex >= total - 1
+	        );
+	    }
 	}
-
 	/*
 	 * ============================================================ PREVIOUS
 	 * ============================================================
 	 */
 
-	public void onClick$btnPrevious(Event event) {
-
-		if (cheques == null || cheques.isEmpty()) {
-
-			return;
-		}
-
-		if (currentIndex > 0) {
-
-			currentIndex--;
-
-			displayCheque();
-		}
-	}
-
 	/*
-	 * ============================================================ NEXT
+	 * ============================================================
+	 * PREVIOUS
 	 * ============================================================
 	 */
+	public void onClick$btnPrevious(Event event) {
 
+	    if (cheques == null || cheques.isEmpty()) {
+	        return;
+	    }
+
+	    if (currentIndex > 0) {
+
+	        currentIndex--;
+
+	        displayCheque();
+
+	        // Update pagination and progress bar
+	        updatePaginationProgress();
+	    }
+	}
+
+
+	/*
+	 * ============================================================
+	 * NEXT
+	 * ============================================================
+	 */
 	public void onClick$btnNext(Event event) {
 
-		if (cheques == null || cheques.isEmpty()) {
+	    if (cheques == null || cheques.isEmpty()) {
+	        return;
+	    }
 
-			return;
-		}
+	    if (currentIndex < cheques.size() - 1) {
 
-		if (currentIndex < cheques.size() - 1) {
+	        currentIndex++;
 
-			currentIndex++;
+	        displayCheque();
 
-			displayCheque();
-		}
+	        // Update pagination and progress bar
+	        updatePaginationProgress();
+	    }
 	}
 
 	/*
@@ -2006,52 +2374,133 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	 * ============================================================
 	 */
 
+	
 	public void onClick$btnReturn(Event event) {
 
-		if (cheques == null || cheques.isEmpty() || currentIndex < 0 || currentIndex >= cheques.size()) {
+	    if (cheques == null
+	            || cheques.isEmpty()
+	            || currentIndex < 0
+	            || currentIndex >= cheques.size()) {
 
-			return;
-		}
+	        return;
+	    }
 
-		try {
+	    try {
 
-			OutwardCheque cheque = cheques.get(currentIndex);
+	        OutwardCheque cheque = cheques.get(currentIndex);
 
-			if (lblReturnBatch != null) {
+	        if (cheque == null) {
+	            return;
+	        }
 
-				lblReturnBatch.setValue(batchNo);
-			}
+	        String chequeStatus =
+	                nullSafe(cheque.getChequeStatus()).trim();
 
-			if (lblReturnCheque != null) {
+	        System.out.println("====================================");
+	        System.out.println("RETURN TO MAKER");
+	        System.out.println(
+	                "Cheque No : " + cheque.getChequeNumber()
+	        );
+	        System.out.println(
+	                "Status    : " + chequeStatus
+	        );
+	        System.out.println("====================================");
 
-				lblReturnCheque.setValue(nullSafe(cheque.getChequeNumber()));
-			}
+	        /*
+	         * ============================================================
+	         * ALREADY RETURNED CHECK
+	         * ============================================================
+	         */
+	        if ("PENDING_MICR_REPAIR".equalsIgnoreCase(chequeStatus)
+	                || "PENDING_DATA_ENTRY".equalsIgnoreCase(chequeStatus)) {
 
-			if (cmbSendBackReason != null) {
+	            Messagebox.show(
+	                    "Already rejected.",
+	                    "Return to Maker",
+	                    Messagebox.OK,
+	                    Messagebox.EXCLAMATION
+	            );
 
-				cmbSendBackReason.getItems().clear();
+	            return;
+	        }
 
-				loadSendBackReasons();
-			}
+	        /*
+	         * ============================================================
+	         * CREATE A FRESH POPUP
+	         * ============================================================
+	         */
+	        createReturnMakerWindow();
 
-			if (txtReturnRemarks != null) {
+	        if (returnMakerWindow == null) {
+	            return;
+	        }
 
-				txtReturnRemarks.setValue("");
-			}
+	        /*
+	         * ============================================================
+	         * LOAD BATCH
+	         * ============================================================
+	         */
+	        if (lblReturnBatch != null) {
 
-			if (returnMakerWindow != null) {
+	            lblReturnBatch.setValue(
+	                    nullSafe(batchNo)
+	            );
+	        }
 
-				returnMakerWindow.setVisible(true);
+	        /*
+	         * ============================================================
+	         * LOAD CHEQUE
+	         * ============================================================
+	         */
+	        if (lblReturnCheque != null) {
 
-				returnMakerWindow.doModal();
-			}
+	            lblReturnCheque.setValue(
+	                    nullSafe(cheque.getChequeNumber())
+	            );
+	        }
 
-		} catch (Exception e) {
+	        /*
+	         * ============================================================
+	         * LOAD REASONS
+	         * ============================================================
+	         */
+	        if (cmbSendBackReason != null) {
 
-			e.printStackTrace();
+	            cmbSendBackReason.getItems().clear();
 
-			showError("Unable to open Return to Maker.", e);
-		}
+	            cmbSendBackReason.setValue("");
+
+	            loadSendBackReasons();
+	        }
+
+	        /*
+	         * ============================================================
+	         * CLEAR REMARKS
+	         * ============================================================
+	         */
+	        if (txtReturnRemarks != null) {
+
+	            txtReturnRemarks.setValue("");
+	        }
+
+	        /*
+	         * ============================================================
+	         * SHOW POPUP
+	         * ============================================================
+	         */
+	        returnMakerWindow.setVisible(true);
+
+	        returnMakerWindow.doModal();
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        showError(
+	                "Unable to open Return to Maker.",
+	                e
+	        );
+	    }
 	}
 
 	/*
@@ -2391,94 +2840,475 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	// ============================================================
 	// REJECT BUTTON
 	// ============================================================
-
 	public void onClick$btnReject(Event event) {
 
-		if (cheques == null || cheques.isEmpty() || currentIndex < 0 || currentIndex >= cheques.size()) {
+	    System.out.println("====================================");
+	    System.out.println("REJECT BUTTON CLICKED");
+	    System.out.println("====================================");
 
-			return;
-		}
+	    try {
 
-		try {
+	        // ---------------------------------------------------------
+	        // CHECK CHEQUE LIST
+	        // ---------------------------------------------------------
 
-			OutwardCheque cheque = cheques.get(currentIndex);
+	        if (cheques == null || cheques.isEmpty()) {
 
-			// --------------------------------------------------------
-			// SET BATCH ID
-			// --------------------------------------------------------
+	            showError(
+	                    "No cheque is selected.",
+	                    new IllegalStateException(
+	                            "Cheque list is empty.")
+	            );
 
-			lblRejectBatch.setValue(nullSafe(batchId));
+	            return;
+	        }
 
-			// --------------------------------------------------------
-			// SET CHEQUE NUMBER
-			// --------------------------------------------------------
 
-			lblRejectCheque.setValue(nullSafe(cheque.getChequeNumber()));
+	        // ---------------------------------------------------------
+	        // CHECK CURRENT INDEX
+	        // ---------------------------------------------------------
 
-			// --------------------------------------------------------
-			// CLEAR OLD VALUES
-			// --------------------------------------------------------
+	        if (currentIndex < 0
+	                || currentIndex >= cheques.size()) {
 
-			cmbRejectReason.setSelectedItem(null);
+	            showError(
+	                    "No cheque is selected.",
+	                    new IllegalStateException(
+	                            "Invalid current cheque index.")
+	            );
 
-			if (txtRejectRemarks != null) {
-				txtRejectRemarks.setValue("");
-			}
+	            return;
+	        }
 
-			// --------------------------------------------------------
-			// SHOW POPUP
-			// --------------------------------------------------------
 
-			rejectWindow.setVisible(true);
+	        // ---------------------------------------------------------
+	        // GET CURRENT CHEQUE
+	        // ---------------------------------------------------------
 
-		} catch (Exception e) {
+	        OutwardCheque cheque =
+	                cheques.get(currentIndex);
 
-			e.printStackTrace();
+	        if (cheque == null) {
 
-			showError("Unable to open Reject Cheque popup.", e);
-		}
+	            showError(
+	                    "No cheque is selected.",
+	                    new IllegalStateException(
+	                            "Current cheque is null.")
+	            );
+
+	            return;
+	        }
+
+
+	        System.out.println(
+	                "Selected Cheque = "
+	                + cheque.getChequeNumber());
+
+	        System.out.println(
+	                "Batch ID = "
+	                + batchId);
+
+
+	        // ---------------------------------------------------------
+	        // CREATE POPUP IF REQUIRED
+	        // ---------------------------------------------------------
+
+	        if (rejectWindow == null
+	                || rejectWindow.getPage() == null) {
+
+	            System.out.println(
+	                    "Reject window does not exist. Creating...");
+
+	            createRejectWindow();
+	        }
+
+
+	        // ---------------------------------------------------------
+	        // FINAL CHECK
+	        // ---------------------------------------------------------
+
+	        if (rejectWindow == null) {
+
+	            System.out.println(
+	                    "ERROR: rejectWindow is NULL.");
+
+	            showError(
+	                    "Unable to open Reject Cheque popup.",
+	                    new IllegalStateException(
+	                            "Reject window was not created.")
+	            );
+
+	            return;
+	        }
+
+
+	        if (rejectWindow.getPage() == null) {
+
+	            System.out.println(
+	                    "ERROR: rejectWindow has no Page.");
+
+	            showError(
+	                    "Unable to open Reject Cheque popup.",
+	                    new IllegalStateException(
+	                            "Reject window is not attached to the current Page.")
+	            );
+
+	            return;
+	        }
+
+
+	        // ---------------------------------------------------------
+	        // SET POPUP DATA
+	        // ---------------------------------------------------------
+
+	        lblRejectBatch.setValue(
+	                nullSafe(batchId));
+
+	        lblRejectCheque.setValue(
+	                nullSafe(cheque.getChequeNumber()));
+
+
+	        // ---------------------------------------------------------
+	        // CLEAR OLD VALUES
+	        // ---------------------------------------------------------
+
+	        cmbRejectReason.setSelectedItem(null);
+	        cmbRejectReason.setValue("");
+
+	        txtRejectRemarks.setValue("");
+
+
+	        // ---------------------------------------------------------
+	        // SHOW POPUP
+	        // ---------------------------------------------------------
+
+	        rejectWindow.setVisible(true);
+
+	        rejectWindow.doModal();
+
+
+	        System.out.println(
+	                "Reject Cheque window opened successfully.");
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        showError(
+	                "Unable to open Reject Cheque popup.",
+	                e
+	        );
+	    }
 	}
-
 	// ============================================================
-	// CREATE REJECT WINDOW
+	// CREATE REJECT CHEQUE POPUP
 	// ============================================================
-
 	private void createRejectWindow() {
 
-		try {
+	    System.out.println("====================================");
+	    System.out.println("CREATE REJECT CHEQUE WINDOW");
+	    System.out.println("====================================");
 
-			rejectWindow = (Window) Executions.createComponents("/outward/checker/reject-cheque.zul", self, null);
+	    try {
 
-			lblRejectBatch = (Label) rejectWindow.getFellow("lblRejectBatch");
+	        // ---------------------------------------------------------
+	        // CHECK CURRENT PAGE
+	        // ---------------------------------------------------------
 
-			lblRejectCheque = (Label) rejectWindow.getFellow("lblRejectCheque");
+	        if (self == null) {
+	            throw new IllegalStateException(
+	                    "Checker Queue root component 'self' is NULL.");
+	        }
 
-			cmbRejectReason = (Combobox) rejectWindow.getFellow("cmbRejectReason");
+	        if (self.getPage() == null) {
+	            throw new IllegalStateException(
+	                    "Checker Queue root component is not attached to a Page.");
+	        }
 
-			txtRejectRemarks = (Textbox) rejectWindow.getFellow("txtRejectRemarks");
+	        System.out.println("Current Page found successfully.");
 
-			btnRejectConfirm = (Button) rejectWindow.getFellow("btnRejectConfirm");
 
-			btnRejectCancel = (Button) rejectWindow.getFellow("btnRejectCancel");
+	        // ---------------------------------------------------------
+	        // IF WINDOW ALREADY EXISTS
+	        // ---------------------------------------------------------
 
-			btnRejectConfirm.addEventListener("onClick", event -> confirmRejectCheque());
+	        if (rejectWindow != null) {
 
-			btnRejectCancel.addEventListener("onClick", event -> closeRejectWindow());
+	            System.out.println(
+	                    "Existing rejectWindow found. Page = "
+	                    + rejectWindow.getPage());
 
-			rejectWindow.addEventListener("onCancel", event -> closeRejectWindow());
+	            if (rejectWindow.getPage() == null) {
 
-			rejectWindow.setVisible(false);
+	                rejectWindow.setPage(self.getPage());
 
-			loadRejectedReasons();
+	            }
 
-		} catch (Exception e) {
+	            return;
+	        }
 
-			e.printStackTrace();
 
-			showError("Unable to create Reject Cheque popup.", e);
-		}
+	        // ---------------------------------------------------------
+	        // CREATE ZUL COMPONENT
+	        // ---------------------------------------------------------
+
+	        Component component = Executions.createComponents(
+	                "/outward/checker/reject-cheque.zul",
+	                null,
+	                null
+	        );
+
+	        System.out.println(
+	                "Created component type = "
+	                + (component == null
+	                        ? "NULL"
+	                        : component.getClass().getName())
+	        );
+
+
+	        // ---------------------------------------------------------
+	        // CHECK COMPONENT
+	        // ---------------------------------------------------------
+
+	        if (component == null) {
+
+	            throw new IllegalStateException(
+	                    "reject-cheque.zul returned NULL component.");
+
+	        }
+
+
+	        if (!(component instanceof Window)) {
+
+	            throw new IllegalStateException(
+	                    "reject-cheque.zul root must be Window. "
+	                    + "Actual type = "
+	                    + component.getClass().getName());
+
+	        }
+
+
+	        // ---------------------------------------------------------
+	        // ASSIGN WINDOW
+	        // ---------------------------------------------------------
+
+	        rejectWindow = (Window) component;
+
+	        System.out.println(
+	                "Reject Window object created successfully.");
+
+
+	        // ---------------------------------------------------------
+	        // ATTACH WINDOW TO CURRENT PAGE
+	        // ---------------------------------------------------------
+
+	        rejectWindow.setPage(self.getPage());
+
+	        System.out.println(
+	                "Reject Window attached to current Page.");
+
+	        System.out.println(
+	                "Reject Window Page = "
+	                + rejectWindow.getPage());
+
+
+	        // ---------------------------------------------------------
+	        // GET COMPONENTS
+	        // ---------------------------------------------------------
+
+	        lblRejectBatch =
+	                (Label) rejectWindow.getFellowIfAny(
+	                        "lblRejectBatch");
+
+	        lblRejectCheque =
+	                (Label) rejectWindow.getFellowIfAny(
+	                        "lblRejectCheque");
+
+	        cmbRejectReason =
+	                (Combobox) rejectWindow.getFellowIfAny(
+	                        "cmbRejectReason");
+
+	        txtRejectRemarks =
+	                (Textbox) rejectWindow.getFellowIfAny(
+	                        "txtRejectRemarks");
+
+	        btnRejectConfirm =
+	                (Button) rejectWindow.getFellowIfAny(
+	                        "btnRejectConfirm");
+
+	        btnRejectCancel =
+	                (Button) rejectWindow.getFellowIfAny(
+	                        "btnRejectCancel");
+
+	        Button btnRejectClose =
+	                (Button) rejectWindow.getFellowIfAny(
+	                        "btnRejectClose");
+
+
+	        // ---------------------------------------------------------
+	        // PRINT COMPONENT STATUS
+	        // ---------------------------------------------------------
+
+	        System.out.println(
+	                "lblRejectBatch    = "
+	                + (lblRejectBatch != null));
+
+	        System.out.println(
+	                "lblRejectCheque   = "
+	                + (lblRejectCheque != null));
+
+	        System.out.println(
+	                "cmbRejectReason   = "
+	                + (cmbRejectReason != null));
+
+	        System.out.println(
+	                "txtRejectRemarks  = "
+	                + (txtRejectRemarks != null));
+
+	        System.out.println(
+	                "btnRejectConfirm  = "
+	                + (btnRejectConfirm != null));
+
+	        System.out.println(
+	                "btnRejectCancel   = "
+	                + (btnRejectCancel != null));
+
+	        System.out.println(
+	                "btnRejectClose    = "
+	                + (btnRejectClose != null));
+
+
+	        // ---------------------------------------------------------
+	        // VALIDATE REQUIRED COMPONENTS
+	        // ---------------------------------------------------------
+
+	        if (lblRejectBatch == null) {
+	            throw new IllegalStateException(
+	                    "lblRejectBatch not found in reject-cheque.zul.");
+	        }
+
+	        if (lblRejectCheque == null) {
+	            throw new IllegalStateException(
+	                    "lblRejectCheque not found in reject-cheque.zul.");
+	        }
+
+	        if (cmbRejectReason == null) {
+	            throw new IllegalStateException(
+	                    "cmbRejectReason not found in reject-cheque.zul.");
+	        }
+
+	        if (txtRejectRemarks == null) {
+	            throw new IllegalStateException(
+	                    "txtRejectRemarks not found in reject-cheque.zul.");
+	        }
+
+	        if (btnRejectConfirm == null) {
+	            throw new IllegalStateException(
+	                    "btnRejectConfirm not found in reject-cheque.zul.");
+	        }
+
+	        if (btnRejectCancel == null) {
+	            throw new IllegalStateException(
+	                    "btnRejectCancel not found in reject-cheque.zul.");
+	        }
+
+
+	        // ---------------------------------------------------------
+	        // ADD BUTTON EVENTS
+	        // ---------------------------------------------------------
+
+	        btnRejectConfirm.addEventListener(
+	                "onClick",
+	                event -> confirmRejectCheque()
+	        );
+
+	        btnRejectCancel.addEventListener(
+	                "onClick",
+	                event -> closeRejectWindow()
+	        );
+
+	        if (btnRejectClose != null) {
+
+	            btnRejectClose.addEventListener(
+	                    "onClick",
+	                    event -> closeRejectWindow()
+	            );
+
+	        }
+
+
+	        // ---------------------------------------------------------
+	        // LOAD REJECTION REASONS
+	        // ---------------------------------------------------------
+
+	        try {
+
+	            loadRejectedReasons();
+
+	            System.out.println(
+	                    "Rejected reasons loaded successfully.");
+
+	        } catch (Exception reasonException) {
+
+	            System.out.println(
+	                    "WARNING: Could not load rejected reasons.");
+
+	            reasonException.printStackTrace();
+
+	        }
+
+
+	        // ---------------------------------------------------------
+	        // INITIAL STATE
+	        // ---------------------------------------------------------
+
+	        rejectWindow.setVisible(false);
+
+	        System.out.println(
+	                "Reject window created successfully.");
+
+	    } catch (Exception e) {
+
+	        System.out.println(
+	                "ERROR WHILE CREATING REJECT WINDOW");
+
+	        e.printStackTrace();
+
+
+	        // ---------------------------------------------------------
+	        // CLEANUP
+	        // ---------------------------------------------------------
+
+	        if (rejectWindow != null) {
+
+	            try {
+
+	                if (rejectWindow.getPage() != null) {
+	                    rejectWindow.detach();
+	                }
+
+	            } catch (Exception detachException) {
+
+	                detachException.printStackTrace();
+
+	            }
+
+	        }
+
+
+	        rejectWindow = null;
+
+	        lblRejectBatch = null;
+	        lblRejectCheque = null;
+	        cmbRejectReason = null;
+	        txtRejectRemarks = null;
+	        btnRejectConfirm = null;
+	        btnRejectCancel = null;
+
+	        System.out.println(
+	                "Reject window creation FAILED.");
+	    }
 	}
-
 	// ============================================================
 	// CONFIRM REJECT CHEQUE
 	// ============================================================
@@ -2605,10 +3435,10 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 							User loggedInUser = (User) session.getAttribute("USER_OBJ");
 
 							if (loggedInUser == null || loggedInUser.getUserId() == null
-							        || loggedInUser.getUserId().trim().isEmpty()) {
+									|| loggedInUser.getUserId().trim().isEmpty()) {
 
-							    showError("Logged-in user information not found in session.", null);
-							    return;
+								showError("Logged-in user information not found in session.", null);
+								return;
 							}
 
 							String userId = loggedInUser.getUserId().trim();
@@ -2790,9 +3620,12 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	private void closeRejectWindow() {
 
-		if (rejectWindow != null) {
-			rejectWindow.setVisible(false);
-		}
+	    if (rejectWindow != null) {
+
+	        rejectWindow.setVisible(false);
+
+	    }
+
 	}
 
 	/*
@@ -2892,3 +3725,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		return value == null ? "" : value;
 	}
 }
+
+
+
+

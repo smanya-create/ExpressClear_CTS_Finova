@@ -24,6 +24,7 @@ import org.zkoss.zul.Space;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
@@ -39,645 +40,710 @@ import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
 public class InwardMakerDashboardController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
-    private static final int PAGE_SIZE = 5;
-
-    // Services
-    private InwardDashboardService dashboardService;
-    private InwardBatchService batchService;
-    private InwardChequeService chequeService;
-    private InwardSendBackRequestService sendBackRequestService;
-
-    // Filter Toolbar Components
-    private Textbox inwardMakerTxtSearch;
-    private Combobox inwardMakerCmbModule;
-    private Combobox inwardMakerCmbStatus;
-    private Button inwardMakerBtnSearch;
-    private Button inwardMakerBtnClear;
-
-    // Section Containers
-    private Div inwardMakerReturnSection;
-    private Space inwardMakerSectionSpacer;
-    private Div inwardMakerProcessingSection;
-    private Div inwardMakerPaginationBar;
-    private Div inwardMakerReturnPaginationBar;
-
-    // Batches Processing Grid & Pagination
-    private Grid inwardMakerGridBatchDetails;
-    private Rows inwardMakerRowsBatchDetails;
-    private Vlayout inwardMakerVlayoutEmptyState;
-    private Label inwardMakerLblCurrentPage;
-
-    private Button inwardMakerBtnFirst;
-    private Button inwardMakerBtnPrevious;
-    private Button inwardMakerBtnNext;
-    private Button inwardMakerBtnLast;
-
-    // Return From Checker Grid & Pagination
-    private Grid inwardMakerGridReturnedBatches;
-    private Rows inwardMakerRowsReturnedBatches;
-    private Vlayout inwardMakerVlayoutReturnedEmptyState;
-    private Label inwardMakerLblReturnCurrentPage;
-
-    private Button inwardMakerBtnReturnFirst;
-    private Button inwardMakerBtnReturnPrevious;
-    private Button inwardMakerBtnReturnNext;
-    private Button inwardMakerBtnReturnLast;
-
-    // Data lists & state
-    private List<InwardDashboardBatchDTO> batchList = new ArrayList<>();
-    private List<ReturnedChequeDisplayItem> returnedChequeList = new ArrayList<>();
-    private int currentPage = 1;
-    private int currentReturnPage = 1;
-
-    // Active Filter State
-    private String currentSearchKeyword = "";
-    private String currentModule = "ALL";
-    private String currentStatus = "ALL";
-
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
-        super.doAfterCompose(comp);
-
-        this.dashboardService = new InwardDashboardServiceImpl();
-        this.batchService = new InwardBatchServiceImpl();
-        this.chequeService = new InwardChequeServiceImpl();
-        this.sendBackRequestService = new InwardSendBackRequestServiceImpl();
-
-        // Default Combobox Selections
-        if (inwardMakerCmbModule != null && inwardMakerCmbModule.getItemCount() > 0) {
-            inwardMakerCmbModule.setSelectedIndex(0);
-        }
-        if (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getItemCount() > 0) {
-            inwardMakerCmbStatus.setSelectedIndex(0);
-        }
-
-        // Filter Actions
-        if (inwardMakerBtnSearch != null) inwardMakerBtnSearch.addEventListener("onClick", event -> onApplyFilter());
-        if (inwardMakerBtnClear != null) inwardMakerBtnClear.addEventListener("onClick", event -> onClearFilter());
-
-        if (inwardMakerTxtSearch != null) {
-            inwardMakerTxtSearch.addEventListener("onOK", event -> onApplyFilter());
-        }
-
-        // Section 2 (Processing Batches) Pagination Listeners
-        if (inwardMakerBtnFirst != null) inwardMakerBtnFirst.addEventListener("onClick", event -> goToFirstPage());
-        if (inwardMakerBtnPrevious != null) inwardMakerBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
-        if (inwardMakerBtnNext != null) inwardMakerBtnNext.addEventListener("onClick", event -> goToNextPage());
-        if (inwardMakerBtnLast != null) inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
-
-        // Section 1 (Return From Checker) Pagination Listeners
-        if (inwardMakerBtnReturnFirst != null) inwardMakerBtnReturnFirst.addEventListener("onClick", event -> goToFirstReturnPage());
-        if (inwardMakerBtnReturnPrevious != null) inwardMakerBtnReturnPrevious.addEventListener("onClick", event -> goToPreviousReturnPage());
-        if (inwardMakerBtnReturnNext != null) inwardMakerBtnReturnNext.addEventListener("onClick", event -> goToNextReturnPage());
-        if (inwardMakerBtnReturnLast != null) inwardMakerBtnReturnLast.addEventListener("onClick", event -> goToLastReturnPage());
-
-        refreshAllDashboardData();
-    }
-
-    private void onApplyFilter() {
-        this.currentSearchKeyword = (inwardMakerTxtSearch != null && inwardMakerTxtSearch.getValue() != null)
-                ? inwardMakerTxtSearch.getValue().trim().toLowerCase() : "";
-
-        this.currentModule = (inwardMakerCmbModule != null && inwardMakerCmbModule.getSelectedItem() != null)
-                ? inwardMakerCmbModule.getSelectedItem().getValue().toString() : "ALL";
-
-        this.currentStatus = (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getSelectedItem() != null)
-                ? inwardMakerCmbStatus.getSelectedItem().getValue().toString() : "ALL";
-
-        refreshAllDashboardData();
-    }
-
-    private void onClearFilter() {
-        this.currentSearchKeyword = "";
-        this.currentModule = "ALL";
-        this.currentStatus = "ALL";
-
-        if (inwardMakerTxtSearch != null) inwardMakerTxtSearch.setValue("");
-        if (inwardMakerCmbModule != null && inwardMakerCmbModule.getItemCount() > 0) inwardMakerCmbModule.setSelectedIndex(0);
-        if (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getItemCount() > 0) inwardMakerCmbStatus.setSelectedIndex(0);
-
-        refreshAllDashboardData();
-    }
-
-    public void refreshAllDashboardData() {
-        boolean showReturned = "ALL".equalsIgnoreCase(currentModule) || "RETURN_FROM_CHECKER".equalsIgnoreCase(currentModule);
-        boolean showProcessing = "ALL".equalsIgnoreCase(currentModule) || "BATCH_PROCESSING".equalsIgnoreCase(currentModule);
-
-        if (inwardMakerReturnSection != null) inwardMakerReturnSection.setVisible(showReturned);
-        if (inwardMakerSectionSpacer != null) inwardMakerSectionSpacer.setVisible(showReturned && showProcessing);
-        if (inwardMakerProcessingSection != null) inwardMakerProcessingSection.setVisible(showProcessing);
-
-        if (showReturned) {
-            loadReturnedCheques();
-        }
-        if (showProcessing) {
-            loadBatches();
-        }
-    }
-
-    // =========================================================
-    // 1. RETURN FROM CHECKER SECTION
-    // =========================================================
-    private void loadReturnedCheques() {
-        this.returnedChequeList = new ArrayList<>();
-
-        try {
-            List<InwardDashboardBatchDTO> recentBatches = dashboardService.getRecentBatches("");
-            if (recentBatches != null) {
-                for (InwardDashboardBatchDTO bDto : recentBatches) {
-                    if (bDto.getBackToMakerCheques() > 0) {
-                        
-                        // Filter by Batch ID Only
-                        if (!currentSearchKeyword.isEmpty()) {
-                            String bId = bDto.getBatchId() != null ? bDto.getBatchId().toLowerCase() : "";
-                            if (!bId.contains(currentSearchKeyword)) {
-                                continue;
-                            }
-                        }
-
-                        // Fetch batch cheques and pending send-back audit records
-                        List<InwardCheque> batchCheques = chequeService.getChequesByBatchAndStatus(bDto.getBatchId(), null);
-                        Map<String, InwardSendBackRequestDTO> pendingRequests = 
-                                sendBackRequestService.getPendingRequestsByBatchId(bDto.getBatchId());
-
-                        if (batchCheques != null) {
-                            for (InwardCheque chq : batchCheques) {
-                                String status = chq.getChequeStatus();
-                                if (isSentBackStatus(status)) {
-                                	String displayStatus = getDisplayStatus(chq);
-
-                                    // Filter by Status (handles spaces or underscores)
-                                    if (!"ALL".equalsIgnoreCase(currentStatus)) {
-                                        String normalizedCurrent = currentStatus.replace("_", " ").trim();
-                                        String normalizedDisplay = displayStatus.replace("_", " ").trim();
-                                        if (!normalizedDisplay.equalsIgnoreCase(normalizedCurrent)) {
-                                            continue;
-                                        }
-                                    }
-
-                                    InwardSendBackRequestDTO req = (pendingRequests != null) ? pendingRequests.get(chq.getInwardChequeId()) : null;
-                                    String displayReason = "-";
-
-                                    if (req != null) {
-                                        String rName = req.getReasonName();
-                                        String rRemarks = req.getRemarks();
-
-                                        boolean hasName = (rName != null && !rName.trim().isEmpty());
-                                        boolean hasRemarks = (rRemarks != null && !rRemarks.trim().isEmpty());
-
-                                        if (hasName && hasRemarks) {
-                                            displayReason = rName.trim() + " (" + rRemarks.trim() + ")";
-                                        } else if (hasName) {
-                                            displayReason = rName.trim();
-                                        } else if (hasRemarks) {
-                                            displayReason = rRemarks.trim();
-                                        } else if (req.getReasonId() != null && req.getReasonId() > 0) {
-                                            displayReason = "Reason Code " + req.getReasonId();
-                                        }
-                                    }
-
-                                    returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq, displayStatus, displayReason));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        this.currentReturnPage = 1;
-        renderCurrentReturnPage();
-    }
-
-    private void renderCurrentReturnPage() {
-        if (inwardMakerRowsReturnedBatches == null) return;
-        inwardMakerRowsReturnedBatches.getChildren().clear();
-
-        if (returnedChequeList == null || returnedChequeList.isEmpty()) {
-            if (inwardMakerVlayoutReturnedEmptyState != null) inwardMakerVlayoutReturnedEmptyState.setVisible(true);
-            if (inwardMakerGridReturnedBatches != null) inwardMakerGridReturnedBatches.setVisible(false);
-            if (inwardMakerReturnPaginationBar != null) inwardMakerReturnPaginationBar.setVisible(false);
-            updateReturnPagination();
-            return;
-        }
-
-        if (inwardMakerVlayoutReturnedEmptyState != null) inwardMakerVlayoutReturnedEmptyState.setVisible(false);
-        if (inwardMakerGridReturnedBatches != null) inwardMakerGridReturnedBatches.setVisible(true);
-        if (inwardMakerReturnPaginationBar != null) inwardMakerReturnPaginationBar.setVisible(true);
-
-        int totalPages = getTotalReturnPages();
-        if (currentReturnPage > totalPages) currentReturnPage = totalPages;
-        if (currentReturnPage < 1) currentReturnPage = 1;
-
-        int startIndex = (currentReturnPage - 1) * PAGE_SIZE;
-        int endIndex = Math.min(startIndex + PAGE_SIZE, returnedChequeList.size());
-
-        for (int i = startIndex; i < endIndex; i++) {
-            ReturnedChequeDisplayItem item = returnedChequeList.get(i);
-            if (item != null) {
-                createReturnedChequeRow(item.batchId, item.cheque, item.displayStatus, item.reasonRemarks);
-            }
-        }
-
-        updateReturnPagination();
-    }
-
-    private void createReturnedChequeRow(String batchId, InwardCheque cheque, String displayStatus, String reasonRemarks) {
-        Row row = new Row();
-
-        Label batchIdLabel = new Label(getValue(batchId));
-        batchIdLabel.setSclass("inward-maker-batch-id");
-
-        Label chequeNumberLabel = new Label(getValue(cheque.getChequeNumber()));
-        chequeNumberLabel.setSclass("inward-maker-cheque-number");
-
-        Label statusLabel = new Label(displayStatus);
-        statusLabel.setSclass("inward-maker-status");
-        
-        if ("RESOLVED".equalsIgnoreCase(displayStatus)) {
-            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
-        }
-
-        Label reasonLabel = new Label(getValue(reasonRemarks));
-        reasonLabel.setSclass("inward-maker-reason");
-
-        Button viewButton = new Button("VIEW DETAILS");
-        viewButton.setSclass("inward-maker-view-button");
-        viewButton.addEventListener("onClick", event -> openBatchWorkflow(batchId));
-
-        row.appendChild(batchIdLabel);
-        row.appendChild(chequeNumberLabel);
-        row.appendChild(statusLabel);
-        row.appendChild(reasonLabel);
-        row.appendChild(viewButton);
-
-        inwardMakerRowsReturnedBatches.appendChild(row);
-    }
-
-    private void goToFirstReturnPage() {
-        if (currentReturnPage > 1) {
-            currentReturnPage = 1;
-            renderCurrentReturnPage();
-        }
-    }
-
-    private void goToPreviousReturnPage() {
-        if (currentReturnPage > 1) {
-            currentReturnPage--;
-            renderCurrentReturnPage();
-        }
-    }
-
-    private void goToNextReturnPage() {
-        if (currentReturnPage < getTotalReturnPages()) {
-            currentReturnPage++;
-            renderCurrentReturnPage();
-        }
-    }
-
-    private void goToLastReturnPage() {
-        int totalPages = getTotalReturnPages();
-        if (currentReturnPage < totalPages) {
-            currentReturnPage = totalPages;
-            renderCurrentReturnPage();
-        }
-    }
-
-    private int getTotalReturnPages() {
-        if (returnedChequeList == null || returnedChequeList.isEmpty()) {
-            return 1;
-        }
-        return (int) Math.ceil((double) returnedChequeList.size() / PAGE_SIZE);
-    }
-
-    private void updateReturnPagination() {
-        int totalPages = getTotalReturnPages();
-        if (inwardMakerLblReturnCurrentPage != null) {
-            inwardMakerLblReturnCurrentPage.setValue(currentReturnPage + " / " + totalPages);
-        }
-        if (inwardMakerBtnReturnFirst != null) inwardMakerBtnReturnFirst.setDisabled(currentReturnPage <= 1);
-        if (inwardMakerBtnReturnPrevious != null) inwardMakerBtnReturnPrevious.setDisabled(currentReturnPage <= 1);
-        if (inwardMakerBtnReturnNext != null) inwardMakerBtnReturnNext.setDisabled(currentReturnPage >= totalPages);
-        if (inwardMakerBtnReturnLast != null) inwardMakerBtnReturnLast.setDisabled(currentReturnPage >= totalPages);
-    }
-
-    // =========================================================
-    // 2. BATCHES PROCESSING SECTION
-    // =========================================================
-    private void loadBatches() {
-        try {
-            List<InwardDashboardBatchDTO> allBatches = dashboardService.getRecentBatches("");
-            this.batchList = new ArrayList<>();
-
-            if (allBatches != null) {
-                for (InwardDashboardBatchDTO b : allBatches) {
-                    if (b.getBackToMakerCheques() == 0 && !"SENT_BACK".equalsIgnoreCase(b.getDisplayStatus())) {
-                        
-                        // Filter by Search Keyword
-                        if (!currentSearchKeyword.isEmpty()) {
-                            String bId = b.getBatchId() != null ? b.getBatchId().toLowerCase() : "";
-                            if (!bId.contains(currentSearchKeyword)) {
-                                continue;
-                            }
-                        }
-
-                     // Check true status
-                        InwardBatch fullBatch = batchService.getBatchById(b.getBatchId());
-                        String bStatus = fullBatch != null ? fullBatch.getBatchStatus() : "";
-
-                        String trueStatus;
-                        if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus)) {
-                            trueStatus = "SUBMITTED_TO_CHECKER";
-                        } else {
-                            String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
-                            trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
-                                    ? "PENDING_MICR_REPAIR" : "PENDING_DATA_ENTRY";
-                        }
-
-                        // Filter by Status dropdown (handles spaces or underscores)
-                        if (!"ALL".equalsIgnoreCase(currentStatus)) {
-                            String normalizedCurrent = currentStatus.replace(" ", "_").toUpperCase();
-                            String normalizedTrue = trueStatus.replace(" ", "_").toUpperCase();
-                            if (!normalizedTrue.equalsIgnoreCase(normalizedCurrent)) {
-                                continue;
-                            }
-                        }
-
-                        this.batchList.add(b);
-                    }
-                }
-            }
-
-            this.currentPage = 1;
-            renderCurrentPage();
-        } catch (Exception e) {
-            e.printStackTrace();
-            this.batchList = new ArrayList<>();
-            this.currentPage = 1;
-            renderCurrentPage();
-        }
-    }
-
-    private void renderCurrentPage() {
-        if (inwardMakerRowsBatchDetails == null) return;
-        inwardMakerRowsBatchDetails.getChildren().clear();
-
-        if (batchList == null || batchList.isEmpty()) {
-            if (inwardMakerVlayoutEmptyState != null) inwardMakerVlayoutEmptyState.setVisible(true);
-            if (inwardMakerGridBatchDetails != null) inwardMakerGridBatchDetails.setVisible(false);
-            if (inwardMakerPaginationBar != null) inwardMakerPaginationBar.setVisible(false);
-            updatePagination();
-            return;
-        }
-
-        if (inwardMakerVlayoutEmptyState != null) inwardMakerVlayoutEmptyState.setVisible(false);
-        if (inwardMakerGridBatchDetails != null) inwardMakerGridBatchDetails.setVisible(true);
-        if (inwardMakerPaginationBar != null) inwardMakerPaginationBar.setVisible(true);
-
-        int totalPages = getTotalPages();
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        int startIndex = (currentPage - 1) * PAGE_SIZE;
-        int endIndex = Math.min(startIndex + PAGE_SIZE, batchList.size());
-
-        for (int i = startIndex; i < endIndex; i++) {
-            InwardDashboardBatchDTO batch = batchList.get(i);
-            if (batch != null) {
-                createBatchRow(batch);
-            }
-        }
-
-        updatePagination();
-    }
-
-    private void createBatchRow(InwardDashboardBatchDTO batch) {
-        Row row = new Row();
-
-        Label batchIdLabel = new Label(getValue(batch.getBatchId()));
-        batchIdLabel.setSclass("inward-maker-batch-id");
-
-        Label chequeCountLabel = new Label(String.valueOf(batch.getTotalCheques()));
-        chequeCountLabel.setSclass("inward-maker-cheque-count");
-
-        InwardBatch fullBatch = batchService.getBatchById(batch.getBatchId());
-        BigDecimal totalAmt = (fullBatch != null && fullBatch.getActualTotalAmount() != null) 
-                ? fullBatch.getActualTotalAmount() : BigDecimal.ZERO;
-        Label totalAmountLabel = new Label(formatIndianAmount(totalAmt));
-        totalAmountLabel.setSclass("inward-maker-total-amount");
-
-        String bStatus = fullBatch != null ? fullBatch.getBatchStatus() : "";
-        boolean isCheckerPending = "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus);
-
-        Label statusLabel = new Label();
-        statusLabel.setSclass("inward-maker-status");
-
-        if (isCheckerPending) {
-            statusLabel.setValue("SUBMITTED TO CHECKER");
-            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
-        } else {
-            String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
-            String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
-                    ? "PENDING MICR REPAIR" : "PENDING DATA ENTRY";
-            statusLabel.setValue(trueStatus);
-            statusLabel.setStyle("display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 130px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
-        }
-
-        // Action Column: ALWAYS renders the VIEW DETAILS button so Maker can view cheques
-        Button viewButton = new Button("VIEW DETAILS");
-        viewButton.setSclass("inward-maker-view-button");
-        viewButton.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
-
-        row.appendChild(batchIdLabel);
-        row.appendChild(chequeCountLabel);
-        row.appendChild(totalAmountLabel);
-        row.appendChild(statusLabel);
-        row.appendChild(viewButton);
-
-        inwardMakerRowsBatchDetails.appendChild(row);
-    }
-
-    // =========================================================
-    // WORKFLOW ROUTING & SPA NAVIGATION
-    // =========================================================
-    private void openBatchWorkflow(String batchId) {
-        if (batchId == null || batchId.trim().isEmpty()) {
-            return;
-        }
-
-        String trimmedBatchId = batchId.trim();
-
-        Sessions.getCurrent().setAttribute("INWARD_MAKER_SELECTED_BATCH_ID", trimmedBatchId);
-        Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", trimmedBatchId);
-        Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", trimmedBatchId);
-        Sessions.getCurrent().setAttribute("DATA_ENTRY_BATCH_ID", trimmedBatchId);
-        Sessions.getCurrent().setAttribute("batchId", trimmedBatchId);
-
-        Include mainContentArea = null;
-        if (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null) {
-            for (org.zkoss.zk.ui.Page page : Executions.getCurrent().getDesktop().getPages()) {
-                Component comp = page.getFellowIfAny("mainContentArea", true);
-                if (comp instanceof Include) {
-                    mainContentArea = (Include) comp;
-                    break;
-                }
-            }
-        }
-
-        if (mainContentArea != null) {
-            try {
-                mainContentArea.clearDynamicProperties();
-                mainContentArea.setDynamicProperty("batchId", trimmedBatchId);
-                mainContentArea.setAttribute("batchId", trimmedBatchId);
-                
-                mainContentArea.setSrc(null);
-                mainContentArea.setSrc("/inward/maker/batch-details.zul?batchId=" + trimmedBatchId);
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + trimmedBatchId);
-    }
-
-    private void goToFirstPage() {
-        if (currentPage > 1) {
-            currentPage = 1;
-            renderCurrentPage();
-        }
-    }
-
-    private void goToPreviousPage() {
-        if (currentPage > 1) {
-            currentPage--;
-            renderCurrentPage();
-        }
-    }
-
-    private void goToNextPage() {
-        if (currentPage < getTotalPages()) {
-            currentPage++;
-            renderCurrentPage();
-        }
-    }
-
-    private void goToLastPage() {
-        int totalPages = getTotalPages();
-        if (currentPage < totalPages) {
-            currentPage = totalPages;
-            renderCurrentPage();
-        }
-    }
-
-    private int getTotalPages() {
-        if (batchList == null || batchList.isEmpty()) {
-            return 1;
-        }
-        return (int) Math.ceil((double) batchList.size() / PAGE_SIZE);
-    }
-
-    private void updatePagination() {
-        int totalPages = getTotalPages();
-        if (inwardMakerLblCurrentPage != null) {
-            inwardMakerLblCurrentPage.setValue(currentPage + " / " + totalPages);
-        }
-        if (inwardMakerBtnFirst != null) inwardMakerBtnFirst.setDisabled(currentPage <= 1);
-        if (inwardMakerBtnPrevious != null) inwardMakerBtnPrevious.setDisabled(currentPage <= 1);
-        if (inwardMakerBtnNext != null) inwardMakerBtnNext.setDisabled(currentPage >= totalPages);
-        if (inwardMakerBtnLast != null) inwardMakerBtnLast.setDisabled(currentPage >= totalPages);
-    }
-
-    private boolean isSentBackStatus(String status) {
-        if (status == null) return false;
-        String s = status.trim().toUpperCase();
-        return s.contains("SEND_BACK") || s.contains("SENT_BACK") || s.contains("RETURN") || "MAKER_RETURNED".equals(s);
-    }
-
-    private String formatIndianAmount(BigDecimal amount) {
-        if (amount == null) return "₹0.00";
-        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
-        symbols.setGroupingSeparator(',');
-        DecimalFormat formatter = new DecimalFormat("##,##,##0.00", symbols);
-        return "₹" + formatter.format(amount);
-    }
-
-    private String getValue(Object value) {
-        if (value == null) return "-";
-        String text = String.valueOf(value);
-        return text.trim().isEmpty() ? "-" : text;
-    }
-
-    private String normalizeStatus(String status) {
-        return (status != null) ? status.trim().toUpperCase() : "";
-    }
-
-    private String getDisplayStatus(InwardCheque chq) {
-        if (chq == null) return "PENDING_MAKER_PROCESS";
-        String s = normalizeStatus(chq.getChequeStatus());
-        
-        if ("MAKER_RETURNED".equals(s)) {
-            return "RESOLVED";
-        }
-
-        if ("SEND_BACK_TO_MAKER_MICR".equals(s) 
-                || "MICR_REPAIR_REQUIRED".equals(s) 
-                || "PENDING_MICR_REPAIR".equals(s)
-                || (chq.getMicrCode() == null || chq.getMicrCode().trim().isEmpty() || chq.getMicrCode().contains("*") || chq.getMicrCode().length() < 9)) {
-            return "REPAIR MICR";
-        }
-
-        if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equals(s)) {
-            return "FIX DATA ENTRY";
-        }
-
-        if ("SEND_BACK_TO_MAKER".equals(s) || "SENT_BACK".equals(s)) {
-            return "NEEDS REWORK";
-        }
-
-        return getDisplayStatus(s);
-    }
-
-    private String getDisplayStatus(String status) {
-        if (status == null || status.trim().isEmpty()) return "PENDING MAKER";
-
-        String s = status.trim().replace(" ", "_").toUpperCase();
-
-        if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) return "CHECKER PENDING";
-        if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equals(s)) return "FIX DATA ENTRY";
-        if ("SEND_BACK_TO_MAKER_MICR".equals(s)) return "REPAIR MICR";
-        if ("SEND_BACK_TO_MAKER".equals(s) || "SENT_BACK".equals(s)) return "NEEDS REWORK";
-
-        if ("PENDING_MICR_REPAIR".equals(s) || "MICR_REPAIR_PENDING".equals(s) || "MICR_REPAIR".equals(s)) {
-            return "PENDING MICR REPAIR";
-        }
-        
-        if ("PENDING_DATA_ENTRY".equals(s) || "DATA_ENTRY_PENDING".equals(s) 
-                || "PARTIALLY_PROCESSED".equals(s) || "DATA_ENTRY".equals(s)) {
-            return "PENDING DATA ENTRY";
-        }
-
-        if ("PENDING_MAKER_PROCESS".equals(s) || "PROCESSING".equals(s) || "RAW".equals(s)) {
-            return "PENDING MAKER";
-        }
-
-        return s.replace("_", " ").trim();
-    }
-
-    private static class ReturnedChequeDisplayItem {
-        final String batchId;
-        final InwardCheque cheque;
-        final String displayStatus;
-        final String reasonRemarks;
-
-        ReturnedChequeDisplayItem(String batchId, InwardCheque cheque, String displayStatus, String reasonRemarks) {
-            this.batchId = batchId;
-            this.cheque = cheque;
-            this.displayStatus = displayStatus;
-            this.reasonRemarks = reasonRemarks;
-        }
-    }
+	private static final long serialVersionUID = 1L;
+	private static final int PAGE_SIZE = 5;
+
+	// Services
+	private InwardDashboardService dashboardService;
+	private InwardBatchService batchService;
+	private InwardChequeService chequeService;
+	private InwardSendBackRequestService sendBackRequestService;
+
+	// Filter Toolbar Components
+	private Textbox inwardMakerTxtSearch;
+	private Combobox inwardMakerCmbModule;
+	private Combobox inwardMakerCmbStatus;
+	private Button inwardMakerBtnSearch;
+	private Button inwardMakerBtnClear;
+
+	// Section Containers
+	private Div inwardMakerReturnSection;
+	private Space inwardMakerSectionSpacer;
+	private Div inwardMakerProcessingSection;
+	private Div inwardMakerPaginationBar;
+	private Div inwardMakerReturnPaginationBar;
+
+	// Batches Processing Grid & Pagination
+	private Grid inwardMakerGridBatchDetails;
+	private Rows inwardMakerRowsBatchDetails;
+	private Vlayout inwardMakerVlayoutEmptyState;
+	private Label inwardMakerLblCurrentPage;
+
+	private Button inwardMakerBtnFirst;
+	private Button inwardMakerBtnPrevious;
+	private Button inwardMakerBtnNext;
+	private Button inwardMakerBtnLast;
+
+	// Return From Checker Grid & Pagination
+	private Grid inwardMakerGridReturnedBatches;
+	private Rows inwardMakerRowsReturnedBatches;
+	private Vlayout inwardMakerVlayoutReturnedEmptyState;
+	private Label inwardMakerLblReturnCurrentPage;
+
+	private Button inwardMakerBtnReturnFirst;
+	private Button inwardMakerBtnReturnPrevious;
+	private Button inwardMakerBtnReturnNext;
+	private Button inwardMakerBtnReturnLast;
+
+	// Data lists & state
+	private List<InwardDashboardBatchDTO> batchList = new ArrayList<>();
+	private List<ReturnedChequeDisplayItem> returnedChequeList = new ArrayList<>();
+	private int currentPage = 1;
+	private int currentReturnPage = 1;
+
+	// Active Filter State
+	private String currentSearchKeyword = "";
+	private String currentModule = "ALL";
+	private String currentStatus = "ALL";
+
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
+		
+		
+		super.doAfterCompose(comp);
+
+		this.dashboardService = new InwardDashboardServiceImpl();
+		this.batchService = new InwardBatchServiceImpl();
+		this.chequeService = new InwardChequeServiceImpl();
+		this.sendBackRequestService = new InwardSendBackRequestServiceImpl();
+
+		// Default Combobox Selections
+		if (inwardMakerCmbModule != null && inwardMakerCmbModule.getItemCount() > 0) {
+			inwardMakerCmbModule.setSelectedIndex(0);
+		}
+		if (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getItemCount() > 0) {
+			inwardMakerCmbStatus.setSelectedIndex(0);
+		}
+
+		// Filter Actions
+		if (inwardMakerBtnSearch != null)
+			inwardMakerBtnSearch.addEventListener("onClick", event -> onApplyFilter());
+		if (inwardMakerBtnClear != null)
+			inwardMakerBtnClear.addEventListener("onClick", event -> onClearFilter());
+
+		if (inwardMakerTxtSearch != null) {
+			inwardMakerTxtSearch.addEventListener("onOK", event -> onApplyFilter());
+		}
+
+		// Section 2 (Processing Batches) Pagination Listeners
+		if (inwardMakerBtnFirst != null)
+			inwardMakerBtnFirst.addEventListener("onClick", event -> goToFirstPage());
+		if (inwardMakerBtnPrevious != null)
+			inwardMakerBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
+		if (inwardMakerBtnNext != null)
+			inwardMakerBtnNext.addEventListener("onClick", event -> goToNextPage());
+		if (inwardMakerBtnLast != null)
+			inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
+
+		// Section 1 (Return From Checker) Pagination Listeners
+		if (inwardMakerBtnReturnFirst != null)
+			inwardMakerBtnReturnFirst.addEventListener("onClick", event -> goToFirstReturnPage());
+		if (inwardMakerBtnReturnPrevious != null)
+			inwardMakerBtnReturnPrevious.addEventListener("onClick", event -> goToPreviousReturnPage());
+		if (inwardMakerBtnReturnNext != null)
+			inwardMakerBtnReturnNext.addEventListener("onClick", event -> goToNextReturnPage());
+		if (inwardMakerBtnReturnLast != null)
+			inwardMakerBtnReturnLast.addEventListener("onClick", event -> goToLastReturnPage());
+
+		refreshAllDashboardData();
+	}
+
+	private void onApplyFilter() {
+		this.currentSearchKeyword = (inwardMakerTxtSearch != null && inwardMakerTxtSearch.getValue() != null)
+				? inwardMakerTxtSearch.getValue().trim().toLowerCase()
+				: "";
+
+		this.currentModule = (inwardMakerCmbModule != null && inwardMakerCmbModule.getSelectedItem() != null)
+				? inwardMakerCmbModule.getSelectedItem().getValue().toString()
+				: "ALL";
+
+		this.currentStatus = (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getSelectedItem() != null)
+				? inwardMakerCmbStatus.getSelectedItem().getValue().toString()
+				: "ALL";
+
+		refreshAllDashboardData();
+	}
+
+	private void onClearFilter() {
+		this.currentSearchKeyword = "";
+		this.currentModule = "ALL";
+		this.currentStatus = "ALL";
+
+		if (inwardMakerTxtSearch != null)
+			inwardMakerTxtSearch.setValue("");
+		if (inwardMakerCmbModule != null && inwardMakerCmbModule.getItemCount() > 0)
+			inwardMakerCmbModule.setSelectedIndex(0);
+		if (inwardMakerCmbStatus != null && inwardMakerCmbStatus.getItemCount() > 0)
+			inwardMakerCmbStatus.setSelectedIndex(0);
+
+		refreshAllDashboardData();
+	}
+
+	public void refreshAllDashboardData() {
+		boolean showReturned = "ALL".equalsIgnoreCase(currentModule)
+				|| "RETURN_FROM_CHECKER".equalsIgnoreCase(currentModule);
+		boolean showProcessing = "ALL".equalsIgnoreCase(currentModule)
+				|| "BATCH_PROCESSING".equalsIgnoreCase(currentModule);
+
+		if (inwardMakerReturnSection != null)
+			inwardMakerReturnSection.setVisible(showReturned);
+		if (inwardMakerSectionSpacer != null)
+			inwardMakerSectionSpacer.setVisible(showReturned && showProcessing);
+		if (inwardMakerProcessingSection != null)
+			inwardMakerProcessingSection.setVisible(showProcessing);
+
+		if (showReturned) {
+			loadReturnedCheques();
+		}
+		if (showProcessing) {
+			loadBatches();
+		}
+	}
+
+	private void loadReturnedCheques() {
+		this.returnedChequeList = new ArrayList<>();
+
+		try {
+			List<InwardDashboardBatchDTO> recentBatches = dashboardService.getRecentBatches("");
+			if (recentBatches != null) {
+				for (InwardDashboardBatchDTO bDto : recentBatches) {
+					if (bDto.getBackToMakerCheques() > 0) {
+
+						// Filter by Batch ID Only
+						if (!currentSearchKeyword.isEmpty()) {
+							String bId = bDto.getBatchId() != null ? bDto.getBatchId().toLowerCase() : "";
+							if (!bId.contains(currentSearchKeyword)) {
+								continue;
+							}
+						}
+
+						// Fetch batch cheques and pending send-back audit records
+						List<InwardCheque> batchCheques = chequeService.getChequesByBatchAndStatus(bDto.getBatchId(),
+								null);
+						Map<String, InwardSendBackRequestDTO> pendingRequests = sendBackRequestService
+								.getPendingRequestsByBatchId(bDto.getBatchId());
+
+						if (batchCheques != null) {
+							for (InwardCheque chq : batchCheques) {
+								String status = chq.getChequeStatus();
+								if (isSentBackStatus(status)) {
+									String displayStatus = getDisplayStatus(chq);
+
+									// Filter by Status (handles spaces or underscores)
+									if (!"ALL".equalsIgnoreCase(currentStatus)) {
+										String normalizedCurrent = currentStatus.replace("_", " ").trim();
+										String normalizedDisplay = displayStatus.replace("_", " ").trim();
+										if (!normalizedDisplay.equalsIgnoreCase(normalizedCurrent)) {
+											continue;
+										}
+									}
+
+									InwardSendBackRequestDTO req = (pendingRequests != null)
+											? pendingRequests.get(chq.getInwardChequeId())
+											: null;
+									String displayReason = "-";
+
+									if (req != null) {
+										String rName = req.getReasonName();
+										String rRemarks = req.getRemarks();
+
+										boolean hasName = (rName != null && !rName.trim().isEmpty());
+										boolean hasRemarks = (rRemarks != null && !rRemarks.trim().isEmpty());
+
+										if (hasName && hasRemarks) {
+											displayReason = rName.trim() + " (" + rRemarks.trim() + ")";
+										} else if (hasName) {
+											displayReason = rName.trim();
+										} else if (hasRemarks) {
+											displayReason = rRemarks.trim();
+										} else if (req.getReasonId() != null && req.getReasonId() > 0) {
+											displayReason = "Reason Code " + req.getReasonId();
+										}
+									}
+
+									returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq,
+											displayStatus, displayReason));
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		this.currentReturnPage = 1;
+		renderCurrentReturnPage();
+	}
+
+	private void renderCurrentReturnPage() {
+		if (inwardMakerRowsReturnedBatches == null)
+			return;
+		inwardMakerRowsReturnedBatches.getChildren().clear();
+
+		if (returnedChequeList == null || returnedChequeList.isEmpty()) {
+			if (inwardMakerVlayoutReturnedEmptyState != null)
+				inwardMakerVlayoutReturnedEmptyState.setVisible(true);
+			if (inwardMakerGridReturnedBatches != null)
+				inwardMakerGridReturnedBatches.setVisible(false);
+			if (inwardMakerReturnPaginationBar != null)
+				inwardMakerReturnPaginationBar.setVisible(false);
+			updateReturnPagination();
+			return;
+		}
+
+		if (inwardMakerVlayoutReturnedEmptyState != null)
+			inwardMakerVlayoutReturnedEmptyState.setVisible(false);
+		if (inwardMakerGridReturnedBatches != null)
+			inwardMakerGridReturnedBatches.setVisible(true);
+		if (inwardMakerReturnPaginationBar != null)
+			inwardMakerReturnPaginationBar.setVisible(true);
+
+		int totalPages = getTotalReturnPages();
+		if (currentReturnPage > totalPages)
+			currentReturnPage = totalPages;
+		if (currentReturnPage < 1)
+			currentReturnPage = 1;
+
+		int startIndex = (currentReturnPage - 1) * PAGE_SIZE;
+		int endIndex = Math.min(startIndex + PAGE_SIZE, returnedChequeList.size());
+
+		for (int i = startIndex; i < endIndex; i++) {
+			ReturnedChequeDisplayItem item = returnedChequeList.get(i);
+			if (item != null) {
+				createReturnedChequeRow(item.batchId, item.cheque, item.displayStatus, item.reasonRemarks);
+			}
+		}
+
+		updateReturnPagination();
+	}
+
+	private void createReturnedChequeRow(String batchId, InwardCheque cheque, String displayStatus,
+			String reasonRemarks) {
+		Row row = new Row();
+
+		Label batchIdLabel = new Label(getValue(batchId));
+		batchIdLabel.setSclass("inward-maker-batch-id");
+
+		Label chequeNumberLabel = new Label(getValue(cheque.getChequeNumber()));
+		chequeNumberLabel.setSclass("inward-maker-cheque-number");
+
+		Label statusLabel = new Label(displayStatus != null ? displayStatus.toLowerCase().replace('_', ' ') : "-");
+		statusLabel.setSclass("inward-maker-status");
+
+		if ("RESOLVED".equalsIgnoreCase(displayStatus)) {
+			statusLabel.setStyle(
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+		}
+
+		Label reasonLabel = new Label(getValue(reasonRemarks));
+		reasonLabel.setSclass("inward-maker-reason");
+
+		Button viewButton = new Button("View Details");
+		viewButton.setSclass("inward-maker-view-button");
+		viewButton.addEventListener("onClick", event -> openBatchWorkflow(batchId));
+
+		row.appendChild(batchIdLabel);
+		row.appendChild(chequeNumberLabel);
+		row.appendChild(statusLabel);
+		row.appendChild(reasonLabel);
+		row.appendChild(viewButton);
+
+		inwardMakerRowsReturnedBatches.appendChild(row);
+	}
+
+	private void goToFirstReturnPage() {
+		if (currentReturnPage > 1) {
+			currentReturnPage = 1;
+			renderCurrentReturnPage();
+		}
+	}
+
+	private void goToPreviousReturnPage() {
+		if (currentReturnPage > 1) {
+			currentReturnPage--;
+			renderCurrentReturnPage();
+		}
+	}
+
+	private void goToNextReturnPage() {
+		if (currentReturnPage < getTotalReturnPages()) {
+			currentReturnPage++;
+			renderCurrentReturnPage();
+		}
+	}
+
+	private void goToLastReturnPage() {
+		int totalPages = getTotalReturnPages();
+		if (currentReturnPage < totalPages) {
+			currentReturnPage = totalPages;
+			renderCurrentReturnPage();
+		}
+	}
+
+	private int getTotalReturnPages() {
+		if (returnedChequeList == null || returnedChequeList.isEmpty()) {
+			return 1;
+		}
+		return (int) Math.ceil((double) returnedChequeList.size() / PAGE_SIZE);
+	}
+
+	private void updateReturnPagination() {
+		int totalPages = getTotalReturnPages();
+		if (inwardMakerLblReturnCurrentPage != null) {
+			inwardMakerLblReturnCurrentPage.setValue(currentReturnPage + " / " + totalPages);
+		}
+		if (inwardMakerBtnReturnFirst != null)
+			inwardMakerBtnReturnFirst.setDisabled(currentReturnPage <= 1);
+		if (inwardMakerBtnReturnPrevious != null)
+			inwardMakerBtnReturnPrevious.setDisabled(currentReturnPage <= 1);
+		if (inwardMakerBtnReturnNext != null)
+			inwardMakerBtnReturnNext.setDisabled(currentReturnPage >= totalPages);
+		if (inwardMakerBtnReturnLast != null)
+			inwardMakerBtnReturnLast.setDisabled(currentReturnPage >= totalPages);
+	}
+
+	private void loadBatches() {
+		try {
+			List<InwardDashboardBatchDTO> allBatches = dashboardService.getRecentBatches("");
+			this.batchList = new ArrayList<>();
+
+			if (allBatches != null) {
+				for (InwardDashboardBatchDTO b : allBatches) {
+					if (b.getBackToMakerCheques() == 0 && !"SENT_BACK".equalsIgnoreCase(b.getDisplayStatus())
+							&& !"CHECKER_PROCESSING"
+									.equalsIgnoreCase(batchService.getBatchById(b.getBatchId()).getBatchStatus())) {
+
+						if (!currentSearchKeyword.isEmpty()) {
+							String bId = b.getBatchId() != null ? b.getBatchId().toLowerCase() : "";
+							if (!bId.contains(currentSearchKeyword)) {
+								continue;
+							}
+						}
+
+						InwardBatch fullBatch = batchService.getBatchById(b.getBatchId());
+						String bStatus = fullBatch != null ? normalizeStatus(fullBatch.getBatchStatus()) : "";
+
+						String trueStatus;
+
+						if ("CHECKER_PROCESSING_PENDING".equals(bStatus)) {
+							trueStatus = "SUBMITTED_TO_CHECKER";
+						} else if ("PROCESSING".equals(bStatus)) {
+							String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
+
+							trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
+									? "PENDING_MICR_REPAIR"
+									: "PENDING_DATA_ENTRY";
+						} else {
+							continue;
+						}
+
+						if (!"ALL".equalsIgnoreCase(currentStatus)) {
+							String normalizedCurrent = currentStatus.replace(" ", "_").toUpperCase();
+							String normalizedTrue = trueStatus.replace(" ", "_").toUpperCase();
+							if (!normalizedTrue.equalsIgnoreCase(normalizedCurrent)) {
+								continue;
+							}
+						}
+
+						this.batchList.add(b);
+					}
+				}
+			}
+
+			this.currentPage = 1;
+			renderCurrentPage();
+		} catch (Exception e) {
+			e.printStackTrace();
+			this.batchList = new ArrayList<>();
+			this.currentPage = 1;
+			renderCurrentPage();
+		}
+	}
+
+	private void renderCurrentPage() {
+		if (inwardMakerRowsBatchDetails == null)
+			return;
+		inwardMakerRowsBatchDetails.getChildren().clear();
+
+		if (batchList == null || batchList.isEmpty()) {
+			if (inwardMakerVlayoutEmptyState != null)
+				inwardMakerVlayoutEmptyState.setVisible(true);
+			if (inwardMakerGridBatchDetails != null)
+				inwardMakerGridBatchDetails.setVisible(false);
+			if (inwardMakerPaginationBar != null)
+				inwardMakerPaginationBar.setVisible(false);
+			updatePagination();
+			return;
+		}
+
+		if (inwardMakerVlayoutEmptyState != null)
+			inwardMakerVlayoutEmptyState.setVisible(false);
+		if (inwardMakerGridBatchDetails != null)
+			inwardMakerGridBatchDetails.setVisible(true);
+		if (inwardMakerPaginationBar != null)
+			inwardMakerPaginationBar.setVisible(true);
+
+		int totalPages = getTotalPages();
+		if (currentPage > totalPages)
+			currentPage = totalPages;
+		if (currentPage < 1)
+			currentPage = 1;
+
+		int startIndex = (currentPage - 1) * PAGE_SIZE;
+		int endIndex = Math.min(startIndex + PAGE_SIZE, batchList.size());
+
+		for (int i = startIndex; i < endIndex; i++) {
+			InwardDashboardBatchDTO batch = batchList.get(i);
+			if (batch != null) {
+				createBatchRow(batch);
+			}
+		}
+
+		updatePagination();
+	}
+
+	private void createBatchRow(InwardDashboardBatchDTO batch) {
+		Row row = new Row();
+
+		Label batchIdLabel = new Label(getValue(batch.getBatchId()));
+		batchIdLabel.setSclass("inward-maker-batch-id");
+
+		Label chequeCountLabel = new Label(String.valueOf(batch.getTotalCheques()));
+		chequeCountLabel.setSclass("inward-maker-cheque-count");
+
+		InwardBatch fullBatch = batchService.getBatchById(batch.getBatchId());
+		BigDecimal totalAmt = (fullBatch != null && fullBatch.getActualTotalAmount() != null)
+				? fullBatch.getActualTotalAmount()
+				: BigDecimal.ZERO;
+		Label totalAmountLabel = new Label(formatIndianAmount(totalAmt));
+		totalAmountLabel.setSclass("inward-maker-total-amount");
+
+		String bStatus = fullBatch != null ? fullBatch.getBatchStatus() : "";
+		boolean isCheckerPending = "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus);
+
+		Label statusLabel = new Label();
+		statusLabel.setSclass("inward-maker-status");
+
+		if (isCheckerPending) {
+			statusLabel.setValue("submitted to checker");
+			statusLabel.setStyle(
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
+		} else {
+			String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
+			String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
+					? "pending micr repair"
+					: "pending data entry";
+			statusLabel.setValue(trueStatus);
+			statusLabel.setStyle(
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 130px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
+		}
+
+		// Action Column: ALWAYS renders the VIEW DETAILS button so Maker can view cheques
+		Button viewButton = new Button("View Details");
+		viewButton.setSclass("inward-maker-view-button");
+		viewButton.addEventListener("onClick", event -> openBatchWorkflow(batch.getBatchId()));
+
+		row.appendChild(batchIdLabel);
+		row.appendChild(chequeCountLabel);
+		row.appendChild(totalAmountLabel);
+		row.appendChild(statusLabel);
+		row.appendChild(viewButton);
+
+		inwardMakerRowsBatchDetails.appendChild(row);
+	}
+
+	// =========================================================
+	// WORKFLOW ROUTING & SPA NAVIGATION
+	// =========================================================
+	private void openBatchWorkflow(String batchId) {
+		if (batchId == null || batchId.trim().isEmpty()) {
+			return;
+		}
+
+		String trimmedBatchId = batchId.trim();
+
+		Sessions.getCurrent().setAttribute("INWARD_MAKER_SELECTED_BATCH_ID", trimmedBatchId);
+		Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", trimmedBatchId);
+		Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", trimmedBatchId);
+		Sessions.getCurrent().setAttribute("DATA_ENTRY_BATCH_ID", trimmedBatchId);
+		Sessions.getCurrent().setAttribute("batchId", trimmedBatchId);
+
+		Include mainContentArea = null;
+		if (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null) {
+			for (org.zkoss.zk.ui.Page page : Executions.getCurrent().getDesktop().getPages()) {
+				Component comp = page.getFellowIfAny("mainContentArea", true);
+				if (comp instanceof Include) {
+					mainContentArea = (Include) comp;
+					break;
+				}
+			}
+		}
+
+		if (mainContentArea != null) {
+			try {
+				mainContentArea.clearDynamicProperties();
+				mainContentArea.setDynamicProperty("batchId", trimmedBatchId);
+				mainContentArea.setAttribute("batchId", trimmedBatchId);
+
+				mainContentArea.setSrc(null);
+				mainContentArea.setSrc("/inward/maker/batch-details.zul?batchId=" + trimmedBatchId);
+				return;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + trimmedBatchId);
+	}
+
+	private void goToFirstPage() {
+		if (currentPage > 1) {
+			currentPage = 1;
+			renderCurrentPage();
+		}
+	}
+
+	private void goToPreviousPage() {
+		if (currentPage > 1) {
+			currentPage--;
+			renderCurrentPage();
+		}
+	}
+
+	private void goToNextPage() {
+		if (currentPage < getTotalPages()) {
+			currentPage++;
+			renderCurrentPage();
+		}
+	}
+
+	private void goToLastPage() {
+		int totalPages = getTotalPages();
+		if (currentPage < totalPages) {
+			currentPage = totalPages;
+			renderCurrentPage();
+		}
+	}
+
+	private int getTotalPages() {
+		if (batchList == null || batchList.isEmpty()) {
+			return 1;
+		}
+		return (int) Math.ceil((double) batchList.size() / PAGE_SIZE);
+	}
+
+	private void updatePagination() {
+		int totalPages = getTotalPages();
+		if (inwardMakerLblCurrentPage != null) {
+			inwardMakerLblCurrentPage.setValue(currentPage + " / " + totalPages);
+		}
+		if (inwardMakerBtnFirst != null)
+			inwardMakerBtnFirst.setDisabled(currentPage <= 1);
+		if (inwardMakerBtnPrevious != null)
+			inwardMakerBtnPrevious.setDisabled(currentPage <= 1);
+		if (inwardMakerBtnNext != null)
+			inwardMakerBtnNext.setDisabled(currentPage >= totalPages);
+		if (inwardMakerBtnLast != null)
+			inwardMakerBtnLast.setDisabled(currentPage >= totalPages);
+	}
+
+	private boolean isSentBackStatus(String status) {
+		if (status == null)
+			return false;
+		String s = status.trim().toUpperCase();
+		return s.contains("SEND_BACK") || s.contains("SENT_BACK") || s.contains("RETURN") || "MAKER_RETURNED".equals(s);
+	}
+
+	private String formatIndianAmount(BigDecimal amount) {
+		if (amount == null)
+			return "₹0.00";
+		DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
+		symbols.setGroupingSeparator(',');
+		DecimalFormat formatter = new DecimalFormat("##,##,##0.00", symbols);
+		return "₹" + formatter.format(amount);
+	}
+
+	private String getValue(Object value) {
+		if (value == null)
+			return "-";
+		String text = String.valueOf(value);
+		return text.trim().isEmpty() ? "-" : text;
+	}
+
+	private String normalizeStatus(String status) {
+		return (status != null) ? status.trim().toUpperCase() : "";
+	}
+
+	private String getDisplayStatus(InwardCheque chq) {
+		if (chq == null)
+			return "PENDING_MAKER_PROCESS";
+		String s = normalizeStatus(chq.getChequeStatus());
+
+		if ("MAKER_RETURNED".equals(s)) {
+			return "RESOLVED";
+		}
+
+		if ("SEND_BACK_TO_MAKER_MICR".equals(s) || "MICR_REPAIR_REQUIRED".equals(s) || "PENDING_MICR_REPAIR".equals(s)
+				|| (chq.getMicrCode() == null || chq.getMicrCode().trim().isEmpty() || chq.getMicrCode().contains("*")
+						|| chq.getMicrCode().length() < 9)) {
+			return "REPAIR MICR";
+		}
+
+		if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equals(s)) {
+			return "FIX DATA ENTRY";
+		}
+
+		if ("SEND_BACK_TO_MAKER".equals(s) || "SENT_BACK".equals(s)) {
+			return "NEEDS REWORK";
+		}
+
+		return getDisplayStatus(s);
+	}
+
+	private String getDisplayStatus(String status) {
+		if (status == null || status.trim().isEmpty())
+			return "PENDING MAKER";
+
+		String s = status.trim().replace(" ", "_").toUpperCase();
+
+		if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s))
+			return "CHECKER PENDING";
+		if ("SEND_BACK_TO_MAKER_DATA_ENTRY".equals(s))
+			return "FIX DATA ENTRY";
+		if ("SEND_BACK_TO_MAKER_MICR".equals(s))
+			return "REPAIR MICR";
+		if ("SEND_BACK_TO_MAKER".equals(s) || "SENT_BACK".equals(s))
+			return "NEEDS REWORK";
+
+		if ("PENDING_MICR_REPAIR".equals(s) || "MICR_REPAIR_PENDING".equals(s) || "MICR_REPAIR".equals(s)) {
+			return "PENDING MICR REPAIR";
+		}
+
+		if ("PENDING_DATA_ENTRY".equals(s) || "DATA_ENTRY_PENDING".equals(s) || "PARTIALLY_PROCESSED".equals(s)
+				|| "DATA_ENTRY".equals(s)) {
+			return "PENDING DATA ENTRY";
+		}
+
+		if ("PENDING_MAKER_PROCESS".equals(s) || "PROCESSING".equals(s) || "RAW".equals(s)) {
+			return "PENDING MAKER";
+		}
+
+		return s.replace("_", " ").trim();
+	}
+
+	private static class ReturnedChequeDisplayItem {
+		final String batchId;
+		final InwardCheque cheque;
+		final String displayStatus;
+		final String reasonRemarks;
+
+		ReturnedChequeDisplayItem(String batchId, InwardCheque cheque, String displayStatus, String reasonRemarks) {
+			this.batchId = batchId;
+			this.cheque = cheque;
+			this.displayStatus = displayStatus;
+			this.reasonRemarks = reasonRemarks;
+		}
+	}
 }

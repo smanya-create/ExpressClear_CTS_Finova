@@ -1,122 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?page title="CTS - Outward Processing" contentType="text/html;charset=UTF-8"?>
 
 <zk>
-
-    <style src="/css/outward/batch-upload.css"/>
+    <style src="/css/outward/batch-upload.css?v=30"/>
 
     <window id="winBatchUpload"
             apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchUploadController"
             width="100%"
-            height="100%"
             border="none"
-            sclass="batch-upload-window">
+            sclass="winBatchUpload">
 
-        <vlayout width="100%"
-                 spacing="15px"
-                 sclass="batch-upload-page">
+        <vlayout id="vltPage"
+                 width="100%"
+                 spacing="0"
+                 sclass="vltPage">
 
-            <!-- BATCH UPLOAD SECTION -->
-            <groupbox id="grpBatchUpload"
-                      width="100%"
-                      closable="false">
-                <caption label="Batch Upload"/>
-                <vlayout width="100%" spacing="10px">
-                    <hlayout width="100%" spacing="10px">
-                        <vlayout width="250px">
-                            <label value="Expected Total Cheques"/>
-                            <intbox id="txtExpectedTotalCheques" width="100%"/>
+            <!-- PAGE HEADER -->
+            <vlayout id="vltPageHeader" sclass="vltPageHeader">
+                <label id="lblPageTitle"
+                       value="Batch Upload"
+                       sclass="lblPageTitle"/>
+            </vlayout>
+
+            <!-- BATCH UPLOAD CARD CONTAINER -->
+            <vlayout id="vltBatchUpload" sclass="vltBatchUpload">
+
+                <hlayout id="hltBatchHeader" sclass="hltBatchHeader">
+                    <vlayout id="vltBatchHeaderText" hflex="1" sclass="vltBatchHeaderText"/>
+                </hlayout>
+
+                <!-- INPUT FORM SECTION -->
+                <vlayout id="vltBatchForm" sclass="vltBatchForm">
+
+                    <!-- TWO COLUMN ROW: CHEQUES & AMOUNT -->
+                    <hlayout id="hltFormGrid" sclass="hltFormGrid" width="100%">
+                        
+                        <!-- EXPECTED TOTAL CHEQUES -->
+                        <vlayout id="vltExpectedChequeCount" hflex="1" sclass="vltFormField">
+                            <label id="lblExpectedChequeCount"
+                                   value="Expected Total Cheques *"
+                                   sclass="lblFormLabel"/>
+                            <intbox id="txtExpectedTotalCheques"
+                                    width="100%"
+                                    placeholder="e.g. 25"
+                                    sclass="txtFormInput"/>
                         </vlayout>
-                        <vlayout width="250px">
-                            <label value="Expected Total Cheque Amount"/>
-                            <decimalbox id="txtExpectedTotalChequeAmount" width="100%"/>
+
+                        <!-- EXPECTED TOTAL CHEQUE AMOUNT -->
+                        <vlayout id="vltExpectedChequeAmount" hflex="1" sclass="vltFormField">
+                            <label id="lblExpectedChequeAmount"
+                                   value="Expected Total Cheque Amount *"
+                                   sclass="lblFormLabel"/>
+                            <decimalbox id="txtExpectedTotalChequeAmount"
+                                        width="100%"
+                                        placeholder="e.g. 2,50,000.00"
+                                        format="#,##0.00"
+                                        sclass="txtFormInput"/>
                         </vlayout>
+
                     </hlayout>
-                    <hlayout width="100%" spacing="10px">
-                    <label value = "Browse Zip Folder"/>
-                        <textbox id="txtChequeFolder" width="500px" readonly="true"/>
-                        <button id="btnBrowse"
-                                label="Browse"
-                                sclass="btn-browse"
-                                upload="true,maxsize=104857600"/>
+
+                    <!-- BROWSE ZIP -->
+                    <vlayout id="vltChequeFolder" width="100%" sclass="vltFormField">
+                        <label id="lblChequeFolder"
+                               value="Browse ZIP Folder *"
+                               sclass="lblFormLabel"/>
+                        
+                        <hlayout id="hltChequeFolderInput" width="100%" valign="middle" spacing="10px">
+                            <textbox id="txtChequeFolder"
+                                     hflex="1"
+                                     readonly="true"
+                                     placeholder="Select batch ZIP archive..."
+                                     sclass="txtChequeFolder txtFormInput"/>
+                            <button id="btnBrowse"
+                                    label="Browse"
+                                    upload="true,maxsize=104857600"
+                                    iconSclass="z-icon-folder-open"
+                                    sclass="btnBrowse"/>
+                        </hlayout>
+                    </vlayout>
+
+                    <!-- ACTION BUTTON -->
+                    <hlayout id="hltValidateAction" sclass="hltValidateAction">
                         <button id="btnValidateBatch"
-                                label="Validate Batch"
-                                disabled="true"/>
+                                label="Validate &amp; Ingest Batch"
+                                iconSclass="z-icon-check-circle"
+                                sclass="btnValidateBatch"/>
                     </hlayout>
+
                 </vlayout>
-            </groupbox>
 
-            <!-- SUCCESS MESSAGE BANNER -->
-            <div id="divSuccessMessage" visible="false" width="100%">
-                <label id="lblSuccessText" value="" width="100%"/>
-            </div>
+            </vlayout>
 
-            <!-- BATCH DETAILS TABLE -->
-            <groupbox id="batchDetailsGroup"
-                      width="100%"
-                      visible="false"
-                      closable="false">
-                <caption label="Batch Details"/>
-                <listbox id="lstBatchDetails" width="100%">
-                    <listhead>
-                        <listheader label="Batch ID" width="15%" align="left"/>
-                        <listheader label="Scan Date" width="15%" align="center"/>
-                        <listheader label="Total Cheques" width="15%" align="center"/>
-                        <listheader label="MICR Errors" width="15%" align="center"/>
-                        <listheader label="Status" width="15%" align="center"/>
-                        <listheader label="Action" width="25%" align="center"/>
-                    </listhead>
-                </listbox>
-            </groupbox>
+            <!-- VALIDATED BATCH RESULT -->
+            <vlayout id="vltBatchResult"
+                     visible="false"
+                     width="100%"
+                     sclass="vltBatchResult">
 
-            <!-- CHEQUE DETAILS TABLE -->
-            <groupbox id="grpChequeDetails"
-                      width="100%"
-                      visible="false"
-                      closable="false">
-                <caption label="Cheque Details"/>
-                <vlayout width="100%" spacing="10px">
+                <!-- RESULT HEADER -->
+                <hlayout id="hltResultHeader" width="100%" valign="middle" sclass="hltResultHeader">
+                    <vlayout id="vltResultHeaderText" hflex="1" spacing="2px">
+                        <label id="lblResultTitle" value="Batch Information" sclass="lblResultTitle"/>
+                        <label id="lblResultDescription" value="Validated batch details and cheque records." sclass="lblResultDescription"/>
+                    </vlayout>
+                </hlayout>
 
-                    <hlayout width="100%" spacing="10px">
-                        <label id="lblChequeFilter" value="Filter:"/>
-                        <combobox id="cmbChequeFilter"
-                                  width="220px"
-                                  readonly="true">
-                            <comboitem label="All Cheques" value="ALL"/>
-                            <comboitem label="Normal Cheques" value="NORMAL"/>
-                            <comboitem label="MICR Repair Cheques" value="MICR_REPAIR"/>
-                        </combobox>
-                        <label id="lblTotalCheques" value="Total Cheques: 0"/>
+                <!-- BATCH INFORMATION -->
+                <hlayout id="hltBatchInformation" width="100%" sclass="hltBatchInformation">
+                    <vlayout id="vltBatchId" hflex="1" sclass="vltBatchInfoItem">
+                        <label id="lblBatchId" value="Batch ID" sclass="lblBatchInfoLabel"/>
+                        <label id="lblBatchIdValue" value="-" sclass="lblBatchInfoValue"/>
+                    </vlayout>
+
+                    <vlayout id="vltTotalCheques" hflex="1" sclass="vltBatchInfoItem">
+                        <label id="lblTotalCheques" value="No. of Cheques" sclass="lblBatchInfoLabel"/>
+                        <label id="lblTotalChequesValue" value="-" sclass="lblBatchInfoValue"/>
+                    </vlayout>
+
+                    <vlayout id="vltTotalAmount" hflex="1" sclass="vltBatchInfoItem">
+                        <label id="lblTotalAmount" value="Total Amount" sclass="lblBatchInfoLabel"/>
+                        <label id="lblTotalAmountValue" value="-" sclass="lblBatchInfoValue"/>
+                    </vlayout>
+                </hlayout>
+
+                <!-- CHEQUE DETAILS -->
+                <vlayout id="vltChequeList" width="100%" sclass="vltChequeList">
+                    <hlayout id="hltChequeListHeader" width="100%" valign="middle" sclass="hltChequeListHeader">
+                        <label id="lblChequeListTitle" value="Cheque Details" sclass="lblChequeListTitle"/>
+                        <label id="lblChequeListCount" value="" hflex="1" sclass="lblChequeListCount"/>
                     </hlayout>
 
-                    <listbox id="lstCheques"
-                             width="100%"
-                             sclass="cheque-listbox">
-                        <listhead>
-                            <listheader label="Cheque ID" width="15%" align="left"/>
-                            <listheader label="Cheque Number" width="15%" align="center"/>
-                            <listheader label="Amount" width="15%" align="center"/>
-                            <listheader label="Status" width="15%" align="center"/>
-                            <listheader label="MICR" width="10%" align="center"/>
-                            <listheader label="Action" width="30%" align="center"/>
+                    <!-- CHEQUE FILTER BAR -->
+                    <hlayout id="hltChequeFilterBar" width="100%" valign="middle" spacing="12px" sclass="hltChequeFilterBar">
+                        <label id="lblChequeSearch" value="Search Cheque No." sclass="lblChequeFilterLabel"/>
+                        <textbox id="txtChequeSearch" width="280px" placeholder="Enter full or partial Cheque No." sclass="txtChequeSearch txtFormInput"/>
+                        <combobox id="cmbChequeFilter" sclass="cmbChequeFilter" width="160px" readonly="true">
+                            <comboitem label="All Cheques" value="ALL"/>
+                            <comboitem label="Pending MICR" value="PENDING_MICR"/>
+                            <comboitem label="Pending Data Entry" value="PENDING_DATA_ENTRY"/>
+                        </combobox>
+                        <button id="btnClearChequeFilter" label="Clear" sclass="btnClearChequeFilter"/>
+                    </hlayout>
+
+                    <!-- CHEQUE LISTBOX -->
+                    <listbox id="lstCheques" width="100%" sclass="lstCheques">
+                        <listhead id="lstHeadCheque" sizable="false" sclass="lstHeadCheque">
+                            <listheader id="lstHeaderSerial" label="S.No" width="8%" align="center" sclass="lstHeader"/>
+                            <listheader id="lstHeaderChequeNumber" label="Cheque No." width="15%" align="center" sclass="lstHeader"/>
+                            <listheader id="lstHeaderDraweeAccount" label="Drawee Account No." width="22%" align="center" sclass="lstHeader"/>
+                            <listheader id="lstHeaderChequeDate" label="Cheque Date" width="14%" align="center" sclass="lstHeader"/>
+                            <listheader id="lstHeaderChequeAmount" label="Cheque Amount" width="15%" align="center" sclass="lstHeader"/>
+                            <listheader id="lstHeaderStatus" label="Cheque Status" width="14%" align="center" sclass="lstHeader"/>
+                            <listheader id="lstHeaderAction" label="Action" width="12%" align="center" sclass="lstHeader"/>
                         </listhead>
                     </listbox>
 
-                    <hlayout width="100%"
-                             spacing="10px"
-                             sclass="cheque-pagination">
-                        <button id="btnChequePrevious"
-                                label="Previous"
-                                disabled="true"/>
-                        <label id="lblChequePage" value="Page 1"/>
-                        <button id="btnChequeNext"
-                                label="Next"
-                                disabled="true"/>
+                    <!-- PAGINATION -->
+                    <hlayout id="hltChequePagination" width="100%" valign="middle" spacing="8px" sclass="hltChequePagination">
+                        <button id="btnChequePrevious" label="&lt;" disabled="true" sclass="btnChequePaging"/>
+                        <label id="lblChequePage" value="1 / 1" sclass="lblChequePage"/>
+                        <button id="btnChequeNext" label="&gt;" disabled="true" sclass="btnChequePaging"/>
                     </hlayout>
-
                 </vlayout>
-            </groupbox>
+            </vlayout>
 
         </vlayout>
     </window>

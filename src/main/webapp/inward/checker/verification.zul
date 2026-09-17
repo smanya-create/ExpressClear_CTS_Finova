@@ -3,12 +3,9 @@
 <zk>
 	<style src="/css/inward/verification.css" />
 
-	<zscript>
-		org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE",
-		"INWARD_CHECKER");
-		org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER",
-		"Alex");
-	</zscript>
+	<!-- <zscript> org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", 
+		"INWARD_CHECKER"); org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("LOGGED_USER", 
+		"Alex"); </zscript> -->
 
 	<borderlayout width="100%" height="100vh"
 		apply="com.iispl.cts.controller.inward.checker.InwardCheckerVerificationController">
@@ -22,11 +19,10 @@
 			<borderlayout width="100%" height="100%">
 
 				<north height="70px" border="0">
-    <include src="/components/header.zul">
-        <attribute name="pageTitle">Verification</attribute>
-        <attribute name="pageSubtitle">Inward Processing</attribute>
-    </include>
-</north>
+					<!-- FIXED HEADER INCLUDE -->
+					<include src="/components/header.zul"
+						pageTitle="Inward Processing" pageSubtitle="Verification" />
+				</north>
 
 				<!-- PAGE CONTENT -->
 				<center border="0" autoscroll="false" vflex="1"
@@ -36,7 +32,7 @@
 						<!-- BREADCRUMB -->
 						<hlayout spacing="8px" valign="middle" sclass="breadcrumb">
 
-						
+
 						</hlayout>
 
 						<!--PAGE TITLE -->
@@ -47,9 +43,6 @@
 
 								<label value="CHEQUE VERIFICATION" sclass="page-title" />
 
-								<label
-									value="Review the selected cheque and record the Checker decision."
-									sclass="page-description" />
 
 							</vlayout>
 
@@ -100,22 +93,19 @@
 								</vlayout>
 
 								<!-- CHEQUE STATUS -->
-<vlayout hflex="1"
-         sclass="batch-info-item"
-         style="padding-left:5px; padding-right:5px;">
+								<vlayout hflex="1" sclass="batch-info-item"
+									style="padding-left:5px; padding-right:5px;">
 
-    <label value="CHEQUE STATUS"
-           sclass="info-label" />
+									<label value="CHEQUE STATUS" sclass="info-label" />
 
-    <label value=""
-           id="lblChequeStatus"
-           sclass="status-badge mismatch"
-           style="white-space:nowrap;
-                  font-size:8px;
-                  padding:3px 5px;
-                  box-sizing:border-box;" />
+									<label value="" id="lblChequeStatus"
+										sclass="status-badge mismatch"
+										style="white-space:nowrap;
+								                  font-size:8px;
+								                  padding:3px 5px;
+								                  box-sizing:border-box;" />
 
-</vlayout>
+								</vlayout>
 
 								<!-- RECEIVED DATE -->
 								<vlayout hflex="1" sclass="batch-info-item">
@@ -144,54 +134,24 @@
 									sclass="cheque-image-header">
 
 									<vlayout spacing="3px" hflex="1"
-         style="margin-bottom: 8px;">
+										style="margin-bottom: 8px;">
 
-    <label value="CHEQUE IMAGE" sclass="card-title" />
+										<label value="CHEQUE IMAGE" sclass="card-title" />
 
-    <label
-        value="Review the scanned cheque before making your verification decision."
-        sclass="card-description" />
+										<label
+											value="Review the scanned cheque before making your verification decision."
+											sclass="card-description" />
 
-</vlayout>
+									</vlayout>
 									<hlayout valign="middle" spacing="5px"
 										style="margin-left:10px;margin-right:5px;">
 
 										<button id="btnFront" label="Front"
-											sclass="cheque-side-btn"
-											style="width:55px !important;
-                   height:28px !important;
-                   min-width:55px !important;
-                   min-height:28px !important;
-                   padding:0 !important;
-                   margin:0 !important;
-                   background:#0B2344 !important;
-                   background-image:none !important;
-                   color:#FFFFFF !important;
-                   border:1px solid #0B2344 !important;
-                   border-radius:4px !important;
-                   font-size:11px !important;
-                   font-weight:500 !important;
-                   line-height:26px !important;
-                   box-shadow:none !important;" />
+											sclass="cheque-side-btn" />
 
 										<!-- BACK -->
 										<button id="btnBack" label="Back"
-											sclass="cheque-side-btn"
-											style="width:55px !important;
-                   height:28px !important;
-                   min-width:55px !important;
-                   min-height:28px !important;
-                   padding:0 !important;
-                   margin:0 !important;
-                   background:#0B2344 !important;
-                   background-image:none !important;
-                   color:#FFFFFF !important;
-                   border:1px solid #0B2344 !important;
-                   border-radius:4px !important;
-                   font-size:11px !important;
-                   font-weight:500 !important;
-                   line-height:26px !important;
-                   box-shadow:none !important;" />
+											sclass="cheque-side-btn" />
 
 									</hlayout>
 
@@ -240,12 +200,10 @@
 										<label value="CHEQUE VERIFICATION" sclass="card-title"
 											hflex="1" style="white-space:nowrap;" />
 
-							<label id="lblVerificationStatus"
-       value="PENDING"
-       sclass="verification-status-pending"
-       width="72px"
-       height="24px"
-       style="display:inline-flex;
+										<label id="lblVerificationStatus" value="PENDING"
+											sclass="verification-status-pending" width="72px"
+											height="24px"
+											style="display:inline-flex;
               align-items:center;
               justify-content:center;
               flex-shrink:0;
@@ -255,7 +213,7 @@
               box-sizing:border-box;
               padding:2px 8px;
               line-height:18px;" />
-              
+
 									</hlayout>
 
 									<label
@@ -436,20 +394,20 @@
 										<div sclass="verification-separator">
 										</div>
 
-										
+
 
 										<vlayout spacing="7px" sclass="verification-section">
 
 											<label value="DRAWEE DETAILS"
 												sclass="verification-section-title" />
-										
+
 											<hlayout width="100%">
 												<label value="Drawee Name"
 													sclass="verification-field-label" hflex="1" />
 												<label value="" id="lblDraweeName"
 													sclass="verification-field-value" />
 											</hlayout>
-										
+
 											<hlayout width="100%">
 												<label value="Drawee Account No."
 													sclass="verification-field-label" hflex="1" />
@@ -458,7 +416,7 @@
 
 											</hlayout>
 
-											
+
 
 											<hlayout width="100%">
 
@@ -471,7 +429,7 @@
 
 										</vlayout>
 
-										
+
 										<div sclass="verification-separator">
 										</div>
 									</div>
@@ -497,14 +455,17 @@
 
 							</vlayout>
 
-						
+
 						</hlayout>
 
-						<div id="noChequesContainer" visible="false" width="100%"
+						<div id="noChequesContainer" visible="false" hflex="1"
+							vflex="1"
 							style="display:flex;
             justify-content:center;
             align-items:center;
-            min-height:430px;">
+            width:100%;
+            min-height:430px;
+            box-sizing:border-box;">
 
 							<div width="650px"
 								style="background:#FFFFFF;
@@ -631,7 +592,7 @@
 							<vlayout width="100%" spacing="15px"
 								style="padding:20px;">
 
-							
+
 								<vlayout width="100%" spacing="6px">
 
 									<label value="Send Back Reason"
@@ -647,7 +608,7 @@
 
 								</vlayout>
 
-								
+
 								<vlayout width="100%" spacing="6px">
 
 									<label value="Remarks"
@@ -658,7 +619,7 @@
 
 								</vlayout>
 
-								
+
 								<hlayout width="100%" spacing="8px">
 
 									<button id="btnCancelSendBack" label="Cancel"
@@ -676,8 +637,9 @@
 
 
 						<window id="verificationSummaryWindow"
-							title="Complete Verification" width="520px" closable="true"
-							sizable="false" mode="modal" visible="false" border="normal">
+							title="Complete Verification" width="440px" closable="true"
+							sizable="false" mode="modal" visible="false" border="normal"
+							sclass="verification-summary-modal">
 
 							<vlayout width="100%" spacing="15px"
 								style="padding:20px;">
@@ -725,7 +687,7 @@
 
 								</hlayout>
 
-								
+
 
 								<label
 									value="Submitting will mark this batch as COMPLETED and remove it from the active Verification queue."
@@ -738,7 +700,8 @@
 									style="justify-content:center;">
 
 									<button id="btnStayVerification"
-										label="Stay in Verification" width="150px" height="34px" />
+										label="Stay in Verification" sclass="stay-verification-btn"
+										width="150px" height="34px" />
 
 									<button id="btnSubmitBatch" label="✓ Submit"
 										width="110px" height="34px"
@@ -757,4 +720,3 @@
 		</center>
 	</borderlayout>
 </zk>
-

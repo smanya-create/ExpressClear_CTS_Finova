@@ -23,8 +23,7 @@ public class ReportXmlGenerator {
     private ReportXmlGenerator() {
     }
 
-
-    public static String generateRrfXml(String batchId, List<InwardReportChequeDTO> rejectedCheques, String generatedBy) throws Exception {
+    public static String generateRrfXml(String batchId, List<InwardReportChequeDTO> rejectedCheques) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         XMLStreamWriter writer = null;
 
@@ -34,16 +33,15 @@ public class ReportXmlGenerator {
 
             writer.writeStartDocument(StandardCharsets.UTF_8.name(), "1.0");
             writer.writeCharacters("\n");
-       
+        
             writer.writeStartElement("RRFReport");
-   
+    
             writer.writeCharacters("\n    ");
             writer.writeStartElement("ReportInformation");
 
-            writeElement(writer, "RRFReferenceNo", generateRrfReferenceNo(batchId), 8);
+            writeElement(writer, "RRFReferenceNo", getRrfReferenceNo(batchId), 8);
             writeElement(writer, "BatchId", batchId, 8);
-            writeElement(writer, "GenerationDate", LocalDate.now().format(DATE_FORMATTER), 8);
-            writeElement(writer, "GeneratedBy", generatedBy, 8);
+            writeElement(writer, "GeneratedDate", LocalDate.now().format(DATE_FORMATTER), 8);
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
@@ -82,7 +80,6 @@ public class ReportXmlGenerator {
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
 
-
             writer.writeCharacters("\n");
             writer.writeEndElement();
             writer.writeCharacters("\n");
@@ -99,9 +96,7 @@ public class ReportXmlGenerator {
         }
     }
 
-    
-
-    public static String generateBatchSummaryXml(String batchId, List<InwardReportChequeDTO> cheques, String generatedBy) throws Exception {
+    public static String generateBatchSummaryXml(String batchId, List<InwardReportChequeDTO> cheques) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         XMLStreamWriter writer = null;
 
@@ -119,7 +114,6 @@ public class ReportXmlGenerator {
 
             writeElement(writer, "BatchId", batchId, 8);
             writeElement(writer, "GeneratedAt", LocalDate.now().format(DATE_FORMATTER), 8);
-            writeElement(writer, "GeneratedBy", generatedBy, 8);
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
@@ -157,8 +151,6 @@ public class ReportXmlGenerator {
                 }
             }
 
-         
-
             writer.writeCharacters("\n    ");
             writer.writeStartElement("Summary");
 
@@ -190,7 +182,6 @@ public class ReportXmlGenerator {
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
-
 
             writer.writeCharacters("\n    ");
             writer.writeStartElement("RejectedCheques");
@@ -295,8 +286,7 @@ public class ReportXmlGenerator {
         return dateTime.toLocalDate().format(DATE_FORMATTER);
     }
 
-
-    private static String generateRrfReferenceNo(String batchId) {
+    private static String getRrfReferenceNo(String batchId) {
         return "RRF-" + safe(batchId);
     }
 

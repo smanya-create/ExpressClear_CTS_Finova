@@ -1,11 +1,17 @@
 /* =========================================================
-   MICR REPAIR VIEW
+   OUTWARD MICR REPAIR QUEUE
+   Outward-specific CSS namespace
    ========================================================= */
 
-.micr-repair-view-page {
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.outward-micr-repair-view-page {
     width: 100%;
     box-sizing: border-box;
-    padding: 18px 12px 24px 12px;
+    padding: 18px 24px 24px 24px;
     margin: 0;
     background: #f8fafc !important;
     overflow-x: hidden;
@@ -16,23 +22,17 @@
    PAGE TITLE
    ========================================================= */
 
-.micr-repair-view-title-section {
+.outward-micr-repair-title-section {
     padding: 0;
-    margin: 0 0 16px 0;
+    margin: 0 0 4px 0;
 }
 
-.micr-repair-view-title {
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    color: #111827 !important;
-    line-height: 25px !important;
-}
-
-.micr-repair-view-subtitle {
-    font-size: 11px !important;
-    font-weight: 400 !important;
-    color: #374151 !important;
-    line-height: 15px !important;
+.outward-micr-repair-title {
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    line-height: 28px !important;
+    letter-spacing: 0.2px;
 }
 
 
@@ -40,50 +40,218 @@
    SECTION CARD
    ========================================================= */
 
-.micr-repair-section-card {
+.outward-micr-repair-section-card {
     width: 100%;
     box-sizing: border-box;
-
     background: #ffffff !important;
     border: 1px solid #d9dee7 !important;
     border-radius: 8px !important;
+    padding: 16px 20px 14px 20px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
 
-    padding: 12px 12px 8px 12px;
-    margin: 0 0 16px 0;
+.outward-micr-repair-section-title {
+    font-size: 15px !important;
+    font-weight: 750 !important;
+    color: #0f172a !important;
+    line-height: 20px !important;
 }
 
 
 /* =========================================================
-   SECTION TITLE
+   RESULT COUNT
    ========================================================= */
 
-.micr-repair-section-title {
-    font-size: 14px !important;
+.outward-micr-repair-result-count {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: #eaf2fb;
+    color: #172554;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FILTER BAR
+   ========================================================= */
+
+.outward-micr-repair-filter-bar {
+    width: 100%;
+    box-sizing: border-box;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+}
+
+
+/* =========================================================
+   FILTER LABEL
+   ========================================================= */
+
+.outward-micr-repair-filter-label {
+    font-size: 11.5px !important;
     font-weight: 700 !important;
-    color: #111827 !important;
-    line-height: 19px !important;
-}
-
-.micr-repair-section-subtitle {
-    font-size: 10px !important;
-    font-weight: 400 !important;
-    color: #6b7280 !important;
-    line-height: 14px !important;
+    color: #334155 !important;
 }
 
 
 /* =========================================================
-   GRID
+   BATCH ID FILTER INPUT
    ========================================================= */
 
-.micr-repair-grid {
-    width: 100% !important;
+.outward-micr-repair-filter-input {
+    height: 32px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    color: #1e293b;
+    font-size: 11.5px;
+}
 
+.outward-micr-repair-filter-input:focus {
+    border-color: #172554;
+    outline: none;
+}
+
+
+/* =========================================================
+   STATUS COMBOBOX
+   ========================================================= */
+
+.outward-micr-repair-status-filter {
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+}
+
+.outward-micr-repair-status-filter .z-combobox-input {
+    height: 32px !important;
+    line-height: 30px !important;
+    box-sizing: border-box !important;
+    padding: 0 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-right: none !important;
+    border-radius: 5px 0 0 5px !important;
+    color: #1e293b !important;
     background: #ffffff !important;
+}
 
-    border: 1px solid #d1d5db !important;
-    border-radius: 7px !important;
+.outward-micr-repair-status-filter .z-combobox-button {
+    height: 32px !important;
+    line-height: 30px !important;
+    width: 28px !important;
+    box-sizing: border-box !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: none !important;
+    border-radius: 0 5px 5px 0 !important;
+    background: #ffffff !important;
+    color: #475569 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
 
+.outward-micr-repair-status-filter .z-combobox-input:focus {
+    border-color: #172554 !important;
+    outline: none !important;
+}
+
+.outward-micr-repair-status-filter:hover .z-combobox-input,
+.outward-micr-repair-status-filter:hover .z-combobox-button {
+    border-color: #94a3b8 !important;
+}
+
+
+/* =========================================================
+   COMBOBOX DROPDOWN
+   ========================================================= */
+
+.z-combobox-popup {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.1) !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: hidden !important;
+    padding: 4px 0 !important;
+}
+
+.z-combobox-popup .z-combobox-content {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   COMBOBOX ITEMS
+   ========================================================= */
+
+.z-comboitem {
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+}
+
+.z-comboitem-text {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    line-height: 32px !important;
+    vertical-align: middle !important;
+}
+
+.z-comboitem:hover,
+.z-comboitem-selected {
+    background: #f1f5f9 !important;
+    color: #172554 !important;
+}
+
+
+/* =========================================================
+   CLEAR FILTER BUTTON
+   ========================================================= */
+
+.outward-micr-repair-clear-button.z-button {
+    height: 32px;
+    padding: 0 16px;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    color: #475569 !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.outward-micr-repair-clear-button.z-button:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+
+/* =========================================================
+   GRID CONTAINER
+   ========================================================= */
+
+.outward-micr-repair-grid {
+    width: 100% !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
     overflow: hidden !important;
     border-collapse: separate !important;
 }
@@ -93,40 +261,35 @@
    GRID HEADER
    ========================================================= */
 
-.micr-repair-grid .z-grid-header {
+.outward-micr-repair-grid .z-grid-header {
     background: #18275c !important;
     border: none !important;
 }
 
-.micr-repair-grid .z-columns {
+.outward-micr-repair-grid .z-columns {
     background: #18275c !important;
 }
 
-.micr-repair-grid .z-column {
+.outward-micr-repair-grid .z-column {
     background: #18275c !important;
-
     border-right: 1px solid #30406f !important;
     border-bottom: none !important;
 }
 
-.micr-repair-grid .z-column:last-child {
+.outward-micr-repair-grid .z-column:last-child {
     border-right: none !important;
 }
 
-.micr-repair-grid .z-column-content {
-    height: 36px !important;
-    line-height: 36px !important;
-
+.outward-micr-repair-grid .z-column-content {
+    height: 38px !important;
+    line-height: 38px !important;
     padding: 0 8px !important;
-
     background: #18275c !important;
     color: #ffffff !important;
-
-    font-size: 9px !important;
-    font-weight: 700 !important;
-
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px;
     text-align: center !important;
-
     white-space: nowrap;
 }
 
@@ -135,167 +298,122 @@
    GRID ROWS
    ========================================================= */
 
-.micr-repair-grid .z-row {
+.outward-micr-repair-grid .z-row {
     height: 48px !important;
     background: #ffffff !important;
     border-bottom: 1px solid #e5e7eb !important;
 }
 
-.micr-repair-grid .z-row-inner {
+.outward-micr-repair-grid .z-row:last-child {
+    border-bottom: none !important;
+}
+
+.outward-micr-repair-grid .z-row-inner {
     height: 48px !important;
     background: #ffffff !important;
     border-bottom: 1px solid #e5e7eb !important;
 }
 
-.micr-repair-grid .z-cell {
+.outward-micr-repair-grid .z-cell {
     height: 48px !important;
     padding: 0 8px !important;
-
     background: #ffffff !important;
-
     border-right: none !important;
     border-bottom: 1px solid #e5e7eb !important;
-
     vertical-align: middle !important;
+    text-align: center !important;
 }
 
-.micr-repair-grid .z-row-content {
+.outward-micr-repair-grid .z-row-content {
     text-align: center !important;
     white-space: nowrap;
+    padding: 0 6px !important;
 }
 
 
-/* Actual Labels inside the cells */
-.micr-repair-grid .z-cell > .z-label {
-    font-size: 9px !important;
-    font-weight: 500 !important;
-    color: #111827 !important;
+/* =========================================================
+   GRID HOVER
+   ========================================================= */
 
-    line-height: normal !important;
-
-    text-align: center !important;
-    vertical-align: middle !important;
+.outward-micr-repair-grid .z-row:hover,
+.outward-micr-repair-grid .z-row:hover .z-cell,
+.outward-micr-repair-grid .z-row:hover .z-row-inner {
+    background: #f8fafc !important;
 }
 
-
-/* Batch ID */
-.micr-repair-batch-id {
-    color: #075bd3 !important;
-    font-size: 9px !important;
-    font-weight: 700 !important;
-    text-align: center !important;
-}
 
 /* =========================================================
    BATCH ID
    ========================================================= */
 
-.micr-repair-batch-id {
+.outward-micr-repair-batch-id {
     color: #075bd3 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    cursor: pointer;
+    text-align: center !important;
+}
 
-    font-size: 9px !important;
+
+/* =========================================================
+   CELL TEXT
+   ========================================================= */
+
+.outward-micr-repair-cell-text {
+    font-size: 11px !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   COUNT TEXT
+   ========================================================= */
+
+.outward-micr-repair-count-text {
+    font-size: 11.5px !important;
     font-weight: 700 !important;
-
-    text-align: center !important;
+    color: #0f172a !important;
 }
 
 
 /* =========================================================
-   STATUS CELL
+   PENDING COUNT
    ========================================================= */
 
-.micr-repair-grid .z-cell:nth-child(5) {
-    text-align: center !important;
-    vertical-align: middle !important;
+.outward-micr-repair-pending-count {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: #d97706 !important;
 }
 
 
 /* =========================================================
-   STATUS PILL
+   ACTION BUTTON
    ========================================================= */
 
-.micr-repair-status {
-    display: inline-block !important;
-
-    min-width: 82px !important;
-    height: 22px !important;
-    line-height: 20px !important;
-
-    padding: 0 12px !important;
-    margin: 0 !important;
-
-    box-sizing: border-box !important;
-
-    background: linear-gradient(
-        90deg,
-        #fff8d6 0%,
-        #ffd84d 55%,
-        #ffb71b 100%
-    ) !important;
-
-    color: #172554 !important;
-
-    border: 1px solid #ffb000 !important;
-    border-radius: 14px !important;
-
-    font-size: 8px !important;
-    font-weight: 700 !important;
-
-    text-align: center !important;
-    vertical-align: middle !important;
-
-    box-shadow: 0 2px 5px rgba(255, 183, 27, 0.35) !important;
-}
-
-
-/* =========================================================
-   ACTION CELL
-   ========================================================= */
-
-.micr-repair-grid .z-cell:last-child {
-    text-align: center !important;
-    vertical-align: middle !important;
-}
-
-
-/* =========================================================
-   OPEN BUTTON
-   ========================================================= */
-
-.micr-repair-grid .z-cell:last-child .btn-action-repair {
+.outward-micr-repair-action-button {
     display: inline-block !important;
     vertical-align: middle !important;
-
-    width: 82px !important;
+    width: 80px !important;
     height: 28px !important;
     line-height: 26px !important;
-
     padding: 0 !important;
-    margin: 0 auto !important;
-
     background: #18275c !important;
     border: 1px solid #18275c !important;
-
-    border-radius: 5px !important;
-
+    border-radius: 4px !important;
     color: #ffffff !important;
-
-    font-size: 8px !important;
-    font-weight: 700 !important;
-
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px;
     text-align: center !important;
-
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.20) !important;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15) !important;
 }
 
-.micr-repair-grid .z-cell:last-child .btn-action-repair:hover {
+.outward-micr-repair-action-button:hover {
     background: #101c46 !important;
     border-color: #101c46 !important;
-}
-
-.micr-repair-grid .z-cell:last-child .btn-action-repair:active {
-    background: #0d1738 !important;
-    border-color: #0d1738 !important;
 }
 
 
@@ -303,103 +421,98 @@
    PAGINATION
    ========================================================= */
 
-.micr-repair-paging {
+.outward-micr-repair-paging {
     width: 100% !important;
     box-sizing: border-box;
-
-    padding: 12px 0 2px 0 !important;
-
+    padding: 10px 0 2px 0 !important;
     text-align: center !important;
     background: transparent !important;
 }
 
-.micr-repair-paging .z-paging-button {
+.outward-micr-repair-paging .z-paging-button {
     min-width: 32px !important;
     height: 30px !important;
     line-height: 28px !important;
-
     margin: 0 2px !important;
-
     background: #ffffff !important;
-
-    border: 1px solid #d1d5db !important;
-    border-radius: 5px !important;
-
-    color: #111827 !important;
-
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    color: #1e293b !important;
     font-size: 11px !important;
     font-weight: 600 !important;
 }
 
-.micr-repair-paging .z-paging-button:hover {
+.outward-micr-repair-paging .z-paging-button:hover {
     background: #f1f5f9 !important;
 }
 
 
 /* =========================================================
-   EMPTY MESSAGE
+   EMPTY STATE
    ========================================================= */
 
-.micr-repair-empty-card {
+.outward-micr-repair-empty-card {
     width: 100%;
     box-sizing: border-box;
-
     background: #ffffff !important;
-
     border: 1px solid #d9dee7 !important;
     border-radius: 8px !important;
-
-    padding: 22px !important;
-
+    padding: 24px !important;
     text-align: center;
 }
 
-.micr-repair-empty-title {
+.outward-micr-repair-empty-title {
     font-size: 14px !important;
     font-weight: 700 !important;
     color: #111827 !important;
 }
 
-.micr-repair-empty-message {
-    font-size: 10px !important;
+.outward-micr-repair-empty-message {
+    font-size: 11px !important;
     font-weight: 400 !important;
     color: #6b7280 !important;
+}
+/* =========================================================
+   PENDING MAKER STATUS
+  /* =========================================================
+   PENDING MAKER STATUS
+   ========================================================= */
+
+.outward-micr-repair-status-pending {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 3px 10px !important;
+    box-sizing: border-box !important;
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    white-space: nowrap !important;
 }
 
 
 /* =========================================================
-   RESPONSIVE
+   CHECKER RETURNED STATUS
    ========================================================= */
 
-@media (max-width: 900px) {
-
-    .micr-repair-view-page {
-        padding: 14px 8px 20px 8px;
-    }
-
-    .micr-repair-section-card {
-        padding: 10px 8px 8px 8px;
-    }
-
-    .micr-repair-grid .z-column-content {
-        font-size: 8px !important;
-        padding: 0 5px !important;
-    }
-
-    .micr-repair-grid .z-row-content {
-        font-size: 8px !important;
-    }
-
-    .micr-repair-batch-id {
-        font-size: 8px !important;
-    }
-
-    .micr-repair-status {
-        min-width: 76px !important;
-        font-size: 8px !important;
-    }
-
-    .micr-repair-grid .z-cell:last-child .btn-action-repair {
-        width: 70px !important;
-    }
+.outward-micr-repair-status-returned {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 3px 10px !important;
+    box-sizing: border-box !important;
+    background: #e0e7ff !important;
+    color: #3730a3 !important;
+    border: 1px solid #a5b4fc !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    white-space: nowrap !important;
 }

@@ -67,83 +67,120 @@
 }
 
 /* =========================================================
-   METADATA CARD & TOP CONTROLS
+   METADATA CARD & TOP CONTROLS (Aligned with MICR Repair)
    ========================================================= */
-.cts-metadata-card-compact {
+.cts-metadata-card {
     background: #ffffff !important;
-    border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
-    padding: 12px 20px !important;
-    display: flex !important;
+    border: 1px solid #dfe5ed !important;
+    border-radius: 7px !important;
+    padding: 12px 18px !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 2fr auto !important;
+    gap: 20px !important;
     align-items: center !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .04) !important;
     box-sizing: border-box !important;
     width: 100% !important;
+    min-height: 70px !important;
 }
 
-.cts-meta-col-item {
+.cts-meta-col {
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
+    min-width: 0 !important;
 }
 
-.cts-meta-header-compact {
-    font-size: 11px !important;
+.cts-meta-header {
+    font-size: 10px !important;
     font-weight: 600 !important;
     color: #64748b !important;
+    letter-spacing: .6px !important;
     display: block !important;
-    margin-bottom: 2px !important;
+    margin-bottom: 3px !important;
 }
 
-.cts-meta-val-compact {
-    font-size: 15px !important;
-    font-weight: 800 !important;
-    color: #0f172a !important;
-}
-
-.cts-progress-percentage-label {
+.cts-meta-val {
     font-size: 12px !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     color: #0f172a !important;
-}
-
-.cts-progress-subtext {
-    font-size: 10.5px !important;
-    font-weight: 500 !important;
-    color: #64748b !important;
-    margin-top: 4px !important;
-    display: block !important;
-}
-
-/* Progress Meter (Strict Solid Navy #18275c) */
-.cts-compact-progress.z-progressmeter,
-.z-progressmeter.cts-compact-progress {
-    background: #e2e8f0 !important;
-    background-color: #e2e8f0 !important;
-    border: none !important;
-    border-radius: 4px !important;
+    white-space: nowrap !important;
     overflow: hidden !important;
-    height: 8px !important;
+    text-overflow: ellipsis !important;
 }
 
-.cts-compact-progress .z-progressmeter-img,
+.cts-progress-meta-col {
+    min-width: 230px !important;
+}
+
+.cts-navigation-meta-col {
+    align-items: flex-end !important;
+}
+
+/* Compact Progress Bar Track */
+.cts-compact-progress {
+    width: 225px !important;
+    height: 7px !important;
+    min-height: 7px !important;
+    max-height: 7px !important;
+    border-radius: 9999px !important;
+    background: #e2e8f0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    /* Forces Chrome/Blink to cleanly mask child elements to the rounded corners */
+    -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
+}
+
+/* Inner Filled Progress Bar */
 .cts-compact-progress .z-progressmeter-image,
-.cts-compact-progress .z-progressmeter-inner,
+.cts-compact-progress .z-progressmeter-img,
 .cts-compact-progress span {
     background: #18275c !important;
     background-color: #18275c !important;
     background-image: none !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 9999px !important;
+    display: block !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     border: none !important;
-    border-radius: 4px !important;
-    transition: width 0.3s ease-in-out !important;
+    transition: width .25s ease-in-out !important;
 }
 
-.cts-cheque-page-counter {
-    min-width: 50px !important;
-    text-align: center !important;
-    font-size: 12px !important;
+/* Progress Count Text (e.g., 0/20) */
+.cts-data-entry-progress-text {
+    font-size: 11px !important;
     font-weight: 700 !important;
-    color: #1e293b !important;
+    color: #334155 !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+}
+
+/* Cheque Position Counter (e.g., 1 of 10) */
+.cts-data-entry-nav-counter {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    min-width: 48px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+/* Nav Buttons Height & Font Consistency */
+.cts-data-entry-btn-nav.z-button {
+    height: 34px !important;
+    padding: 0 14px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 5px !important;
+    color: #18275c !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 /* =========================================================
@@ -204,7 +241,7 @@
     font-size: 9.5px !important;
     font-weight: 800 !important;
     letter-spacing: 0.4px !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     text-align: center !important;
     box-shadow: none !important;
     white-space: nowrap !important;
@@ -222,8 +259,6 @@
     overflow: auto !important;
     position: relative !important;
     display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
 }
 
 .cts-cheque-img-display {
@@ -231,7 +266,8 @@
     user-select: none !important;
     display: block !important;
     margin: auto !important;
-    transition: transform 0.2s ease !important;
+    max-width: none !important;
+    transition: transform 0.2s ease, width 0.2s ease !important;
 }
 
 .cts-cheque-img-display:active {

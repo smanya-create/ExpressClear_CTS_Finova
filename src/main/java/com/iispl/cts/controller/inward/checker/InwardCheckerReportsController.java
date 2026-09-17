@@ -25,6 +25,7 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.dto.ReportSummaryRow;
@@ -54,6 +55,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         
+    	
     	super.doAfterCompose(comp);
     	
         service = new InwardBatchServiceImpl();
@@ -243,13 +245,11 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
             return;
         }
 
-        String generatedBy = String.valueOf(
-                Sessions.getCurrent().getAttribute("LOGGED_USER"));
+    
 
         String xml = ReportXmlGenerator.generateRrfXml(
                 batchId,
-                rejectedCheques,
-                generatedBy);
+                rejectedCheques);
 
         Filedownload.save(
                 xml.getBytes(StandardCharsets.UTF_8),
@@ -277,8 +277,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         String xml = ReportXmlGenerator.generateBatchSummaryXml(
                 batchId,
-                batchCheques,
-                generatedBy);
+                batchCheques);
 
         Filedownload.save(
                 xml.getBytes(StandardCharsets.UTF_8),

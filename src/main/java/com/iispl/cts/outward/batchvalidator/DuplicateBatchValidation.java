@@ -20,7 +20,7 @@ public class DuplicateBatchValidation implements ValidateBatch {
         if (data == null) {
             return new ValidationResult(
                     false,
-                    "Batch information is not available. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         ScanBatch batch = data.getBatch();
@@ -28,7 +28,7 @@ public class DuplicateBatchValidation implements ValidateBatch {
         if (batch == null) {
             return new ValidationResult(
                     false,
-                    "Batch information is not available. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         String batchId = batch.getScannedBatchId();
@@ -36,22 +36,19 @@ public class DuplicateBatchValidation implements ValidateBatch {
         if (batchId == null || batchId.trim().isEmpty()) {
             return new ValidationResult(
                     false,
-                    "Batch number is missing. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         batchId = batchId.trim();
 
         try {
 
-            ScanBatch existingBatch =
-                    scanService.getBatchById(batchId);
+            ScanBatch existingBatch = scanService.getBatchById(batchId);
 
             if (existingBatch != null) {
-
                 return new ValidationResult(
                         false,
-                        "Batch " + batchId
-                                + " has already been uploaded. Please check the batch details.");
+                        "Batch already exists.");
             }
 
             return new ValidationResult(true, null);
@@ -62,8 +59,7 @@ public class DuplicateBatchValidation implements ValidateBatch {
 
             return new ValidationResult(
                     false,
-                    "Unable to check the batch details at the moment. Please try again.");
+                    "Unable to check batch details. Please try again.");
         }
     }
 }
-

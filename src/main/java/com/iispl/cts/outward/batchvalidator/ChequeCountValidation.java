@@ -1,4 +1,3 @@
-
 package com.iispl.cts.outward.batchvalidator;
 
 import java.util.List;
@@ -16,7 +15,7 @@ public class ChequeCountValidation implements ValidateBatch {
         if (data == null) {
             return new ValidationResult(
                     false,
-                    "Batch information is not available. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         ScanBatch batch = data.getBatch();
@@ -24,7 +23,7 @@ public class ChequeCountValidation implements ValidateBatch {
         if (batch == null) {
             return new ValidationResult(
                     false,
-                    "Batch information is not available. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         List<ScanCheque> chequeList = data.getChequeList();
@@ -32,64 +31,31 @@ public class ChequeCountValidation implements ValidateBatch {
         if (chequeList == null) {
             return new ValidationResult(
                     false,
-                    "Cheque information is not available. Please check the uploaded file.");
+                    "Invalid cheque details found in batch.");
         }
 
-        Integer expectedTotalCheques =
-                data.getExpectedTotalCheques();
+        Integer expectedTotalCheques = data.getExpectedTotalCheques();
 
         if (expectedTotalCheques == null) {
             return new ValidationResult(
                     false,
-                    "Expected total cheque count is missing. Please enter the expected cheque count.");
+                    "Cheque count mismatch.");
         }
 
         int expectedCount = expectedTotalCheques.intValue();
-
         int batchCount = batch.getActualChequeCount();
-
         int actualChequeCount = chequeList.size();
 
         /*
-         * Expected count vs Batch Info count
+         * Check for any count mismatch across expected, header, or actual list count
          */
-        if (expectedCount != batchCount) {
+        if (expectedCount != batchCount 
+                || expectedCount != actualChequeCount 
+                || batchCount != actualChequeCount) {
 
             return new ValidationResult(
                     false,
-                    "Cheque count mismatch. Expected cheque count is "
-                            + expectedCount
-                            + ", but batch information contains "
-                            + batchCount
-                            + " cheques.");
-        }
-
-        /*
-         * Expected count vs actual cheque list count
-         */
-        if (expectedCount != actualChequeCount) {
-
-            return new ValidationResult(
-                    false,
-                    "Cheque count mismatch. Expected cheque count is "
-                            + expectedCount
-                            + ", but "
-                            + actualChequeCount
-                            + " cheque records were found in the uploaded file.");
-        }
-
-        /*
-         * Batch Info count vs actual cheque list count
-         */
-        if (batchCount != actualChequeCount) {
-
-            return new ValidationResult(
-                    false,
-                    "Cheque count mismatch. Batch information contains "
-                            + batchCount
-                            + " cheques, but "
-                            + actualChequeCount
-                            + " cheque records were found in the uploaded file.");
+                    "Cheque count mismatch.");
         }
 
         return new ValidationResult(true, null);

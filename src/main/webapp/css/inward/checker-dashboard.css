@@ -31,7 +31,7 @@ body {
 }
 
 .inward-checker-filter-heading {
-    color: #1C3673 !important;
+    color: black !important;
     font-size: 16px !important;
     font-weight: bold !important;
 }
@@ -72,11 +72,6 @@ body {
 .inward-checker-btn-action-search:hover {
     background-color: #294575 !important;
 }
-
-
-/* =========================================================
-   CLEAR BUTTON
-   ========================================================= */
 
 .inward-checker-btn-action-clear {
     height: 38px !important;
@@ -184,38 +179,41 @@ body {
     margin-right: auto !important;
 }
 
-
 .batch-status {
     display: inline-block !important;
-    padding: 2px 4px !important;
-    border-radius: 12px !important;
-    font-weight: bold !important;
-    font-size: 10px !important;
-    text-align: center !important;
-    line-height: 16px !important;
-    white-space: nowrap !important;
-    max-width: 100% !important;
+    width: 80px !important;
+    height: 28px !important;
     box-sizing: border-box !important;
+    padding: 3px 0 !important;
+    border-radius: 18px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    line-height: 20px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
 }
 
-.batch-status-completed {
-    background: #28A745 !important;
-    color: white !important;
-    border: 1px solid #28A745 !important;
-    padding: 2px 8px !important;
-    border-radius: 15px !important;
-    font-size: 10px !important;
-    font-weight: bold !important;
-    line-height: 18px !important;
-    min-width: 65px !important;
-    text-align: center !important;
-    display: inline-block !important;
+.batch-status-pending,
+.batch-status-processing {
+    width: 80px !important;
+    height: 28px !important;
     box-sizing: border-box !important;
+    padding: 3px 0 !important;
+    border-radius: 18px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    line-height: 20px !important;
+    text-align: center !important;
 }
 
 .batch-status-pending {
     background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
-     padding: 2px 8px !important;
+    border: 1px solid #F5A900 !important;
+    color: #7A4500 !important;
+}
+
+.batch-status-processing {
+    background: linear-gradient(to right, #FFF4C2, #F5A900) !important;
     border: 1px solid #F5A900 !important;
     color: #7A4500 !important;
 }

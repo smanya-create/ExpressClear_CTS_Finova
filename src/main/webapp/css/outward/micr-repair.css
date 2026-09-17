@@ -1,685 +1,1251 @@
-/* =========================================================
-   CTS OUTWARD - MICR REPAIR
-   ========================================================= */
+.cts-data-entry-wrapper {
 
-.micr-repair-window {
-    background: #f4f7fb;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #243447;
+    padding: 10px 16px 20px 16px !important;
+
+    background: #f1f5f9 !important;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+
+    color: #172033 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    gap: 10px !important;
+
+    box-sizing: border-box !important;
+
+    width: 100% !important;
+
 }
 
-.micr-repair-page {
-    padding: 12px 16px;
-    box-sizing: border-box;
-    background: #f4f7fb;
+.cts-title-group {
+
+    display: flex !important;
+
+    justify-content: space-between !important;
+
+    align-items: center !important;
+
+    width: 100% !important;
+
+    padding: 2px 0 4px 0 !important;
+
 }
 
+/* Top Back Button (Solid Deep Navy #18275c) */
 
-/* =========================================================
-   HEADER
-   ========================================================= */
+.cts-btn-top-back.z-button {
 
-.micr-repair-header {
-    min-height: 58px;
+    background-image: none !important;
+
+    background: #18275c !important;
+    background-color: #18275c !important;
+
+    border: 1px solid #18275c !important;
+
+    color: #ffffff !important;
+
+    font-size: 12px !important;
+
+    font-weight: 700 !important;
+
+    height: 34px !important;
+
+    padding: 0 18px !important;
+
+    border-radius: 5px !important;
+
+    cursor: pointer !important;
+
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
+
 }
 
-.micr-repair-title {
-    font-size: 21px;
-    font-weight: 700;
-    color: #17324d;
-    line-height: 25px;
+.cts-btn-top-back.z-button:hover {
+
+    background: #101c46 !important;
+    background-color: #101c46 !important;
+
+    border-color: #101c46 !important;
+
 }
 
-.micr-repair-description {
-    font-size: 12px;
-    color: #718096;
-    line-height: 16px;
+.cts-btn-top-back.z-button:focus,
+
+.cts-btn-top-back.z-button:active {
+
+    background: #0c1535 !important;
+    background-color: #0c1535 !important;
+
+    border-color: #0c1535 !important;
+
+    color: #ffffff !important;
+
+    outline: none !important;
+
+    box-shadow: none !important;
+
 }
 
+.cts-main-title {
 
-/* =========================================================
-   HEADER PROGRESS
-   Progress is above Prev / Next
-   ========================================================= */
+    font-size: 17px !important;
 
-.header-progress {
-    box-sizing: border-box;
-    padding: 2px 4px;
+    font-weight: 700 !important;
+
+    color: #0f172a !important;
+
+    display: block !important;
+
+    line-height: 1.2 !important;
+
 }
 
-.header-progress .progress-title {
-    font-size: 9px;
-    font-weight: 700;
-    color: #7b8794;
-    letter-spacing: 0.4px;
+.cts-main-subtitle {
+
+    font-size: 11px !important;
+
+    color: #64748b !important;
+
+    display: block !important;
+
+    margin-top: 4px !important;
+
+    margin-left: 8px !important;
+
 }
 
-.header-progress .progress-text {
-    font-size: 9px;
-    color: #64748b;
-    text-align: right;
+/* Kept for compatibility with the existing ZUL/controller. */
+
+.micr-nav-pill-box {
+
+    background: transparent !important;
+
+    border: none !important;
+
+    padding: 0 !important;
+
+    box-shadow: none !important;
+
 }
 
-.micr-progress-meter {
-    width: 100%;
-    height: 6px;
-    border: none;
-    border-radius: 5px;
-    background: #e2e8f0;
+.cts-metadata-card {
+
+    background: #ffffff !important;
+
+    border: 1px solid #dfe5ed !important;
+
+    border-radius: 7px !important;
+
+    padding: 12px 18px !important;
+
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr 2fr auto !important;
+
+    gap: 20px !important;
+
+    align-items: center !important;
+
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .04) !important;
+
+    box-sizing: border-box !important;
+
+    width: 100% !important;
+
+    min-height: 70px !important;
+
+    margin-bottom: 2px !important;
+
 }
 
+.cts-meta-col {
 
-/* =========================================================
-   TOP NAVIGATION
-   ========================================================= */
+    display: flex !important;
 
-.cheque-navigation {
-    margin-right: 4px;
+    flex-direction: column !important;
+
+    justify-content: center !important;
+
+    min-width: 0 !important;
+
 }
 
-.micr-button {
-    box-sizing: border-box;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
+.cts-meta-header {
+
+    font-size: 10px !important;
+
+    font-weight: 600 !important;
+
+    color: #64748b !important;
+
+    letter-spacing: .6px !important;
+
+    display: block !important;
+
+    margin-bottom: 3px !important;
+
 }
 
-.navigation-button {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #334155;
+.cts-meta-val {
+
+    font-size: 12px !important;
+
+    font-weight: 700 !important;
+
+    color: #0f172a !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
 }
 
-.navigation-button:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
+.cts-progress-meta-col {
+
+    min-width: 230px !important;
+
 }
 
-.back-button {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #334155;
+.cts-navigation-meta-col {
+
+    align-items: flex-end !important;
+
 }
 
-.back-button:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
+.cts-compact-progress {
+
+    width: 225px !important;
+
+    height: 7px !important;
+
+    border-radius: 5px !important;
+
+    background: #e2e8f0 !important;
+
+    overflow: hidden !important;
+
 }
 
-.cheque-position {
-    min-width: 45px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #475569;
+.cts-compact-progress .z-progressmeter-image {
+
+    background: #1b3d68 !important;
+    background-color: #1b3d68 !important;
+
+    background-image: none !important;
+
+    transition: width .25s ease-in-out !important;
+
 }
 
+.micr-progress-text {
 
-/* =========================================================
-   BATCH INFORMATION
-   ========================================================= */
+    font-size: 11px !important;
 
-.batch-information {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 11px 15px;
-    background: #ffffff;
-    border: 1px solid #dbe3ec;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    font-weight: 700 !important;
+
+    color: #334155 !important;
+
+    white-space: nowrap !important;
+
 }
 
-.batch-information-layout {
-    min-height: 42px;
+.micr-divider {
+
+    height: 16px !important;
+
 }
 
-.batch-information-item {
-    min-width: 0;
+.micr-nav-counter {
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    color: #1e293b !important;
+
+    min-width: 48px !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+
 }
 
-.batch-label-title {
-    font-size: 9px;
-    font-weight: 700;
-    color: #7b8794;
-    letter-spacing: 0.5px;
-    line-height: 12px;
+.micr-btn-compact-nav {
+
+    height: 34px !important;
+
+    padding: 0 11px !important;
+
+    font-size: 11px !important;
+
+    border-radius: 5px !important;
+
 }
 
-.batch-label-value {
-    font-size: 14px;
-    font-weight: 700;
-    color: #243b53;
-    line-height: 18px;
+.cts-badge-micr,
+
+.cts-badge-micr-completed {
+
+    display: inline-block !important;
+
+    padding: 1px 8px !important;
+
+    border-radius: 10px !important;
+
+    font-size: 10px !important;
+
+    font-weight: 700 !important;
+
+    width: fit-content !important;
+
 }
 
+#lblHeaderItemStatus,
+.cts-status-pill-peach,
+#lblHeaderItemStatus.z-label {
 
-/* =========================================================
-   MAIN WORKSPACE
-   ========================================================= */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 
-.micr-repair-content {
-    width: 100%;
-    min-height: 0;
-    box-sizing: border-box;
+    min-width: 150px !important;
+    height: 24px !important;
+    padding: 0 14px !important;
+    line-height: normal !important;
+    box-sizing: border-box !important;
+
+    background: #ffedd5 !important;
+    background-color: #ffedd5 !important;
+    background-image: none !important;
+
+    color: #c2410c !important;
+
+    border: 1px solid #fed7aa !important;
+    border-radius: 9999px !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
+.cts-badge-micr-completed {
 
-/* =========================================================
-   LEFT - CHEQUE IMAGE CARD
-   ========================================================= */
+    background: #dcfce7 !important;
+    background-color: #dcfce7 !important;
+    background-image: none !important;
 
-.cheque-image-section {
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #dbe3ec;
-    border-radius: 6px;
-    padding: 12px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    color: #16a34a !important;
+
+    border: 1px solid #86efac !important;
+
 }
 
-.cheque-image-content {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
+.cts-data-entry-grid {
+
+    display: grid !important;
+
+    grid-template-columns: 1.18fr 1fr !important;
+
+    gap: 14px !important;
+
+    width: 100% !important;
+
+    align-items: stretch !important;
+
 }
 
-.section-header {
-    min-height: 31px;
+.cts-work-card {
+
+    background: #ffffff !important;
+
+    border: 1px solid #dfe5ed !important;
+
+    border-radius: 7px !important;
+
+    padding: 14px 16px !important;
+
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .04) !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    box-sizing: border-box !important;
+
+    position: relative !important;
+
+    min-width: 0 !important;
+
 }
 
-.section-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #243b53;
-    line-height: 17px;
+.micr-card-header-row {
+
+    display: flex !important;
+
+    justify-content: space-between !important;
+
+    align-items: flex-start !important;
+
+    margin-bottom: 8px !important;
+
 }
 
-.section-subtitle {
-    font-size: 10px;
-    color: #8a96a3;
-    line-height: 13px;
+.cts-card-title {
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+    display: block !important;
+
+    line-height: 1.2 !important;
+
 }
 
-.record-position {
-    font-size: 10px;
-    color: #64748b;
-    text-align: right;
-    white-space: nowrap;
+.cts-card-tagline {
+
+    font-size: 10px !important;
+
+    color: #64748b !important;
+
+    display: block !important;
+
+    margin-top: 3px !important;
+
+    margin-left: 0 !important;
+
 }
 
+.micr-btn-tab {
 
-/* =========================================================
-   FRONT / BACK IMAGE BUTTONS
-   ========================================================= */
+    height: 34px !important;
 
-.image-side-button {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #334155;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
+    min-width: 54px !important;
+
+    padding: 0 10px !important;
+
+    font-size: 11px !important;
+
+    border-radius: 5px !important;
+
 }
 
-.image-side-button:hover {
-    background: #f1f5f9;
-    border-color: #94a3b8;
+.cts-cheque-box-placeholder {
+
+    background: #f4f7fa !important;
+
+    border: 1px solid #d7dee7 !important;
+
+    border-radius: 5px !important;
+
+    height: 340px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    margin-bottom: 9px !important;
+
+    overflow: hidden !important;
+
+    position: relative !important;
+
+    box-sizing: border-box !important;
+
+    flex: 1 1 auto !important;
+
 }
 
+.micr-cheque-image {
 
-/* =========================================================
-   CHEQUE IMAGE VIEWER
-   ========================================================= */
+    max-height: 100% !important;
 
-.cheque-image-container {
-    position: relative;
-    width: 100%;
-    min-height: 0;
-    overflow: hidden;
-    background: #eef2f6;
-    border: 1px solid #d7dee7;
-    border-radius: 4px;
-    text-align: center;
-    box-sizing: border-box;
+    max-width: 100% !important;
+
+    object-fit: contain !important;
+
+    transition: transform .2s ease, width .2s ease !important;
+
 }
 
-.cheque-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
-    pointer-events: auto;
-    cursor: grab;
-    transform-origin: center center;
+.micr-empty-box {
+
+    background: transparent !important;
+
+    border: none !important;
+
+    text-align: center !important;
+
 }
 
-.cheque-image:active {
-    cursor: grabbing;
+.micr-empty-title {
+
+    color: #475569 !important;
+
+    font-weight: 700 !important;
+
+    font-size: 12px !important;
+
 }
 
-.cheque-image-placeholder {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    margin-top: -8px;
-    text-align: center;
-    font-size: 12px;
-    color: #8a96a3;
+.micr-empty-sub {
+
+    color: #94a3b8 !important;
+
+    font-size: 10px !important;
+
 }
 
+.micr-done-overlay {
 
-/* =========================================================
-   IMAGE CONTROLS
-   ========================================================= */
+    position: absolute !important;
 
-.image-controls {
-    width: 100%;
+    top: 0 !important;
+
+    left: 0 !important;
+
+    right: 0 !important;
+
+    bottom: 0 !important;
+
+    background: #ffffff !important;
+
+    z-index: 10 !important;
+
+    text-align: center !important;
+
+    padding: 24px !important;
+
 }
 
-.image-control-button {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #475569;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
+.micr-done-inner {
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    height: 100% !important;
+
 }
 
-.image-control-button:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
+.micr-done-icon {
+
+    font-size: 36px !important;
+
+    color: #16a34a !important;
+
+    font-weight: 800 !important;
+
 }
 
-.compact-image-button {
-    font-size: 13px;
-    font-weight: 700;
+.micr-done-title {
+
+    font-size: 16px !important;
+
+    font-weight: 800 !important;
+
+    color: #0f172a !important;
+
 }
 
+.micr-done-batch {
 
-/* =========================================================
-   RIGHT - MICR DETAILS CARD
-   ========================================================= */
+    font-size: 12px !important;
 
-.micr-details-section {
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #dbe3ec;
-    border-radius: 6px;
-    padding: 12px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    color: #64748b !important;
+
 }
 
+.micr-done-desc {
 
-/* IMPORTANT:
-   Only this MICR area gets a scrollbar.
-   The rest of the page does not scroll because of this rule. */
+    font-size: 11px !important;
 
-.micr-details-scroll {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-sizing: border-box;
-    padding-right: 4px;
+    color: #475569 !important;
+
 }
 
-.micr-details-content {
-    width: 100%;
-    min-height: 100%;
-    box-sizing: border-box;
+.cts-btn-secondary {
+
+    background-image: none !important;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    color: #24334d !important;
+
+    font-size: 11px !important;
+
+    font-weight: 600 !important;
+
+    border-radius: 5px !important;
+
+    cursor: pointer !important;
+
 }
 
-.cheque-status {
-    padding: 4px 8px;
-    background: #fff1f2;
-    border: 1px solid #fecdd3;
-    border-radius: 12px;
-    color: #be123c;
-    font-size: 9px;
-    font-weight: 700;
-    white-space: nowrap;
+.cts-btn-secondary:hover {
+
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+
+    border-color: #94a3b8 !important;
+
 }
 
+.cts-btn-icon-sq {
 
-/* =========================================================
-   CHECKER RETURN INFORMATION
-   ========================================================= */
+    width: 38px !important;
 
-.checker-return-information {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    background: #fff8e8;
-    border: 1px solid #f5d48a;
-    border-radius: 4px;
+    height: 34px !important;
+
+    padding: 0 !important;
+
 }
 
-.checker-return-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: #8a5a00;
+.micr-btn-tool {
+
+    height: 34px !important;
+
+    padding: 0 12px !important;
+
+    font-size: 11px !important;
+
 }
-
-.checker-label-title {
-    font-size: 10px;
-    font-weight: 600;
-    color: #64748b;
-}
-
-.checker-label-value {
-    font-size: 10px;
-    color: #334155;
-}
-
-
-/* =========================================================
-   MICR FORM
-   ========================================================= */
 
 .cts-form-row {
-    display: flex;
-    width: 100%;
-    gap: 10px;
-    box-sizing: border-box;
+
+    display: flex !important;
+
+    gap: 10px !important;
+
+    margin-bottom: 7px !important;
+
+    width: 100% !important;
+
 }
 
 .cts-form-field {
-    flex: 1;
-    min-width: 0;
+
+    flex: 1 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    min-width: 0 !important;
+
 }
 
-.cts-field-lbl {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    color: #475569;
+.micr-form-group {
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    margin-bottom: 7px !important;
+
+    width: 100% !important;
+
+}
+
+.micr-remarks-wrap {
+
+    margin-bottom: 8px !important;
+
+}
+
+.cts-field-lbl,
+
+.cts-field-lbl-bold {
+
+    font-size: 11px !important;
+
+    font-weight: 600 !important;
+
+    color: #1f2937 !important;
+
+    margin-bottom: 3px !important;
+
+    display: block !important;
+
+}
+
+.cts-field-lbl-bold {
+
+    font-weight: 700 !important;
+
 }
 
 .cts-input-text {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 30px;
-    padding: 5px 8px;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    color: #243b53;
-    font-size: 12px;
+
+    width: 100% !important;
+
+    height: 34px !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    border-radius: 4px !important;
+
+    padding: 4px 9px !important;
+
+    font-size: 12px !important;
+
+    box-sizing: border-box !important;
+
 }
 
-.cts-input-text:focus {
-    border-color: #4c9be8;
-    box-shadow: 0 0 0 2px rgba(29, 117, 214, 0.10);
-}
+.cts-textarea {
 
-.readonly-field {
-    background: #f1f5f9;
-    color: #64748b;
-}
+    width: 100% !important;
 
+    border: 1px solid #cbd5e1 !important;
 
-/* =========================================================
-   CURRENT MICR ERROR
-   ========================================================= */
+    border-radius: 4px !important;
 
-.error-field {
-    background: #fff1f2;
-    border: 1px solid #f0a1aa;
-    color: #9f1239;
-}
+    padding: 5px 9px !important;
 
-.error-field:focus {
-    border-color: #e56b76;
-    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.08);
-}
+    font-size: 12px !important;
 
+    color: #1e293b !important;
 
-/* =========================================================
-   CORRECTED MICR
-   ========================================================= */
+    resize: vertical !important;
 
-.correction-field {
-    background: #ffffff;
+    box-sizing: border-box !important;
+
 }
 
 .micr-code-field {
-    letter-spacing: 0.8px;
-    font-weight: 600;
+
+    font-weight: 700 !important;
+
+    letter-spacing: 1px !important;
+
 }
 
+.readonly-field {
 
-/* =========================================================
-   VALIDATION MESSAGE
-   ========================================================= */
+    background: #f1f5f9 !important;
 
-.micr-validation-message {
-    width: 100%;
-    padding: 5px 7px;
-    box-sizing: border-box;
-    background: #fff1f2;
-    border: 1px solid #fecdd3;
-    border-radius: 4px;
-    color: #be123c;
-    font-size: 10px;
-    line-height: 14px;
+    border: 1px solid #d5dde8 !important;
+
+    color: #64748b !important;
+
 }
 
+.ocr-field {
 
-/* =========================================================
-   ACTION BUTTONS
-   ========================================================= */
+    background: #eff6ff !important;
 
-.micr-action-buttons {
-    width: 100%;
+    border: 1px solid #93c5fd !important;
+
+    color: #475569 !important;
+
 }
 
-.micr-action-button {
-    box-sizing: border-box;
-    height: 32px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 700;
+.error-field {
+
+    background: #fff7ed !important;
+
+    border: 1px solid #fb923c !important;
+
+    color: #64748b !important;
+
 }
 
+.repair-editable-field {
 
-/* Save & Next - CTS sidebar color */
+    background: #fee2e2 !important;
 
-.save-button {
-    background: #1d3d61;
-    border: 1px solid #1d3d61;
-    color: #ffffff;
+    border: 2px solid #ef4444 !important;
+
+    color: #b91c1c !important;
+
+    font-weight: 700 !important;
+
 }
 
-.save-button:hover {
-    background: #254b75;
-    border-color: #254b75;
+.repair-editable-field:focus {
+
+    background: #fee2e2 !important;
+
+    border: 2px solid #dc2626 !important;
+
+    color: #991b1b !important;
+
+    outline: none !important;
+
+    box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important;
+
 }
 
+.correction-field {
 
-/* Request Rejection */
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
 
-.reject-button {
-    background: #ffffff;
-    border: 1px solid #dc3545;
-    color: #dc3545;
+    border: 1px solid #cbd5e1 !important;
+
+    color: #0f172a !important;
+
 }
 
-.reject-button:hover {
-    background: #fff5f5;
-    border-color: #c82333;
-    color: #c82333;
+.correction-field:focus {
+
+    border-color: #1677e8 !important;
+
+    box-shadow: 0 0 0 2px rgba(22,119,232,.12) !important;
+
+    outline: none !important;
+
 }
 
+.micr-action-footer {
 
-/* Submit - disabled until all MICR repairs are processed */
+    width: 100% !important;
 
-.submit-button {
-    background: #e5e7eb;
-    border: 1px solid #d1d5db;
-    color: #9ca3af;
+    border-top: 1px solid #e2e8f0 !important;
+
+    padding: 10px 8px 0 8px !important;
+
+    margin-top: auto !important;
+
+    box-sizing: border-box !important;
+
 }
 
-.submit-button:hover {
-    background: #e5e7eb;
-    border-color: #d1d5db;
-    color: #9ca3af;
+.micr-action-footer .micr-action-btn {
+
+    height: 42px !important;
+
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+
 }
 
+.cts-btn-outline-danger,
 
-/* Submit after controller enables it */
+.cts-btn-solid-primary,
 
-.submit-button:not([disabled]) {
-    background: #1d3d61;
-    border: 1px solid #1d3d61;
-    color: #ffffff;
+.cts-btn-submit-data-entry {
+
+    height: 34px !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700 !important;
+
+    border-radius: 5px !important;
+
+    cursor: pointer !important;
+
+    box-sizing: border-box !important;
+
 }
 
-.submit-button:not([disabled]):hover {
-    background: #254b75;
-    border-color: #254b75;
+.cts-btn-outline-danger,
+#btnRejectRequest.z-button {
+
+    background-image: none !important;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+
+    border: 1px solid #ef4444 !important;
+
+    color: #dc2626 !important;
+
+    padding: 0 13px !important;
+
 }
 
+.cts-btn-outline-danger:hover,
+#btnRejectRequest.z-button:hover {
 
-/* =========================================================
-   FOOTER
-   ========================================================= */
+    background: #fef2f2 !important;
+    background-color: #fef2f2 !important;
+    background-image: none !important;
 
-.micr-repair-footer {
-    border-top: 1px solid #dbe3ec;
 }
 
-.footer-text {
-    font-size: 9px;
-    color: #94a3b8;
+.cts-btn-solid-primary,
+#btnSaveAndNext.z-button {
+
+    background-image: none !important;
+
+    background: #1b3d68 !important;
+    background-color: #1b3d68 !important;
+
+    border: 1px solid #1b3d68 !important;
+
+    color: #ffffff !important;
+
+    padding: 0 14px !important;
+
 }
 
-.footer-version {
-    font-size: 9px;
-    color: #94a3b8;
-    text-align: right;
+.cts-btn-solid-primary:hover,
+#btnSaveAndNext.z-button:hover {
+
+    background: #142f50 !important;
+    background-color: #142f50 !important;
+    background-image: none !important;
+
 }
 
+.cts-btn-submit-data-entry.z-button {
 
-/* =========================================================
-   REJECTION POPUP
-   ========================================================= */
+    background-image: none !important;
 
-.reject-request-window {
-    background: #ffffff;
+    background: #059669 !important;
+    background-color: #059669 !important;
+
+    border: 1px solid #059669 !important;
+
+    color: #ffffff !important;
+
+    font-weight: 700 !important;
+
+    font-size: 12px !important;
+
+    height: 34px !important;
+
+    border-radius: 5px !important;
+
+    cursor: pointer !important;
+
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2) !important;
+
+    transition: all 0.2s ease !important;
+
 }
 
-.reject-request-description {
-    font-size: 11px;
-    line-height: 16px;
-    color: #475569;
+.cts-btn-submit-data-entry.z-button:hover {
+
+    background: #047857 !important;
+    background-color: #047857 !important;
+
+    border-color: #047857 !important;
+
 }
 
-.reject-field-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #475569;
+.cts-btn-submit-data-entry.z-button[disabled],
+
+.cts-btn-submit-data-entry.z-button-disabled {
+
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+    background-image: none !important;
+
+    border-color: #cbd5e1 !important;
+
+    color: #94a3b8 !important;
+
+    cursor: not-allowed !important;
+
+    box-shadow: none !important;
+
 }
 
-.reject-reason-combobox {
-    box-sizing: border-box;
-    min-height: 30px;
+.cts-modal-window {
+
+    background: transparent !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+
 }
 
-.reject-remarks {
-    box-sizing: border-box;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    font-size: 11px;
+.cts-modal-window .z-window-content {
+
+    background: transparent !important;
+
+    padding: 0 !important;
+
+    border: none !important;
+
 }
 
-.reject-cancel-button {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #475569;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
+.cts-modal-box {
+
+    background: #ffffff !important;
+
+    width: 460px !important;
+
+    border-radius: 8px !important;
+
+    padding: 18px !important;
+
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,.3) !important;
+
+    box-sizing: border-box !important;
+
 }
 
-.reject-confirm-button {
-    background: #dc3545;
-    border: 1px solid #dc3545;
-    color: #ffffff;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
+.cts-modal-title-bar {
+
+    display: flex !important;
+
+    justify-content: space-between !important;
+
+    align-items: center !important;
+
+    border-bottom: 1px solid #e2e8f0 !important;
+
+    padding-bottom: 8px !important;
+
 }
 
+.cts-modal-heading {
 
-/* =========================================================
-   GENERAL POPUPS
-   ========================================================= */
+    font-size: 15px !important;
 
-.micr-popup {
-    background: #ffffff;
+    font-weight: 700 !important;
+
+    color: #0f172a !important;
+
 }
 
-.micr-popup .z-window-content {
-    padding: 14px;
+.cts-modal-desc {
+
+    font-size: 12px !important;
+
+    color: #475569 !important;
+
 }
 
+.cts-modal-footer-bar {
 
-/* =========================================================
-   DISABLED COMPONENTS
-   ========================================================= */
+    border-top: 1px solid #e2e8f0 !important;
 
-.z-button[disabled] {
-    opacity: 1;
-    cursor: default;
+    padding-top: 10px !important;
+
+    display: flex !important;
+
+    justify-content: flex-end !important;
+
+    gap: 8px !important;
+
 }
 
+.cts-btn-modal-cancel {
 
-/* =========================================================
-   SMALL SCREEN SUPPORT
-   ========================================================= */
+    height: 30px !important;
 
-@media screen and (max-width: 900px) {
+    font-size: 12px !important;
 
-    .micr-repair-page {
-        padding: 8px;
+    padding: 0 14px !important;
+
+}
+
+.cts-btn-modal-confirm {
+
+    background-image: none !important;
+
+    background: #dc2626 !important;
+
+    border: 1px solid #dc2626 !important;
+
+    color: #ffffff !important;
+
+    height: 30px !important;
+
+    font-size: 12px !important;
+
+    padding: 0 14px !important;
+
+    font-weight: 600 !important;
+
+    border-radius: 6px !important;
+
+    cursor: pointer !important;
+
+}
+
+.cts-btn-modal-confirm:hover {
+
+    background: #b91c1c !important;
+
+    border-color: #b91c1c !important;
+
+}
+
+@media (max-width: 1050px) {
+
+    .cts-metadata-card {
+
+        grid-template-columns: 1fr 1fr !important;
+
     }
 
-    .micr-repair-content {
-        display: block;
+    .cts-progress-meta-col,
+
+    .cts-navigation-meta-col {
+
+        min-width: 0 !important;
+
+        align-items: flex-start !important;
+
     }
 
-    .cheque-image-section,
-    .micr-details-section {
-        width: 100%;
-        height: 100%;
+    .cts-data-entry-grid {
+
+        grid-template-columns: 1fr !important;
+
     }
 
-    .cheque-image-container {
-        height: 260px;
-    }
+}
 
-    .micr-repair-header {
-        min-height: 40px;
-    }
+/* ============================================================
+   FINAL ZK BUTTON / STATUS OVERRIDES
+   These rules intentionally come last so the ZK theme cannot
+   replace the colors defined for this screen.
+   ============================================================ */
 
-    .micr-repair-title {
-        font-size: 18px;
-    }
+.cts-btn-top-back.z-button,
+.cts-btn-top-back.z-button:focus,
+.cts-btn-top-back.z-button:active {
+    background: #18275c !important;
+    background-color: #18275c !important;
+    background-image: none !important;
+    border-color: #18275c !important;
+    color: #ffffff !important;
+}
 
-    .header-progress {
-        width: 160px;
-    }
+.cts-btn-top-back.z-button:hover {
+    background: #101c46 !important;
+    background-color: #101c46 !important;
+    background-image: none !important;
+    border-color: #101c46 !important;
+    color: #ffffff !important;
+}
+
+.cts-btn-secondary.z-button {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border-color: #cbd5e1 !important;
+    color: #24334d !important;
+}
+
+.cts-btn-secondary.z-button:hover {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+    border-color: #94a3b8 !important;
+    color: #24334d !important;
+}
+
+#btnRejectRequest.z-button,
+.cts-btn-outline-danger.z-button {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border-color: #ef4444 !important;
+    color: #dc2626 !important;
+}
+
+#btnRejectRequest.z-button:hover,
+.cts-btn-outline-danger.z-button:hover {
+    background: #fef2f2 !important;
+    background-color: #fef2f2 !important;
+    background-image: none !important;
+    border-color: #ef4444 !important;
+    color: #dc2626 !important;
+}
+
+#btnSaveAndNext.z-button,
+.cts-btn-solid-primary.z-button {
+    background: #1b3d68 !important;
+    background-color: #1b3d68 !important;
+    background-image: none !important;
+    border-color: #1b3d68 !important;
+    color: #ffffff !important;
+}
+
+#btnSaveAndNext.z-button:hover,
+.cts-btn-solid-primary.z-button:hover {
+    background: #142f50 !important;
+    background-color: #142f50 !important;
+    background-image: none !important;
+    border-color: #142f50 !important;
+    color: #ffffff !important;
+}
+
+#btnSubmitToDataEntry.z-button,
+.cts-btn-submit-data-entry.z-button {
+    background: #059669 !important;
+    background-color: #059669 !important;
+    background-image: none !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+}
+
+#btnSubmitToDataEntry.z-button:hover,
+.cts-btn-submit-data-entry.z-button:hover {
+    background: #047857 !important;
+    background-color: #047857 !important;
+    background-image: none !important;
+    border-color: #047857 !important;
+    color: #ffffff !important;
+}
+
+#btnSubmitToDataEntry.z-button[disabled],
+#btnSubmitToDataEntry.z-button.z-button-disabled,
+.cts-btn-submit-data-entry.z-button[disabled],
+.cts-btn-submit-data-entry.z-button-disabled {
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+    background-image: none !important;
+    border-color: #cbd5e1 !important;
+    color: #94a3b8 !important;
+}
+
+#lblHeaderItemStatus,
+#lblHeaderItemStatus.z-label,
+.cts-status-pill-peach {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 150px !important;
+    height: 24px !important;
+    padding: 0 14px !important;
+    line-height: normal !important;
+    box-sizing: border-box !important;
+    background: #ffedd5 !important;
+    background-color: #ffedd5 !important;
+    background-image: none !important;
+    color: #c2410c !important;
+    border: 1px solid #fed7aa !important;
+    border-radius: 9999px !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }

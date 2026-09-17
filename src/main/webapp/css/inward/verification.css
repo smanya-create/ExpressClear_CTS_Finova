@@ -81,13 +81,25 @@
 /* Status badges */
 
 .status-badge {
-    display: inline-block;
-    padding: 3px 5px;
-    border-radius: 10px;
-    font-size: 8px;
-    font-weight: bold;
-    white-space: nowrap;
-    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: #FFF8E9 !important;
+    color: #C57A00 !important;
+
+    border: 1px solid #F5C96B !important;
+    border-radius: 12px !important;
+
+    padding: 2px 8px !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
+
+    height: 18px !important;
+    min-width: 48px !important;
+
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
 }
 
 .status-badge.pending,
@@ -411,23 +423,26 @@
     box-shadow: none !important;
 }
 
-/* Accept - white with green border */
-
+/* Accept - full green */
 .z-button.accept-action-btn {
-    background: #FFFFFF !important;
-    background-color: #FFFFFF !important;
+    background: #16834B !important;
+    background-color: #16834B !important;
     background-image: none !important;
-    color: #16834B !important;
+
+    color: #FFFFFF !important;
+
     border: 1px solid #16834B !important;
     border-color: #16834B !important;
 }
 
 .z-button.accept-action-btn:hover {
-    background: #EAF7F0 !important;
-    background-color: #EAF7F0 !important;
+    background: #146F42 !important;
+    background-color: #146F42 !important;
     background-image: none !important;
-    color: #16834B !important;
-    border-color: #16834B !important;
+
+    color: #FFFFFF !important;
+
+    border-color: #146F42 !important;
 }
 
 /* Reject - white with red border */
@@ -449,16 +464,27 @@
     border-color: #C83A32 !important;
 }
 
-/* Send Back */
+/* Send Back - white with orange border */
+.z-button.send-back-action-btn {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
 
-.send-back-action-btn {
-    background: #FFFFFF;
-    color: #344963;
-    border: 1px solid #D5DFEA;
+    color: #F59E0B !important;
+
+    border: 1px solid #F59E0B !important;
+    border-color: #F59E0B !important;
 }
 
-.send-back-action-btn:hover { background: #F6F8FB; }
+.z-button.send-back-action-btn:hover {
+    background: #FFF7E6 !important;
+    background-color: #FFF7E6 !important;
+    background-image: none !important;
 
+    color: #D97706 !important;
+
+    border-color: #D97706 !important;
+}
 /* Verification panel */
 
 .verification-panel {
@@ -520,39 +546,79 @@
     spacing: 5px;
 }
 
-.cheque-side-buttons .z-button.cheque-side-btn {
+ .z-button.cheque-side-btn {
     width: 55px !important;
     height: 28px !important;
     min-width: 55px !important;
     min-height: 28px !important;
     padding: 0 !important;
     margin: 0 !important;
+
     background: #0B2344 !important;
     background-image: none !important;
+
+    color: #FFFFFF !important;
+
     border: 1px solid #0B2344 !important;
     border-radius: 4px !important;
-    color: #FFFFFF !important;
+
     font-size: 11px !important;
     font-weight: 500 !important;
     line-height: 26px !important;
+
     box-shadow: none !important;
 }
 
-.cheque-side-buttons .z-button.cheque-side-btn:hover {
+.z-button.cheque-side-btn:hover {
     background: #12345F !important;
     background-image: none !important;
     color: #FFFFFF !important;
 }
 
-.cheque-side-buttons .z-button.cheque-side-active {
+.z-button.cheque-side-active {
     background: #12345F !important;
     background-image: none !important;
     border-color: #12345F !important;
     color: #FFFFFF !important;
 }
 
-.cheque-side-buttons .z-button.cheque-side-btn:active {
+.z-button.cheque-side-btn:active {
     background: #08203D !important;
     background-image: none !important;
     color: #FFFFFF !important;
 }
+
+.stay-verification-btn {
+    width: 136px !important;
+    height: 35px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    background: #FFFFFF !important;
+    background-image: none !important;
+    color: #0B2344 !important;
+
+    border: 1px solid #0B2344 !important;
+    border-radius: 4px !important;
+
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    line-height: 30px !important;
+
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+}
+
+.verification-summary-modal {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+
+.stay-verification-btn:hover {
+    background: #F4F7FA !important;
+    color: #0B2344 !important;
+    border-color: #0B2344 !important;
+}
+
+

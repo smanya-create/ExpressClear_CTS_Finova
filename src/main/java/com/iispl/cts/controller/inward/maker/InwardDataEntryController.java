@@ -27,6 +27,7 @@ import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.User;
@@ -133,6 +134,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+	
+		
 		super.doAfterCompose(comp);
 
 		if (btnConfirmCompletionModal != null) {
@@ -216,22 +220,22 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				String st = c.getChequeStatus().trim();
 
 				if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
-				        || InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-				        || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
+						|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
+						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
 
-				    this.activeQueue.add(c);
-				    continue;
+					this.activeQueue.add(c);
+					continue;
 				}
 
 				if (isSentBackStatus(st)) {
-				    this.activeQueue.add(c);
-				    continue;
+					this.activeQueue.add(c);
+					continue;
 				}
 
 				if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
-				        && isDataEntryRejectionRequest(c)) {
+						&& isDataEntryRejectionRequest(c)) {
 
-				    this.activeQueue.add(c);
+					this.activeQueue.add(c);
 				}
 			}
 		}
@@ -298,8 +302,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		String sql = "SELECT EXISTS (" + "SELECT 1 " + "FROM inward_cheque_rejection_request "
-				+ "WHERE inward_cheque_id = ? " + "AND request_stage = 'DATA_ENTRY' " + "AND request_status = 'PENDING'"
-				+ ")";
+				+ "WHERE inward_cheque_id = ? " + "AND request_stage IN ('DATA_ENTRY', 'MICR_REPAIR') "
+				+ "AND request_status = 'PENDING'" + ")";
 
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -369,39 +373,25 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
 		if (lblDataStatus != null) {
-			String baseStyle = "display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; border-radius: 9999px !important; font-size: 8.5px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: uppercase !important; text-align: center !important; white-space: nowrap !important; ";
+			lblDataStatus.setStyle(null); // Clear inline gradient style so the CSS peach pill is respected
 
 			if (isSentBackStatus(status)) {
-				lblDataStatus.setValue("SENT BACK");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #e0e7ff 0%, #c7d2fe 55%, #a5b4fc 100%) !important; color: #1e1b4b !important; border: 1px solid #818cf8 !important; box-shadow: 0 1px 3px rgba(129, 140, 248, 0.3) !important;");
+				lblDataStatus.setValue("Sent Back");
 			} else if (InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("RETURNED TO CHECKER");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+				lblDataStatus.setValue("Returned To Checker");
 			} else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)
 					|| "REJECTION REQUESTED".equalsIgnoreCase(status) || "REJECT REQ".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("REJECTION REQUESTED");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #ffe4e6 0%, #fecdd3 55%, #fda4af 100%) !important; color: #9f1239 !important; border: 1px solid #fb7185 !important; box-shadow: 0 1px 3px rgba(251, 113, 133, 0.25) !important;");
+				lblDataStatus.setValue("Rejection Requested");
 			} else if (InwardChequeStatus.REJECTED.name().equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("REJECTED");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #ffe4e6 0%, #fecdd3 55%, #fda4af 100%) !important; color: #9f1239 !important; border: 1px solid #fb7185 !important; box-shadow: 0 1px 3px rgba(251, 113, 133, 0.25) !important;");
+				lblDataStatus.setValue("Rejected");
 			} else if (InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("IN PROGRESS");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
+				lblDataStatus.setValue("In Progress");
 			} else if (InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(status)
 					|| InwardChequeStatus.COMPLETED.name().equalsIgnoreCase(status)
 					|| "ACCEPTED".equalsIgnoreCase(status) || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("CHECKER PENDING");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
+				lblDataStatus.setValue("Checker Pending");
 			} else {
-				lblDataStatus.setValue("PENDING");
-				lblDataStatus.setStyle(baseStyle
-						+ "background: linear-gradient(90deg, #fff8d6 0%, #ffd84d 55%, #ffb71b 100%) !important; color: #172554 !important; border: 1px solid #ffb000 !important; box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;");
+				lblDataStatus.setValue("Pending");
 			}
 		}
 
@@ -540,12 +530,13 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
+
 		int percentage = (int) Math.round(((double) resolvedInBatch / totalInBatch) * 100);
 
 		if (pmBatchProgress != null)
 			pmBatchProgress.setValue(percentage);
 		if (lblProgressText != null)
-			lblProgressText.setValue(resolvedInBatch + "/" + totalInBatch + " (" + percentage + "%)");
+			lblProgressText.setValue(resolvedInBatch + "/" + totalInBatch);
 
 		boolean allResolved = (resolvedInBatch == totalInBatch);
 		if (btnSubmitToChecker != null) {
@@ -1033,6 +1024,32 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtAmountInWords.setValue(convertToIndianCurrencyWords(val));
 		} catch (Exception e) {
 			txtAmountInWords.setValue("Invalid Amount");
+		}
+	}
+	
+	public void onClick$btnBackToList() {
+		Sessions.getCurrent().removeAttribute("ACTIVE_INWARD_BATCH_ID");
+
+		Include mainInclude = null;
+		try {
+			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
+		} catch (Exception ignored) {}
+
+		if (mainInclude == null && self != null && self.getDesktop() != null) {
+			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+				Component comp = p.getFellowIfAny("mainContentArea", true);
+				if (comp instanceof Include) {
+					mainInclude = (Include) comp;
+					break;
+				}
+			}
+		}
+
+		if (mainInclude != null) {
+			mainInclude.invalidate();
+			mainInclude.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
+		} else {
+			Executions.sendRedirect("/inward/maker/index.zul?page=data-entry-batches");
 		}
 	}
 }

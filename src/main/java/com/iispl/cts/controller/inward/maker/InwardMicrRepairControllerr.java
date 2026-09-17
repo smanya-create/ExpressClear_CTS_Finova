@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -31,6 +32,7 @@ import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardBatch;
@@ -136,6 +138,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		
 		super.doAfterCompose(comp);
 
 		inwardChequeService = new InwardChequeServiceImpl();
@@ -215,13 +219,12 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 						continue;
 					String status = cheque.getChequeStatus();
 					if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status)
-					        || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
-					        || "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
-					        || "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-					        || "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-					        || isMicrRejectionRequest(cheque)) {
+							|| "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
+							|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+							|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
+							|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status) || isMicrRejectionRequest(cheque)) {
 
-					    repairCheques.add(cheque);
+						repairCheques.add(cheque);
 					}
 				}
 			}
@@ -448,18 +451,21 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
 		if (lblHeaderChequeNo != null)
 			lblHeaderChequeNo.setValue(cheque.getChequeNumber() != null ? cheque.getChequeNumber() : "-");
+		
 		if (lblHeaderItemStatus != null) {
-
-			String status = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim() : "MICR_REPAIR";
-
-			lblHeaderItemStatus.setValue(status);
-
-			if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)) {
-				lblHeaderItemStatus.setSclass("cts-badge-micr-completed");
-			} else {
-				lblHeaderItemStatus.setSclass("cts-badge-micr");
+			String rawStatus = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim() : "MICR_REPAIR";
+			
+			// Replace underscores with spaces and convert to Title Case
+			String[] parts = rawStatus.replace('_', ' ').toLowerCase().split("\\s+");
+			StringBuilder titleCaseStatus = new StringBuilder();
+			for (String p : parts) {
+				if (!p.isEmpty()) {
+					titleCaseStatus.append(Character.toUpperCase(p.charAt(0))).append(p.substring(1)).append(" ");
+				}
 			}
+			lblHeaderItemStatus.setValue(titleCaseStatus.toString().trim());
 		}
+		
 		if (lblReceivedDate != null && batch.getUploadedAt() != null) {
 			lblReceivedDate.setValue(new java.text.SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
 		}
@@ -507,7 +513,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 				String status = cheque.getChequeStatus().trim();
 
-				if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)) {
+				if ("MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
+						|| "REJECTION_REQUESTED".equalsIgnoreCase(status)) {
 					completedRecords++;
 				}
 			}
@@ -516,7 +523,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 		int progress = totalRecords == 0 ? 0 : (completedRecords * 100) / totalRecords;
 
 		if (lblProgress != null) {
-			lblProgress.setValue(completedRecords + "/" + totalRecords + " (" + progress + "%)");
+			lblProgress.setValue(completedRecords + "/" + totalRecords);
 		}
 
 		if (progressMeter != null) {
@@ -721,8 +728,9 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private void applyImageTransform() {
 		if (chequeImage == null)
 			return;
-		chequeImage.setStyle("transform: scale(" + zoomLevel + ") rotate(" + rotation
-				+ "deg); transform-origin: center center; transition: transform 0.2s ease, width 0.2s ease; max-height: 100%; object-fit: contain;");
+		int widthPercent = (int) Math.round(zoomLevel * 100);
+		chequeImage.setStyle("width: " + widthPercent + "%; transform: rotate(" + rotation
+				+ "deg); transition: width 0.2s ease, transform 0.2s ease; object-fit: contain;");
 	}
 
 	public void onClick$btnPrevious() {
@@ -816,8 +824,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 				if ("MICR_REPAIR_PENDING".equalsIgnoreCase(status) || "MICR_REPAIR_IN_PROGRESS".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_COMPLETED".equalsIgnoreCase(status)
 						|| "MICR_REPAIR_REQUIRED".equalsIgnoreCase(status)
-						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-						|| isMicrRejectionRequest(cheque)) {
+						|| "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status) || isMicrRejectionRequest(cheque)) {
 					repairCheques.add(cheque);
 				}
 			}
@@ -850,9 +857,8 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 			return;
 		}
 
-		
 		if (currentRecord < totalRecords - 1) {
-		    currentRecord++;
+			currentRecord++;
 		}
 
 		displayCurrentCheque();
@@ -965,7 +971,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	public void onClick$btnBackToList() {
-		Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + lblBatchId.getValue());
+		Executions.sendRedirect("/inward/maker/index.zul?page=micr-repair-queue");
 	}
 
 	private String loadOcrSortCode(InwardCheque cheque) {

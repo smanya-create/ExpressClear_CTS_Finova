@@ -213,13 +213,14 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	@Override
 	public List<DashboardSummaryDTO> getDashboardBatches() {
 		String dashboardSummaryQuery = "SELECT ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count AS total_cheques, "
-				+ "COUNT(CASE WHEN ic.cheque_status = 'CHECKER_PROCESSING_PENDING' THEN 1 END) AS normal_cheques, "
+				+ "COUNT(CASE WHEN ic.cheque_status IN ('DATA_ENTRY_COMPLETED', 'CHECKER_PROCESSING_PENDING') THEN 1 END) AS normal_cheques, "
 				+ "COUNT(CASE WHEN ic.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS rejected_cheques, "
 				+ "COUNT(CASE WHEN ic.cheque_status = 'MAKER_RETURNED' THEN 1 END) AS maker_returned "
 				+ "FROM inward_batch ib " + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
-				+ "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING', 'COMPLETED') "
+				+ "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING') "
 				+ "GROUP BY ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count "
 				+ "ORDER BY ib.inward_batch_id;";
+
 		List<DashboardSummaryDTO> batchList = new ArrayList<>();
 
 		try (Connection conn = DBConnection.getConnection();
@@ -312,41 +313,22 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	public List<InwardReportChequeDTO> getChequesByBatch() {
 		List<InwardReportChequeDTO> chequeList = new ArrayList<>();
 
-		String sql = "SELECT "
-		        + "ic.inward_cheque_id, ic.inward_batch_id, "
-		        + "ic.cheque_number, ic.micr_code, "
-		        + "ic.drawee_name, ic.drawee_account_number, "
-		        + "ic.payee_name, ic.payee_account_number, "
-		        + "ic.cheque_amount, ic.cheque_date, "
-		        + "ic.cheque_status, "
-		        + "drawee_bank.bank_name AS drawee_bank, "
-		        + "presenting_bank.bank_name AS presenting_bank, "
-		        + "r.rejection_id, r.rejected_reason_id, "
-		        + "r.remarks, r.rejected_by, r.rejected_at, "
-		        + "rr.rejected_reason_code, "
-		        + "rr.rejected_reason_name, "
-		        + "rr.rejected_reason_description "
-		        + "FROM inward_cheque ic "
-		        + "INNER JOIN inward_batch ib "
-		        + "ON ib.inward_batch_id = ic.inward_batch_id "
-		        + "LEFT JOIN master_account drawee_acc "
-		        + "ON drawee_acc.account_number = ic.drawee_account_number "
-		        + "LEFT JOIN branch drawee_branch "
-		        + "ON drawee_branch.branch_id = drawee_acc.branch_id "
-		        + "LEFT JOIN bank drawee_bank "
-		        + "ON drawee_bank.bank_id = drawee_branch.bank_id "
-		        + "LEFT JOIN master_account payee_acc "
-		        + "ON payee_acc.account_number = ic.payee_account_number "
-		        + "LEFT JOIN branch payee_branch "
-		        + "ON payee_branch.branch_id = payee_acc.branch_id "
-		        + "LEFT JOIN bank presenting_bank "
-		        + "ON presenting_bank.bank_id = payee_branch.bank_id "
-		        + "LEFT JOIN inward_cheque_rejection r "
-		        + "ON r.inward_cheque_id = ic.inward_cheque_id "
-		        + "LEFT JOIN rejected_reasons rr "
-		        + "ON rr.rejected_reason_id = r.rejected_reason_id "
-		        + "WHERE ib.batch_status = 'COMPLETED' "
-		        + "ORDER BY ib.inward_batch_id, ic.inward_cheque_id";
+		String sql = "SELECT " + "ic.inward_cheque_id, ic.inward_batch_id, " + "ic.cheque_number, ic.micr_code, "
+				+ "ic.drawee_name, ic.drawee_account_number, " + "ic.payee_name, ic.payee_account_number, "
+				+ "ic.cheque_amount, ic.cheque_date, " + "ic.cheque_status, " + "drawee_bank.bank_name AS drawee_bank, "
+				+ "presenting_bank.bank_name AS presenting_bank, " + "r.rejection_id, r.rejected_reason_id, "
+				+ "r.remarks, r.rejected_by, r.rejected_at, " + "rr.rejected_reason_code, "
+				+ "rr.rejected_reason_name, " + "rr.rejected_reason_description " + "FROM inward_cheque ic "
+				+ "INNER JOIN inward_batch ib " + "ON ib.inward_batch_id = ic.inward_batch_id "
+				+ "LEFT JOIN master_account drawee_acc " + "ON drawee_acc.account_number = ic.drawee_account_number "
+				+ "LEFT JOIN branch drawee_branch " + "ON drawee_branch.branch_id = drawee_acc.branch_id "
+				+ "LEFT JOIN bank drawee_bank " + "ON drawee_bank.bank_id = drawee_branch.bank_id "
+				+ "LEFT JOIN master_account payee_acc " + "ON payee_acc.account_number = ic.payee_account_number "
+				+ "LEFT JOIN branch payee_branch " + "ON payee_branch.branch_id = payee_acc.branch_id "
+				+ "LEFT JOIN bank presenting_bank " + "ON presenting_bank.bank_id = payee_branch.bank_id "
+				+ "LEFT JOIN inward_cheque_rejection r " + "ON r.inward_cheque_id = ic.inward_cheque_id "
+				+ "LEFT JOIN rejected_reasons rr " + "ON rr.rejected_reason_id = r.rejected_reason_id "
+				+ "WHERE ib.batch_status = 'COMPLETED' " + "ORDER BY ib.inward_batch_id, ic.inward_cheque_id";
 		;
 
 		try (Connection con = DBConnection.getConnection();

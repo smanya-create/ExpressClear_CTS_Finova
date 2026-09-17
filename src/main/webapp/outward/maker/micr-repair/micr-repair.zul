@@ -2,767 +2,568 @@
 
 <?page title="CTS - Outward Processing" contentType="text/html;charset=UTF-8"?>
 
-<zk>
+<zk xmlns:h="xhtml">
 
-    <style src="/css/outward/micr-repair.css"/>
+	<style src="/css/outward/micr-repair.css?v=30" />
 
-    <window id="winMicrRepair"
-            border="none"
-            width="100%"
-            height="100%"
-            apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairController"
-            sclass="micr-repair-window">
+	<div id="outwardMicrRepairRoot" sclass="cts-data-entry-wrapper"
 
-        <vlayout id="divMicrRepairPage"
-                 width="100%"
-                 height="100%"
-                 spacing="10px"
-                 sclass="micr-repair-page">
+		apply="com.iispl.cts.controller.outward.maker.OutwardMakerMicrRepairController">
 
-            <!-- =====================================================
-                 TOP HEADER
-                 ===================================================== -->
 
-            <hlayout id="divMicrRepairHeader"
+		<div sclass="cts-title-group">
+
+			<div>
+
+				<label value="MICR Repair"
+
+					sclass="cts-main-title" />
+
+				<label
+
+					value=""
+
+					sclass="cts-main-subtitle" />
+
+			</div>
+
+			<!-- Solid Navy Back Button -->
+
+			<button id="btnBackToList" label="Back" iconSclass="z-icon-arrow-left" 
+
+					sclass="cts-btn-top-back" />
+
+		</div>
+
+
+		<div sclass="cts-metadata-card">
+
+			<div sclass="cts-meta-col">
+
+				<label value="Batch No." sclass="cts-meta-header" />
+
+				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
+
+			</div>
+
+			<div sclass="cts-meta-col">
+
+				<label value="Total Cheques" sclass="cts-meta-header" />
+
+				<label id="lblTotalCheques" value="0"
+
+					sclass="cts-meta-val" />
+
+			</div>
+
+			<div sclass="cts-meta-col cts-progress-meta-col">
+
+				<label value="Progess" sclass="cts-meta-header" />
+
+				<hlayout spacing="8px" valign="middle">
+
+					<progressmeter id="progressMeter" value="0"
+
+						sclass="cts-compact-progress" />
+
+					<label id="lblProgress" value="0/0 (0%)"
+
+						sclass="micr-progress-text" />
+
+				</hlayout>
+
+			</div>
+
+			<div sclass="cts-meta-col cts-navigation-meta-col">
+
+				<hlayout spacing="6px" valign="middle">
+
+					<button id="btnPrevious" label="Previous"
+
+						iconSclass="z-icon-chevron-left"
+
+						sclass="cts-btn-secondary micr-btn-compact-nav" />
+
+					<label id="lblRecordPosition" value="1 of 1"
+
+						sclass="micr-nav-counter" />
+
+					<button id="btnNext" label="Next"
+
+						iconSclass="z-icon-chevron-right"
+
+						sclass="cts-btn-secondary micr-btn-compact-nav" />
+
+				</hlayout>
+
+			</div>
+
+
+			<div visible="false">
+
+				<label id="lblBatchSource" value="CHI"
+
+					sclass="cts-meta-val" />
+
+				<label id="lblHeaderChequeNo" value="-"
+
+					sclass="cts-meta-val" />
+
+				<label id="lblRepairStatus" value="MICR ERROR" />
+
+				<label id="lblReceivedDate" value="-"
+
+					sclass="cts-meta-val" />
+
+			</div>
+
+		</div>
+
+
+		<div sclass="cts-data-entry-grid">
+
+
+			<div sclass="cts-work-card">
+
+				<div sclass="micr-card-header-row">
+
+					<div>
+
+						<label value="Cheque Image"
+
+							sclass="cts-card-title" />
+
+						<label id="lblChequeImageTitle"
+
+							value="Front and back scans captured by clearing house."
+
+							sclass="cts-card-tagline" />
+
+					</div>
+
+					<hlayout spacing="4px">
+
+						<button id="btnViewFront" label="Front"
+
+							sclass="cts-btn-secondary micr-btn-tab" />
+
+						<button id="btnViewBack" label="Back"
+
+							sclass="cts-btn-secondary micr-btn-tab" />
+
+					</hlayout>
+
+				</div>
+
+				<div id="micrImageContainer"
+
+					sclass="cts-cheque-box-placeholder">
+
+					<image id="chequeImage" visible="false"
+
+						sclass="micr-cheque-image" />
+
+					<groupbox id="emptyImageState" visible="false"
+
+						sclass="micr-empty-box">
+
+						<vlayout spacing="4px">
+
+							<label value="Cheque image unavailable"
+
+								sclass="micr-empty-title" />
+
+							<label
+
+								value="The scan is not available for this repair record."
+
+								sclass="micr-empty-sub" />
+
+						</vlayout>
+
+					</groupbox>
+
+					<div id="micrRepairCompletedState" visible="false"
+
+						sclass="micr-done-overlay">
+
+						<vlayout spacing="6px"
+
+							sclass="micr-done-inner">
+
+							<label value="✓" sclass="micr-done-icon" />
+
+							<label value="MICR REPAIR COMPLETED"
+
+								sclass="micr-done-title" />
+
+							<label id="lblCompletedBatchId" value=""
+
+								sclass="micr-done-batch" />
+
+							<label
+
+								value="All MICR exceptions in this batch have been resolved."
+
+								sclass="micr-done-desc" />
+
+						</vlayout>
+
+					</div>
+
+				</div>
+
+				<hlayout spacing="6px" width="100%" valign="middle">
+
+					<button id="btnZoomOut" iconSclass="z-icon-minus"
+
+						sclass="cts-btn-secondary cts-btn-icon-sq" tooltiptext="Zoom Out" />
+
+					<button id="btnZoom" iconSclass="z-icon-plus"
+
+						sclass="cts-btn-secondary cts-btn-icon-sq" tooltiptext="Zoom In" />
+
+					<button id="btnZoomReset" label="Reset View"
+
+						iconSclass="z-icon-arrows-alt"
+
+						sclass="cts-btn-secondary micr-btn-tool" />
+
+					<button id="btnRotate" label="Rotate"
+
+						iconSclass="z-icon-repeat"
+
+						sclass="cts-btn-secondary micr-btn-tool" />
+
+				</hlayout>
+
+			</div>
+
+
+			<div sclass="cts-work-card">
+
+    <div class="micr-card-header-row">
+
+        <div>
+
+            <label value="MICR Data Entry"
+
+                   sclass="cts-card-title" />
+
+            <label value="Review and correct MICR codeline fields."
+
+                   sclass="cts-card-tagline" />
+
+        </div>
+
+        <label id="lblHeaderItemStatus"
+
+               value="MICR Repair pending"
+
+               sclass="cts-status-pill-peach" />
+
+    </div>
+
+
+    <div id="micrAlertBox"
+
+         visible="false"
+
+         style="background:#fffdf5; border:1px solid #fef08a; border-left:3px solid #f59e0b; border-radius:4px; padding:8px 12px; margin-bottom:8px;">
+
+        <label id="lblMicrAlertTitle"
+
+               value="CHECKER SEND BACK"
+
+               style="font-size:10px; font-weight:800; color:#b45309; letter-spacing:.5px; text-transform:uppercase; margin-bottom:4px; display:block;" />
+
+        <hlayout spacing="8px"
+
+                 style="align-items:center; margin-bottom:2px;">
+
+            <label id="lblMicrCodeTitle"
+
+                   value="Reason Code:"
+
+                   style="font-size:11px; font-weight:600; color:#78350f; width:85px; min-width:85px; white-space:nowrap;" />
+
+            <label id="lblMicrReasonCode"
+
+                   value="-"
+
+                   style="font-size:11px; font-weight:700; color:#0f172a;" />
+
+        </hlayout>
+
+        <hlayout spacing="8px"
+
+                 style="align-items:baseline; margin-bottom:2px;">
+
+            <label id="lblMicrNameTitle"
+
+                   value="Reason:"
+
+                   style="font-size:11px; font-weight:600; color:#78350f; width:85px; min-width:85px; white-space:nowrap;" />
+
+            <label id="lblMicrReasonName"
+
+                   value="-"
+
+                   style="font-size:11px; font-weight:500; color:#1e293b;" />
+
+        </hlayout>
+
+        <hlayout spacing="8px"
+
+                 style="align-items:baseline;">
+
+            <label id="lblMicrRemarksTitle"
+
+                   value="Remarks:"
+
+                   style="font-size:11px; font-weight:600; color:#78350f; width:85px; min-width:85px; white-space:nowrap;" />
+
+            <label id="lblMicrRemarks"
+
+                   value="-"
+
+                   style="font-size:11px; font-weight:400; color:#334155;" />
+
+        </hlayout>
+
+    </div>
+
+
+    <!-- Cheque Number + City Code -->
+
+    <div sclass="cts-form-row">
+
+        <div sclass="cts-form-field">
+
+            <label value="Cheque Number *"
+
+                   sclass="cts-field-lbl" />
+
+            <textbox id="txtChequeNumber"
+
                      width="100%"
-                     valign="middle"
-                     spacing="10px"
-                     sclass="micr-repair-header">
 
-                <vlayout hflex="1"
-                         spacing="2px">
+                     readonly="true"
 
-                    <label id="lblMicrRepairTitle"
-                           value="MICR Repair"
-                           sclass="micr-repair-title"/>
+                     sclass="cts-input-text readonly-field" />
 
-                    <label id="lblMicrRepairDescription"
-                           value="Review and correct MICR details against the cheque image."
-                           sclass="micr-repair-description"/>
+        </div>
 
-                </vlayout>
 
+        <div sclass="cts-form-field">
 
-                <!-- Progress is above the Prev / Next navigation -->
+            <label value="City Code *"
 
-                <vlayout id="divHeaderProgress"
-                         width="210px"
-                         spacing="2px"
-                         sclass="header-progress">
+                   sclass="cts-field-lbl" />
 
-                    <hlayout width="100%"
-                             spacing="4px"
-                             valign="middle">
+            <textbox id="txtCityCode"
 
-                        <label id="lblProgressTitle"
-                               value="PROGRESS"
-                               hflex="1"
-                               sclass="progress-title"/>
-
-                        <label id="lblProgressText"
-                               value="Record 0 of 0"
-                               width="90px"
-                               sclass="progress-text"/>
-
-                    </hlayout>
-
-                    <progressmeter id="prgMicrRepair"
-                                   value="0"
-                                   width="100%"
-                                   height="6px"
-                                   sclass="micr-progress-meter"/>
-
-                </vlayout>
-
-
-                <!-- Previous / position / next -->
-
-                <hlayout id="divChequeNavigation"
-                         spacing="6px"
-                         valign="middle"
-                         sclass="cheque-navigation">
-
-                    <button id="btnPrevious"
-                            label="Prev"
-                            iconSclass="z-icon-chevron-left"
-                            width="70px"
-                            height="26px"
-                            disabled="true"
-                            sclass="micr-button navigation-button"/>
-
-                    <label id="lblChequePosition"
-                           value="1 of 1"
-                           sclass="cheque-position"/>
-
-                    <button id="btnNext"
-                            label="Next"
-                            iconSclass="z-icon-chevron-right"
-                            width="70px"
-                            height="26px"
-                            disabled="true"
-                            sclass="micr-button navigation-button"/>
-
-                </hlayout>
-
-
-                <button id="btnBackToList"
-                        label="Back to List"
-                        iconSclass="z-icon-arrow-left"
-                        width="110px"
-                        height="32px"
-                        sclass="micr-button back-button"/>
-
-            </hlayout>
-
-
-            <!-- =====================================================
-                 BATCH METADATA CARD
-                 ===================================================== -->
-
-            <div id="divBatchInformation"
-                 width="100%"
-                 sclass="batch-information">
-
-                <hlayout id="divBatchInformationLayout"
-                         width="100%"
-                         spacing="18px"
-                         valign="middle"
-                         sclass="batch-information-layout">
-
-                    <vlayout hflex="1"
-                             spacing="2px"
-                             sclass="batch-information-item">
-
-                        <label id="lblBatchIdTitle"
-                               value="BATCH ID"
-                               sclass="batch-label-title"/>
-
-                        <label id="lblBatchId"
-                               value="-"
-                               sclass="batch-label-value"/>
-
-                    </vlayout>
-
-                    <vlayout hflex="1"
-                             spacing="2px"
-                             sclass="batch-information-item">
-
-                        <label id="lblMicrRepairCountTitle"
-                               value="MICR REPAIR REQUIRED"
-                               sclass="batch-label-title"/>
-
-                        <label id="lblMicrRepairCount"
-                               value="0"
-                               sclass="batch-label-value"/>
-
-                    </vlayout>
-
-                    <vlayout hflex="1"
-                             spacing="2px"
-                             sclass="batch-information-item">
-
-                        <label id="lblCompletedCountTitle"
-                               value="COMPLETED"
-                               sclass="batch-label-title"/>
-
-                        <label id="lblCompletedCount"
-                               value="0"
-                               sclass="batch-label-value"/>
-
-                    </vlayout>
-
-                    <vlayout hflex="1"
-                             spacing="2px"
-                             sclass="batch-information-item">
-
-                        <label id="lblRemainingCountTitle"
-                               value="REMAINING"
-                               sclass="batch-label-title"/>
-
-                        <label id="lblRemainingCount"
-                               value="0"
-                               sclass="batch-label-value"/>
-
-                    </vlayout>
-
-                </hlayout>
-
-            </div>
-
-
-            <!-- =====================================================
-                 TWO-COLUMN WORKSPACE
-                 Both cards have the same fixed height.
-                 Only MICR DATA ENTRY content scrolls.
-                 ===================================================== -->
-
-            <hlayout id="divMicrRepairContent"
-                     hflex="1"
-                     spacing="14px"
-                     valign="top"
-                     sclass="micr-repair-content">
-
-                <!-- =================================================
-                     LEFT CARD - CHEQUE IMAGE
-                     ================================================= -->
-
-                <div id="divChequeImageSection"
-                     hflex="55"
-                     height="100%"
-                     sclass="cheque-image-section">
-
-                    <vlayout id="divChequeImageContent"
-                             width="100%"
-                             height="100%"
-                             spacing="7px"
-                             sclass="cheque-image-content">
-
-                        <hlayout id="divChequeImageHeader"
-                                 width="100%"
-                                 valign="top"
-                                 spacing="5px"
-                                 sclass="section-header">
-
-                            <vlayout hflex="1"
-                                     spacing="1px">
-
-                                <label id="lblChequeImageTitle"
-                                       value="CHEQUE IMAGE"
-                                       sclass="section-title"/>
-
-                      
-
-                            </vlayout>
-
-                            <button id="btnImagePrevious"
-                                    label="Front"
-                                    iconSclass="z-icon-file-image-o"
-                                    width="68px"
-                                    height="26px"
-                                    sclass="image-side-button"/>
-
-                            <button id="btnImageNext"
-                                    label="Back"
-                                    iconSclass="z-icon-file-image-o"
-                                    width="68px"
-                                    height="26px"
-                                    sclass="image-side-button"/>
-
-                            
-
-                            <label id="lblImagePosition"
-                                   value="1 of 2"
-                                   visible="false"
-                                   width="1px"/>
-
-                        </hlayout>
-
-
-                        <div id="divChequeImageContainer"
-                             hflex="1"
-                             sclass="cheque-image-container"
-                             onMouseDown="onMouseDown$divChequeImageContainer"
-                             onMouseMove="onMouseMove$divChequeImageContainer"
-                             onMouseUp="onMouseUp$divChequeImageContainer">
-
-                            <image id="imgCheque"
-                                   visible="false"
-                                   width="100%"
-                                   height="100%"
-                                   sclass="cheque-image"/>
-
-                            <label id="lblChequeImagePlaceholder"
-                                   value="Cheque image not available"
-                                   sclass="cheque-image-placeholder"/>
-
-                        </div>
-
-
-                        <hlayout id="divImageControls"
-                                 width="100%"
-                                 spacing="6px"
-                                 valign="middle"
-                                 sclass="image-controls">
-
-                            <button id="btnZoomOut"
-                                    iconSclass="z-icon-minus"
-                                    width="32px"
-                                    height="28px"
-                                    tooltiptext="Zoom Out"
-                                    sclass="image-control-button compact-image-button"/>
-
-                            <button id="btnZoom"
-                                    iconSclass="z-icon-plus"
-                                    width="32px"
-                                    height="28px"
-                                    tooltiptext="Zoom In"
-                                    sclass="image-control-button compact-image-button"/>
-
-                            <button id="btnZoomReset"
-                                    label="Reset View"
-                                    iconSclass="z-icon-arrows-alt"
-                                    hflex="1"
-                                    height="28px"
-                                    sclass="image-control-button"/>
-
-                            <button id="btnRotate"
-                                    label="Rotate"
-                                    iconSclass="z-icon-repeat"
-                                    hflex="1"
-                                    height="28px"
-                                    sclass="image-control-button"/>
-
-                        </hlayout>
-
-
-                        <button id="btnImageToggle"
-                                visible="false"
-                                label="View Back"
-                                width="1px"
-                                height="1px"/>
-
-                    </vlayout>
-
-                </div>
-
-
-                <!-- =================================================
-                     RIGHT CARD - MICR DATA ENTRY
-                     The inner content is independently scrollable.
-                     ================================================= -->
-
-                <div id="divMicrDetailsSection"
-                     hflex="45"
-                     height="100%"
-                     sclass="micr-details-section">
-
-                    <div id="divMicrDetailsScroll"
-                         width="100%"
-                         height="100%"
-                         sclass="micr-details-scroll">
-
-                        <vlayout id="divMicrDetailsContent"
-                                 width="100%"
-                                 spacing="7px"
-                                 sclass="micr-details-content">
-
-                            <hlayout id="divMicrDetailsHeader"
-                                     width="100%"
-                                     valign="top"
-                                     spacing="5px"
-                                     sclass="section-header">
-
-                                <vlayout hflex="1"
-                                         spacing="1px">
-
-                                    <label id="lblMicrDetailsTitle"
-                                           value="MICR DATA ENTRY"
-                                           sclass="section-title"/>
-
-                                    <label value="Review and correct MICR codeline fields."
-                                           sclass="section-subtitle"/>
-
-                                </vlayout>
-
-                                <label id="lblChequeStatus"
-                                       value="PENDING_MICR_REPAIR"
-                                       sclass="cheque-status"/>
-
-                            </hlayout>
-
-
-                            <!-- CHECKER RETURN INFORMATION -->
-
-                            <div id="divCheckerReturnInformation"
-                                 width="100%"
-                                 visible="false"
-                                 sclass="checker-return-information">
-
-                                <vlayout id="divCheckerReturnContent"
-                                         width="100%"
-                                         spacing="3px">
-
-                                    <label id="lblCheckerReturnTitle"
-                                           value="MESSAGE"
-                                           sclass="checker-return-title"/>
-
-                                    <hlayout width="100%"
-                                             spacing="8px"
-                                             valign="top">
-
-                                        <label id="lblCheckerReasonIdTitle"
-                                               value="Reason ID"
-                                               width="82px"
-                                               sclass="checker-label-title"/>
-
-                                        <label id="lblCheckerReasonId"
-                                               value=""
-                                               hflex="1"
-                                               sclass="checker-label-value"/>
-
-                                    </hlayout>
-
-                                    <hlayout width="100%"
-                                             spacing="8px"
-                                             valign="top">
-
-                                        <label id="lblCheckerReasonTitle"
-                                               value="Reason"
-                                               width="82px"
-                                               sclass="checker-label-title"/>
-
-                                        <label id="lblCheckerReason"
-                                               value=""
-                                               hflex="1"
-                                               multiline="true"
-                                               sclass="checker-label-value"/>
-
-                                    </hlayout>
-
-                                    <hlayout width="100%"
-                                             spacing="8px"
-                                             valign="top">
-
-                                        <label id="lblCheckerRemarksTitle"
-                                               value="Remarks"
-                                               width="82px"
-                                               sclass="checker-label-title"/>
-
-                                        <label id="lblCheckerRemarks"
-                                               value=""
-                                               hflex="1"
-                                               multiline="true"
-                                               sclass="checker-label-value"/>
-
-                                    </hlayout>
-
-                                </vlayout>
-
-                            </div>
-
-
-                            <!-- MICR FORM -->
-
-                            <div sclass="cts-form-row">
-
-                                <div sclass="cts-form-field">
-
-                                    <label value="Cheque Number *"
-                                           sclass="cts-field-lbl"/>
-
-                                    <textbox id="txtChequeNumber"
-                                             width="100%"
-                                             readonly="true"
-                                             sclass="cts-input-text readonly-field"/>
-
-                                </div>
-
-                                <div sclass="cts-form-field">
-
-                                    <label value="City Code *"
-                                           sclass="cts-field-lbl"/>
-
-                                    <textbox id="txtCityCode"
-                                             width="100%"
-                                             maxlength="3"
-                                             sclass="cts-input-text"
-                                             onChange="onChange$txtCityCode"/>
-
-                                </div>
-
-                            </div>
-
-
-                            <div sclass="cts-form-row">
-
-                                <div sclass="cts-form-field">
-
-                                    <label value="Bank Code *"
-                                           sclass="cts-field-lbl"/>
-
-                                    <textbox id="txtBankCode"
-                                             width="100%"
-                                             maxlength="3"
-                                             sclass="cts-input-text"
-                                             onChange="onChange$txtBankCode"/>
-
-                                </div>
-
-                                <div sclass="cts-form-field">
-
-                                    <label value="Branch Code *"
-                                           sclass="cts-field-lbl"/>
-
-                                    <textbox id="txtBranchCode"
-                                             width="100%"
-                                             maxlength="3"
-                                             sclass="cts-input-text"
-                                             onChange="onChange$txtBranchCode"/>
-
-                                </div>
-
-                            </div>
-
-
-                            <div sclass="cts-form-row">
-
-                                <div sclass="cts-form-field">
-
-                                    <label value="Current MICR *"
-                                           sclass="cts-field-lbl"/>
-
-                                    <textbox id="txtCurrentMicr"
-                                             width="100%"
-                                             readonly="true"
-                                             sclass="cts-input-text error-field"/>
-
-                                </div>
-
-                                <div sclass="cts-form-field">
-
-                                    <label value="Corrected MICR Code *"
-                                           sclass="cts-field-lbl"/>
-
-                                    <textbox id="txtCorrectedMicr"
-                                             width="100%"
-                                             maxlength="9"
-                                             placeholder="Enter 9-character corrected MICR code"
-                                             sclass="cts-input-text correction-field micr-code-field"
-                                             onChange="onChange$txtCorrectedMicr"/>
-
-                                </div>
-
-                            </div>
-
-
-                            <label id="lblMicrValidationMessage"
-                                   value=""
-                                   visible="false"
-                                   multiline="true"
-                                   sclass="micr-validation-message"/>
-
-
-                            <!-- ACTION BUTTONS -->
-
-                            <hlayout id="divMicrActionButtons"
-                                     width="100%"
-                                     spacing="8px"
-                                     valign="middle"
-                                     sclass="micr-action-buttons">
-
-                                <button id="btnRejectRequest"
-                                        label="Request Rejection"
-                                        iconSclass="z-icon-times-circle"
-                                        hflex="1"
-                                        height="32px"
-                                        sclass="micr-action-button reject-button"/>
-
-                                <button id="btnSaveNext"
-                                        label="Save &amp; Next"
-                                        iconSclass="z-icon-check"
-                                        hflex="1"
-                                        height="32px"
-                                        sclass="micr-action-button save-button"/>
-
-                                <button id="btnSubmit"
-                                        label="Submit"
-                                        iconSclass="z-icon-check"
-                                        hflex="1"
-                                        height="32px"
-                                        disabled="true"
-                                        sclass="micr-action-button submit-button"/>
-
-                            </hlayout>
-
-                        </vlayout>
-
-                    </div>
-
-                </div>
-
-            </hlayout>
-
-
-            <!-- =====================================================
-                 FOOTER
-                 ===================================================== -->
-
-            <hlayout id="divMicrRepairFooter"
                      width="100%"
-                     height="28px"
-                     valign="middle"
-                     spacing="5px"
-                     sclass="micr-repair-footer">
 
-                <label id="lblFooterText"
-                       value="CTS MICR Repair"
-                       hflex="1"
-                       sclass="footer-text"/>
+                     maxlength="3"
 
-                <label id="lblFooterVersion"
-                       value="v1.0"
-                       width="60px"
-                       sclass="footer-version"/>
+                     sclass="cts-input-text"
 
-            </hlayout>
+                     onChange="onChange$txtCityCode" />
+
+        </div>
+
+    </div>
 
 
-            <!-- =====================================================
-                 REQUEST INSTRUMENT REJECTION POPUP
-                 ===================================================== -->
+    <!-- Bank Code + Branch Code -->
 
-            <window id="winRejectRequest"
-                    title="Request Instrument Rejection"
-                    width="500px"
-                    mode="modal"
-                    visible="false"
-                    closable="true"
-                    sizable="false"
-                    sclass="reject-request-window">
+    <div sclass="cts-form-row">
 
-                <vlayout id="divRejectRequestPopup"
-                         width="100%"
-                         spacing="12px">
+        <div sclass="cts-form-field">
 
-                    <label id="lblRejectRequestMessage"
-                           value="Please specify the CTS return reason and any remarks for the checker:"
-                           multiline="true"
-                           sclass="reject-request-description"/>
+            <label value="Bank Code *"
 
-                    <vlayout width="100%" spacing="4px">
+                   sclass="cts-field-lbl" />
 
-                        <label id="lblRejectReasonTitle"
-                               value="Rejection Reason / Return Code *"
-                               sclass="reject-field-label"/>
+            <textbox id="txtBankCode"
 
-                        <combobox id="cmbRejectReason"
-                                  width="100%"
-                                  readonly="true"
-                                  autodrop="true"
-                                  placeholder="Select rejected reason"
-                                  sclass="reject-reason-combobox"/>
+                     width="100%"
 
-                    </vlayout>
+                     maxlength="3"
 
-                    <vlayout width="100%" spacing="4px">
+                     sclass="cts-input-text"
 
-                        <label id="lblRejectRemarksTitle"
-                               value="Rejection Remark"
-                               sclass="reject-field-label"/>
+                     onChange="onChange$txtBankCode" />
 
-                        <textbox id="txtRejectRemarks"
-                                 width="100%"
-                                 height="80px"
-                                 multiline="true"
-                                 placeholder="Enter remarks"
-                                 sclass="reject-remarks"/>
-
-                    </vlayout>
-
-                    <hlayout id="divRejectRequestButtons"
-                             width="100%"
-                             spacing="8px"
-                             valign="middle">
-
-                        <label hflex="1" value=""/>
-
-                        <button id="btnCancelReject"
-                                label="Cancel"
-                                width="90px"
-                                sclass="reject-cancel-button"/>
-
-                        <button id="btnProceedReject"
-                                label="Proceed"
-                                iconSclass="z-icon-check"
-                                width="100px"
-                                sclass="reject-confirm-button"/>
-
-                    </hlayout>
-
-                </vlayout>
-
-            </window>
+        </div>
 
 
-            <!-- SAVE CONFIRMATION POPUP -->
+        <div sclass="cts-form-field">
 
-            <window id="winConfirmSave"
-                    title="Confirm Save Changes"
-                    width="420px"
-                    closable="true"
-                    sizable="false"
-                    mode="modal"
-                    visible="false"
-                    sclass="micr-popup">
+            <label value="Branch Code *"
 
-                <vlayout id="divConfirmSavePopup"
-                         width="100%"
-                         spacing="12px">
+                   sclass="cts-field-lbl" />
 
-                    <label id="lblConfirmSaveMessage"
-                           value="Are you sure you want to save the MICR changes?"
-                           multiline="true"/>
+            <textbox id="txtBranchCode"
 
-                    <hlayout id="divConfirmSaveButtons"
-                             width="100%"
-                             spacing="8px"
-                             valign="middle">
+                     width="100%"
 
-                        <label hflex="1" value=""/>
+                     maxlength="3"
 
-                        <button id="btnCancelSave"
-                                label="Cancel"
-                                width="90px"/>
+                     sclass="cts-input-text"
 
-                        <button id="btnConfirmSave"
-                                label="Save"
-                                iconSclass="z-icon-check"
-                                width="90px"/>
+                     onChange="onChange$txtBranchCode" />
 
-                    </hlayout>
+        </div>
 
-                </vlayout>
-
-            </window>
+    </div>
 
 
-            <!-- INFORMATION POPUP -->
+    <!-- Current MICR + Corrected MICR -->
 
-            <window id="winMicrInformation"
-                    title="MICR Repair"
-                    width="400px"
-                    closable="true"
-                    sizable="false"
-                    mode="modal"
-                    visible="false"
-                    sclass="micr-popup">
+    <div sclass="cts-form-row">
 
-                <vlayout id="divMicrInformationPopup"
-                         width="100%"
-                         spacing="12px">
+        <div sclass="cts-form-field">
 
-                    <label id="lblMicrInformationMessage"
-                           value=""
-                           multiline="true"/>
+            <label value="Current MICR *"
 
-                    <hlayout id="divMicrInformationButton"
-                             width="100%"
-                             valign="middle">
+                   sclass="cts-field-lbl" />
 
-                        <label hflex="1" value=""/>
+            <textbox id="txtCurrentMicr"
 
-                        <button id="btnCloseMicrInformation"
-                                label="OK"
-                                width="80px"/>
+                     width="100%"
 
-                    </hlayout>
+                     readonly="true"
 
-                </vlayout>
+                     sclass="cts-input-text error-field" />
 
-            </window>
+        </div>
 
-        </vlayout>
 
-    </window>
+        <div sclass="cts-form-field">
 
+            <label value="Corrected MICR Code *"
+
+                   sclass="cts-field-lbl" />
+
+            <textbox id="txtCorrectedMicr"
+
+                     width="100%"
+
+                     maxlength="9"
+
+                     placeholder="Enter 9-character corrected MICR code"
+
+                     sclass="cts-input-text correction-field micr-code-field"
+
+                     onChange="onChange$txtCorrectedMicr" />
+
+        </div>
+
+    </div>
+
+
+
+
+				<hlayout width="100%" spacing="10px" valign="middle"
+
+					sclass="micr-action-footer">
+
+					<button id="btnRejectRequest"
+
+						label="Request Rejection" iconSclass="z-icon-times-circle"
+
+						hflex="1" sclass="cts-btn-outline-danger micr-action-btn" />
+
+					<button id="btnSaveAndNext" label="Save &amp; Next"
+
+						iconSclass="z-icon-check" hflex="1"
+
+						sclass="cts-btn-solid-primary micr-action-btn" />
+
+					<button id="btnSubmitToDataEntry"
+
+						label="Proceed to Data Entry" iconSclass="z-icon-arrow-right"
+
+						hflex="1" disabled="true"
+
+						sclass="cts-btn-submit-data-entry micr-action-btn" />
+
+				</hlayout>
+
+			</div>
+			
+					</div>
+			
+
+
+
+		<window id="rejectRequestWindow" mode="modal" visible="false"
+
+			border="none" sclass="cts-modal-window">
+
+			<div sclass="cts-modal-box">
+
+				<vlayout spacing="12px">
+
+					<div sclass="cts-modal-title-bar">
+
+						<label value="Request Instrument Rejection"
+
+							sclass="cts-modal-heading" />
+
+					</div>
+
+					<label
+
+						value="Please specify the CTS return reason and any remarks for the checker:"
+
+						sclass="cts-modal-desc" />
+
+					<vlayout spacing="4px">
+
+						<label value="Rejection Reason / Return Code *"
+
+							sclass="cts-field-lbl-bold" />
+
+						<combobox id="cmbRejectReason" readonly="true"
+
+							placeholder="Select return reason..." width="100%" />
+
+					</vlayout>
+
+					<vlayout spacing="4px">
+
+						<label value="Rejection Remark"
+
+							sclass="cts-field-lbl-bold" />
+
+						<textbox id="txtModalRejectionRemark" rows="2"
+
+							placeholder="Enter reason details..." width="100%"
+
+							sclass="cts-textarea" />
+
+					</vlayout>
+
+					<div sclass="cts-modal-footer-bar">
+
+						<button id="btnCancelReject" label="Cancel"
+
+							sclass="cts-btn-secondary cts-btn-modal-cancel" />
+
+						<button id="btnConfirmReject"
+
+							label="Confirm Rejection"
+
+							sclass="cts-btn-solid-primary cts-btn-modal-confirm" />
+
+					</div>
+
+				</vlayout>
+
+			</div>
+		</window>
+		</div>
 </zk>

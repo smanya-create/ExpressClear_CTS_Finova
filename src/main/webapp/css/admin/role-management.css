@@ -110,7 +110,6 @@
     background: #ffffff !important;
 }
 
-/* --- Action Buttons --- */
 /* --- Action Buttons (Download CSV & PDF) --- */
 .btn-primary {
     background-color: #173b61 !important;
@@ -219,6 +218,8 @@
     line-height: 24px !important;
     padding: 0 4px !important;
     text-transform: uppercase !important;
+    text-align: center !important;
+    justify-content: center !important;
 }
 
 .role-grid .z-row .z-row-inner,
@@ -242,6 +243,50 @@
     color: #334155 !important;
 }
 
+/* --- Column Alignment Overrides for Role Grid Rows --- */
+/* Column 1 (ROLE ID): Center aligned */
+.role-grid .z-row .z-cell:nth-child(1),
+.role-grid .z-row .z-row-inner:nth-child(1),
+.role-grid .z-row .z-cell:nth-child(1) .z-cell-content,
+.role-grid .z-row .z-cell:nth-child(1) .z-label {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* Column 2 (ROLE NAME): Left aligned */
+.role-grid .z-row .z-cell:nth-child(2),
+.role-grid .z-row .z-row-inner:nth-child(2),
+.role-grid .z-row .z-cell:nth-child(2) .z-cell-content,
+.role-grid .z-row .z-cell:nth-child(2) .z-label {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+
+/* Column 3 (DESCRIPTION): Left aligned */
+.role-grid .z-row .z-cell:nth-child(3),
+.role-grid .z-row .z-row-inner:nth-child(3),
+.role-grid .z-row .z-cell:nth-child(3) .z-cell-content,
+.role-grid .z-row .z-cell:nth-child(3) .z-label {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+
+/* Column 4 (STATUS): Center aligned */
+.role-grid .z-row .z-cell:nth-child(4),
+.role-grid .z-row .z-row-inner:nth-child(4),
+.role-grid .z-row .z-cell:nth-child(4) .z-cell-content {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* Column 5 (ACTIONS): Center aligned */
+.role-grid .z-row .z-cell:nth-child(5),
+.role-grid .z-row .z-row-inner:nth-child(5),
+.role-grid .z-row .z-cell:nth-child(5) .z-cell-content {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
 /* --- Dark Navy Blue Modify Button with Pencil Icon --- */
 .role-grid .btn-action-modify,
 .role-grid .z-row .z-button {
@@ -263,7 +308,7 @@
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
     transition: background-color 0.15s ease, transform 0.05s ease !important;
     line-height: 1 !important;
-    text-transform: none !important; /* Preserves "Modify" casing */
+    text-transform: none !important;
 }
 
 .role-grid .btn-action-modify:hover,

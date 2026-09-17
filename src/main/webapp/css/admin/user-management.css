@@ -587,6 +587,10 @@
     color: #94a3b8;
 }
 
+/* ==========================================================================
+   ALIGNMENT RULES & FIX FOR CENTERED NUMBERS / PHONE
+   ========================================================================== */
+
 /* 1. All Column Headers Center Aligned */
 .z-listheader, 
 .z-column {
@@ -605,15 +609,116 @@
     text-align: left;
 }
 
-/* 3. Utility class for Numeric / Count / Status Cells (Centered) */
+/* 3. Utility class for Numeric / Phone / Status Cells (Forces block & full width centering) */
 .cell-center,
-.cell-num {
+.cell-num,
+.z-label.cell-center,
+.z-label.cell-num {
     text-align: center !important;
     justify-content: center !important;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 auto !important;
 }
 
 /* 4. Utility class for Text / Descriptions (Left Aligned) */
-.cell-text {
+.cell-text,
+.z-label.cell-text {
     text-align: left !important;
     justify-content: flex-start !important;
+    display: block !important;
+}
+
+/* 5. Direct Column Rule for Phone & Role ID (Automatically centers column 4 and 5 in User grids) */
+.cts-custom-grid .z-row .z-cell:nth-child(4),
+.cts-custom-grid .z-row .z-row-inner:nth-child(4),
+.cts-custom-grid .z-row .z-cell:nth-child(4) .z-row-content,
+.cts-custom-grid .z-row .z-cell:nth-child(4) .z-label,
+.cts-custom-grid .z-row .z-cell:nth-child(5),
+.cts-custom-grid .z-row .z-row-inner:nth-child(5),
+.cts-custom-grid .z-row .z-cell:nth-child(5) .z-row-content,
+.cts-custom-grid .z-row .z-cell:nth-child(5) .z-label {
+    text-align: center !important;
+    justify-content: center !important;
+}
+/* ==========================================================================
+   PIXEL-PERFECT EXACT COLUMN CENTERING FIX
+   ========================================================================== */
+
+/* 1. Remove the hidden ZK header button that pushes "PHONE" off-center */
+.z-column .z-column-button {
+    display: none !important;
+    width: 0 !important;
+}
+
+/* 2. Force the header text to true geometric center */
+.z-column-content,
+.cts-custom-grid .z-column-content,
+.role-grid .z-column-content {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 3. True-center utility class (apply sclass="cell-center" to your phone label/cell) */
+.cell-center,
+.cell-num,
+.z-label.cell-center,
+.z-label.cell-num {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+}
+
+/* 4. Ensure the parent TD/DIV container does not push children with asymmetric padding */
+.z-row-inner:has(.cell-center),
+.z-cell:has(.cell-center) {
+    text-align: center !important;
+}
+
+.z-row-inner:has(.cell-center) .z-row-content,
+.z-cell:has(.cell-center) .z-cell-content {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+/* ==========================================================================
+   ROLE COLUMN - LEFT ALIGNMENT OVERRIDE
+   ========================================================================== */
+
+/* 1. If using the utility class on the label/cell: */
+.role-left,
+.cell-text,
+.z-label.role-left {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    width: 100% !important;
+    padding-left: 14px !important; /* Matches grid text cell padding */
+}
+
+/* 2. Direct Column Targeting (Identify the column index of ROLE, e.g., 3rd column): */
+/* If ROLE is Column 3, keep as :nth-child(3); if it is Column 2, change to :nth-child(2) */
+.cts-custom-grid .z-row .z-cell:nth-child(3),
+.cts-custom-grid .z-row .z-row-inner:nth-child(3),
+.cts-custom-grid .z-row .z-cell:nth-child(3) .z-row-content,
+.cts-custom-grid .z-row .z-cell:nth-child(3) .z-label,
+.role-grid .z-row .z-cell:nth-child(3),
+.role-grid .z-row .z-row-inner:nth-child(3),
+.role-grid .z-row .z-cell:nth-child(3) .z-row-content,
+.role-grid .z-row .z-cell:nth-child(3) .z-label {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    padding-left: 14px !important;
 }

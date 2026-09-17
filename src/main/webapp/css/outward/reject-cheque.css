@@ -1,153 +1,586 @@
-@charset "UTF-8";
-
 /* =========================================================
-   REJECT CHEQUE WINDOW
+   REJECT CHEQUE POPUP
    ========================================================= */
 
-.reject-cheque-window {
-    background: #ffffff;
-    border-radius: 6px;
+.reject-popup-overlay {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
+/* =========================================================
+   MAIN POPUP
+   ========================================================= */
+
+.reject-popup {
+    width: 480px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.reject-popup,
+.reject-popup * {
+    box-sizing: border-box;
+}
 
 /* =========================================================
    HEADER
    ========================================================= */
 
-.reject-header {
-    padding: 14px 26px 8px 26px;
+.reject-popup-header {
+    width: 100%;
+    min-height: 70px;
+    padding: 14px 18px;
+    margin: 0;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
 }
 
-.reject-title {
-    display: block;
-    font-size: 16px;
-    font-weight: 500;
-    color: #666666;
-    margin-bottom: 4px;
+.reject-header-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
 }
 
-.reject-description {
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.reject-popup-title {
     display: block;
-    font-size: 13px;
-    color: #222222;
+    margin: 0;
+    padding: 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 600;
+
+    color: #111827;
+}
+
+/* =========================================================
+   SUBTITLE
+   ========================================================= */
+
+.reject-popup-subtitle {
+    display: block;
+    margin: 3px 0 0 0;
+    padding: 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 17px;
+    font-weight: 400;
+
+    color: #6b7280;
+}
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.reject-close-button {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+
+    margin: 0 0 0 12px !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 6px !important;
+
+    background: transparent !important;
+    color: #64748b !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    line-height: 30px !important;
+
+    text-align: center !important;
+    cursor: pointer;
+}
+
+.reject-close-button:hover {
+    background: #f1f5f9 !important;
+    color: #111827 !important;
+}
+
+/* =========================================================
+   BATCH / CHEQUE INFORMATION
+   ========================================================= */
+
+.reject-info-card {
+    width: auto;
+    margin: 16px 18px;
+    padding: 13px 15px;
+
+    display: flex;
+    flex-direction: row;
+
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+/* =========================================================
+   INFORMATION ITEMS
+   ========================================================= */
+
+.reject-info-item {
+    width: 50%;
+
+    display: flex;
+    flex-direction: column;
+
+    margin: 0;
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
+.reject-info-item:first-child {
+    padding-right: 15px;
+}
+
+.reject-info-item:last-child {
+    padding-left: 15px;
+    border-left: 1px solid #e2e8f0;
+}
+
+/* =========================================================
+   INFO LABEL
+   ========================================================= */
+
+.reject-info-label {
+    display: block;
+
+    margin: 0 0 5px 0;
+    padding: 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 700;
+
+    letter-spacing: 0.8px;
+    color: #64748b;
+}
+
+/* =========================================================
+   INFO VALUE
+   ========================================================= */
+
+.reject-info-value {
+    display: block;
+
+    margin: 0;
+    padding: 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
     line-height: 18px;
-}
+    font-weight: 600;
 
+    color: #1e293b;
+}
 
 /* =========================================================
-   CONTENT
+   FORM FIELD
    ========================================================= */
 
-.reject-content {
-    padding: 8px 26px 10px 26px;
+.reject-field {
+    width: auto;
+
+    margin: 0 18px 16px 18px;
+    padding: 0;
+
+    box-sizing: border-box;
 }
-
-
-/* =========================================================
-   TWO COLUMN
-   ========================================================= */
-
-.two-column {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 28px;
-}
-
-
-/* =========================================================
-   FIELD GROUP
-   ========================================================= */
-
-.field-group {
-    margin-bottom: 14px;
-}
-
 
 /* =========================================================
    FIELD LABEL
    ========================================================= */
 
-.field-label {
+.reject-field-label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 9px;
-    font-weight: 600;
-    color: #64748b;
-}
 
+    margin: 0 0 6px 0;
+    padding: 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+    color: #374151;
+}
 
 /* =========================================================
-   READ ONLY FIELD
+   COMBOBOX
    ========================================================= */
 
-.readonly-field {
-    display: block;
-    width: 100%;
-    min-height: 18px;
-    font-size: 13px;
-    color: #1f2937;
-    line-height: 18px;
+.reject-combobox {
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
+/* ZK combobox */
+
+.reject-combobox .z-combobox {
+    width: 100% !important;
+}
+
+/* Combobox input */
+
+.reject-combobox .z-combobox-input {
+    width: 100% !important;
+    height: 38px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 0 42px 0 11px !important;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 7px !important;
+
+    background: #ffffff !important;
+    color: #111827 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 13px !important;
+    line-height: 38px !important;
+
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Placeholder */
+
+.reject-combobox .z-combobox-input::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Hover */
+
+.reject-combobox .z-combobox-input:hover {
+    border-color: #9ca3af !important;
+}
+
+/* Focus */
+
+.reject-combobox .z-combobox-input:focus {
+    border-color: #64748b !important;
+
+    outline: none !important;
+
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12) !important;
+}
 
 /* =========================================================
-   REASON COMBOBOX
+   COMBOBOX BUTTON
    ========================================================= */
 
-.reason-combobox {
-    width: 100%;
+.reject-combobox .z-combobox-button {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid #d1d5db !important;
+    border-left: 0 !important;
+
+    border-radius: 0 7px 7px 0 !important;
+
+    background: #f8fafc !important;
+    color: #475569 !important;
 }
 
-.reason-combobox .z-combobox-input {
-    height: 30px;
-    font-size: 13px;
-    border: 1px solid #b9c4d0;
-    border-radius: 3px;
-    box-sizing: border-box;
+.reject-combobox .z-combobox-button:hover {
+    background: #f1f5f9 !important;
 }
-
 
 /* =========================================================
-   REMARKS
+   COMBOBOX POPUP
    ========================================================= */
 
-.remarks-field {
-    width: 100%;
-    font-size: 13px;
-    border: 1px solid #b9c4d0;
-    border-radius: 3px;
-    box-sizing: border-box;
+.reject-combobox-popup {
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
 }
 
+/* =========================================================
+   REMARKS TEXTBOX
+   ========================================================= */
+
+.reject-remarks {
+    width: 100% !important;
+
+    height: 95px !important;
+    min-height: 95px !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+}
+
+/* ZK textarea */
+
+.reject-remarks textarea {
+    width: 100% !important;
+
+    height: 95px !important;
+    min-height: 95px !important;
+
+    box-sizing: border-box !important;
+
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 10px 11px !important;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 7px !important;
+
+    background: #ffffff !important;
+    color: #111827 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
+
+    resize: none !important;
+
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Hover */
+
+.reject-remarks textarea:hover {
+    border-color: #9ca3af !important;
+}
+
+/* Focus */
+
+.reject-remarks textarea:focus {
+    border-color: #64748b !important;
+
+    outline: none !important;
+
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12) !important;
+}
+
+/* Placeholder */
+
+.reject-remarks textarea::placeholder {
+    color: #9ca3af !important;
+}
 
 /* =========================================================
    FOOTER
    ========================================================= */
 
-.reject-footer {
-    display: flex;
-    justify-content: flex-start;
-    gap: 4px;
-    padding: 0 26px 18px 26px;
-}
+.reject-popup-footer {
+    width: 100%;
 
+    min-height: 64px;
+
+    margin: 0;
+    padding: 12px 18px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+}
 
 /* =========================================================
-   BUTTONS
+   CANCEL BUTTON
+   SIDEBAR BLUE
    ========================================================= */
 
-.cancel-button,
-.reject-confirm-button {
-    background: #0797e8;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    padding: 7px 16px;
-    font-size: 12px;
-    cursor: pointer;
+.reject-cancel-button {
+    height: 38px !important;
+    min-width: 90px !important;
+
+    padding: 0 18px !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid #173b63 !important;
+    border-radius: 7px !important;
+
+    background: #173b63 !important;
+    color: #ffffff !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 36px !important;
+
+    text-align: center !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
 }
 
-.cancel-button:hover,
+.reject-cancel-button:hover {
+    background: #0f2f50 !important;
+    border-color: #0f2f50 !important;
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   REJECT CHEQUE BUTTON
+   SIDEBAR BLUE
+   ========================================================= */
+
+.reject-confirm-button {
+    height: 38px !important;
+    min-width: 135px !important;
+
+    padding: 0 18px !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid #173b63 !important;
+    border-radius: 7px !important;
+
+    background: #173b63 !important;
+    color: #ffffff !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 36px !important;
+
+    text-align: center !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
+}
+
 .reject-confirm-button:hover {
-    background: #0786cf;
+    background: #0f2f50 !important;
+    border-color: #0f2f50 !important;
+    color: #ffffff !important;
+}
+
+.reject-confirm-button:active {
+    background: #078bd2 !important;
+    border-color: #078bd2 !important;
+}
+
+/* =========================================================
+   ZK BUTTON INTERNAL ELEMENTS
+   ========================================================= */
+
+.reject-cancel-button.z-button,
+.reject-confirm-button.z-button {
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* =========================================================
+   REMOVE DEFAULT ZK WINDOW STYLING
+   ========================================================= */
+
+.z-window-modal {
+    border: none !important;
+
+    box-shadow: none !important;
+
+    background: transparent !important;
+}
+
+.z-window-modal .z-window-content {
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    border: none !important;
+
+    background: transparent !important;
+}
+
+.z-window-modal .z-window-header {
+    display: none !important;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media screen and (max-width: 550px) {
+
+    .reject-popup {
+        width: 100%;
+        max-width: 480px;
+    }
+
+    .reject-popup-overlay {
+        padding: 0;
+    }
+
+    .reject-info-card {
+        display: block;
+    }
+
+    .reject-info-item {
+        width: 100%;
+    }
+
+    .reject-info-item:first-child {
+        padding-right: 0;
+        padding-bottom: 10px;
+    }
+
+    .reject-info-item:last-child {
+        padding-left: 0;
+        padding-top: 10px;
+
+        border-left: none;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .reject-popup-footer {
+        flex-wrap: wrap;
+    }
 }

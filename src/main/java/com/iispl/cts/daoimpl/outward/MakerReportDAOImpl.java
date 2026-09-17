@@ -51,19 +51,19 @@ public class MakerReportDAOImpl implements MakerReportDAO {
             reportData.put("dataEntry", executeQuery(conn, sqlDataEntry, makerId, fromDate, toDate));
 
             // 3. Unprocessed cheques audit (Added outward_batch_id & outward_cheque_id aliases)
-            String sqlUnprocessed = "SELECT sc.scanned_batch_id, sc.scanned_batch_id AS outward_batch_id, " +
-                                    "       sc.scanned_cheque_id, sc.scanned_cheque_id AS outward_cheque_id, " +
-                                    "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, " +
-                                    "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, " +
-                                    "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, " +
-                                    "       sc.cheque_amount, sc.cheque_status, sc.created_at " +
-                                    "FROM scan_cheque sc " +
-                                    "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
-                                    "WHERE sb.uploaded_by = ? " +
-                                    "  AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED') " +
-                                    "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? " +
-                                    "ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id";
-            reportData.put("unprocessed", executeQuery(conn, sqlUnprocessed, makerId, fromDate, toDate));
+//            String sqlUnprocessed = "SELECT sc.scanned_batch_id, sc.scanned_batch_id AS outward_batch_id, " +
+//                                    "       sc.scanned_cheque_id, sc.scanned_cheque_id AS outward_cheque_id, " +
+//                                    "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, " +
+//                                    "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, " +
+//                                    "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, " +
+//                                    "       sc.cheque_amount, sc.cheque_status, sc.created_at " +
+//                                    "FROM scan_cheque sc " +
+//                                    "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+//                                    "WHERE sb.uploaded_by = ? " +
+//                                    "  AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED') " +
+//                                    "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? " +
+//                                    "ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id";
+//            reportData.put("unprocessed", executeQuery(conn, sqlUnprocessed, makerId, fromDate, toDate));
 
             // 4. Batches submitted to checker
             String sqlChecker = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, " +

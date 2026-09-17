@@ -14,7 +14,7 @@ public class ChequeDataValidation implements ValidateBatch {
         if (data == null) {
             return new ValidationResult(
                     false,
-                    "Cheque information is not available. Please check the uploaded file.");
+                    "Invalid cheque details found in batch.");
         }
 
         List<ScanCheque> chequeList = data.getChequeList();
@@ -22,7 +22,7 @@ public class ChequeDataValidation implements ValidateBatch {
         if (chequeList == null || chequeList.isEmpty()) {
             return new ValidationResult(
                     false,
-                    "No cheque information is available. Please check the uploaded file.");
+                    "Invalid cheque details found in batch.");
         }
 
         for (ScanCheque cheque : chequeList) {
@@ -30,48 +30,39 @@ public class ChequeDataValidation implements ValidateBatch {
             if (cheque == null) {
                 return new ValidationResult(
                         false,
-                        "Invalid cheque information found. Please check the uploaded file.");
+                        "Invalid cheque details found in batch.");
             }
-
-            String chequeId = cheque.getScannedChequeId();
 
             // Scanned Cheque ID
-            if (chequeId == null || chequeId.trim().isEmpty()) {
+            if (cheque.getScannedChequeId() == null
+                    || cheque.getScannedChequeId().trim().isEmpty()) {
                 return new ValidationResult(
                         false,
-                        "Scanned cheque ID is missing. Please check the cheque details.");
+                        "Invalid cheque details found in batch.");
             }
-
-            chequeId = chequeId.trim();
 
             // Scanned Batch ID
             if (cheque.getScannedBatchId() == null
                     || cheque.getScannedBatchId().trim().isEmpty()) {
-
                 return new ValidationResult(
                         false,
-                        "Scanned batch ID is missing for cheque "
-                                + chequeId + ". Please check the cheque details.");
+                        "Invalid cheque details found in batch.");
             }
 
             // Cheque Number
             if (cheque.getChequeNumber() == null
                     || cheque.getChequeNumber().trim().isEmpty()) {
-
                 return new ValidationResult(
                         false,
-                        "Cheque number is missing for cheque "
-                                + chequeId + ". Please check the cheque details.");
+                        "Invalid cheque details found in batch.");
             }
 
             // Account Number
             if (cheque.getDraweeAccountNumber() == null
                     || cheque.getDraweeAccountNumber().trim().isEmpty()) {
-
                 return new ValidationResult(
                         false,
-                        "Account number is missing for cheque "
-                                + chequeId + ". Please check the cheque details.");
+                        "Invalid cheque details found in batch.");
             }
         }
 

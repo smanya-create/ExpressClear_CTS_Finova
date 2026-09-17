@@ -17,24 +17,29 @@
 					value="Review and correct individual cheque MICR details."
 					sclass="cts-main-subtitle" />
 			</div>
+			
+			<!-- Solid Navy Back Button -->
+			<button id="btnBackToList" label="Back" iconSclass="z-icon-arrow-left" 
+					sclass="cts-btn-top-back" />
+					
 		</div>
 
 
 		<div sclass="cts-metadata-card">
 
 			<div sclass="cts-meta-col">
-				<label value="BATCH NO." sclass="cts-meta-header" />
+				<label value="Batch No." sclass="cts-meta-header" />
 				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
 			</div>
 
 			<div sclass="cts-meta-col">
-				<label value="TOTAL CHEQUES" sclass="cts-meta-header" />
+				<label value="Total Cheques" sclass="cts-meta-header" />
 				<label id="lblTotalCheques" value="0"
 					sclass="cts-meta-val" />
 			</div>
 
 			<div sclass="cts-meta-col cts-progress-meta-col">
-				<label value="PROGRESS" sclass="cts-meta-header" />
+				<label value="Progress" sclass="cts-meta-header" />
 				<hlayout spacing="8px" valign="middle">
 					<progressmeter id="progressMeter" value="0"
 						sclass="cts-compact-progress" />
@@ -62,8 +67,7 @@
 					sclass="cts-meta-val" />
 				<label id="lblHeaderChequeNo" value="-"
 					sclass="cts-meta-val" />
-				<label id="lblHeaderItemStatus"
-					value="MICR_REPAIR_PENDING" sclass="cts-badge-micr" />
+				<label id="lblRepairStatus" value="MICR ERROR" />
 				<label id="lblReceivedDate" value="-"
 					sclass="cts-meta-val" />
 			</div>
@@ -146,8 +150,7 @@
 							value="Review and correct MICR codeline fields."
 							sclass="cts-card-tagline" />
 					</div>
-					<label id="lblRepairStatus" value="MICR ERROR"
-						sclass="cts-badge-micr" />
+					<label id="lblHeaderItemStatus" value="MICR_REPAIR_PENDING" sclass="cts-status-pill-peach" />
 				</div>
 
 				<div id="micrAlertBox" visible="false"

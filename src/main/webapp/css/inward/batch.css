@@ -819,3 +819,48 @@ body:has(.batch-page) [id$="mainContentArea"] {
 	border-color: #94a3b8 !important;
 	color: #0f172a !important;
 }
+
+.batch-page .status-pill-gold,
+.batch-page .status-pill-blue,
+.batch-page .status-pill-sentback,
+.batch-page .status-pill-completed,
+.batch-page .status-pill-failed {
+	width: 160px !important;
+	min-width: 160px !important;
+	max-width: 160px !important;
+	height: 28px !important;
+	padding: 0 !important;
+	box-sizing: border-box !important;
+	text-transform: none !important;
+	white-space: nowrap !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	text-align: center !important;
+}
+
+.batch-page .z-listheader-content {
+	text-transform: none !important;
+}
+
+.batch-page .status-pill-gold,
+.batch-page .status-pill-blue,
+.batch-page .status-pill-sentback,
+.batch-page .status-pill-completed,
+.batch-page .status-pill-failed {
+	text-transform: none !important;
+}
+
+.batch-page .view-button.z-button,
+.batch-page .parse-button.z-button,
+.batch-page .parsing-button.z-button {
+	text-transform: none !important;
+}
+
+.batch-validation-window .view-button.z-button {
+	text-transform: none !important;
+}
+
+.batch-validation-window .batch-btn-clear.z-button {
+	text-transform: none !important;
+}

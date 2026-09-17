@@ -24,6 +24,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
@@ -47,6 +48,8 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		
 		super.doAfterCompose(comp);
 
 		this.inwardBatchService = new InwardBatchServiceImpl();

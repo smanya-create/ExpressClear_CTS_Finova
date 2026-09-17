@@ -1,0 +1,319 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ChequeBatchTransmission xmlns="urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing">
+    <BatchHeader>
+        <ScannedBatchId>INW260917014</ScannedBatchId>
+        <BatchReferenceId>BATCH-2026-09-17-014</BatchReferenceId>
+        <ActualChequeCount>8</ActualChequeCount>
+        <ActualTotalAmount currency="INR">1005000.00</ActualTotalAmount>
+        <StagingStatus>RAW</StagingStatus>
+        <BatchStatus>PROCESSING</BatchStatus>
+        <UploadedBy>USR_INWARD</UploadedBy>
+        <UploadedAt>2026-09-17T09:30:00</UploadedAt>
+    </BatchHeader>
+    <Cheques>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ001</ScannedChequeId>
+            <ItemSequenceNumber>1</ItemSequenceNumber>
+            <ChequeNumber>704001</ChequeNumber>
+            <ChequeDate>2026-09-10</ChequeDate>
+            <Amount currency="INR">75000.00</Amount>
+            <AmountInWords>INR 75000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400137</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>VIKRAM MEHTA</AccountHolderName>
+                <AccountNumber>1000400137</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>NORTHSTAR TRADERS</AccountHolderName>
+                <AccountNumber>7000001401</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ001-F" path="BATCH-2026-09-17-014/images/CHQ001_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ001-B" path="BATCH-2026-09-17-014/images/CHQ001_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-10</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ002</ScannedChequeId>
+            <ItemSequenceNumber>2</ItemSequenceNumber>
+            <ChequeNumber>704002</ChequeNumber>
+            <ChequeDate>2026-09-11</ChequeDate>
+            <Amount currency="INR">125000.00</Amount>
+            <AmountInWords>INR 125000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400274</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>ANITA REDDY</AccountHolderName>
+                <AccountNumber>1000400274</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>BLUEWAVE SYSTEMS</AccountHolderName>
+                <AccountNumber>7000001402</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ002-F" path="BATCH-2026-09-17-014/images/CHQ002_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ002-B" path="BATCH-2026-09-17-014/images/CHQ002_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-11</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ003</ScannedChequeId>
+            <ItemSequenceNumber>3</ItemSequenceNumber>
+            <ChequeNumber>704003</ChequeNumber>
+            <ChequeDate>2026-09-12</ChequeDate>
+            <Amount currency="INR">95000.00</Amount>
+            <AmountInWords>INR 95000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400411</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>ARJUN JAIN</AccountHolderName>
+                <AccountNumber>1000400411</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>AARAV ENTERPRISES</AccountHolderName>
+                <AccountNumber>7000001403</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ003-F" path="BATCH-2026-09-17-014/images/CHQ003_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ003-B" path="BATCH-2026-09-17-014/images/CHQ003_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-12</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ004</ScannedChequeId>
+            <ItemSequenceNumber>4</ItemSequenceNumber>
+            <ChequeNumber>704004</ChequeNumber>
+            <ChequeDate>2026-09-13</ChequeDate>
+            <Amount currency="INR">180000.00</Amount>
+            <AmountInWords>INR 180000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400548</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>NEHA MALHOTRA</AccountHolderName>
+                <AccountNumber>1000400548</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>SILVERLINE LOGISTICS</AccountHolderName>
+                <AccountNumber>7000001404</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ004-F" path="BATCH-2026-09-17-014/images/CHQ004_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ004-B" path="BATCH-2026-09-17-014/images/CHQ004_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-13</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ005</ScannedChequeId>
+            <ItemSequenceNumber>5</ItemSequenceNumber>
+            <ChequeNumber>704005</ChequeNumber>
+            <ChequeDate>2026-09-14</ChequeDate>
+            <Amount currency="INR">210000.00</Amount>
+            <AmountInWords>INR 210000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400685</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>KARAN DAS</AccountHolderName>
+                <AccountNumber>1000400685</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>GREENFIELD SUPPLIES</AccountHolderName>
+                <AccountNumber>7000001405</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ005-F" path="BATCH-2026-09-17-014/images/CHQ005_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ005-B" path="BATCH-2026-09-17-014/images/CHQ005_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-14</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ006</ScannedChequeId>
+            <ItemSequenceNumber>6</ItemSequenceNumber>
+            <ChequeNumber>704006</ChequeNumber>
+            <ChequeDate>2026-09-15</ChequeDate>
+            <Amount currency="INR">65000.00</Amount>
+            <AmountInWords>INR 65000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400822</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>MEERA RAO</AccountHolderName>
+                <AccountNumber>1000400822</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>ORBITAL CONSULTING</AccountHolderName>
+                <AccountNumber>7000001406</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ006-F" path="BATCH-2026-09-17-014/images/CHQ006_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ006-B" path="BATCH-2026-09-17-014/images/CHQ006_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-15</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ007</ScannedChequeId>
+            <ItemSequenceNumber>7</ItemSequenceNumber>
+            <ChequeNumber>704007</ChequeNumber>
+            <ChequeDate>2026-09-16</ChequeDate>
+            <Amount currency="INR">145000.00</Amount>
+            <AmountInWords>INR 145000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>400959</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>ADITYA SAXENA</AccountHolderName>
+                <AccountNumber>1000400959</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>MAPLE RETAILS</AccountHolderName>
+                <AccountNumber>7000001407</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ007-F" path="BATCH-2026-09-17-014/images/CHQ007_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ007-B" path="BATCH-2026-09-17-014/images/CHQ007_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-16</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+        <ChequeItem>
+            <ScannedChequeId>INW260917014-CHQ008</ScannedChequeId>
+            <ItemSequenceNumber>8</ItemSequenceNumber>
+            <ChequeNumber>704008</ChequeNumber>
+            <ChequeDate>2026-09-17</ChequeDate>
+            <Amount currency="INR">110000.00</Amount>
+            <AmountInWords>INR 110000.00</AmountInWords>
+            <ChequeStatus>RECEIVED</ChequeStatus>
+            <MICRDetails>
+                <FullMICR>400002012</FullMICR>
+                <CityCode>400</CityCode>
+                <BankCode>002</BankCode>
+                <BranchCode>012</BranchCode>
+                <AccountShortCode>401096</AccountShortCode>
+                <TransactionCode>29</TransactionCode>
+            </MICRDetails>
+            <Drawee>
+                <BankName>State Bank of India</BankName>
+                <BranchName>SBI Main Branch</BranchName>
+                <IFSCCode>SBIN0000012</IFSCCode>
+                <AccountHolderName>POOJA SHARMA</AccountHolderName>
+                <AccountNumber>1000401096</AccountNumber>
+            </Drawee>
+            <Payee>
+                <AccountHolderName>EVEREST OFFICE SOLUTIONS</AccountHolderName>
+                <AccountNumber>7000001408</AccountNumber>
+            </Payee>
+            <ChequeImages>
+                <FrontImage imageId="INW260917014-CHQ008-F" path="BATCH-2026-09-17-014/images/CHQ008_front.jpg" type="FRONT" />
+                <BackImage imageId="INW260917014-CHQ008-B" path="BATCH-2026-09-17-014/images/CHQ008_back.png" type="BACK" />
+            </ChequeImages>
+            <ClearingDetails>
+                <PresentingBank>BR001</PresentingBank>
+                <PresentingBranch>BR001</PresentingBranch>
+                <PresentmentDate>2026-09-17</PresentmentDate>
+                <ClearingType>CTS CLEARING</ClearingType>
+            </ClearingDetails>
+        </ChequeItem>
+    </Cheques>
+</ChequeBatchTransmission>

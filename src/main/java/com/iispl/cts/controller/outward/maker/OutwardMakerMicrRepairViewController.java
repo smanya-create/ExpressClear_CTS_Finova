@@ -6,13 +6,15 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Path;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Cell;
 import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Include;
@@ -26,1315 +28,708 @@ import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.service.outward.OutwardMakerService;
 import com.iispl.cts.serviceimpl.outward.OutwardMakerServiceImpl;
 
+public class OutwardMakerMicrRepairViewController extends GenericForwardComposer<Component> {
 
-public class OutwardMakerMicrRepairViewController
-        extends GenericForwardComposer<Component> {
+	private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 1L;
+	/*
+	 * ========================================================= ZUL COMPONENTS
+	 * =========================================================
+	 */
 
+	private Grid grdMicrRepairBatches;
+	private Rows rowsMicrRepairBatches;
+	private Paging pagingMicrRepair;
+	private Div divMicrRepairEmpty;
 
-    // =========================================================
-    // ZUL COMPONENTS
-    // =========================================================
+	private Textbox batchIdFilter;
+	private Combobox cmbStatusFilter;
+	private Label batchResultCount;
 
-    private Component sidebarComponent;
+	/*
+	 * ========================================================= SERVICE
+	 * =========================================================
+	 */
 
-    private Div divMicrRepairScanSection;
-    private Div divMicrRepairCheckerSection;
-    private Div divMicrRepairEmpty;
-    private Grid grdMicrRepairBatches;
+	private OutwardMakerService outwardMakerService;
 
-    private Label lblMicrRepairEmptyTitle;
-    private Label lblMicrRepairEmptyMessage;
+	/*
+	 * ========================================================= DATA
+	 * =========================================================
+	 */
 
-    /*
-     * Main visible table
-     */
-    private Rows rowsMicrRepairScanBatches;
+	private List<MicrRepairBatchDisplay> allBatches = new ArrayList<>();
 
-    /*
-     * Kept because the current ZUL/controller structure expects it.
-     * It will no longer be displayed as a second table.
-     */
-    private Rows rowsMicrRepairCheckerBatches;
+	private List<MicrRepairBatchDisplay> filteredBatches = new ArrayList<>();
 
-    private Paging pagingMicrRepairScan;
-    private Paging pagingMicrRepairChecker;
+	/*
+	 * ========================================================= INITIALIZATION
+	 * =========================================================
+	 */
 
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-    // =========================================================
-    // NEW FILTER COMPONENTS
-    // =========================================================
+		super.doAfterCompose(comp);
 
-    private Textbox txtMicrRepairSearch;
+		outwardMakerService = new OutwardMakerServiceImpl();
 
-    private Button btnMicrRepairSearch;
+		/*
+		 * Default status filter All Statuses
+		 */
+		if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
 
-    private Button btnMicrRepairClear;
+			cmbStatusFilter.setSelectedIndex(0);
+		}
 
-    private Combobox cmbMicrRepairBatchType;
+		/*
+		 * Pagination listener
+		 */
+		if (pagingMicrRepair != null) {
 
-    private Combobox cmbMicrRepairRowsPerPage;
+			pagingMicrRepair.addEventListener("onPaging", new EventListener<Event>() {
 
-    private Label lblMicrRepairShowing;
+				@Override
+				public void onEvent(Event event) throws Exception {
 
+					renderPage();
+				}
+			});
+		}
 
-    // =========================================================
-    // SERVICE
-    // =========================================================
+		/*
+		 * Load Outward MICR repair batches
+		 */
+		loadBatchQueue();
+	}
 
-    private OutwardMakerService outwardMakerService;
+	/*
+	 * ========================================================= LOAD BATCH QUEUE
+	 * =========================================================
+	 */
 
+	private void loadBatchQueue() {
 
-    // =========================================================
-    // ORIGINAL DATA
-    // =========================================================
+		List<MicrRepairBatch> scanBatches = new ArrayList<>();
 
-    private List<MicrRepairBatch> scanBatchRows =
-            new ArrayList<MicrRepairBatch>();
+		List<MicrRepairBatch> checkerReturnedBatches = new ArrayList<>();
 
-    private List<MicrRepairBatch> checkerBatchRows =
-            new ArrayList<MicrRepairBatch>();
+		/*
+		 * Scan batches
+		 */
+		try {
 
+			List<MicrRepairBatch> result = outwardMakerService.getScanMicrRepairBatches();
 
-    // =========================================================
-    // UNIFIED DISPLAY DATA
-    // =========================================================
+			if (result != null) {
+				scanBatches = result;
+			}
 
-    private List<MicrRepairBatchDisplay> allBatchRows =
-            new ArrayList<MicrRepairBatchDisplay>();
+		} catch (Exception e) {
 
-    private List<MicrRepairBatchDisplay> filteredBatchRows =
-            new ArrayList<MicrRepairBatchDisplay>();
+			e.printStackTrace();
+		}
 
+		/*
+		 * Checker returned batches
+		 */
+		try {
 
-    // =========================================================
-    // INTERNAL DISPLAY OBJECT
-    // =========================================================
+			List<MicrRepairBatch> result = outwardMakerService.getOutwardMicrRepairBatches();
 
-    private static class MicrRepairBatchDisplay {
+			if (result != null) {
+				checkerReturnedBatches = result;
+			}
 
-        private MicrRepairBatch batch;
+		} catch (Exception e) {
 
-        /*
-         * SCAN     -> batch came from scanning
-         * OUTWARD  -> batch was returned by checker
-         */
-        private String source;
+			e.printStackTrace();
+		}
 
+		/*
+		 * Combine both sources
+		 */
+		buildUnifiedBatchList(scanBatches, checkerReturnedBatches);
 
-        MicrRepairBatchDisplay(
-                MicrRepairBatch batch,
-                String source) {
+		/*
+		 * Apply filters
+		 */
+		applyCombinedFilter(null, null);
+	}
 
-            this.batch = batch;
-            this.source = source;
-        }
+	/*
+	 * ========================================================= BUILD UNIFIED BATCH
+	 * LIST =========================================================
+	 */
 
+	private void buildUnifiedBatchList(List<MicrRepairBatch> scanBatches,
+			List<MicrRepairBatch> checkerReturnedBatches) {
 
-        public MicrRepairBatch getBatch() {
-            return batch;
-        }
+		allBatches = new ArrayList<>();
 
+		/*
+		 * Scan source
+		 */
+		if (scanBatches != null) {
 
-        public String getSource() {
-            return source;
-        }
-    }
+			for (MicrRepairBatch batch : scanBatches) {
 
+				if (batch == null) {
+					continue;
+				}
 
-    // =========================================================
-    // COMPOSE
-    // =========================================================
+				allBatches.add(new MicrRepairBatchDisplay(batch, BatchSource.SCAN));
+			}
+		}
 
-    @Override
-    public void doAfterCompose(Component component) throws Exception {
+		/*
+		 * Checker returned source
+		 */
+		if (checkerReturnedBatches != null) {
 
-        super.doAfterCompose(component);
+			for (MicrRepairBatch batch : checkerReturnedBatches) {
 
+				if (batch == null) {
+					continue;
+				}
 
-        // =====================================================
-        // EXISTING COMPONENTS
-        // =====================================================
+				allBatches.add(new MicrRepairBatchDisplay(batch, BatchSource.OUTWARD));
+			}
+		}
+	}
 
-        divMicrRepairScanSection =
-                (Div) component.getFellow("divMicrRepairScanSection");
+	/*
+	 * ========================================================= APPLY SEARCH +
+	 * STATUS FILTER =========================================================
+	 */
 
-        divMicrRepairCheckerSection =
-                (Div) component.getFellow("divMicrRepairCheckerSection");
+	private void applyCombinedFilter(String searchText, String statusFilter) {
 
-        divMicrRepairEmpty =
-                (Div) component.getFellow("divMicrRepairEmpty");
+		/*
+		 * Search text
+		 */
+		if (searchText == null) {
 
+			searchText = batchIdFilter != null && batchIdFilter.getValue() != null
+					? batchIdFilter.getValue().trim().toLowerCase()
+					: "";
 
-        lblMicrRepairEmptyTitle =
-                (Label) component.getFellow("lblMicrRepairEmptyTitle");
+		} else {
 
-        lblMicrRepairEmptyMessage =
-                (Label) component.getFellow("lblMicrRepairEmptyMessage");
+			searchText = searchText.trim().toLowerCase();
+		}
 
-        grdMicrRepairBatches =
-                (Grid) component.getFellow("grdMicrRepairBatches");
+		/*
+		 * Status
+		 */
+		if (statusFilter == null) {
 
+			if (cmbStatusFilter != null && cmbStatusFilter.getSelectedItem() != null
+					&& cmbStatusFilter.getSelectedItem().getValue() != null) {
 
-        rowsMicrRepairScanBatches =
-                (Rows) component.getFellow("rowsMicrRepairScanBatches");
+				statusFilter = cmbStatusFilter.getSelectedItem().getValue().toString();
 
-        rowsMicrRepairCheckerBatches =
-                (Rows) component.getFellow("rowsMicrRepairCheckerBatches");
+			} else {
 
+				statusFilter = "ALL";
+			}
+		}
 
-        pagingMicrRepairScan =
-                (Paging) component.getFellow("pagingMicrRepairScan");
+		filteredBatches = new ArrayList<>();
 
-        pagingMicrRepairChecker =
-                (Paging) component.getFellow("pagingMicrRepairChecker");
+		/*
+		 * Apply filters to unified list
+		 */
+		for (MicrRepairBatchDisplay displayBatch : allBatches) {
 
+			if (displayBatch == null || displayBatch.getBatch() == null) {
 
-        // =====================================================
-        // NEW FILTER COMPONENTS
-        // =====================================================
+				continue;
+			}
 
-        txtMicrRepairSearch =
-                (Textbox) component.getFellow("txtMicrRepairSearch");
+			MicrRepairBatch batch = displayBatch.getBatch();
 
-        btnMicrRepairSearch =
-                (Button) component.getFellow("btnMicrRepairSearch");
+			/*
+			 * --------------------------------------------- Search by Batch ID
+			 * ---------------------------------------------
+			 */
 
-        btnMicrRepairClear =
-                (Button) component.getFellow("btnMicrRepairClear");
+			boolean matchesSearch = true;
 
-        cmbMicrRepairBatchType =
-                (Combobox) component.getFellow("cmbMicrRepairBatchType");
+			if (!searchText.isEmpty()) {
 
-        cmbMicrRepairRowsPerPage =
-                (Combobox) component.getFellow("cmbMicrRepairRowsPerPage");
+				String batchId = batch.getBatchId();
 
-        lblMicrRepairShowing =
-                (Label) component.getFellow("lblMicrRepairShowing");
+				matchesSearch = batchId != null && batchId.toLowerCase().contains(searchText);
+			}
 
+			/*
+			 * --------------------------------------------- Status filter
+			 * ---------------------------------------------
+			 */
 
-        // =====================================================
-        // CREATE SERVICE
-        // =====================================================
+			boolean matchesStatus = true;
 
-        outwardMakerService =
-                new OutwardMakerServiceImpl();
+			if (!"ALL".equalsIgnoreCase(statusFilter)) {
 
+				if ("PENDING_MAKER".equalsIgnoreCase(statusFilter)) {
 
-        // =====================================================
-        // INITIAL STATE
-        // =====================================================
+					matchesStatus = displayBatch.getSource() == BatchSource.SCAN;
 
-        divMicrRepairScanSection.setVisible(false);
+				} else if ("CHECKER_RETURNED".equalsIgnoreCase(statusFilter)) {
 
-        divMicrRepairCheckerSection.setVisible(false);
+					matchesStatus = displayBatch.getSource() == BatchSource.OUTWARD;
+				}
+			}
 
-        divMicrRepairEmpty.setVisible(false);
+			if (matchesSearch && matchesStatus) {
 
-        pagingMicrRepairScan.setVisible(false);
+				filteredBatches.add(displayBatch);
+			}
+		}
 
-        pagingMicrRepairChecker.setVisible(false);
+		setupPagination();
+	}
 
+	/*
+	 * ========================================================= PAGINATION
+	 * =========================================================
+	 */
 
-        // =====================================================
-        // DEFAULT FILTER
-        // =====================================================
+	private void setupPagination() {
 
-        selectDefaultBatchType();
+		int totalSize = filteredBatches.size();
 
-        selectDefaultRowsPerPage();
+		/*
+		 * Result count
+		 */
+		if (batchResultCount != null) {
 
+			batchResultCount.setValue(totalSize + (totalSize == 1 ? " Batch" : " Batches"));
+		}
 
-        // =====================================================
-        // FILTER EVENTS
-        // =====================================================
+		/*
+		 * Empty state
+		 */
+		if (totalSize == 0) {
 
-        btnMicrRepairSearch.addEventListener(
-                "onClick",
-                new EventListener<Event>() {
+			if (grdMicrRepairBatches != null) {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+				grdMicrRepairBatches.setVisible(false);
+			}
 
-                        applyFilters();
-                    }
-                });
+			if (pagingMicrRepair != null) {
 
+				pagingMicrRepair.setVisible(false);
+			}
 
-        btnMicrRepairClear.addEventListener(
-                "onClick",
-                new EventListener<Event>() {
+			if (divMicrRepairEmpty != null) {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+				divMicrRepairEmpty.setVisible(true);
+			}
 
-                        clearFilters();
-                    }
-                });
+			return;
+		}
 
+		/*
+		 * Show grid
+		 */
+		if (grdMicrRepairBatches != null) {
 
-        cmbMicrRepairBatchType.addEventListener(
-                "onSelect",
-                new EventListener<Event>() {
+			grdMicrRepairBatches.setVisible(true);
+		}
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+		if (divMicrRepairEmpty != null) {
 
-                        applyFilters();
-                    }
-                });
+			divMicrRepairEmpty.setVisible(false);
+		}
 
+		/*
+		 * Configure pagination
+		 */
+		if (pagingMicrRepair != null) {
 
-        cmbMicrRepairRowsPerPage.addEventListener(
-                "onSelect",
-                new EventListener<Event>() {
+			pagingMicrRepair.setTotalSize(totalSize);
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			pagingMicrRepair.setActivePage(0);
 
-                        refreshPagination();
-                    }
-                });
+			pagingMicrRepair.setVisible(totalSize > pagingMicrRepair.getPageSize());
+		}
 
+		renderPage();
+	}
 
-        // =====================================================
-        // LOAD DATA
-        // =====================================================
+	/*
+	 * ========================================================= RENDER PAGE
+	 * =========================================================
+	 */
 
-        loadMicrRepairBatches();
-    }
+	private void renderPage() {
 
+		if (rowsMicrRepairBatches == null) {
+			return;
+		}
 
-    // =========================================================
-    // DEFAULT BATCH TYPE
-    // =========================================================
+		rowsMicrRepairBatches.getChildren().clear();
 
-    private void selectDefaultBatchType() {
+		int pageSize = pagingMicrRepair != null ? pagingMicrRepair.getPageSize() : 10;
 
-        if (cmbMicrRepairBatchType == null) {
-            return;
-        }
+		int activePage = pagingMicrRepair != null ? pagingMicrRepair.getActivePage() : 0;
 
-        List<Comboitem> items =
-                cmbMicrRepairBatchType.getItems();
+		int startIndex = activePage * pageSize;
 
-        if (items == null || items.isEmpty()) {
-            return;
-        }
+		int endIndex = Math.min(startIndex + pageSize, filteredBatches.size());
 
-        cmbMicrRepairBatchType.setSelectedItem(items.get(0));
-    }
+		for (int i = startIndex; i < endIndex; i++) {
 
+			MicrRepairBatchDisplay displayBatch = filteredBatches.get(i);
 
-    // =========================================================
-    // DEFAULT PAGE SIZE
-    // =========================================================
+			if (displayBatch != null && displayBatch.getBatch() != null) {
 
-    private void selectDefaultRowsPerPage() {
+				createBatchRow(displayBatch);
+			}
+		}
+	}
 
-        if (cmbMicrRepairRowsPerPage == null) {
-            return;
-        }
+	/*
+	 * ========================================================= CREATE BATCH ROW
+	 * =========================================================
+	 */
 
-        List<Comboitem> items =
-                cmbMicrRepairRowsPerPage.getItems();
+	private void createBatchRow(MicrRepairBatchDisplay displayBatch) {
 
-        if (items == null || items.isEmpty()) {
-            return;
-        }
+		MicrRepairBatch batch = displayBatch.getBatch();
 
-        for (Comboitem item : items) {
+		Row row = new Row();
 
-            if ("10".equals(item.getValue())) {
+		/*
+		 * ===================================================== BATCH ID
+		 * =====================================================
+		 */
 
-                cmbMicrRepairRowsPerPage
-                        .setSelectedItem(item);
+		Label batchIdLabel = new Label(getValue(batch.getBatchId()));
 
-                return;
-            }
-        }
+		batchIdLabel.setSclass("outward-micr-repair-batch-id");
 
-        cmbMicrRepairRowsPerPage
-                .setSelectedItem(items.get(0));
-    }
+		batchIdLabel.addEventListener("onClick", event -> openBatch(batch.getBatchId(), displayBatch.getSource()));
 
+		/*
+		 * ===================================================== RECEIVED DATE
+		 * =====================================================
+		 */
 
-    // =========================================================
-    // LOAD ALL MICR REPAIR BATCHES
-    // =========================================================
+		Label dateLabel = new Label(formatDate(batch.getScanDate()));
 
-    private void loadMicrRepairBatches() {
+		dateLabel.setSclass("outward-micr-repair-cell-text");
 
-        try {
+		/*
+		 * ===================================================== TOTAL CHEQUES
+		 * =====================================================
+		 */
 
-            scanBatchRows.clear();
+		Label totalChequesLabel = new Label(String.valueOf(batch.getTotalCheques()));
 
-            checkerBatchRows.clear();
+		totalChequesLabel.setSclass("outward-micr-repair-count-text");
 
-            allBatchRows.clear();
+		/*
+		 * ===================================================== MICR ERRORS
+		 * =====================================================
+		 */
 
-            filteredBatchRows.clear();
+		Label micrErrorsLabel = new Label(String.valueOf(batch.getMicrErrors()));
 
+		micrErrorsLabel.setSclass("outward-micr-repair-pending-count");
 
-            // =================================================
-            // SCAN SOURCE
-            // =================================================
+		/*
+		 * ===================================================== STATUS
+		 * =====================================================
+		 */
 
-            loadScanMicrRepairBatches();
+		Label statusLabel = new Label();
 
+		if (displayBatch.getSource() == BatchSource.OUTWARD) {
 
-            // =================================================
-            // OUTWARD / CHECKER SOURCE
-            // =================================================
+			statusLabel.setValue("Checker Returned");
 
-            loadCheckerReturnedMicrRepairBatches();
+			statusLabel.setSclass("outward-micr-repair-status-returned");
 
+		} else {
 
-            // =================================================
-            // COMBINE INTO ONE LIST
-            // =================================================
+			statusLabel.setValue("Pending Maker");
 
-            buildUnifiedBatchList();
+			statusLabel.setSclass("outward-micr-repair-status-pending");
+		}
 
+		/*
+		 * ===================================================== OPEN BUTTON
+		 * =====================================================
+		 */
 
-            // =================================================
-            // APPLY DEFAULT FILTER
-            // =================================================
+		Button actionButton = new Button("OPEN");
 
-            applyFilters();
+		actionButton.setSclass("outward-micr-repair-action-button");
 
+		actionButton.addEventListener("onClick", event -> openBatch(batch.getBatchId(), displayBatch.getSource()));
 
-        } catch (Exception e) {
+		/*
+		 * ===================================================== APPEND COMPONENTS
+		 * =====================================================
+		 */
 
-            e.printStackTrace();
+		row.appendChild(batchIdLabel);
 
+		row.appendChild(dateLabel);
 
-            divMicrRepairScanSection
-                    .setVisible(true);
+		row.appendChild(totalChequesLabel);
 
-            grdMicrRepairBatches
-                    .setVisible(false);
+		row.appendChild(micrErrorsLabel);
 
-            divMicrRepairCheckerSection
-                    .setVisible(false);
+		row.appendChild(statusLabel);
 
-            pagingMicrRepairScan
-                    .setVisible(false);
+		row.appendChild(actionComponentWrapper(actionButton));
 
-            pagingMicrRepairChecker
-                    .setVisible(false);
+		rowsMicrRepairBatches.appendChild(row);
+	}
 
+	/*
+	 * ========================================================= ACTION BUTTON
+	 * =========================================================
+	 */
 
-            divMicrRepairEmpty
-                    .setVisible(true);
+	private Component actionComponentWrapper(Button button) {
 
+		return button;
+	}
 
-            lblMicrRepairEmptyTitle
-                    .setValue(
-                            "Unable to load MICR repair batches");
+	/*
+	 * ========================================================= SEARCH EVENTS
+	 * =========================================================
+	 */
 
+	public void onChanging$batchIdFilter(InputEvent event) {
 
-            lblMicrRepairEmptyMessage
-                    .setValue(
-                            "Something went wrong while loading MICR repair batches.");
-        }
-    }
+		applyCombinedFilter(event != null ? event.getValue() : "", null);
+	}
 
+	public void onChange$batchIdFilter(Event event) {
 
-    // =========================================================
-    // SCAN MICR REPAIR BATCHES
-    // =========================================================
+		applyCombinedFilter(null, null);
+	}
 
-    private void loadScanMicrRepairBatches()
-            throws Exception {
+	/*
+	 * ========================================================= STATUS EVENTS
+	 * =========================================================
+	 */
 
-        /*
-         * Controller calls ONLY OutwardMakerService.
-         *
-         * OutwardMakerServiceImpl internally calls:
-         *
-         * ScanBatchDAO
-         * ScanChequeDAO
-         */
+	public void onSelect$cmbStatusFilter(SelectEvent<?, ?> event) {
 
-        List<MicrRepairBatch> scanBatches =
-                outwardMakerService
-                        .getScanMicrRepairBatches();
+		applyCombinedFilter(null, null);
+	}
 
+	public void onSelect$cmbStatusFilter(Event event) {
 
-        if (scanBatches == null) {
-            return;
-        }
+		applyCombinedFilter(null, null);
+	}
 
+	public void onSelect$cmbStatusFilter() {
 
-        for (MicrRepairBatch batch : scanBatches) {
+		applyCombinedFilter(null, null);
+	}
 
-            if (batch == null) {
-                continue;
-            }
+	/*
+	 * ========================================================= CLEAR FILTER
+	 * =========================================================
+	 */
 
+	public void clearBatchFilter() {
 
-            if (batch.getBatchId() == null
-                    || batch.getBatchId()
-                            .trim()
-                            .isEmpty()) {
+		if (batchIdFilter != null) {
 
-                continue;
-            }
+			batchIdFilter.setValue("");
+		}
 
+		if (cmbStatusFilter != null && cmbStatusFilter.getItemCount() > 0) {
 
-            /*
-             * DAO has already calculated:
-             *
-             * totalCheques
-             * micrErrors
-             *
-             * Therefore controller does NOT
-             * calculate them.
-             */
+			cmbStatusFilter.setSelectedIndex(0);
+		}
 
-            scanBatchRows.add(batch);
-        }
-    }
+		applyCombinedFilter("", "ALL");
+	}
 
+	/*
+	 * ========================================================= OPEN BATCH
+	 * =========================================================
+	 */
 
-    // =========================================================
-    // OUTWARD / CHECKER RETURNED BATCHES
-    // =========================================================
+	public void openBatch(Object batchId, BatchSource source) {
 
-    private void loadCheckerReturnedMicrRepairBatches()
-            throws Exception {
+		if (batchId == null) {
+			return;
+		}
 
-        /*
-         * Controller calls ONLY OutwardMakerService.
-         *
-         * OutwardMakerServiceImpl internally calls:
-         *
-         * OutwardBatchDAO
-         * OutwardChequeDAO
-         */
+		String batchIdValue = String.valueOf(batchId).trim();
 
-        List<MicrRepairBatch> outwardBatches =
-                outwardMakerService
-                        .getOutwardMicrRepairBatches();
+		if (batchIdValue.isEmpty()) {
+			return;
+		}
 
+		/*
+		 * Existing session attributes
+		 */
+		Sessions.getCurrent().setAttribute("MICR_REPAIR_BATCH_ID", batchIdValue);
 
-        if (outwardBatches == null) {
-            return;
-        }
+		Sessions.getCurrent().setAttribute("batchId", batchIdValue);
 
+		/*
+		 * Existing Outward source information
+		 */
+		Sessions.getCurrent().setAttribute("MICR_REPAIR_SOURCE", source == BatchSource.SCAN ? "SCAN" : "OUTWARD");
 
-        for (MicrRepairBatch batch : outwardBatches) {
+		Include mainInclude = null;
 
-            if (batch == null) {
-                continue;
-            }
+		/*
+		 * Find Outward main content area
+		 */
+		try {
 
+			mainInclude = (Include) Path.getComponent("/outwardMakerRootWin/mainContentArea");
 
-            if (batch.getBatchId() == null
-                    || batch.getBatchId()
-                            .trim()
-                            .isEmpty()) {
+		} catch (Exception ignored) {
+		}
 
-                continue;
-            }
+		/*
+		 * Fallback lookup
+		 */
+		if (mainInclude == null && self != null && self.getDesktop() != null) {
 
+			for (org.zkoss.zk.ui.Page page : self.getDesktop().getPages()) {
 
-            checkerBatchRows.add(batch);
-        }
-    }
+				Component component = page.getFellowIfAny("mainContentArea", true);
 
+				if (component instanceof Include) {
 
-    // =========================================================
-    // BUILD ONE UNIFIED LIST
-    // =========================================================
+					mainInclude = (Include) component;
 
-    private void buildUnifiedBatchList() {
+					break;
+				}
+			}
+		}
 
-        allBatchRows.clear();
+		/*
+		 * Navigate to MICR Repair page
+		 */
+		if (mainInclude != null) {
 
+		    String sourceValue =
+		            source == BatchSource.SCAN
+		                    ? "SCAN"
+		                    : "OUTWARD";
 
-        // =====================================================
-        // SCAN BATCHES
-        // =====================================================
+		    mainInclude.setAttribute(
+		            "MICR_REPAIR_SOURCE",
+		            sourceValue
+		    );
 
-        for (MicrRepairBatch batch : scanBatchRows) {
+		    mainInclude.setAttribute(
+		            "MICR_REPAIR_BATCH_ID",
+		            batchIdValue
+		    );
 
-            allBatchRows.add(
-                    new MicrRepairBatchDisplay(
-                            batch,
-                            "SCAN"));
-        }
+		    mainInclude.setSrc(null);
 
+		    mainInclude.setSrc(
+		            "/outward/maker/micr-repair/micr-repair.zul"
+		                    + "?batchId="
+		                    + batchIdValue
+		                    + "&source="
+		                    + sourceValue
+		    );
 
-        // =====================================================
-        // CHECKER RETURNED BATCHES
-        // =====================================================
+		} else {
 
-        for (MicrRepairBatch batch : checkerBatchRows) {
+			Executions.sendRedirect("/outward/maker/index.zul" + "?page=micr-repair" + "&batchId=" + batchIdValue
+					+ "&source=" + (source == BatchSource.SCAN ? "SCAN" : "OUTWARD"));
+		}
+	}
 
-            allBatchRows.add(
-                    new MicrRepairBatchDisplay(
-                            batch,
-                            "OUTWARD"));
-        }
-    }
+	/*
+	 * ========================================================= DATE FORMAT
+	 * =========================================================
+	 */
 
+	private String formatDate(Object date) {
 
-    // =========================================================
-    // APPLY SEARCH + BATCH TYPE FILTER
-    // =========================================================
+		if (date == null) {
+			return "-";
+		}
 
-    private void applyFilters() {
+		try {
 
-        filteredBatchRows.clear();
+			if (date instanceof java.util.Date) {
 
+				return new SimpleDateFormat("dd-MM-yyyy").format((java.util.Date) date);
+			}
 
-        String searchText = "";
+			return date.toString().trim();
 
-        if (txtMicrRepairSearch != null
-                && txtMicrRepairSearch.getValue() != null) {
+		} catch (Exception e) {
 
-            searchText =
-                    txtMicrRepairSearch
-                            .getValue()
-                            .trim()
-                            .toLowerCase();
-        }
+			return "-";
+		}
+	}
 
+	/*
+	 * ========================================================= SAFE VALUE
+	 * =========================================================
+	 */
 
-        String batchType = "ALL";
+	private String getValue(Object value) {
 
+		if (value == null || String.valueOf(value).trim().isEmpty()) {
 
-        if (cmbMicrRepairBatchType != null
-                && cmbMicrRepairBatchType
-                        .getSelectedItem() != null) {
+			return "-";
+		}
 
-            Object value =
-                    cmbMicrRepairBatchType
-                            .getSelectedItem()
-                            .getValue();
+		return String.valueOf(value).trim();
+	}
 
-            if (value != null) {
+	/*
+	 * ========================================================= BATCH SOURCE
+	 * =========================================================
+	 */
 
-                batchType =
-                        value.toString();
-            }
-        }
+	private enum BatchSource {
 
+		SCAN,
 
-        for (MicrRepairBatchDisplay displayBatch
-                : allBatchRows) {
+		OUTWARD
+	}
 
-            MicrRepairBatch batch =
-                    displayBatch.getBatch();
+	/*
+	 * ========================================================= DISPLAY OBJECT
+	 * =========================================================
+	 */
 
+	private static class MicrRepairBatchDisplay {
 
-            // =================================================
-            // BATCH TYPE FILTER
-            // =================================================
+		private final MicrRepairBatch batch;
 
-            if (!matchesBatchType(
-                    displayBatch,
-                    batchType)) {
+		private final BatchSource source;
 
-                continue;
-            }
+		private MicrRepairBatchDisplay(MicrRepairBatch batch, BatchSource source) {
 
+			this.batch = batch;
+			this.source = source;
+		}
 
-            // =================================================
-            // SEARCH FILTER
-            // =================================================
+		private MicrRepairBatch getBatch() {
 
-            if (!matchesSearch(
-                    batch,
-                    searchText)) {
+			return batch;
+		}
 
-                continue;
-            }
+		private BatchSource getSource() {
 
-
-            filteredBatchRows.add(displayBatch);
-        }
-
-
-        refreshPagination();
-    }
-
-
-    // =========================================================
-    // BATCH TYPE MATCH
-    // =========================================================
-
-    private boolean matchesBatchType(
-            MicrRepairBatchDisplay displayBatch,
-            String batchType) {
-
-        if (batchType == null
-                || "ALL".equals(batchType)) {
-
-            return true;
-        }
-
-
-        if ("RETURNED_BY_CHECKER"
-                .equals(batchType)) {
-
-            return "OUTWARD".equals(
-                    displayBatch.getSource());
-        }
-
-
-        if ("PENDING_MAKER_PROCESS"
-                .equals(batchType)) {
-
-            return "SCAN".equals(
-                    displayBatch.getSource());
-        }
-
-
-        return true;
-    }
-
-
-    // =========================================================
-    // SEARCH MATCH
-    // =========================================================
-
-    private boolean matchesSearch(
-            MicrRepairBatch batch,
-            String searchText) {
-
-        if (searchText == null
-                || searchText.isEmpty()) {
-
-            return true;
-        }
-
-
-        // =====================================================
-        // BATCH ID
-        // =====================================================
-
-        if (batch.getBatchId() != null
-                && batch.getBatchId()
-                        .toLowerCase()
-                        .contains(searchText)) {
-
-            return true;
-        }
-
-
-        // =====================================================
-        // SCAN DATE
-        // =====================================================
-
-        String scanDate =
-                formatDate(batch.getScanDate());
-
-
-        if (scanDate != null
-                && scanDate
-                        .toLowerCase()
-                        .contains(searchText)) {
-
-            return true;
-        }
-
-
-        // =====================================================
-        // STATUS
-        // =====================================================
-
-        if (batch.getStatus() != null
-                && batch.getStatus()
-                        .toLowerCase()
-                        .contains(searchText)) {
-
-            return true;
-        }
-
-
-        // =====================================================
-        // TOTAL CHEQUES
-        // =====================================================
-
-        String totalCheques =
-                String.valueOf(
-                        batch.getTotalCheques());
-
-
-        if (totalCheques.contains(searchText)) {
-
-            return true;
-        }
-
-
-        // =====================================================
-        // MICR ERRORS
-        // =====================================================
-
-        String micrErrors =
-                String.valueOf(
-                        batch.getMicrErrors());
-
-
-        if (micrErrors.contains(searchText)) {
-
-            return true;
-        }
-
-
-        return false;
-    }
-
-
-    // =========================================================
-    // CLEAR FILTERS
-    // =========================================================
-
-    private void clearFilters() {
-
-        if (txtMicrRepairSearch != null) {
-
-            txtMicrRepairSearch
-                    .setValue("");
-        }
-
-
-        selectDefaultBatchType();
-
-
-        applyFilters();
-    }
-
-
-    // =========================================================
-    // GET PAGE SIZE
-    // =========================================================
-
-    private int getPageSize() {
-
-        int pageSize = 10;
-
-
-        if (cmbMicrRepairRowsPerPage != null
-                && cmbMicrRepairRowsPerPage
-                        .getSelectedItem() != null) {
-
-            Object value =
-                    cmbMicrRepairRowsPerPage
-                            .getSelectedItem()
-                            .getValue();
-
-            if (value != null) {
-
-                try {
-
-                    pageSize =
-                            Integer.parseInt(
-                                    value.toString());
-
-                } catch (NumberFormatException e) {
-
-                    pageSize = 10;
-                }
-            }
-        }
-
-
-        return pageSize;
-    }
-
-
-    // =========================================================
-    // REFRESH PAGINATION
-    // =========================================================
-
-    private void refreshPagination() {
-
-        rowsMicrRepairScanBatches
-                .getChildren()
-                .clear();
-
-
-        if (filteredBatchRows.isEmpty()) {
-
-            // Keep filter bar visible; hide only the table.
-            divMicrRepairScanSection
-                    .setVisible(true);
-
-            grdMicrRepairBatches
-                    .setVisible(false);
-
-            pagingMicrRepairScan
-                    .setVisible(false);
-
-
-            divMicrRepairEmpty
-                    .setVisible(true);
-
-
-            lblMicrRepairEmptyTitle
-                    .setValue(
-                            "No MICR repair batches found");
-
-
-            lblMicrRepairEmptyMessage
-                    .setValue(
-                            "No batches match the selected filter or search criteria.");
-
-
-            updateShowingText();
-
-            return;
-        }
-
-
-        divMicrRepairEmpty
-                .setVisible(false);
-
-
-        divMicrRepairScanSection
-                .setVisible(true);
-
-        grdMicrRepairBatches
-                .setVisible(true);
-
-
-        int pageSize =
-                getPageSize();
-
-
-        pagingMicrRepairScan
-                .setPageSize(pageSize);
-
-
-        pagingMicrRepairScan
-                .setTotalSize(
-                        filteredBatchRows.size());
-
-
-        pagingMicrRepairScan
-                .setVisible(
-                        filteredBatchRows.size()
-                                > pageSize);
-
-
-        /*
-         * Always start from first page after
-         * changing search/filter/page size.
-         */
-
-        pagingMicrRepairScan
-                .setActivePage(0);
-
-
-        populateUnifiedPage(0);
-
-
-        updateShowingText();
-
-
-        /*
-         * Prevent duplicate listeners by using
-         * the existing component listener only once
-         * through the normal ZK event mechanism.
-         */
-
-        addPagingListenerIfRequired();
-    }
-
-
-    // =========================================================
-    // PAGING LISTENER
-    // =========================================================
-
-    private boolean pagingListenerAdded = false;
-
-
-    private void addPagingListenerIfRequired() {
-
-        if (pagingListenerAdded) {
-            return;
-        }
-
-
-        pagingListenerAdded = true;
-
-
-        pagingMicrRepairScan
-                .addEventListener(
-                        "onPaging",
-                        new EventListener<Event>() {
-
-                            @Override
-                            public void onEvent(
-                                    Event event)
-                                    throws Exception {
-
-                                int page =
-                                        pagingMicrRepairScan
-                                                .getActivePage();
-
-                                populateUnifiedPage(page);
-
-                                updateShowingText();
-                            }
-                        });
-    }
-
-
-    // =========================================================
-    // POPULATE UNIFIED PAGE
-    // =========================================================
-
-    private void populateUnifiedPage(
-            int page) {
-
-        rowsMicrRepairScanBatches
-                .getChildren()
-                .clear();
-
-
-        int pageSize =
-                getPageSize();
-
-
-        int start =
-                page * pageSize;
-
-
-        int end =
-                Math.min(
-                        start + pageSize,
-                        filteredBatchRows.size());
-
-
-        for (int i = start;
-                i < end;
-                i++) {
-
-            MicrRepairBatchDisplay displayBatch =
-                    filteredBatchRows.get(i);
-
-
-            MicrRepairBatch batch =
-                    displayBatch.getBatch();
-
-
-            Row row =
-                    new Row();
-
-
-            // =================================================
-            // BATCH ID
-            // =================================================
-
-            Label batchLabel =
-                    new Label(
-                            safe(
-                                    batch.getBatchId()));
-
-
-            batchLabel.setSclass(
-                    "micr-repair-batch-id");
-
-
-            row.appendChild(batchLabel);
-
-
-            // =================================================
-            // SCAN DATE
-            // =================================================
-
-            row.appendChild(
-                    new Label(
-                            formatDate(
-                                    batch.getScanDate())));
-
-
-            // =================================================
-            // TOTAL CHEQUES
-            // =================================================
-
-            row.appendChild(
-                    new Label(
-                            String.valueOf(
-                                    batch.getTotalCheques())));
-
-
-            // =================================================
-            // MICR ERRORS
-            // =================================================
-
-            row.appendChild(
-                    new Label(
-                            String.valueOf(
-                                    batch.getMicrErrors())));
-
-
-            // =================================================
-            // STATUS
-            // =================================================
-
-            Label statusLabel =
-                    new Label(
-                            safe(
-                                    batch.getStatus()));
-
-
-            statusLabel.setSclass(
-                    "micr-repair-status");
-
-
-            row.appendChild(statusLabel);
-
-
-            // =================================================
-            // ACTION
-            // =================================================
-
-            Cell actionCell =
-                    new Cell();
-
-
-            Button openButton =
-                    new Button("OPEN");
-
-
-            openButton.setSclass(
-                    "btn-action-repair");
-
-
-            final String selectedBatchId =
-                    batch.getBatchId();
-
-
-            final String selectedSource =
-                    displayBatch.getSource();
-
-
-            openButton.addEventListener(
-                    "onClick",
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(
-                                Event event)
-                                throws Exception {
-
-                            openMicrRepair(
-                                    selectedSource,
-                                    selectedBatchId);
-                        }
-                    });
-
-
-            actionCell.appendChild(
-                    openButton);
-
-
-            row.appendChild(
-                    actionCell);
-
-
-            rowsMicrRepairScanBatches
-                    .appendChild(row);
-        }
-    }
-
-
-    // =========================================================
-    // UPDATE SHOWING TEXT
-    // =========================================================
-
-    private void updateShowingText() {
-
-        if (lblMicrRepairShowing == null) {
-            return;
-        }
-
-
-        int total =
-                filteredBatchRows.size();
-
-
-        if (total == 0) {
-
-            lblMicrRepairShowing
-                    .setValue(
-                            "Showing 0 of 0 batches");
-
-            return;
-        }
-
-
-        int pageSize =
-                getPageSize();
-
-
-        int activePage =
-                pagingMicrRepairScan
-                        .getActivePage();
-
-
-        int start =
-                (activePage * pageSize) + 1;
-
-
-        int end =
-                Math.min(
-                        (activePage + 1)
-                                * pageSize,
-                        total);
-
-
-        lblMicrRepairShowing
-                .setValue(
-                        "Showing "
-                        + start
-                        + " - "
-                        + end
-                        + " of "
-                        + total
-                        + " batches");
-    }
-
-
-    // =========================================================
-    // OLD CHECKER DISPLAY
-    // =========================================================
-
-    /*
-     * The old second table is no longer used.
-     *
-     * We intentionally keep this method so the controller
-     * structure remains easy to understand and so existing
-     * references do not need to be removed unnecessarily.
-     */
-
-    private void displayCheckerBatches() {
-
-        rowsMicrRepairCheckerBatches
-                .getChildren()
-                .clear();
-
-        pagingMicrRepairChecker
-                .setVisible(false);
-
-        divMicrRepairCheckerSection
-                .setVisible(false);
-    }
-
-
-    // =========================================================
-    // OPEN MICR REPAIR PAGE
-    // =========================================================
-
-    private void openMicrRepair(
-            String source,
-            String batchId) {
-
-        if (source == null
-                || source.trim().isEmpty()) {
-
-            return;
-        }
-
-
-        if (batchId == null
-                || batchId.trim().isEmpty()) {
-
-            return;
-        }
-
-
-        Component root =
-                Executions.getCurrent()
-                        .getDesktop()
-                        .getFirstPage()
-                        .getFirstRoot();
-
-
-        Component mainContentArea =
-                root.getFellowIfAny(
-                        "mainContentArea",
-                        true);
-
-
-        if (mainContentArea
-                instanceof Include) {
-
-            Include include =
-                    (Include) mainContentArea;
-
-
-            include.setAttribute(
-                    "MICR_REPAIR_SOURCE",
-                    source.trim());
-
-
-            include.setAttribute(
-                    "MICR_REPAIR_BATCH_ID",
-                    batchId.trim());
-
-
-            include.setSrc(
-                    "/outward/maker/micr-repair/micr-repair.zul");
-
-
-            System.out.println(
-                    "MICR REPAIR SOURCE = "
-                    + source);
-
-
-            System.out.println(
-                    "MICR REPAIR BATCH ID = "
-                    + batchId);
-        }
-    }
-
-
-    // =========================================================
-    // FORMAT DATE
-    // =========================================================
-
-    private String formatDate(
-            java.sql.Timestamp timestamp) {
-
-        if (timestamp == null) {
-
-            return "-";
-        }
-
-
-        SimpleDateFormat formatter =
-                new SimpleDateFormat(
-                        "dd-MM-yyyy");
-
-
-        return formatter.format(timestamp);
-    }
-
-
-    // =========================================================
-    // SAFE VALUE
-    // =========================================================
-
-    private String safe(String value) {
-
-        if (value == null) {
-
-            return "-";
-        }
-
-
-        return value;
-    }
+			return source;
+		}
+	}
 }

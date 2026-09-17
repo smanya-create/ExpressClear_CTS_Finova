@@ -67,7 +67,9 @@
         <field name="uploaded_at" class="java.sql.Timestamp"/>
     </subDataset>
 
-    <!-- 3. Unprocessed Cheques Audit -->
+    <!-- =========================================================================
+         3. Unprocessed Cheques Audit Dataset (DISABLED FOR EVALUATION)
+         =========================================================================
     <subDataset name="DatasetUnprocessed" uuid="b8c73489-0824-4f4c-8fa0-681b4d0812de">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
@@ -97,6 +99,7 @@
         <field name="cheque_amount" class="java.math.BigDecimal"/>
         <field name="cheque_status" class="java.lang.String"/>
     </subDataset>
+    ========================================================================= -->
 
     <!-- 4. Batches Submitted to Checker -->
     <subDataset name="DatasetSubmittedChecker" uuid="e6181fcd-f446-4cb4-96d5-a337198a964f">
@@ -155,7 +158,7 @@
                 <textElement verticalAlignment="Middle">
                     <font size="9"/>
                 </textElement>
-                <text><![CDATA[Operational Audit: MICR Repairs, Data Entry, Exceptions & Checker Submissions]]></text>
+                <text><![CDATA[Operational Audit: MICR Repairs, Data Entry & Checker Submissions]]></text>
             </staticText>
             <textField>
                 <reportElement x="430" y="10" width="356" height="16" forecolor="#FFFFFF" uuid="cfd8ea3a-73d8-4f1a-b68e-5b1e6e44b94e"/>
@@ -270,7 +273,9 @@
                 </jr:table>
             </componentElement>
 
-            <!-- SECTION 3 -->
+            <!-- =========================================================================
+                 SECTION 3: Unprocessed Cheques Audit (DISABLED FOR EVALUATION)
+                 =========================================================================
             <staticText>
                 <reportElement positionType="Float" mode="Opaque" x="0" y="90" width="802" height="20" backcolor="#F1F5F9" uuid="2a56113b-18cb-46fc-bd85-052479fbb333"/>
                 <box leftPadding="6">
@@ -291,51 +296,25 @@
                         <datasetParameter name="DS_TO_DATE"><datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression></datasetParameter>
                         <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
                     </datasetRun>
-                    <jr:column width="100">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="100" height="20" backcolor="#E2E8F0" uuid="f9ea5168-98e9-4e78-ba9f-4318d172eef0"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="100" height="18" uuid="7a659223-bdce-4b21-a472-fc17625539fa"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{scanned_batch_id}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="110">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="09d3b764-da32-48f5-9be9-d65298a0fc43"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CHEQUE ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="ea6549b0-4f51-40ef-9fa0-c081734ef98b"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{scanned_cheque_id}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="110">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="a6590924-fca1-4560-bf5d-16a8d7cbefda"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CHEQUE NO]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="110" height="18" uuid="88e9fa65-c089-4fa2-be9f-86417fae29ca"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{cheque_number}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="120">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="120" height="20" backcolor="#E2E8F0" uuid="a9d70189-53e2-45e0-9ef2-75d1f86050b1"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[MICR CODE]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="120" height="18" uuid="7cf539fa-58e1-45df-bcf5-998ea051d9eb"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{micr_code}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="130">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="130" height="20" backcolor="#E2E8F0" uuid="ff98e178-0cf2-4a0b-ba62-81729ec0bcf5"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[DRAWEE ACC NO]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="130" height="18" uuid="09d8fc62-ba15-467f-8e24-9104fa289ec0"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{drawee_account_number}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="110">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="c24a6839-ba61-4603-bd76-0816fac0e941"/><box rightPadding="4"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[AMOUNT (INR)]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField pattern="#,##0.00"><reportElement x="0" y="0" width="110" height="18" uuid="939e0817-ff0b-4261-bcfa-5178daef0193"/><box rightPadding="4"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{cheque_amount}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="122">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="122" height="20" backcolor="#E2E8F0" uuid="e6189fa1-0178-4351-8762-b98a0fcb5120"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="122" height="18" uuid="88e907a1-52cb-4654-8e43-e6089fac0187"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{cheque_status}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
+                    ...
                 </jr:table>
             </componentElement>
+            ========================================================================= -->
 
-            <!-- SECTION 4 -->
+            <!-- SECTION 3 (formerly 4) -->
             <staticText>
-                <reportElement positionType="Float" mode="Opaque" x="0" y="133" width="802" height="20" backcolor="#F1F5F9" uuid="2a56113b-18cb-46fc-bd85-052479fbb444"/>
+                <reportElement positionType="Float" mode="Opaque" x="0" y="90" width="802" height="20" backcolor="#F1F5F9" uuid="2a56113b-18cb-46fc-bd85-052479fbb444"/>
                 <box leftPadding="6">
                     <pen lineWidth="0.5" lineColor="#CBD5E1"/>
                 </box>
                 <textElement verticalAlignment="Middle">
                     <font size="9" isBold="true"/>
                 </textElement>
-                <text><![CDATA[4. BATCHES SUBMITTED TO CHECKER]]></text>
+                <text><![CDATA[3. BATCHES SUBMITTED TO CHECKER]]></text>
             </staticText>
 
             <componentElement>
-                <reportElement positionType="Float" x="0" y="155" width="802" height="15" uuid="acf424fa-4b8f-4a0b-8d76-e8220556635f"/>
+                <reportElement positionType="Float" x="0" y="112" width="802" height="15" uuid="acf424fa-4b8f-4a0b-8d76-e8220556635f"/>
                 <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
                     <datasetRun subDataset="DatasetSubmittedChecker" uuid="fa539cf9-fb50-4ff6-8367-17fa003e8c17">
                         <datasetParameter name="DS_MAKER_ID"><datasetParameterExpression><![CDATA[$P{MAKER_ID}]]></datasetParameterExpression></datasetParameter>
