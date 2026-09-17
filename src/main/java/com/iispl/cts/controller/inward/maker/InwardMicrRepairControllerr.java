@@ -970,7 +970,7 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	public void onClick$btnBackToList() {
-		Executions.sendRedirect("/inward/maker/index.zul?page=batch-details&batchId=" + lblBatchId.getValue());
+		Executions.sendRedirect("/inward/maker/index.zul?page=micr-repair-queue");
 	}
 
 	private String loadOcrSortCode(InwardCheque cheque) {
