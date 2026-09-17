@@ -53,9 +53,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		
-		if (!SecurityUtil.checkAccess("DATA_ENTRY")) {
-		    return;
-		}
+		
 		super.doAfterCompose(comp);
 
 		// Default dropdown selection to index 0 ("All Statuses")

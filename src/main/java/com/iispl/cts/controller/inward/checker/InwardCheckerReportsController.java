@@ -55,9 +55,6 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         
-    	if (!SecurityUtil.checkAccess("REPORTS")) {
-    	    return;
-    	}
     	
     	super.doAfterCompose(comp);
     	

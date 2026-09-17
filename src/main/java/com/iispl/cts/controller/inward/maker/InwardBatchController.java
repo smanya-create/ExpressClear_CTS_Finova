@@ -139,9 +139,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 	public void doAfterCompose(Window window) throws Exception {
 
-		if (!SecurityUtil.checkAccess("BATCH_LIST")) {
-		    return;
-		}
+		
 		super.doAfterCompose(window);
 
 		currentWindow = window;

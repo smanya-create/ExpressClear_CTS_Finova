@@ -47,9 +47,7 @@ public class InwardIntakeController extends GenericComposer {
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 
-		 if (!SecurityUtil.checkAccess("BATCH_UPLOAD")) {
-		        return;
-		    }
+		
 		super.doAfterCompose(comp);
 
 		Window mainWindow = (Window) comp;
