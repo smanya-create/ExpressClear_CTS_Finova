@@ -17,7 +17,7 @@
 				sclass="batch-title-section">
 				<label value="Batch Intake" sclass="batch-page-title" />
 				<space hflex="1" />
-				<button id="dashboardButton" label="BACK TO DASHBOARD"
+				<button id="dashboardButton" label="Back To Dashboard"
 					sclass="view-button batch-dashboard-button" />
 			</hlayout>
 
@@ -85,8 +85,8 @@
 							mold="paging" pageSize="10" sclass="batch-listbox"
 							emptyMessage="No inward batches found">
 							<listhead sizable="false">
-								<listheader label="Batch"
-									width="20%" align="center" />
+								<listheader label="Batch" width="20%"
+									align="center" />
 								<listheader label="Received Date"
 									width="22%" align="center" />
 								<listheader label="Amount (INR)"
