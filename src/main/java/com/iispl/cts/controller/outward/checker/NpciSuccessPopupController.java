@@ -17,11 +17,6 @@ public class NpciSuccessPopupController
     public void doAfterCompose(Component component) throws Exception {
         super.doAfterCompose(component);
 
-        String batchId = (String) component.getAttribute("batchId");
-        String fileName = (String) component.getAttribute("fileName");
-
-        lblBatchId.setValue(batchId);
-        lblFileName.setValue(fileName);
 
         btnDone.addEventListener("onClick", event -> {
             ((Window) component).detach();

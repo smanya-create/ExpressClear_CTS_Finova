@@ -89,9 +89,9 @@
 
 .outward-checker-dashboard .outward-checker-welcome-subtitle {
     display: block;
-    margin-top: 5px;
     font-size: 8px;
-    color: #8fa6ba;
+    color: #64748b;
+    font-weight: 700;
 }
 
 .outward-checker-dashboard .outward-checker-summary-card {
@@ -151,7 +151,7 @@
     display: block;
     margin-top: 4px;
     font-size: 7px;
-    color: #8fa6ba;
+    color: #0f172a;
 }
 
 .outward-checker-dashboard .outward-checker-table-card {
@@ -250,7 +250,6 @@
     max-height: none;
     overflow: visible;
     border: none;
-    background: #f8fafc;
 }
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listbox-body table {
@@ -269,13 +268,7 @@
     background: #f8fafc;
 }
 
-.outward-checker-dashboard .outward-checker-batch-table .z-listitem:hover {
-    background: #eef2f7;
-}
 
-.outward-checker-dashboard .outward-checker-batch-table .z-listitem:hover .z-listcell {
-    background: #eef2f7;
-}
 
 .outward-checker-dashboard .outward-checker-batch-table .z-listcell {
     height: 50px;
@@ -294,7 +287,7 @@
     padding: 12px 8px;
     box-sizing: border-box;
     color: #334155;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 600;
     line-height: 16px;
     text-align: center;
@@ -535,6 +528,8 @@
 .z-west {
     border: none;
     background: transparent;
+    padding: 16px 0 16px 16px;
+    box-sizing: border-box;
 }
 
 .z-west-body {
@@ -542,6 +537,7 @@
     background: transparent;
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
 }
 
 .z-center {

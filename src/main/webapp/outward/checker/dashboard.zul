@@ -39,7 +39,7 @@
 
                     <include
                         src="/components/header.zul"
-                        pageTitle="Checker Dashboard" />
+                        pageTitle="Outward Processing" />
 
                 </north>
 
@@ -87,6 +87,7 @@
 
                                         <textbox
                                             id="txtBatchId"
+                                            hflex="1"
                                             placeholder="Search by Batch ID..."
                                             sclass="outward-checker-search-input" />
 

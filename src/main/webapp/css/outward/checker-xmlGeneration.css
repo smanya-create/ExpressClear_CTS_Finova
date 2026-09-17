@@ -13,8 +13,7 @@ body {
     box-sizing: border-box;
     margin: 0;
     padding: 20px;
-    overflow-y: hidden;
-    overflow-x: hidden;
+    overflow: hidden;
     min-height: 0;
 }
 
@@ -24,6 +23,7 @@ body {
     padding: 4px 8px 8px 8px;
     margin: 0;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .outward-checker-xml-center .z-center-body {
@@ -32,6 +32,7 @@ body {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .outward-checker-xml-center .xml-generation-content {
@@ -44,8 +45,7 @@ body {
     border: 1px solid #dbe4ee;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
-    overflow-y: hidden;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .outward-maker-welcome-section {
@@ -63,10 +63,9 @@ body {
 
 .outward-maker-welcome-subtitle {
     display: block;
-    margin-top: 5px;
-    font-size: 9px;
+    font-size: 12px;
     font-weight: normal;
-    color: #8fa6ba;
+    color: #0f172a;
 }
 
 .summary-card {
@@ -349,8 +348,9 @@ body {
 
 .info-label {
     display: block;
-    font-size: 8px;
-    color: #7590a8;
+    font-size: 12px;
+    color: #0f172a;
+    
 }
 
 .z-borderlayout {
@@ -361,6 +361,8 @@ body {
 .z-west {
     border: none;
     background: transparent;
+    padding: 16px 0 16px 16px;
+    box-sizing: border-box;
 }
 
 .z-west-body {
@@ -368,6 +370,7 @@ body {
     background: transparent;
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
 }
 
 .z-center {
@@ -375,6 +378,7 @@ body {
     padding: 0;
     margin: 0;
     background: transparent;
+    overflow: hidden;
 }
 
 .z-center-body {
@@ -382,6 +386,7 @@ body {
     padding: 0;
     margin: 0;
     background: transparent;
+    overflow: hidden;
 }
 
 .z-north {
@@ -391,11 +396,11 @@ body {
 
 .z-north-body {
     border: none;
-    border-bottom: none;
     background: transparent;
     box-shadow: none;
     padding: 0;
     margin: 0;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -425,19 +430,6 @@ body {
 
 .xml-batch-table .z-listbox-header-bg,
 .xml-batch-table .z-listbox-header,
-.xml-batch-table .z-listbox-header table {
-    background: #172554;
-    background-image: none;
-    border: none;
-}
-
-.xml-batch-table .z-listbox-body {
-    background: #ffffff;
-    border: none;
-}
-
-.xml-batch-table .z-listbox-header-bg,
-.xml-batch-table .z-listbox-header,
 .xml-batch-table .z-listbox-header table,
 .xml-batch-table .z-listhead,
 .xml-batch-table .z-listheader,
@@ -451,6 +443,8 @@ body {
 .xml-batch-table .z-listbox-body {
     background: #ffffff;
     border: none;
+    overflow: hidden;
+    scrollbar-width: none;
 }
 
 .xml-batch-table .z-listbox-body::-webkit-scrollbar {
@@ -458,36 +452,35 @@ body {
     height: 0;
 }
 
-.xml-batch-table .z-listbox-body {
-    scrollbar-width: none;
+.xml-batch-table .z-listbox-header::-webkit-scrollbar,
+.xml-batch-table .z-listbox-header table::-webkit-scrollbar,
+.xml-batch-table .z-listhead::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
-.xml-batch-table .z-listbox-header-bg,
-.xml-batch-table .z-listbox-header,
-.xml-batch-table .z-listbox-header table,
-.xml-batch-table .z-listhead {
-    background: #172554;
-    background-image: none;
-    border: none;
-}
-
+.xml-batch-table .z-listbox-header .z-scrollbar,
 .xml-batch-table .z-listbox-header .z-scrollbar-horizontal,
 .xml-batch-table .z-listbox-header .z-scrollbar-vertical,
+.xml-batch-table .z-listbox-body .z-scrollbar,
 .xml-batch-table .z-listbox-body .z-scrollbar-horizontal,
 .xml-batch-table .z-listbox-body .z-scrollbar-vertical {
     display: none;
 }
 
+.xml-batch-table .z-listbox-header .z-scrollbar-horizontal,
+.xml-batch-table .z-listbox-header .z-scrollbar-vertical {
+    background: #172554;
+    border: none;
+}
+
+.xml-batch-table .z-listbox-body .z-scrollbar-horizontal,
 .xml-batch-table .z-listbox-body .z-scrollbar-vertical {
     background: #ffffff;
     border: none;
 }
 
-.xml-batch-table .z-listbox-body .z-scrollbar-vertical .z-scrollbar-rail {
-    background: #ffffff;
-    border: none;
-}
-
+.xml-batch-table .z-listbox-body .z-scrollbar-vertical .z-scrollbar-rail,
 .xml-batch-table .z-listbox-body .z-scrollbar-vertical .z-scrollbar-indicator {
     background: #ffffff;
     border: none;
@@ -507,6 +500,8 @@ body {
 }
 
 .npci-success-content {
+    width: 100%;
+    box-sizing: border-box;
     padding: 30px;
     align-items: center;
     text-align: center;
@@ -515,30 +510,40 @@ body {
 .npci-success-icon {
     width: 52px;
     height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    margin: 0 auto;
     border-radius: 50%;
     background: #dcfce7;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 .npci-success-icon .z-label {
     font-size: 28px;
     font-weight: 700;
     color: #15803d;
+    line-height: 52px;
+    text-align: center;
 }
 
 .npci-success-title {
+    width: 100%;
     font-size: 21px;
     font-weight: 700;
     color: #172554;
+    text-align: center;
 }
 
 .npci-success-description {
     width: 360px;
+    max-width: 100%;
     font-size: 13px;
     line-height: 20px;
     color: #64748b;
+    text-align: center;
 }
 
 .npci-success-details {
@@ -578,18 +583,19 @@ body {
 }
 
 .npci-done-button {
-    width: 80px;
-    min-width: 80px;
-    height: 34px;
+     width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+    height: 27px;
     box-sizing: border-box;
-    padding: 0 6px;
-    margin: 0;
-    background: #172554;
+    padding: 0 5px;
+    margin: 0 auto;
+    background: #172554 ;
     background-image: none;
     border: 1px solid #172554;
     border-radius: 6px;
     color: #ffffff;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
     white-space: nowrap;
     text-align: center;
@@ -607,8 +613,8 @@ body {
     font-size: 9px;
     font-weight: 800;
 }
-
 @media (max-width: 1400px) {
+
     .xml-generation-content {
         padding: 20px;
     }
@@ -646,30 +652,35 @@ body {
         font-size: 8px;
     }
 
-    .xml-batch-table .z-listitem {
-        min-height: 62px;
-        height: 62px;
-        margin: 0;
-        padding: 0;
-        background: #ffffff;
-        border-bottom: 1px solid #edf1f5;
-    }
+.xml-batch-table .z-listitem {
+    min-height: 50px;
+    height: 50px;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    border-bottom: 1px solid #edf1f5;
+}
 
-    .xml-batch-table .z-listcell {
-        min-height: 62px;
-        height: 62px;
-        margin: 0;
-        padding: 0;
-        background: #ffffff;
-        border: none;
-        text-align: center;
-        vertical-align: middle;
-    }
+.xml-batch-table .z-listcell {
+    height: 50px;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+}
 
-    .xml-batch-table .z-listcell-content {
-        padding: 13px 8px;
-        font-size: 8px;
-    }
+.xml-batch-table .z-listcell-content {
+    margin: 0;
+    padding: 12px 8px;
+    background: #ffffff;
+    color: #526f8b;
+    font-size: 10px;
+    font-weight: normal;
+    text-align: center;
+    vertical-align: middle;
+}
 
     .xml-batch-table .z-listitem .z-listcell:nth-child(4) .z-listcell-content {
         min-width: 82px;
@@ -731,17 +742,8 @@ body {
     }
 }
 
-.xml-batch-table .z-listbox-body {
-    overflow: hidden;
-}
-
-.xml-batch-table .z-listbox-body .z-scrollbar,
-.xml-batch-table .z-listbox-body .z-scrollbar-vertical,
-.xml-batch-table .z-listbox-body .z-scrollbar-horizontal {
-    display: none;
-}
-
 @media (max-width: 1000px) {
+
     .outward-checker-xml-center {
         padding: 4px 6px 6px 6px;
     }
@@ -755,10 +757,16 @@ body {
     }
 
     .xml-batch-table {
-        overflow-x: auto;
+        overflow: hidden;
     }
 
     .xml-batch-table .z-listbox-body {
         min-width: 900px;
+        overflow: hidden;
     }
+}
+
+.xml-batch-table.z-listbox {
+    height: auto;
+    min-height: 0;
 }
