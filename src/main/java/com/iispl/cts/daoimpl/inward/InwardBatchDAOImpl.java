@@ -217,7 +217,7 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 				+ "COUNT(CASE WHEN ic.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS rejected_cheques, "
 				+ "COUNT(CASE WHEN ic.cheque_status = 'MAKER_RETURNED' THEN 1 END) AS maker_returned "
 				+ "FROM inward_batch ib " + "LEFT JOIN inward_cheque ic ON ic.inward_batch_id = ib.inward_batch_id "
-				+ "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING', 'COMPLETED') "
+				+ "WHERE ib.batch_status IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING') "
 				+ "GROUP BY ib.inward_batch_id, ib.batch_status, ib.actual_cheque_count "
 				+ "ORDER BY ib.inward_batch_id;";
 
