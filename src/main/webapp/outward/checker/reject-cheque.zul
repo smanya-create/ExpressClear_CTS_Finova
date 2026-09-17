@@ -1,123 +1,176 @@
-<?page title="Reject Cheque" contentType="text/html;charset=UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
-<?link rel="stylesheet" type="text/css" href="/css/outward/reject-cheque.css"?>
+<?page
+    title="Reject Cheque"
+    contentType="text/html;charset=UTF-8"
+?>
 
-<zk>
+<?link
+    rel="stylesheet"
+    type="text/css"
+    href="/css/outward/reject-cheque.css"
+?>
 
-    <window
-        id="rejectWindow"
-        title="Reject Cheque"
-        border="normal"
-        width="680px"
-        closable="true"
-        sizable="false"
-        mode="modal"
-        position="center"
-        sclass="reject-cheque-window">
+<div
+    id="rejectPopupOverlay"
+    sclass="reject-popup-overlay"
+    visible="false"
+    width="100%"
+    height="100%">
 
-        <!-- HEADER -->
-        <div sclass="reject-header">
+    <!-- =========================================================
+         POPUP CONTAINER
+         ========================================================= -->
 
-            <label
-                value="Reject Cheque"
-                sclass="reject-title"/>
+    <div
+        id="rejectPopup"
+        sclass="reject-popup">
 
-            <label
-                value="Please select the reason for rejecting this cheque."
-                sclass="reject-description"/>
+        <!-- =====================================================
+             HEADER
+             ===================================================== -->
+
+        <div
+            sclass="reject-popup-header">
+
+            <div
+                sclass="reject-header-text">
+
+                <label
+                    value="Reject Cheque"
+                    sclass="reject-popup-title"
+                />
+
+                <label
+                    value="Reject the selected cheque"
+                    sclass="reject-popup-subtitle"
+                />
+
+            </div>
+
+            <button
+                id="btnRejectClose"
+                label="×"
+                sclass="reject-close-button"
+            />
 
         </div>
 
 
-        <!-- CONTENT -->
-        <div sclass="reject-content">
+        <!-- =====================================================
+             CHEQUE INFORMATION
+             ===================================================== -->
 
-            <!-- BATCH + CHEQUE NUMBER -->
-            <div sclass="two-column">
+        <div
+            sclass="reject-info-card">
 
-                <div sclass="field-group">
+            <!-- BATCH -->
 
-                    <label
-                        value="BATCH"
-                        sclass="field-label"/>
+            <div
+                sclass="reject-info-item">
 
-                    <label
-                        id="lblRejectBatch"
-                        value="-"
-                        sclass="readonly-field"/>
+                <label
+                    value="BATCH"
+                    sclass="reject-info-label"
+                />
 
-                </div>
-
-
-                <div sclass="field-group">
-
-                    <label
-                        value="CHEQUE NUMBER"
-                        sclass="field-label"/>
-
-                    <label
-                        id="lblRejectCheque"
-                        value="-"
-                        sclass="readonly-field"/>
-
-                </div>
+                <label
+                    id="lblRejectBatch"
+                    value="-"
+                    sclass="reject-info-value"
+                />
 
             </div>
 
 
-            <!-- REJECTION REASON -->
-            <div sclass="field-group">
+            <!-- CHEQUE -->
+
+            <div
+                sclass="reject-info-item">
 
                 <label
-                    value="REJECTION REASON *"
-                    sclass="field-label"/>
-
-                <combobox
-                    id="cmbRejectReason"
-                    width="100%"
-                    placeholder="Select rejection reason"
-                    readonly="true"
-                    sclass="reason-combobox"/>
-
-            </div>
-
-
-            <!-- REMARKS -->
-            <div sclass="field-group">
+                    value="CHEQUE"
+                    sclass="reject-info-label"
+                />
 
                 <label
-                    value="REMARKS *"
-                    sclass="field-label"/>
-
-                <textbox
-                    id="txtRejectRemarks"
-                    multiline="true"
-                    rows="4"
-                    width="100%"
-                    maxlength="255"
-                    placeholder="Enter remarks..."
-                    sclass="remarks-field"/>
+                    id="lblRejectCheque"
+                    value="-"
+                    sclass="reject-info-value"
+                />
 
             </div>
 
         </div>
 
 
-        <!-- FOOTER -->
-        <div sclass="reject-footer">
+        <!-- =====================================================
+             REJECTION REASON
+             ===================================================== -->
+
+        <div
+            sclass="reject-field">
+
+            <label
+                value="REJECTION REASON"
+                sclass="reject-field-label"
+            />
+
+            <combobox
+                id="cmbRejectReason"
+                width="100%"
+                placeholder="Select rejection reason"
+                sclass="reject-combobox"
+            />
+
+        </div>
+
+
+        <!-- =====================================================
+             REMARKS
+             ===================================================== -->
+
+        <div
+            sclass="reject-field">
+
+            <label
+                value="REMARKS"
+                sclass="reject-field-label"
+            />
+
+            <textbox
+                id="txtRejectRemarks"
+                width="100%"
+                rows="4"
+                multiline="true"
+                placeholder="Enter rejection remarks"
+                sclass="reject-remarks"
+            />
+
+        </div>
+
+
+        <!-- =====================================================
+             FOOTER
+             ===================================================== -->
+
+        <div
+            sclass="reject-popup-footer">
 
             <button
                 id="btnRejectCancel"
                 label="CANCEL"
-                sclass="cancel-button"/>
+                sclass="reject-cancel-button"
+            />
 
             <button
                 id="btnRejectConfirm"
-                label="REJECT"
-                sclass="reject-confirm-button"/>
+                label="REJECT CHEQUE"
+                sclass="reject-confirm-button"
+            />
 
         </div>
 
-    </window>
+    </div>
 
-</zk>
+</div>
