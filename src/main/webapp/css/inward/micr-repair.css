@@ -257,20 +257,19 @@
     border-radius: 5px !important;
     height: 340px !important;
     display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     margin-bottom: 9px !important;
-    overflow: hidden !important;
+    overflow: auto !important;
     position: relative !important;
     box-sizing: border-box !important;
     flex: 1 1 auto !important;
 }
 
 .micr-cheque-image {
-    max-height: 100% !important;
-    max-width: 100% !important;
+    display: block !important;
+    margin: auto !important;
+    max-width: none !important;
     object-fit: contain !important;
-    transition: transform .2s ease, width .2s ease !important;
+    transition: width .2s ease, transform .2s ease !important;
 }
 
 .micr-empty-box {

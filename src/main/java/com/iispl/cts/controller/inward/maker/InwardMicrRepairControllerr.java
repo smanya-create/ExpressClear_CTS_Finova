@@ -728,8 +728,9 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	private void applyImageTransform() {
 		if (chequeImage == null)
 			return;
-		chequeImage.setStyle("transform: scale(" + zoomLevel + ") rotate(" + rotation
-				+ "deg); transform-origin: center center; transition: transform 0.2s ease, width 0.2s ease; max-height: 100%; object-fit: contain;");
+		int widthPercent = (int) Math.round(zoomLevel * 100);
+		chequeImage.setStyle("width: " + widthPercent + "%; transform: rotate(" + rotation
+				+ "deg); transition: width 0.2s ease, transform 0.2s ease; object-fit: contain;");
 	}
 
 	public void onClick$btnPrevious() {
