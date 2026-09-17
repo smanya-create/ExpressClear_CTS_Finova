@@ -25,7 +25,7 @@ public class DuplicateChequeValidation implements ValidateBatch {
         if (data == null) {
             return new ValidationResult(
                     false,
-                    "Cheque information is not available. Please check the uploaded file.");
+                    "Invalid cheque details found in batch.");
         }
 
         List<ScanCheque> chequeList = data.getChequeList();
@@ -33,7 +33,7 @@ public class DuplicateChequeValidation implements ValidateBatch {
         if (chequeList == null || chequeList.isEmpty()) {
             return new ValidationResult(
                     false,
-                    "No cheque information is available. Please check the uploaded file.");
+                    "Invalid cheque details found in batch.");
         }
 
         Set<String> scannedChequeIds = new HashSet<>();
@@ -44,23 +44,15 @@ public class DuplicateChequeValidation implements ValidateBatch {
             if (cheque == null) {
                 return new ValidationResult(
                         false,
-                        "Invalid cheque information found. Please check the uploaded file.");
+                        "Invalid cheque details found in batch.");
             }
 
-            String scannedChequeId =
-                    cheque.getScannedChequeId();
-
-            String chequeNumber =
-                    cheque.getChequeNumber();
-
-            String accountNumber =
-                    cheque.getDraweeAccountNumber();
-
+            String scannedChequeId = cheque.getScannedChequeId();
+            String chequeNumber = cheque.getChequeNumber();
+            String accountNumber = cheque.getDraweeAccountNumber();
 
             /*
-             * Duplicate Scanned Cheque ID
-             *
-             * This is only checked inside the current batch.
+             * Duplicate Scanned Cheque ID inside current batch
              */
             if (scannedChequeId != null
                     && !scannedChequeId.trim().isEmpty()) {
@@ -68,16 +60,11 @@ public class DuplicateChequeValidation implements ValidateBatch {
                 scannedChequeId = scannedChequeId.trim();
 
                 if (!scannedChequeIds.add(scannedChequeId)) {
-
                     return new ValidationResult(
                             false,
-                            "Duplicate scanned cheque ID "
-                                    + scannedChequeId
-                                    + " found in the uploaded batch. "
-                                    + "Please check the cheque details.");
+                            "Duplicate cheque found in batch.");
                 }
             }
-
 
             /*
              * Duplicate Cheque Number + Account Number
@@ -90,43 +77,25 @@ public class DuplicateChequeValidation implements ValidateBatch {
                 chequeNumber = chequeNumber.trim();
                 accountNumber = accountNumber.trim();
 
-                String combination =
-                        chequeNumber + "|" + accountNumber;
-
+                String combination = chequeNumber + "|" + accountNumber;
 
                 /*
                  * 1. Duplicate inside current batch
                  */
-                if (!chequeNumberAccountCombinations
-                        .add(combination)) {
-
+                if (!chequeNumberAccountCombinations.add(combination)) {
                     return new ValidationResult(
                             false,
-                            "Duplicate cheque found. Cheque number "
-                                    + chequeNumber
-                                    + " with account number "
-                                    + accountNumber
-                                    + " already exists in the uploaded batch. "
-                                    + "Please check the cheque details.");
+                            "Duplicate cheque found in batch.");
                 }
 
-
                 /*
-                 * 2. Duplicate in previous/existing batches
+                 * 2. Duplicate in database (system-wide)
                  */
-                if (outwardMakerService
-                        .existsChequeNumberAndAccount(
-                                chequeNumber,
-                                accountNumber)) {
-
+                if (outwardMakerService.existsChequeNumberAndAccount(
+                        chequeNumber, accountNumber)) {
                     return new ValidationResult(
                             false,
-                            "Duplicate cheque found. Cheque number "
-                                    + chequeNumber
-                                    + " with account number "
-                                    + accountNumber
-                                    + " already exists in another batch. "
-                                    + "Please check the cheque details.");
+                            "Cheque already exists in the system.");
                 }
             }
         }

@@ -1,4 +1,3 @@
-
 package com.iispl.cts.outward.batchvalidator;
 
 import java.math.BigDecimal;
@@ -17,7 +16,7 @@ public class TotalAmountValidation implements ValidateBatch {
         if (data == null) {
             return new ValidationResult(
                     false,
-                    "Batch information is not available. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         ScanBatch batch = data.getBatch();
@@ -25,7 +24,7 @@ public class TotalAmountValidation implements ValidateBatch {
         if (batch == null) {
             return new ValidationResult(
                     false,
-                    "Batch information is not available. Please check the uploaded file.");
+                    "Invalid batch details found.");
         }
 
         List<ScanCheque> chequeList = data.getChequeList();
@@ -33,25 +32,23 @@ public class TotalAmountValidation implements ValidateBatch {
         if (chequeList == null) {
             return new ValidationResult(
                     false,
-                    "Cheque information is not available. Please check the uploaded file.");
+                    "Invalid cheque details found in batch.");
         }
 
-        BigDecimal expectedTotalAmount =
-                data.getExpectedTotalAmount();
+        BigDecimal expectedTotalAmount = data.getExpectedTotalAmount();
 
         if (expectedTotalAmount == null) {
             return new ValidationResult(
                     false,
-                    "Expected total cheque amount is missing. Please enter the expected amount.");
+                    "Total batch amount mismatch.");
         }
 
-        BigDecimal batchTotalAmount =
-                batch.getActualTotalAmount();
+        BigDecimal batchTotalAmount = batch.getActualTotalAmount();
 
         if (batchTotalAmount == null) {
             return new ValidationResult(
                     false,
-                    "Total cheque amount is missing from the batch information.");
+                    "Total batch amount mismatch.");
         }
 
         /*
@@ -64,64 +61,30 @@ public class TotalAmountValidation implements ValidateBatch {
             if (cheque == null) {
                 return new ValidationResult(
                         false,
-                        "Invalid cheque information found. Please check the uploaded file.");
+                        "Invalid cheque details found in batch.");
             }
 
-            BigDecimal chequeAmount =
-                    cheque.getChequeAmount();
+            BigDecimal chequeAmount = cheque.getChequeAmount();
 
             if (chequeAmount == null) {
                 return new ValidationResult(
                         false,
-                        "Cheque amount is missing for cheque "
-                                + cheque.getScannedChequeId()
-                                + ". Please check the cheque details.");
+                        "Invalid cheque details found in batch.");
             }
 
-            actualTotalAmount =
-                    actualTotalAmount.add(chequeAmount);
+            actualTotalAmount = actualTotalAmount.add(chequeAmount);
         }
 
         /*
-         * Expected amount vs Batch Info amount
+         * Check for any amount mismatch across expected, header, or actual cheque total
          */
-        if (expectedTotalAmount.compareTo(batchTotalAmount) != 0) {
+        if (expectedTotalAmount.compareTo(batchTotalAmount) != 0
+                || expectedTotalAmount.compareTo(actualTotalAmount) != 0
+                || batchTotalAmount.compareTo(actualTotalAmount) != 0) {
 
             return new ValidationResult(
                     false,
-                    "Total amount mismatch. Expected total amount is "
-                            + expectedTotalAmount
-                            + ", but batch information contains "
-                            + batchTotalAmount
-                            + ".");
-        }
-
-        /*
-         * Expected amount vs actual cheque list total
-         */
-        if (expectedTotalAmount.compareTo(actualTotalAmount) != 0) {
-
-            return new ValidationResult(
-                    false,
-                    "Total amount mismatch. Expected total amount is "
-                            + expectedTotalAmount
-                            + ", but the total of cheque amounts is "
-                            + actualTotalAmount
-                            + ".");
-        }
-
-        /*
-         * Batch Info amount vs actual cheque list total
-         */
-        if (batchTotalAmount.compareTo(actualTotalAmount) != 0) {
-
-            return new ValidationResult(
-                    false,
-                    "Total amount mismatch. Batch information contains "
-                            + batchTotalAmount
-                            + ", but the total of cheque amounts is "
-                            + actualTotalAmount
-                            + ".");
+                    "Total batch amount mismatch.");
         }
 
         return new ValidationResult(true, null);
