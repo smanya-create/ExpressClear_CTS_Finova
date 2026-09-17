@@ -69,9 +69,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
     // =========================================================
     @Override
     public void doAfterCompose(Component comp) throws Exception {
-    	if (!SecurityUtil.checkAccess(null)) {
-            return;
-        }
+    	
         super.doAfterCompose(comp);
         loadRejectedCheques();
     }

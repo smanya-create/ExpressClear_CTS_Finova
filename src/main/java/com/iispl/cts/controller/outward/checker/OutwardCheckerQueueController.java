@@ -274,9 +274,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-		if (!SecurityUtil.checkAccess(null)) {
-            return;
-        }
+		
 
 		super.doAfterCompose(comp);
 
