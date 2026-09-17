@@ -520,38 +520,43 @@
     spacing: 5px;
 }
 
-.cheque-side-buttons .z-button.cheque-side-btn {
+ .z-button.cheque-side-btn {
     width: 55px !important;
     height: 28px !important;
     min-width: 55px !important;
     min-height: 28px !important;
     padding: 0 !important;
     margin: 0 !important;
+
     background: #0B2344 !important;
     background-image: none !important;
+
+    color: #FFFFFF !important;
+
     border: 1px solid #0B2344 !important;
     border-radius: 4px !important;
-    color: #FFFFFF !important;
+
     font-size: 11px !important;
     font-weight: 500 !important;
     line-height: 26px !important;
+
     box-shadow: none !important;
 }
 
-.cheque-side-buttons .z-button.cheque-side-btn:hover {
+.z-button.cheque-side-btn:hover {
     background: #12345F !important;
     background-image: none !important;
     color: #FFFFFF !important;
 }
 
-.cheque-side-buttons .z-button.cheque-side-active {
+.z-button.cheque-side-active {
     background: #12345F !important;
     background-image: none !important;
     border-color: #12345F !important;
     color: #FFFFFF !important;
 }
 
-.cheque-side-buttons .z-button.cheque-side-btn:active {
+.z-button.cheque-side-btn:active {
     background: #08203D !important;
     background-image: none !important;
     color: #FFFFFF !important;
