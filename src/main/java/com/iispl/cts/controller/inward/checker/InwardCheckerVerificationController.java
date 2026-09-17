@@ -96,8 +96,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 	private List<InwardCheque> currentBatchCheques = new ArrayList<>();
 	private final NotificationService notificationService = NotificationServiceImpl.getInstance();
-	private final ExecutorService notificationExecutor =
-	        Executors.newSingleThreadExecutor();
+	private final ExecutorService notificationExecutor = Executors.newSingleThreadExecutor();
 	private String currentChequeId;
 	private String currentBatchId;
 	private int currentChequeIndex = 0;
@@ -174,9 +173,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-		
-		
-		
+
 		super.doAfterCompose(comp);
 		pageRoot = comp.getPage().getFirstRoot();
 		inwardChequeService = new InwardChequeServiceImpl();
@@ -192,10 +189,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		proceedButton.addEventListener(Events.ON_CLICK, event -> onClick$btnProceedReject());
 
 		cancelButton.addEventListener(Events.ON_CLICK, event -> onClick$btnCancelReject());
-		
+
 		window.addEventListener(Events.ON_CLOSE, event -> {
-		    event.stopPropagation();
-		    window.setVisible(false);
+			event.stopPropagation();
+			window.setVisible(false);
 		});
 
 		Window sendBackWindow = sendBackReasonWindow;
@@ -228,36 +225,38 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		btnStayVerification.addEventListener(Events.ON_CLICK, event -> onClick$btnStayVerification());
 
 		btnSubmitBatch.addEventListener(Events.ON_CLICK, event -> onClick$btnSubmitBatch());
+		
+		verificationSummaryWindow.addEventListener(Events.ON_CLOSE, event -> {
+		    event.stopPropagation();
+		    verificationSummaryWindow.setVisible(false);
+		});
 
 		String batchId = Executions.getCurrent().getParameter("batchId");
 
 		if (batchId != null && !batchId.trim().isEmpty()) {
 
-		    currentBatchId = batchId.trim();
+			currentBatchId = batchId.trim();
 
-		    Sessions.getCurrent()
-		            .setAttribute("ACTIVE_VERIFICATION_BATCH_ID", currentBatchId);
+			Sessions.getCurrent().setAttribute("ACTIVE_VERIFICATION_BATCH_ID", currentBatchId);
 
 		} else {
 
-		    // No URL batchId.
-		    // Check whether an active verification batch already exists in session.
-		    String sessionBatch =
-		            (String) Sessions.getCurrent()
-		                    .getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
+			// No URL batchId.
+			// Check whether an active verification batch already exists in session.
+			String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-		    if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
+			if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
 
-		        currentBatchId = sessionBatch.trim();
+				currentBatchId = sessionBatch.trim();
 
-		    } else {
+			} else {
 
-		        // Nothing selected yet
-		        currentBatchId = null;
+				// Nothing selected yet
+				currentBatchId = null;
 
-		        showNoChequesToVerify();
-		        return;
-		    }
+				showNoChequesToVerify();
+				return;
+			}
 		}
 
 		loadSelectedBatch();
@@ -463,7 +462,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 					lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;"
 							+ "border:1px solid #198754;" + "border-radius:12px;" + "padding:3px 10px;"
-							+ "font-size:11px;" + "font-weight:600;");
+							+ "font-size:11px;" + "font-weight:600;" + "display:inline-flex;" + "align-items:center;"
+							+ "justify-content:center;" + "box-sizing:border-box;" + "white-space:nowrap;"
+							+ "text-align:center;" + "width:72px;" + "height:24px;" + "line-height:18px;"
+							+ "flex-shrink:0;" + "margin-right:10px;");
 
 				} else {
 
@@ -800,15 +802,11 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
-			
+
 			if (isChequeSentBackToMaker(cheque)) {
-			    Messagebox.show(
-			            "This cheque has already been sent back to Maker and cannot be accepted.",
-			            "Verification",
-			            Messagebox.OK,
-			            Messagebox.EXCLAMATION
-			    );
-			    return;
+				Messagebox.show("This cheque has already been sent back to Maker and cannot be accepted.",
+						"Verification", Messagebox.OK, Messagebox.EXCLAMATION);
+				return;
 			}
 
 			CbsValidationResult cbsResult = runCbsValidation(cheque);
@@ -874,7 +872,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 					lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;"
 							+ "border:1px solid #198754;" + "border-radius:12px;" + "padding:3px 10px;"
-							+ "font-size:11px;" + "font-weight:600;");
+							+ "font-size:11px;" + "font-weight:600;" + "display:inline-flex;" + "align-items:center;"
+							+ "justify-content:center;" + "box-sizing:border-box;" + "white-space:nowrap;"
+							+ "text-align:center;" + "width:72px;" + "height:24px;" + "line-height:18px;"
+							+ "flex-shrink:0;" + "margin-right:10px;");
 				}
 
 				updateVerificationCount();
@@ -899,9 +900,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 
 			if (lblChequeStatus != null) {
-
-				lblChequeStatus.setValue("ACCEPTED");
-				lblChequeStatus.setSclass("status-badge");
+			    lblChequeStatus.setValue("ACCEPTED");
+			    lblChequeStatus.setSclass("status-badge");
 			}
 
 			if (lblVerificationStatus != null) {
@@ -909,7 +909,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				lblVerificationStatus.setValue("VERIFIED");
 
 				lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;" + "border:1px solid #198754;"
-						+ "border-radius:12px;" + "padding:3px 10px;" + "font-size:11px;" + "font-weight:600;");
+						+ "border-radius:12px;" + "padding:3px 10px;" + "font-size:11px;" + "font-weight:600;"
+						+ "display:inline-flex;" + "align-items:center;" + "justify-content:center;"
+						+ "box-sizing:border-box;" + "white-space:nowrap;" + "text-align:center;" + "width:72px;"
+						+ "height:24px;" + "line-height:18px;" + "flex-shrink:0;" + "margin-right:10px;");
 			}
 
 			updateVerificationCount();
@@ -1154,15 +1157,11 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
-			
+
 			if (isChequeSentBackToMaker(cheque)) {
-			    Messagebox.show(
-			            "This cheque has already been sent back to Maker and cannot be rejected.",
-			            "Verification",
-			            Messagebox.OK,
-			            Messagebox.EXCLAMATION
-			    );
-			    return;
+				Messagebox.show("This cheque has already been sent back to Maker and cannot be rejected.",
+						"Verification", Messagebox.OK, Messagebox.EXCLAMATION);
+				return;
 			}
 			Window window = (Window) pageRoot.getFellow("rejectReasonWindow");
 
@@ -1555,7 +1554,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				lblVerificationStatus.setValue("VERIFIED");
 
 				lblVerificationStatus.setStyle("background:#E8F5E9;" + "color:#198754;" + "border:1px solid #198754;"
-						+ "border-radius:12px;" + "padding:3px 10px;" + "font-size:11px;" + "font-weight:600;");
+						+ "border-radius:12px;" + "padding:3px 10px;" + "font-size:11px;" + "font-weight:600;"
+						+ "display:inline-flex;" + "align-items:center;" + "justify-content:center;"
+						+ "box-sizing:border-box;" + "white-space:nowrap;" + "text-align:center;" + "width:72px;"
+						+ "height:24px;" + "line-height:18px;" + "flex-shrink:0;" + "margin-right:10px;");
 			}
 
 			window.setVisible(false);
@@ -1617,17 +1619,13 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
-			
-			if ("SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-			        || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
 
-			    Messagebox.show(
-			            "This cheque has already been sent back to Maker.",
-			            "Send Back",
-			            Messagebox.OK,
-			            Messagebox.EXCLAMATION
-			    );
-			    return;
+			if ("SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+					|| "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status)) {
+
+				Messagebox.show("This cheque has already been sent back to Maker.", "Send Back", Messagebox.OK,
+						Messagebox.EXCLAMATION);
+				return;
 			}
 
 			Window window = sendBackReasonWindow;
@@ -1698,37 +1696,28 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			String sendBackStatus;
 
-			if ("39".equalsIgnoreCase(reasonCode)
-			        || "SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
-			        || "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
-			        || "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)
-			        || "SBN_RESCAN_REQUIRED".equalsIgnoreCase(reasonCode)) {
+			if ("39".equalsIgnoreCase(reasonCode) || "SBN_MICR_CHEQUE_NO".equalsIgnoreCase(reasonCode)
+					|| "SBN_MICR_SORT_CODE".equalsIgnoreCase(reasonCode)
+					|| "SBN_MICR_SAN_TC".equalsIgnoreCase(reasonCode)
+					|| "SBN_RESCAN_REQUIRED".equalsIgnoreCase(reasonCode)) {
 
-			    sendBackStatus = "SEND_BACK_TO_MAKER_MICR";
+				sendBackStatus = "SEND_BACK_TO_MAKER_MICR";
 
-			} else if ("40".equalsIgnoreCase(reasonCode)
-			        || "35".equalsIgnoreCase(reasonCode)
-			        || "53".equalsIgnoreCase(reasonCode)
-			        || "54".equalsIgnoreCase(reasonCode)
-			        || "66".equalsIgnoreCase(reasonCode)
-			        || "67".equalsIgnoreCase(reasonCode)
-			        || "76".equalsIgnoreCase(reasonCode)
-			        || "87".equalsIgnoreCase(reasonCode)
-			        || "SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
-			        || "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
-			        || "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
-			        || "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)
-			        || "SBN_REMARKS_MISSING".equalsIgnoreCase(reasonCode)
-			        || "SBN_OTHER_INTERNAL".equalsIgnoreCase(reasonCode)) {			   
-			    sendBackStatus = "SEND_BACK_TO_MAKER_DATA_ENTRY";
+			} else if ("40".equalsIgnoreCase(reasonCode) || "35".equalsIgnoreCase(reasonCode)
+					|| "53".equalsIgnoreCase(reasonCode) || "54".equalsIgnoreCase(reasonCode)
+					|| "66".equalsIgnoreCase(reasonCode) || "67".equalsIgnoreCase(reasonCode)
+					|| "76".equalsIgnoreCase(reasonCode) || "87".equalsIgnoreCase(reasonCode)
+					|| "SBN_AMOUNT_MISMATCH".equalsIgnoreCase(reasonCode)
+					|| "SBN_ACC_NO_INVALID".equalsIgnoreCase(reasonCode)
+					|| "SBN_DATE_ENTRY_ERROR".equalsIgnoreCase(reasonCode)
+					|| "SBN_PAYEE_NAME_ERROR".equalsIgnoreCase(reasonCode)
+					|| "SBN_REMARKS_MISSING".equalsIgnoreCase(reasonCode)
+					|| "SBN_OTHER_INTERNAL".equalsIgnoreCase(reasonCode)) {
+				sendBackStatus = "SEND_BACK_TO_MAKER_DATA_ENTRY";
 
-			} else {			   
-			    Messagebox.show(
-			            "Invalid send back reason.",
-			            "Send Back",
-			            Messagebox.OK,
-			            Messagebox.ERROR);
-			    return;
+			} else {
+				Messagebox.show("Invalid send back reason.", "Send Back", Messagebox.OK, Messagebox.ERROR);
+				return;
 			}
 
 			Object userObject = Sessions.getCurrent().getAttribute("CTS_USERNAME");
@@ -1768,21 +1757,17 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 					+ selectedReason.getReasonName();
 
 			notificationExecutor.submit(() -> {
-			    try {
-			        boolean notificationSent =
-			                notificationService.sendNotification(
-			                        "INWARD_MAKER",
-			                        null,
-			                        notificationMessage);
+				try {
+					boolean notificationSent = notificationService.sendNotification("INWARD_MAKER", null,
+							notificationMessage);
 
-			        if (!notificationSent) {
-			            System.out.println(
-			                    "WARNING: Send Back notification failed.");
-			        }
+					if (!notificationSent) {
+						System.out.println("WARNING: Send Back notification failed.");
+					}
 
-			    } catch (Exception e) {
-			        e.printStackTrace();
-			    }
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			});
 
 			window.setVisible(false);
@@ -2036,8 +2021,18 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				lblSummaryRejected.setValue(String.valueOf(rejected));
 			}
 
-			if (verificationSummaryWindow != null) {
-				verificationSummaryWindow.doModal();
+			
+			if (verificationSummaryWindow != null
+			        && verificationSummaryWindow.getPage() != null) {
+
+			    verificationSummaryWindow.doModal();
+
+			} else {
+			    Messagebox.show(
+			            "Verification summary window is no longer available.",
+			            "Verification Error",
+			            Messagebox.OK,
+			            Messagebox.ERROR);
 			}
 
 		} catch (Exception e) {
@@ -2119,14 +2114,12 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			currentChequeId = null;
 			currentBatchId = null;
 
-			Sessions.getCurrent()
-	        .removeAttribute("ACTIVE_VERIFICATION_BATCH_ID");
+			Sessions.getCurrent().removeAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
-	Sessions.getCurrent()
-	        .removeAttribute("ACTIVE_VERIFICATION_CHEQUE_ID");
+			Sessions.getCurrent().removeAttribute("ACTIVE_VERIFICATION_CHEQUE_ID");
 
-	currentChequeIndex = 0;
-	verificationOrderInitialized = false;
+			currentChequeIndex = 0;
+			verificationOrderInitialized = false;
 
 			if (btnSubmitVerification != null) {
 				btnSubmitVerification.setVisible(false);
@@ -2171,17 +2164,17 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	public void onClick$btnGoToDashboard() {
 		Executions.getCurrent().sendRedirect("/inward/checker/dashboard.zul");
 	}
-	
+
 	private boolean isChequeSentBackToMaker(InwardCheque cheque) {
 
-	    if (cheque == null || cheque.getChequeStatus() == null) {
-	        return false;
-	    }
+		if (cheque == null || cheque.getChequeStatus() == null) {
+			return false;
+		}
 
-	    String status = cheque.getChequeStatus();
+		String status = cheque.getChequeStatus();
 
-	    return "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
-	            || "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status);
+		return "SEND_BACK_TO_MAKER_MICR".equalsIgnoreCase(status)
+				|| "SEND_BACK_TO_MAKER_DATA_ENTRY".equalsIgnoreCase(status);
 	}
 
 	private void enableMouseWheelZoom() {
