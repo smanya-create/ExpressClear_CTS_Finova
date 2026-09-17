@@ -155,7 +155,7 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 	@Override
 	public String getBankNameByCode(String bankCode) {
 
-		String sql = "SELECT bank_name " + "FROM master_bank " + "WHERE bank_code = ?";
+		String sql = "SELECT bank_name " + "FROM bank " + "WHERE bank_code = ?";
 
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
