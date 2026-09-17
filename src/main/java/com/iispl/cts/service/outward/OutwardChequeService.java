@@ -43,4 +43,6 @@ public interface OutwardChequeService {
 	int getCompletedMakerChequeCountByBatchId(String outwardBatchId);
 
 	boolean submitMakerBatchToChecker(String scannedBatchId);
+
+	List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId);
 }

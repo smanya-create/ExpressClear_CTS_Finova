@@ -16,4 +16,7 @@ public interface OutwardChequeRequestDAO {
 	OutwardChequeRequest getRequestByChequeId(String chequeId);
 
 	List<OutwardChequeRequest> getRequestsByBatchId(String batchId);
+
+	boolean saveRejectionRequest(Connection connection, String chequeId, String batchId, String remarks,
+			String reasonId, String reason);
 }

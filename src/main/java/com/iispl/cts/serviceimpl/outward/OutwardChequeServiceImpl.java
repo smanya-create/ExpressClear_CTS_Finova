@@ -25,6 +25,20 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 
 	private final OutwardChequeRequestDAO outwardChequeRequestDAO;
 
+	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
+
+	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
+
+	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
+
+	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
+
+	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
+
+	private static final String STATUS_ON_HOLD = "ON_HOLD";
+
+	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
+
 	public OutwardChequeServiceImpl() {
 
 		this.outwardChequeDAO = new OutwardChequeDAOImpl();
@@ -139,7 +153,17 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			throw new IllegalArgumentException("Outward cheque cannot be null");
 		}
 
+		if (cheque.getOutwardChequeId() == null || cheque.getOutwardChequeId().trim().isEmpty()) {
+			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
+		}
+
 		String batchId = scannedBatchId.trim();
+		String currentStatus = cheque.getChequeStatus();
+
+		if (currentStatus != null) {
+			currentStatus = currentStatus.trim().toUpperCase();
+		}
+
 		Connection connection = null;
 
 		try {
@@ -153,38 +177,37 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			}
 
 			outwardBatchId = outwardBatchId.trim();
+
 			cheque.setOutwardBatchId(outwardBatchId);
 
-			String existingOutwardChequeId = cheque.getOutwardChequeId();
+			String chequeId = cheque.getOutwardChequeId().trim();
+			cheque.setOutwardChequeId(chequeId);
 
-			if (existingOutwardChequeId != null && !existingOutwardChequeId.trim().isEmpty()) {
+			String nextStatus;
 
-				existingOutwardChequeId = existingOutwardChequeId.trim();
-				cheque.setOutwardChequeId(existingOutwardChequeId);
-
-				cheque.setChequeStatus("PENDING_VERIFICATION");
-
-				boolean updated = outwardChequeDAO.saveDataEntry(connection, cheque);
-
-				if (!updated) {
-					throw new IllegalStateException("Unable to update outward cheque: " + existingOutwardChequeId);
-				}
-
+			if (STATUS_MICR_REJECTED.equals(currentStatus)) {
+				nextStatus = STATUS_MICR_REJECTED;
+			} else if (STATUS_ON_HOLD.equals(currentStatus)) {
+				nextStatus = STATUS_PENDING_VERIFICATION;
+			} else if (STATUS_PENDING_DATA_ENTRY.equals(currentStatus)) {
+				nextStatus = STATUS_PENDING_VERIFICATION;
+			} else if (STATUS_PENDING_VERIFICATION.equals(currentStatus)) {
+				nextStatus = STATUS_PENDING_VERIFICATION;
 			} else {
+				nextStatus = STATUS_PENDING_VERIFICATION;
+			}
 
-				cheque.setChequeStatus("PENDING_VERIFICATION");
+			cheque.setChequeStatus(nextStatus);
 
-				String outwardChequeId = outwardChequeDAO.createOutwardChequeFromScan(connection, outwardBatchId,
-						cheque);
+			boolean updated = outwardChequeDAO.saveDataEntry(connection, cheque);
 
-				if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
-					throw new IllegalStateException("Unable to create outward cheque for batch: " + outwardBatchId);
-				}
-
-				cheque.setOutwardChequeId(outwardChequeId.trim());
+			if (!updated) {
+				throw new IllegalStateException("Unable to save outward cheque: " + chequeId);
 			}
 
 			connection.commit();
+
+			cheque.setChequeStatus(nextStatus);
 
 			return cheque;
 
@@ -240,6 +263,14 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
 		}
 
+		if (reasonId == null || reasonId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Rejection reason is required");
+		}
+
+		if (reason == null || reason.trim().isEmpty()) {
+			throw new IllegalArgumentException("Rejection reason cannot be empty");
+		}
+
 		if (remarks == null || remarks.trim().isEmpty()) {
 			throw new IllegalArgumentException("Rejection remarks are required");
 		}
@@ -247,40 +278,33 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 		Connection connection = null;
 
 		try {
+
 			connection = DBConnection.getConnection();
 			connection.setAutoCommit(false);
 
 			String chequeId = cheque.getOutwardChequeId().trim();
 			String batchId = cheque.getOutwardBatchId().trim();
 
-			if (outwardChequeRequestDAO.existsByChequeId(connection, chequeId)) {
+			boolean requestExists = outwardChequeRequestDAO.existsByChequeId(connection, chequeId);
+
+			if (requestExists) {
 				connection.rollback();
 				return false;
 			}
 
-			cheque.setOutwardChequeId(chequeId);
-			cheque.setOutwardBatchId(batchId);
-			cheque.setChequeStatus("REJECTION_REQUEST");
-
-			boolean chequeUpdated = outwardChequeDAO.saveDataEntry(connection, cheque);
+			boolean chequeUpdated = outwardChequeDAO.updateChequeStatus(connection, chequeId, STATUS_REJECTION_REQUEST);
 
 			if (!chequeUpdated) {
-				throw new IllegalStateException("Unable to save cheque data for rejection request: " + chequeId);
+				throw new IllegalStateException("Unable to update cheque status for rejection request: " + chequeId);
 			}
 
 			OutwardChequeRequest request = new OutwardChequeRequest();
 
 			request.setChequeId(chequeId);
 			request.setBatchId(batchId);
+			request.setReasonId(reasonId.trim());
+			request.setReason(reason.trim());
 			request.setRemarks(remarks.trim());
-
-			if (reasonId != null && !reasonId.trim().isEmpty()) {
-				request.setReasonId(reasonId.trim());
-			}
-
-			if (reason != null && !reason.trim().isEmpty()) {
-				request.setReason(reason.trim());
-			}
 
 			boolean requestSaved = outwardChequeRequestDAO.saveRequest(connection, request);
 
@@ -290,7 +314,7 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 
 			connection.commit();
 
-			cheque.setChequeStatus("REJECTION_REQUEST");
+			cheque.setChequeStatus(STATUS_REJECTION_REQUEST);
 
 			return true;
 
@@ -433,5 +457,15 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId) {
+
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return outwardChequeDAO.getMakerDataEntryCheques(outwardBatchId.trim());
 	}
 }
