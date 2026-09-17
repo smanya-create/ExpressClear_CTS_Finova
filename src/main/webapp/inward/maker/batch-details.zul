@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk>
-	<style src="/css/inward/maker-batch-details.css" />
+	<style src="/css/inward/maker-batch-details.css?v=11" />
 
 	<div id="inwardMakerBatchDetailsDiv" width="100%"
 		sclass="inward-maker-batch-details"
@@ -22,7 +22,7 @@
 					</div>
 
 					<button id="inwardMakerBtnBack"
-						label="BACK TO DASHBOARD"
+						label="Back"
 						sclass="inward-maker-batch-back-button" />
 				</div>
 
@@ -30,21 +30,21 @@
 				<div sclass="inward-maker-batch-summary">
 
 					<div sclass="inward-maker-batch-summary-item">
-						<label value="BATCH ID"
+						<label value="Batch Id"
 							sclass="inward-maker-batch-summary-label" />
 						<label id="inwardMakerLblBatchId" value="-"
 							sclass="inward-maker-batch-summary-value inward-maker-batch-id-highlight" />
 					</div>
 
 					<div sclass="inward-maker-batch-summary-item">
-						<label value="NO. OF CHEQUES"
+						<label value="No. of Cheques"
 							sclass="inward-maker-batch-summary-label" />
 						<label id="inwardMakerLblChequeCount" value="0"
 							sclass="inward-maker-batch-summary-value" />
 					</div>
 
 					<div sclass="inward-maker-batch-summary-item">
-						<label value="TOTAL AMOUNT"
+						<label value="Total Amount"
 							sclass="inward-maker-batch-summary-label" />
 						<label id="inwardMakerLblTotalAmount"
 							value="₹0.00" sclass="inward-maker-batch-summary-value" />
@@ -71,7 +71,6 @@
 
 				<grid id="inwardMakerGridChequeDetails"
 					width="100%"
-					height="280px"
 					sclass="inward-maker-cheque-grid">
 
 					<columns sizable="true">

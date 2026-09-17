@@ -247,14 +247,16 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		}
 
 		if (isMicrRepairStatus(status)) {
-			Button button = new Button("MICR REPAIR REQUIRED");
+			Button button = new Button("Modify");
+			button.setIconSclass("z-icon-pencil-square-o");
 			button.setSclass("inward-maker-action-button");
 			button.addEventListener("onClick", event -> openMicrRepair(cheque));
 			return button;
 		}
 
 		if (isDataEntryStatus(status)) {
-			Button button = new Button("DATA ENTRY REQUIRED");
+			Button button = new Button("Modify");
+			button.setIconSclass("z-icon-pencil-square-o");
 			button.setDisabled(false);
 			button.setSclass("inward-maker-action-button");
 			button.addEventListener("onClick", event -> openDataEntry(cheque));
@@ -318,29 +320,29 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		String s = normalizeStatus(status);
 
 		if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) {
-			return "CHECKER PENDING";
+			return "checker pending";
 		}
 		if (isMicrRepairStatus(s)) {
-			return "PENDING MICR REPAIR";
+			return "pending micr repair";
 		}
 		if (isDataEntryStatus(s)) {
-			return "PENDING DATA ENTRY";
+			return "pending data entry";
 		}
 		if ("REJECTION_REQUESTED".equals(s)) {
-			return "REJECTION REQUESTED";
+			return "rejection requested";
 		}
 		if ("REJECTED".equals(s)) {
-			return "REJECTED";
+			return "rejected";
 		}
 		if ("COMPLETED".equals(s)) {
-			return "COMPLETED";
+			return "completed";
 		}
 		if ("SEND_BACK_TO_MAKER".equals(s) || "ON_HOLD".equals(s)) {
-			return "ON HOLD";
+			return "on hold";
 		}
 
-		// Fallback: strip underscores and format with clean spaces
-		return s.replace("_", " ").trim();
+		// Fallback: strip underscores, lowercase, and let CSS capitalize
+		return s.replace("_", " ").toLowerCase().trim();
 	}
 
 	private String getStatusClass(String status) {

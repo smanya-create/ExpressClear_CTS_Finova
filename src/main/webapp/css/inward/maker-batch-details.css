@@ -4,20 +4,24 @@
 
 .inward-maker-batch-details {
 	width: 100% !important;
+	height: 100% !important;
 	box-sizing: border-box !important;
 	margin: 0 !important;
 	padding: 0 !important;
 	background: #f8fafc !important;
+	overflow: hidden !important;
 }
 
 .inward-maker-batch-details-container {
 	width: 100% !important;
+	height: 100% !important;
 	box-sizing: border-box !important;
 	margin: 0 !important;
-	padding: 16px 28px 20px 28px !important;
+	padding: 16px 28px 16px 28px !important;
 	background: #f8fafc !important;
 	display: flex !important;
 	flex-direction: column !important;
+	overflow: hidden !important;
 }
 
 /* 1. Static Top Section */
@@ -38,7 +42,7 @@
 .inward-maker-batch-details-title {
 	display: block;
 	font-size: 24px !important;
-	font-weight: 800 !important;
+	font-weight: 600 !important;
 	color: #0f172a !important;
 	letter-spacing: 0.2px;
 	line-height: 28px !important;
@@ -52,8 +56,8 @@
 }
 
 .inward-maker-batch-back-button {
-	width: 165px !important;
-	min-width: 165px !important;
+	width: 70px !important;
+	min-width: 70px !important;
 	height: 36px !important;
 	padding: 0 14px !important;
 	box-sizing: border-box !important;
@@ -102,7 +106,6 @@
 	font-weight: 700 !important;
 	color: #64748b !important;
 	letter-spacing: 0.5px;
-	text-transform: uppercase;
 }
 
 .inward-maker-batch-summary-value {
@@ -127,7 +130,7 @@
 .inward-maker-cheque-section-title {
 	display: block;
 	font-size: 17px !important;
-	font-weight: 800 !important;
+	font-weight: 600 !important;
 	color: #0f172a !important;
 }
 
@@ -208,12 +211,15 @@
 	text-overflow: ellipsis !important;
 }
 
-/* Internal Table Scroll: Native vertical scroll inside the table container */
+/* Dynamic Grid Body Height with Internal Scrollbar */
 .inward-maker-cheque-grid .z-grid-body {
 	margin: 0 !important;
 	padding: 0 !important;
 	background: #f8fafc !important;
 	border: none !important;
+	height: calc(100vh - 510px) !important;
+	min-height: 220px !important;
+	max-height: calc(100vh - 510px) !important;
 	overflow-y: scroll !important;
 	overflow-x: hidden !important;
 }
@@ -316,22 +322,20 @@
 
 /* Status Badges */
 .inward-maker-cheque-status {
-	display: inline-flex !important;
-	align-items: center !important;
-	justify-content: center !important;
-	min-width: 125px !important;
-	max-width: 165px !important;
-	height: 27px !important;
-	margin: 0 auto !important;
-	padding: 0 12px !important;
-	box-sizing: border-box !important;
-	border-radius: 9999px !important;
-	font-size: 9.5px !important;
-	font-weight: 700 !important;
-	letter-spacing: 0.3px !important;
-	text-transform: uppercase !important;
-	text-align: center !important;
-	white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 130px !important;
+    height: 26px !important;                 
+    padding: 0 14px !important;               
+    box-sizing: border-box !important;
+    border-radius: 9999px !important;
+    font-size: 10px !important;            
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: capitalize !important;
+    text-align: center !important;
+    white-space: nowrap !important;
 }
 
 .inward-maker-cheque-status.pending-data-entry {
@@ -352,32 +356,38 @@
 	color: #92400e !important;
 }
 
-/* Action Button */
+/* Action Button (Outward-Style Modify Pill) */
 .inward-maker-action-button {
 	display: inline-flex !important;
 	align-items: center !important;
 	justify-content: center !important;
-	width: auto !important;
-	min-width: 125px !important;
-	max-width: 145px !important;
+	gap: 5px !important;
+	width: 82px !important;
+	min-width: 82px !important;
 	height: 28px !important;
 	padding: 0 10px !important;
 	box-sizing: border-box !important;
-	background: #172554 !important;
-	border: 1px solid #172554 !important;
-	border-radius: 4px !important;
+	background: #18275c !important;
+	border: 1px solid #18275c !important;
+	border-radius: 5px !important;
 	color: #ffffff !important;
-	font-size: 9.5px !important;
-	font-weight: 800 !important;
-	letter-spacing: 0.3px !important;
+	font-size: 11px !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.2px !important;
 	cursor: pointer !important;
 	white-space: nowrap !important;
 	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12) !important;
+	transition: background 0.15s ease-in-out !important;
 }
 
 .inward-maker-action-button:hover {
-	background: #0f1b3d !important;
-	border-color: #0f1b3d !important;
+	background: #101c46 !important;
+	border-color: #101c46 !important;
+}
+
+.inward-maker-action-button .z-icon-pencil-square-o {
+	font-size: 11px !important;
+	margin-right: 2px !important;
 }
 
 .inward-maker-action-empty {
@@ -503,7 +513,6 @@
     font-size: 8.5px !important;
     font-weight: 800 !important;
     letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
     text-align: center !important;
     white-space: nowrap !important;
 }

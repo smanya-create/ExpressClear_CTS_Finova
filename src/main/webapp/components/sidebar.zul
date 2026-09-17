@@ -128,10 +128,13 @@
 						<a id="navInwardDataEntry" label="Data Entry"
 							sclass="${arg.activeTab eq 'inward-data-entry' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToInwardDataEntry()" />
-						<a id="navInwardUnprocessed"
+							
+						<!-- Temporarily disabled Unprocessed Cheques navigation -->
+						<!-- <a id="navInwardUnprocessed"
 							label="Unprocessed Cheques"
 							sclass="${arg.activeTab eq 'inward-unprocessed' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToInwardUnprocessedQueue()" />
+							onClick="$composer.navToInwardUnprocessedQueue()" />  -->
+							
 					</vlayout>
 				</div>
 
