@@ -46,9 +46,7 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-		if (!SecurityUtil.checkAccess(null)) {
-            return;
-        }
+		
 		super.doAfterCompose(comp);
 
 		java.util.Date today = new java.util.Date();

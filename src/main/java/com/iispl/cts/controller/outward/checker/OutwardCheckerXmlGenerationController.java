@@ -46,9 +46,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
-		if (!SecurityUtil.checkAccess(null)) {
-            return;
-        }
+		
 		super.doAfterCompose(component);
 
 		restoreGeneratedXmlState();
