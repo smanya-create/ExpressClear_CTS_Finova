@@ -15,6 +15,7 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -33,6 +34,11 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	
+    	if (!SecurityUtil.checkAccess("CHECKER_VERIFICATION")) {
+    	    return;
+    	}
+    	
         super.doAfterCompose(comp);
 
        

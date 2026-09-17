@@ -15,6 +15,8 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
+
 public class InwardIntakeController extends GenericComposer {
 
 	private Window validationFailedWindow;
@@ -45,6 +47,9 @@ public class InwardIntakeController extends GenericComposer {
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 
+		 if (!SecurityUtil.checkAccess("BATCH_UPLOAD")) {
+		        return;
+		    }
 		super.doAfterCompose(comp);
 
 		Window mainWindow = (Window) comp;

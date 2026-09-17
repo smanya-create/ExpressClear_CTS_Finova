@@ -25,6 +25,7 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.DashboardSummaryDTO;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.dto.ReportSummaryRow;
@@ -54,6 +55,10 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         
+    	if (!SecurityUtil.checkAccess("REPORTS")) {
+    	    return;
+    	}
+    	
     	super.doAfterCompose(comp);
     	
         service = new InwardBatchServiceImpl();

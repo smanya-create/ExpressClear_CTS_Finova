@@ -32,6 +32,7 @@ import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.inward.InwardBatch;
@@ -137,6 +138,10 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		if (!SecurityUtil.checkAccess("MICR_REPAIR")) {
+		    return;
+		}
 		super.doAfterCompose(comp);
 
 		inwardChequeService = new InwardChequeServiceImpl();
