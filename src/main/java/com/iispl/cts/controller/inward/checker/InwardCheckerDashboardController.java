@@ -144,30 +144,35 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         item.appendChild(statusCell);
 
         Listcell actionCell = new Listcell();
+
         String actionLabel;
         String buttonStyle;
+        String actionIcon;
 
         if (InwardBatchStatus.CHECKER_PROCESSING.toString().equalsIgnoreCase(batchStatus)) {
-
             actionLabel = "Process";
-            buttonStyle = "background:#D97706; color: black; border:1px solid #F5A900; border-radius:4px; cursor:pointer; font-size:9px; font-weight:bold; padding:2px 10px; line-height:16px;";
+            actionIcon = "z-icon-refresh";
+            buttonStyle = "background:#D97706; color:black; border:1px solid #F5A900; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold; padding:0; line-height:25px; width:125px; height:28px; box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:4px;";
         } else if (InwardBatchStatus.CHECKER_PROCESSING_PENDING.toString().equalsIgnoreCase(batchStatus)) {
-
             actionLabel = "Proceed Verification";
-            buttonStyle = "background:#1C2D4A; color:white; border-radius:4px; cursor:pointer; font-size:10px; padding:2px 8px;";
-
+            actionIcon = "z-icon-arrow-right";
+            buttonStyle = "background:#1C2D4A; color:white; border:1px solid #1C2D4A; border-radius:4px; cursor:pointer; font-size:10px; font-weight:bold; padding:0; line-height:32px; width:125px; height:28px; box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center; gap:4px;";
         } else {
-
             return;
         }
 
-        Button btnVerify = new Button(actionLabel);
+        // Instantiate button without label first
+        Button btnVerify = new Button();
+
+        // Set icon before setting label and styles
+        btnVerify.setIconSclass(actionIcon);
+        btnVerify.setLabel(actionLabel);
         btnVerify.setStyle(buttonStyle);
 
         btnVerify.addEventListener(Events.ON_CLICK, e -> {
 
             boolean updated = batchService.updateProcessingBatchStatus(
-                    batchId,InwardBatchStatus.CHECKER_PROCESSING);
+                    batchId, InwardBatchStatus.CHECKER_PROCESSING);
 
             if (updated) {
                 Executions.getCurrent().sendRedirect(
@@ -178,6 +183,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
         });
 
         actionCell.setStyle("text-align:center;vertical-align:middle;");
+
         actionCell.appendChild(btnVerify);
         item.appendChild(actionCell);
 
