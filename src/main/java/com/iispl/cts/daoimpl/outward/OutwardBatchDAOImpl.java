@@ -134,8 +134,9 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 				+ "ob.actual_total_amount, " + "ob.batch_status, " + "ob.uploaded_by, " + "ob.uploaded_at "
 				+ "FROM outward_batch ob " + "WHERE UPPER(TRIM(ob.batch_status)) IN "
 				+ "('PENDING_DATA_ENTRY', 'ON_HOLD') " + "AND EXISTS (" + "SELECT 1 " + "FROM outward_cheque oc "
-				+ "WHERE oc.outward_batch_id = ob.outward_batch_id " + "AND UPPER(TRIM(oc.cheque_status)) = "
-				+ "'PENDING_DATA_ENTRY'" + ") " + "ORDER BY ob.uploaded_at ASC";
+				+ "WHERE oc.outward_batch_id = ob.outward_batch_id " + "AND UPPER(TRIM(oc.cheque_status)) IN "
+				+ "('PENDING_DATA_ENTRY', " + "'PENDING_MICR_REPAIR', " + "'MICR_REJECTED', " + "'ON_HOLD')" + ") "
+				+ "ORDER BY ob.uploaded_at ASC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);

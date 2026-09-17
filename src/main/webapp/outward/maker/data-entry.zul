@@ -54,19 +54,22 @@
 
 					<columns sizable="false">
 
-						<column label="Batch No." width="20%"
+						<column label="Batch No." width="17%"
 							align="center" />
 
-						<column label="Total No. Of Cheques" width="22%"
+						<column label="Total No. Of Cheques" width="19%"
 							align="center" />
 
-						<column label="Pending Data Entry" width="25%"
+						<column label="Pending Data Entry" width="20%"
 							align="center" />
 
-						<column label="Status" width="16%"
+						<column label="MICR Rejected" width="15%"
 							align="center" />
 
-						<column label="Action" width="17%"
+						<column label="Status" width="15%"
+							align="center" />
+
+						<column label="Action" width="14%"
 							align="center" />
 
 					</columns>

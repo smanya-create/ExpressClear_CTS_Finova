@@ -1,863 +1,729 @@
 .outward-cheque-data-entry-page {
 	width: 100%;
-	min-height: calc(100vh - 84px);
+	height: 100%;
+	min-height: 0;
 	box-sizing: border-box;
-	padding: 18px 24px 28px;
-	background: #f7f9fc;
+	padding: 18px 28px 24px 28px;
+	background: #eef3f9;
+	overflow: auto;
 	font-family: Arial, Helvetica, sans-serif;
-	color: #10233f;
+	color: #172b4d;
 }
 
 .outward-cheque-data-entry-topbar {
 	width: 100%;
-	min-height: 58px;
+	min-height: 60px;
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
-	margin-bottom: 14px;
+	padding: 0 4px 14px 4px;
 }
 
 .outward-cheque-data-entry-heading {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	gap: 3px;
 }
 
 .outward-cheque-data-entry-title {
-	display: block;
-	font-size: 21px;
-	line-height: 26px;
+	font-size: 22px;
 	font-weight: 700;
-	color: #0b1f3a !important;
+	color: #13294b;
 }
 
 .outward-cheque-data-entry-subtitle {
-	display: block;
-	margin-top: 2px;
-	font-size: 11px;
-	line-height: 16px;
-	color: #66758a !important;
+	font-size: 13px;
+	color: #4f6681;
 }
 
-.outward-cheque-data-entry-topbar-spacer,
-	.outward-cheque-data-entry-card-header-spacer {
-	flex: 1 1 auto;
+.outward-cheque-data-entry-topbar-spacer {
+	flex: 1;
 }
 
 .outward-cheque-data-entry-back-button {
-	width: 74px !important;
-	height: 36px !important;
-	min-height: 36px !important;
-	border: 1px solid #cbd5e1 !important;
-	border-radius: 5px !important;
-	background: #ffffff !important;
-	color: #0d2750 !important;
-	font-size: 10px !important;
+	min-width: 92px !important;
+	height: 38px !important;
+	padding: 0 18px !important;
+	border: none !important;
+	border-radius: 6px !important;
+	background: #182b61 !important;
+	color: #ffffff !important;
+	font-size: 13px !important;
 	font-weight: 700 !important;
-	box-shadow: 0 1px 4px rgba(15, 35, 65, 0.10);
+	box-shadow: 0 2px 5px rgba(15, 23, 42, .16);
 }
 
 .outward-cheque-data-entry-back-button:hover {
-	background: #f8fafc !important;
-	border-color: #aebdce !important;
+	background: #10204c !important;
 }
 
-.outward-cheque-data-entry-batch-card {
+.outward-cheque-data-entry-summary-card {
 	width: 100%;
-	height: 80px;
+	min-height: 76px;
+	display: grid;
+	grid-template-columns: 1.1fr 1fr 2.2fr 1.3fr;
+	gap: 20px;
+	align-items: center;
 	box-sizing: border-box;
 	margin-bottom: 14px;
-	border: 1px solid #e1e7ef;
-	border-radius: 7px;
+	padding: 14px 18px;
 	background: #ffffff;
-	box-shadow: 0 1px 4px rgba(15, 35, 65, 0.05);
+	border: 1px solid #d9e1eb;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(15, 23, 42, .05);
 }
 
-.outward-cheque-data-entry-batch-info {
-	width: 100%;
-	height: 100%;
-	display: grid;
-	grid-template-columns: 125px 120px minmax(220px, 1fr) auto;
-	column-gap: 28px;
-	align-items: center;
-	box-sizing: border-box;
-	padding: 13px 20px;
-}
-
-.outward-cheque-data-entry-meta-block {
+.outward-cheque-summary-item, .outward-cheque-summary-progress {
 	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
 }
 
-.outward-cheque-data-entry-meta-label {
+.outward-cheque-summary-label {
 	display: block;
-	margin-bottom: 5px;
-	font-size: 9px;
-	line-height: 12px;
-	font-weight: 700;
-	color: #52657e !important;
-}
-
-.outward-cheque-data-entry-meta-value {
-	display: block;
-	font-size: 16px;
-	line-height: 20px;
-	font-weight: 700;
-	color: #0b1f3a !important;
-}
-
-.outward-cheque-data-entry-batch-value {
-	color: #0b1f3a !important;
-}
-
-.outward-cheque-data-entry-progress-block {
-	min-width: 0;
-	width: 100%;
-	max-width: 390px;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.outward-cheque-data-entry-progress-row {
-	width: 100%;
-	display: grid;
-	grid-template-columns: minmax(130px, 1fr) 38px;
-	column-gap: 8px;
-	align-items: center;
-}
-
-.outward-cheque-data-entry-progress {
-	width: 100% !important;
-	height: 7px !important;
-	min-height: 7px !important;
-	border: 0 !important;
-	border-radius: 3px !important;
-	overflow: hidden !important;
-	background: #dfe5ed !important;
-	box-shadow: none !important;
-}
-
-.outward-cheque-data-entry-progress.z-progressmeter {
-	background: #dfe5ed !important;
-	border: none !important;
-	border-radius: 3px !important;
-	box-shadow: none !important;
-}
-
-.outward-cheque-data-entry-progress .z-progressmeter-image {
-	background: #0d3263 !important;
-	background-color: #0d3263 !important;
-	border-radius: 3px !important;
-}
-
-.outward-cheque-data-entry-progress .z-progressmeter-inner {
-	background: #0d3263 !important;
-	background-color: #0d3263 !important;
-	border-radius: 3px !important;
-}
-
-.outward-cheque-data-entry-progress .z-progressmeter-value {
-	background: #0d3263 !important;
-	background-color: #0d3263 !important;
-	border-radius: 3px !important;
-}
-
-.outward-cheque-data-entry-progress-value {
-	display: block;
-	width: 38px;
-	text-align: right;
 	font-size: 11px;
-	line-height: 13px;
-	font-weight: 700;
-	color: #0b1f3a !important;
+	color: #718096;
+	font-weight: 600;
+	margin-bottom: 4px;
 }
 
-.outward-cheque-data-entry-progress-count {
+.outward-cheque-summary-value {
 	display: block;
-	margin-top: 3px;
-	font-size: 9px;
-	line-height: 12px;
-	color: #66758a !important;
+	font-size: 14px;
+	color: #172b4d;
+	font-weight: 700;
 }
 
-.outward-cheque-data-entry-batch-divider {
-	display: none;
-}
-
-.outward-cheque-data-entry-navigation {
-	display: grid;
-	grid-template-columns: 91px 42px 91px;
-	column-gap: 7px;
+.outward-cheque-progress-row {
+	width: 100%;
+	display: flex;
 	align-items: center;
-	justify-content: end;
+	gap: 10px;
 }
 
-.outward-cheque-data-entry-navigation-button {
-	width: 91px !important;
-	height: 36px !important;
-	min-height: 36px !important;
-	border: 1px solid #cbd5e1 !important;
-	border-radius: 5px !important;
-	background: #ffffff !important;
-	color: #0d3263 !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
-	box-shadow: none !important;
+.outward-cheque-progress-meter {
+	width: 100% !important;
+	height: 10px !important;
+	background: #e1e8f0 !important;
+	border-radius: 10px !important;
 }
 
-.outward-cheque-data-entry-navigation-button:hover {
-	background: #f8fafc !important;
-	border-color: #aebdce !important;
+.outward-cheque-progress-meter .z-progressmeter-image {
+	background: #287ff0 !important;
+	border-radius: 10px !important;
 }
 
-.outward-cheque-data-entry-position {
-	display: block;
-	width: 42px;
-	text-align: center;
-	font-size: 10px;
-	line-height: 14px;
+.outward-cheque-progress-count {
+	min-width: 45px;
+	font-size: 11px;
 	font-weight: 700;
-	color: #263a55 !important;
+	color: #172b4d;
 }
 
-.outward-cheque-data-entry-main-area {
+.outward-cheque-navigation {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 7px;
+}
+
+.outward-cheque-navigation-button {
+	height: 36px !important;
+	min-width: 90px !important;
+	padding: 0 12px !important;
+	background: #ffffff !important;
+	border: 1px solid #d1dbe6 !important;
+	border-radius: 5px !important;
+	color: #172b4d !important;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-navigation-button:hover {
+	background: #f4f7fa !important;
+}
+
+.outward-cheque-position-label {
+	min-width: 58px;
+	text-align: center;
+	font-size: 11px;
+	color: #53677e;
+	font-weight: 600;
+}
+
+.outward-cheque-data-entry-main {
 	width: 100%;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	column-gap: 14px;
-	align-items: start;
+	gap: 14px;
+	align-items: stretch;
 	box-sizing: border-box;
 }
 
 .outward-cheque-data-entry-card {
 	width: 100%;
+	min-width: 0;
 	box-sizing: border-box;
-	border: 1px solid #e1e7ef;
-	border-radius: 7px;
 	background: #ffffff;
-	box-shadow: 0 1px 4px rgba(15, 35, 65, 0.05);
-}
-
-.outward-cheque-data-entry-image-card {
-	min-height: 426px;
-}
-
-.outward-cheque-data-entry-details-card {
-	min-height: 426px;
+	border: 1px solid #d9e1eb;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(15, 23, 42, .05);
+	overflow: hidden;
 }
 
 .outward-cheque-data-entry-card-header {
 	width: 100%;
-	height: 60px;
+	min-height: 58px;
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
-	padding: 0 18px;
-	border-bottom: 1px solid #e4e9ef;
+	padding: 12px 16px;
+	border-bottom: 1px solid #e2e8f0;
 }
 
 .outward-cheque-data-entry-card-title {
 	display: block;
-	font-size: 13px;
-	line-height: 18px;
+	font-size: 17px;
+	line-height: 1.3;
 	font-weight: 700;
-	color: #0b1f3a !important;
-}
-
-.outward-cheque-data-entry-image-side-actions {
-	display: grid;
-	grid-template-columns: 59px 59px;
-	column-gap: 7px;
-}
-
-.outward-cheque-data-entry-image-side-button {
-	width: 59px !important;
-	height: 34px !important;
-	min-height: 34px !important;
-	border: 1px solid #b8c7d9 !important;
-	border-radius: 5px !important;
-	background: #ffffff !important;
-	color: #0d3263 !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
-}
-
-.outward-cheque-data-entry-image-side-button:hover {
-	background: #f7f9fc !important;
-}
-
-.outward-cheque-data-entry-image-side-button-active {
-	background: #eef3f9 !important;
-	border-color: #8ea5bf !important;
-	color: #0b2b58 !important;
-}
-
-.outward-cheque-data-entry-image-container {
-	width: calc(100% - 36px);
-	height: 310px;
-	margin: 12px 18px 10px;
-	box-sizing: border-box;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	overflow: hidden;
-	border: 1px solid #d5dee9;
-	border-radius: 5px;
-	background: #f5f7fa;
-}
-
-.outward-cheque-data-entry-cheque-image {
-	max-width: 92%;
-	max-height: 90%;
-	width: auto;
-	height: auto;
-	display: block;
-	object-fit: contain;
-	transform-origin: center center;
-}
-
-.outward-cheque-data-entry-image-empty {
-	display: block;
-	font-size: 11px;
-	color: #8a98a9;
-}
-
-.outward-cheque-data-entry-image-actions {
-	width: calc(100% - 36px);
-	height: 34px;
-	margin: 0 18px 12px;
-	display: grid;
-	grid-template-columns: 38px 38px 78px 78px;
-	column-gap: 7px;
-	box-sizing: border-box;
-}
-
-.outward-cheque-data-entry-image-button {
-	width: 100% !important;
-	height: 32px !important;
-	min-height: 32px !important;
-	border: 1px solid #c3cfdd !important;
-	border-radius: 5px !important;
-	background: #ffffff !important;
-	color: #0d3263 !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
-}
-
-.outward-cheque-data-entry-image-button:hover {
-	background: #f8fafc !important;
-}
-
-.outward-cheque-data-entry-zoom-button {
-	font-size: 16px !important;
-}
-
-.outward-cheque-data-entry-details-heading {
-	width: 100%;
-	height: 60px;
-	display: flex;
-	align-items: center;
-	box-sizing: border-box;
-	padding: 0 18px;
-	border-bottom: 1px solid #e4e9ef;
-}
-
-.outward-cheque-data-entry-details-title-group {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
+	color: #13294b;
 }
 
 .outward-cheque-data-entry-card-subtitle {
 	display: block;
-	margin-top: 2px;
-	font-size: 9px;
-	line-height: 13px;
-	color: #66758a !important;
+	margin-top: 3px;
+	font-size: 11px;
+	color: #718096;
+}
+
+.outward-cheque-data-entry-card-header-spacer {
+	flex: 1;
+}
+
+.outward-cheque-image-side-button {
+	height: 34px !important;
+	min-width: 78px !important;
+	padding: 0 13px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	color: #172b4d !important;
+	font-size: 11px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-data-entry-image-container {
+	width: calc(100% - 32px);
+	height: 370px;
+	margin: 14px 16px 16px 16px;
+	box-sizing: border-box;
+	border: 1px solid #d5e0eb;
+	border-radius: 6px;
+	background: #f8fafc;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.outward-cheque-data-entry-cheque-image {
+	max-width: 94%;
+	max-height: 94%;
+	object-fit: contain;
+	display: block;
+}
+
+.outward-cheque-data-entry-image-empty {
+	font-size: 13px;
+	color: #94a3b8;
+	font-weight: 600;
+	text-align: center;
+}
+
+.outward-cheque-image-actions {
+	width: calc(100% - 32px);
+	margin: 0 16px 16px 16px;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1.4fr 1.4fr;
+	gap: 8px;
+}
+
+.outward-cheque-image-button {
+	width: 100% !important;
+	height: 38px !important;
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	color: #172b4d !important;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-image-button:hover {
+	background: #f4f7fa !important;
 }
 
 .outward-cheque-data-entry-status-badge {
-	min-width: 137px;
-	height: 27px;
-	padding: 0 13px;
-	box-sizing: border-box;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 15px;
-	font-size: 9px;
-	font-weight: 700;
-	white-space: nowrap;
-}
-
-.outward-cheque-data-entry-status-pending {
-	border: 1px solid #f3c89d;
-	background: #fff1e3;
-	color: #c9620c;
-}
-
-.outward-cheque-data-entry-status-onhold {
-	border: 1px solid #f0d38f;
-	background: #fff8e8;
-	color: #a45c00;
-}
-
-.outward-cheque-data-entry-status-rejected,
-	.outward-cheque-data-entry-status-rejection {
-	border: 1px solid #efaaaa;
-	background: #fff1f1;
-	color: #c62828;
-}
-
-.outward-cheque-data-entry-status-micr {
-	border: 1px solid #efd38a;
-	background: #fff9e9;
-	color: #9a6400;
-}
-
-.outward-cheque-data-entry-status-verification {
-	border: 1px solid #b8ddc4;
-	background: #eef9f1;
-	color: #18733a;
-}
-
-.outward-cheque-data-entry-status-checker {
-	border: 1px solid #bfd4ed;
-	background: #eef5fd;
-	color: #205b98;
-}
-
-.outward-cheque-data-entry-status-default {
-	border: 1px solid #d6dee8;
-	background: #f7f9fb;
-	color: #62738a;
-}
-
-.outward-cheque-data-entry-form-grid {
-	width: 100%;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	column-gap: 13px;
-	row-gap: 8px;
-	padding: 12px 18px 7px;
-	box-sizing: border-box;
-}
-
-.outward-cheque-data-entry-field {
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-}
-
-.outward-cheque-data-entry-field-label {
-	display: block;
-	margin-bottom: 4px;
-	font-size: 9px;
-	line-height: 12px;
-	font-weight: 700;
-	color: #263d59 !important;
-}
-
-.outward-cheque-data-entry-input {
-	width: 100% !important;
-	height: 32px !important;
-	min-height: 32px !important;
-	box-sizing: border-box;
-	border: 1px solid #d1dae5 !important;
-	border-radius: 4px !important;
-	background: #ffffff !important;
-	color: #172b45 !important;
-	font-weight: 500 !important;
-	font-size: 10px !important;
-}
-
-.outward-cheque-data-entry-input:focus, .outward-cheque-data-entry-input.z-textbox-focus,
-	.outward-cheque-data-entry-input.z-decimalbox-focus,
-	.outward-cheque-data-entry-input.z-datebox-focus {
-	border-color: #6d91bb !important;
-	box-shadow: 0 0 0 2px rgba(13, 50, 99, 0.08) !important;
-}
-
-.outward-cheque-data-entry-input input, .outward-cheque-data-entry-input textarea,
-	.outward-cheque-data-entry-input .z-textbox-input,
-	.outward-cheque-data-entry-input .z-decimalbox-input,
-	.outward-cheque-data-entry-input .z-datebox-input {
-	color: #172b45 !important;
-	font-weight: 500 !important;
-}
-
-.outward-cheque-data-entry-micr-input,
-	.outward-cheque-data-entry-micr-input:disabled {
-	background: #f0f3f7 !important;
-	color: #7c8b9d !important;
-}
-
-.outward-cheque-data-entry-postdated {
-	display: block;
-	margin-top: 2px;
-	font-size: 8px;
-	color: #a15e00;
-}
-
-.outward-cheque-data-entry-micr-reason {
-	display: block;
-	margin-top: 2px;
-	font-size: 8px;
-	color: #b42323;
-}
-
-.outward-cheque-data-entry-alert-panel {
-	width: calc(100% - 36px);
-	margin: 3px 18px 0;
-	padding: 8px 10px !important;
-	box-sizing: border-box;
-	border-radius: 5px !important;
-}
-
-.outward-cheque-data-entry-rejection-panel,
-	.outward-cheque-data-entry-micr-rejected-panel {
-	border: 1px solid #efb2b2 !important;
-	background: #fff5f5 !important;
-}
-
-.outward-cheque-data-entry-checker-panel,
-	.outward-cheque-data-entry-micr-pending-panel {
-	border: 1px solid #efd49a !important;
-	background: #fff9ed !important;
-}
-
-.outward-cheque-data-entry-alert-title {
-	display: block;
-	font-size: 9px;
-	line-height: 13px;
-	font-weight: 700;
-	color: #b42323;
-}
-
-.outward-cheque-data-entry-alert-message {
-	display: block;
-	font-size: 8px;
-	line-height: 12px;
-	color: #704040;
-}
-
-.outward-cheque-data-entry-checker-panel .outward-cheque-data-entry-alert-title,
-	.outward-cheque-data-entry-micr-pending-panel .outward-cheque-data-entry-alert-title
-	{
-	color: #9a5a00;
-}
-
-.outward-cheque-data-entry-action-row {
-	width: calc(100% - 36px);
-	margin: 8px 18px 7px;
-	display: grid;
-	grid-template-columns: 1fr 1.15fr 1.15fr;
-	column-gap: 7px;
-	box-sizing: border-box;
-}
-
-.outward-cheque-data-entry-action-button,
-	.outward-cheque-data-entry-submit-button {
-	height: 35px !important;
-	min-height: 35px !important;
-	box-sizing: border-box;
-	border-radius: 5px !important;
-	font-size: 9px !important;
-	font-weight: 700 !important;
-}
-
-.outward-cheque-data-entry-reset-button {
-	border: 1px solid #cbd5e1 !important;
-	background: #ffffff !important;
-	color: #17365d !important;
-}
-
-.outward-cheque-data-entry-reset-button:hover {
-	background: #f8fafc !important;
-}
-
-.outward-cheque-data-entry-reject-button {
-	border: 1px solid #e56b6b !important;
-	background: #ffffff !important;
-	color: #cf2f2f !important;
-}
-
-.outward-cheque-data-entry-reject-button:hover {
-	background: #fff8f8 !important;
-}
-
-.outward-cheque-data-entry-approve-button {
-	border: 1px solid #122f63 !important;
-	background: #122f63 !important;
-	color: #ffffff !important;
-}
-
-.outward-cheque-data-entry-approve-button:hover {
-	background: #0d2855 !important;
-}
-
-.outward-cheque-data-entry-submit-button {
-	width: calc(100% - 36px) !important;
-	margin: 0 18px 7px;
-	border: 1px solid #079b6a !important;
-	background: #079b6a !important;
-	color: #ffffff !important;
-}
-
-.outward-cheque-data-entry-submit-button:hover {
-	background: #078c61 !important;
-}
-
-.outward-cheque-data-entry-action-button.z-button-disabled,
-	.outward-cheque-data-entry-submit-button.z-button-disabled {
-	opacity: .45 !important;
-}
-
-.outward-cheque-data-entry-footer-status {
-	display: block;
-	width: calc(100% - 36px);
-	min-height: 13px;
-	margin: 0 18px 8px;
-	font-size: 8px;
-	line-height: 12px;
-	color: #5d7189;
-}
-
-.outward-cheque-data-entry-modal {
-	width: 520px !important;
-	border-radius: 7px !important;
-	background: #ffffff !important;
-}
-
-.outward-cheque-data-entry-modal .z-window-header {
-	padding: 13px 18px !important;
-	background: #0d3263 !important;
-	color: #ffffff !important;
-	font-size: 13px !important;
-	font-weight: 700 !important;
-}
-
-.outward-cheque-data-entry-modal .z-window-content {
-	padding: 20px !important;
-	background: #ffffff !important;
-}
-
-.outward-cheque-data-entry-modal-content {
-	background: #ffffff !important;
-}
-
-.outward-cheque-data-entry-modal-title {
-	display: block;
-	font-size: 15px;
-	line-height: 20px;
-	font-weight: 700;
-	color: #17365d;
-}
-
-.outward-cheque-data-entry-modal-subtitle {
-	display: block;
+	display: inline-block;
+	min-width: 125px;
+	padding: 6px 13px;
+	border-radius: 18px;
+	background: #fff4e5;
+	border: 1px solid #f6c982;
+	color: #b45309;
+	text-align: center;
 	font-size: 10px;
-	line-height: 15px;
-	color: #64748b;
+	font-weight: 700;
 }
 
-.outward-cheque-data-entry-modal-label {
-	display: block;
-	font-size: 10px;
-	font-weight: 600;
-	color: #526985;
-}
-
-.outward-cheque-data-entry-modal-input {
-	height: 36px !important;
-	border: 1px solid #c9d7e7 !important;
-	border-radius: 5px !important;
-	background: #ffffff !important;
-	font-size: 10px !important;
-}
-
-.outward-cheque-data-entry-modal-textarea {
-	min-height: 86px !important;
-	border: 1px solid #c9d7e7 !important;
-	border-radius: 5px !important;
-	background: #ffffff !important;
-	font-size: 10px !important;
-}
-
-.outward-cheque-data-entry-reject-cheque-card,
-	.outward-cheque-data-entry-confirm-card {
-	width: 100%;
-	padding: 12px 14px;
+.outward-cheque-alert {
+	width: calc(100% - 32px);
+	margin: 12px 16px 0 16px;
+	padding: 10px 12px;
 	box-sizing: border-box;
-	border: 1px solid #e0e7ef;
-	border-radius: 6px;
-	background: #f8fafc;
+	border-radius: 5px;
 }
 
-.outward-cheque-data-entry-reject-cheque-card {
+.outward-cheque-alert-title {
+	display: block;
+	font-size: 11px;
+	font-weight: 800;
+	margin-bottom: 3px;
+}
+
+.outward-cheque-alert-message {
+	display: block;
+	font-size: 11px;
+	line-height: 1.45;
+}
+
+.outward-cheque-alert-error {
+	background: #fff1f2;
+	border: 1px solid #fecdd3;
+}
+
+.outward-cheque-alert-error .outward-cheque-alert-title,
+	.outward-cheque-alert-error .outward-cheque-alert-message {
+	color: #b91c1c;
+}
+
+.outward-cheque-alert-warning {
+	background: #fff7ed;
+	border: 1px solid #fed7aa;
+}
+
+.outward-cheque-alert-warning .outward-cheque-alert-title,
+	.outward-cheque-alert-warning .outward-cheque-alert-message {
+	color: #c2410c;
+}
+
+.outward-cheque-alert-rejection {
+	background: #fffbeb;
+	border: 1px solid #fde68a;
+}
+
+.outward-cheque-alert-rejection .outward-cheque-alert-title,
+	.outward-cheque-alert-rejection .outward-cheque-alert-message {
+	color: #92400e;
+}
+
+.outward-cheque-alert-info {
+	background: #eff6ff;
+	border: 1px solid #bfdbfe;
+}
+
+.outward-cheque-alert-info .outward-cheque-alert-title,
+	.outward-cheque-alert-info .outward-cheque-alert-message {
+	color: #1e40af;
+}
+
+.outward-cheque-form {
+	width: 100%;
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	column-gap: 10px;
-	align-items: center;
+	column-gap: 24px;
+	row-gap: 13px;
+	padding: 18px 16px 0 16px;
+	box-sizing: border-box;
 }
 
-.outward-cheque-data-entry-confirm-label {
-	display: block;
-	font-size: 10px;
-	font-weight: 600;
-	color: #526985;
+.outward-cheque-field {
+	width: 100%;
+	min-width: 0;
 }
 
-.outward-cheque-data-entry-confirm-value {
+.outward-cheque-field-label {
 	display: block;
+	margin-bottom: 5px;
+	font-size: 11px;
+	color: #172b4d;
+	font-weight: 700;
+}
+
+.outward-cheque-field-label:after {
+	content: " *";
+	color: #dc2626;
+}
+
+.outward-cheque-micr-field .outward-cheque-field-label:after {
+	content: "";
+}
+
+.outward-cheque-input {
+	width: 100% !important;
+	height: 36px !important;
+	box-sizing: border-box !important;
+}
+
+.outward-cheque-input.z-textbox, .outward-cheque-input.z-datebox {
+	width: 100% !important;
+	height: 36px !important;
+	box-sizing: border-box !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 5px !important;
+	background: #ffffff !important;
+	color: #334155 !important;
+	font-size: 12px !important;
+}
+
+.outward-cheque-input.z-textbox:focus, .outward-cheque-input.z-datebox:focus
+	{
+	border-color: #5473a5 !important;
+	box-shadow: 0 0 0 2px rgba(30, 64, 175, .08) !important;
+}
+
+.outward-cheque-input.z-datebox {
+	display: inline-flex !important;
+	align-items: center !important;
+	overflow: hidden !important;
+}
+
+.outward-cheque-date-input {
+	width: 100% !important;
+	height: 36px !important;
+	box-sizing: border-box !important;
+}
+
+.outward-cheque-date-input .z-datebox-input, .outward-cheque-date-input input
+	{
+	height: 34px !important;
+	box-sizing: border-box !important;
+	font-size: 12px !important;
+}
+
+.outward-cheque-date-input .z-datebox-button {
+	width: 34px !important;
+	min-width: 34px !important;
+	height: 34px !important;
+	box-sizing: border-box !important;
+}
+
+.z-datebox-calendar {
+	width: 270px !important;
+	max-width: 270px !important;
+}
+
+.z-datebox-calendar .z-calendar {
+	width: 270px !important;
+	max-width: 270px !important;
+	box-sizing: border-box !important;
+}
+
+.z-datebox-calendar .z-calendar-header, .z-datebox-calendar .z-calendar-body
+	{
+	width: 100% !important;
+	box-sizing: border-box !important;
+}
+
+.z-datebox-calendar .z-calendar-body table {
+	width: 100% !important;
+	table-layout: fixed !important;
+}
+
+.z-datebox-calendar .z-calendar-body td {
+	width: 14.28% !important;
+	box-sizing: border-box !important;
+}
+
+.outward-cheque-micr-input, .outward-cheque-micr-input.z-textbox {
+	background: #f1f5f9 !important;
+	color: #475569 !important;
+}
+
+.outward-cheque-input.z-textbox-readonly, .outward-cheque-input.z-textbox[readonly],
+	.outward-cheque-input.z-datebox[readonly], .outward-cheque-input[disabled]
+	{
+	background: #f1f5f9 !important;
+	color: #64748b !important;
+	opacity: 1 !important;
+}
+
+.outward-cheque-postdated-message {
+	display: block;
+	margin: 8px 16px 0 16px;
+	padding: 5px 9px;
+	background: #fff7ed;
+	border: 1px solid #fed7aa;
+	border-radius: 5px;
+	color: #c2410c;
 	font-size: 11px;
 	font-weight: 700;
-	color: #1e293b;
 }
 
-.outward-cheque-data-entry-confirm-row {
-	width: 100%;
-	min-height: 38px;
+.outward-cheque-micr-reason {
+	display: block;
+	margin: 7px 16px 0 16px;
+	color: #dc2626;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.outward-cheque-validation-status {
+	display: block;
+	margin: 10px 16px 0 16px;
+	padding: 7px 10px;
+	box-sizing: border-box;
+	background: #fff1f2;
+	border: 1px solid #fecdd3;
+	border-radius: 5px;
+	color: #b91c1c;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.outward-cheque-action-separator {
+	width: calc(100% - 32px);
+	margin: 12px 16px 0 16px;
+	border-top: 1px solid #e2e8f0;
+}
+
+.outward-cheque-action-row {
+	width: calc(100% - 32px);
+	margin: 10px 16px 8px 16px;
 	display: grid;
-	grid-template-columns: 125px 1fr;
-	column-gap: 10px;
-	align-items: center;
-	border-bottom: 1px solid #e5eaf0;
-}
-
-.outward-cheque-data-entry-confirm-row:last-child {
-	border-bottom: none;
-}
-
-.outward-cheque-data-entry-modal-actions {
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
+	grid-template-columns: 1fr 1.15fr 1fr;
 	gap: 8px;
-	margin-top: 3px;
 }
 
-.outward-cheque-data-entry-modal-spacer {
-	flex: 1 1 auto;
-}
-
-.outward-cheque-data-entry-modal-close-button,
-	.outward-cheque-data-entry-modal-reject-button,
-	.outward-cheque-data-entry-modal-submit-button {
+.outward-cheque-action-button {
+	width: 100% !important;
 	height: 37px !important;
-	min-height: 37px !important;
-	min-width: 88px !important;
-	padding: 0 17px !important;
 	border-radius: 5px !important;
-	font-size: 10px !important;
+	font-size: 11px !important;
 	font-weight: 700 !important;
 }
 
-.outward-cheque-data-entry-modal-close-button {
-	border: 1px solid #c9d7e7 !important;
+.outward-cheque-reset-button {
 	background: #ffffff !important;
-	color: #334e70 !important;
+	border: 1px solid #cbd5e1 !important;
+	color: #172b4d !important;
 }
 
-.outward-cheque-data-entry-modal-reject-button {
-	border: 1px solid #ef4444 !important;
+.outward-cheque-reject-button {
 	background: #ffffff !important;
-	color: #dc2626 !important;
+	border: 1px solid #dc6b6b !important;
+	color: #c62828 !important;
 }
 
-.outward-cheque-data-entry-modal-submit-button {
-	border: 1px solid #0d3263 !important;
-	background: #0d3263 !important;
+.outward-cheque-approve-button {
+	background: #182b61 !important;
+	border: 1px solid #182b61 !important;
 	color: #ffffff !important;
 }
 
-.outward-cheque-data-entry-success-message {
+.outward-cheque-approve-button:hover {
+	background: #10204c !important;
+}
+
+.outward-cheque-submit-button {
+	width: calc(100% - 32px) !important;
+	height: 38px !important;
+	margin: 0 16px;
+	box-sizing: border-box;
+	border-radius: 5px !important;
+	background: #dce4ee !important;
+	border: 1px solid #d1d9e4 !important;
+	color: #8a99ac !important;
+	font-size: 11px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-submit-button:not(.z-button-disabled) {
+	background: #182b61 !important;
+	border-color: #182b61 !important;
+	color: #ffffff !important;
+}
+
+.outward-cheque-submit-button:not(.z-button-disabled):hover {
+	background: #10204c !important;
+}
+
+.outward-cheque-footer-status {
 	display: block;
-	font-size: 11px;
+	min-height: 18px;
+	margin: 6px 16px 10px 16px;
+	color: #64748b;
+	font-size: 10px;
 	line-height: 16px;
+}
+
+.outward-cheque-modal {
+	border-radius: 8px !important;
+	overflow: hidden;
+}
+
+.outward-cheque-modal .z-window-header {
+	background: #182b61 !important;
+	color: #ffffff !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-modal-content {
+	padding: 18px;
+	box-sizing: border-box;
+}
+
+.outward-cheque-modal-title {
+	display: block;
+	margin-bottom: 15px;
+	font-size: 16px;
 	font-weight: 700;
-	color: #15803d;
+	color: #172b4d;
 }
 
-@media screen and (max-width: 1200px) {
+.outward-cheque-modal-label {
+	display: block;
+	margin: 10px 0 5px 0;
+	font-size: 11px;
+	font-weight: 700;
+	color: #334155;
+}
+
+.outward-cheque-modal-actions {
+	width: 100%;
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 18px;
+}
+
+.outward-cheque-modal-close-button, .outward-cheque-modal-submit-button,
+	.outward-cheque-modal-reject-button {
+	height: 36px !important;
+	min-width: 90px !important;
+	border-radius: 5px !important;
+	font-weight: 700 !important;
+}
+
+.outward-cheque-modal-close-button {
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	color: #334155 !important;
+}
+
+.outward-cheque-modal-submit-button, .outward-cheque-modal-reject-button
+	{
+	background: #182b61 !important;
+	border: 1px solid #182b61 !important;
+	color: #ffffff !important;
+}
+
+.outward-cheque-confirm-row {
+	width: 100%;
+	display: grid;
+	grid-template-columns: 100px 1fr;
+	gap: 10px;
+	margin-top: 10px;
+}
+
+.outward-cheque-confirm-label {
+	font-size: 11px;
+	color: #64748b;
+	font-weight: 600;
+}
+
+.outward-cheque-confirm-value {
+	font-size: 12px;
+	color: #172b4d;
+	font-weight: 700;
+}
+
+.outward-cheque-success-modal {
+	border-radius: 8px !important;
+}
+
+.outward-cheque-success-content {
+	padding: 25px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+}
+
+.outward-cheque-success-icon {
+	font-size: 32px;
+	color: #16a34a;
+	font-weight: 700;
+}
+
+.outward-cheque-success-title {
+	font-size: 18px;
+	color: #172b4d;
+	font-weight: 700;
+	text-align: center;
+}
+
+.outward-cheque-success-details {
+	font-size: 12px;
+	color: #64748b;
+	text-align: center;
+	line-height: 1.5;
+}
+
+.outward-cheque-success-button {
+	margin-top: 10px;
+	height: 38px !important;
+	min-width: 130px !important;
+	background: #182b61 !important;
+	border: 1px solid #182b61 !important;
+	color: #ffffff !important;
+	border-radius: 5px !important;
+	font-weight: 700 !important;
+}
+
+@media ( max-width : 1100px) {
 	.outward-cheque-data-entry-page {
-		padding-left: 18px;
-		padding-right: 18px;
+		padding: 15px 18px 22px 18px;
 	}
-	.outward-cheque-data-entry-batch-info {
-		grid-template-columns: 115px 110px minmax(180px, 1fr) auto;
-		column-gap: 18px;
-		padding-left: 16px;
-		padding-right: 16px;
-	}
-	.outward-cheque-data-entry-navigation {
-		grid-template-columns: 82px 40px 82px;
-	}
-	.outward-cheque-data-entry-navigation-button {
-		width: 82px !important;
-	}
-}
-
-@media screen and (max-width: 1000px) {
-	.outward-cheque-data-entry-main-area {
-		grid-template-columns: 1fr;
-		row-gap: 14px;
-	}
-	.outward-cheque-data-entry-batch-card {
-		height: auto;
-	}
-	.outward-cheque-data-entry-batch-info {
+	.outward-cheque-data-entry-summary-card {
 		grid-template-columns: 1fr 1fr;
-		row-gap: 14px;
-		height: auto;
-		padding-top: 15px;
-		padding-bottom: 15px;
 	}
-	.outward-cheque-data-entry-progress-block {
-		max-width: none;
+	.outward-cheque-summary-progress {
+		grid-column: span 2;
 	}
-	.outward-cheque-data-entry-navigation {
-		grid-column: 1/-1;
-		justify-content: start;
+	.outward-cheque-navigation {
+		justify-content: flex-start;
+	}
+	.outward-cheque-data-entry-main {
+		grid-template-columns: 1fr;
 	}
 }
 
-@media screen and (max-width: 650px) {
+@media ( max-width : 700px) {
 	.outward-cheque-data-entry-page {
-		padding: 14px 10px 20px;
+		padding: 12px;
 	}
-	.outward-cheque-data-entry-topbar {
-		min-height: 48px;
-	}
-	.outward-cheque-data-entry-title {
-		font-size: 18px;
-		line-height: 23px;
-	}
-	.outward-cheque-data-entry-back-button {
-		width: 70px !important;
-	}
-	.outward-cheque-data-entry-batch-info,
-		.outward-cheque-data-entry-form-grid {
+	.outward-cheque-data-entry-summary-card {
 		grid-template-columns: 1fr;
 	}
-	.outward-cheque-data-entry-navigation {
+	.outward-cheque-summary-progress {
 		grid-column: auto;
 	}
-	.outward-cheque-data-entry-form-grid {
-		row-gap: 10px;
-	}
-	.outward-cheque-data-entry-image-container {
-		height: 250px;
-	}
-	.outward-cheque-data-entry-action-row {
+	.outward-cheque-form {
 		grid-template-columns: 1fr;
-		row-gap: 7px;
 	}
-	.outward-cheque-data-entry-status-badge {
-		display: none;
+	.outward-cheque-action-row {
+		grid-template-columns: 1fr;
+	}
+	.outward-cheque-image-actions {
+		grid-template-columns: 1fr 1fr;
 	}
 }
