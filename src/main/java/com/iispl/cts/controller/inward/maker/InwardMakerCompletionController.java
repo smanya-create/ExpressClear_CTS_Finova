@@ -88,9 +88,7 @@ public class InwardMakerCompletionController extends GenericForwardComposer<Comp
     @Override
     public void doAfterCompose(Component comp) throws Exception {
     	
-    	if (!SecurityUtil.checkAccess("SUBMIT_BATCH")) {
-    	    return;
-    	}
+    	
         super.doAfterCompose(comp);
 
         String paramBatch = execution.getParameter("batchId");

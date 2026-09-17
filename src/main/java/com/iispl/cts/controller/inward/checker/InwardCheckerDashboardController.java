@@ -35,9 +35,7 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
     @Override
     public void doAfterCompose(Component comp) throws Exception {
     	
-    	if (!SecurityUtil.checkAccess("CHECKER_VERIFICATION")) {
-    	    return;
-    	}
+    	
     	
         super.doAfterCompose(comp);
 

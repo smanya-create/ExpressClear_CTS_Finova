@@ -175,9 +175,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		
-		if (!SecurityUtil.checkAccess("CHECKER_VERIFICATION")) {
-		    return;
-		}
+		
 		
 		super.doAfterCompose(comp);
 		pageRoot = comp.getPage().getFirstRoot();

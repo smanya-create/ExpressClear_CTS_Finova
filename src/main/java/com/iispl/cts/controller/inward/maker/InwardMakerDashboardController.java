@@ -99,9 +99,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		
-		 if (!SecurityUtil.checkAccess("DASHBOARD")) {
-		        return;
-		    }
 		
 		super.doAfterCompose(comp);
 

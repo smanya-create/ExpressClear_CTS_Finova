@@ -63,9 +63,7 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		
-		if (!SecurityUtil.checkAccess("CHEQUE_DETAILS")) {
-		    return;
-		}
+	
 		super.doAfterCompose(comp);
 
 		this.inwardBatchService = new InwardBatchServiceImpl();

@@ -49,9 +49,7 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		
-		if (!SecurityUtil.checkAccess("MICR_REPAIR")) {
-		    return;
-		}
+		
 		super.doAfterCompose(comp);
 
 		this.inwardBatchService = new InwardBatchServiceImpl();
