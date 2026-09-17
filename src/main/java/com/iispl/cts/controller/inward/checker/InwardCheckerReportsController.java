@@ -248,13 +248,11 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
             return;
         }
 
-        String generatedBy = String.valueOf(
-                Sessions.getCurrent().getAttribute("LOGGED_USER"));
+    
 
         String xml = ReportXmlGenerator.generateRrfXml(
                 batchId,
-                rejectedCheques,
-                generatedBy);
+                rejectedCheques);
 
         Filedownload.save(
                 xml.getBytes(StandardCharsets.UTF_8),
@@ -282,8 +280,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
 
         String xml = ReportXmlGenerator.generateBatchSummaryXml(
                 batchId,
-                batchCheques,
-                generatedBy);
+                batchCheques);
 
         Filedownload.save(
                 xml.getBytes(StandardCharsets.UTF_8),

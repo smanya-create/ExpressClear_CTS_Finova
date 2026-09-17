@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -58,25 +56,43 @@ public class HeaderController extends GenericForwardComposer<Component> {
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        initUserProfile();
-     // --- HIDE NOTIFICATION BELL FOR ADMIN OR WHEN SUPPRESSED ---
-        String currentRole = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
-        Object showNotifArg = Executions.getCurrent().getArg().get("showNotifications");
 
-        if ("ADMIN".equalsIgnoreCase(currentRole) || "false".equalsIgnoreCase(String.valueOf(showNotifArg))) {
+        // 1. Initialize user details first to guarantee UI components get populated
+        initUserProfile();
+
+        // 2. Hide notification bell safely without null pointer exceptions
+        String currentRole = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "";
+        Object showNotifArg = Executions.getCurrent().getArg().get("showNotifications");
+        boolean suppressNotif = showNotifArg != null && "false".equalsIgnoreCase(String.valueOf(showNotifArg));
+
+        if ("ADMIN".equalsIgnoreCase(currentRole) || suppressNotif) {
             if (divNotificationBell != null) {
                 divNotificationBell.setVisible(false);
             }
         }
-        loadSessionState();
-     // Optional optimization: skip querying notifications for Admin
-        if (divNotificationBell != null && divNotificationBell.isVisible()) {
-            loadDatabaseNotifications();
-        }
-        com.iispl.cts.common.util.SecurityUtil.applySessionLockdown(comp.getPage());
-        
 
-        // Attach listener to first root element of the page
+        // 3. Load Session State (Database Date & Status)
+        loadSessionState();
+
+        // 4. Safely load notifications (isolated in try-catch to keep header rendering intact)
+        if (divNotificationBell != null && divNotificationBell.isVisible()) {
+            try {
+                loadDatabaseNotifications();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 5. Apply Security Lockdown
+        if (comp != null && comp.getPage() != null) {
+            try {
+                com.iispl.cts.common.util.SecurityUtil.applySessionLockdown(comp.getPage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // 6. Attach Session Status Listener
         if (getPage() != null && getPage().getFirstRoot() != null) {
             getPage().getFirstRoot().addEventListener("onSessionStatusChanged", new EventListener<Event>() {
                 @Override
@@ -94,22 +110,36 @@ public class HeaderController extends GenericForwardComposer<Component> {
     }
 
     private void initUserProfile() {
-        // Read authenticated user details from session
+        // Fallback check across all potential session attribute keys for username
         String username = (String) Sessions.getCurrent().getAttribute("CTS_USERNAME");
-        String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
-
+        if (username == null) {
+            username = (String) Sessions.getCurrent().getAttribute("USERNAME");
+        }
         if (username == null || username.trim().isEmpty()) {
-            username = "Admin";
+            username = "User";
+        }
+
+        // Fallback check across all potential session attribute keys for role
+        String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
+        if (role == null) {
+            role = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
         }
         if (role == null || role.trim().isEmpty()) {
             role = "ADMIN";
         }
 
-        if (lblHeaderUsername != null) lblHeaderUsername.setValue(username);
-        if (lblHeaderRole != null) lblHeaderRole.setValue(role);
-        if (lblUserInitial != null) lblUserInitial.setValue(username.substring(0, 1).toUpperCase());
+        // Assign values to header labels
+        if (lblHeaderUsername != null) {
+            lblHeaderUsername.setValue(username);
+        }
+        if (lblHeaderRole != null) {
+            lblHeaderRole.setValue(role);
+        }
+        if (lblUserInitial != null && !username.isEmpty()) {
+            lblUserInitial.setValue(username.substring(0, 1).toUpperCase());
+        }
 
-        // Notifications are visible for operational roles and administrators
+        // Role check for visible bell icon
         boolean isOperationalRole = "OUTWARD_MAKER".equalsIgnoreCase(role)
                 || "OUTWARD_CHECKER".equalsIgnoreCase(role)
                 || "INWARD_MAKER".equalsIgnoreCase(role)
@@ -215,21 +245,22 @@ public class HeaderController extends GenericForwardComposer<Component> {
         List<Notification> dbList = notificationService.getUnreadNotifications(role, userId);
 
         notificationQueue.clear();
-        for (Notification item : dbList) {
-            notificationQueue.add(new NotificationItem(
-                item.getNotificationId(),
-                item.getMessage(),
-                calculateRelativeTime(item.getCreatedAt())
-            ));
+        if (dbList != null) {
+            for (Notification item : dbList) {
+                notificationQueue.add(new NotificationItem(
+                    item.getNotificationId(),
+                    item.getMessage(),
+                    calculateRelativeTime(item.getCreatedAt())
+                ));
+            }
         }
 
         renderNotifications();
     }
 
     private String calculateRelativeTime(java.sql.Timestamp ts) {
-    	if (ts == null) return "Just now";
+        if (ts == null) return "Just now";
 
-        // Compare raw millisecond differences directly
         long diffMillis = System.currentTimeMillis() - ts.getTime();
         long seconds = diffMillis / 1000;
 
@@ -289,7 +320,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
             itemLayout.appendChild(timeLabel);
             notifRow.appendChild(itemLayout);
 
-            // Click action: Close popup and redirect to Unprocessed Queue
+            // Click action: Close popup and redirect to target page
             notifRow.addEventListener("onClick", (Event event) -> {
                 if (popupNotifications != null) {
                     popupNotifications.close();
@@ -309,32 +340,37 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
         String normalizedRole = role.trim().toUpperCase();
 
-        // 1. If it's a Maker or relates to scan/repair queues
+        // Outward Role Navigation
         if ("OUTWARD_MAKER".equals(normalizedRole)) {
             Executions.sendRedirect("/outward/maker/unprocessed-cheques.zul");
             return;
         }
-
-        // 2. If it's a Checker
         if ("OUTWARD_CHECKER".equals(normalizedRole)) {
             Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
             return;
         }
 
-        // 3. Fallback routing based on message keywords if role is generic or ADMIN
+        // Inward Role Navigation
+        if ("INWARD_MAKER".equals(normalizedRole)) {
+            Executions.sendRedirect("/inward/maker/inward-maker-dashboard.zul");
+            return;
+        }
+        if ("INWARD_CHECKER".equals(normalizedRole)) {
+            Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
+            return;
+        }
+
+        // Fallback routing based on message keywords
         if (message != null) {
             String lowerMsg = message.toLowerCase();
-            if (lowerMsg.contains("checker") || lowerMsg.contains("verification")) {
-                Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
-            } else if (lowerMsg.contains("maker") || lowerMsg.contains("repair") || lowerMsg.contains("data entry") || lowerMsg.contains("unprocessed")) {
-                Executions.sendRedirect("/outward/maker/unprocessed-cheques.zul");
+            if (lowerMsg.contains("checker")) {
+                Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
+            } else if (lowerMsg.contains("maker")) {
+                Executions.sendRedirect("/inward/maker/inward-maker-dashboard.zul");
             }
         }
     }
 
-	/**
-     * Inspects the target role and message intent, routing the user to the appropriate screen.
-     */
     public void onClickMarkAllRead() {
         String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
         String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
@@ -347,7 +383,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
         renderNotifications();
     }
 
-    // Helper Model
+    // Helper Model Class
     private static class NotificationItem {
         final Long id;
         final String message;
