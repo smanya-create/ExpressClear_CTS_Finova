@@ -1,8 +1,8 @@
 /* =========================================================
-   CHECKER QUEUE WINDOW
+   ROOT PAGE
    ========================================================= */
 
-.checker-queue-window {
+.checker-queue-root {
     width: 100%;
     height: 100%;
     background: #f4f7fb;
@@ -13,15 +13,14 @@
 
 
 /* =========================================================
-   NO PAGE SCROLL
+   GLOBAL ZK LAYOUT
    ========================================================= */
 
-.checker-queue-window .z-window-content,
-.checker-queue-window .z-borderlayout,
-.checker-queue-window .z-borderlayout-center,
-.checker-queue-window .z-borderlayout-center-body,
-.checker-queue-window .z-center,
-.checker-queue-window .z-center-body {
+.checker-queue-root .z-borderlayout,
+.checker-queue-root .z-borderlayout-center,
+.checker-queue-root .z-borderlayout-center-body,
+.checker-queue-root .z-center,
+.checker-queue-root .z-center-body {
     overflow: hidden !important;
 }
 
@@ -34,6 +33,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden !important;
+    box-sizing: border-box;
 }
 
 
@@ -46,31 +46,38 @@
     height: 100%;
     background: #f3f7fb;
     overflow: hidden !important;
-}
-
-.main-content {
-    width: 100%;
-    height: 100%;
-    padding: 8px 20px 5px 20px;
     box-sizing: border-box;
-    overflow: hidden !important;
 }
 
 
 /* =========================================================
-   HEADER
+   MAIN CONTENT
+   ========================================================= */
+
+.main-content {
+    width: 100%;
+    height: 100%;
+    padding: 8px 20px 2px 20px;
+    box-sizing: border-box;
+    overflow: hidden !important;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   PAGE HEADER
    ========================================================= */
 
 .page-header {
     width: 100%;
-    height: 90px;
+    height: 60px;
     background: #ffffff;
     border-bottom: 1px solid #dce4ed;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 0 28px;
     box-sizing: border-box;
 }
@@ -82,15 +89,15 @@
 }
 
 .header-page-title {
-    font-size: 21px;
+    font-size: 18px;
     font-weight: 700;
     color: #163d68;
 }
 
 .header-page-description {
-    font-size: 10px;
+    font-size: 9px;
     color: #8292a6;
-    margin-top: 5px;
+    margin-top: 3px;
 }
 
 .header-right-content {
@@ -101,13 +108,35 @@
 
 
 /* =========================================================
+   QUEUE HEADER ROW
+   ========================================================= */
+
+.queue-header-row {
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+
+    /* Increased space below pagination */
+    margin-bottom: 16px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
    SECTION HEADING
    ========================================================= */
 
 .section-heading {
-    width: 100%;
-    height: 20px;
-    margin-bottom: 5px;
+    width: auto;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .main-title {
@@ -118,8 +147,199 @@
 
 
 /* =========================================================
-   SUMMARY CARD
+   PAGINATION CARD
    ========================================================= */
+
+.pagination-card {
+    width: 310px;
+    height: 34px;
+    background: #ffffff;
+    border: 1px solid #dce3eb;
+    border-radius: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 7px;
+    padding: 4px 7px;
+
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   PROGRESS SECTION
+   ========================================================= */
+
+.progress-section {
+    width: 125px;
+    height: 24px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   PROGRESS BAR
+   ========================================================= */
+
+.queue-progress-bar {
+    width: 72px !important;
+    min-width: 72px !important;
+    height: 5px !important;
+
+    border: none !important;
+    border-radius: 5px !important;
+
+    overflow: hidden !important;
+
+    background-color: #e5eaf0 !important;
+
+    --zk-progressmeter-background-color: #168ee5;
+
+    flex-shrink: 0;
+}
+
+.queue-progress-bar.z-progressmeter {
+    width: 72px !important;
+    height: 5px !important;
+
+    background: #e5eaf0 !important;
+    background-color: #e5eaf0 !important;
+
+    border: none !important;
+    border-radius: 5px !important;
+
+    overflow: hidden !important;
+}
+
+.queue-progress-bar .z-progressmeter-image {
+    height: 100% !important;
+
+    background: #168ee5 !important;
+    background-color: #168ee5 !important;
+
+    border: none !important;
+    border-radius: 5px !important;
+
+    transition: width 0.25s ease !important;
+}
+
+.queue-progress-bar .z-progressmeter-value {
+    height: 100% !important;
+
+    background: #168ee5 !important;
+    background-color: #168ee5 !important;
+
+    border: none !important;
+    border-radius: 5px !important;
+
+    transition: width 0.25s ease !important;
+}
+
+
+/* =========================================================
+   PROGRESS TEXT
+   ========================================================= */
+
+.progress-text {
+    min-width: 43px;
+
+    font-size: 8px;
+    font-weight: 600;
+
+    color: #536273;
+
+    white-space: nowrap;
+    text-align: center;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   PAGINATION DIVIDER
+   ========================================================= */
+
+.pagination-divider {
+    width: 1px;
+    height: 20px;
+
+    background: #e1e6ec;
+
+    margin: 0 2px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   PAGINATION BUTTON
+   ========================================================= */
+
+.pagination-button {
+    height: 27px;
+    min-width: 52px;
+
+    padding: 0 7px;
+
+    background: #ffffff;
+
+    border: 1px solid #d3dce6;
+    border-radius: 4px;
+
+    color: #294b6d;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+
+    flex-shrink: 0;
+}
+
+.pagination-button:hover {
+    background: #f5f8fb;
+}
+
+.pagination-button[disabled],
+.pagination-button.z-button-disabled {
+    background: #eeeeee !important;
+    color: #b8bec5 !important;
+    border-color: #eeeeee !important;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   PAGINATION COUNT
+   ========================================================= */
+
+.pagination-count {
+    min-width: 38px;
+
+    font-size: 8px;
+    font-weight: 600;
+
+    color: #526274;
+
+    text-align: center;
+    white-space: nowrap;
+
+    flex-shrink: 0;
+}
+
 
 /* =========================================================
    SUMMARY CARD
@@ -127,25 +347,42 @@
 
 .summary-card {
     width: 100%;
-    height: 50px;
-    min-height: 50px;
+    height: 49px;
+    min-height: 49px;
+
     background: #ffffff;
+
     border: 1px solid #d2ddea;
     border-radius: 6px;
+
     display: flex;
+    align-items: stretch;
+
     overflow: hidden;
+
     box-sizing: border-box;
-    margin-bottom: 7px;
+
+    /* Increased space below summary */
+    margin-bottom: 16px;
+
+    flex-shrink: 0;
 }
+
+
+/* =========================================================
+   SUMMARY ITEM
+   ========================================================= */
 
 .summary-item {
     flex: 1;
     min-width: 0;
-    padding: 7px 12px;
-    border-right: 1px solid #d2ddea;
+
+    padding: 6px 12px;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
+
     box-sizing: border-box;
 }
 
@@ -153,46 +390,84 @@
     border-right: none;
 }
 
-/* INCREASED */
+
+/* =========================================================
+   SUMMARY LABEL
+   ========================================================= */
+
 .summary-label {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 600;
+
     color: #748aa4;
-    margin-bottom: 3px;
+
+    margin-bottom: 2px;
 }
 
-/* INCREASED */
-.summary-value {
-    font-size: 12px;
-    font-weight: 700;
-    color: #173b63;
-}
 
-/* INCREASED */
+/* =========================================================
+   SUMMARY VALUE
+   ========================================================= */
+
+.summary-value,
 .remaining-value {
     font-size: 12px;
     font-weight: 700;
+
     color: #173b63;
 }
 
 
 /* =========================================================
-   BATCH STATUS
+   QUEUE STATUS
    ========================================================= */
 
 .status-pending {
-    display: inline-block;
-    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 23px;
+    min-width: 100px;
+
+    padding: 0 12px;
+
     border: 1px solid #f0a329;
     border-radius: 15px;
+
     background: #fffaf1;
     color: #d88a00;
 
-    /* INCREASED */
     font-size: 9px;
-
     font-weight: 700;
+
     text-align: center;
+
+    box-sizing: border-box;
+}
+
+.status-verified {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 23px;
+    min-width: 100px;
+
+    padding: 0 12px;
+
+    border: 1px solid #a7dfbd;
+    border-radius: 15px;
+
+    background: #dcfce7;
+    color: #15803d;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    text-align: center;
+
+    box-sizing: border-box;
 }
 
 
@@ -202,26 +477,36 @@
 
 .verification-row {
     width: 100%;
-    height: 315px;
+
+    height: 410px;
+    min-height: 410px;
 
     display: flex;
+
     gap: 10px;
+
     align-items: stretch;
 
     box-sizing: border-box;
+
     overflow: hidden;
+
+    flex-shrink: 0;
 }
 
 
 /* =========================================================
-   IMAGE CARD - 50%
+   IMAGE CARD
    ========================================================= */
 
 .image-card {
     width: calc(50% - 5px);
-    height: 315px;
+
+    height: 410px;
+    min-height: 410px;
 
     flex: none;
+
     min-width: 0;
 
     background: #ffffff;
@@ -229,33 +514,34 @@
     border: 1px solid #d2ddea;
     border-radius: 6px;
 
-    padding: 9px 12px;
+    padding: 8px 12px;
 
     box-sizing: border-box;
+
     overflow: hidden;
 }
 
 
 /* =========================================================
-   DETAILS CARD - 50%
+   IMAGE CARD HEADER
    ========================================================= */
 
-.details-card {
-    width: calc(50% - 5px);
-    height: 315px;
+.image-card-header {
+    width: 100%;
+    height: 31px;
 
-    flex: none;
-    min-width: 0;
-
-    background: #ffffff;
-
-    border: 1px solid #d2ddea;
-    border-radius: 6px;
-
-    padding: 9px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
 
     box-sizing: border-box;
-    overflow: hidden;
+}
+
+.image-title-area {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
 }
 
 
@@ -266,110 +552,53 @@
 .card-title {
     font-size: 17px;
     font-weight: 700;
+
     color: #173b63;
 }
 
 .card-description {
     display: block;
+
     font-size: 9px;
+
     color: #8c9bad;
-    margin-top: 3px;
-}
 
-/* =========================================================
-   ZOOM CONTROLS
-   ========================================================= */
+    margin-top: 2px;
 
-.zoom-controls {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 2px 0 0 0;
+    white-space: nowrap;
 }
 
 
 /* =========================================================
-   ZOOM BUTTON
-   ========================================================= */
-
-.zoom-button {
-    width: 25px;
-    height: 23px;
-    min-width: 25px;
-
-    padding: 0;
-
-    background: #ffffff;
-
-    border: 1px solid #cbd6e2;
-    border-radius: 4px;
-
-    color: #315575;
-
-    font-size: 15px;
-    text-align: center;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   ZOOM LEVEL
-   ========================================================= */
-
-.zoom-level {
-    min-width: 34px;
-    font-size: 8px;
-    color: #6f8094;
-    text-align: center;
-}
-
-
-/* =========================================================
-   RESET BUTTON
-   ========================================================= */
-
-.zoom-reset-button {
-    height: 23px;
-
-    padding: 0 8px;
-
-    background: #ffffff;
-
-    border: 1px solid #cbd6e2;
-    border-radius: 4px;
-
-    color: #53677d;
-
-    font-size: 8px;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================================
-   BACK SIDE BUTTON
+   FRONT / BACK BUTTON
    ========================================================= */
 
 .image-side-button {
     height: 23px;
+    min-width: 75px;
 
-    padding: 0 13px;
+    padding: 0 12px;
 
-    background: #078bd2;
+    background: #0b1f3a !important;
 
-    border: none;
+    border: none !important;
+
     border-radius: 4px;
 
-    color: #ffffff;
+    color: #ffffff !important;
 
     font-size: 8px;
     font-weight: 700;
 
     box-sizing: border-box;
+
+    flex-shrink: 0;
+
+    white-space: nowrap;
+}
+
+.image-side-button:hover {
+    background: #17395f !important;
 }
 
 
@@ -379,7 +608,11 @@
 
 .cheque-image-container {
     width: 100%;
-    height: 225px;
+
+    height: 235px;
+    min-height: 235px;
+
+    margin-top: 7px;
 
     background: #ffffff;
 
@@ -401,15 +634,142 @@
    ========================================================= */
 
 .cheque-image {
-    width: 96%;
-    height: 92%;
+    width: 100%;
+    height: 100%;
 
-    max-width: 96%;
-    max-height: 92%;
+    max-width: 100%;
+    max-height: 100%;
 
     object-fit: contain;
+    object-position: center center;
 
     display: block;
+
+    transform-origin: center center;
+}
+
+
+/* =========================================================
+   ZOOM CONTROLS
+   ========================================================= */
+
+.zoom-controls {
+    width: 100%;
+    height: 23px;
+
+    display: flex;
+
+    justify-content: flex-start;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 5px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ZOOM BUTTON
+   ========================================================= */
+
+.zoom-button {
+    width: 25px;
+    height: 23px;
+
+    min-width: 25px;
+
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #cbd6e2 !important;
+
+    border-radius: 4px;
+
+    color: #315575 !important;
+
+    font-size: 15px;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+.zoom-button:hover {
+    background: #f3f7fb !important;
+}
+
+
+/* =========================================================
+   ZOOM LEVEL
+   ========================================================= */
+
+.zoom-level {
+    min-width: 34px;
+
+    font-size: 8px;
+
+    color: #6f8094;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   ZOOM RESET
+   ========================================================= */
+
+.zoom-reset-button {
+    height: 23px;
+
+    padding: 0 8px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #cbd6e2 !important;
+
+    border-radius: 4px;
+
+    color: #53677d !important;
+
+    font-size: 8px;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+}
+
+.zoom-reset-button:hover {
+    background: #f3f7fb !important;
+}
+
+
+/* =========================================================
+   DETAILS CARD
+   ========================================================= */
+
+.details-card {
+    width: calc(50% - 5px);
+
+    height: 410px;
+    min-height: 410px;
+
+    flex: none;
+
+    min-width: 0;
+
+    background: #ffffff;
+
+    border: 1px solid #d2ddea;
+    border-radius: 6px;
+
+    padding: 8px 12px;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
 }
 
 
@@ -421,23 +781,26 @@
     width: 100%;
 
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     gap: 8px;
 
-    margin-bottom: 7px;
+    margin-bottom: 5px;
 }
 
 .details-card-title-area {
     display: flex;
     flex-direction: column;
+
     min-width: 0;
 }
 
 
 /* =========================================================
-   ACCOUNT VALIDATION BADGES
+   VALIDATION BADGES
    ========================================================= */
 
 .validation-pending-badge,
@@ -449,7 +812,6 @@
     justify-content: center;
 
     height: 25px;
-
     min-width: 100px;
 
     padding: 0 12px;
@@ -464,33 +826,51 @@
     box-sizing: border-box;
 
     white-space: nowrap;
+
+    flex-shrink: 0;
 }
-
-
-/* NOT VERIFIED */
 
 .validation-pending-badge {
     border: 1px solid #cbd5df;
+
     background: #f4f6f8;
+
     color: #7c8997;
 }
 
-
-/* VALID */
-
 .valid-badge {
     border: 1px solid #a7dfbd;
+
     background: #dcfce7;
+
     color: #15803d;
 }
 
-
-/* INVALID */
-
 .invalid-badge {
     border: 1px solid #f3b4b4;
+
     background: #fee2e2;
+
     color: #dc2626;
+}
+
+
+/* =========================================================
+   MAKER STATUS MESSAGE
+   ========================================================= */
+
+.maker-rejection-request {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    font-size: 10px;
+}
+
+.rejection-details {
+    width: 100%;
+
+    box-sizing: border-box;
 }
 
 
@@ -500,16 +880,22 @@
 
 .two-column-fields {
     width: 100%;
+
     display: flex;
+
     gap: 10px;
-    margin-bottom: 8px;
+
+    margin-bottom: 7px;
+
     box-sizing: border-box;
 }
 
 .field-group {
     width: 50%;
+
     min-width: 0;
 }
+
 
 /* =========================================================
    FIELD LABEL
@@ -517,161 +903,89 @@
 
 .field-label {
     display: block;
-    font-size: 9px;
+
+    font-size: 8px;
     font-weight: 700;
+
     color: #71869e;
-    margin-bottom: 4px;
+
+    margin-bottom: 3px;
+
+    white-space: nowrap;
 }
+
+
 /* =========================================================
    READ ONLY FIELD
    ========================================================= */
 
 .readonly-field {
     width: 100%;
+
     height: 32px;
-    background: #f5f7fa;
-    border: 1px solid #d0dbe6;
+
+    background: #f5f7fa !important;
+
+    border: 1px solid #d0dbe6 !important;
+
     border-radius: 4px;
 
-    color: #304f6e;
+    color: #304f6e !important;
+
     font-size: 12px;
     font-weight: 500;
 
     padding: 0 9px;
-    box-sizing: border-box;
-}
 
-/* =========================================================
-   MAKER REJECTION REQUEST
-   ========================================================= */
-
-.maker-rejection-request {
-    width: 100%;
-    box-sizing: border-box;
-
-    font-size: 11px;
-}
-
-/* =========================================================
-   REJECTION DETAILS
-   ========================================================= */
-
-.rejection-details {
-    width: 100%;
     box-sizing: border-box;
 }
 
 
 /* =========================================================
-   NAVIGATION
-   BELOW BOTH CARDS
+   CHECKER ACTION AREA
    ========================================================= */
 
-.navigation-row {
+.details-action-area {
     width: 100%;
 
-    height: 28px;
+    margin-top: 9px;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding-top: 7px;
 
-    margin-top: 6px;
+    border-top: 1px solid #e1e6ed;
 
     box-sizing: border-box;
-}
-
-.navigation-button {
-    height: 25px;
-
-    min-width: 75px;
-
-    padding: 0 9px;
-
-    background: #ffffff;
-
-    border: 1px solid #ccd7e3;
-    border-radius: 4px;
-
-    color: #244b73;
-
-    font-size: 7px;
-    font-weight: 700;
-
-    box-sizing: border-box;
-}
-
-.navigation-label {
-    font-size: 7px;
-    color: #8595a9;
-}
-
-.navigation-button:disabled {
-    background: #eeeeee;
-    color: #c5c5c5;
-    border-color: #eeeeee;
-    cursor: not-allowed;
 }
 
 
 /* =========================================================
-   ACTION CARD
+   CHECKER ACTION TITLE
    ========================================================= */
 
-.action-card {
-    width: 100%;
+.details-action-title {
+    display: block;
 
-    height: 58px;
-    min-height: 58px;
-
-    margin-top: 6px;
-
-    background: #ffffff;
-
-    border: 1px solid #d2ddea;
-    border-radius: 6px;
-
-    padding: 7px 12px;
-
-    box-sizing: border-box;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 15px;
-
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   ACTION TITLE
-   ========================================================= */
-
-.action-title {
     font-size: 8px;
     font-weight: 700;
+
     color: #6e8299;
 
-    flex-shrink: 0;
+    margin-bottom: 5px;
 }
 
 
 /* =========================================================
-   ACTION BUTTONS
+   ACTION BUTTON ROW
    ========================================================= */
 
-.action-buttons {
-    flex: 1;
+.details-action-buttons {
+    width: 100%;
 
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
 
-    gap: 8px;
+    gap: 6px;
 
-    min-width: 0;
+    box-sizing: border-box;
 }
 
 
@@ -679,100 +993,207 @@
    COMMON ACTION BUTTON
    ========================================================= */
 
-.verified-button,
-.xml-generation-button,
-.xml-generation-button-enabled,
-.return-button,
-.reject-button {
+.details-action-buttons .verified-button,
+.details-action-buttons .return-button,
+.details-action-buttons .reject-button {
 
-    height: 34px;
+    flex: 1 1 0;
 
-    min-width: 115px;
+    width: 0;
 
-    padding: 0 12px;
+    min-width: 0;
 
-    border: none;
+    height: 31px;
+
+    padding: 0 8px !important;
+
     border-radius: 5px;
 
-    color: #ffffff;
-
     font-size: 8px;
+
     font-weight: 700;
+
+    line-height: 29px;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+
+    text-align: center;
+
+    flex-shrink: 1;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   VERIFY BUTTON
+   WHITE BACKGROUND
+   GREEN BORDER + GREEN TEXT
+   ========================================================= */
+
+.details-action-buttons .verified-button {
+
+    background: #ffffff !important;
+
+    border: 1px solid #22a06b !important;
+
+    color: #168a5b !important;
+}
+
+.details-action-buttons .verified-button:hover {
+
+    background: #f0fff7 !important;
+
+    border-color: #168a5b !important;
+
+    color: #168a5b !important;
+}
+
+
+/* =========================================================
+   RETURN TO MAKER BUTTON
+   WHITE BACKGROUND
+   ORANGE BORDER + ORANGE TEXT
+   ========================================================= */
+
+.details-action-buttons .return-button {
+
+    background: #ffffff !important;
+
+    border: 1px solid #e59a00 !important;
+
+    color: #d98500 !important;
+}
+
+.details-action-buttons .return-button:hover {
+
+    background: #fff8e8 !important;
+
+    border-color: #d98500 !important;
+
+    color: #c47700 !important;
+}
+
+
+/* =========================================================
+   REJECT BUTTON
+   WHITE BACKGROUND
+   RED BORDER + RED TEXT
+   ========================================================= */
+
+.details-action-buttons .reject-button {
+
+    background: #ffffff !important;
+
+    border: 1px solid #d94b4b !important;
+
+    color: #d33f3f !important;
+}
+
+.details-action-buttons .reject-button:hover {
+
+    background: #fff5f5 !important;
+
+    border-color: #c93636 !important;
+
+    color: #c93636 !important;
+}
+
+
+/* =========================================================
+   ZK BUTTON INTERNAL TEXT
+   ========================================================= */
+
+.details-action-buttons .z-button,
+.details-action-buttons .z-button-content,
+.details-action-buttons .z-button-label {
+
+    white-space: nowrap !important;
+
+    overflow: visible !important;
+
+    text-overflow: clip !important;
 
     box-sizing: border-box;
 }
 
 
 /* =========================================================
-   VERIFY
+   APPROVE BATCH - DISABLED
    ========================================================= */
 
-.verified-button {
-    background: #218b58;
-}
+.details-action-area .xml-generation-button {
 
-.verified-button:hover {
-    background: #19794c;
-}
+    width: 100%;
 
-/* =========================================================
-   XML GENERATION - DISABLED
-   ========================================================= */
+    height: 31px;
 
-.xml-generation-button {
-    background: #DDDDDD !important;
-    border: 1px solid #DDDDDD !important;
-    color: #A8A8A8 !important;
+    margin-top: 6px;
+
+    display: block;
+
+    padding: 0 8px !important;
+
+    border: 1px solid #d8e0e9 !important;
+
+    border-radius: 5px;
+
+    background: #e1e8f0 !important;
+
+    color: #8ea0b4 !important;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    box-sizing: border-box;
+
     box-shadow: none !important;
+
+    white-space: nowrap;
 }
 
 
 /* =========================================================
-   XML GENERATION - ENABLED
-   Same dark blue as sidebar
+   APPROVE BATCH - ENABLED
    ========================================================= */
 
-.xml-generation-button-enabled {
-    background: #0F2747 !important;
-    border: 1px solid #0F2747 !important;
-    color: #FFFFFF !important;
+.details-action-area .xml-generation-button-enabled {
+
+    width: 100%;
+
+    height: 31px;
+
+    margin-top: 6px;
+
+    display: block;
+
+    padding: 0 8px !important;
+
+    border: 1px solid #173b63 !important;
+
+    border-radius: 5px;
+
+    background: #173b63 !important;
+
+    color: #ffffff !important;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    box-sizing: border-box;
+
     box-shadow: none !important;
+
+    white-space: nowrap;
 }
 
+.details-action-area .xml-generation-button-enabled:hover {
 
-/*
- * ZK adds its own disabled class.
- * Keep the enabled colour when the button is enabled.
- */
-
-.xml-generation-button-enabled.z-button-disd {
-    background: #0F2747 !important;
-    border: 1px solid #0F2747 !important;
-    color: #FFFFFF !important;
-}
-/* =========================================================
-   RETURN TO MAKER
-   ========================================================= */
-
-.return-button {
-    background: #df9207;
-}
-
-.return-button:hover {
-    background: #c98205;
-}
-
-
-/* =========================================================
-   REJECT
-   ========================================================= */
-
-.reject-button {
-    background: #c84d4d;
-}
-
-.reject-button:hover {
-    background: #b64040;
+    background: #0f2f50 !important;
 }
 
 
@@ -781,46 +1202,62 @@
    ========================================================= */
 
 .page-footer {
+
     width: 100%;
 
-    height: 18px;
+    height: 20px;
+    min-height: 20px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding: 0 2px;
 
-    margin-top: 3px;
+    margin-top: 5px;
 
     box-sizing: border-box;
 
     overflow: hidden;
+
+    flex-shrink: 0;
 }
 
 .footer-left,
 .footer-right {
+
     font-size: 7px;
+
     color: #9aa8b9;
 }
 
 
 /* =========================================================
-   BACK DASHBOARD
+   BACK TO DASHBOARD
    ========================================================= */
 
 .back-dashboard-button {
-    background: #0789d2;
 
-    border: none;
+    background: #0789d2 !important;
+
+    border: none !important;
+
     border-radius: 4px;
 
-    color: #ffffff;
+    color: #ffffff !important;
 
     padding: 8px 15px;
 
     font-size: 9px;
+
     font-weight: 700;
+}
+
+.back-dashboard-button:hover {
+
+    background: #067bb9 !important;
 }
 
 
@@ -831,92 +1268,179 @@
 @media screen and (max-width: 1150px) {
 
     .main-content {
-        padding: 7px 15px 4px 15px;
+        padding: 7px 15px 2px 15px;
+    }
+
+    .queue-header-row {
+        margin-bottom: 16px;
+    }
+
+    .pagination-card {
+        width: 300px;
     }
 
     .verification-row {
+
         gap: 8px;
+
+        height: 410px;
+        min-height: 410px;
     }
 
-    .image-card,
-    .details-card {
+    .image-card {
+
         width: calc(50% - 4px);
+
+        height: 410px;
+        min-height: 410px;
     }
 
-    .action-buttons {
-        gap: 6px;
-    }
+    .details-card {
 
-    .verified-button,
-    .xml-generation-button,
-    .xml-generation-button-enabled,
-    .return-button,
-    .reject-button {
-        min-width: 100px;
-        padding: 0 7px;
-        font-size: 7px;
+        width: calc(50% - 4px);
+
+        height: 410px;
+        min-height: 410px;
     }
 
     .cheque-image-container {
-        height: 220px;
+
+        height: 235px;
+        min-height: 235px;
+    }
+
+    .details-action-buttons {
+        gap: 5px;
+    }
+
+    .details-action-buttons .verified-button,
+    .details-action-buttons .return-button,
+    .details-action-buttons .reject-button {
+
+        font-size: 7px;
+
+        padding-left: 5px !important;
+        padding-right: 5px !important;
     }
 }
 
 
 /* =========================================================
    SMALL SCREEN
-   KEEP 50 / 50
    ========================================================= */
 
 @media screen and (max-width: 850px) {
 
-    .verification-row {
-        flex-direction: row;
-        gap: 6px;
+    .main-content {
+        padding: 6px 10px 2px 10px;
     }
 
-    .image-card,
-    .details-card {
-        width: calc(50% - 3px);
+    .queue-header-row {
+
+        height: 34px;
+
+        margin-bottom: 14px;
     }
 
-    .cheque-image-container {
-        height: 215px;
+    .pagination-card {
+
+        width: 270px;
+
+        gap: 5px;
+
+        padding: 4px 5px;
     }
 
-    .action-buttons {
+    .progress-section {
+
+        width: 95px;
+
         gap: 4px;
     }
 
-    .verified-button,
-    .xml-generation-button,
-    .xml-generation-button-enabled,
-    .return-button,
-    .reject-button {
-        min-width: 85px;
-        padding: 0 5px;
-        font-size: 6px;
+    .queue-progress-bar {
+
+        width: 55px !important;
+
+        min-width: 55px !important;
     }
-}
 
-.status-verified {
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius: 12px;
-    background: #DCFCE7;
-    color: #15803D;
-    font-size: 11px;
-    font-weight: 700;
-}
+    .progress-text {
 
-.status-pending {
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius: 12px;
-    background: #FEF3C7;
-    color: #B45309;
-    font-size: 11px;
-    font-weight: 700;
+        min-width: 34px;
+
+        font-size: 7px;
+    }
+
+    .pagination-button {
+
+        min-width: 45px;
+
+        padding: 0 5px;
+
+        font-size: 7px;
+    }
+
+    .pagination-count {
+
+        min-width: 32px;
+
+        font-size: 7px;
+    }
+
+    .summary-card {
+
+        margin-bottom: 14px;
+    }
+
+    .verification-row {
+
+        gap: 6px;
+
+        height: 410px;
+        min-height: 410px;
+    }
+
+    .image-card {
+
+        width: calc(50% - 3px);
+
+        height: 410px;
+        min-height: 410px;
+    }
+
+    .details-card {
+
+        width: calc(50% - 3px);
+
+        height: 410px;
+        min-height: 410px;
+    }
+
+    .cheque-image-container {
+
+        height: 235px;
+        min-height: 235px;
+    }
+
+    .details-action-buttons {
+
+        gap: 4px;
+    }
+
+    .details-action-buttons .verified-button,
+    .details-action-buttons .return-button,
+    .details-action-buttons .reject-button {
+
+        font-size: 6.5px;
+
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+
+    .readonly-field {
+        font-size: 11px;
+    }
 }
 
 
@@ -927,6 +1451,9 @@
 @media screen and (max-width: 600px) {
 
     .page-header {
+
+        height: 60px;
+
         padding: 0 15px;
     }
 
@@ -938,42 +1465,248 @@
         font-size: 8px;
     }
 
+    .queue-header-row {
+
+        height: 34px;
+
+        margin-bottom: 14px;
+    }
+
+    .main-title {
+        font-size: 15px;
+    }
+
+    .pagination-card {
+
+        width: 255px;
+
+        gap: 4px;
+
+        padding: 4px 5px;
+    }
+
+    .progress-section {
+
+        width: 82px;
+
+        gap: 3px;
+    }
+
+    .queue-progress-bar {
+
+        width: 42px !important;
+
+        min-width: 42px !important;
+    }
+
+    .progress-text {
+
+        min-width: 32px;
+
+        font-size: 6.5px;
+    }
+
+    .pagination-button {
+
+        min-width: 43px;
+
+        padding: 0 4px;
+
+        font-size: 6.5px;
+    }
+
+    .pagination-count {
+
+        min-width: 30px;
+
+        font-size: 6.5px;
+    }
+
     .summary-card {
-        flex-wrap: nowrap;
+
+        margin-bottom: 14px;
     }
 
     .summary-item {
-        min-width: 0;
+
+        padding-left: 7px;
+
+        padding-right: 7px;
+    }
+
+    .summary-label {
+        font-size: 7px;
+    }
+
+    .summary-value,
+    .remaining-value {
+        font-size: 10px;
+    }
+
+    .status-pending,
+    .status-verified {
+
+        min-width: 75px;
+
+        height: 21px;
+
+        padding: 0 7px;
+
+        font-size: 7px;
+    }
+
+    .verification-row {
+
+        height: 410px;
+
+        min-height: 410px;
+
+        gap: 5px;
+    }
+
+    .image-card {
+
+        height: 410px;
+
+        min-height: 410px;
+
+        padding: 7px 9px;
+    }
+
+    .details-card {
+
+        height: 410px;
+
+        min-height: 410px;
+
+        padding: 7px 9px;
+    }
+
+    .card-title {
+        font-size: 14px;
+    }
+
+    .card-description {
+        font-size: 7px;
+    }
+
+    .image-side-button {
+
+        min-width: 65px;
+
+        padding: 0 7px;
+
+        font-size: 7px;
+    }
+
+    .cheque-image-container {
+
+        height: 235px;
+
+        min-height: 235px;
     }
 
     .two-column-fields {
+
         flex-direction: row;
+
+        gap: 5px;
+
+        margin-bottom: 5px;
     }
 
     .field-group {
         width: 50%;
     }
 
-    .zoom-controls {
-        justify-content: flex-end;
-        flex-wrap: nowrap;
+    .field-label {
+        font-size: 7px;
     }
 
-    .action-buttons {
+    .readonly-field {
+
+        height: 29px;
+
+        font-size: 9px;
+
+        padding: 0 6px;
+    }
+
+    .details-action-area {
+
+        margin-top: 6px;
+
+        padding-top: 5px;
+    }
+
+    .details-action-buttons {
+
         flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
+
+        gap: 3px;
     }
 
-    .verified-button,
-    .xml-generation-button,
-    .xml-generation-button-enabled,
-    .return-button,
-    .reject-button {
-        width: auto;
+    .details-action-buttons .verified-button,
+    .details-action-buttons .return-button,
+    .details-action-buttons .reject-button {
+
+        width: 0;
+
+        min-width: 0;
+
+        height: 29px;
+
+        font-size: 5.5px;
+
+        padding-left: 1px !important;
+        padding-right: 1px !important;
     }
 
-    .cheque-image-container {
-        height: 205px;
+    .details-action-area .xml-generation-button,
+    .details-action-area .xml-generation-button-enabled {
+
+        height: 29px;
+
+        font-size: 7px;
     }
+
+    .zoom-controls {
+        gap: 5px;
+    }
+}
+
+
+/* =========================================================
+   GLOBAL HTML / BODY SCROLL PREVENTION
+   ========================================================= */
+
+html,
+body {
+
+    width: 100%;
+
+    height: 100%;
+
+    margin: 0;
+
+    padding: 0;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   ZK BORDERLAYOUT SCROLL PREVENTION
+   ========================================================= */
+
+.z-borderlayout {
+    overflow: hidden !important;
+}
+
+.z-center {
+    overflow: hidden !important;
+}
+
+.z-center-body {
+    overflow: hidden !important;
 }
