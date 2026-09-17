@@ -139,44 +139,44 @@ public class MakerReportServiceImpl implements MakerReportService {
             }
 
             // SECTION 3: Unprocessed Cheques Audit
-            sb.append("\n\n========================================================================================\n");
-            sb.append("                         3. UNPROCESSED CHEQUES AUDIT                                   \n");
-            sb.append("========================================================================================\n");
-            sb.append("Batch ID,Cheque ID,Cheque No,MICR Code,Drawee Acc No,Amount (INR),Status\n");
-
-            String sql3 = "SELECT sc.scanned_batch_id, sc.scanned_cheque_id, "
-                    + "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, "
-                    + "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, "
-                    + "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, "
-                    + "       sc.cheque_amount, sc.cheque_status "
-                    + "FROM scan_cheque sc "
-                    + "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id "
-                    + "WHERE sb.uploaded_by = ? "
-                    + "  AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED') "
-                    + "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? "
-                    + "ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id";
-
-            try (PreparedStatement ps = conn.prepareStatement(sql3)) {
-                ps.setString(1, makerId);
-                ps.setDate(2, new java.sql.Date(fromDate.getTime()));
-                ps.setDate(3, new java.sql.Date(toDate.getTime()));
-
-                try (ResultSet rs = ps.executeQuery()) {
-                    boolean found = false;
-                    while (rs.next()) {
-                        found = true;
-                        sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
-                                rs.getString("scanned_batch_id"),  // Fixed: changed from outward_batch_id
-                                rs.getString("scanned_cheque_id"), // Fixed: changed from outward_cheque_id
-                                rs.getString("cheque_number"),
-                                rs.getString("micr_code"),
-                                rs.getString("drawee_account_number"),
-                                df.format(rs.getDouble("cheque_amount")),
-                                rs.getString("cheque_status")));
-                    }
-                    if (!found) sb.append("\"No unprocessed cheques found for this period.\",,,,,,\n");
-                }
-            }
+//            sb.append("\n\n========================================================================================\n");
+//            sb.append("                         3. UNPROCESSED CHEQUES AUDIT                                   \n");
+//            sb.append("========================================================================================\n");
+//            sb.append("Batch ID,Cheque ID,Cheque No,MICR Code,Drawee Acc No,Amount (INR),Status\n");
+//
+//            String sql3 = "SELECT sc.scanned_batch_id, sc.scanned_cheque_id, "
+//                    + "       COALESCE(sc.cheque_number, 'UNREADABLE') AS cheque_number, "
+//                    + "       COALESCE(sc.micr_code, 'UNREADABLE') AS micr_code, "
+//                    + "       COALESCE(sc.drawee_account_number, 'UNREADABLE') AS drawee_account_number, "
+//                    + "       sc.cheque_amount, sc.cheque_status "
+//                    + "FROM scan_cheque sc "
+//                    + "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id "
+//                    + "WHERE sb.uploaded_by = ? "
+//                    + "  AND UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'UNPROCESSED', 'RAW', 'OCR_FAILED', 'IMAGE_REJECTED') "
+//                    + "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? "
+//                    + "ORDER BY sc.scanned_batch_id, sc.scanned_cheque_id";
+//
+//            try (PreparedStatement ps = conn.prepareStatement(sql3)) {
+//                ps.setString(1, makerId);
+//                ps.setDate(2, new java.sql.Date(fromDate.getTime()));
+//                ps.setDate(3, new java.sql.Date(toDate.getTime()));
+//
+//                try (ResultSet rs = ps.executeQuery()) {
+//                    boolean found = false;
+//                    while (rs.next()) {
+//                        found = true;
+//                        sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+//                                rs.getString("scanned_batch_id"),  // Fixed: changed from outward_batch_id
+//                                rs.getString("scanned_cheque_id"), // Fixed: changed from outward_cheque_id
+//                                rs.getString("cheque_number"),
+//                                rs.getString("micr_code"),
+//                                rs.getString("drawee_account_number"),
+//                                df.format(rs.getDouble("cheque_amount")),
+//                                rs.getString("cheque_status")));
+//                    }
+//                    if (!found) sb.append("\"No unprocessed cheques found for this period.\",,,,,,\n");
+//                }
+//            }
 
             // SECTION 4: Batches Submitted to Checker (outward_batch keeps outward_batch_id)
             sb.append("\n\n========================================================================================\n");

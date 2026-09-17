@@ -591,19 +591,19 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
 			String clearingDateStr = nextDate.format(dateFormatter);
 
-			if (rolledOverScanCheques > 0) {
-				String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
-						+ rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
-				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-				.sendNotification("OUTWARD_MAKER", null, makerMsg);
-			}
-
-			if (rolledOverCheckerCheques > 0) {
-				String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
-						+ rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
-				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-				.sendNotification("OUTWARD_CHECKER", null, checkerMsg);
-			}
+//			if (rolledOverScanCheques > 0) {
+//				String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
+//						+ rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
+//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+//				.sendNotification("OUTWARD_MAKER", null, makerMsg);
+//			}
+//
+//			if (rolledOverCheckerCheques > 0) {
+//				String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
+//						+ rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
+//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+//				.sendNotification("OUTWARD_CHECKER", null, checkerMsg);
+//			}
 
 			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
 					"BOD initialized for date: " + nextDate + " | Unprocessed scan: " + rolledOverScanCheques 
