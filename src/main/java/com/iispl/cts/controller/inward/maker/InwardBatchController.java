@@ -275,7 +275,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 				if (sessionParsedData != null && sessionParsedData.getInwardBatch() != null) {
 					dbBatch = sessionParsedData.getInwardBatch();
-					dbBatch.setBatchStatus("READY_FOR_VALIDATION");
+					dbBatch.setBatchStatus("PENDING_VALIDATION");
 				}
 
 				if (dbBatch != null) {
@@ -462,18 +462,12 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		}
 
-		if ("Ready For Validation".equalsIgnoreCase(status)) {
-
+		if ("Pending Validation".equalsIgnoreCase(status)) {
 			Button validateButton = new Button("Validate");
-
 			validateButton.setSclass("view-button");
-
 			validateButton.addEventListener("onClick", event -> openValidationModal(item, batch));
-
 			actionCell.appendChild(validateButton);
-
 			return;
-
 		}
 
 		Label dashLabel = new Label("-");
@@ -496,8 +490,8 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		status = status.trim();
 		if ("VALIDATED".equalsIgnoreCase(status))
 			return "Validated";
-		if ("READY_FOR_VALIDATION".equalsIgnoreCase(status))
-			return "Ready For Validation";
+		if ("PENDING_VALIDATION".equalsIgnoreCase(status))
+			return "Pending Validation";
 		if ("PROCESSING".equalsIgnoreCase(status))
 			return "Processing";
 		if ("RECEIVED".equalsIgnoreCase(status))
@@ -632,8 +626,8 @@ public class InwardBatchController extends SelectorComposer<Window> {
 									: parsedBatchData.getInwardCheques().size();
 							parsedBatch.setActualChequeCount(chequeCount);
 						}
-						parsedBatch.setBatchStatus("READY_FOR_VALIDATION");
-						result = new ParseResult(finalBatchId, parsedBatchData, "Ready For Validation", null);
+						parsedBatch.setBatchStatus("PENDING_VALIDATION");
+						result = new ParseResult(finalBatchId, parsedBatchData, "Pending Validation", null);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -706,113 +700,59 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void handleParseComplete(ParseResult result) {
-
 		if (result == null)
-
 			return;
-
 		try {
-
 			String batchId = result.getBatchId();
-
 			Listitem targetItem = null;
-
 			for (Listitem item : batchListbox.getItems()) {
-
 				InwardBatch itemBatch = (InwardBatch) item.getValue();
-
 				if (itemBatch != null && itemBatch.getInwardBatchId() != null
-
 						&& batchId.equalsIgnoreCase(itemBatch.getInwardBatchId())) {
-
 					targetItem = item;
-
 					break;
-
 				}
-
 			}
-
-			if ("Ready For Validation".equalsIgnoreCase(result.getStatus())) {
-
+			if ("Pending Validation".equalsIgnoreCase(result.getStatus())) {
 				ParsedBatchData data = result.getParsedBatchData();
-
 				if (data == null || data.getInwardBatch() == null)
-
 					return;
-
 				InwardBatch parsedBatch = data.getInwardBatch();
-
-				parsedBatch.setBatchStatus("READY_FOR_VALIDATION");
+				parsedBatch.setBatchStatus("PENDING_VALIDATION");
 				storeParsedBatchData(batchId, data);
-
 				if (targetItem != null) {
-
 					targetItem.setValue(parsedBatch);
-
 					updateReadyForValidationRow(targetItem, parsedBatch);
-
 				}
-
 				for (int i = 0; i < allBatches.size(); i++) {
-
 					InwardBatch current = allBatches.get(i);
-
 					if (current != null && current.getInwardBatchId() != null
-
 							&& batchId.equalsIgnoreCase(current.getInwardBatchId())) {
-
 						allBatches.set(i, parsedBatch);
-
 						break;
-
 					}
-
 				}
-
-				Messagebox.show("Batch " + batchId + " parsed successfully. Ready for validation.",
-						"Parsing Successful",
-
+				Messagebox.show("Batch " + batchId + "Batch " + batchId + " parsed successfully. Pending validation.", "Parsing Successful",
 						Messagebox.OK, Messagebox.INFORMATION);
-
 			} else {
-
 				if (targetItem != null) {
-
 					InwardBatch failedBatch = (InwardBatch) targetItem.getValue();
-
 					if (failedBatch != null) {
-
 						failedBatch.setBatchStatus("Validation Failed");
-
 					}
-
 					updateFailedRow(targetItem);
-
 				}
-
 				String message = result.getMessage();
-
 				if (message == null || message.trim().isEmpty()) {
-
 					message = "NPCI/OCR parsing or validation failed.";
-
 				}
-
 				Messagebox.show(message, "Validation Failed", Messagebox.OK, Messagebox.ERROR);
-
 			}
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to update batch status: " + e.getMessage(), "Error", Messagebox.OK,
-
 					Messagebox.ERROR);
-
 		}
-
 	}
 
 	private void updateParsingRow(Listitem item) {
@@ -842,29 +782,17 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	}
 
 	private void updateReadyForValidationRow(Listitem item, InwardBatch batch) {
-
 		Listcell statusCell = (Listcell) item.getChildren().get(3);
-
 		statusCell.getChildren().clear();
-
-		Label statusLabel = new Label("Ready For Validation");
-
-		setStatusStyle(statusLabel, "Ready For Validation");
-
+		Label statusLabel = new Label("Pending Validation");
+		setStatusStyle(statusLabel, "Pending Validation");
 		statusCell.appendChild(statusLabel);
-
 		Listcell actionCell = (Listcell) item.getChildren().get(4);
-
 		actionCell.getChildren().clear();
-
 		Button validateButton = new Button("Validate");
-
 		validateButton.setSclass("view-button");
-
 		validateButton.addEventListener("onClick", event -> openValidationModal(item, batch));
-
 		actionCell.appendChild(validateButton);
-
 	}
 
 	private void updateProcessingAfterValidationRow(Listitem item, InwardBatch batch) {
