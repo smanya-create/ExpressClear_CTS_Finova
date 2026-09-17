@@ -145,9 +145,9 @@
 											<column label="EMAIL"
 												hflex="3" />
 											<column label="PHONE"
-												hflex="2" />
+												hflex="2" align="center" />
 											<column label="ROLE"
-												hflex="2" />
+												hflex="3" />
 											<column label="STATUS"
 												hflex="1" align="center" />
 											<column label="ACTION"

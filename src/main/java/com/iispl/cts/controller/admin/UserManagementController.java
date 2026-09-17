@@ -262,7 +262,8 @@ public class UserManagementController extends GenericForwardComposer<Component> 
             row.appendChild(lblPhone);
 
             Label lblRole = new Label(getRoleDisplayName(user.getRoleId()));
-            lblRole.setStyle("color: #4a5568; font-size: 13px;");
+            lblRole.setStyle("color: #4a5568; font-size: 13px; text-align: left !important; display: block; width: 100%; padding-left: 12px;");
+            lblRole.setSclass("cell-text");
             row.appendChild(lblRole);
 
             Label lblStatus = new Label("ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Active" : "Inactive");
