@@ -29,7 +29,7 @@
                     
                     <!-- Fixed Page Title Header -->
                     <vlayout spacing="2px" style="flex: 0 0 auto;">
-                        <label value="System Audit Logs" sclass="page-title"/>
+                        <label value="Audit Logs" sclass="page-title"/>
                         
                     </vlayout>
 
