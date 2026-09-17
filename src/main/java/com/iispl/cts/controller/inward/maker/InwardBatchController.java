@@ -436,7 +436,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		if ("Received".equalsIgnoreCase(status)) {
 
-			Button parseButton = new Button("PARSE");
+			Button parseButton = new Button("Parse");
 
 			parseButton.setSclass("parse-button");
 
@@ -450,7 +450,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		if ("Parsing".equalsIgnoreCase(status)) {
 
-			Button parsingButton = new Button("PARSING...");
+			Button parsingButton = new Button("Parsing...");
 
 			parsingButton.setDisabled(true);
 
@@ -464,7 +464,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		if ("Ready For Validation".equalsIgnoreCase(status)) {
 
-			Button validateButton = new Button("VALIDATE");
+			Button validateButton = new Button("Validate");
 
 			validateButton.setSclass("view-button");
 
@@ -491,84 +491,46 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			return "Received";
 
 		String status = batch.getBatchStatus();
-
 		if (status == null || status.trim().isEmpty())
-
 			return "Received";
-
 		status = status.trim();
-
 		if ("VALIDATED".equalsIgnoreCase(status))
-
-			return "VALIDATED";
-
+			return "Validated";
 		if ("READY_FOR_VALIDATION".equalsIgnoreCase(status))
-
 			return "Ready For Validation";
-
 		if ("PROCESSING".equalsIgnoreCase(status))
-
 			return "Processing";
-
 		if ("RECEIVED".equalsIgnoreCase(status))
-
 			return "Received";
-
 		if ("PARSING".equalsIgnoreCase(status))
-
 			return "Parsing";
-
 		if ("COMPLETED".equalsIgnoreCase(status))
-
 			return "Completed";
-
 		if ("VALIDATION_FAILED".equalsIgnoreCase(status))
-
 			return "Validation Failed";
-
 		if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(status))
 			return "Checker Pending";	
-
 		if ("CHECKER_PROCESSING".equalsIgnoreCase(status))
-
 			return "Checker Processing";
-
 		if ("IN_VERIFICATION".equalsIgnoreCase(status))
-
 			return "In Verification";
-
 		if ("HOLD".equalsIgnoreCase(status))
-
 			return "Hold";
-
 		if ("REJECTED".equalsIgnoreCase(status))
-
 			return "Rejected";
-
 		if ("FAILED".equalsIgnoreCase(status))
-
 			return "Failed";
-
 		return formatStatus(status);
-
 	}
 
 	private String formatStatus(String status) {
-
 		String[] words = status.replace('_', ' ').trim().toLowerCase().split("\\s+");
-
 		StringBuilder result = new StringBuilder();
-
 		for (String word : words) {
-
 			if (word.isEmpty())
-
 				continue;
-
 			if (result.length() > 0)
-
 				result.append(" ");
-
 			result.append(Character.toUpperCase(word.charAt(0)));
 			if (word.length() > 1)
 				result.append(word.substring(1));
@@ -624,137 +586,72 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			}
 
 			String npciXml = "Inward-data/" + folderName + "/NPCI_Inward.xml";
-
 			String ocrXml = "Inward-data/" + folderName + "/OCR_Mock.xml";
-
 			String npciPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + npciXml);
-
 			String ocrPath = currentWindow.getDesktop().getWebApp().getRealPath("/" + ocrXml);
-
 			if (npciPath == null || !new File(npciPath).isFile()) {
-
 				Messagebox.show("NPCI XML not found:\n" + npciXml, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
-
 				return;
-
 			}
 
 			if (ocrPath == null || !new File(ocrPath).isFile()) {
-
 				Messagebox.show("OCR XML not found:\n" + ocrXml, "Parse Failed", Messagebox.OK, Messagebox.ERROR);
-
 				return;
-
 			}
 
 			batch.setBatchStatus("Parsing");
-
 			updateParsingRow(item);
-
 			final String finalNpciPath = npciPath;
-
 			final String finalOcrPath = ocrPath;
-
 			final String finalBatchId = batchId;
-
 			final String finalFolderName = folderName;
-
 			Thread parsingThread = new Thread(() -> {
-
 				ParseResult result;
-
 				try {
-
 					ParsedBatchData parsedBatchData = inwardBatchService.parseBatchXml(finalNpciPath, finalOcrPath);
-
 					if (parsedBatchData == null || parsedBatchData.getInwardBatch() == null) {
-
 						result = new ParseResult(finalBatchId, null, "Validation Failed",
-
 								"Unable to parse NPCI and OCR XML.");
-
 					} else {
-
 						InwardBatch parsedBatch = parsedBatchData.getInwardBatch();
-
 						String xmlBatchId = parsedBatch.getInwardBatchId();
-
 						if (xmlBatchId == null || xmlBatchId.trim().isEmpty()) {
-
 							parsedBatch.setInwardBatchId(finalBatchId);
-
 						} else if (!finalBatchId.equalsIgnoreCase(xmlBatchId)) {
-
 							result = new ParseResult(finalBatchId, null, "Validation Failed",
-
-									"Batch number mismatch. Queue Batch: " + finalBatchId + " XML Batch: "
-
-											+ xmlBatchId);
-
+									"Batch number mismatch. Queue Batch: " + finalBatchId + " XML Batch: "+ xmlBatchId);
 							scheduleParseResult(result);
-
 							return;
-
 						}
-
 						if (parsedBatch.getBatchReferenceId() == null
-
 								|| parsedBatch.getBatchReferenceId().trim().isEmpty()) {
-
 							parsedBatch.setBatchReferenceId(finalFolderName);
-
 						}
-
 						if (parsedBatch.getActualChequeCount() <= 0) {
-
 							int chequeCount = parsedBatchData.getInwardCheques() == null ? 0
-
 									: parsedBatchData.getInwardCheques().size();
-
 							parsedBatch.setActualChequeCount(chequeCount);
-
 						}
-
 						parsedBatch.setBatchStatus("READY_FOR_VALIDATION");
-
 						result = new ParseResult(finalBatchId, parsedBatchData, "Ready For Validation", null);
-
 					}
-
 				} catch (Exception e) {
-
 					e.printStackTrace();
-
 					String errorMessage = e.getMessage();
-
 					if (errorMessage == null || errorMessage.trim().isEmpty()) {
-
 						errorMessage = e.getClass().getSimpleName();
-
 					}
-
 					result = new ParseResult(finalBatchId, null, "Validation Failed", errorMessage);
-
 				}
-
 				scheduleParseResult(result);
-
 			});
-
 			parsingThread.setName("InwardBatchParser-" + batchId);
-
 			parsingThread.start();
-
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to start parsing: " + e.getMessage(), "Parse Failed", Messagebox.OK,
-
 					Messagebox.ERROR);
-
 		}
-
 	}
 
 	private String getParsedBatchSessionKey(String batchId) {
@@ -934,7 +831,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		actionCell.getChildren().clear();
 
-		Button parsingButton = new Button("PARSING...");
+		Button parsingButton = new Button("Parsing...");
 
 		parsingButton.setDisabled(true);
 
@@ -960,7 +857,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		actionCell.getChildren().clear();
 
-		Button validateButton = new Button("VALIDATE");
+		Button validateButton = new Button("Validate");
 
 		validateButton.setSclass("view-button");
 
@@ -976,7 +873,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		statusCell.getChildren().clear();
 
-		Label statusLabel = new Label("PROCESSING");
+		Label statusLabel = new Label("Processing");
 
 		setStatusStyle(statusLabel, "Processing");
 
@@ -1034,7 +931,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		actionCell.getChildren().clear();
 
-		Button parseButton = new Button("PARSE");
+		Button parseButton = new Button("Parse");
 
 		parseButton.setSclass("parse-button");
 
@@ -1117,7 +1014,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		Hlayout buttonLayout = new Hlayout();
 		buttonLayout.setSpacing("8px");
 		layout.appendChild(buttonLayout);
-		Button validateButton = new Button("VALIDATE");
+		Button validateButton = new Button("Validate");
 		validateButton.setSclass("view-button");
 		buttonLayout.appendChild(validateButton);
 		Button cancelButton = new Button("Cancel");
@@ -1202,7 +1099,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			expectedCount.setReadonly(true);
 			expectedAmount.setReadonly(true);
 			validateButton.setVisible(false);
-			cancelButton.setLabel("OK");
+			cancelButton.setLabel("Ok");
 			cancelButton.addEventListener("onClick", event -> validationWindow.detach());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1221,8 +1118,8 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	private void updateValidatedRow(Listitem item, InwardBatch batch) {
 		Listcell statusCell = (Listcell) item.getChildren().get(3);
 		statusCell.getChildren().clear();
-		Label statusLabel = new Label("VALIDATED");
-		setStatusStyle(statusLabel, "VALIDATED");
+		Label statusLabel = new Label("Validated");
+		setStatusStyle(statusLabel, "Validated");
 		statusCell.appendChild(statusLabel);
 		Listcell actionCell = (Listcell) item.getChildren().get(4);
 		actionCell.getChildren().clear();
@@ -1240,7 +1137,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Button nextButton = new Button(micrRepairRequired ? "OPEN MICR REPAIR" : "OPEN DATA ENTRY");
+		Button nextButton = new Button(micrRepairRequired ? "Open Micr Repair" : "Open Data Entry");
 		nextButton.setSclass("view-button");
 		nextButton.addEventListener("onClick", event -> openNextStep(batch));
 		actionCell.appendChild(nextButton);
@@ -1684,25 +1581,25 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 					|| "Rejected".equalsIgnoreCase(status)) {
 
-				parsingStatusLabel.setValue("SUCCESS");
+				parsingStatusLabel.setValue("Success");
 
 				parsingStatusLabel.setSclass("status-badge status-success");
 
 			} else if ("Parsing".equalsIgnoreCase(status)) {
 
-				parsingStatusLabel.setValue("PARSING");
+				parsingStatusLabel.setValue("Parsing");
 
 				parsingStatusLabel.setSclass("status-badge status-hold");
 
 			} else if ("Validation Failed".equalsIgnoreCase(status) || "Failed".equalsIgnoreCase(status)) {
 
-				parsingStatusLabel.setValue("FAILED");
+				parsingStatusLabel.setValue("Failed");
 
 				parsingStatusLabel.setSclass("status-badge status-hold");
 
 			} else {
 
-				parsingStatusLabel.setValue("PENDING");
+				parsingStatusLabel.setValue("Pending");
 
 				parsingStatusLabel.setSclass("status-badge status-hold");
 

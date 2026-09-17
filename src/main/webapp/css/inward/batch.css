@@ -838,3 +838,29 @@ body:has(.batch-page) [id$="mainContentArea"] {
 	justify-content: center !important;
 	text-align: center !important;
 }
+
+.batch-page .z-listheader-content {
+	text-transform: none !important;
+}
+
+.batch-page .status-pill-gold,
+.batch-page .status-pill-blue,
+.batch-page .status-pill-sentback,
+.batch-page .status-pill-completed,
+.batch-page .status-pill-failed {
+	text-transform: none !important;
+}
+
+.batch-page .view-button.z-button,
+.batch-page .parse-button.z-button,
+.batch-page .parsing-button.z-button {
+	text-transform: none !important;
+}
+
+.batch-validation-window .view-button.z-button {
+	text-transform: none !important;
+}
+
+.batch-validation-window .batch-btn-clear.z-button {
+	text-transform: none !important;
+}
