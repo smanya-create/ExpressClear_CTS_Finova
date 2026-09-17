@@ -1,1072 +1,491 @@
 /* =========================================================
-   CTS - OUTWARD MAKER - BATCH UPLOAD
-   Clean Light Blue Dashboard Styling
+   OUTWARD BATCH UPLOAD - COMPACT FORM & FULL-WIDTH RESULTS
    ========================================================= */
 
-
-/* =========================================================
-   1. MAIN PAGE
-   ========================================================= */
-
-.batch-upload-window {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    background: #eef6ff !important;
-}
-
-.batch-upload-page {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-
-    margin: 0;
-    padding: 20px 28px 30px 28px;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    background: #eef6ff !important;
-
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-
-/* =========================================================
-   2. GROUPBOX / CARD
-   ========================================================= */
-
-.batch-upload-page .z-groupbox {
-    width: 100%;
-    box-sizing: border-box;
-
-    background: #ffffff !important;
-
-    border: 1px solid #c8d7e8 !important;
-    border-radius: 8px !important;
-
-    padding: 0 !important;
-    margin: 0 0 18px 0;
-
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   GROUPBOX HEADER
-   ========================================================= */
-
-.batch-upload-page .z-groupbox-header {
-    background: #ffffff !important;
-
-    border-bottom: 1px solid #dce7f2 !important;
-
-    padding: 11px 16px !important;
-}
-
-
-/* =========================================================
-   GROUPBOX CAPTION
-   ========================================================= */
-
-.batch-upload-page .z-caption {
-    color: #17365d !important;
-
-    font-size: 14px !important;
-    line-height: 20px !important;
-
-    font-weight: bold !important;
-
-    letter-spacing: 0;
-}
-
-
-/* =========================================================
-   GROUPBOX CONTENT
-   ========================================================= */
-
-.batch-upload-page .z-groupbox-content {
-    background: #ffffff !important;
-
-    padding: 16px !important;
-}
-
-
-/* =========================================================
-   3. LABELS
-   ========================================================= */
-
-.batch-upload-page .z-label {
-    color: #40566f !important;
-
-    font-size: 11px !important;
-    line-height: 17px !important;
-
-    font-weight: bold !important;
-}
-
-
-/* =========================================================
-   4. TEXTBOX / INTBOX / DECIMALBOX
-   ========================================================= */
-
-.batch-upload-page .z-textbox,
-.batch-upload-page .z-intbox,
-.batch-upload-page .z-decimalbox,
-.batch-upload-page .z-combobox-input {
-
-    height: 34px !important;
-
-    box-sizing: border-box;
-
-    background: #ffffff !important;
-
-    border: 1px solid #c5d3e2 !important;
-    border-radius: 5px !important;
-
-    color: #263b53 !important;
-
-    font-size: 11px !important;
-
-    padding: 0 9px !important;
-}
-
-
-/* =========================================================
-   INPUT FOCUS
-   ========================================================= */
-
-.batch-upload-page .z-textbox:focus,
-.batch-upload-page .z-intbox:focus,
-.batch-upload-page .z-decimalbox:focus,
-.batch-upload-page .z-combobox-input:focus {
-
-    border-color: #4285c5 !important;
-
-    outline: none;
-
-    box-shadow: 0 0 0 2px rgba(66, 133, 197, 0.12) !important;
-}
-
-
-/* =========================================================
-   READONLY FILE NAME
-   ========================================================= */
-
-.batch-upload-page .z-textbox[readonly] {
-
-    background: #f5f8fc !important;
-
-    color: #60758c !important;
-
-    border-color: #cbd8e6 !important;
-}
-
-
-/* =========================================================
-   5. COMBOBOX
-   ========================================================= */
-
-.batch-upload-page .z-combobox {
-    height: 34px !important;
-}
-
-.batch-upload-page .z-combobox-input {
-    background: #ffffff !important;
-}
-
-
-/* =========================================================
-   6. MAIN BUTTONS
-   ========================================================= */
-
-.batch-upload-page .btn-browse,
-.batch-upload-page #btnValidateBatch {
-
-    height: 34px !important;
-
-    min-width: 105px !important;
-
-    box-sizing: border-box;
-
-    padding: 0 14px !important;
-
-    background: #17365d !important;
-
-    border: 1px solid #17365d !important;
-    border-radius: 5px !important;
-
-    color: #ffffff !important;
-
-    font-size: 10px !important;
-    font-weight: bold !important;
-
-    cursor: pointer !important;
-
-    box-shadow: none !important;
-}
-
-
-/* =========================================================
-   MAIN BUTTON HOVER
-   ========================================================= */
-
-.batch-upload-page .btn-browse:hover,
-.batch-upload-page #btnValidateBatch:hover {
-
-    background: #245181 !important;
-
-    border-color: #245181 !important;
-}
-
-
-/* =========================================================
-   VALIDATE BUTTON
-   ========================================================= */
-
-.batch-upload-page #btnValidateBatch {
-
-    background: #1688d8 !important;
-
-    border-color: #1688d8 !important;
-}
-
-
-/* =========================================================
-   VALIDATE HOVER
-   ========================================================= */
-
-.batch-upload-page #btnValidateBatch:hover {
-
-    background: #0f73bb !important;
-
-    border-color: #0f73bb !important;
-}
-
-
-/* =========================================================
-   DISABLED VALIDATE
-   ========================================================= */
-
-.batch-upload-page #btnValidateBatch:disabled {
-
-    background: #cbd5e1 !important;
-
-    border-color: #cbd5e1 !important;
-
-    color: #718096 !important;
-
-    cursor: default !important;
-
-    box-shadow: none !important;
-}
-
-
-/* =========================================================
-   7. SUCCESS MESSAGE
-   ========================================================= */
-
-.batch-upload-page #divSuccessMessage {
-
-    box-sizing: border-box;
-
-    background: #f0faf4 !important;
-
-    border: 1px solid #b7dfc4 !important;
-
-    border-left: 4px solid #28a745 !important;
-
-    border-radius: 6px !important;
-
-    padding: 10px 14px !important;
-
-    margin: 0 0 18px 0;
-}
-
-
-.batch-upload-page #lblSuccessText {
-
-    color: #207a3c !important;
-
-    font-size: 11px !important;
-
-    font-weight: bold !important;
-}
-
-
-/* =========================================================
-   8. ALL LISTBOXES
-   ========================================================= */
-
-.batch-upload-page .z-listbox {
-
+/* Main Container & Full Layout */
+.winBatchUpload {
     width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    background: transparent !important;
+}
 
-    box-sizing: border-box;
-
-    background: #ffffff !important;
-
-    border: 1px solid #c8d7e8 !important;
-
-    border-radius: 6px !important;
-
+.winBatchUpload > .z-window-content {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 16px 24px !important;
     margin: 0 !important;
+    background: #f8fafc !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
 
+.vltPage {
+    width: 100% !important;
+    max-width: 100% !important; /* Full width for page container */
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    padding-bottom: 24px !important;
+}
+
+/* Page Header */
+.vltPageHeader {
+    width: 100% !important;
+    margin-bottom: 14px !important;
+}
+
+.lblPageTitle {
+    font-size: 18px !important;
+    line-height: 24px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+}
+
+/* =========================================================
+   1. BATCH UPLOAD CARD (COMPACT / SMALL WIDTH)
+   ========================================================= */
+
+.vltBatchUpload {
+    width: 100% !important;
+    max-width: 650px !important; /* Limits size of upload card */
+    margin: 0 0 16px 0 !important;
+    box-sizing: border-box !important;
+    padding: 18px 20px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.vltBatchForm {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.hltFormRow {
+    width: 100% !important;
+    min-height: 36px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+}
+
+/* Label Alignment inside Upload Form */
+.hltFormRow .lblFormLabel {
+    flex: 0 0 180px !important;
+    width: 180px !important;
+    min-width: 180px !important;
+    margin: 0 !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+    font-size: 12.5px !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+}
+
+/* Inputs inside Upload Form */
+.hltFormRow .txtFormInput,
+.z-textbox,
+.z-intbox,
+.z-decimalbox {
+    flex: 1 1 auto !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    box-sizing: border-box !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    font-size: 12.5px !important;
+    color: #0f172a !important;
+    padding: 0 10px !important;
+}
+
+.z-textbox:focus,
+.z-intbox:focus,
+.z-decimalbox:focus {
+    border-color: #18275c !important;
+    box-shadow: 0 0 0 3px rgba(24, 39, 92, 0.1) !important;
+    outline: none !important;
+}
+
+/* File Browse Row */
+.hltChequeFolder {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.hltChequeFolder .txtChequeFolder {
+    flex: 1 1 auto !important;
+    height: 34px !important;
+    margin-right: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #f8fafc !important;
+    color: #64748b !important;
+}
+
+.btnBrowse {
+    flex: 0 0 85px !important;
+    height: 34px !important;
+    border: 1px solid #18275c !important;
+    border-radius: 6px !important;
+    background: #18275c !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.btnBrowse:hover,
+.btnValidateBatch:hover {
+    background: #24356f !important;
+}
+
+.hltValidateAction .btnValidateBatch {
+    height: 34px !important;
+    padding: 0 16px !important;
+    border: 1px solid #18275c !important;
+    border-radius: 6px !important;
+    background: #18275c !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+/* =========================================================
+   2. BATCH INFORMATION & CHEQUE GRID (FULL 100% SCREEN WIDTH)
+   ========================================================= */
+
+.vltBatchResult {
+    width: 100% !important; /* Extends to full available screen width */
+    max-width: 100% !important;
+    margin: 0 0 16px 0 !important;
+    box-sizing: border-box !important;
+    padding: 18px 20px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.lblResultTitle,
+.lblChequeListTitle {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.lblResultDescription {
+    font-size: 11.5px !important;
+    color: #64748b !important;
+}
+
+/* Full Width Batch Info Cards */
+.vltBatchInformation {
+    width: 100% !important;
+    margin-top: 10px !important;
+    display: flex !important;
+    gap: 12px !important;
+}
+
+.vltBatchInfoItem,
+.vltBatchInfoBox {
+    flex: 1 1 0 !important;
+    padding: 10px 14px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+}
+
+.lblBatchInfoLabel {
+    font-size: 10.5px !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+}
+
+.lblBatchIdValue,
+.lblTotalChequesValue,
+.lblTotalAmountValue {
+    margin-top: 2px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #18275c !important;
+}
+
+/* Full Width Filter Bar */
+.hltChequeFilterBar {
+    width: 100% !important;
+    padding: 8px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    margin-bottom: 10px !important;
+}
+
+.lblChequeSearch {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin-right: 8px !important;
+}
+
+.txtChequeSearch {
+    width: 250px !important;
+    height: 30px !important;
+    font-size: 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+}
+
+.cmbChequeFilter {
+    width: 140px !important;
+    height: 30px !important;
+    margin-left: 8px !important;
+}
+
+.btnClearChequeFilter {
+    height: 30px !important;
+    margin-left: 8px !important;
+    padding: 0 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+/* Full Width Listbox Grid */
+.lstCheques,
+.lstChequeList {
+    width: 100% !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
     overflow: hidden !important;
 }
 
-
-/* =========================================================
-   9. CHEQUE LISTBOX
-   Proper placement inside Cheque Details card
-   ========================================================= */
-
-.batch-upload-page .cheque-listbox {
-
-    width: 100% !important;
-
-    margin: 0 !important;
-
-    box-sizing: border-box;
-
-    display: block !important;
+.lstCheques .z-listbox-header th,
+.lstChequeList .z-listbox-header th {
+    height: 36px !important;
+    background: #18275c !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border: none !important;
 }
 
+.lstCheques .z-listitem,
+.lstChequeList .z-listitem {
+    height: 38px !important;
+}
+
+.lstCheques .z-listcell,
+.lstChequeList .z-listcell {
+    height: 38px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+    font-size: 12px !important;
+    text-align: center !important;
+}
+
+/* Pagination Control */
+.hltChequePagination {
+    width: 100% !important;
+    margin-top: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.btnChequePaging,
+.btnChequePrevious,
+.btnChequeNext {
+    width: 30px !important;
+    height: 28px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.lblChequePage {
+    min-width: 45px !important;
+    margin: 0 6px !important;
+    color: #475569 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
 
 /* =========================================================
-   CHEQUE LISTBOX BODY
+   FIX COMBOBOX DROPDOWN HEIGHT & SCROLLBAR
    ========================================================= */
 
-.batch-upload-page .cheque-listbox .z-listbox-body {
-
-    width: 100% !important;
-
-    box-sizing: border-box;
-
-    background: #ffffff !important;
-
+/* Prevent fixed height forcing scrollbars on short lists */
+.z-combobox-popup {
+    height: auto !important;
+    min-height: min-content !important;
+    max-height: 250px !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
-}
-
-
-/* =========================================================
-   10. TABLE HEADER
-   ========================================================= */
-
-.batch-upload-page .z-listbox-header {
-
-    background: #17365d !important;
-
-    border: none !important;
-}
-
-
-/* =========================================================
-   INDIVIDUAL HEADER
-   ========================================================= */
-
-.batch-upload-page .z-listheader {
-
-    height: 40px !important;
-
-    box-sizing: border-box;
-
-    background: #17365d !important;
-
-    border: none !important;
-
-    border-right: 1px solid #315477 !important;
-}
-
-
-/* =========================================================
-   LAST HEADER
-   ========================================================= */
-
-.batch-upload-page .z-listheader:last-child {
-
-    border-right: none !important;
-}
-
-
-/* =========================================================
-   HEADER TEXT
-   ========================================================= */
-
-.batch-upload-page .z-listheader-content {
-
-    box-sizing: border-box;
-
-    background: #17365d !important;
-
-    color: #ffffff !important;
-
-    font-size: 10px !important;
-
-    line-height: 14px !important;
-
-    font-weight: bold !important;
-
-    padding: 11px 7px !important;
-
-    text-align: center !important;
-
-    white-space: normal !important;
-}
-
-
-/* =========================================================
-   11. TABLE ROWS
-   ========================================================= */
-
-.batch-upload-page .z-listitem {
-
-    height: 48px !important;
-
+    padding: 4px 0 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
     background: #ffffff !important;
-
-    border-bottom: 1px solid #e1e9f2 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
 }
 
-
-/* =========================================================
-   ALTERNATE ROWS
-   ========================================================= */
-
-.batch-upload-page .z-listitem:nth-child(even) {
-
-    background: #f8fbfe !important;
-}
-
-
-/* =========================================================
-   ROW HOVER
-   ========================================================= */
-
-.batch-upload-page .z-listitem:hover {
-
-    background: #edf5fd !important;
-}
-
-
-/* =========================================================
-   LAST ROW
-   ========================================================= */
-
-.batch-upload-page .z-listitem:last-child {
-
-    border-bottom: none !important;
-}
-
-
-/* =========================================================
-   12. TABLE CELLS
-   ========================================================= */
-
-.batch-upload-page .z-listcell {
-
-    box-sizing: border-box;
-
-    background: transparent !important;
-
-    border: none !important;
-
-    border-right: 1px solid #e5edf5 !important;
-
-    vertical-align: middle !important;
-
-    padding: 0 !important;
-}
-
-
-.batch-upload-page .z-listcell:last-child {
-
-    border-right: none !important;
-}
-
-
-/* =========================================================
-   CELL CONTENT
-   ========================================================= */
-
-.batch-upload-page .z-listcell-content {
-
-    box-sizing: border-box;
-
-    color: #34495e !important;
-
-    font-size: 10px !important;
-
-    line-height: 16px !important;
-
-    font-weight: normal !important;
-
-    padding: 8px 7px !important;
-
-    white-space: normal !important;
-
-    word-break: break-word !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* =========================================================
-   13. BATCH TABLE DATA ALIGNMENT
-   ========================================================= */
-
-
-/* Batch ID */
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(1) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(1)
-.z-listcell-content {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* Scan Date */
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(2) {
-
-    text-align: center !important;
-}
-
-
-/* Total Cheques */
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(3) {
-
-    text-align: center !important;
-}
-
-
-/* MICR Errors */
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(4) {
-
-    text-align: center !important;
-}
-
-
-/* =========================================================
-   14. CHEQUE TABLE DATA ALIGNMENT
-   ========================================================= */
-
-
-/* Cheque ID */
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(1) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(1)
-.z-listcell-content {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* Cheque Number */
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(2) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* Amount */
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(3) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* MICR */
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(5) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* =========================================================
-   15. STATUS CELL
-   ========================================================= */
-
-
-/*
-   IMPORTANT:
-   ZK normally renders the value as a Label component.
-
-   Therefore we target:
-       .z-listcell:nth-child(X) .z-label
-
-   instead of only .z-listcell-content.
-*/
-
-
-/* -------------------------
-   BATCH STATUS CELL
-   ------------------------- */
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(5) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-    padding: 0 !important;
-}
-
-
-/* Batch Status Label */
-
-.batch-upload-page
-.z-listbox:not(.cheque-listbox)
-.z-listitem
-.z-listcell:nth-child(5)
-.z-label {
-
-    display: inline-block !important;
-
-    width: auto !important;
-
-    min-width: 0 !important;
-
+/* Remove internal list overflow constraints */
+.z-combobox-popup ul,
+.z-combobox-content {
     height: auto !important;
-
-    box-sizing: border-box;
-
-    padding: 6px 13px !important;
-
-    margin: 0 auto !important;
-
-    background: #f6a000 !important;
-
-    border: 1px solid #ed9500 !important;
-
-    border-radius: 20px !important;
-
-    color: #ffffff !important;
-
-    font-size: 9px !important;
-
-    line-height: 13px !important;
-
-    font-weight: bold !important;
-
-    text-align: center !important;
-
-    white-space: nowrap !important;
-
-    word-break: normal !important;
-}
-
-
-/* -------------------------
-   CHEQUE STATUS CELL
-   ------------------------- */
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(4) {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
+    max-height: none !important;
     padding: 0 !important;
+    margin: 0 !important;
 }
 
-
-/* Cheque Status Label */
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(4)
-.z-label {
-
-    display: inline-block !important;
-
-    width: auto !important;
-
-    min-width: 0 !important;
-
-    height: auto !important;
-
-    box-sizing: border-box;
-
-    padding: 6px 13px !important;
-
-    margin: 0 auto !important;
-
-    background: #f6a000 !important;
-
-    border: 1px solid #ed9500 !important;
-
-    border-radius: 20px !important;
-
-    color: #ffffff !important;
-
-    font-size: 9px !important;
-
-    line-height: 13px !important;
-
-    font-weight: bold !important;
-
-    text-align: center !important;
-
-    white-space: nowrap !important;
-
-    word-break: normal !important;
-}
-
-
-/* =========================================================
-   16. STATUS LABEL OVERRIDE
-   Prevent generic .z-label styling from overriding pill
-   ========================================================= */
-
-.batch-upload-page
-.z-listbox
-.z-listitem
-.z-listcell:nth-child(5)
-.z-label,
-
-.batch-upload-page
-.cheque-listbox
-.z-listitem
-.z-listcell:nth-child(4)
-.z-label {
-
-    color: #ffffff !important;
-
-    font-weight: bold !important;
-}
-
-
-/* =========================================================
-   17. TABLE ACTION CELL
-   ========================================================= */
-
-.batch-upload-page
-.z-listitem
-.z-listcell:last-child {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-}
-
-
-/* =========================================================
-   18. TABLE ACTION BUTTON
-   ========================================================= */
-
-.batch-upload-page .btn-batch-action {
-
-    width: 100px !important;
-
-    min-width: 100px !important;
-
-    height: 30px !important;
-
-    box-sizing: border-box;
-
-    padding: 0 8px !important;
-
-    background: #17365d !important;
-
-    border: 1px solid #17365d !important;
-
-    border-radius: 5px !important;
-
-    color: #ffffff !important;
-
-    font-size: 9px !important;
-
-    font-weight: bold !important;
-
+/* Ensure options fit cleanly without scroll trigger */
+.z-combobox-popup .z-comboitem {
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+    color: #334155 !important;
     cursor: pointer !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
 }
 
+.z-combobox-popup .z-comboitem-text {
+    line-height: 32px !important;
+    font-size: 12px !important;
+}
+/* Fix for native HTML <select> element if used instead of ZK Combobox */
+select.cmbChequeFilter {
+    width: 160px !important;
+    height: 34px !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+}
+
+select.cmbChequeFilter option {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    min-height: 28px !important;
+}
 
 /* =========================================================
-   ACTION HOVER
+   CHEQUE STATUS BADGES
    ========================================================= */
 
-.batch-upload-page .btn-batch-action:hover {
-
-    background: #245181 !important;
-
-    border-color: #245181 !important;
-}
-
-
-/* =========================================================
-   19. CHEQUE FILTER AREA
-   ========================================================= */
-
-.batch-upload-page #lblChequeFilter {
-
-    color: #40566f !important;
-
-    font-size: 11px !important;
-
-    font-weight: bold !important;
-}
-
-
-.batch-upload-page #lblTotalCheques {
-
-    color: #17365d !important;
-
-    font-size: 11px !important;
-
-    font-weight: bold !important;
-
-    padding-left: 8px;
-}
-
-
-/* =========================================================
-   20. CHEQUE PAGINATION
-   ========================================================= */
-
-.batch-upload-page .cheque-pagination {
-
-    width: 100%;
-
-    box-sizing: border-box;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 12px 0 4px 0;
-
-    margin: 0;
-}
-
-
-/* =========================================================
-   PREVIOUS / NEXT
-   ========================================================= */
-
-.batch-upload-page #btnChequePrevious,
-.batch-upload-page #btnChequeNext {
-
-    min-width: 75px !important;
-
-    height: 30px !important;
-
-    box-sizing: border-box;
-
+.chequeStatusMicrRepair,
+.chequeStatusDataEntry,
+.chequeStatusDefault {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 22px !important;
     padding: 0 10px !important;
+    border-radius: 999px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    text-transform: capitalize !important;
+}
 
-    background: #ffffff !important;
+.chequeStatusMicrRepair {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+}
 
-    border: 1px solid #c5d3e2 !important;
+.chequeStatusDataEntry {
+    background: #e0e7ff !important;
+    color: #3730a3 !important;
+    border: 1px solid #c7d2fe !important;
+}
 
+.chequeStatusDefault {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* =========================================================
+   ACTION BUTTONS (DARK NAVY MATCH)
+   ========================================================= */
+
+.btnChequeAction,
+.btn-batch-action,
+.z-button.btnChequeAction {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100px !important;
+    height: 28px !important;
+    border: 1px solid #18275c !important;
     border-radius: 5px !important;
-
-    color: #34506d !important;
-
-    font-size: 10px !important;
-
-    font-weight: bold !important;
-
+    background: #18275c !important; /* Matches table header navy */
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
     cursor: pointer !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
 }
 
-
+.btnChequeAction:hover,
+.btn-batch-action:hover {
+    background: #24356f !important;
+    border-color: #24356f !important;
+}
 /* =========================================================
-   PAGINATION HOVER
+   UNIFIED LISTBOX TABLE FONT STYLING
    ========================================================= */
 
-.batch-upload-page #btnChequePrevious:hover,
-.batch-upload-page #btnChequeNext:hover {
-
-    background: #edf5fd !important;
-
-    border-color: #8eabc7 !important;
+/* Header Text (Both Screens) */
+.lstCheques .z-listbox-header th,
+.lstChequeList .z-listbox-header th,
+.z-listhead-bar {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    letter-spacing: 0.3px !important;
 }
 
-
-/* =========================================================
-   DISABLED PAGINATION
-   ========================================================= */
-
-.batch-upload-page #btnChequePrevious:disabled,
-.batch-upload-page #btnChequeNext:disabled {
-
-    background: #f3f6f9 !important;
-
-    border-color: #d5dee8 !important;
-
-    color: #a0acb8 !important;
-
-    cursor: default !important;
+/* Row Data Cell Text (Both Screens) */
+.lstCheques .z-listcell,
+.lstChequeList .z-listcell,
+.lstCheques .z-listcell-content,
+.lstChequeList .z-listcell-content {
+    font-size: 12px !important;
+    font-weight: 500 !important; /* Standard medium weight */
+    color: #334155 !important;   /* Standard Slate Gray */
+    line-height: 1.4 !important;
 }
 
-
-/* =========================================================
-   PAGE NUMBER
-   ========================================================= */
-
-.batch-upload-page #lblChequePage {
-
-    min-width: 65px;
-
-    text-align: center;
-
-    color: #17365d !important;
-
-    font-size: 10px !important;
-
-    font-weight: bold !important;
-}
-
-
-/* =========================================================
-   21. CHEQUE DETAILS INTERNAL SPACING
-   ========================================================= */
-
-.batch-upload-page
-#grpChequeDetails
-.z-groupbox-content {
-
-    padding: 16px !important;
-}
-
-
-/*
-   Keep the filter area separated from the listbox,
-   but don't push the listbox unnecessarily downward.
-*/
-
-.batch-upload-page
-.cheque-listbox {
-
-    margin-top: 0 !important;
-
-    margin-bottom: 0 !important;
-}
-
-
-/* =========================================================
-   22. RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 1100px) {
-
-    .batch-upload-page {
-
-        padding-left: 20px;
-
-        padding-right: 20px;
-    }
-}
-
-
-@media (max-width: 750px) {
-
-    .batch-upload-page {
-
-        padding: 15px 12px 25px 12px;
-    }
-
-
-    .batch-upload-page .btn-batch-action {
-
-        width: 82px !important;
-
-        min-width: 82px !important;
-
-        height: 28px !important;
-
-        font-size: 8px !important;
-    }
-
-
-    .batch-upload-page
-    .z-listbox
-    .z-listitem
-    .z-listcell:nth-child(5)
-    .z-label,
-
-    .batch-upload-page
-    .cheque-listbox
-    .z-listitem
-    .z-listcell:nth-child(4)
-    .z-label {
-
-        font-size: 8px !important;
-
-        padding: 5px 9px !important;
-    }
-
+/* Blue Link / Batch ID Text */
+.lstCheques .z-listcell a,
+.lstChequeList .z-listcell a,
+.lblBatchIdLink {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #1d4ed8 !important; /* Standardized link blue */
 }

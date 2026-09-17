@@ -472,9 +472,9 @@
     font-weight: 400 !important;
     color: #6b7280 !important;
 }
-
-
 /* =========================================================
+   PENDING MAKER STATUS
+  /* =========================================================
    PENDING MAKER STATUS
    ========================================================= */
 
@@ -482,25 +482,16 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 110px !important;
-    height: 24px !important;
-    padding: 0 12px !important;
+    padding: 3px 10px !important;
     box-sizing: border-box !important;
-    background: linear-gradient(
-        90deg,
-        #fff8d6 0%,
-        #ffd84d 55%,
-        #ffb71b 100%
-    ) !important;
-    color: #172554 !important;
-    border: 1px solid #ffb000 !important;
-    border-radius: 9999px !important;
-    font-size: 8.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
     text-transform: uppercase !important;
     text-align: center !important;
-    box-shadow: 0 1px 3px rgba(255, 183, 27, 0.25) !important;
     white-space: nowrap !important;
 }
 
@@ -513,24 +504,15 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 110px !important;
-    height: 24px !important;
-    padding: 0 12px !important;
+    padding: 3px 10px !important;
     box-sizing: border-box !important;
-    background: linear-gradient(
-        90deg,
-        #e0e7ff 0%,
-        #c7d2fe 55%,
-        #a5b4fc 100%
-    ) !important;
-    color: #1e1b4b !important;
-    border: 1px solid #818cf8 !important;
-    border-radius: 9999px !important;
-    font-size: 8.5px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
+    background: #e0e7ff !important;
+    color: #3730a3 !important;
+    border: 1px solid #a5b4fc !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
     text-transform: uppercase !important;
     text-align: center !important;
-    box-shadow: 0 1px 3px rgba(129, 140, 248, 0.3) !important;
     white-space: nowrap !important;
 }
