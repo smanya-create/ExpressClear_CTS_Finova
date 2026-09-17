@@ -21,6 +21,7 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dao.outward.OutwardBatchDashboardDAO;
 import com.iispl.cts.daoimpl.outward.OutwardBatchDashboardDAOImpl;
 import com.iispl.cts.entity.outward.OutwardBatch;
@@ -56,6 +57,9 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		if (!SecurityUtil.checkAccess(null)) {
+            return;
+        }
 
 		super.doAfterCompose(comp);
 
