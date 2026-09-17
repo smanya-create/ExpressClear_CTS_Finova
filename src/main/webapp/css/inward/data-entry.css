@@ -259,8 +259,6 @@
     overflow: auto !important;
     position: relative !important;
     display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
 }
 
 .cts-cheque-img-display {
@@ -268,7 +266,8 @@
     user-select: none !important;
     display: block !important;
     margin: auto !important;
-    transition: transform 0.2s ease !important;
+    max-width: none !important;
+    transition: transform 0.2s ease, width 0.2s ease !important;
 }
 
 .cts-cheque-img-display:active {
