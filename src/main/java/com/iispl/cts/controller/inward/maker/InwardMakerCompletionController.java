@@ -19,6 +19,7 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -86,6 +87,10 @@ public class InwardMakerCompletionController extends GenericForwardComposer<Comp
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	
+    	if (!SecurityUtil.checkAccess("SUBMIT_BATCH")) {
+    	    return;
+    	}
         super.doAfterCompose(comp);
 
         String paramBatch = execution.getParameter("batchId");

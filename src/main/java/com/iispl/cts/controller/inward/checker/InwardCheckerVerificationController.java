@@ -36,6 +36,7 @@ import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.SendBackReason;
@@ -173,6 +174,11 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		if (!SecurityUtil.checkAccess("CHECKER_VERIFICATION")) {
+		    return;
+		}
+		
 		super.doAfterCompose(comp);
 		pageRoot = comp.getPage().getFirstRoot();
 		inwardChequeService = new InwardChequeServiceImpl();

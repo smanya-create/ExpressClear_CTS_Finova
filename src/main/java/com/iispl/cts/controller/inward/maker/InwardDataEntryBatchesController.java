@@ -28,6 +28,7 @@ import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.DataEntryBatchItemDTO;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.enums.inward.InwardChequeStatus;
@@ -51,6 +52,10 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		if (!SecurityUtil.checkAccess("DATA_ENTRY")) {
+		    return;
+		}
 		super.doAfterCompose(comp);
 
 		// Default dropdown selection to index 0 ("All Statuses")

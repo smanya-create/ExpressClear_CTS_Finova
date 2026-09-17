@@ -78,6 +78,7 @@ import org.zkoss.zul.Vlayout;
 
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
 
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
@@ -138,6 +139,9 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 	public void doAfterCompose(Window window) throws Exception {
 
+		if (!SecurityUtil.checkAccess("BATCH_LIST")) {
+		    return;
+		}
 		super.doAfterCompose(window);
 
 		currentWindow = window;

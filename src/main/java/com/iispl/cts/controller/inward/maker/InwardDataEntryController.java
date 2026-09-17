@@ -27,6 +27,7 @@ import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.User;
@@ -133,6 +134,11 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		if (!SecurityUtil.checkAccess("DATA_ENTRY")) {
+		    return;
+		}
+		
 		super.doAfterCompose(comp);
 
 		if (btnConfirmCompletionModal != null) {

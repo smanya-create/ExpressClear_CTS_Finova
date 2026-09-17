@@ -23,6 +23,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Vlayout;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.service.inward.InwardBatchService;
@@ -61,6 +62,10 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		if (!SecurityUtil.checkAccess("CHEQUE_DETAILS")) {
+		    return;
+		}
 		super.doAfterCompose(comp);
 
 		this.inwardBatchService = new InwardBatchServiceImpl();

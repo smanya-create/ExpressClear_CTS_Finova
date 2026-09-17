@@ -24,6 +24,7 @@ import org.zkoss.zul.Space;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
@@ -97,6 +98,11 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
+		 if (!SecurityUtil.checkAccess("DASHBOARD")) {
+		        return;
+		    }
+		
 		super.doAfterCompose(comp);
 
 		this.dashboardService = new InwardDashboardServiceImpl();
@@ -197,9 +203,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 		}
 	}
 
-	// =========================================================
-	// 1. RETURN FROM CHECKER SECTION
-	// =========================================================
 	private void loadReturnedCheques() {
 		this.returnedChequeList = new ArrayList<>();
 
@@ -404,9 +407,6 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 			inwardMakerBtnReturnLast.setDisabled(currentReturnPage >= totalPages);
 	}
 
-	// =========================================================
-	// 2. BATCHES PROCESSING SECTION
-	// =========================================================
 	private void loadBatches() {
 		try {
 			List<InwardDashboardBatchDTO> allBatches = dashboardService.getRecentBatches("");
