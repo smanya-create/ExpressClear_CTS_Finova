@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk xmlns:h="xhtml">
-	<style src="/css/inward/data-entry.css?v=601" />
+	<style src="/css/inward/data-entry.css?v=605" />
 
 	<div id="dataEntryRootDiv" sclass="cts-data-entry-wrapper"
 		apply="com.iispl.cts.controller.inward.maker.InwardDataEntryController">
