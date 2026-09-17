@@ -22,8 +22,7 @@
 
                 <!-- Shared Application Header -->
                 <include id="incHeader" src="/components/header.zul"
-                         pageTitle="Outward Checker"
-                         pageSubtitle="Rejected Cheques" />
+                         pageTitle="Outward Processing" />
 
                 <!-- Modal Window Host -->
                 <vlayout id="windowHost" spacing="0"/>
@@ -73,7 +72,11 @@
                     </hlayout>
 
                     <!-- ================= TABLE SECTION ================= -->
-                    <vlayout sclass="table-card" hflex="1" vflex="1" spacing="8px" style="min-height: 0; overflow: hidden !important;">
+                   <vlayout sclass="table-card"
+         hflex="1"
+         vflex="1"
+         spacing="5px"
+         style="min-height: 0; overflow: hidden !important;">
                         <vlayout sclass="list-title-section" spacing="1px">
                             <label value="Rejected Cheques List" sclass="list-title"/>
                             <label value="List of cheques rejected by the Checker" sclass="list-subtitle"/>

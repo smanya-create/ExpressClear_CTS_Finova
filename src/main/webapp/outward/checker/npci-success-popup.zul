@@ -25,32 +25,6 @@
             <label value="The batch has been successfully sent to NPCI for further processing."
                    sclass="npci-success-description"/>
 
-            <vlayout sclass="npci-success-details"
-                     spacing="8px">
-
-                <hlayout sclass="npci-detail-row">
-                    <label value="Batch ID"
-                           sclass="npci-detail-label"/>
-                    <label id="lblBatchId"
-                           sclass="npci-detail-value"/>
-                </hlayout>
-
-                <hlayout sclass="npci-detail-row">
-                    <label value="File"
-                           sclass="npci-detail-label"/>
-                    <label id="lblFileName"
-                           sclass="npci-detail-value"/>
-                </hlayout>
-
-                <hlayout sclass="npci-detail-row">
-                    <label value="Status"
-                           sclass="npci-detail-label"/>
-                    <label value="SENT TO NPCI"
-                           sclass="npci-status"/>
-                </hlayout>
-
-            </vlayout>
-
             <button id="btnDone"
                     label="DONE"
                     sclass="npci-done-button"/>

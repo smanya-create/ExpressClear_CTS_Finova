@@ -3,13 +3,6 @@
 
 <zk>
 
-	<!-- =========================================================
-		SESSION
-		========================================================= -->
-	<zscript>
-		org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "OUTWARD_CHECKER");
-		org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "ochecker");
-	</zscript>
 
 	<!-- =========================================================
 		MAIN WINDOW
@@ -42,13 +35,9 @@
 
 						<!-- HEADER -->
 						<north height="90px" border="none">
-							<div sclass="header-wrapper" width="100%" height="90px">
-								<div sclass="header-page-title">
-									<label value="Checker Reports" sclass="header-title" />
-									<label value="Checker verification, batch settlement, and rejection audit reports" sclass="header-subtitle" />
-								</div>
+							<div sclass="header-wrapper" width="100%" height="90px">					
 								<div sclass="common-header-container">
-									<include src="/components/header.zul" width="100%" height="100%" />
+									<include src="/components/header.zul" pageTitle = "Outward Processing" width="100%" height="100%" />
 								</div>
 							</div>
 						</north>
