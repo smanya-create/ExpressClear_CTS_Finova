@@ -466,63 +466,86 @@
     outline: none !important;
 }
 
+/* =========================================================
+   FOOTER ACTIONS & BUTTON UNIFICATION
+   ========================================================= */
+
 .micr-action-footer {
     width: 100% !important;
     border-top: 1px solid #e2e8f0 !important;
-    padding: 10px 8px 0 8px !important;
+    padding: 12px 8px 0 8px !important;
     margin-top: auto !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
 }
 
-.micr-action-footer .micr-action-btn {
-    height: 42px !important;
-    min-width: 0 !important;
+/* Unified base for all 3 action buttons */
+.micr-action-footer .z-button,
+.micr-action-footer .micr-action-btn.z-button {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    line-height: 34px !important;
     box-sizing: border-box !important;
-}
-.cts-btn-outline-danger,
-.cts-btn-solid-primary,
-.cts-btn-submit-data-entry {
-    height: 34px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
     border-radius: 5px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+    padding: 0 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
     cursor: pointer !important;
-    box-sizing: border-box !important;
+    transition: all 0.15s ease-in-out !important;
 }
 
-.cts-btn-outline-danger {
+/* Ensure icons align centrally with text */
+.micr-action-footer .z-button i,
+.micr-action-footer .z-button [class^="z-icon-"] {
+    font-size: 12px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+}
+
+/* 1. Request Rejection (Bordered Red) */
+.cts-btn-outline-danger.z-button {
     background: #ffffff !important;
     border: 1px solid #ef4444 !important;
     color: #dc2626 !important;
-    padding: 0 13px !important;
 }
 
-.cts-btn-outline-danger:hover {
+.cts-btn-outline-danger.z-button:hover {
     background: #fef2f2 !important;
+    border-color: #dc2626 !important;
 }
 
-.cts-btn-solid-primary {
-    background: #1b3d68 !important;
-    border: 1px solid #1b3d68 !important;
+/* 2. Save & Next (Deep Navy #18275c) */
+.cts-btn-solid-primary.z-button {
+    background: #18275c !important;
+    border: 1px solid #18275c !important;
     color: #ffffff !important;
-    padding: 0 14px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
 }
 
-.cts-btn-solid-primary:hover {
-    background: #142f50 !important;
+.cts-btn-solid-primary.z-button:hover {
+    background: #101c46 !important;
+    border-color: #101c46 !important;
 }
 
+/* 3. Proceed to Data Entry (Enabled State) */
 .cts-btn-submit-data-entry.z-button {
     background: #059669 !important;
     border: 1px solid #059669 !important;
     color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: 12px !important;
-    height: 34px !important;
-    border-radius: 5px !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2) !important;
-    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2) !important;
 }
 
 .cts-btn-submit-data-entry.z-button:hover {
@@ -530,13 +553,15 @@
     border-color: #047857 !important;
 }
 
+/* 3. Proceed to Data Entry (Disabled State) */
 .cts-btn-submit-data-entry.z-button[disabled],
-.cts-btn-submit-data-entry.z-button-disabled {
-    background: #e2e8f0 !important;
-    border-color: #cbd5e1 !important;
+.cts-btn-submit-data-entry.z-button.z-button-disabled {
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
     color: #94a3b8 !important;
     cursor: not-allowed !important;
     box-shadow: none !important;
+    opacity: 0.8 !important;
 }
 
 .cts-modal-window {
