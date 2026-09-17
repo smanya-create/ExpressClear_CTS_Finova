@@ -15,13 +15,13 @@
 
 			<div>
 
-				<label value="Outward MICR Repair"
+				<label value="MICR Repair"
 
 					sclass="cts-main-title" />
 
 				<label
 
-					value="Review and correct individual cheque MICR details."
+					value=""
 
 					sclass="cts-main-subtitle" />
 
@@ -40,7 +40,7 @@
 
 			<div sclass="cts-meta-col">
 
-				<label value="BATCH NO." sclass="cts-meta-header" />
+				<label value="Batch No." sclass="cts-meta-header" />
 
 				<label id="lblBatchId" value="-" sclass="cts-meta-val" />
 
@@ -48,7 +48,7 @@
 
 			<div sclass="cts-meta-col">
 
-				<label value="TOTAL CHEQUES" sclass="cts-meta-header" />
+				<label value="Total Cheques" sclass="cts-meta-header" />
 
 				<label id="lblTotalCheques" value="0"
 
@@ -58,7 +58,7 @@
 
 			<div sclass="cts-meta-col cts-progress-meta-col">
 
-				<label value="PROGRESS" sclass="cts-meta-header" />
+				<label value="Progess" sclass="cts-meta-header" />
 
 				<hlayout spacing="8px" valign="middle">
 
@@ -129,7 +129,7 @@
 
 					<div>
 
-						<label value="CHEQUE IMAGE"
+						<label value="Cheque Image"
 
 							sclass="cts-card-title" />
 
@@ -246,7 +246,7 @@
 
         <div>
 
-            <label value="MICR DATA ENTRY"
+            <label value="MICR Data Entry"
 
                    sclass="cts-card-title" />
 
@@ -258,7 +258,7 @@
 
         <label id="lblHeaderItemStatus"
 
-               value="MICR_REPAIR_PENDING"
+               value="MICR Repair pending"
 
                sclass="cts-status-pill-peach" />
 
@@ -564,14 +564,6 @@
 				</vlayout>
 
 			</div>
-
-
-
 		</window>
 		</div>
-
-
-
-
-
 </zk>

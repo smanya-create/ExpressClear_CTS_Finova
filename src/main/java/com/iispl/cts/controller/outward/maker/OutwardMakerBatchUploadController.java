@@ -481,10 +481,11 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
             if ("MICR Repair".equalsIgnoreCase(filterValue)) {
                 matchesType = "PENDING_MICR_REPAIR".equalsIgnoreCase(status) 
-                           || "MICR_REJECTED".equalsIgnoreCase(status);
+                           || "MICR_REJECTED".equalsIgnoreCase(status)
+                           || "MICR_REJECTION_PENDING".equalsIgnoreCase(status);
             } else if ("Data Entry".equalsIgnoreCase(filterValue) || "Pending Data Entry".equalsIgnoreCase(filterValue)) {
                 matchesType = "PENDING_DATA_ENTRY".equalsIgnoreCase(status) 
-                           || (!"PENDING_MICR_REPAIR".equalsIgnoreCase(status) && !"MICR_REJECTED".equalsIgnoreCase(status));
+                           || "MICR_REPAIRED".equalsIgnoreCase(status);
             }
 
             if (matchesType) {
@@ -519,15 +520,21 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             item.appendChild(new Listcell(formatAmount(cheque.getChequeAmount())));
 
             // Status Cell
-            String status = cheque.getChequeStatus();
-            if (status == null || status.trim().isEmpty()) {
-                status = "-";
+            String rawStatus = cheque.getChequeStatus();
+            if (rawStatus == null || rawStatus.trim().isEmpty()) {
+                rawStatus = "";
             }
 
-            Listcell statusCell = new Listcell();
-            Label statusLabel = new Label(status);
+            String displayStatus = getDisplayStatus(rawStatus);
 
-            if ("PENDING_MICR_REPAIR".equalsIgnoreCase(status) || "MICR_REJECTED".equalsIgnoreCase(status)) {
+            Listcell statusCell = new Listcell();
+            Label statusLabel = new Label(displayStatus);
+
+            boolean isMicrRepair = "PENDING_MICR_REPAIR".equalsIgnoreCase(rawStatus) 
+                                || "MICR_REJECTED".equalsIgnoreCase(rawStatus)
+                                || "MICR_REJECTION_PENDING".equalsIgnoreCase(rawStatus);
+
+            if (isMicrRepair) {
                 statusLabel.setSclass("chequeStatusMicrRepair");
             } else {
                 statusLabel.setSclass("chequeStatusDataEntry");
@@ -536,20 +543,19 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             statusCell.appendChild(statusLabel);
             item.appendChild(statusCell);
 
-         // Action Buttons
+            // Action Buttons
             Listcell actionCell = new Listcell();
             Button actionButton = new Button();
 
             final String selectedBatchId = (batchId != null) ? batchId : "";
             final String selectedChequeId = cheque.getScannedChequeId();
 
-            if ("PENDING_MICR_REPAIR".equalsIgnoreCase(status) || "MICR_REJECTED".equalsIgnoreCase(status)) {
+            if (isMicrRepair) {
                 actionButton.setLabel("MICR Repair");
                 actionButton.setSclass("btnChequeAction");
                 actionButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
                     @Override
                     public void onEvent(Event event) {
-                        // FIX: Explicitly pass "SCAN" as source for newly uploaded scan batches
                         openMicrRepairPopup("SCAN", selectedBatchId, selectedChequeId);
                     }
                 });
@@ -607,7 +613,6 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
     public void openMicrRepairPopup(String source, String batchId, String chequeId) {
         try {
-            // FIX: If source parameter is missing, check session before falling back to SCAN
             String src = source;
             if (src == null || src.trim().isEmpty()) {
                 src = (String) Sessions.getCurrent().getAttribute("MICR_REPAIR_SOURCE");
@@ -663,12 +668,11 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
             showErrorMessage("Unable to open MICR Repair view.");
         }
     }
-    // 2-parameter overload defaulting to SCAN for upload flows
+
     public void openMicrRepairPopup(String batchId, String chequeId) {
         openMicrRepairPopup("SCAN", batchId, chequeId);
     }
 
-    // Lookup helper matching desktop structure
     private Include findMainInclude() {
         try {
             Include inc = (Include) Path.getComponent("/outwardMakerRootWin/mainContentArea");
@@ -692,6 +696,35 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
     // =========================================================
     // UTILITY METHODS
     // =========================================================
+
+    private String getDisplayStatus(String backendStatus) {
+        if (backendStatus == null || backendStatus.trim().isEmpty()) {
+            return "-";
+        }
+
+        String status = backendStatus.trim().toUpperCase();
+
+        switch (status) {
+            case "PENDING_MICR_REPAIR":
+                return "MICR Repair";
+
+            case "PENDING_DATA_ENTRY":
+                return "Data Entry";
+
+            case "MICR_REJECTED":
+                return "MICR Rejected";
+
+            case "MICR_REJECTION_PENDING":
+                return "MICR Rejection Pending";
+
+            case "MICR_REPAIRED":
+                return "MICR Repaired";
+
+            default:
+                String readable = status.replace("_", " ");
+                return readable.substring(0, 1).toUpperCase() + readable.substring(1).toLowerCase();
+        }
+    }
 
     private BigDecimal calculateChequeTotal(List<ScanCheque> chequeList) {
         BigDecimal total = BigDecimal.ZERO;
