@@ -1,6 +1,5 @@
 package com.iispl.cts.controller.outward.maker;
 
-import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.service.outward.MakerReportService;
 import com.iispl.cts.serviceimpl.outward.MakerReportServiceImpl;
 
@@ -8,6 +7,7 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Messagebox;
@@ -19,6 +19,7 @@ public class MakerReportController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
+    private Combobox cmbReportType;
     private Datebox dtFromDate;
     private Datebox dtToDate;
     private Button btnExportCsv;
@@ -28,20 +29,38 @@ public class MakerReportController extends GenericForwardComposer<Component> {
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
-        
         super.doAfterCompose(comp);
 
+        // Default dates to today
         Date today = new Date();
         if (dtFromDate != null) dtFromDate.setValue(today);
         if (dtToDate != null) dtToDate.setValue(today);
+
+        // Default combobox to first item
+        if (cmbReportType != null && cmbReportType.getItemCount() > 0) {
+            cmbReportType.setSelectedIndex(0);
+        }
     }
 
     private String getMakerId() {
-        String makerId = (String) Sessions.getCurrent().getAttribute("userId");
+        String makerId = (String) Sessions.getCurrent().getAttribute("USER_ID");
+        if (makerId == null || makerId.trim().isEmpty()) {
+            makerId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
+        }
+        if (makerId == null || makerId.trim().isEmpty()) {
+            makerId = (String) Sessions.getCurrent().getAttribute("userId");
+        }
         if (makerId == null || makerId.trim().isEmpty()) {
             makerId = "USR1001";
         }
         return makerId;
+    }
+
+    private String getSelectedReportType() {
+        if (cmbReportType != null && cmbReportType.getSelectedItem() != null) {
+            return cmbReportType.getSelectedItem().getValue();
+        }
+        return "MICR_REPAIRS";
     }
 
     public void onClick$btnExportCsv() {
@@ -58,11 +77,12 @@ public class MakerReportController extends GenericForwardComposer<Component> {
         }
 
         String makerId = getMakerId();
+        String reportType = getSelectedReportType();
         try {
-            byte[] csvBytes = makerReportService.generateMakerReportCsv(makerId, fromDate, toDate);
+            byte[] csvBytes = makerReportService.generateMakerReportCsv(makerId, reportType, fromDate, toDate);
 
             SimpleDateFormat fileSdf = new SimpleDateFormat("yyyyMMdd");
-            String fileName = "Maker_Report_" + makerId + "_" + fileSdf.format(fromDate) + "_to_" + fileSdf.format(toDate) + ".csv";
+            String fileName = "Maker_" + reportType + "_" + makerId + "_" + fileSdf.format(fromDate) + "_to_" + fileSdf.format(toDate) + ".csv";
 
             Filedownload.save(csvBytes, "text/csv", fileName);
 
@@ -86,11 +106,12 @@ public class MakerReportController extends GenericForwardComposer<Component> {
         }
 
         String makerId = getMakerId();
+        String reportType = getSelectedReportType();
         try {
-            byte[] pdfBytes = makerReportService.generateMakerReportPdf(makerId, fromDate, toDate);
+            byte[] pdfBytes = makerReportService.generateMakerReportPdf(makerId, reportType, fromDate, toDate);
 
             SimpleDateFormat fileSdf = new SimpleDateFormat("yyyyMMdd");
-            String fileName = "Maker_Report_" + makerId + "_" + fileSdf.format(fromDate) + "_to_" + fileSdf.format(toDate) + ".pdf";
+            String fileName = "Maker_" + reportType + "_" + makerId + "_" + fileSdf.format(fromDate) + "_to_" + fileSdf.format(toDate) + ".pdf";
 
             Filedownload.save(pdfBytes, "application/pdf", fileName);
 

@@ -16,7 +16,7 @@
             <north size="auto" border="none">
                 <include id="incHeader" src="/components/header.zul" 
                          pageTitle="Admin Dashboard" 
-                         pageSubtitle="Consolidated Reports" />
+                         pageSubtitle="Reports" />
             </north>
 
             <!-- Main Content Canvas -->
@@ -26,7 +26,7 @@
                     
                     <!-- Page Title -->
                     <vlayout spacing="3px" style="flex: 0 0 auto;">
-                        <label value="Consolidated System &amp; Audit Report" sclass="page-title" />
+                        <label value="Reports" sclass="page-title" />
                         
                     </vlayout>
 
@@ -63,7 +63,7 @@
 
                         <!-- Standardized Action Buttons -->
                         <vlayout spacing="8px">
-                            <label value="DOWNLOAD FORMAT" sclass="field-label" />
+                            <label value="Download Formats" sclass="field-label" />
                             <hlayout spacing="14px">
                                 <button id="btnExportCsv" label="Download CSV" sclass="btn-primary" height="38px" />
                                 <button id="btnExportPdf" label="Download PDF" sclass="btn-outline" height="38px" />
