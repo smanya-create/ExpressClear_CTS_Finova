@@ -219,28 +219,51 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 				String st = c.getChequeStatus().trim();
 
-				if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
-						|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
+				if (this.isReworkBatch) {
+					// =========================================================================
+					// REWORK FLOW:
+					// 1. Sent-back cheques waiting for Maker
+					// 2. Cheques reworked in this current active session (MAKER_RETURNED)
+					// 3. Rejections requested during rework
+					// EXCLUDES: DATA_ENTRY_COMPLETED, old normal-run rejections, and COMPLETED items
+					// =========================================================================
+					if (isSentBackStatus(st) || InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st)) {
+						this.activeQueue.add(c);
+						continue;
+					}
 
-					this.activeQueue.add(c);
-					continue;
-				}
+					// Only include rejection requests belonging to an active send-back rework ticket
+					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
+							&& isReworkRejectionRequest(c)) {
+						this.activeQueue.add(c);
+					}
 
-				if (isSentBackStatus(st)) {
-					this.activeQueue.add(c);
-					continue;
-				}
+				} else {
+					// =========================================================================
+					// NORMAL FLOW (First intake pass):
+					// =========================================================================
+					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
+							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
+							|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
 
-				if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
-						&& isDataEntryRejectionRequest(c)) {
+						this.activeQueue.add(c);
+						continue;
+					}
 
-					this.activeQueue.add(c);
+					if (isSentBackStatus(st)) {
+						this.activeQueue.add(c);
+						continue;
+					}
+
+					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
+							&& isDataEntryRejectionRequest(c)) {
+
+						this.activeQueue.add(c);
+					}
 				}
 			}
 		}
 
-		//
 
 		String targetChequeId = execution.getParameter("chequeId");
 		if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
@@ -284,6 +307,29 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			return false;
 		return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(status)
 				|| InwardChequeStatus.SEND_BACK_TO_MAKER.name().equalsIgnoreCase(status);
+	}
+	
+	private boolean isReworkRejectionRequest(InwardCheque cheque) {
+		if (cheque == null || cheque.getInwardChequeId() == null) {
+			return false;
+		}
+
+		// A rejection belongs to rework if this cheque has an inward_send_back_request ticket
+		String sql = "SELECT EXISTS (" 
+				+ "SELECT 1 FROM inward_send_back_request "
+				+ "WHERE inward_cheque_id = ? "
+				+ "AND inward_batch_id = ?"
+				+ ")";
+
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, cheque.getInwardChequeId());
+			ps.setString(2, this.currentBatchId);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next() && rs.getBoolean(1);
+			}
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	private boolean isMicrRepairStatus(String status) {
@@ -780,6 +826,15 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 		String userId = currentUser != null ? currentUser.getUserId() : "SYSTEM";
+		
+		// IF THIS CHEQUE WAS PREVIOUSLY SENT BACK, CLOSE THE PREVIOUS SEND-BACK TICKET
+				if (isSentBackStatus(current.getChequeStatus())) {
+					try {
+						sendBackRequestService.markRequestResolved(current.getInwardChequeId(), userId);
+					} catch (Exception ex) {
+						System.err.println("WARN: Could not mark send-back request resolved: " + ex.getMessage());
+					}
+				}
 
 		current.setChequeStatus(InwardChequeStatus.REJECTION_REQUESTED.name());
 		chequeService.updateChequeDetails(current);
@@ -865,8 +920,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		try {
-
-			batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
+			// For rework batches, preserve CHECKER_PROCESSING. For initial batches, set CHECKER_PROCESSING_PENDING.
+			String targetBatchStatus = this.isReworkBatch ? "CHECKER_PROCESSING" : "CHECKER_PROCESSING_PENDING";
+			batchService.updateBatchStatus(this.currentBatchId, targetBatchStatus);
 
 			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId()
