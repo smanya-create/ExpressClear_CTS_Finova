@@ -1406,16 +1406,17 @@ public class OutwardCheckerQueueDAOImpl
  public RejectRequestDTO getRejectRequestByChequeId(
          String chequeId) throws SQLException {
 
-     String sql =
-             "SELECT request_id, "
-           + "       cheque_id, "
-           + "       batch_id, "
-           + "       remarks, "
-           + "       reason_id, "
-           + "       reason "
-           + "FROM outward_cheque_request "
-           + "WHERE cheque_id = ?";
-
+	 String sql =
+		        "SELECT request_id, "
+		      + "       cheque_id, "
+		      + "       batch_id, "
+		      + "       remarks, "
+		      + "       reason_id, "
+		      + "       reason "
+		      + "FROM outward_cheque_request "
+		      + "WHERE cheque_id = ? "
+		      + "ORDER BY time_stamp DESC, request_id DESC "
+		      + "LIMIT 1";
      try (
          Connection connection =
                  DBConnection.getConnection();

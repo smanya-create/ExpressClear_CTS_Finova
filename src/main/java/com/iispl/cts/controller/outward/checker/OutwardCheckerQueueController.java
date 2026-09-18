@@ -378,20 +378,20 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				if (lblMakerRejectionReasonCode != null) {
 
 					lblMakerRejectionReasonCode
-							.setValue(request.getRejectedReasonId() != null ? request.getRejectedReasonId() : "-");
+							.setValue("Reject Code : "+(request.getRejectedReasonId() != null ? request.getRejectedReasonId() : "-"));
 				}
 
 				// Reason name
 				if (lblMakerRejectionReasonName != null) {
 
 					lblMakerRejectionReasonName
-							.setValue(request.getRejectedReasonName() != null ? request.getRejectedReasonName() : "-");
+							.setValue("Reject reason : "+(request.getRejectedReasonName() != null ? request.getRejectedReasonName() : "-"));
 				}
 
 				// Remarks
 				if (lblMakerRejectionRemarks != null) {
 
-					lblMakerRejectionRemarks.setValue(request.getRemarks() != null ? request.getRemarks() : "-");
+					lblMakerRejectionRemarks.setValue("Remarks : "+(request.getRemarks() != null ? request.getRemarks() : "-"));
 				}
 
 			} catch (Exception e) {
