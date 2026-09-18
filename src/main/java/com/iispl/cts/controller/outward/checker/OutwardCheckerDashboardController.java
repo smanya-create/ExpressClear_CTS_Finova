@@ -46,21 +46,19 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 	private Label lblPage;
 
-	private OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
-	private OutwardCheckerQueueService outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
+	private final OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
+	private final OutwardCheckerQueueService outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
 
-	private OutwardBatchDashboardDAO outwardBatchDashboardDAO = new OutwardBatchDashboardDAOImpl();
+	private final OutwardBatchDashboardDAO outwardBatchDashboardDAO = new OutwardBatchDashboardDAOImpl();
 
+	
 	int pageNumber = 1;
 	int pageSize = 5;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-
 		super.doAfterCompose(comp);
-
 		btnPrevious.addEventListener(Events.ON_CLICK, event -> {
-
 			if (pageNumber > 1) {
 				pageNumber--;
 				loadDashboard();
@@ -70,7 +68,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		btnNext.addEventListener(Events.ON_CLICK, event -> {
 
 			int totalBatches = getTotalBatchCount();
-
 			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
 
 			if (pageNumber < totalPages) {
@@ -118,13 +115,13 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		loadDashboard();
 	}
 
+	//checking search is in active or not
 	private boolean isSearchActive() {
-
 		String batchId = txtBatchId.getValue();
-
 		return batchId != null && !batchId.trim().isEmpty();
 	}
 
+	//Getting total batch count 
 	private int getTotalBatchCount() {
 
 		if (isSearchActive()) {
@@ -134,7 +131,8 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 		return outwardBatchService.getPendingBatchCount();
 	}
-
+	
+//loading  dashboard
 	private void loadDashboard() {
 
 		try {
@@ -157,6 +155,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 				totalBatches = outwardBatchService.getPendingBatchCount();
 			}
 
+			//Calculating total pages based on total batch count
 			int totalPages = (int) Math.ceil((double) totalBatches / pageSize);
 
 			if (totalPages == 0) {
@@ -305,10 +304,10 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		}
 	}
 
+	//counting normal cheques,Total cheques,Rejectin request cheques,maker returned cheques
 	private Map<String, Integer> getChequeCounts(String batchId) throws SQLException {
 
 		Map<String, Integer> countedCheques = new HashMap<>();
-
 		int totalCheques = 0;
 		int normalCheques = 0;
 		int rejectionRequests = 0;
