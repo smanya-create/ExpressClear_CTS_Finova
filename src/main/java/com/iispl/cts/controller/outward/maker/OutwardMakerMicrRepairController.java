@@ -1,4 +1,5 @@
 package com.iispl.cts.controller.outward.maker;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.zkoss.zk.ui.Component;
@@ -23,9 +24,10 @@ import com.iispl.cts.dto.MicrRepairChequeDTO;
 import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.service.outward.OutwardMakerService;
 import com.iispl.cts.serviceimpl.outward.OutwardMakerServiceImpl;
+
 public class OutwardMakerMicrRepairController extends GenericForwardComposer<Component> {
-	private static final long serialVersionUID = 1L;
 	private final OutwardMakerService outwardMakerService;
+
 	@Wire
 	private Component outwardMicrRepairRoot;
 	@Wire
@@ -100,17 +102,20 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	private Button btnCancelReject;
 	@Wire
 	private Button btnConfirmReject;
+
 	private List<MicrRepairChequeDTO> micrRepairCheques = new ArrayList<MicrRepairChequeDTO>();
 	private String source;
 	private String batchId;
 	private String chequeId;
 	private int currentIndex = 0;
+
 	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
 	private static final String STATUS_MICR_REPAIRED = "MICR_REPAIRED";
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
 	private static final String STATUS_MICR_REJECTION_PENDING = "MICR_REJECTION_PENDING";
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 	private static final String STATUS_REJECT_REQUESTED = "REJECT_REQUESTED";
+
 	private boolean showingBackImage = false;
 	private double zoomLevel = 1.0;
 	private int rotation = 0;
@@ -122,13 +127,14 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	private boolean syncingMicrFields = false;
 	private String frontImagePath = "";
 	private String backImagePath = "";
+
 	public OutwardMakerMicrRepairController() {
 		outwardMakerService = new OutwardMakerServiceImpl();
 	}
+
 	@Override
 	public void doAfterCompose(Component window) throws Exception {
 		super.doAfterCompose(window);
-		System.out.println("[MICR-TRACE] doAfterCompose: super COMPLETE");
 		resolveRejectPopupComponents(window);
 		loadParameters(window);
 		if (source == null || source.trim().isEmpty()) {
@@ -167,6 +173,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		loadCurrentCheque();
 		updateSubmitButton();
 	}
+
 	private void registerRejectPopupListeners() {
 		if (btnCancelReject != null) {
 			btnCancelReject.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
@@ -184,9 +191,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 				}
 			});
 		}
-		System.out.println("[MICR-TRACE] Reject popup listeners registered. " + "Cancel=" + (btnCancelReject != null)
-				+ ", Proceed=" + (btnConfirmReject != null));
 	}
+
 	private void resolveRejectPopupComponents(Component root) {
 		if (root == null) {
 			return;
@@ -195,18 +201,15 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 			Component popup = findComponentById(root, "rejectRequestWindow");
 			if (popup instanceof Window) {
 				rejectRequestWindow = (Window) popup;
-				System.out.println("[MICR-TRACE] rejectRequestWindow resolved successfully.");
 			}
 		}
 		if (rejectRequestWindow == null) {
-			System.out.println("[MICR-TRACE] rejectRequestWindow could not be resolved.");
 			return;
 		}
 		if (cmbRejectReason == null) {
 			Component component = findComponentById(rejectRequestWindow, "cmbRejectReason");
 			if (component instanceof Combobox) {
 				cmbRejectReason = (Combobox) component;
-				System.out.println("[MICR-TRACE] cmbRejectReason resolved successfully.");
 			}
 		}
 		if (txtModalRejectionRemark == null) {
@@ -229,6 +232,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		registerRejectPopupListeners();
 	}
+
 	private Component findComponentById(Component root, String id) {
 		if (root == null || id == null) {
 			return null;
@@ -244,6 +248,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		return null;
 	}
+
 	private void loadParameters(Component window) {
 		Component parent = window.getParent();
 		while (parent != null && !(parent instanceof Include)) {
@@ -273,22 +278,18 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		if (chequeId == null || chequeId.trim().isEmpty()) {
 			chequeId = Executions.getCurrent().getParameter("chequeId");
 		}
-		System.out.println("MICR REPAIR source = [" + source + "]");
-		System.out.println("MICR REPAIR batchId = [" + batchId + "]");
-		System.out.println("MICR REPAIR chequeId = [" + chequeId + "]");
 	}
+
 	private void loadRejectedReasons() {
 		try {
 			if (cmbRejectReason == null) {
 				resolveRejectPopupComponents(outwardMicrRepairRoot);
 			}
 			if (cmbRejectReason == null) {
-				System.out.println("[MICR-TRACE] cmbRejectReason could not be resolved from rejectRequestWindow.");
 				showError("Rejection reason field is unavailable.");
 				return;
 			}
-			List<RejectedReason> reasons =
-					outwardMakerService.getRejectedReasons();
+			List<RejectedReason> reasons = outwardMakerService.getRejectedReasons();
 			cmbRejectReason.getItems().clear();
 			if (reasons == null) {
 				return;
@@ -299,56 +300,36 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 				item.setValue(reason.getRejectedReasonId());
 				cmbRejectReason.appendChild(item);
 			}
-			System.out.println("Rejected reasons loaded = " + reasons.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 			showError("Unable to load rejection reasons.");
 		}
 	}
+
 	private void loadMicrRepairCheques() {
-		System.out.println("\n========== LOAD MICR REPAIR CHEQUES ==========");
-		System.out.println("Source = [" + source + "]");
-		System.out.println("Batch ID = [" + batchId + "]");
 		try {
 			if ("SCAN".equals(source)) {
-				System.out.println("Calling SCAN cheque service...");
-				micrRepairCheques =
-						outwardMakerService.getScanMicrRepairCheques(batchId);
+				micrRepairCheques = outwardMakerService.getScanMicrRepairCheques(batchId);
 			} else {
-				System.out.println("Calling OUTWARD cheque service...");
-				micrRepairCheques =
-						outwardMakerService.getOutwardMicrRepairCheques(batchId);
+				micrRepairCheques = outwardMakerService.getOutwardMicrRepairCheques(batchId);
 			}
 			if (micrRepairCheques == null) {
-				System.out.println("Cheque list returned = NULL");
-				micrRepairCheques =
-						new ArrayList<MicrRepairChequeDTO>();
+				micrRepairCheques = new ArrayList<MicrRepairChequeDTO>();
 			}
-			System.out.println("Cheque list returned = "
-					+ micrRepairCheques.size());
-			for (MicrRepairChequeDTO cheque : micrRepairCheques) {
-				System.out.println(
-						"Cheque ID = [" + cheque.getChequeId() + "]"
-								+ " | Cheque No = [" + cheque.getChequeNumber() + "]"
-								+ " | Status = [" + cheque.getChequeStatus() + "]");
-			}
-			System.out.println(
-					"========== LOAD MICR REPAIR CHEQUES COMPLETE ==========\n");
 		} catch (Exception e) {
-			System.out.println(
-					"========== LOAD MICR REPAIR CHEQUES ERROR ==========");
 			e.printStackTrace();
-			micrRepairCheques =
-					new ArrayList<MicrRepairChequeDTO>();
+			micrRepairCheques = new ArrayList<MicrRepairChequeDTO>();
 			showError("Unable to load MICR repair cheques.");
 		}
 	}
+
 	private int getTotalCheques() {
 		if (micrRepairCheques == null) {
 			return 0;
 		}
 		return micrRepairCheques.size();
 	}
+
 	private int findOpeningChequeIndex() {
 		if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
 			return -1;
@@ -376,19 +357,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		return 0;
 	}
+
 	private void loadCurrentCheque() {
-		System.out.println("\n========== LOAD CURRENT CHEQUE ==========");
-		System.out.println("[MICR-TRACE] loadCurrentCheque ENTER");
-		System.out.println("Current index = " + currentIndex);
-		System.out.println("Total cheques = " + (micrRepairCheques == null ? "NULL" : micrRepairCheques.size()));
-		System.out.println("[MICR-TRACE] 01. Calling getTotalCheques()");
 		int totalCheques = getTotalCheques();
-		System.out.println("[MICR-TRACE] 01. getTotalCheques COMPLETE = " + totalCheques);
 		if (currentIndex < 0 || currentIndex >= totalCheques) {
-			System.out.println("[MICR-TRACE] INVALID currentIndex - returning");
 			return;
 		}
-		System.out.println("[MICR-TRACE] 02. Resetting screen state");
 		txtCityCode.setValue("");
 		txtBankCode.setValue("");
 		txtBranchCode.setValue("");
@@ -408,99 +382,70 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		imageY = 0;
 		frontImagePath = "";
 		backImagePath = "";
-		System.out.println("[MICR-TRACE] 02. Screen state reset COMPLETE");
-		System.out.println("[MICR-TRACE] 03. Reading DTO");
+
 		MicrRepairChequeDTO cheque = micrRepairCheques.get(currentIndex);
 		if (cheque == null) {
-			System.out.println("[MICR-TRACE] DTO IS NULL - returning");
 			return;
 		}
-		System.out.println("Current cheque ID = [" + cheque.getChequeId() + "]");
-		System.out.println("Current cheque number = [" + cheque.getChequeNumber() + "]");
-		System.out.println("Current cheque status = [" + cheque.getChequeStatus() + "]");
-		System.out.println("[MICR-TRACE] 04. Calling populateCheque()");
 		populateCheque(cheque);
-		System.out.println("[MICR-TRACE] 04. populateCheque COMPLETE");
-		System.out.println("[MICR-TRACE] 05. Calling updateProgress()");
 		updateProgress();
-		System.out.println("[MICR-TRACE] 05. updateProgress COMPLETE");
-		System.out.println("[MICR-TRACE] 06. Calling updateNavigationButtons()");
 		updateNavigationButtons();
-		System.out.println("[MICR-TRACE] 06. updateNavigationButtons COMPLETE");
-		System.out.println("[MICR-TRACE] 07. Calling updateActionButtons()");
 		updateActionButtons();
-		System.out.println("[MICR-TRACE] 07. updateActionButtons COMPLETE");
-		System.out.println("[MICR-TRACE] 08. Calling updateSubmitButton()");
 		updateSubmitButton();
-		System.out.println("[MICR-TRACE] 08. updateSubmitButton COMPLETE");
-		System.out.println("========== LOAD CURRENT CHEQUE COMPLETE ==========");
 	}
+
 	private void populateCheque(MicrRepairChequeDTO cheque) {
-		System.out.println("\n========== POPULATE CHEQUE ==========");
-		System.out.println("[MICR-TRACE] populateCheque ENTER");
 		if (cheque == null) {
-			System.out.println("[MICR-TRACE] populateCheque: DTO NULL - returning");
 			return;
 		}
-		System.out.println("Populate cheque ID = [" + cheque.getChequeId() + "]");
-		System.out.println("Populate cheque number = [" + cheque.getChequeNumber() + "]");
-		System.out.println("Populate cheque status = [" + cheque.getChequeStatus() + "]");
-		System.out.println("Populate MICR = [" + cheque.getFullMicr() + "]");
-		System.out.println("1. Setting cheque number");
 		txtChequeNumber.setValue(safe(cheque.getChequeNumber()));
-		System.out.println("1. cheque number COMPLETE");
-		System.out.println("2. Setting city code");
 		txtCityCode.setValue(safe(cheque.getCityCode()));
-		System.out.println("2. city code COMPLETE = [" + safe(cheque.getCityCode()) + "]");
-		System.out.println("3. Setting bank code");
 		txtBankCode.setValue(safe(cheque.getBankCode()));
-		System.out.println("3. bank code COMPLETE = [" + safe(cheque.getBankCode()) + "]");
-		System.out.println("4. Setting branch code");
 		txtBranchCode.setValue(safe(cheque.getBranchCode()));
-		System.out.println("4. branch code COMPLETE = [" + safe(cheque.getBranchCode()) + "]");
-		System.out.println("5. Setting current MICR");
+		
 		String currentMicr = safe(cheque.getFullMicr());
 		txtCurrentMicr.setValue(currentMicr);
-		System.out.println("5. current MICR COMPLETE = [" + currentMicr + "]");
-		System.out.println("6. Setting corrected MICR");
 		txtCorrectedMicr.setValue(currentMicr);
 		refreshMicrValidationHighlight();
-		System.out.println("6. corrected MICR COMPLETE = [" + currentMicr + "]");
-		System.out.println("7. Setting cheque status");
-		lblHeaderItemStatus.setValue(safe(cheque.getChequeStatus()));
-		System.out.println("7. cheque status COMPLETE");
-		System.out.println("========== MICR DETAILS POPULATED ==========");
-		System.out.println("8. Reading rejection information");
+		
+		String formattedStatus = formatStatusDisplay(cheque.getChequeStatus());
+		lblHeaderItemStatus.setValue(formattedStatus);
+
 		String reasonId = safe(cheque.getReasonId());
 		String reason = safe(cheque.getReason());
 		String remarks = safe(cheque.getRemarks());
-		System.out.println("Reason ID = [" + reasonId + "]");
-		System.out.println("Reason = [" + reason + "]");
-		System.out.println("Remarks = [" + remarks + "]");
+
 		if (!reasonId.isEmpty() || !reason.isEmpty() || !remarks.isEmpty()) {
-			System.out.println("9. Rejection information is available - showing section");
 			micrAlertBox.setVisible(true);
-			System.out.println("10. Setting checker reason ID");
 			lblMicrReasonCode.setValue(reasonId);
-			System.out.println("10. checker reason ID COMPLETE");
-			System.out.println("11. Setting checker reason");
 			lblMicrReasonName.setValue(reason);
-			System.out.println("11. checker reason COMPLETE");
-			System.out.println("12. Setting checker remarks");
 			lblMicrRemarks.setValue(remarks);
-			System.out.println("12. checker remarks COMPLETE");
 		} else {
-			System.out.println("9. No rejection information - hiding section");
 			micrAlertBox.setVisible(false);
 		}
+
 		frontImagePath = safe(cheque.getChequeImageFront());
 		backImagePath = safe(cheque.getChequeImageBack());
-		System.out.println("========== CHECKER INFORMATION COMPLETE ==========");
-		System.out.println("13. Calling showFrontImage()");
 		showFrontImage();
-		System.out.println("13. showFrontImage COMPLETE");
-		System.out.println("========== POPULATE CHEQUE COMPLETE ==========");
 	}
+
+	private String formatStatusDisplay(String rawStatus) {
+		if (rawStatus == null || rawStatus.trim().isEmpty()) {
+			return "";
+		}
+		String[] words = rawStatus.trim().split("_+");
+		StringBuilder formatted = new StringBuilder();
+
+		for (String word : words) {
+			if (!word.isEmpty()) {
+				formatted.append(Character.toUpperCase(word.charAt(0)))
+						.append(word.substring(1).toLowerCase())
+						.append(" ");
+			}
+		}
+		return formatted.toString().trim();
+	}
+
 	private void showFrontImage() {
 		showingBackImage = false;
 		lblChequeImageTitle.setValue("Cheque Front Image");
@@ -508,6 +453,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		updateImagePosition();
 		applyImageTransform();
 	}
+
 	private void showBackImage() {
 		showingBackImage = true;
 		lblChequeImageTitle.setValue("Cheque Back Image");
@@ -523,6 +469,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		updateImagePosition();
 		applyImageTransform();
 	}
+
 	private void loadChequeImage(String imagePath) {
 		if (imagePath == null || imagePath.trim().isEmpty()) {
 			chequeImage.setSrc("");
@@ -538,8 +485,10 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		chequeImage.setVisible(true);
 		emptyImageState.setVisible(false);
 	}
+
 	private void updateImagePosition() {
 	}
+
 	public void onClick$btnViewFront(Event event) {
 		draggingImage = false;
 		imageX = 0;
@@ -548,6 +497,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		rotation = 0;
 		showFrontImage();
 	}
+
 	public void onClick$btnViewBack(Event event) {
 		draggingImage = false;
 		imageX = 0;
@@ -556,6 +506,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		rotation = 0;
 		showBackImage();
 	}
+
 	public void onClick$btnZoom(Event event) {
 		zoomLevel += 0.25;
 		if (zoomLevel > 3.0) {
@@ -563,6 +514,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		applyImageTransform();
 	}
+
 	public void onClick$btnZoomOut(Event event) {
 		zoomLevel -= 0.25;
 		if (zoomLevel < 0.5) {
@@ -570,6 +522,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		applyImageTransform();
 	}
+
 	public void onClick$btnZoomReset(Event event) {
 		zoomLevel = 1.0;
 		rotation = 0;
@@ -578,6 +531,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		draggingImage = false;
 		applyImageTransform();
 	}
+
 	public void onClick$btnRotate(Event event) {
 		rotation += 90;
 		if (rotation >= 360) {
@@ -585,11 +539,13 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		applyImageTransform();
 	}
+
 	private void applyImageTransform() {
 		String transform = "transform: translate(" + imageX + "px, " + imageY + "px) " + "scale(" + zoomLevel + ") "
 				+ "rotate(" + rotation + "deg);" + "transform-origin:center center;";
 		chequeImage.setStyle(transform);
 	}
+
 	public void onMouseDown$divChequeImageContainer(MouseEvent event) {
 		if (!chequeImage.isVisible()) {
 			return;
@@ -598,6 +554,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		lastMouseX = event.getX();
 		lastMouseY = event.getY();
 	}
+
 	public void onMouseMove$divChequeImageContainer(MouseEvent event) {
 		if (!draggingImage || !chequeImage.isVisible()) {
 			return;
@@ -612,9 +569,11 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		lastMouseY = currentMouseY;
 		applyImageTransform();
 	}
+
 	public void onMouseUp$divChequeImageContainer(MouseEvent event) {
 		draggingImage = false;
 	}
+
 	public void onClick$btnPrevious(Event event) {
 		if (currentIndex <= 0) {
 			return;
@@ -622,6 +581,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		currentIndex--;
 		loadCurrentCheque();
 	}
+
 	public void onClick$btnNext(Event event) {
 		int totalCheques = getTotalCheques();
 		if (currentIndex >= totalCheques - 1) {
@@ -630,15 +590,15 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		currentIndex++;
 		loadCurrentCheque();
 	}
+
 	private void updateNavigationButtons() {
-		System.out.println("[MICR-TRACE] private void updateNavigationButtons ENTER");
 		int totalCheques = getTotalCheques();
 		btnPrevious.setDisabled(currentIndex <= 0);
 		btnNext.setDisabled(currentIndex >= totalCheques - 1);
 		lblRecordPosition.setValue((currentIndex + 1) + " of " + totalCheques);
 	}
+
 	private void updateProgress() {
-		System.out.println("[MICR-TRACE] private void updateProgress ENTER");
 		int totalCheques = getTotalCheques();
 		if (totalCheques <= 0) {
 			lblProgress.setValue("0/0 (0%)");
@@ -652,6 +612,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		progressMeter.setValue(percentage);
 		lblTotalCheques.setValue(String.valueOf(totalCheques));
 	}
+
 	private int countProcessedCheques() {
 		if (micrRepairCheques == null) {
 			return 0;
@@ -667,6 +628,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		return count;
 	}
+
 	private int countPendingCheques() {
 		if (micrRepairCheques == null) {
 			return 0;
@@ -682,8 +644,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		return count;
 	}
+
 	private void updateActionButtons() {
-		System.out.println("[MICR-TRACE] private void updateActionButtons ENTER");
 		if (currentIndex < 0 || currentIndex >= getTotalCheques()) {
 			btnSaveAndNext.setDisabled(true);
 			btnRejectRequest.setDisabled(true);
@@ -694,15 +656,15 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		btnSaveAndNext.setDisabled(!pending);
 		btnRejectRequest.setDisabled(!pending);
 	}
+
 	private void updateSubmitButton() {
-		System.out.println("[MICR-TRACE] private void updateSubmitButton ENTER");
 		if (btnSubmitToDataEntry == null) {
 			return;
 		}
 		btnSubmitToDataEntry.setDisabled(!areAllChequesProcessed());
 	}
+
 	private boolean areAllChequesProcessed() {
-		System.out.println("[MICR-TRACE] private boolean areAllChequesProcessed ENTER");
 		if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
 			return false;
 		}
@@ -716,8 +678,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		return true;
 	}
+
 	public void onClick$btnSaveAndNext(Event event) {
-		System.out.println("========== SAVE BUTTON CLICKED ==========");
 		int totalCheques = getTotalCheques();
 		if (currentIndex < 0 || currentIndex >= totalCheques) {
 			showError("Invalid cheque selection.");
@@ -755,7 +717,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 				updateSubmitButton();
 				if (areAllChequesProcessed()) {
 					Clients.showNotification(
-							"All MICR repair cheques have been processed. " + "Click Submit to complete.",
+							"All MICR repair cheques have been processed. Click Submit to complete.",
 							Clients.NOTIFICATION_TYPE_INFO, null, "top_center", 2500);
 				} else {
 					Clients.showNotification("MICR repair saved successfully.", Clients.NOTIFICATION_TYPE_INFO, null,
@@ -770,29 +732,32 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 			showError("Failed to save MICR repair: " + safe(e.getMessage()));
 		}
 	}
+
 	private void updateChequeFromScreen(MicrRepairChequeDTO cheque) {
-		System.out.println("[MICR-TRACE] private void updateChequeFromScreen ENTER");
 		cheque.setCityCode(safe(txtCityCode.getValue()).trim());
 		cheque.setBankCode(safe(txtBankCode.getValue()).trim());
 		cheque.setBranchCode(safe(txtBranchCode.getValue()).trim());
 		cheque.setFullMicr(safe(txtCorrectedMicr.getValue()).trim());
 	}
+
 	private boolean validateMicrFields() {
-		System.out.println("[MICR-TRACE] private boolean validateMicrFields ENTER");
 		String city = safe(txtCityCode.getValue()).trim().toUpperCase();
 		String bank = safe(txtBankCode.getValue()).trim().toUpperCase();
 		String branch = safe(txtBranchCode.getValue()).trim().toUpperCase();
 		String micr = safe(txtCorrectedMicr.getValue()).trim().toUpperCase();
+
 		boolean cityValid = isValidMicrPart(city);
 		boolean bankValid = isValidMicrPart(bank);
 		boolean branchValid = isValidMicrPart(branch);
 		boolean micrFormatValid = isValidCorrectedMicrFormat(micr);
 		boolean micrMatchesParts = cityValid && bankValid && branchValid && micrFormatValid
 				&& micr.equals(city + bank + branch);
+
 		setMicrFieldError(txtCityCode, !cityValid);
 		setMicrFieldError(txtBankCode, !bankValid);
 		setMicrFieldError(txtBranchCode, !branchValid);
 		setMicrFieldError(txtCorrectedMicr, !micrMatchesParts);
+
 		if (city.isEmpty()) {
 			showValidationMessage("City Code is required.");
 			txtCityCode.setFocus(true);
@@ -840,30 +805,35 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		return true;
 	}
+
 	public void onChange$txtCityCode(Event event) {
 		if (syncingMicrFields) {
 			return;
 		}
 		syncCorrectedMicrFromParts();
 	}
+
 	public void onChange$txtBankCode(Event event) {
 		if (syncingMicrFields) {
 			return;
 		}
 		syncCorrectedMicrFromParts();
 	}
+
 	public void onChange$txtBranchCode(Event event) {
 		if (syncingMicrFields) {
 			return;
 		}
 		syncCorrectedMicrFromParts();
 	}
+
 	public void onChange$txtCorrectedMicr(Event event) {
 		if (syncingMicrFields) {
 			return;
 		}
 		syncPartsFromCorrectedMicr();
 	}
+
 	private void syncCorrectedMicrFromParts() {
 		if (syncingMicrFields) {
 			return;
@@ -881,6 +851,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 		refreshMicrValidationHighlight();
 	}
+
 	private void syncPartsFromCorrectedMicr() {
 		if (syncingMicrFields) {
 			return;
