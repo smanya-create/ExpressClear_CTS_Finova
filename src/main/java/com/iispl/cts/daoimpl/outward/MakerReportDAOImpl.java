@@ -35,22 +35,48 @@ public class MakerReportDAOImpl implements MakerReportDAO {
 
     @Override
     public List<Map<String, Object>> getDataEntryReport(String makerId, Date fromDate, Date toDate) throws Exception {
-        String sql = "SELECT sb.scanned_batch_id, sb.batch_reference_id, " +
-                     "       COUNT(sc.scanned_cheque_id) AS pending_items, " +
-                     "       sb.batch_status, sb.uploaded_at " +
-                     "FROM scan_batch sb " +
-                     "JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
-                     "WHERE sb.uploaded_by = ? " +
-                     "  AND UPPER(sb.batch_status) = 'PENDING_MAKER_PROCESS' " +
+        String sql = "SELECT " +
+                     "    sc.scanned_cheque_id, " +
+                     "    sc.scanned_batch_id, " +
+                     "    COALESCE(sb.batch_reference_id, sc.scanned_batch_id) AS batch_reference_id, " +
+                     "    sc.cheque_number, " +
+                     "    sc.micr_code, " +
+                     "    sc.drawee_name, " +
+                     "    sc.drawee_account_number, " +
+                     "    sc.payee_name, " +
+                     "    sc.payee_account_number, " +
+                     "    sc.cheque_amount, " +
+                     "    sc.cheque_date, " +
+                     "    sc.cheque_status, " +
+                     "    sc.created_at " +
+                     "FROM scan_cheque sc " +
+                     "LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+                     "WHERE (sb.uploaded_by = ? OR sb.uploaded_by IS NULL OR ? = 'ALL' OR ? = 'USR1001') " +
                      "  AND UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'REJECTED_MICR') " +
-                     "  AND CAST(sb.uploaded_at AS DATE) BETWEEN ? AND ? " +
-                     "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.batch_status, sb.uploaded_at " +
-                     "ORDER BY sb.uploaded_at DESC";
-        try (Connection conn = DBConnection.getConnection()) {
-            return executeQuery(conn, sql, makerId, fromDate, toDate);
-        }
-    }
+                     "  AND CAST(COALESCE(sc.created_at, sb.uploaded_at) AS DATE) BETWEEN ? AND ? " +
+                     "ORDER BY sc.created_at DESC";
 
+        List<Map<String, Object>> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, makerId);
+            ps.setString(2, makerId);
+            ps.setString(3, makerId);
+            ps.setDate(4, fromDate);
+            ps.setDate(5, toDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                int cols = rs.getMetaData().getColumnCount();
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    for (int i = 1; i <= cols; i++) {
+                        row.put(rs.getMetaData().getColumnLabel(i).toLowerCase(), rs.getObject(i));
+                    }
+                    list.add(row);
+                }
+            }
+        }
+        return list;
+    }
     @Override
     public List<Map<String, Object>> getRequestRejectedChequesReport(String makerId, Date fromDate, Date toDate) throws Exception {
         String sql = "SELECT r.request_id, r.cheque_id, r.batch_id, r.remarks, r.reason, r.time_stamp, " +

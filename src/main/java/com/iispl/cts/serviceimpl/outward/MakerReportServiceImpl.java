@@ -87,21 +87,28 @@ public class MakerReportServiceImpl implements MakerReportService {
 
             case "DATA_ENTRY": {
                 sb.append("========================================================================================\n");
-                sb.append("               BATCHES GONE FOR DATA ENTRY (CAR/LAR KEYING)                             \n");
+                sb.append("               CHEQUES PENDING DATA ENTRY (CAR/LAR KEYING)                              \n");
                 sb.append("========================================================================================\n");
-                sb.append("Batch ID,Batch Reference,Pending Cheques,Status,Uploaded Time\n");
+                sb.append("Cheque ID,Batch ID,Batch Reference,Cheque No,MICR Code,Drawee Name,Payee Name,Amount (INR),Status,Created Time\n");
 
                 List<Map<String, Object>> rows = makerReportDAO.getDataEntryReport(makerId, sqlFrom, sqlTo);
                 if (rows.isEmpty()) {
-                    sb.append("\"No batches pending data entry for this period.\",,,,\n");
+                    sb.append("\"No cheques pending data entry for this period.\",,,,,,,,,\n");
                 } else {
                     for (Map<String, Object> r : rows) {
-                        String ts = r.get("uploaded_at") != null ? "=\"" + sdf.format(r.get("uploaded_at")) + "\"" : "-";
-                        sb.append(String.format("\"%s\",\"%s\",\"%s Items\",\"%s\",%s\n",
-                                r.get("scanned_batch_id"),
-                                r.get("batch_reference_id"),
-                                r.get("pending_items"),
-                                r.get("batch_status"),
+                        String ts = r.get("created_at") != null ? "=\"" + sdf.format(r.get("created_at")) + "\"" : "-";
+                        String amount = r.get("cheque_amount") != null ? df.format(Double.parseDouble(String.valueOf(r.get("cheque_amount")))) : "0.00";
+                        
+                        sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s\n",
+                                r.get("scanned_cheque_id") != null ? r.get("scanned_cheque_id") : "-",
+                                r.get("scanned_batch_id") != null ? r.get("scanned_batch_id") : "-",
+                                r.get("batch_reference_id") != null ? r.get("batch_reference_id") : "-",
+                                r.get("cheque_number") != null ? r.get("cheque_number") : "-",
+                                r.get("micr_code") != null ? r.get("micr_code") : "-",
+                                r.get("drawee_name") != null ? r.get("drawee_name") : "-",
+                                r.get("payee_name") != null ? r.get("payee_name") : "-",
+                                amount,
+                                r.get("cheque_status") != null ? r.get("cheque_status") : "-",
                                 ts));
                     }
                 }

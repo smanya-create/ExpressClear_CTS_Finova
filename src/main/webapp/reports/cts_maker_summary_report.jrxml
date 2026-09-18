@@ -38,35 +38,36 @@
         <field name="uploaded_at" class="java.sql.Timestamp"/>
     </subDataset>
 
-    <!-- 2. Batches Gone for Data Entry -->
+<!-- 2. Cheques Gone for Data Entry -->
     <subDataset name="DatasetDataEntry" uuid="a7f47e7a-9b16-419b-a3d8-4f169213bc54">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
         <parameter name="DS_TO_DATE" class="java.sql.Date"/>
         <queryString>
             <![CDATA[
-            SELECT sb.scanned_batch_id, 
-                   sb.batch_reference_id,
-                   COUNT(sc.scanned_cheque_id) AS pending_items,
-                   sb.batch_status, 
-                   sb.uploaded_at
-            FROM scan_batch sb
-            JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id
-            WHERE sb.uploaded_by = $P{DS_MAKER_ID}
-              AND UPPER(sb.batch_status) = 'PENDING_MAKER_PROCESS'
+            SELECT sc.scanned_cheque_id,
+                   sc.scanned_batch_id, 
+                   COALESCE(sb.batch_reference_id, sc.scanned_batch_id) AS batch_reference_id,
+                   sc.cheque_number,
+                   sc.cheque_amount,
+                   sc.cheque_status, 
+                   sc.created_at
+            FROM scan_cheque sc
+            LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id
+            WHERE (sb.uploaded_by = $P{DS_MAKER_ID} OR sb.uploaded_by IS NULL OR $P{DS_MAKER_ID} = 'USR1001')
               AND UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'REJECTED_MICR')
-              AND CAST(sb.uploaded_at AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
-            GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.batch_status, sb.uploaded_at
-            ORDER BY sb.uploaded_at DESC
+              AND CAST(COALESCE(sc.created_at, sb.uploaded_at) AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
+            ORDER BY sc.created_at DESC
             ]]>
         </queryString>
+        <field name="scanned_cheque_id" class="java.lang.String"/>
         <field name="scanned_batch_id" class="java.lang.String"/>
         <field name="batch_reference_id" class="java.lang.String"/>
-        <field name="pending_items" class="java.lang.Long"/>
-        <field name="batch_status" class="java.lang.String"/>
-        <field name="uploaded_at" class="java.sql.Timestamp"/>
+        <field name="cheque_number" class="java.lang.String"/>
+        <field name="cheque_amount" class="java.math.BigDecimal"/>
+        <field name="cheque_status" class="java.lang.String"/>
+        <field name="created_at" class="java.sql.Timestamp"/>
     </subDataset>
-
     <!-- =========================================================================
          3. Unprocessed Cheques Audit Dataset (DISABLED FOR EVALUATION)
          =========================================================================

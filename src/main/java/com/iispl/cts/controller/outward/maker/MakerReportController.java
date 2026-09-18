@@ -53,6 +53,7 @@ public class MakerReportController extends GenericForwardComposer<Component> {
         if (makerId == null || makerId.trim().isEmpty()) {
             makerId = "USR1001";
         }
+        System.out.println(">>> REPORT MAKER ID RESOLVED TO: " + makerId);
         return makerId;
     }
 
