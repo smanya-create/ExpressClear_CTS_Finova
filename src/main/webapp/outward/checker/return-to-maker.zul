@@ -1,4 +1,5 @@
 <?page title="Return to Maker" contentType="text/html;charset=UTF-8"?>
+
 <?link rel="stylesheet" type="text/css" href="/css/return-to-maker.css"?>
 
 <zk>
@@ -14,7 +15,6 @@
 
         <!-- HEADER -->
         <div sclass="return-header">
-
             <label
                 value="Return to Maker"
                 sclass="return-title"/>
@@ -22,9 +22,7 @@
             <label
                 value="Send this cheque back to the Maker for correction."
                 sclass="return-description"/>
-
         </div>
-
 
         <!-- CONTENT -->
         <div sclass="return-content">
@@ -33,7 +31,6 @@
             <div sclass="two-column">
 
                 <div sclass="field-group">
-
                     <label
                         value="BATCH"
                         sclass="field-label"/>
@@ -41,13 +38,11 @@
                     <label
                         id="lblReturnBatch"
                         value="-"
-                        sclass="readonly-field"/>
-
+                        sclass="readonly-field"
+                        style="font-weight:bold;"/>
                 </div>
 
-
                 <div sclass="field-group">
-
                     <label
                         value="CHEQUE NUMBER"
                         sclass="field-label"/>
@@ -55,16 +50,14 @@
                     <label
                         id="lblReturnCheque"
                         value="-"
-                        sclass="readonly-field"/>
-
+                        sclass="readonly-field"
+                        style="font-weight:bold;"/>
                 </div>
 
             </div>
 
-
             <!-- REASON -->
             <div sclass="field-group">
-
                 <label
                     value="REASON FOR SENDING BACK"
                     sclass="field-label"/>
@@ -75,13 +68,10 @@
                     placeholder="Select reason"
                     readonly="true"
                     sclass="reason-combobox"/>
-
             </div>
-
 
             <!-- REMARKS -->
             <div sclass="field-group">
-
                 <label
                     value="REMARKS"
                     sclass="field-label"/>
@@ -93,26 +83,52 @@
                     width="100%"
                     placeholder="Enter remarks for Maker..."
                     sclass="remarks-field"/>
-
             </div>
 
         </div>
 
+       <!-- FOOTER -->
+<div
+    sclass="return-footer"
+    style="margin-top:20px;">
 
-        <!-- FOOTER -->
-        <div sclass="return-footer">
+    <button
+        id="btnReturnCancel"
+        label="CANCEL"
+        sclass="cancel-button"
+        style="
+            background:#173b63 !important;
+            background-color:#173b63 !important;
+            color:#ffffff !important;
+            border:1px solid #173b63 !important;
+            border-radius:5px;
+            font-weight:600;
+            font-size:12px;
+            padding:5px 14px;
+            min-width:80px;
+            height:32px;
+            cursor:pointer;
+        "/>
 
-            <button
-                id="btnReturnCancel"
-                label="CANCEL"
-                sclass="cancel-button"/>
+    <button
+        id="btnReturnConfirm"
+        label="RETURN"
+        sclass="return-confirm-button"
+        style="
+            background:#173b63 !important;
+            background-color:#173b63 !important;
+            color:#ffffff !important;
+            border:1px solid #173b63 !important;
+            border-radius:5px;
+            font-weight:600;
+            font-size:12px;
+            padding:5px 14px;
+            min-width:80px;
+            height:32px;
+            cursor:pointer;
+        "/>
 
-            <button
-                id="btnReturnConfirm"
-                label="RETURN"
-                sclass="return-confirm-button"/>
-
-        </div>
+</div>
 
     </window>
 

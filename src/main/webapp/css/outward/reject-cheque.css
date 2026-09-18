@@ -1,53 +1,35 @@
 /* =========================================================
-   REJECT CHEQUE POPUP OVERLAY
+   REJECT CHEQUE POPUP
    ========================================================= */
 
 .reject-popup-overlay {
-    position: fixed !important;
-
-    top: 0 !important;
-    left: 0 !important;
-
-    width: 100vw !important;
-    height: 100vh !important;
-
-    background: rgba(15, 39, 71, 0.35) !important;
-
-    z-index: 999999 !important;
-
-    box-sizing: border-box !important;
-
-    display: flex !important;
-
-    align-items: center !important;
-
-    justify-content: center !important;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 /* =========================================================
-   POPUP
+   MAIN POPUP
    ========================================================= */
+
 .reject-popup {
-    position: relative;
-
-    width: 430px !important;
-
-    max-width: 90vw;
-
-    background: #ffffff !important;
-
-    border: 1px solid #d2ddea;
-
-    border-radius: 8px;
-
-    box-shadow:
-        0 10px 30px rgba(15, 39, 71, 0.20);
-
-    box-sizing: border-box;
-
+    width: 480px;
+    margin: 0;
     padding: 0;
-
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.reject-popup,
+.reject-popup * {
+    box-sizing: border-box;
 }
 
 /* =========================================================
@@ -56,22 +38,27 @@
 
 .reject-popup-header {
     width: 100%;
+    min-height: 70px;
+    padding: 14px 18px;
+    margin: 0;
 
     display: flex;
-
+    flex-direction: row;
     align-items: center;
-
     justify-content: space-between;
 
-    padding: 15px 18px;
-
-    background: #f7f9fc;
-
-    border-bottom: 1px solid #dce4ed;
-
-    box-sizing: border-box;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
 }
 
+.reject-header-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
 
 /* =========================================================
    TITLE
@@ -79,14 +66,16 @@
 
 .reject-popup-title {
     display: block;
+    margin: 0;
+    padding: 0;
 
-    font-size: 17px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 600;
 
-    font-weight: 700;
-
-    color: #173b63;
+    color: #111827;
 }
-
 
 /* =========================================================
    SUBTITLE
@@ -94,156 +83,140 @@
 
 .reject-popup-subtitle {
     display: block;
+    margin: 3px 0 0 0;
+    padding: 0;
 
-    margin-top: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 17px;
+    font-weight: 400;
 
-    font-size: 10px;
-
-    color: #8797aa;
+    color: #6b7280;
 }
-
 
 /* =========================================================
    CLOSE BUTTON
    ========================================================= */
 
 .reject-close-button {
-    width: 28px;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
 
-    height: 28px;
+    margin: 0 0 0 12px !important;
+    padding: 0 !important;
 
-    min-width: 28px;
+    border: 0 !important;
+    border-radius: 6px !important;
 
-    padding: 0;
+    background: transparent !important;
+    color: #64748b !important;
 
-    background: transparent;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    line-height: 30px !important;
 
-    border: none;
-
-    color: #64748b;
-
-    font-size: 20px;
-
-    font-weight: 400;
-
-    text-align: center;
-
-    line-height: 28px;
-
+    text-align: center !important;
     cursor: pointer;
 }
 
-
-/* =========================================================
-   CLOSE BUTTON HOVER
-   ========================================================= */
-
 .reject-close-button:hover {
-    color: #173b63;
-
-    background: #edf2f7;
-
-    border-radius: 4px;
+    background: #f1f5f9 !important;
+    color: #111827 !important;
 }
 
-
 /* =========================================================
-   INFORMATION CARD
+   BATCH / CHEQUE INFORMATION
    ========================================================= */
 
 .reject-info-card {
+    width: auto;
+    margin: 16px 18px;
+    padding: 13px 15px;
+
     display: flex;
+    flex-direction: row;
 
-    width: calc(100% - 36px);
-
-    margin: 15px 18px 12px 18px;
-
-    border: 1px solid #d2ddea;
-
-    border-radius: 5px;
-
-    overflow: hidden;
-
-    background: #ffffff;
-
-    box-sizing: border-box;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
 }
 
-
 /* =========================================================
-   INFORMATION ITEM
+   INFORMATION ITEMS
    ========================================================= */
 
 .reject-info-item {
     width: 50%;
 
-    padding: 9px 12px;
+    display: flex;
+    flex-direction: column;
+
+    margin: 0;
+    padding: 0;
 
     box-sizing: border-box;
 }
 
-
-/* =========================================================
-   INFORMATION ITEM DIVIDER
-   ========================================================= */
-
 .reject-info-item:first-child {
-    border-right: 1px solid #d2ddea;
+    padding-right: 15px;
 }
 
+.reject-info-item:last-child {
+    padding-left: 15px;
+    border-left: 1px solid #e2e8f0;
+}
 
 /* =========================================================
-   INFORMATION LABEL
+   INFO LABEL
    ========================================================= */
 
 .reject-info-label {
     display: block;
 
-    font-size: 8px;
+    margin: 0 0 5px 0;
+    padding: 0;
 
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    line-height: 14px;
     font-weight: 700;
 
-    color: #748aa4;
-
-    letter-spacing: 0.4px;
+    letter-spacing: 0.8px;
+    color: #64748b;
 }
 
-
 /* =========================================================
-   INFORMATION VALUE
+   INFO VALUE
    ========================================================= */
 
 .reject-info-value {
     display: block;
 
-    margin-top: 3px;
+    margin: 0;
+    padding: 0;
 
-    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 600;
 
-    font-weight: 700;
-
-    color: #173b63;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
+    color: #1e293b;
 }
 
-
 /* =========================================================
-   FIELD
+   FORM FIELD
    ========================================================= */
 
 .reject-field {
-    width: calc(100% - 36px);
+    width: auto;
 
-    margin: 0 18px 12px 18px;
+    margin: 0 18px 16px 18px;
+    padding: 0;
 
     box-sizing: border-box;
 }
-
 
 /* =========================================================
    FIELD LABEL
@@ -252,123 +225,179 @@
 .reject-field-label {
     display: block;
 
-    margin-bottom: 5px;
+    margin: 0 0 6px 0;
+    padding: 0;
 
-    font-size: 9px;
-
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    line-height: 16px;
     font-weight: 700;
 
-    color: #71869e;
-
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    color: #374151;
 }
-
 
 /* =========================================================
    COMBOBOX
    ========================================================= */
 
 .reject-combobox {
-    width: 100%;
-
-    height: 34px;
-
-    box-sizing: border-box;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
+/* ZK combobox */
 
-/* =========================================================
-   COMBOBOX INPUT
-   ========================================================= */
+.reject-combobox .z-combobox {
+    width: 100% !important;
+}
+
+/* Combobox input */
 
 .reject-combobox .z-combobox-input {
-    height: 34px;
+    width: 100% !important;
+    height: 38px !important;
 
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 
-    border: 1px solid #d0dbe6;
+    padding: 0 42px 0 11px !important;
 
-    border-radius: 4px;
+    border: 1px solid #d1d5db !important;
+    border-radius: 7px !important;
 
-    background: #ffffff;
+    background: #ffffff !important;
+    color: #111827 !important;
 
-    color: #304f6e;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 13px !important;
+    line-height: 38px !important;
 
-    font-size: 11px;
-
-    padding: 0 9px;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
+/* Placeholder */
 
-/* =========================================================
-   COMBOBOX INPUT FOCUS
-   ========================================================= */
+.reject-combobox .z-combobox-input::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Hover */
+
+.reject-combobox .z-combobox-input:hover {
+    border-color: #9ca3af !important;
+}
+
+/* Focus */
 
 .reject-combobox .z-combobox-input:focus {
-    border-color: #7d9abb;
+    border-color: #64748b !important;
 
-    outline: none;
+    outline: none !important;
 
-    box-shadow:
-        0 0 0 2px rgba(52, 93, 133, 0.08);
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12) !important;
 }
-
 
 /* =========================================================
    COMBOBOX BUTTON
    ========================================================= */
 
 .reject-combobox .z-combobox-button {
-    height: 34px;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
 
-    border: 1px solid #d0dbe6;
+    box-sizing: border-box !important;
 
-    border-left: none;
+    border: 1px solid #d1d5db !important;
+    border-left: 0 !important;
 
-    background: #f7f9fc;
+    border-radius: 0 7px 7px 0 !important;
+
+    background: #f8fafc !important;
+    color: #475569 !important;
 }
 
+.reject-combobox .z-combobox-button:hover {
+    background: #f1f5f9 !important;
+}
+
+/* =========================================================
+   COMBOBOX POPUP
+   ========================================================= */
+
+.reject-combobox-popup {
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+}
 
 /* =========================================================
    REMARKS TEXTBOX
    ========================================================= */
 
 .reject-remarks {
-    width: 100%;
+    width: 100% !important;
 
-    min-height: 80px;
+    height: 95px !important;
+    min-height: 95px !important;
 
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 
-    background: #f5f7fa;
-
-    border: 1px solid #d0dbe6;
-
-    border-radius: 4px;
-
-    color: #304f6e;
-
-    font-size: 11px;
-
-    padding: 8px;
-
-    resize: none;
+    margin: 0 !important;
 }
 
+/* ZK textarea */
 
-/* =========================================================
-   REMARKS FOCUS
-   ========================================================= */
+.reject-remarks textarea {
+    width: 100% !important;
 
-.reject-remarks:focus {
-    border-color: #7d9abb;
+    height: 95px !important;
+    min-height: 95px !important;
 
-    outline: none;
+    box-sizing: border-box !important;
 
-    box-shadow:
-        0 0 0 2px rgba(52, 93, 133, 0.08);
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 10px 11px !important;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 7px !important;
+
+    background: #ffffff !important;
+    color: #111827 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
+
+    resize: none !important;
+
+    outline: none !important;
+    box-shadow: none !important;
 }
 
+/* Hover */
+
+.reject-remarks textarea:hover {
+    border-color: #9ca3af !important;
+}
+
+/* Focus */
+
+.reject-remarks textarea:focus {
+    border-color: #64748b !important;
+
+    outline: none !important;
+
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12) !important;
+}
+
+/* Placeholder */
+
+.reject-remarks textarea::placeholder {
+    color: #9ca3af !important;
+}
 
 /* =========================================================
    FOOTER
@@ -377,149 +406,181 @@
 .reject-popup-footer {
     width: 100%;
 
-    display: flex;
+    min-height: 64px;
 
-    justify-content: flex-end;
-
-    align-items: center;
-
-    gap: 8px;
-
+    margin: 0;
     padding: 12px 18px;
 
-    background: #f8fafc;
-
-    border-top: 1px solid #dce4ed;
-
     box-sizing: border-box;
-}
 
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+}
 
 /* =========================================================
    CANCEL BUTTON
+   SIDEBAR BLUE
    ========================================================= */
 
 .reject-cancel-button {
-    height: 32px;
+    height: 38px !important;
+    min-width: 90px !important;
 
-    min-width: 85px;
+    padding: 0 18px !important;
+    margin: 0 !important;
 
-    padding: 0 12px;
+    box-sizing: border-box !important;
 
-    background: #ffffff;
+    border: 1px solid #173b63 !important;
+    border-radius: 7px !important;
 
-    border: 1px solid #cbd6e2;
+    background: #173b63 !important;
+    color: #ffffff !important;
 
-    border-radius: 4px;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 36px !important;
 
-    color: #53677d;
+    text-align: center !important;
 
-    font-size: 8px;
+    cursor: pointer !important;
 
-    font-weight: 700;
-
-    cursor: pointer;
-
-    box-sizing: border-box;
+    box-shadow: none !important;
 }
-
-
-/* =========================================================
-   CANCEL BUTTON HOVER
-   ========================================================= */
 
 .reject-cancel-button:hover {
-    background: #f3f6f9;
-
-    border-color: #b8c5d3;
-
-    color: #304f6e;
+    background: #0f2f50 !important;
+    border-color: #0f2f50 !important;
+    color: #ffffff !important;
 }
 
-
 /* =========================================================
-   CONFIRM BUTTON
+   REJECT CHEQUE BUTTON
+   SIDEBAR BLUE
    ========================================================= */
 
 .reject-confirm-button {
-    height: 32px;
+    height: 38px !important;
+    min-width: 135px !important;
 
-    min-width: 115px;
+    padding: 0 18px !important;
+    margin: 0 !important;
 
-    padding: 0 12px;
+    box-sizing: border-box !important;
 
-    background: #c84d4d;
+    border: 1px solid #173b63 !important;
+    border-radius: 7px !important;
 
-    border: none;
+    background: #173b63 !important;
+    color: #ffffff !important;
 
-    border-radius: 4px;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 36px !important;
 
-    color: #ffffff;
+    text-align: center !important;
 
-    font-size: 8px;
+    cursor: pointer !important;
 
-    font-weight: 700;
-
-    cursor: pointer;
-
-    box-sizing: border-box;
+    box-shadow: none !important;
 }
-
-
-/* =========================================================
-   CONFIRM BUTTON HOVER
-   ========================================================= */
 
 .reject-confirm-button:hover {
-    background: #b64040;
+    background: #0f2f50 !important;
+    border-color: #0f2f50 !important;
+    color: #ffffff !important;
 }
 
+.reject-confirm-button:active {
+    background: #078bd2 !important;
+    border-color: #078bd2 !important;
+}
 
 /* =========================================================
-   CONFIRM BUTTON DISABLED
+   ZK BUTTON INTERNAL ELEMENTS
    ========================================================= */
 
-.reject-confirm-button:disabled {
-    background: #d9a0a0;
+.reject-cancel-button.z-button,
+.reject-confirm-button.z-button {
+    display: inline-flex !important;
 
-    color: #ffffff;
-
-    cursor: not-allowed;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
+/* =========================================================
+   REMOVE DEFAULT ZK WINDOW STYLING
+   ========================================================= */
+
+.z-window-modal {
+    border: none !important;
+
+    box-shadow: none !important;
+
+    background: transparent !important;
+}
+
+.z-window-modal .z-window-content {
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    border: none !important;
+
+    background: transparent !important;
+}
+
+.z-window-modal .z-window-header {
+    display: none !important;
+}
 
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 
-@media screen and (max-width: 520px) {
+@media screen and (max-width: 550px) {
 
     .reject-popup {
-        width: 94vw;
-
-        max-width: 94vw;
+        width: 100%;
+        max-width: 480px;
     }
 
-    .reject-popup-header {
-        padding: 14px 15px;
+    .reject-popup-overlay {
+        padding: 0;
     }
 
     .reject-info-card {
-        width: calc(100% - 30px);
-
-        margin-left: 15px;
-        margin-right: 15px;
+        display: block;
     }
 
-    .reject-field {
-        width: calc(100% - 30px);
+    .reject-info-item {
+        width: 100%;
+    }
 
-        margin-left: 15px;
-        margin-right: 15px;
+    .reject-info-item:first-child {
+        padding-right: 0;
+        padding-bottom: 10px;
+    }
+
+    .reject-info-item:last-child {
+        padding-left: 0;
+        padding-top: 10px;
+
+        border-left: none;
+        border-top: 1px solid #e2e8f0;
     }
 
     .reject-popup-footer {
-        padding-left: 15px;
-        padding-right: 15px;
+        flex-wrap: wrap;
     }
 }

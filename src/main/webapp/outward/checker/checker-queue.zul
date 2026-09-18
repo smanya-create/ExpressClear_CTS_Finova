@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?page title="Express Clear CTS - Checker Queue"
-        contentType="text/html;charset=UTF-8"?>
+<?page
+    title="Express Clear CTS - Checker Queue"
+    contentType="text/html;charset=UTF-8"
+?>
 
-<?link rel="stylesheet"
-        type="text/css"
-        href="/css/outward/checker-queue.css"?>
+<?link
+    rel="stylesheet"
+    type="text/css"
+    href="/css/outward/checker-queue.css"
+/?>
 
 <zk>
-
-    <!-- =========================================================
-         ROOT BORDERLAYOUT
-         ========================================================= -->
 
     <borderlayout
         id="checkerQueueRoot"
@@ -21,7 +21,7 @@
         sclass="checker-queue-root">
 
         <!-- =====================================================
-             LEFT SIDEBAR
+             SIDEBAR
              ===================================================== -->
 
         <west
@@ -39,7 +39,7 @@
 
 
         <!-- =====================================================
-             RIGHT SIDE
+             MAIN AREA
              ===================================================== -->
 
         <center
@@ -51,42 +51,29 @@
                 height="100%">
 
                 <!-- =================================================
-                     HEADER
+                     COMMON HEADER
                      ================================================= -->
 
                 <north
-                    height="60px"
-                    border="none">
+                    id="checkerQueueHeaderArea"
+                    size="84px"
+                    border="none"
+                    style="margin:0 !important;
+                           padding:0 !important;
+                           overflow:hidden;">
 
-                    <div sclass="page-header">
-
-                        <div sclass="header-left-content">
-
-                            <label
-                                value="Cheque Verification"
-                                sclass="header-page-title"/>
-
-                            <label
-                                value="Review the cheque and verify the read-only details submitted by Maker."
-                                sclass="header-page-description"/>
-
-                        </div>
-
-
-                        <div sclass="header-right-content">
-
-                            <include
-                                src="/components/header.zul"/>
-
-                        </div>
-
-                    </div>
+                    <include
+                        id="headerInclude"
+                        src="/components/header.zul"
+                        pageTitle="Outward Process"
+                        hflex="1"
+                        vflex="1"/>
 
                 </north>
 
 
                 <!-- =================================================
-                     MAIN CONTENT
+                     CONTENT
                      ================================================= -->
 
                 <center
@@ -98,6 +85,7 @@
                         height="100%"
                         sclass="content-wrapper">
 
+
                         <!-- =================================================
                              NO BATCH MESSAGE
                              ================================================= -->
@@ -107,7 +95,8 @@
                             visible="false"
                             width="100%"
                             height="100%"
-                            style="align-items:center;justify-content:center;">
+                            style="align-items:center;
+                                   justify-content:center;">
 
                             <vlayout
                                 spacing="15px"
@@ -115,7 +104,8 @@
 
                                 <label
                                     value="No batch has been selected."
-                                    style="font-size:24px;font-weight:bold;"/>
+                                    style="font-size:24px;
+                                           font-weight:bold;"/>
 
                                 <label
                                     value="Please select a batch from the Checker Dashboard."
@@ -142,28 +132,25 @@
 
                             <div sclass="main-content">
 
+
                                 <!-- =================================================
-                                     QUEUE HEADER + PAGINATION
+                                     VERIFICATION HEADER + PAGINATION
                                      ================================================= -->
 
                                 <div sclass="queue-header-row">
 
-                                    <!-- LEFT : HEADING -->
-
                                     <div sclass="section-heading">
 
                                         <label
-                                            value="Cheque Queue"
+                                            value="VERIFICATION"
                                             sclass="main-title"/>
 
                                     </div>
 
 
-                                    <!-- RIGHT : PAGINATION -->
+                                    <!-- PAGINATION -->
 
                                     <div sclass="pagination-card">
-
-                                        <!-- PROGRESS -->
 
                                         <div sclass="progress-section">
 
@@ -180,12 +167,8 @@
                                         </div>
 
 
-                                        <!-- DIVIDER -->
-
                                         <div sclass="pagination-divider"/>
 
-
-                                        <!-- PREVIOUS -->
 
                                         <button
                                             id="btnPrevious"
@@ -194,15 +177,11 @@
                                             sclass="pagination-button"/>
 
 
-                                        <!-- CURRENT -->
-
                                         <label
                                             id="lblCurrentChequeNavigation"
                                             value="0 of 0"
                                             sclass="pagination-count"/>
 
-
-                                        <!-- NEXT -->
 
                                         <button
                                             id="btnNext"
@@ -214,126 +193,116 @@
                                 </div>
 
 
-                               <!-- =================================================
-     SUMMARY CARD
-     ================================================= -->
-
-<div sclass="summary-card">
-
-    <!-- =================================================
-         1. BATCH ID
-         ================================================= -->
-
-    <div sclass="summary-item">
-
-        <label
-            value="BATCH ID"
-            sclass="summary-label"/>
-
-        <label
-            id="lblBatchNo"
-            value="-"
-            sclass="summary-value"/>
-
-    </div>
-
-
-    <!-- =================================================
-         2. CHEQUE COUNT
-         ================================================= -->
-
-    <div sclass="summary-item">
-
-        <label
-            value="CHEQUE COUNT"
-            sclass="summary-label"/>
-
-        <label
-            id="lblChequeCount"
-            value="0"
-            sclass="summary-value"/>
-
-    </div>
-
-
-    <!-- =================================================
-         3. CHEQUE NUMBER
-         ================================================= -->
-
-    <div sclass="summary-item">
-
-        <label
-            value="CHEQUE NUMBER"
-            sclass="summary-label"/>
-
-        <label
-            id="lblChequeNo"
-            value="-"
-            sclass="summary-value"/>
-
-    </div>
-
-
-    <!-- =================================================
-         4. CHEQUE STATUS
-         ================================================= -->
-
-    <div sclass="summary-item">
-
-        <label
-            value="CHEQUE STATUS"
-            sclass="summary-label"/>
-
-        <label
-            id="lblQueueStatus"
-            value="-"
-            sclass="status-pending"/>
-
-    </div>
-
-
-    <!-- =================================================
-         5. CURRENT CHEQUE
-         ================================================= -->
-
-    <div sclass="summary-item">
-
-        <label
-            value="CURRENT CHEQUE"
-            sclass="summary-label"/>
-
-        <label
-            id="lblCurrentCheque"
-            value="-"
-            sclass="summary-value"/>
-
-    </div>
-
-
-    <!-- =================================================
-         6. REMAINING
-         ================================================= -->
-
-    <div
-        sclass="summary-item last">
-
-        <label
-            value="REMAINING"
-            sclass="summary-label"/>
-
-        <label
-            id="lblRemaining"
-            value="0"
-            sclass="remaining-value"/>
-
-    </div>
-
-</div>
                                 <!-- =================================================
-                                     IMAGE + DETAILS ROW
+                                     SUMMARY
+                                     ================================================= -->
+
+                                <div sclass="summary-card">
+
+                                    <!-- BATCH ID -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="BATCH ID"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblBatchNo"
+                                            value="-"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- CHEQUE COUNT -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CHEQUE COUNT"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblChequeCount"
+                                            value="0"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- CHEQUE NUMBER -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CHEQUE NUMBER"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblChequeNo"
+                                            value="-"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- CHEQUE STATUS -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CHEQUE STATUS"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblQueueStatus"
+                                            value="-"
+                                            sclass="status-pending"/>
+
+                                    </div>
+
+
+                                    <!-- CURRENT CHEQUE -->
+
+                                    <div sclass="summary-item">
+
+                                        <label
+                                            value="CURRENT CHEQUE"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblCurrentCheque"
+                                            value="-"
+                                            sclass="summary-value"/>
+
+                                    </div>
+
+
+                                    <!-- REMAINING -->
+
+                                    <div sclass="summary-item last">
+
+                                        <label
+                                            value="REMAINING"
+                                            sclass="summary-label"/>
+
+                                        <label
+                                            id="lblRemaining"
+                                            value="0"
+                                            sclass="remaining-value"/>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- =================================================
+                                     VERIFICATION ROW
                                      ================================================= -->
 
                                 <div sclass="verification-row">
+
 
                                     <!-- =================================================
                                          CHEQUE IMAGE CARD
@@ -358,8 +327,6 @@
                                             </div>
 
 
-                                            <!-- FRONT / BACK -->
-
                                             <button
                                                 id="btnImageSide"
                                                 label="BACK SIDE"
@@ -368,12 +335,9 @@
                                         </div>
 
 
-                                        <!-- =================================================
-                                             CHEQUE IMAGE
-                                             ================================================= -->
+                                        <!-- CHEQUE IMAGE -->
 
-                                        <div
-                                            sclass="cheque-image-container">
+                                        <div sclass="cheque-image-container">
 
                                             <image
                                                 id="imgCheque"
@@ -382,9 +346,7 @@
                                         </div>
 
 
-                                        <!-- =================================================
-                                             ZOOM CONTROLS
-                                             ================================================= -->
+                                        <!-- ZOOM CONTROLS -->
 
                                         <div sclass="zoom-controls">
 
@@ -394,16 +356,19 @@
                                                 sclass="zoom-button"
                                                 tooltiptext="Zoom Out"/>
 
+
                                             <label
                                                 id="lblZoom"
                                                 value="100%"
                                                 sclass="zoom-level"/>
+
 
                                             <button
                                                 id="btnZoomIn"
                                                 label="+"
                                                 sclass="zoom-button"
                                                 tooltiptext="Zoom In"/>
+
 
                                             <button
                                                 id="btnZoomReset"
@@ -422,7 +387,10 @@
 
                                     <div sclass="details-card">
 
-                                        <!-- DETAILS HEADER -->
+
+                                        <!-- =================================================
+                                             DETAILS HEADER
+                                             ================================================= -->
 
                                         <div sclass="details-card-header">
 
@@ -439,8 +407,6 @@
                                             </div>
 
 
-                                            <!-- ACCOUNT VALIDATION -->
-
                                             <label
                                                 id="lblAccountValidation"
                                                 value="NOT VERIFIED"
@@ -450,18 +416,31 @@
 
 
                                         <!-- =================================================
-                                             MAKER STATUS MESSAGE
+                                             FIXED MAKER REJECTION / WARNING AREA
+
+                                             IMPORTANT:
+                                             Keep visible="true".
+                                             This reserves fixed space so the
+                                             action buttons do not move when
+                                             clicking NEXT/PREV.
                                              ================================================= -->
 
                                         <vlayout
                                             id="makerRejectionRequestSection"
-                                            visible="false"
+                                            visible="true"
                                             spacing="3px"
-                                            style="margin:5px 0 7px 0;
+                                            style="width:100%;
+                                                   height:85px;
+                                                   min-height:85px;
+                                                   max-height:85px;
+                                                   margin:3px 0 7px 0;
                                                    padding:7px 9px;
                                                    background:#FFF7ED;
                                                    border-left:3px solid #F59E0B;
-                                                   border-radius:3px;">
+                                                   border-radius:3px;
+                                                   box-sizing:border-box;
+                                                   overflow:hidden;
+                                                   flex-shrink:0;">
 
                                             <label
                                                 id="lblMakerStatusHeading"
@@ -470,6 +449,7 @@
                                                        font-weight:700;
                                                        color:#B45309;"/>
 
+
                                             <label
                                                 id="lblMakerRejectionReasonCode"
                                                 value=""
@@ -477,12 +457,14 @@
                                                        color:#475569;
                                                        white-space:normal;"/>
 
+
                                             <label
                                                 id="lblMakerRejectionReasonName"
                                                 value=""
                                                 style="font-size:10px;
                                                        color:#475569;
                                                        white-space:normal;"/>
+
 
                                             <label
                                                 id="lblMakerRejectionRemarks"
@@ -495,7 +477,7 @@
 
 
                                         <!-- =================================================
-                                             ROW 1
+                                             CHEQUE NUMBER + MICR
                                              ================================================= -->
 
                                         <div sclass="two-column-fields">
@@ -533,7 +515,7 @@
 
 
                                         <!-- =================================================
-                                             ROW 2
+                                             PAYEE + ACCOUNT
                                              ================================================= -->
 
                                         <div sclass="two-column-fields">
@@ -571,7 +553,7 @@
 
 
                                         <!-- =================================================
-                                             ROW 3
+                                             AMOUNT + DATE
                                              ================================================= -->
 
                                         <div sclass="two-column-fields">
@@ -609,7 +591,7 @@
 
 
                                         <!-- =================================================
-                                             CHECKER ACTION
+                                             CHECKER ACTION AREA
                                              ================================================= -->
 
                                         <div sclass="details-action-area">
@@ -619,19 +601,25 @@
                                                 sclass="details-action-title"/>
 
 
-                                            <!-- VERIFY / RETURN / REJECT -->
-
                                             <div sclass="details-action-buttons">
+
+                                                <!-- VERIFY -->
 
                                                 <button
                                                     id="btnVerified"
                                                     label="VERIFY"
                                                     sclass="verified-button"/>
 
+
+                                                <!-- RETURN TO MAKER -->
+
                                                 <button
                                                     id="btnReturn"
                                                     label="RETURN TO MAKER"
                                                     sclass="return-button"/>
+
+
+                                                <!-- REJECT -->
 
                                                 <button
                                                     id="btnReject"
@@ -665,6 +653,7 @@
                                     <label
                                         value="Express Clear CTS · Checker Portal"
                                         sclass="footer-left"/>
+
 
                                     <label
                                         value="Cheque Verification"

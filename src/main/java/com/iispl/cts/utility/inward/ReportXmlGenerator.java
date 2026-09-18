@@ -39,7 +39,7 @@ public class ReportXmlGenerator {
             writer.writeCharacters("\n    ");
             writer.writeStartElement("ReportInformation");
 
-            writeElement(writer, "RRFReferenceNo", generateRrfReferenceNo(batchId), 8);
+            writeElement(writer, "RRFReferenceNo", getRrfReferenceNo(batchId), 8);
             writeElement(writer, "BatchId", batchId, 8);
             writeElement(writer, "GeneratedDate", LocalDate.now().format(DATE_FORMATTER), 8);
 
@@ -286,7 +286,7 @@ public class ReportXmlGenerator {
         return dateTime.toLocalDate().format(DATE_FORMATTER);
     }
 
-    private static String generateRrfReferenceNo(String batchId) {
+    private static String getRrfReferenceNo(String batchId) {
         return "RRF-" + safe(batchId);
     }
 

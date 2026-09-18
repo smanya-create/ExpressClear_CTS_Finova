@@ -23,6 +23,7 @@ import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.service.outward.OutwardBatchService;
@@ -45,6 +46,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
+		
 		super.doAfterCompose(component);
 
 		restoreGeneratedXmlState();
