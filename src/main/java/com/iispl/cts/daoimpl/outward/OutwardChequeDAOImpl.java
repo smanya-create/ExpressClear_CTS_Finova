@@ -15,380 +15,22 @@ import com.iispl.cts.entity.outward.OutwardCheque;
 public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 
 	@Override
-	public int getTotalChequeCountByBatchId(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT COUNT(outward_cheque_id) " + "FROM outward_cheque " + "WHERE outward_batch_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return resultSet.getInt(1);
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch total cheque count for outward batch: " + outwardBatchId,
-					exception);
-		}
-
-		return 0;
-	}
-
-	@Override
-	public BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT COALESCE(SUM(cheque_amount), 0) " + "FROM outward_cheque " + "WHERE outward_batch_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return resultSet.getBigDecimal(1);
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch total cheque amount for outward batch: " + outwardBatchId,
-					exception);
-		}
-
-		return BigDecimal.ZERO;
-	}
-
-	@Override
-	public List<OutwardCheque> getChequesByBatchId(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		List<OutwardCheque> chequeList = new ArrayList<>();
-
-		String sql = "SELECT " + "oc.outward_cheque_id, " + "oc.outward_batch_id, " + "oc.cheque_number, "
-				+ "oc.micr_code, " + "oc.drawee_name, " + "oc.drawee_account_number, " + "oc.payee_name, "
-				+ "oc.payee_account_number, " + "oc.cheque_amount, " + "oc.cheque_date, " + "oc.cheque_status, "
-				+ "oc.account_id, " + "oc.created_at, " + "oc.city_code, " + "oc.bank_code, " + "oc.branch_code, "
-				+ "oc.cheque_image_front, " + "oc.cheque_image_back " + "FROM outward_cheque oc "
-				+ "WHERE oc.outward_batch_id = ? " + "ORDER BY oc.outward_cheque_id";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				while (resultSet.next()) {
-					chequeList.add(mapOutwardCheque(resultSet));
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch outward cheques for batch: " + outwardBatchId, exception);
-		}
-
-		return chequeList;
-	}
-
-	@Override
-	public OutwardCheque getOutwardChequeById(String outwardChequeId) {
-
-		if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
-		}
-
-		String sql = "SELECT " + "outward_cheque_id, " + "outward_batch_id, " + "cheque_number, " + "micr_code, "
-				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
-				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
-				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
-				+ "FROM outward_cheque " + "WHERE outward_cheque_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardChequeId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return mapOutwardCheque(resultSet);
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch outward cheque: " + outwardChequeId, exception);
-		}
-
-		return null;
-	}
-
-	@Override
-	public OutwardCheque getOutwardChequeByScanCheque(String outwardBatchId, String chequeNumber,
-			String chequeImageFront, String chequeImageBack) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT " + "outward_cheque_id, " + "outward_batch_id, " + "cheque_number, " + "micr_code, "
-				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
-				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
-				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
-				+ "FROM outward_cheque " + "WHERE outward_batch_id = ? " + "AND (" + "(cheque_number = ? "
-				+ "AND COALESCE(cheque_number, '') <> '') " + "OR (COALESCE(cheque_image_front, '') = ? "
-				+ "AND COALESCE(cheque_image_front, '') <> '') " + "OR (COALESCE(cheque_image_back, '') = ? "
-				+ "AND COALESCE(cheque_image_back, '') <> '')" + ") " + "ORDER BY CASE "
-				+ "WHEN cheque_number = ? THEN 1 " + "WHEN COALESCE(cheque_image_front, '') = ? THEN 2 "
-				+ "WHEN COALESCE(cheque_image_back, '') = ? THEN 3 " + "ELSE 4 " + "END, " + "outward_cheque_id "
-				+ "LIMIT 1";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-			preparedStatement.setString(2, chequeNumber);
-			preparedStatement.setString(3, chequeImageFront);
-			preparedStatement.setString(4, chequeImageBack);
-			preparedStatement.setString(5, chequeNumber);
-			preparedStatement.setString(6, chequeImageFront);
-			preparedStatement.setString(7, chequeImageBack);
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return mapOutwardCheque(resultSet);
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to find outward cheque for scanned cheque in batch: " + outwardBatchId,
-					exception);
-		}
-
-		return null;
-	}
-
-	@Override
-	public String createOutwardChequeFromScan(Connection connection, String outwardBatchId, OutwardCheque cheque) {
-
-		if (connection == null) {
-			throw new IllegalArgumentException("Connection cannot be null");
-		}
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		if (cheque == null) {
-			throw new IllegalArgumentException("Outward cheque cannot be null");
-		}
-
-		String idSql = "SELECT 'CH' || " + "(COALESCE(MAX(" + "CASE " + "WHEN outward_cheque_id ~ '^CH[0-9]+$' "
-				+ "THEN CAST(SUBSTRING(outward_cheque_id FROM 3) AS BIGINT) " + "ELSE 0 " + "END" + "), 0) + 1) "
-				+ "AS next_outward_cheque_id " + "FROM outward_cheque";
-
-		String insertSql = "INSERT INTO outward_cheque (" + "outward_cheque_id, " + "outward_batch_id, "
-				+ "cheque_number, " + "micr_code, " + "drawee_name, " + "drawee_account_number, " + "payee_name, "
-				+ "payee_account_number, " + "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, "
-				+ "created_at, " + "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, "
-				+ "cheque_image_back" + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-		String outwardChequeId = null;
-
-		try (PreparedStatement idStatement = connection.prepareStatement(idSql)) {
-
-			try (ResultSet resultSet = idStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					outwardChequeId = resultSet.getString("next_outward_cheque_id");
-				}
-			}
-
-			if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
-				throw new IllegalStateException("Unable to generate outward cheque ID");
-			}
-
-			outwardChequeId = outwardChequeId.trim();
-
-			try (PreparedStatement preparedStatement = connection.prepareStatement(insertSql)) {
-
-				preparedStatement.setString(1, outwardChequeId);
-				preparedStatement.setString(2, outwardBatchId.trim());
-				preparedStatement.setString(3, cheque.getChequeNumber());
-				preparedStatement.setString(4, cheque.getMicrCode());
-				preparedStatement.setString(5, cheque.getDraweeName());
-				preparedStatement.setString(6, cheque.getDraweeAccountNumber());
-				preparedStatement.setString(7, cheque.getPayeeName());
-				preparedStatement.setString(8, cheque.getPayeeAccountNumber());
-				preparedStatement.setBigDecimal(9, cheque.getChequeAmount());
-
-				if (cheque.getChequeDate() != null) {
-					preparedStatement.setDate(10, cheque.getChequeDate());
-				} else {
-					preparedStatement.setNull(10, java.sql.Types.DATE);
-				}
-
-				preparedStatement.setString(11, "PENDING_VERIFICATION");
-
-				preparedStatement.setString(12, cheque.getAccountId());
-
-				if (cheque.getCreatedAt() != null) {
-					preparedStatement.setTimestamp(13, cheque.getCreatedAt());
-				} else {
-					preparedStatement.setTimestamp(13, new java.sql.Timestamp(System.currentTimeMillis()));
-				}
-
-				preparedStatement.setString(14, cheque.getCityCode());
-
-				preparedStatement.setString(15, cheque.getBankCode());
-
-				preparedStatement.setString(16, cheque.getBranchCode());
-
-				preparedStatement.setString(17, cheque.getChequeImageFront());
-
-				preparedStatement.setString(18, cheque.getChequeImageBack());
-
-				int rowsInserted = preparedStatement.executeUpdate();
-
-				if (rowsInserted != 1) {
-					throw new IllegalStateException(
-							"Unable to create outward cheque for outward batch: " + outwardBatchId);
-				}
-			}
-
-			return outwardChequeId;
-
-		} catch (SQLException exception) {
-
-			String message = exception.getMessage();
-
-			throw new RuntimeException("Unable to create outward cheque for outward batch: " + outwardBatchId
-					+ ". Cause: " + (message == null ? "Unknown database error" : message), exception);
-		}
-	}
-
-	@Override
-	public int getDataEnteredCountByBatchId(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT COUNT(outward_cheque_id) " + "FROM outward_cheque " + "WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) = 'PENDING_VERIFICATION'";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return resultSet.getInt(1);
-				}
-			}
-
-		} catch (SQLException exception) {
-			throw new RuntimeException(
-					"Unable to fetch completed data entry count for outward batch: " + outwardBatchId, exception);
-		}
-
-		return 0;
-	}
-
-	@Override
-	public boolean updateChequeStatus(String outwardChequeId, String chequeStatus) {
-
-		if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
-		}
-
-		if (chequeStatus == null || chequeStatus.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Cheque status cannot be null or empty");
-		}
-
-		String sql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE outward_cheque_id = ?";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, chequeStatus.trim());
-
-			preparedStatement.setString(2, outwardChequeId.trim());
-
-			return preparedStatement.executeUpdate() > 0;
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to update cheque status for outward cheque ID: " + outwardChequeId,
-					exception);
-		}
-	}
-
-	@Override
-	public boolean saveDataEntry(OutwardCheque cheque) {
-
-		if (cheque == null) {
-			throw new IllegalArgumentException("Outward cheque cannot be null");
-		}
-
-		if (cheque.getOutwardChequeId() == null || cheque.getOutwardChequeId().trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
-		}
-
-		try (Connection connection = DBConnection.getConnection()) {
-
-			return saveDataEntry(connection, cheque);
-
-		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to save data entry for outward cheque: " + cheque.getOutwardChequeId(),
-					exception);
-		}
-	}
-
-	@Override
 	public boolean saveDataEntry(Connection connection, OutwardCheque cheque) {
-
-		if (connection == null) {
+		if (connection == null)
 			throw new IllegalArgumentException("Connection cannot be null");
-		}
-
-		if (cheque == null) {
+		if (cheque == null)
 			throw new IllegalArgumentException("Outward cheque cannot be null");
-		}
-
 		if (cheque.getOutwardChequeId() == null || cheque.getOutwardChequeId().trim().isEmpty()) {
 			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
 		}
 
-		String sql = "UPDATE outward_cheque SET " + "cheque_number = ?, " + "micr_code = ?, " + "drawee_name = ?, "
-				+ "drawee_account_number = ?, " + "payee_name = ?, " + "payee_account_number = ?, "
-				+ "cheque_amount = ?, " + "cheque_date = ?, " + "cheque_status = ?, " + "account_id = ?, "
-				+ "city_code = ?, " + "bank_code = ?, " + "branch_code = ?, " + "cheque_image_front = ?, "
-				+ "cheque_image_back = ? " + "WHERE outward_cheque_id = ?";
+		String sql = "UPDATE outward_cheque SET "
+				+ "cheque_number = ?, micr_code = ?, drawee_name = ?, drawee_account_number = ?, "
+				+ "payee_name = ?, payee_account_number = ?, cheque_amount = ?, cheque_date = ?, "
+				+ "cheque_status = ?, account_id = ?, city_code = ?, bank_code = ?, branch_code = ?, "
+				+ "cheque_image_front = ?, cheque_image_back = ? WHERE outward_cheque_id = ?";
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
 			preparedStatement.setString(1, cheque.getChequeNumber());
 			preparedStatement.setString(2, cheque.getMicrCode());
 			preparedStatement.setString(3, cheque.getDraweeName());
@@ -404,17 +46,10 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 			}
 
 			String status = cheque.getChequeStatus();
-
 			if (status == null || status.trim().isEmpty()) {
 				status = "PENDING_VERIFICATION";
-			} else if (status.equalsIgnoreCase("PENDING_DATA_ENTRY")) {
-				status = "PENDING_VERIFICATION";
-			} else if (status.equalsIgnoreCase("ON_HOLD")) {
-				status = "PENDING_VERIFICATION";
-			} else if (status.equalsIgnoreCase("MICR_REJECTED")) {
-				status = "MICR_REJECTED";
 			} else {
-				status = status.trim();
+				status = status.trim().toUpperCase();
 			}
 
 			preparedStatement.setString(9, status);
@@ -427,367 +62,420 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 			preparedStatement.setString(16, cheque.getOutwardChequeId().trim());
 
 			int rowsUpdated = preparedStatement.executeUpdate();
-
 			if (rowsUpdated == 0) {
 				throw new IllegalStateException("Outward cheque not found for ID: " + cheque.getOutwardChequeId());
 			}
-
 			return true;
 
 		} catch (SQLException exception) {
-
-			String message = exception.getMessage();
-
 			throw new RuntimeException("Unable to save data entry for outward cheque: " + cheque.getOutwardChequeId()
-					+ ". Cause: " + (message == null ? "Unknown database error" : message), exception);
+					+ ". Cause: " + exception.getMessage(), exception);
 		}
 	}
 
 	@Override
-	public OutwardCheque getOutwardChequeByScanCheque(String scannedBatchId, String scannedChequeId) {
-
-		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
-		}
-
-		if (scannedChequeId == null || scannedChequeId.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Scanned cheque ID cannot be null or empty");
-		}
-
-		String sql = "SELECT " + "oc.outward_cheque_id, " + "oc.outward_batch_id, " + "oc.cheque_number, "
-				+ "oc.micr_code, " + "oc.drawee_name, " + "oc.drawee_account_number, " + "oc.payee_name, "
-				+ "oc.payee_account_number, " + "oc.cheque_amount, " + "oc.cheque_date, " + "oc.cheque_status, "
-				+ "oc.account_id, " + "oc.created_at, " + "oc.city_code, " + "oc.bank_code, " + "oc.branch_code, "
-				+ "oc.cheque_image_front, " + "oc.cheque_image_back " + "FROM outward_cheque oc "
-				+ "INNER JOIN scan_cheque sc " + "ON sc.scanned_batch_id = oc.outward_batch_id "
-				+ "AND sc.cheque_number = oc.cheque_number " + "WHERE sc.scanned_batch_id = ? "
-				+ "AND sc.scanned_cheque_id = ? " + "ORDER BY oc.outward_cheque_id " + "LIMIT 1";
-
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, scannedBatchId.trim());
-
-			preparedStatement.setString(2, scannedChequeId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return mapOutwardCheque(resultSet);
-				}
-			}
-
+	public boolean saveDataEntry(OutwardCheque cheque) {
+		try (Connection connection = DBConnection.getConnection()) {
+			return saveDataEntry(connection, cheque);
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to find outward cheque for scanned cheque: " + scannedChequeId,
+			throw new RuntimeException("Unable to save data entry for outward cheque: " + cheque.getOutwardChequeId(),
 					exception);
 		}
-
-		return null;
-	}
-
-	private OutwardCheque mapOutwardCheque(ResultSet resultSet) throws SQLException {
-
-		OutwardCheque outwardCheque = new OutwardCheque();
-
-		outwardCheque.setOutwardChequeId(resultSet.getString("outward_cheque_id"));
-
-		outwardCheque.setOutwardBatchId(resultSet.getString("outward_batch_id"));
-
-		outwardCheque.setChequeNumber(resultSet.getString("cheque_number"));
-
-		outwardCheque.setMicrCode(resultSet.getString("micr_code"));
-
-		outwardCheque.setDraweeName(resultSet.getString("drawee_name"));
-
-		outwardCheque.setDraweeAccountNumber(resultSet.getString("drawee_account_number"));
-
-		outwardCheque.setPayeeName(resultSet.getString("payee_name"));
-
-		outwardCheque.setPayeeAccountNumber(resultSet.getString("payee_account_number"));
-
-		outwardCheque.setChequeAmount(resultSet.getBigDecimal("cheque_amount"));
-
-		outwardCheque.setChequeDate(resultSet.getDate("cheque_date"));
-
-		outwardCheque.setChequeStatus(resultSet.getString("cheque_status"));
-
-		outwardCheque.setAccountId(resultSet.getString("account_id"));
-
-		outwardCheque.setCreatedAt(resultSet.getTimestamp("created_at"));
-
-		outwardCheque.setCityCode(resultSet.getString("city_code"));
-
-		outwardCheque.setBankCode(resultSet.getString("bank_code"));
-
-		outwardCheque.setBranchCode(resultSet.getString("branch_code"));
-
-		outwardCheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
-
-		outwardCheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
-
-		return outwardCheque;
 	}
 
 	@Override
-	public List<OutwardCheque> getOnHoldCheques(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+	public String createOutwardChequeFromScan(Connection connection, String outwardBatchId, OutwardCheque cheque) {
+		if (connection == null)
+			throw new IllegalArgumentException("Connection cannot be null");
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty())
 			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
+		if (cheque == null)
+			throw new IllegalArgumentException("Outward cheque cannot be null");
 
-		List<OutwardCheque> chequeList = new ArrayList<>();
+		String idSql = "SELECT 'CH' || (COALESCE(MAX(CASE WHEN outward_cheque_id ~ '^CH[0-9]+$' "
+				+ "THEN CAST(SUBSTRING(outward_cheque_id FROM 3) AS BIGINT) ELSE 0 END), 0) + 1) "
+				+ "AS next_outward_cheque_id FROM outward_cheque";
 
-		String sql = "SELECT " + "outward_cheque_id, " + "outward_batch_id, " + "cheque_number, " + "micr_code, "
-				+ "drawee_name, " + "drawee_account_number, " + "payee_name, " + "payee_account_number, "
-				+ "cheque_amount, " + "cheque_date, " + "cheque_status, " + "account_id, " + "created_at, "
-				+ "city_code, " + "bank_code, " + "branch_code, " + "cheque_image_front, " + "cheque_image_back "
-				+ "FROM outward_cheque " + "WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN (?, ?, ?) " + "ORDER BY outward_cheque_id";
+		String insertSql = "INSERT INTO outward_cheque ("
+				+ "outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, drawee_account_number, "
+				+ "payee_name, payee_account_number, cheque_amount, cheque_date, cheque_status, account_id, "
+				+ "created_at, city_code, bank_code, branch_code, cheque_image_front, cheque_image_back"
+				+ ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+		String outwardChequeId = null;
 
-			preparedStatement.setString(1, outwardBatchId.trim());
-			preparedStatement.setString(2, "PENDING_DATA_ENTRY");
-			preparedStatement.setString(3, "PENDING_MICR_REPAIR");
-			preparedStatement.setString(4, "ON_HOLD");
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				while (resultSet.next()) {
-					chequeList.add(mapOutwardCheque(resultSet));
+		try (PreparedStatement idStatement = connection.prepareStatement(idSql)) {
+			try (ResultSet resultSet = idStatement.executeQuery()) {
+				if (resultSet.next()) {
+					outwardChequeId = resultSet.getString("next_outward_cheque_id");
 				}
 			}
 
+			if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
+				throw new IllegalStateException("Unable to generate outward cheque ID");
+			}
+
+			outwardChequeId = outwardChequeId.trim();
+
+			try (PreparedStatement ps = connection.prepareStatement(insertSql)) {
+				ps.setString(1, outwardChequeId);
+				ps.setString(2, outwardBatchId.trim());
+				ps.setString(3, cheque.getChequeNumber());
+				ps.setString(4, cheque.getMicrCode());
+				ps.setString(5, cheque.getDraweeName());
+				ps.setString(6, cheque.getDraweeAccountNumber());
+				ps.setString(7, cheque.getPayeeName());
+				ps.setString(8, cheque.getPayeeAccountNumber());
+				ps.setBigDecimal(9, cheque.getChequeAmount());
+
+				if (cheque.getChequeDate() != null) {
+					ps.setDate(10, cheque.getChequeDate());
+				} else {
+					ps.setNull(10, java.sql.Types.DATE);
+				}
+
+				String status = cheque.getChequeStatus();
+				if (status == null || status.trim().isEmpty()) {
+					status = "PENDING_VERIFICATION";
+				}
+				ps.setString(11, status.trim().toUpperCase());
+				ps.setString(12, cheque.getAccountId());
+
+				if (cheque.getCreatedAt() != null) {
+					ps.setTimestamp(13, cheque.getCreatedAt());
+				} else {
+					ps.setTimestamp(13, new java.sql.Timestamp(System.currentTimeMillis()));
+				}
+
+				ps.setString(14, cheque.getCityCode());
+				ps.setString(15, cheque.getBankCode());
+				ps.setString(16, cheque.getBranchCode());
+				ps.setString(17, cheque.getChequeImageFront());
+				ps.setString(18, cheque.getChequeImageBack());
+
+				int rowsInserted = ps.executeUpdate();
+				if (rowsInserted != 1) {
+					throw new IllegalStateException(
+							"Unable to create outward cheque for outward batch: " + outwardBatchId);
+				}
+			}
+
+			return outwardChequeId;
+
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch returned cheques for outward batch: " + outwardBatchId,
+			throw new RuntimeException("Unable to create outward cheque for outward batch: " + outwardBatchId,
 					exception);
 		}
+	}
 
+	@Override
+	public int getTotalChequeCountByBatchId(String outwardBatchId) {
+		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ?";
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1);
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch total cheque count", exception);
+		}
+		return 0;
+	}
+
+	@Override
+	public BigDecimal getTotalChequeAmountByBatchId(String outwardBatchId) {
+		String sql = "SELECT COALESCE(SUM(cheque_amount), 0) FROM outward_cheque WHERE outward_batch_id = ?";
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return rs.getBigDecimal(1);
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch total cheque amount", exception);
+		}
+		return BigDecimal.ZERO;
+	}
+
+	@Override
+	public List<OutwardCheque> getChequesByBatchId(String outwardBatchId) {
+		List<OutwardCheque> chequeList = new ArrayList<>();
+		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
+				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
+				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
+				+ "cheque_image_front, cheque_image_back FROM outward_cheque "
+				+ "WHERE outward_batch_id = ? ORDER BY outward_cheque_id";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					chequeList.add(mapOutwardCheque(rs));
+				}
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch outward cheques for batch: " + outwardBatchId, exception);
+		}
 		return chequeList;
 	}
 
 	@Override
-	public boolean updateChequeStatus(Connection connection, String outwardChequeId, String chequeStatus) {
+	public OutwardCheque getOutwardChequeById(String outwardChequeId) {
+		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
+				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
+				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
+				+ "cheque_image_front, cheque_image_back FROM outward_cheque WHERE outward_cheque_id = ?";
 
-		if (connection == null) {
-			throw new IllegalArgumentException("Connection cannot be null");
-		}
-
-		if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
-		}
-
-		if (chequeStatus == null || chequeStatus.trim().isEmpty()) {
-
-			throw new IllegalArgumentException("Cheque status cannot be null or empty");
-		}
-
-		String sql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE outward_cheque_id = ?";
-
-		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, chequeStatus.trim());
-
-			preparedStatement.setString(2, outwardChequeId.trim());
-
-			return preparedStatement.executeUpdate() > 0;
-
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardChequeId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return mapOutwardCheque(rs);
+			}
 		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch outward cheque: " + outwardChequeId, exception);
+		}
+		return null;
+	}
 
-			String message = exception.getMessage();
+	@Override
+	public OutwardCheque getOutwardChequeByScanCheque(String outwardBatchId, String chequeNumber,
+			String chequeImageFront, String chequeImageBack) {
+		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
+				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
+				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
+				+ "cheque_image_front, cheque_image_back FROM outward_cheque WHERE outward_batch_id = ? AND ("
+				+ "(cheque_number = ? AND COALESCE(cheque_number, '') <> '') "
+				+ "OR (COALESCE(cheque_image_front, '') = ? AND COALESCE(cheque_image_front, '') <> '') "
+				+ "OR (COALESCE(cheque_image_back, '') = ? AND COALESCE(cheque_image_back, '') <> '')) "
+				+ "ORDER BY outward_cheque_id LIMIT 1";
 
-			throw new RuntimeException("Unable to update cheque status for outward cheque ID: " + outwardChequeId
-					+ ". Cause: " + (message == null ? "Unknown database error" : message), exception);
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			ps.setString(2, chequeNumber);
+			ps.setString(3, chequeImageFront);
+			ps.setString(4, chequeImageBack);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return mapOutwardCheque(rs);
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to find outward cheque", exception);
+		}
+		return null;
+	}
+
+	@Override
+	public OutwardCheque getOutwardChequeByScanCheque(String scannedBatchId, String scannedChequeId) {
+		String sql = "SELECT oc.outward_cheque_id, oc.outward_batch_id, oc.cheque_number, oc.micr_code, "
+				+ "oc.drawee_name, oc.drawee_account_number, oc.payee_name, oc.payee_account_number, "
+				+ "oc.cheque_amount, oc.cheque_date, oc.cheque_status, oc.account_id, oc.created_at, "
+				+ "oc.city_code, oc.bank_code, oc.branch_code, oc.cheque_image_front, oc.cheque_image_back "
+				+ "FROM outward_cheque oc INNER JOIN scan_cheque sc ON sc.scanned_batch_id = oc.outward_batch_id "
+				+ "AND sc.cheque_number = oc.cheque_number WHERE sc.scanned_batch_id = ? AND sc.scanned_cheque_id = ? "
+				+ "ORDER BY oc.outward_cheque_id LIMIT 1";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, scannedBatchId.trim());
+			ps.setString(2, scannedChequeId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return mapOutwardCheque(rs);
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to find outward cheque for scanned cheque: " + scannedChequeId,
+					exception);
+		}
+		return null;
+	}
+
+	@Override
+	public int getDataEnteredCountByBatchId(String outwardBatchId) {
+		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) = 'PENDING_VERIFICATION'";
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1);
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch completed data entry count", exception);
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean updateChequeStatus(String outwardChequeId, String chequeStatus) {
+		try (Connection connection = DBConnection.getConnection()) {
+			return updateChequeStatus(connection, outwardChequeId, chequeStatus);
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to update cheque status: " + outwardChequeId, exception);
 		}
 	}
 
 	@Override
-	public List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
+	public boolean updateChequeStatus(Connection connection, String outwardChequeId, String chequeStatus) {
+		String sql = "UPDATE outward_cheque SET cheque_status = ? WHERE outward_cheque_id = ?";
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, chequeStatus.trim().toUpperCase());
+			ps.setString(2, outwardChequeId.trim());
+			return ps.executeUpdate() > 0;
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to update cheque status: " + outwardChequeId, exception);
 		}
+	}
 
+	@Override
+	public List<OutwardCheque> getOnHoldCheques(String outwardBatchId) {
 		List<OutwardCheque> chequeList = new ArrayList<>();
-
-		String sql = "SELECT " + "oc.outward_cheque_id, " + "oc.outward_batch_id, " + "oc.cheque_number, "
-				+ "oc.micr_code, " + "oc.drawee_name, " + "oc.drawee_account_number, " + "oc.payee_name, "
-				+ "oc.payee_account_number, " + "oc.cheque_amount, " + "oc.cheque_date, " + "oc.cheque_status, "
-				+ "oc.account_id, " + "oc.created_at, " + "oc.city_code, " + "oc.bank_code, " + "oc.branch_code, "
-				+ "oc.cheque_image_front, " + "oc.cheque_image_back " + "FROM outward_cheque oc "
-				+ "WHERE oc.outward_batch_id = ? " + "AND UPPER(TRIM(oc.cheque_status)) IN (" + "'PENDING_DATA_ENTRY', "
-				+ "'PENDING_MICR_REPAIR', " + "'MICR_REJECTED', " + "'ON_HOLD'" + ") "
-				+ "ORDER BY oc.outward_cheque_id";
+		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
+				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
+				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
+				+ "cheque_image_front, cheque_image_back FROM outward_cheque WHERE outward_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_DATA_ENTRY', 'PENDING_MICR_REPAIR', 'ON_HOLD') "
+				+ "ORDER BY outward_cheque_id";
 
 		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				while (resultSet.next()) {
-					chequeList.add(mapOutwardCheque(resultSet));
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					chequeList.add(mapOutwardCheque(rs));
 				}
 			}
-
 		} catch (SQLException exception) {
-
-			throw new RuntimeException("Unable to fetch Maker data entry cheques for outward batch: " + outwardBatchId,
-					exception);
+			throw new RuntimeException("Unable to fetch returned cheques", exception);
 		}
+		return chequeList;
+	}
 
+	@Override
+	public List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId) {
+		List<OutwardCheque> chequeList = new ArrayList<>();
+		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
+				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
+				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
+				+ "cheque_image_front, cheque_image_back FROM outward_cheque WHERE outward_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_DATA_ENTRY', 'PENDING_MICR_REPAIR', 'MICR_REJECTED', 'ON_HOLD') "
+				+ "ORDER BY outward_cheque_id";
+
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					chequeList.add(mapOutwardCheque(rs));
+				}
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch Maker data entry cheques", exception);
+		}
 		return chequeList;
 	}
 
 	@Override
 	public int getCompletedMakerChequeCountByBatchId(String outwardBatchId) {
-
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
-			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		}
-
-		String sql = "SELECT COUNT(outward_cheque_id) " + "FROM outward_cheque " + "WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN (" + "'PENDING_VERIFICATION', " + "'REJECTION_REQUEST', "
-				+ "'MICR_REJECTED'" + ")";
+		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ? "
+				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_VERIFICATION', 'REJECTION_REQUEST', 'REJECTION_REJECT')";
 
 		try (Connection connection = DBConnection.getConnection();
-				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-			preparedStatement.setString(1, outwardBatchId.trim());
-
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
-				if (resultSet.next()) {
-					return resultSet.getInt(1);
-				}
+				PreparedStatement ps = connection.prepareStatement(sql)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return rs.getInt(1);
 			}
-
 		} catch (SQLException exception) {
-
-			throw new RuntimeException(
-					"Unable to fetch completed Maker cheque count for outward batch: " + outwardBatchId, exception);
+			throw new RuntimeException("Unable to fetch completed Maker cheque count", exception);
 		}
-
 		return 0;
 	}
 
 	@Override
 	public boolean saveRejectionRequest(String outwardChequeId, String rejectionReason, String rejectionRemarks) {
-
 		if (outwardChequeId == null || outwardChequeId.trim().isEmpty()) {
 			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
 		}
-
 		if (rejectionReason == null || rejectionReason.trim().isEmpty()) {
 			throw new IllegalArgumentException("Rejection reason cannot be null or empty");
 		}
 
 		OutwardCheque cheque = getOutwardChequeById(outwardChequeId);
-
 		if (cheque == null) {
 			throw new IllegalArgumentException("Outward cheque not found: " + outwardChequeId);
 		}
 
 		String reasonId = null;
 		String reason = rejectionReason.trim();
-
 		int separatorIndex = reason.indexOf("|");
-
 		if (separatorIndex > 0) {
 			reasonId = reason.substring(0, separatorIndex).trim();
 			reason = reason.substring(separatorIndex + 1).trim();
 		}
 
-		String updateChequeSql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE outward_cheque_id = ?";
-
-		String insertRequestSql = "INSERT INTO outward_cheque_request "
-				+ "(cheque_id, batch_id, remarks, reason_id, reason) " + "VALUES (?, ?, ?, ?, ?)";
+		String updateChequeSql = "UPDATE outward_cheque SET cheque_status = 'REJECTION_REJECT' WHERE outward_cheque_id = ?";
+		String insertRequestSql = "INSERT INTO outward_cheque_request (cheque_id, batch_id, remarks, reason_id, reason) VALUES (?, ?, ?, ?, ?)";
 
 		try (Connection connection = DBConnection.getConnection()) {
-
 			boolean previousAutoCommit = connection.getAutoCommit();
-
 			try {
-
 				connection.setAutoCommit(false);
-
 				try (PreparedStatement updateStatement = connection.prepareStatement(updateChequeSql)) {
-
-					updateStatement.setString(1, "REJECTION_REQUEST");
-					updateStatement.setString(2, outwardChequeId.trim());
-
-					int rowsUpdated = updateStatement.executeUpdate();
-
-					if (rowsUpdated == 0) {
-						throw new IllegalStateException(
-								"Unable to update cheque status for outward cheque: " + outwardChequeId);
-					}
+					updateStatement.setString(1, outwardChequeId.trim());
+					updateStatement.executeUpdate();
 				}
 
 				try (PreparedStatement insertStatement = connection.prepareStatement(insertRequestSql)) {
-
 					insertStatement.setString(1, cheque.getOutwardChequeId());
 					insertStatement.setString(2, cheque.getOutwardBatchId());
-
-					if (rejectionRemarks == null || rejectionRemarks.trim().isEmpty()) {
-						insertStatement.setNull(3, java.sql.Types.LONGVARCHAR);
-					} else {
-						insertStatement.setString(3, rejectionRemarks.trim());
-					}
-
-					if (reasonId == null || reasonId.isEmpty()) {
-						insertStatement.setNull(4, java.sql.Types.VARCHAR);
-					} else {
-						insertStatement.setString(4, reasonId);
-					}
-
+					insertStatement.setString(3, rejectionRemarks);
+					insertStatement.setString(4, reasonId);
 					insertStatement.setString(5, reason);
-
-					int rowsInserted = insertStatement.executeUpdate();
-
-					if (rowsInserted != 1) {
-						throw new IllegalStateException(
-								"Unable to create rejection request for outward cheque: " + outwardChequeId);
-					}
+					insertStatement.executeUpdate();
 				}
 
 				connection.commit();
-
 				connection.setAutoCommit(previousAutoCommit);
-
 				return true;
-
 			} catch (Exception exception) {
-
-				try {
-					connection.rollback();
-				} catch (SQLException rollbackException) {
-					exception.addSuppressed(rollbackException);
-				}
-
-				try {
-					connection.setAutoCommit(previousAutoCommit);
-				} catch (SQLException autoCommitException) {
-					exception.addSuppressed(autoCommitException);
-				}
-
-				if (exception instanceof RuntimeException) {
-					throw (RuntimeException) exception;
-				}
-
-				throw new RuntimeException("Unable to save rejection request for outward cheque: " + outwardChequeId,
-						exception);
+				connection.rollback();
+				connection.setAutoCommit(previousAutoCommit);
+				throw new RuntimeException("Unable to save rejection request: " + outwardChequeId, exception);
 			}
-
 		} catch (SQLException exception) {
-
-			throw new RuntimeException("Unable to save rejection request for outward cheque: " + outwardChequeId,
-					exception);
+			throw new RuntimeException("Database error saving rejection request: " + outwardChequeId, exception);
 		}
+	}
+
+	private OutwardCheque mapOutwardCheque(ResultSet resultSet) throws SQLException {
+		OutwardCheque outwardCheque = new OutwardCheque();
+		outwardCheque.setOutwardChequeId(resultSet.getString("outward_cheque_id"));
+		outwardCheque.setOutwardBatchId(resultSet.getString("outward_batch_id"));
+		outwardCheque.setChequeNumber(resultSet.getString("cheque_number"));
+		outwardCheque.setMicrCode(resultSet.getString("micr_code"));
+		outwardCheque.setDraweeName(resultSet.getString("drawee_name"));
+		outwardCheque.setDraweeAccountNumber(resultSet.getString("drawee_account_number"));
+		outwardCheque.setPayeeName(resultSet.getString("payee_name"));
+		outwardCheque.setPayeeAccountNumber(resultSet.getString("payee_account_number"));
+		outwardCheque.setChequeAmount(resultSet.getBigDecimal("cheque_amount"));
+		outwardCheque.setChequeDate(resultSet.getDate("cheque_date"));
+		outwardCheque.setChequeStatus(resultSet.getString("cheque_status"));
+		outwardCheque.setAccountId(resultSet.getString("account_id"));
+		outwardCheque.setCreatedAt(resultSet.getTimestamp("created_at"));
+		outwardCheque.setCityCode(resultSet.getString("city_code"));
+		outwardCheque.setBankCode(resultSet.getString("bank_code"));
+		outwardCheque.setBranchCode(resultSet.getString("branch_code"));
+		outwardCheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
+		outwardCheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
+		return outwardCheque;
 	}
 }
