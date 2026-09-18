@@ -39,7 +39,7 @@
     </subDataset>
 
 <!-- 2. Cheques Gone for Data Entry -->
-    <subDataset name="DatasetDataEntry" uuid="a7f47e7a-9b16-419b-a3d8-4f169213bc54">
+<subDataset name="DatasetDataEntry" uuid="a7f47e7a-9b16-419b-a3d8-4f169213bc54">
         <parameter name="DS_MAKER_ID" class="java.lang.String"/>
         <parameter name="DS_FROM_DATE" class="java.sql.Date"/>
         <parameter name="DS_TO_DATE" class="java.sql.Date"/>
@@ -67,8 +67,7 @@
         <field name="cheque_amount" class="java.math.BigDecimal"/>
         <field name="cheque_status" class="java.lang.String"/>
         <field name="created_at" class="java.sql.Timestamp"/>
-    </subDataset>
-    <!-- =========================================================================
+    </subDataset>    <!-- =========================================================================
          3. Unprocessed Cheques Audit Dataset (DISABLED FOR EVALUATION)
          =========================================================================
     <subDataset name="DatasetUnprocessed" uuid="b8c73489-0824-4f4c-8fa0-681b4d0812de">
@@ -230,7 +229,7 @@
                 </jr:table>
             </componentElement>
 
-            <!-- SECTION 2 -->
+            <!-- SECTION 2: CHEQUES GONE FOR DATA ENTRY -->
             <staticText>
                 <reportElement positionType="Float" mode="Opaque" x="0" y="47" width="802" height="20" backcolor="#F1F5F9" uuid="2a56113b-18cb-46fc-bd85-052479fbb222"/>
                 <box leftPadding="6">
@@ -239,7 +238,7 @@
                 <textElement verticalAlignment="Middle">
                     <font size="9" isBold="true"/>
                 </textElement>
-                <text><![CDATA[2. BATCHES GONE FOR DATA ENTRY (CAR/LAR KEYING)]]></text>
+                <text><![CDATA[2. CHEQUES GONE FOR DATA ENTRY (CAR/LAR KEYING)]]></text>
             </staticText>
 
             <componentElement>
@@ -251,25 +250,121 @@
                         <datasetParameter name="DS_TO_DATE"><datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression></datasetParameter>
                         <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
                     </datasetRun>
+                    
+                    <!-- Cheque ID -->
+                    <jr:column width="100">
+                        <jr:columnHeader height="20">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="100" height="20" backcolor="#E2E8F0" uuid="ff9ea17d-2b47-4e94-8255-081cfb5a32ba"/>
+                                <box leftPadding="4"/>
+                                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <text><![CDATA[CHEQUE ID]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="18">
+                            <textField>
+                                <reportElement x="0" y="0" width="100" height="18" uuid="93952f41-3b7c-4740-9a3d-a4175b9e2898"/>
+                                <box leftPadding="4"/>
+                                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <textFieldExpression><![CDATA[$F{scanned_cheque_id}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+
+                    <!-- Cheque Number -->
+                    <jr:column width="110">
+                        <jr:columnHeader height="20">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="20" backcolor="#E2E8F0" uuid="c24a2979-58d0-4bf6-90dc-9b9aaee498e8"/>
+                                <box leftPadding="4"/>
+                                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <text><![CDATA[CHEQUE NO]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="18">
+                            <textField>
+                                <reportElement x="0" y="0" width="110" height="18" uuid="ee24d9c4-0a37-4d76-b631-0df885fca0da"/>
+                                <box leftPadding="4"/>
+                                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                                <textFieldExpression><![CDATA[$F{cheque_number}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+
+                    <!-- Batch ID / Batch Ref -->
+                    <jr:column width="180">
+                        <jr:columnHeader height="20">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="180" height="20" backcolor="#E2E8F0" uuid="b0a7019c-9c98-433b-8515-d3c5fdf6ea45"/>
+                                <box leftPadding="4"/>
+                                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <text><![CDATA[BATCH REF / ID]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="18">
+                            <textField>
+                                <reportElement x="0" y="0" width="180" height="18" uuid="e618f029-4501-4475-b4c5-096b4ef84c31"/>
+                                <box leftPadding="4"/>
+                                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                                <textFieldExpression><![CDATA[$F{batch_reference_id} != null ? $F{batch_reference_id} : $F{scanned_batch_id}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+
+                    <!-- Amount -->
+                    <jr:column width="130">
+                        <jr:columnHeader height="20">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="130" height="20" backcolor="#E2E8F0" uuid="dcf424fa-8b8f-4a0b-8d76-e82205566360"/>
+                                <box rightPadding="4"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <text><![CDATA[AMOUNT (INR)]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="18">
+                            <textField pattern="#,##0.00">
+                                <reportElement x="0" y="0" width="130" height="18" uuid="ecf424fa-8b8f-4a0b-8d76-e82205566361"/>
+                                <box rightPadding="4"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
+                                <textFieldExpression><![CDATA[$F{cheque_amount}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+
+                    <!-- Cheque Status -->
                     <jr:column width="140">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="140" height="20" backcolor="#E2E8F0" uuid="ff9ea17d-2b47-4e94-8255-081cfb5a32ba"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="140" height="18" uuid="93952f41-3b7c-4740-9a3d-a4175b9e2898"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{scanned_batch_id}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:columnHeader height="20">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="140" height="20" backcolor="#E2E8F0" uuid="a6597148-52cb-464a-9ef8-e04f05fbdae1"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <text><![CDATA[STATUS]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="18">
+                            <textField>
+                                <reportElement x="0" y="0" width="140" height="18" uuid="939e0839-bc1a-4c2f-bdae-e9547d25e4f4"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement>
+                                <textFieldExpression><![CDATA[$F{cheque_status}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
                     </jr:column>
-                    <jr:column width="240">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="240" height="20" backcolor="#E2E8F0" uuid="c24a2979-58d0-4bf6-90dc-9b9aaee498e8"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH REFERENCE]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="240" height="18" uuid="ee24d9c4-0a37-4d76-b631-0df885fca0da"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="140">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="140" height="20" backcolor="#E2E8F0" uuid="b0a7019c-9c98-433b-8515-d3c5fdf6ea45"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[PENDING CHEQUES]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="140" height="18" uuid="e618f029-4501-4475-b4c5-096b4ef84c31"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{pending_items} + " Items"]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
-                    <jr:column width="140">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="140" height="20" backcolor="#E2E8F0" uuid="a6597148-52cb-464a-9ef8-e04f05fbdae1"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="140" height="18" uuid="939e0839-bc1a-4c2f-bdae-e9547d25e4f4"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression></textField></jr:detailCell>
-                    </jr:column>
+
+                    <!-- Created At -->
                     <jr:column width="142">
-                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="142" height="20" backcolor="#E2E8F0" uuid="dcba1278-f029-4089-a294-0cfb726359f1"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[UPLOADED TIME]]></text></staticText></jr:columnHeader>
-                        <jr:detailCell height="18"><textField pattern="yyyy-MM-dd HH:mm:ss"><reportElement x="0" y="0" width="142" height="18" uuid="192a74c6-4fb5-48ef-b4fb-a5829d6c703b"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression></textField></jr:detailCell>
+                        <jr:columnHeader height="20">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="142" height="20" backcolor="#E2E8F0" uuid="dcba1278-f029-4089-a294-0cfb726359f1"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                                <text><![CDATA[CREATED TIME]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="18">
+                            <textField pattern="yyyy-MM-dd HH:mm:ss">
+                                <reportElement x="0" y="0" width="142" height="18" uuid="192a74c6-4fb5-48ef-b4fb-a5829d6c703b"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement>
+                                <textFieldExpression><![CDATA[$F{created_at}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
                     </jr:column>
                 </jr:table>
             </componentElement>
