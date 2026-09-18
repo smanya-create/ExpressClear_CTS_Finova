@@ -17,9 +17,11 @@ import com.iispl.cts.entity.outward.OutwardCheque;
 public class OutwardXmlGenerator {
 
 	private static final String NAMESPACE = "urn:iso:std:iso:20022:tech:xsd:cts.cheque.clearing";
-
+	
+	//Indentation containing 4 spaces
 	private static final String INDENT = "    ";
 
+	//Method for generating a xml
 	public static Path generateXml(OutwardBatch batch, List<OutwardCheque> cheques, String outputDirectory)
 			throws Exception {
 
@@ -36,16 +38,15 @@ public class OutwardXmlGenerator {
 
 		XMLOutputFactory factory = XMLOutputFactory.newFactory();
 
-		XMLStreamWriter writer =
-		    factory.createXMLStreamWriter(
-		        Files.newOutputStream(xmlFile),
-		        "UTF-8"
-		    );
+		XMLStreamWriter writer = factory.createXMLStreamWriter(Files.newOutputStream(xmlFile), "UTF-8");
 
 		writer.writeStartDocument("UTF-8", "1.0");
 
+		//root element
 		writer.writeStartElement("ChequeBatchTransmission");
 		writer.writeDefaultNamespace(NAMESPACE);
+		
+		//used to write characters into the xml file
 		writer.writeCharacters("\n");
 
 		writeBatchHeader(writer, batch, cheques);
@@ -79,6 +80,7 @@ public class OutwardXmlGenerator {
 		return xmlFile;
 	}
 
+	//writing batch details 
 	private static void writeBatchHeader(XMLStreamWriter writer, OutwardBatch batch, List<OutwardCheque> cheques)
 			throws Exception {
 
@@ -120,6 +122,7 @@ public class OutwardXmlGenerator {
 		writer.writeEndElement();
 	}
 
+	//writing cheque details
 	private static void writeCheque(XMLStreamWriter writer, OutwardCheque cheque) throws Exception {
 
 		writeIndent(writer, 1);
@@ -184,12 +187,9 @@ public class OutwardXmlGenerator {
 		writeIndent(writer, 2);
 		writer.writeEndElement();
 		writer.writeCharacters("\n");
-		
-		System.out.println("Writing XML Front: "
-		        + cheque.getChequeImageFront());
 
-		System.out.println("Writing XML Back: "
-		        + cheque.getChequeImageBack());
+		System.out.println("Writing XML Front: " + cheque.getChequeImageFront());
+		System.out.println("Writing XML Back: " + cheque.getChequeImageBack());
 
 		writeIndent(writer, 2);
 		writer.writeStartElement("ScannedImages");
@@ -205,12 +205,13 @@ public class OutwardXmlGenerator {
 		writer.writeEndElement();
 	}
 
-	private static void writeSimpleElement(XMLStreamWriter writer, int level, String name, String value)
+	// used to write simple xml element
+	private static void writeSimpleElement(XMLStreamWriter writer, int level, String tagName, String value)
 			throws Exception {
 
 		writeIndent(writer, level);
 
-		writer.writeStartElement(name);
+		writer.writeStartElement(tagName);
 
 		if (value != null) {
 			writer.writeCharacters(value);
@@ -220,6 +221,7 @@ public class OutwardXmlGenerator {
 		writer.writeCharacters("\n");
 	}
 
+	//used for formatting the xml file
 	private static void writeIndent(XMLStreamWriter writer, int level) throws Exception {
 
 		for (int i = 0; i < level; i++) {
