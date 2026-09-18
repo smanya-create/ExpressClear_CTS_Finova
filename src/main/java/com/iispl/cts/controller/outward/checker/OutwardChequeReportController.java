@@ -22,6 +22,7 @@ import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Messagebox;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.SecurityUtil;
 
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -45,6 +46,7 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
 		super.doAfterCompose(comp);
 
 		java.util.Date today = new java.util.Date();

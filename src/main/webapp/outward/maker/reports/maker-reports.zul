@@ -1,107 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
-
 <zk>
-
-   
     <style src="/css/outward/maker-report.css"/>
 
     <vlayout
         apply="com.iispl.cts.controller.outward.maker.MakerReportController"
-        spacing="20px"
-        style="padding:24px;"
+        spacing="16px"
+        style="padding: 24px 32px;"
         hflex="1"
         vflex="1"
         sclass="role-content">
 
         <!-- Page Title Header -->
-
-        <vlayout spacing="4px">
-
-            <label value="Reports"
-                   sclass="page-title" />
-
-            
-
+        <vlayout spacing="2px">
+            <label value="Reports" sclass="page-title" />
         </vlayout>
 
-
-        <!-- Filter Controls Card -->
-
+        <!-- Compact Card Container (matches screenshot width & layout) -->
         <vlayout sclass="card-panel"
-                 spacing="20px"
-                 hflex="1"
-                 style="padding:24px 28px;">
+                 spacing="16px"
+                 width="860px"
+                 style="padding: 24px 28px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
 
-            <!-- Date Inputs -->
+            <!-- Card Header Title -->
+            <label value="Report Parameters" style="font-size: 15px; font-weight: 700; color: #0f172a;" />
 
-            <hlayout spacing="16px"
-                     valign="bottom"
-                     hflex="1">
+            <!-- REPORT TYPE Section -->
+            <vlayout spacing="5px" hflex="1">
+                <label value="REPORT TYPE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
+                <combobox id="cmbReportType" readonly="true" height="36px" hflex="1">
+                   
+                    <comboitem label="Batches with MICR Repairs" value="MICR_REPAIRS" />
+                    <comboitem label="Batches for Data Entry" value="DATA_ENTRY" />
+                    <comboitem label="Request Rejected Cheques Report" value="REQUEST_REJECTED" />
+                    <comboitem label="Batches Submitted to Checker" value="SUBMITTED_CHECKER" />
+                </combobox>
+            </vlayout>
 
-                <vlayout spacing="6px"
-                         width="220px">
-
-                    <label value="FROM DATE"
-                           sclass="field-label" />
-
-                    <datebox id="dtFromDate"
-                             format="yyyy-MM-dd"
-                             height="38px"
-                             width="100%" />
-
+            <!-- Side-by-Side Dates -->
+            <hlayout spacing="20px" hflex="1">
+                <vlayout spacing="5px" hflex="1">
+                    <label value="FROM DATE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
+                    <datebox id="dtFromDate" format="yyyy-MM-dd" height="36px" hflex="1" />
                 </vlayout>
 
-
-                <vlayout spacing="6px"
-                         width="220px">
-
-                    <label value="TO DATE"
-                           sclass="field-label" />
-
-                    <datebox id="dtToDate"
-                             format="yyyy-MM-dd"
-                             height="38px"
-                             width="100%" />
-
+                <vlayout spacing="5px" hflex="1">
+                    <label value="TO DATE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
+                    <datebox id="dtToDate" format="yyyy-MM-dd" height="36px" hflex="1" />
                 </vlayout>
-
             </hlayout>
 
+            <!-- Light Divider Line -->
+            <separator bar="true" style="border-color: #f1f5f9; margin: 4px 0;" />
 
-            <separator bar="true"
-                       style="border-color:#e2e8f0;
-                              margin:4px 0;" />
+            <!-- DOWNLOAD FORMATS Section -->
+            <vlayout spacing="8px" hflex="1">
+                <label value="DOWNLOAD FORMATS" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
 
+                <hlayout spacing="12px" hflex="1">
+                    <button id="btnExportCsv"
+                            label="Download CSV"
+                            height="36px"
+                            style="font-size: 12px; font-weight: 600; padding: 0 18px;"
+                            sclass="btn-primary" />
 
-            <!-- Report Details Description Section -->
-
-    
-
-
-            <!-- Export Buttons -->
-
-            <hlayout spacing="12px"
-                     hflex="1"
-                     style="justify-content:flex-start;
-                            margin-top:12px;">
-
-                <button id="btnExportCsv"
-                        label="Download CSV"
-                        height="38px"
-                        sclass="btn-primary" />
-
-                <button id="btnExportPdf"
-                        label="Download PDF"
-                        height="38px"
-                        sclass="btn-outline"
-                        />
-
-            </hlayout>
+                    <button id="btnExportPdf"
+                            label="Download PDF"
+                            height="36px"
+                            style="font-size: 12px; font-weight: 600; padding: 0 18px;"
+                            sclass="btn-outline" />
+                </hlayout>
+            </vlayout>
 
         </vlayout>
 
     </vlayout>
-
 </zk>

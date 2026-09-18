@@ -26,6 +26,7 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.RejectRequestDTO;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.entity.outward.OutwardCheque;
@@ -273,6 +274,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
+		
 
 		super.doAfterCompose(comp);
 

@@ -22,6 +22,7 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.service.outward.OutwardCheckerRejectionService;
 import com.iispl.cts.serviceimpl.outward.OutwardCheckerRejectionServiceImpl;
@@ -68,6 +69,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
     // =========================================================
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+    	
         super.doAfterCompose(comp);
         loadRejectedCheques();
     }

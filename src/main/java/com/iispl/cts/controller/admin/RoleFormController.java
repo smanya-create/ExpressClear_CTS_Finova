@@ -10,6 +10,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
@@ -114,18 +115,35 @@ public class RoleFormController extends GenericForwardComposer<Component> {
             for (User user : users) {
                 Listitem item = new Listitem();
 
+                // 1. Employee ID
                 String empId = (user.getEmployeeId() != null && !user.getEmployeeId().isEmpty()) 
                                ? user.getEmployeeId() : user.getUserId();
                 item.appendChild(new Listcell(empId));
-                item.appendChild(new Listcell(user.getFullName() != null ? user.getFullName() : "-"));
-                item.appendChild(new Listcell(user.getUsername() != null ? user.getUsername() : "-"));
-                item.appendChild(new Listcell(user.getEmail() != null ? user.getEmail() : "-"));
-                item.appendChild(new Listcell(user.getMobileNumber() != null ? user.getMobileNumber() : "-"));
 
+                // 2. Operator Name
+                item.appendChild(new Listcell(user.getFullName() != null ? user.getFullName() : "-"));
+
+                // 3. Username
+                item.appendChild(new Listcell(user.getUsername() != null ? user.getUsername() : "-"));
+
+                // 4. Email
+                item.appendChild(new Listcell(user.getEmail() != null ? user.getEmail() : "-"));
+
+                // 5. Mobile (Center aligned)
+                Listcell mobileCell = new Listcell(user.getMobileNumber() != null ? user.getMobileNumber() : "-");
+                mobileCell.setStyle("text-align: center;");
+                item.appendChild(mobileCell);
+
+                // 6. Status (Center aligned badge)
                 Listcell statusCell = new Listcell();
+                statusCell.setStyle("text-align: center;");
+
                 boolean isActive = "ACTIVE".equalsIgnoreCase(user.getStatus());
-                statusCell.setLabel(isActive ? "Active" : "Inactive");
-                statusCell.setStyle(isActive ? "color: #16a34a; font-weight: 700;" : "color: #dc2626; font-weight: 700;");
+
+                org.zkoss.zul.Label lblStatus = new org.zkoss.zul.Label(isActive ? "Active" : "Inactive");
+                lblStatus.setSclass(isActive ? "badge-status badge-active" : "badge-status badge-inactive");
+
+                statusCell.appendChild(lblStatus);
                 item.appendChild(statusCell);
 
                 lstAssignedUsers.appendChild(item);
