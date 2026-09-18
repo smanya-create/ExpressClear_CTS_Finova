@@ -40,7 +40,7 @@
                             <label value="REPORT TYPE" sclass="field-label" />
                             <combobox id="cmbReportType" readonly="true" width="100%" height="38px" style="font-size: 13px;">
                                 <comboitem label="User Activity &amp; Security Audit Report" value="USER_AUDIT" />
-                                <comboitem label="BOD / EOD Session Lifecycle &amp; Batch Summary Report" value="SESSION_LIFECYCLE" />
+                                <comboitem label="BOD / EOD Session Lifecycle " value="SESSION_LIFECYCLE" />
                             </combobox>
                         </vlayout>
                         
