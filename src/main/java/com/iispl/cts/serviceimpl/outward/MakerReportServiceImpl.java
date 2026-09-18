@@ -57,8 +57,24 @@ public class MakerReportServiceImpl implements MakerReportService {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         DecimalFormat df = new DecimalFormat("#,##0.00");
-        java.sql.Date sqlFrom = new java.sql.Date(fromDate.getTime());
-        java.sql.Date sqlTo = new java.sql.Date(toDate.getTime());
+
+        // Force sqlFrom to start of day (00:00:00)
+        java.util.Calendar calFrom = java.util.Calendar.getInstance();
+        calFrom.setTime(fromDate);
+        calFrom.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calFrom.set(java.util.Calendar.MINUTE, 0);
+        calFrom.set(java.util.Calendar.SECOND, 0);
+        java.sql.Date sqlFrom = new java.sql.Date(calFrom.getTimeInMillis());
+
+        // Force sqlTo to the very end of the day (23:59:59)
+        java.util.Calendar calTo = java.util.Calendar.getInstance();
+        calTo.setTime(toDate);
+        calTo.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        calTo.set(java.util.Calendar.MINUTE, 59);
+        calTo.set(java.util.Calendar.SECOND, 59);
+        java.sql.Date sqlTo = new java.sql.Date(calTo.getTimeInMillis());
+
+       
 
         switch (reportType) {
             case "MICR_REPAIRS": {
