@@ -514,3 +514,36 @@
     font-weight: 600 !important;
     color: #0f172a !important;
 }
+
+
+/* ==========================================================================
+   READ-ONLY TEXTBOX STYLING (Crisp, High-Contrast & Clearly Locked)
+   ========================================================================== */
+.z-textbox[readonly],
+.z-textbox-readonly {
+    background-color: #f1f5f9 !important; /* Soft grey-blue background */
+    color: #1e293b !important;            /* Dark, crisp, readable text */
+    border: 1px solid #cbd5e1 !important;  /* Defined, neat border */
+    user-select: text !important;          /* Allows text selection if needed */
+    box-shadow: none !important;
+}
+
+/* Prevent blue focus outline/border on click when readonly */
+.z-textbox[readonly]:focus,
+.z-textbox-readonly:focus {
+    border-color: #cbd5e1 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================================================
+   DISABLED ACTION BUTTONS (Clean Muted Look, Text Stays Clear)
+   ========================================================================== */
+.cts-btn-solid-primary[disabled],
+.cts-btn-outline-danger[disabled],
+.cts-btn-secondary[disabled] {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+}
