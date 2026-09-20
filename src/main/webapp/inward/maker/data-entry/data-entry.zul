@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk xmlns:h="xhtml">
-	<style src="/css/inward/data-entry.css?v=605" />
+	<style src="/css/inward/data-entry.css?v=614" />
 
 	<div id="dataEntryRootDiv" sclass="cts-data-entry-wrapper"
 		apply="com.iispl.cts.controller.inward.maker.InwardDataEntryController">
@@ -130,12 +130,20 @@
 					</div>
 				</div>
 
-				<!-- Row 2: Amount & Amount in Words -->
+				<!-- Row 2: Amount & Payee Name -->
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
 						<label value="Amount" sclass="cts-field-lbl" />
 						<textbox id="txtAmount" sclass="cts-input-text" instant="true" width="100%" />
 					</div>
+					<div sclass="cts-form-field">
+						<label value="Payee Name" sclass="cts-field-lbl" />
+						<textbox id="txtPayeeName" sclass="cts-input-text" width="100%" />
+					</div>
+				</div>
+
+				<!-- Row 3: Amount in Words (Full Width) -->
+				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
 						<label value="Amount in Words" sclass="cts-field-lbl" />
 						<textbox id="txtAmountInWords" sclass="cts-input-text cts-input-readonly" readonly="true"
@@ -143,7 +151,7 @@
 					</div>
 				</div>
 
-				<!-- Row 3: Drawee Account Number & Drawee Customer Name -->
+				<!-- Row 4: Drawee Account Number & Drawee Customer Name -->
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
 						<label value="Drawee Account Number" sclass="cts-field-lbl" />
@@ -155,14 +163,6 @@
 					</div>
 				</div>
 
-				<!-- Row 4: Payee Name (Full Width) -->
-				<div sclass="cts-form-row">
-					<div sclass="cts-form-field">
-						<label value="Payee Name" sclass="cts-field-lbl" />
-						<textbox id="txtPayeeName" sclass="cts-input-text" width="100%" />
-					</div>
-				</div>
-
 				<!-- Hidden field preserved so controller field injection does not break -->
 				<div visible="false">
 					<textbox id="txtEntryRemark" />
@@ -171,11 +171,14 @@
 				<!-- Action Buttons Row -->
 				<div sclass="cts-form-action-area">
 					<hlayout width="100%" spacing="12px" valign="middle">
-						<button id="btnCancel" label="Reset Item" 
+						<button id="btnCancel" label="Revert Item" 
+								iconSclass="z-icon-undo"
 								sclass="cts-btn-secondary" hflex="1" />
 						<button id="btnRequestRejection" label="Request Rejection" 
+								iconSclass="z-icon-times-circle"
 								sclass="cts-btn-outline-danger" hflex="1.3" />
 						<button id="btnApproveCheque" label="Approve Cheque" 
+								iconSclass="z-icon-check"
 								sclass="cts-btn-solid-primary" hflex="1.3" />
 					</hlayout>
 
@@ -223,38 +226,47 @@
 
 		<!-- Move to Maker Completion Modal Window -->
 		<div id="winCompletionConfirmModal" visible="false"
-			style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.7) !important; z-index: 999999 !important;">
+			style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.75) !important; z-index: 999999 !important;">
 
-			<div style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; background: #ffffff !important; border-radius: 12px !important; padding: 24px 28px !important; width: 420px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4) !important; text-align: center !important; z-index: 1000000 !important; box-sizing: border-box !important;">
+			<div style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; background: #ffffff !important; border-radius: 16px !important; padding: 32px 36px !important; width: 480px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important; text-align: center !important; z-index: 1000000 !important; box-sizing: border-box !important;">
 
-				<div style="width: 46px; height: 46px; border-radius: 50%; background-color: #dcfce7; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-					<span class="z-icon-check" style="font-size: 22px; color: #16a34a; font-weight: 900;" />
+				<!-- Success Checkmark Badge -->
+				<div style="width: 52px; height: 52px; border-radius: 50%; background-color: #dcfce7; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+					<span class="z-icon-check" style="font-size: 24px; color: #16a34a; font-weight: 900;" />
 				</div>
 
-				<label value="Submit Batch to Checker" style="font-size: 17px; font-weight: 700; color: #0f172a; margin-bottom: 4px; display: block;" />
+				<!-- Modal Title & Description -->
+				<label value="Submit Batch to Checker" style="font-size: 19px; font-weight: 700; color: #0f172a; margin-bottom: 6px; display: block;" />
 				<label value="All cheques in this batch are resolved. Moving this batch will forward it to the Checker verification queue."
-					style="font-size: 12px; color: #64748b; line-height: 1.4; margin-bottom: 16px; display: block;" />
+					style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 24px; display: block;" />
 
-				<hlayout spacing="10px" style="display: flex; justify-content: center; margin-bottom: 20px; width: 100%;">
-					<div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 0;">
-						<label value="TOTAL" style="font-size: 10px; font-weight: 700; color: #64748b; display: block;" />
-						<label id="lblModalTotal" value="0" style="font-size: 18px; font-weight: 800; color: #0f172a; display: block;" />
+				<!-- Summary Metric Cards (Spacious, Equal-Width Grid) -->
+				<hlayout spacing="16px" style="display: flex; justify-content: center; margin-bottom: 28px; width: 100%;">
+					<!-- TOTAL CARD -->
+					<div style="flex: 1; min-width: 110px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); box-sizing: border-box;">
+						<label value="TOTAL" style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px; display: block;" />
+						<label id="lblModalTotal" value="0" style="font-size: 22px; font-weight: 800; color: #0f172a; display: block; line-height: 1.2;" />
 					</div>
-					<div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px 0;">
-						<label value="ACCEPTED" style="font-size: 10px; font-weight: 700; color: #16a34a; display: block;" />
-						<label id="lblModalAccepted" value="0" style="font-size: 18px; font-weight: 800; color: #16a34a; display: block;" />
+
+					<!-- ACCEPTED CARD -->
+					<div style="flex: 1; min-width: 110px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 14px 12px; box-shadow: 0 1px 3px rgba(22,163,74,0.06); box-sizing: border-box;">
+						<label value="ACCEPTED" style="font-size: 11px; font-weight: 700; color: #16a34a; letter-spacing: 0.5px; margin-bottom: 4px; display: block;" />
+						<label id="lblModalAccepted" value="0" style="font-size: 22px; font-weight: 800; color: #16a34a; display: block; line-height: 1.2;" />
 					</div>
-					<div style="flex: 1; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 0;">
-						<label value="REJECTED" style="font-size: 10px; font-weight: 700; color: #dc2626; display: block;" />
-						<label id="lblModalRejected" value="0" style="font-size: 18px; font-weight: 800; color: #dc2626; display: block;" />
+
+					<!-- REJECTED CARD -->
+					<div style="flex: 1; min-width: 110px; background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 14px 12px; box-shadow: 0 1px 3px rgba(220,38,38,0.06); box-sizing: border-box;">
+						<label value="REJECTED" style="font-size: 11px; font-weight: 700; color: #dc2626; letter-spacing: 0.5px; margin-bottom: 4px; display: block;" />
+						<label id="lblModalRejected" value="0" style="font-size: 22px; font-weight: 800; color: #dc2626; display: block; line-height: 1.2;" />
 					</div>
 				</hlayout>
 
-				<hlayout spacing="10px" style="display: flex; justify-content: center; width: 100%;">
+				<!-- Action Buttons -->
+				<hlayout spacing="14px" style="display: flex; justify-content: center; width: 100%;">
 					<button id="btnCancelCompletionModal" label="Stay in Data Entry"
-						style="background: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #475569 !important; font-weight: 600; font-size: 12px; border-radius: 6px; height: 34px; padding: 0 14px; cursor: pointer;" />
+						style="flex: 1; background: #ffffff !important; border: 1.5px solid #cbd5e1 !important; color: #475569 !important; font-weight: 600; font-size: 13px; border-radius: 8px; height: 38px; padding: 0 16px; cursor: pointer; transition: all 0.2s ease;" />
 					<button id="btnConfirmCompletionModal" label="Submit to Checker" iconSclass="z-icon-paper-plane"
-						style="background: #059669 !important; border: none !important; color: #ffffff !important; font-weight: 600; font-size: 12px; border-radius: 6px; height: 34px; padding: 0 16px; cursor: pointer;" />
+						style="flex: 1.2; background: #059669 !important; border: none !important; color: #ffffff !important; font-weight: 600; font-size: 13px; border-radius: 8px; height: 38px; padding: 0 18px; cursor: pointer; box-shadow: 0 2px 4px rgba(5,150,105,0.25); transition: all 0.2s ease;" />
 				</hlayout>
 
 			</div>

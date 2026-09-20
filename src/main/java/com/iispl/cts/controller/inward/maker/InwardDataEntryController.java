@@ -416,6 +416,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			lblChequeNo.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "-");
 		if (lblChequePosition != null)
 			lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
+		
+		// Apply field & button lock based on cheque status
+	    applyChequeActionLock(item);
 
 		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
 		if (lblDataStatus != null) {
@@ -1107,5 +1110,32 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		} else {
 			Executions.sendRedirect("/inward/maker/index.zul?page=data-entry-batches");
 		}
+	}
+	
+	private void applyChequeActionLock(InwardCheque cheque) {
+	    if (cheque == null) return;
+
+	    String st = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim().toUpperCase() : "";
+
+	    // ONLY lock actions if this item has an active Rejection Request
+	    boolean isRejected = InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st);
+	    
+	 // 1. Textbox Readonly Flags
+	    if (txtChequeNumber != null) txtChequeNumber.setReadonly(isRejected);
+	    if (txtChequeDate != null) txtChequeDate.setReadonly(isRejected);
+	    if (txtAmount != null) txtAmount.setReadonly(isRejected);
+	    if (txtDraweeAccount != null) txtDraweeAccount.setReadonly(isRejected);
+	    if (txtPayeeName != null) txtPayeeName.setReadonly(isRejected);
+	    if (txtDraweeBankName != null) txtDraweeBankName.setReadonly(isRejected); 
+
+	    if (btnApproveCheque != null) {
+	        btnApproveCheque.setDisabled(isRejected);
+	    }
+	    if (btnRequestRejection != null) {
+	        btnRequestRejection.setDisabled(isRejected);
+	    }
+	    if (btnCancel != null) {
+	        btnCancel.setDisabled(isRejected);
+	    }
 	}
 }
