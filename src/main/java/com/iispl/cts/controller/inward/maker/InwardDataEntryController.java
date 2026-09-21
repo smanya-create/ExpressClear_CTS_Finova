@@ -489,7 +489,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			if (isSentBackStatus(status)) {
 				lblDataStatus.setValue("Sent Back");
 			} else if (InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("Returned To Checker");
+				lblDataStatus.setValue("Return To Checker");
 			} else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)
 					|| "REJECTION REQUESTED".equalsIgnoreCase(status) || "REJECT REQ".equalsIgnoreCase(status)) {
 				lblDataStatus.setValue("Rejection Requested");
@@ -820,9 +820,11 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		current.setChequeAmount(new BigDecimal(rawAmount));
 		current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
 
-		boolean wasSentBack = isSentBackStatus(current.getChequeStatus());
+		boolean isReworkItem = isSentBackStatus(current.getChequeStatus())
+				|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(current.getChequeStatus())
+				|| this.isReworkBatch;
 
-		if (wasSentBack) {
+		if (isReworkItem) {
 			current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
 			try {
 				User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
@@ -835,6 +837,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		} else {
 			current.setChequeStatus("DATA_ENTRY_COMPLETED");
 		}
+		
 		chequeService.updateChequeDetails(current);
 
 		if (currentIndex < activeQueue.size() - 1) {
