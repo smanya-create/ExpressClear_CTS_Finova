@@ -74,7 +74,8 @@
 							onClick="$composer.navToOutwardDataEntry()"
 							w:onClick="jq('.nav-item').removeClass('active'); jq(this).addClass('active');" />
 
-						<a id="navQueue" label="Unprocessed Cheques" visible="false"
+						<a id="navQueue" label="Unprocessed Cheques"
+							visible="true"
 							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToQueue()"
 							w:onClick="jq('.nav-item').removeClass('active'); jq(this).addClass('active');" />
@@ -103,14 +104,14 @@
 							label="Outward Rejected Cheques"
 							sclass="${arg.activeTab eq 'outward-rejected-cheques' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToOutwardRejectedCheques()" />
+						<a id="navToOutwardCheckerUnprocessedQueue"
+							label="Unprocessed Cheques" visible="true"
+							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
+							onClick="$composer.navToOutwardCheckerUnprocessedQueue()" />
 						<a id="navOutwardCheckerReports" label="Reports"
 							sclass="${arg.activeTab eq 'outward-checker-reports' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToOutwardCheckerReports()" />
-						<a id="navToOutwardCheckerUnprocessedQueue"
-							label="Unprocessed Cheques"
-							visible="false"
-							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToOutwardCheckerUnprocessedQueue()" />
+
 					</vlayout>
 				</div>
 
@@ -129,40 +130,37 @@
 						<a id="navInwardDataEntry" label="Data Entry"
 							sclass="${arg.activeTab eq 'inward-data-entry' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToInwardDataEntry()" />
-							
+
 						<!-- Temporarily disabled Unprocessed Cheques navigation -->
 						<!-- <a id="navInwardUnprocessed"
 							label="Unprocessed Cheques"
 							visible="false"
 							sclass="${arg.activeTab eq 'inward-unprocessed' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToInwardUnprocessedQueue()" />  -->
-							
+
 					</vlayout>
 				</div>
 
 				<!-- INWARD CHECKER MODULES -->
 				<div id="divInwardCheckerMenu" visible="false">
 
-    <vlayout spacing="2px">
+					<vlayout spacing="2px">
 
-        <a id="navInwardCheckerDash"
-           label="Dashboard"
-           sclass="${param.activeTab eq 'inward-checker-dash' ? 'nav-item active' : 'nav-item'}"
-           onClick="$composer.navToInwardCheckerDashboard()" />
+						<a id="navInwardCheckerDash" label="Dashboard"
+							sclass="${param.activeTab eq 'inward-checker-dash' ? 'nav-item active' : 'nav-item'}"
+							onClick="$composer.navToInwardCheckerDashboard()" />
 
-        <a id="navVerification"
-           label="Verification"
-           sclass="${param.activeTab eq 'verification' ? 'nav-item active' : 'nav-item'}"
-           onClick="$composer.navToVerification()" />
+						<a id="navVerification" label="Verification"
+							sclass="${param.activeTab eq 'verification' ? 'nav-item active' : 'nav-item'}"
+							onClick="$composer.navToVerification()" />
 
-        <a id="navInwardCheckerReports"
-           label="Reports"
-           sclass="${param.activeTab eq 'inward-checker-reports' ? 'nav-item active' : 'nav-item'}"
-           onClick="$composer.navToInwardCheckerReports()" />
+						<a id="navInwardCheckerReports" label="Reports"
+							sclass="${param.activeTab eq 'inward-checker-reports' ? 'nav-item active' : 'nav-item'}"
+							onClick="$composer.navToInwardCheckerReports()" />
 
-    </vlayout>
+					</vlayout>
 
-</div>
+				</div>
 			</vlayout>
 		</vlayout>
 
