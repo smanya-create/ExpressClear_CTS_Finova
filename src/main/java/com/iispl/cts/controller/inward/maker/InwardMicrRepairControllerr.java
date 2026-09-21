@@ -55,7 +55,7 @@ import com.iispl.cts.validatorimpl.MICRValidatorImpl;
 
 public class InwardMicrRepairControllerr extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
+	
 
 	private Label lblBatchId;
 	private Label lblRecordPosition;

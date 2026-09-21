@@ -19,12 +19,12 @@
 			<borderlayout width="100%" height="100%">
 
 				<north height="70px" border="0">
-					<!-- FIXED HEADER INCLUDE -->
+				
 					<include src="/components/header.zul"
 						pageTitle="Inward Processing" pageSubtitle="Verification" />
 				</north>
 
-				<!-- PAGE CONTENT -->
+			
 				<center border="0" autoscroll="false" vflex="1"
 					style="background:#FFFFFF !important;">
 					<vlayout width="100%" spacing="10px" vflex="1"
@@ -59,11 +59,12 @@
 								<button id="btnNext" label="Next →"
 									sclass="cheque-nav-btn" width="70px" height="32px"
 									style="background:#0B2344;color:white;border:0;border-radius:4px;font-size:12px;" />
-
-								<button id="btnSubmitVerification" label="✓ Submit"
-									visible="false" width="110px" height="30px"
-									style="background:#198754;color:white;border:0;border-radius:4px;font-weight:600;" />
-
+<button id="btnSubmitVerification"
+        label="✓ Submit"
+        visible="false"
+        width="110px"
+        height="30px"
+        style="background:#198754;color:white;border:0;border-radius:4px;font-weight:600;text-align:center;padding:0;line-height:30px;" />
 							</hlayout>
 
 						</hlayout>

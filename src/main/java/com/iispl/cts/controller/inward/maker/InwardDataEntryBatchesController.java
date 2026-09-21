@@ -35,8 +35,7 @@ import com.iispl.cts.enums.inward.InwardChequeStatus;
 
 public class InwardDataEntryBatchesController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
-
+	
 	private Grid grdDataEntryBatches;
 	private Rows rowsDataEntryBatches;
 	private Paging pagingDataEntry;

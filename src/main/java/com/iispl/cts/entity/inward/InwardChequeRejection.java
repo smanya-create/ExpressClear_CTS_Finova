@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 
 public class InwardChequeRejection implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+   
 
     private String rejectionId;
     private String inwardChequeId;

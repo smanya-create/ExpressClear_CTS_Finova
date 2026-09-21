@@ -57,7 +57,7 @@ import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
+	
 	private Label lblBatchId;
 	private Label lblTotalCheques;
 	private Label lblChequeNumber;
