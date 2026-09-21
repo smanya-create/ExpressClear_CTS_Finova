@@ -134,33 +134,39 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 	private void loadPendingCheques() {
 		pendingTransactionsList.clear();
 
-		// Include PENDING_MICR_REPAIR and prefix matching
 		String sql = 
+				// 1. SCAN STAGE: Exclude cheques whose parent batch or cheque has already progressed to outward clearing
 				"SELECT sc.scanned_batch_id AS batch_id, " +
-						"       sb.batch_reference_id, " +
-						"       sc.cheque_number, " +
-						"       sc.cheque_status, " +
-						"       sc.cheque_amount, " +
-						"       sc.created_at, " +
-						"       'SCAN_STAGE' AS pipeline_source " +
-						"FROM scan_cheque sc " +
-						"LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
-						"WHERE UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'RAW', 'PENDING') " +
+				"       sb.batch_reference_id, " +
+				"       sc.cheque_number, " +
+				"       sc.cheque_status, " +
+				"       sc.cheque_amount, " +
+				"       sc.created_at, " +
+				"       'SCAN_STAGE' AS pipeline_source " +
+				"FROM scan_cheque sc " +
+				"LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+				"WHERE UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'RAW', 'PENDING') " +
+				"  AND UPPER(COALESCE(sb.batch_status, '')) NOT IN ('COMPLETED', 'PROMOTED', 'PENDING_CHECKER_PROCESS') " +
+				"  AND NOT EXISTS ( " +
+				"      SELECT 1 FROM outward_batch ob " +
+				"      WHERE ob.outward_batch_id = sc.scanned_batch_id " +
+				"  ) " +
 
-            "UNION ALL " +
+				"UNION ALL " +
 
-            "SELECT oc.outward_batch_id AS batch_id, " +
-            "       ob.batch_reference_id, " +
-            "       oc.cheque_number, " +
-            "       oc.cheque_status, " +
-            "       oc.cheque_amount, " +
-            "       oc.created_at, " +
-            "       'OUTWARD_STAGE' AS pipeline_source " +
-            "FROM outward_cheque oc " +
-            "LEFT JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id " +
-            "WHERE UPPER(oc.cheque_status) IN ('PENDING_VERIFICATION', 'PENDING_CHECKER_VERIFICATION', 'PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'PENDING') " +
+				// 2. OUTWARD STAGE: Items currently awaiting Checker review or verification
+				"SELECT oc.outward_batch_id AS batch_id, " +
+				"       ob.batch_reference_id, " +
+				"       oc.cheque_number, " +
+				"       oc.cheque_status, " +
+				"       oc.cheque_amount, " +
+				"       oc.created_at, " +
+				"       'OUTWARD_STAGE' AS pipeline_source " +
+				"FROM outward_cheque oc " +
+				"LEFT JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id " +
+				"WHERE UPPER(oc.cheque_status) IN ('PENDING_VERIFICATION', 'PENDING_CHECKER_VERIFICATION', 'PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'PENDING') " +
 
-            "ORDER BY created_at ASC";
+				"ORDER BY created_at ASC";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);
@@ -190,11 +196,11 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 				pendingTransactionsList.add(new PendingChequeDTO(
 						displayBatch,
 						chqNo != null ? chqNo : "------",
-								"OUTWARD",
-								status,
-								assignedQueue,
-								"Amount: " + String.format("%.2f", amount)
-						));
+						"OUTWARD",
+						status,
+						assignedQueue,
+						"Amount: " + String.format("%.2f", amount)
+				));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -487,8 +493,11 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 				"UPDATE outward_batch SET batch_status = 'UNPROCESSED' " +
 						"WHERE UPPER(batch_status) IN ('PENDING_CHECKER_PROCESS', 'PENDING')";
 
-		try (Connection conn = DBConnection.getConnection()) {
+		Connection conn = null;
+		try {
+			conn = DBConnection.getConnection();
 			conn.setAutoCommit(false);
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
 			try (PreparedStatement ps = conn.prepareStatement(updateSessionSql)) {
 				ps.setTimestamp(1, now);
@@ -498,7 +507,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 				int rowsUpdated = ps.executeUpdate();
 				if (rowsUpdated == 0) {
 					conn.rollback();
-					Clients.showNotification("No OPEN session found for current date.", "error", null, "top_center", 3000);
+					Clients.showNotification("No OPEN session found for current date or session already closed.", "error", null, "top_center", 3000);
 					return;
 				}
 			}
@@ -524,7 +533,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
 			String auditDetail = isForced
 					? "Forced EOD completed with " + pendingChequesCount + " pending cheques paused. Reason: " + remarks
-							: "Normal EOD closed successfully for date " + currentClearingDate;
+					: "Normal EOD closed successfully for date " + currentClearingDate;
 			AuditServiceImpl.getInstance().log("EOD_BOD", "EOD_COMPLETED", auditDetail, "SUCCESS");
 
 			this.isSessionOpen = false;
@@ -532,8 +541,14 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			this.pendingTransactionsList.clear();
 			this.pendingChequesCount = 0;
 
+			// Update User Session
 			Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", false);
 			Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
+
+			// Update Application-Wide Scope so Makers & Checkers immediately reflect lock
+			if (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null) {
+			    getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CTS_SESSION_OPEN", false);
+			}
 
 			Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), false));
 			refreshUI();
@@ -542,15 +557,33 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			Clients.showNotification(msg, "info", null, "top_center", 3000);
 
 		} catch (SQLException ex) {
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException rbEx) {
+					rbEx.printStackTrace();
+				}
+			}
 			ex.printStackTrace();
 			AuditServiceImpl.getInstance().log("EOD_BOD", "EOD_FAILED", "EOD execution failed: " + ex.getMessage(), "FAILED");
 			Clients.showNotification("Database error closing EOD: " + ex.getMessage(), "error", null, "top_center", 3000);
+		} finally {
+			if (conn != null) {
+				try {
+					conn.setAutoCommit(true);
+					conn.close();
+				} catch (SQLException closeEx) {
+					closeEx.printStackTrace();
+				}
+			}
 		}
 	}
 
 	private void handleBODFlow() {
+		// Re-verify against DB to eliminate stale state concurrency
+		fetchActiveClearingSession();
 		if (isSessionOpen) {
-			Clients.showNotification("Previous session EOD is not completed. BOD cannot proceed.", "error", null, "top_center", 2500);
+			Clients.showNotification("Active clearing session is still OPEN in database. EOD must be completed first.", "error", null, "top_center", 2500);
 			return;
 		}
 
@@ -559,12 +592,12 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 
 		String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
-
-		// Corrected to prefix match UNPROCESSED_MICR, UNPROCESSED_DATA_ENTRY, and UNPROCESSED_VERIFY
 		String countScanUnprocessed = "SELECT COUNT(*) FROM scan_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
 		String countOutwardUnprocessed = "SELECT COUNT(*) FROM outward_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
 
-		try (Connection conn = DBConnection.getConnection()) {
+		Connection conn = null;
+		try {
+			conn = DBConnection.getConnection();
 			conn.setAutoCommit(false);
 
 			try (PreparedStatement psSession = conn.prepareStatement(insertBodSql)) {
@@ -591,19 +624,19 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
 			String clearingDateStr = nextDate.format(dateFormatter);
 
-//			if (rolledOverScanCheques > 0) {
-//				String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
-//						+ rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
-//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-//				.sendNotification("OUTWARD_MAKER", null, makerMsg);
-//			}
-//
-//			if (rolledOverCheckerCheques > 0) {
-//				String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
-//						+ rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
-//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-//				.sendNotification("OUTWARD_CHECKER", null, checkerMsg);
-//			}
+			if (rolledOverScanCheques > 0) {
+				String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
+						+ rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
+				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+						.sendNotification("OUTWARD_MAKER", null, makerMsg);
+			}
+
+			if (rolledOverCheckerCheques > 0) {
+				String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
+						+ rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
+				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
+						.sendNotification("OUTWARD_CHECKER", null, checkerMsg);
+			}
 
 			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
 					"BOD initialized for date: " + nextDate + " | Unprocessed scan: " + rolledOverScanCheques 
@@ -614,16 +647,41 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			this.selectedAction = "EOD";
 			this.pendingChequesCount = 0;
 
+			// Update User Session
 			Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", true);
 			Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
+
+			// Update Application-Wide Scope
+			if (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null) {
+			    getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CTS_SESSION_OPEN", true);
+			    getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CLEARING_DATE", this.currentClearingDate);
+			}
 
 			Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
 			refreshUI();
 
+			Clients.showNotification("BOD successfully initiated for " + clearingDateStr, "info", null, "top_center", 3000);
+
 		} catch (SQLException ex) {
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException rbEx) {
+					rbEx.printStackTrace();
+				}
+			}
 			ex.printStackTrace();
 			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_FAILED", "Failed to start BOD: " + ex.getMessage(), "FAILED");
 			Clients.showNotification("Database error starting BOD: " + ex.getMessage(), "error", null, "top_center", 3000);
+		} finally {
+			if (conn != null) {
+				try {
+					conn.setAutoCommit(true);
+					conn.close();
+				} catch (SQLException closeEx) {
+					closeEx.printStackTrace();
+				}
+			}
 		}
 	}
 

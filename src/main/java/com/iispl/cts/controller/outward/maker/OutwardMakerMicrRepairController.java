@@ -1,25 +1,31 @@
 package com.iispl.cts.controller.outward.maker;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.MouseEvent;
-import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
+
+import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dto.MicrRepairChequeDTO;
 import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.service.outward.OutwardMakerService;
@@ -115,6 +121,10 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	private static final String STATUS_MICR_REJECTION_PENDING = "MICR_REJECTION_PENDING";
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 	private static final String STATUS_REJECT_REQUESTED = "REJECT_REQUESTED";
+	
+	private static final String STATUS_UNPROCESSED_MICR = "UNPROCESSED_MICR";
+	private static final String STATUS_UNPROCESSED_DATA_ENTRY = "UNPROCESSED_DATA_ENTRY";
+	private static final String STATUS_UNPROCESSED = "UNPROCESSED";
 
 	private boolean showingBackImage = false;
 	private double zoomLevel = 1.0;
@@ -614,19 +624,30 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	}
 
 	private int countProcessedCheques() {
-		if (micrRepairCheques == null) {
-			return 0;
-		}
-		int count = 0;
-		for (MicrRepairChequeDTO cheque : micrRepairCheques) {
-			if (cheque == null) {
-				continue;
-			}
-			if (!isPendingMicrRepair(cheque)) {
-				count++;
-			}
-		}
-		return count;
+	    if (micrRepairCheques == null) {
+	        return 0;
+	    }
+	    int count = 0;
+	    for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+	        if (cheque == null) {
+	            continue;
+	        }
+
+	        String status = cheque.getChequeStatus() != null 
+	                ? cheque.getChequeStatus().trim().toUpperCase() 
+	                : "";
+	        String micr = cheque.getFullMicr();
+
+	        boolean isDoneStatus = STATUS_MICR_REPAIRED.equals(status) 
+	                            || STATUS_MICR_REJECTION_PENDING.equals(status);
+	        boolean hasMask = (micr != null && micr.contains("?"));
+
+	        // Only count as processed if it has been explicitly repaired/rejected and has no '?'
+	        if (isDoneStatus && !hasMask) {
+	            count++;
+	        }
+	    }
+	    return count;
 	}
 
 	private int countPendingCheques() {
@@ -658,10 +679,12 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	}
 
 	private void updateSubmitButton() {
-		if (btnSubmitToDataEntry == null) {
-			return;
-		}
-		btnSubmitToDataEntry.setDisabled(!areAllChequesProcessed());
+	    if (btnSubmitToDataEntry == null) {
+	        return;
+	    }
+	    int total = getTotalCheques();
+	    boolean allDone = (total > 0 && countProcessedCheques() == total);
+	    btnSubmitToDataEntry.setDisabled(!allDone);
 	}
 
 	private boolean areAllChequesProcessed() {
@@ -927,7 +950,13 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		if (cheque == null) {
 			return false;
 		}
-		return STATUS_PENDING_MICR_REPAIR.equalsIgnoreCase(safe(cheque.getChequeStatus()));
+		String status = cheque.getChequeStatus();
+	    if (status == null) {
+	        return false;
+	    }
+	    status = status.trim().toUpperCase();
+	    return STATUS_PENDING_MICR_REPAIR.equals(status) 
+	            || STATUS_UNPROCESSED_MICR.equals(status);
 	}
 	public void onClick$btnRejectRequest(Event event) {
 		System.out.println("========== REQUEST REJECT CLICKED ==========");
@@ -1032,62 +1061,109 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 	}
 	public void onClick$btnSubmitToDataEntry(Event event) {
-		System.out.println("========== SUBMIT BUTTON CLICKED ==========");
-		if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
-			showError("No MICR repair cheques available.");
-			return;
-		}
-		if (!areAllChequesProcessed()) {
-			updateSubmitButton();
-			showWarning("Please process all MICR repair cheques " + "before submitting.");
-			return;
-		}
-		for (MicrRepairChequeDTO cheque : micrRepairCheques) {
-			if (cheque == null) {
-				continue;
-			}
-			String status = safe(cheque.getChequeStatus());
-			if (STATUS_MICR_REJECTION_PENDING.equalsIgnoreCase(status)) {
-				cheque.setChequeStatus(STATUS_MICR_REJECTED);
-			} else {
-				cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
-			}
-		}
-		try {
-			if ("SCAN".equals(source)) {
-				outwardMakerService.submitScanMicrRepair(micrRepairCheques);
-			} else {
-				outwardMakerService.submitOutwardMicrRepair(micrRepairCheques);
-			}
-			btnSubmitToDataEntry.setDisabled(true);
-			btnSaveAndNext.setDisabled(true);
-			btnRejectRequest.setDisabled(true);
-			Clients.showNotification("MICR repair submitted successfully.", Clients.NOTIFICATION_TYPE_INFO, null,
-					"top_center", 2500);
-			redirectToMicrRepairView();
-		} catch (Exception e) {
-			e.printStackTrace();
-			for (MicrRepairChequeDTO cheque : micrRepairCheques) {
-				if (cheque == null) {
-					continue;
-				}
-				String status = safe(cheque.getChequeStatus());
-				if (STATUS_PENDING_DATA_ENTRY.equalsIgnoreCase(status)) {
-					cheque.setChequeStatus(STATUS_MICR_REPAIRED);
-				} else if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
-					cheque.setChequeStatus(STATUS_MICR_REJECTION_PENDING);
-				}
-			}
-			updateProgress();
-			updateSubmitButton();
-			updateActionButtons();
-			showError("Failed to submit MICR repair: " + safe(e.getMessage()));
-		}
+	    System.out.println("========== SUBMIT BUTTON CLICKED ==========");
+	    if (micrRepairCheques == null || micrRepairCheques.isEmpty()) {
+	        showError("No MICR repair cheques available.");
+	        return;
+	    }
+	    if (!areAllChequesProcessed()) {
+	        updateSubmitButton();
+	        showWarning("Please process all MICR repair cheques before submitting.");
+	        return;
+	    }
+
+	    // 1. Mark in-memory repaired cheques as PENDING_DATA_ENTRY
+	    for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+	        if (cheque == null) {
+	            continue;
+	        }
+	        String status = safe(cheque.getChequeStatus());
+	        if (STATUS_MICR_REJECTION_PENDING.equalsIgnoreCase(status)) {
+	            cheque.setChequeStatus(STATUS_MICR_REJECTED);
+	        } else {
+	            cheque.setChequeStatus(STATUS_PENDING_DATA_ENTRY);
+	        }
+	    }
+
+	    try {
+	        // 2. Submit the 4 repaired cheques via existing service
+	        if ("SCAN".equals(source)) {
+	            outwardMakerService.submitScanMicrRepair(micrRepairCheques);
+
+	            // 3. Promote the remaining 11 UNPROCESSED_DATA_ENTRY cheques in scan_cheque to PENDING_DATA_ENTRY
+	            promoteUnprocessedDataEntryCheques(batchId);
+	        } else {
+	            outwardMakerService.submitOutwardMicrRepair(micrRepairCheques);
+	        }
+
+	        btnSubmitToDataEntry.setDisabled(true);
+	        btnSaveAndNext.setDisabled(true);
+	        btnRejectRequest.setDisabled(true);
+
+	        Clients.showNotification("MICR repair submitted successfully. Moving to Data Entry.", 
+	                Clients.NOTIFICATION_TYPE_INFO, null, "top_center", 2000);
+
+	        // 4. Route directly to Data Entry Workbench
+	        redirectToDataEntryView(batchId);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        for (MicrRepairChequeDTO cheque : micrRepairCheques) {
+	            if (cheque == null) {
+	                continue;
+	            }
+	            String status = safe(cheque.getChequeStatus());
+	            if (STATUS_PENDING_DATA_ENTRY.equalsIgnoreCase(status)) {
+	                cheque.setChequeStatus(STATUS_MICR_REPAIRED);
+	            } else if (STATUS_MICR_REJECTED.equalsIgnoreCase(status)) {
+	                cheque.setChequeStatus(STATUS_MICR_REJECTION_PENDING);
+	            }
+	        }
+	        updateProgress();
+	        updateSubmitButton();
+	        updateActionButtons();
+	        showError("Failed to submit MICR repair: " + safe(e.getMessage()));
+	    }
 	}
-	public void onClick$btnBackToList(Event event) {
-		System.out.println("========== BACK TO LIST CLICKED ==========");
-		redirectToMicrRepairView();
+	private void promoteUnprocessedDataEntryCheques(String batchIdStr) {
+		// TODO Auto-generated method stub
+		if (batchIdStr == null || batchIdStr.trim().isEmpty()) {
+	        return;
+	    }
+	    String sql = "UPDATE scan_cheque "
+	               + "SET cheque_status = '" + STATUS_PENDING_DATA_ENTRY + "' "
+	               + "WHERE (scanned_batch_id = ? OR scanned_batch_id = ?) "
+	               + "  AND UPPER(TRIM(cheque_status)) = '" + STATUS_UNPROCESSED_DATA_ENTRY + "'";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setString(1, batchIdStr.trim());
+	        ps.setString(2, batchIdStr.replace("BAT", ""));
+	        int promotedCount = ps.executeUpdate();
+	        System.out.println("Promoted " + promotedCount + " cheques from UNPROCESSED_DATA_ENTRY to PENDING_DATA_ENTRY");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+		
 	}
+	private void redirectToDataEntryView(String batchIdStr) {
+	    Sessions.getCurrent().setAttribute("SELECTED_SCAN_BATCH_ID", batchIdStr);
+	    Sessions.getCurrent().setAttribute("CURRENT_BATCH_ID", batchIdStr);
+
+	    Component root = (getPage() != null) ? getPage().getFirstRoot() 
+	            : Executions.getCurrent().getDesktop().getFirstPage().getFirstRoot();
+	    Component mainContentArea = (root != null) ? root.getFellowIfAny("mainContentArea", true) : null;
+
+	    if (mainContentArea instanceof Include) {
+	        Include include = (Include) mainContentArea;
+	        include.setAttribute("DATA_ENTRY_BATCH_ID", batchIdStr);
+	        include.setSrc(null);
+	        include.setSrc("/outward/maker/data-entry.zul");
+	    } else {
+	        Executions.sendRedirect("/outward/maker/data-entry.zul?batchId=" + batchIdStr);
+	    }
+	}
+
 	private void redirectToMicrRepairView() {
 		Component root = outwardMicrRepairRoot.getDesktop().getFirstPage().getFirstRoot();
 		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);

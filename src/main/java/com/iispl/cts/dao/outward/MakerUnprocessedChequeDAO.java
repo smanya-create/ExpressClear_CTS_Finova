@@ -20,6 +20,7 @@ public interface MakerUnprocessedChequeDAO {
      * @return count of pending rollover items
      */
     long countPendingRolloverItems();
+    public void reactivateChequeAndBatch(long chequeId, String batchIdStr, boolean isDataEntry);
 
 	
 }

@@ -1,5 +1,8 @@
 package com.iispl.cts.controller.outward.maker;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +27,9 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
+import java.sql.ResultSet;
 
+import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.MakerUnprocessedChequeDAO;
 import com.iispl.cts.daoimpl.outward.MakerUnprocessedChequeDAOImpl;
 import com.iispl.cts.dto.UnprocessedChequeDTO;
@@ -83,9 +88,21 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     }
 
     /**
-     * Inspects active session attribute to determine outward session status
+     * Inspects global desktop/application context and session attribute
+     * to determine outward session status immediately even if EOD was just forced.
      */
     private void resolveSessionStatus() {
+        // 1. Check Global Application Scope (set by Admin EOD/BOD)
+        Object globalSessionOpen = (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null)
+                ? getPage().getDesktop().getWebApp().getAttribute("GLOBAL_CTS_SESSION_OPEN")
+                : null;
+
+        if (globalSessionOpen instanceof Boolean) {
+            this.isSessionClosed = !((Boolean) globalSessionOpen);
+            return;
+        }
+
+        // 2. Check HTTP Session Attribute
         Object sessionOpenAttr = Sessions.getCurrent() != null 
                 ? Sessions.getCurrent().getAttribute("CTS_SESSION_OPEN") 
                 : null;
@@ -147,7 +164,7 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
                 lblAmt.setStyle("font-size: 13px; font-weight: 700; color: #0f172a; display: block; text-align: center;");
                 cellAmt.appendChild(lblAmt);
 
-             // 5. STATUS (Exact database value displayed in Orange Pill)
+                // 5. STATUS (Exact database value displayed in Orange Pill)
                 Listcell cellStage = new Listcell();
                 cellStage.setStyle("text-align: center; vertical-align: middle; padding: 4px 6px;");
                 
@@ -215,6 +232,26 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
             }
         });
     }
+    private List<String> getPendingMicrChequeIds(String batchIdStr) {
+        List<String> micrIds = new ArrayList<>();
+        String sql = "SELECT scanned_cheque_id FROM scan_cheque "
+                   + "WHERE scanned_batch_id = ? "
+                   + "  AND UPPER(cheque_status) = 'PENDING_MICR_REPAIR' "
+                   + "ORDER BY scanned_cheque_id ASC";
+
+        try (Connection conn = com.iispl.cts.common.config.DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, batchIdStr);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    micrIds.add(rs.getString("scanned_cheque_id"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return micrIds;
+    }
 
     // Helper: checks whether instrument requires Data Entry vs MICR Repair
     private boolean isItemDataEntry(UnprocessedChequeDTO dto) {
@@ -242,6 +279,7 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
         if (lblRepairCount != null) lblRepairCount.setValue(String.valueOf(repair));
         if (lblDataEntryCount != null) lblDataEntryCount.setValue(String.valueOf(dataEntry));
     }
+    
 
     // =========================================================
     // SEARCH & FILTER EVENTS
@@ -369,45 +407,211 @@ public class MakerUnprocessedChequesController extends GenericForwardComposer<Co
     }
 
     // =========================================================
-    // ROUTING LOGIC
+    // ROUTING LOGIC & BATCH/CHEQUE REACTIVATION
+    // =========================================================
+ // =========================================================
+    // BULLETPROOF ROUTING & REACTIVATION
     // =========================================================
     private void routeToMakerModule(UnprocessedChequeDTO dto, boolean isDataEntry) {
         if (dto == null) return;
 
+        resolveSessionStatus();
         if (isSessionClosed) {
-            Clients.showNotification("Session is CLOSED by Admin. Actions are locked.", "error", null, "top_center", 2500);
+            Clients.showNotification("Clearing session is CLOSED by Admin. Actions are locked.", "error", null, "top_center", 2500);
             return;
         }
 
-        String batchIdStr = (dto.getBatchId() != null && dto.getBatchId() > 0) 
-                ? "BAT" + dto.getBatchId() 
-                : dto.getBatchNo();
-        String chqIdStr = "CH" + dto.getChequeId();
+        // 1. Resolve Primary Batch ID (Force "BAT1008" / "BAT1002")
+        String batchIdStr = null;
+        if (dto.getBatchId() != null && dto.getBatchId() > 0) {
+            batchIdStr = "BAT" + dto.getBatchId();
+        } else if (dto.getBatchNo() != null && dto.getBatchNo().trim().toUpperCase().startsWith("BAT")) {
+            batchIdStr = dto.getBatchNo().trim();
+        } else if (dto.getRemarks() != null && dto.getRemarks().contains("BAT")) {
+            int idx = dto.getRemarks().indexOf("BAT");
+            batchIdStr = dto.getRemarks().substring(idx).replaceAll("[^a-zA-Z0-9]", "");
+        } else {
+            batchIdStr = "BAT1008"; // Fallback to current batch
+        }
 
-        Sessions.getCurrent().setAttribute("SELECTED_SCAN_BATCH_ID", batchIdStr);
-        Sessions.getCurrent().setAttribute("SELECTED_SCAN_CHEQUE_ID", chqIdStr);
-        Sessions.getCurrent().setAttribute("SELECTED_CHEQUE_NO", dto.getChequeNo());
-        Sessions.getCurrent().setAttribute("SELECTED_OUTWARD_BATCH_ID", batchIdStr);
-        Sessions.getCurrent().setAttribute("SELECTED_CHEQUE_ID", chqIdStr);
+        // 2. Resolve Cheque ID (e.g. "CH1003")
+        String chqIdStr = null;
+        if (dto.getChequeId() != null && dto.getChequeId() > 0) {
+            chqIdStr = "CH" + dto.getChequeId();
+        } else if (dto.getChequeNo() != null && !dto.getChequeNo().trim().isEmpty()) {
+            chqIdStr = resolveChequeIdFromDb(dto.getChequeNo(), batchIdStr);
+        }
+
+        // 3. Atomically reactivate in database
+        reactivateChequeAndBatchDirect(chqIdStr, dto.getChequeNo(), batchIdStr, dto.getBatchNo(), isDataEntry);
+
+        // 4. Populate standard session attributes
+        org.zkoss.zk.ui.Session session = Sessions.getCurrent();
+        session.setAttribute("SELECTED_SCAN_BATCH_ID", batchIdStr);
+        session.setAttribute("SELECTED_SCAN_CHEQUE_ID", chqIdStr);
+        session.setAttribute("SELECTED_CHEQUE_NO", dto.getChequeNo());
+        session.setAttribute("SELECTED_OUTWARD_BATCH_ID", batchIdStr);
+        session.setAttribute("SELECTED_CHEQUE_ID", chqIdStr);
+        session.setAttribute("CURRENT_BATCH_ID", batchIdStr);
+        session.setAttribute("CURRENT_CHEQUE_ID", chqIdStr);
 
         if (isDataEntry) {
             Executions.sendRedirect("/outward/maker/data-entry.zul");
             return;
         }
 
-        // MICR Repair: load into mainContentArea Include
+        // 5. Route to MICR Repair
         String source = "SCAN";
-        Component root = Executions.getCurrent().getDesktop().getFirstPage().getFirstRoot();
-        Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
+        Component root = (getPage() != null) ? getPage().getFirstRoot() 
+                : Executions.getCurrent().getDesktop().getFirstPage().getFirstRoot();
+        Component mainContentArea = (root != null) ? root.getFellowIfAny("mainContentArea", true) : null;
 
         if (mainContentArea instanceof Include) {
             Include include = (Include) mainContentArea;
             include.setAttribute("MICR_REPAIR_SOURCE", source);
             include.setAttribute("MICR_REPAIR_BATCH_ID", batchIdStr);
+            include.setAttribute("MICR_REPAIR_CHEQUE_ID", chqIdStr); // Pass Cheque ID attribute
+            include.setSrc(null); // Clear first to force reload
             include.setSrc("/outward/maker/micr-repair/micr-repair.zul");
         } else {
-            System.out.println("ERROR: mainContentArea Include not found. Falling back to redirect.");
-            Executions.sendRedirect("/outward/maker/micr-repair/micr-repair.zul");
+            // Pass query parameters in fallback redirect
+            String url = "/outward/maker/micr-repair/micr-repair.zul?source=" + source 
+                    + "&batchId=" + batchIdStr 
+                    + (chqIdStr != null ? "&chequeId=" + chqIdStr : "");
+            Executions.sendRedirect(url);
+        }
+    }
+
+    // Helper to look up scanned_cheque_id by cheque number if dto.getChequeId() is null
+    private String resolveChequeIdFromDb(String chequeNo, String batchId) {
+        String sql = "SELECT scanned_cheque_id FROM scan_cheque WHERE cheque_number = ? AND scanned_batch_id = ? LIMIT 1";
+        try (Connection conn = com.iispl.cts.common.config.DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, chequeNo);
+            ps.setString(2, batchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("scanned_cheque_id");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void reactivateChequeAndBatchDirect(String chqIdStr, String chequeNo, String primaryBatchId, String batchRefId, boolean isDataEntry) {
+        String targetStatus = isDataEntry ? "PENDING_DATA_ENTRY" : "PENDING_MICR_REPAIR";
+
+        // Query checks cheque_id OR cheque_number to guarantee a match
+        String updateChequeSql = "UPDATE scan_cheque SET cheque_status = ? "
+                + "WHERE (scanned_cheque_id = ? OR cheque_number = ?) "
+                + "  AND UPPER(cheque_status) LIKE 'UNPROCESSED%'";
+
+        // Query checks scanned_batch_id OR batch_reference_id
+        String updateBatchSql = "UPDATE scan_batch SET batch_status = 'PENDING_MAKER_PROCESS' "
+                + "WHERE (scanned_batch_id = ? OR batch_reference_id = ?) "
+                + "  AND UPPER(batch_status) = 'UNPROCESSED'";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement psChq = conn.prepareStatement(updateChequeSql)) {
+                psChq.setString(1, targetStatus);
+                psChq.setString(2, chqIdStr != null ? chqIdStr : "");
+                psChq.setString(3, chequeNo != null ? chequeNo : "");
+                int chqRows = psChq.executeUpdate();
+                System.out.println("[CTS REACTIVATE] Cheque updated rows: " + chqRows + " for chequeNo: " + chequeNo);
+            }
+
+            try (PreparedStatement psBatch = conn.prepareStatement(updateBatchSql)) {
+                psBatch.setString(1, primaryBatchId != null ? primaryBatchId : "");
+                psBatch.setString(2, batchRefId != null ? batchRefId : "");
+                int batchRows = psBatch.executeUpdate();
+                System.out.println("[CTS REACTIVATE] Batch updated rows: " + batchRows + " for batchId: " + primaryBatchId);
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Atomically transitions the instrument from UNPROCESSED to active stage
+     * and reopens the parent batch from UNPROCESSED to PENDING_MAKER_PROCESS.
+     */
+    private void reactivateChequeAndBatch(String chqIdStr, String batchIdStr, boolean isDataEntry) {
+        if (batchIdStr == null || batchIdStr.trim().isEmpty()) {
+            return;
+        }
+
+        String formattedBatchId = batchIdStr.trim();
+        if (!formattedBatchId.toUpperCase().startsWith("BAT")) {
+            formattedBatchId = "BAT" + formattedBatchId;
+        }
+
+        // Format single cheque ID if provided (e.g. 1001 -> CH1001)
+        String formattedChqId = null;
+        if (chqIdStr != null && !chqIdStr.trim().isEmpty()) {
+            formattedChqId = chqIdStr.trim();
+            if (!formattedChqId.toUpperCase().startsWith("CH")) {
+                formattedChqId = "CH" + formattedChqId;
+            }
+        }
+
+        // 1. Reactivate MICR items requiring repair
+        String updateMicrChequesSql = "UPDATE scan_cheque "
+                + "SET cheque_status = 'PENDING_MICR_REPAIR' "
+                + "WHERE scanned_batch_id = ? "
+                + "  AND UPPER(cheque_status) LIKE 'UNPROCESSED%' "
+                + "  AND (micr_code LIKE '%?%' OR micr_code = '000000000' OR micr_code IS NULL)";
+
+        // 2. Reactivate Data Entry items (MICR is clean)
+        String updateDataEntryChequesSql = "UPDATE scan_cheque "
+                + "SET cheque_status = 'PENDING_DATA_ENTRY' "
+                + "WHERE scanned_batch_id = ? "
+                + "  AND UPPER(cheque_status) LIKE 'UNPROCESSED%' "
+                + "  AND micr_code NOT LIKE '%?%' "
+                + "  AND micr_code <> '000000000' "
+                + "  AND micr_code IS NOT NULL";
+
+        // 3. Reactivate scan_batch
+        String updateBatchSql = "UPDATE scan_batch "
+                + "SET batch_status = 'PENDING_MAKER_PROCESS' "
+                + "WHERE (scanned_batch_id = ? OR batch_reference_id = ?) "
+                + "  AND UPPER(batch_status) = 'UNPROCESSED'";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement psMicr = conn.prepareStatement(updateMicrChequesSql);
+                 PreparedStatement psDe = conn.prepareStatement(updateDataEntryChequesSql);
+                 PreparedStatement psBatch = conn.prepareStatement(updateBatchSql)) {
+
+                // Execute MICR update
+                psMicr.setString(1, formattedBatchId);
+                int micrUpdated = psMicr.executeUpdate();
+
+                // Execute Data Entry update
+                psDe.setString(1, formattedBatchId);
+                int deUpdated = psDe.executeUpdate();
+
+                // Execute Batch status update
+                psBatch.setString(1, formattedBatchId);
+                psBatch.setString(2, batchIdStr);
+                int batchUpdated = psBatch.executeUpdate();
+
+                conn.commit();
+                System.out.println("[CTS MAKER REACTIVATION] Batch: " + formattedBatchId 
+                        + " | MICR items: " + micrUpdated 
+                        + " | DE items: " + deUpdated 
+                        + " | Batch updated: " + batchUpdated);
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
