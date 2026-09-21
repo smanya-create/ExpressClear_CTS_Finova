@@ -97,7 +97,7 @@ import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
 public class InwardBatchController extends SelectorComposer<Window> {
 
-	private static final long serialVersionUID = 1L;
+	
 
 	private static final String PARSED_BATCH_SESSION_PREFIX = "CTS_PARSED_BATCH_";
 

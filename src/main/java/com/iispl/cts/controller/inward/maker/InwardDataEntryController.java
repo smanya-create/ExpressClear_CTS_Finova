@@ -48,8 +48,7 @@ import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
 public class InwardDataEntryController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
-
+	
 	private final InwardBatchService batchService = new InwardBatchServiceImpl();
 	private final InwardChequeService chequeService = new InwardChequeServiceImpl();
 	private final InwardSendBackRequestService sendBackRequestService = new InwardSendBackRequestServiceImpl();

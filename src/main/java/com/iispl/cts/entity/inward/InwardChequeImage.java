@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 
 public class InwardChequeImage implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    
 
     private String inwardImageId;
     private String inwardChequeId;
