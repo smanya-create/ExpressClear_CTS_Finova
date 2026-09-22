@@ -138,16 +138,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		
 		super.doAfterCompose(comp);
 
-		if (btnConfirmCompletionModal != null) {
-			btnConfirmCompletionModal.addEventListener("onClick", event -> executeSubmitToChecker());
-		}
-		if (btnCancelCompletionModal != null) {
-			btnCancelCompletionModal.addEventListener("onClick", event -> {
-				if (winCompletionConfirmModal != null) {
-					winCompletionConfirmModal.setVisible(false);
-				}
-			});
-		}
 
 		String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_INWARD_BATCH_ID");
 		if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
