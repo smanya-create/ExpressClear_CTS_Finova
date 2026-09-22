@@ -192,7 +192,7 @@
 					<div sclass="cts-form-field">
 						<label value="City Code *"
 							sclass="cts-field-lbl" />
-						<textbox id="txtCityCode" readonly="true"
+						<textbox id="txtCityCode" maxlength="3" readonly="true"
 							sclass="cts-input-text ocr-field" />
 					</div>
 				</div>
@@ -201,13 +201,13 @@
 					<div sclass="cts-form-field">
 						<label value="Bank Code *"
 							sclass="cts-field-lbl" />
-						<textbox id="txtBankCode" readonly="true"
+						<textbox id="txtBankCode" maxlength="3" readonly="true"
 							sclass="cts-input-text ocr-field" />
 					</div>
 					<div sclass="cts-form-field">
 						<label value="Branch Code *"
 							sclass="cts-field-lbl" />
-						<textbox id="txtBranchCode" readonly="true"
+						<textbox id="txtBranchCode" maxlength="3" readonly="true"
 							sclass="cts-input-text ocr-field" />
 					</div>
 				</div>
