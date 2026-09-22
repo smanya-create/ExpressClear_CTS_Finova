@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -469,8 +470,14 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		if (txtChequeNumber != null)
 			txtChequeNumber.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "");
-		if (txtChequeDate != null)
-			txtChequeDate.setValue(item.getChequeDate() != null ? item.getChequeDate().toString() : "");
+		// WITH THIS:
+		if (txtChequeDate != null) {
+		    if (item.getChequeDate() != null) {
+		        txtChequeDate.setValue(new SimpleDateFormat("dd-MM-yyyy").format(item.getChequeDate()));
+		    } else {
+		        txtChequeDate.setValue("");
+		    }
+		}
 		if (txtAmount != null)
 			txtAmount.setValue(item.getChequeAmount() != null ? "₹ " + item.getChequeAmount().toPlainString() : "");
 		if (txtAmountInWords != null)
@@ -641,10 +648,16 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		if (txtChequeDate != null && !txtChequeDate.getValue().trim().isEmpty()) {
-			try {
-				current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
-			} catch (Exception ignored) {
-			}
+		    String val = txtChequeDate.getValue().trim();
+		    try {
+		        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		        LocalDate parsed = LocalDate.parse(val, dtf);
+		        current.setChequeDate(Date.valueOf(parsed));
+		    } catch (Exception e) {
+		        try {
+		            current.setChequeDate(Date.valueOf(val));
+		        } catch (Exception ignored) {}
+		    }
 		}
 
 		chequeService.updateChequeDetails(current);
@@ -773,7 +786,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String rawAmount = txtAmount.getValue().replace("₹", "").replace(",", "").trim();
 		current.setChequeAmount(new BigDecimal(rawAmount));
-		current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
+		
+
+	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	    LocalDate parsedDate = LocalDate.parse(txtChequeDate.getValue().trim(), dtf);
+	    current.setChequeDate(Date.valueOf(parsedDate));
+		
 
 		boolean isReworkItem = isSentBackStatus(current.getChequeStatus())
 				|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(current.getChequeStatus())
@@ -985,11 +1003,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String dtStr = txtChequeDate != null ? txtChequeDate.getValue().trim() : "";
 		if (dtStr.isEmpty())
-			return "Cheque Date is mandatory.";
+		    return "Cheque Date is mandatory.";
 		try {
-			LocalDate.parse(dtStr);
+		    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		    LocalDate.parse(dtStr, dtf);
 		} catch (Exception e) {
-			return "Invalid Cheque Date format. Expected format: YYYY-MM-DD.";
+		    return "Invalid Cheque Date format. Expected format: DD-MM-YYYY.";
 		}
 
 		String amtStr = txtAmount != null ? txtAmount.getValue().replace("₹", "").replace(",", "").trim() : "";
