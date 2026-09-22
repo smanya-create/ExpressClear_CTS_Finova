@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
@@ -24,6 +25,7 @@ import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Groupbox;
 import org.zkoss.zul.Image;
+import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
@@ -971,7 +973,31 @@ public class InwardMicrRepairControllerr extends GenericForwardComposer<Componen
 	}
 
 	public void onClick$btnBackToList() {
-		Executions.sendRedirect("/inward/maker/index.zul?page=micr-repair-queue");
+		Sessions.getCurrent().removeAttribute("MICR_REPAIR_BATCH_ID");
+		Sessions.getCurrent().removeAttribute("TARGET_CHEQUE_ID");
+		Sessions.getCurrent().removeAttribute("MICR_REPAIR_CHEQUE_ID");
+
+		Include mainInclude = null;
+		try {
+			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
+		} catch (Exception ignored) {}
+
+		if (mainInclude == null && self != null && self.getDesktop() != null) {
+			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+				Component comp = p.getFellowIfAny("mainContentArea", true);
+				if (comp instanceof Include) {
+					mainInclude = (Include) comp;
+					break;
+				}
+			}
+		}
+
+		if (mainInclude != null) {
+			mainInclude.setSrc(null);
+			mainInclude.setSrc("/inward/maker/micr-repair/micr-repair-queue.zul");
+		} else {
+			Executions.sendRedirect("/inward/maker/index.zul?page=micr-repair-queue");
+		}
 	}
 
 	private String loadOcrSortCode(InwardCheque cheque) {

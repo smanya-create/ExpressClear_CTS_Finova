@@ -1101,26 +1101,31 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	public void onClick$btnBackToList() {
 		Sessions.getCurrent().removeAttribute("ACTIVE_INWARD_BATCH_ID");
 
+		// Locate the Sidebar controller and trigger native navigation
+		if (self != null && self.getDesktop() != null) {
+			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+				Component sidebar = p.getFellowIfAny("sidebarComponent", true);
+				if (sidebar == null) {
+					sidebar = p.getFellowIfAny("divInwardMakerMenu", true);
+				}
+				if (sidebar != null && sidebar.getAttribute("$composer") instanceof com.iispl.cts.controller.common.SidebarController) {
+					com.iispl.cts.controller.common.SidebarController sc = 
+						(com.iispl.cts.controller.common.SidebarController) sidebar.getAttribute("$composer");
+					sc.navToInwardDataEntry();
+					return;
+				}
+			}
+		}
+
+		// Fallback: in-place include swap + tab styling
 		Include mainInclude = null;
 		try {
 			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
 		} catch (Exception ignored) {}
 
-		if (mainInclude == null && self != null && self.getDesktop() != null) {
-			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
-				Component comp = p.getFellowIfAny("mainContentArea", true);
-				if (comp instanceof Include) {
-					mainInclude = (Include) comp;
-					break;
-				}
-			}
-		}
-
 		if (mainInclude != null) {
 			mainInclude.invalidate();
 			mainInclude.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
-		} else {
-			Executions.sendRedirect("/inward/maker/index.zul?page=data-entry-batches");
 		}
 	}
 	
