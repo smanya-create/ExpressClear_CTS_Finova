@@ -2,6 +2,8 @@ package com.iispl.cts.dao.inward;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+
 import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
 import com.iispl.cts.entity.inward.CbsValidationResult;
@@ -52,5 +54,13 @@ public interface InwardChequeDAO {
 
 	boolean saveSendBackRequest(String inwardChequeId, String inwardBatchId, String reasonId, String remarks,
 			String sentBackBy);
+	
+	
+	
+	// Added for data entry controller requirement
+	boolean isReworkRejectionRequest(String inwardChequeId, String inwardBatchId);
+	boolean isDataEntryRejectionRequest(String inwardChequeId);
+	Map<String, String> getMakerRejectionAlertDetails(String inwardChequeId);
+	boolean saveRejectionRequest(String inwardChequeId, String inwardBatchId, String reasonId, String remarks, String requestedBy, String requestStage);
 
 }
