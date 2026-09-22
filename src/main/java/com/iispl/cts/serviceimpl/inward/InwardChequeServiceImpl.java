@@ -117,5 +117,29 @@ public class InwardChequeServiceImpl implements InwardChequeService {
 
 		return inwardChequeDAO.saveSendBackRequest(inwardChequeId, inwardBatchId, reasonId, remarks, sentBackBy);
 	}
+	
+	
+	
+	// Added for data entry controller requirement
+	@Override
+    public boolean isReworkRejectionRequest(String inwardChequeId, String inwardBatchId) {
+        return inwardChequeDAO.isReworkRejectionRequest(inwardChequeId, inwardBatchId);
+    }
+
+    @Override
+    public boolean isDataEntryRejectionRequest(String inwardChequeId) {
+        return inwardChequeDAO.isDataEntryRejectionRequest(inwardChequeId);
+    }
+
+    @Override
+    public java.util.Map<String, String> getMakerRejectionAlertDetails(String inwardChequeId) {
+        return inwardChequeDAO.getMakerRejectionAlertDetails(inwardChequeId);
+    }
+
+    @Override
+    public boolean saveRejectionRequest(String inwardChequeId, String inwardBatchId, String reasonId, 
+                                        String remarks, String requestedBy, String requestStage) {
+        return inwardChequeDAO.saveRejectionRequest(inwardChequeId, inwardBatchId, reasonId, remarks, requestedBy, requestStage);
+    }
 
 }

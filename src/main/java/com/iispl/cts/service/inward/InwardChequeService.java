@@ -2,6 +2,7 @@ package com.iispl.cts.service.inward;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
@@ -47,5 +48,13 @@ public interface InwardChequeService {
 
 	boolean saveSendBackRequest(String inwardChequeId, String inwardBatchId, String reasonId, String remarks,
 			String sentBackBy);
+	
+	
+	
+	// Added for data entry controller requirement
+	boolean isReworkRejectionRequest(String inwardChequeId, String inwardBatchId);
+	boolean isDataEntryRejectionRequest(String inwardChequeId);
+	Map<String, String> getMakerRejectionAlertDetails(String inwardChequeId);
+	boolean saveRejectionRequest(String inwardChequeId, String inwardBatchId, String reasonId, String remarks, String requestedBy, String requestStage);
 
 }
