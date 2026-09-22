@@ -109,6 +109,22 @@ public class SidebarController extends GenericForwardComposer<Component> {
 				lblNavCategory.setValue("NAVIGATION");
 			if (divInwardMakerMenu != null)
 				divInwardMakerMenu.setVisible(true);
+
+			// Automatically highlight active tab based on page parameter
+			String pageParam = Executions.getCurrent().getParameter("page");
+			if ("data-entry".equals(pageParam) || "data-entry-queue".equals(pageParam)) {
+				clearInwardActiveTabs();
+				if (navInwardDataEntry != null) navInwardDataEntry.setSclass("nav-item active");
+			} else if ("micr-repair".equals(pageParam) || "micr-repair-queue".equals(pageParam)) {
+				clearInwardActiveTabs();
+				if (navInwardMicr != null) navInwardMicr.setSclass("nav-item active");
+			} else if ("batch-intake".equals(pageParam)) {
+				clearInwardActiveTabs();
+				if (navBatchIntake != null) navBatchIntake.setSclass("nav-item active");
+			} else {
+				clearInwardActiveTabs();
+				if (navInwardDashboard != null) navInwardDashboard.setSclass("nav-item active");
+			}
 			break;
 
 		case "INWARD_CHECKER":
