@@ -547,3 +547,15 @@
     pointer-events: none !important;
     box-shadow: none !important;
 }
+
+
+
+/* Red highlight on error/mismatch fields */
+.z-textbox.field-error-red,
+.cts-input-text.field-error-red {
+    border: 2px solid #dc2626 !important;
+    background-color: #fef2f2 !important;
+    color: #991b1b !important;
+    font-weight: 700 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
