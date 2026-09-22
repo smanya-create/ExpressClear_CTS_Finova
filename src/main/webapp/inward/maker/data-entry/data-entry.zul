@@ -122,7 +122,7 @@
 				<div sclass="cts-form-row">
 					<div sclass="cts-form-field">
 						<label value="Cheque Number" sclass="cts-field-lbl" />
-						<textbox id="txtChequeNumber" sclass="cts-input-text" width="100%" />
+						<textbox id="txtChequeNumber" maxlength="6" constraint="/[0-9]{0,6}/: Cheque Number must contain digits only" sclass="cts-input-text" width="100%" />
 					</div>
 					<div sclass="cts-form-field">
 						<label value="Cheque Date" sclass="cts-field-lbl" />
