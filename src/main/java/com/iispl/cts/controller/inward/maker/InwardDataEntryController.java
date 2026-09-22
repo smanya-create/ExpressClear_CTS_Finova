@@ -1,5 +1,6 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,6 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Path;
@@ -470,7 +476,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		if (txtChequeNumber != null)
 			txtChequeNumber.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "");
-		// WITH THIS:
+
 		if (txtChequeDate != null) {
 		    if (item.getChequeDate() != null) {
 		        txtChequeDate.setValue(new SimpleDateFormat("dd-MM-yyyy").format(item.getChequeDate()));
@@ -490,9 +496,190 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtPayeeName.setValue(item.getPayeeName() != null ? item.getPayeeName() : "");
 		if (txtEntryRemark != null)
 			txtEntryRemark.setValue("");
+		
+		// Highlight OCR discrepancies in red (normal intake only)
+				highlightOcrMismatches(item);
 
 		updateNavigationState();
 		updateProgressBar();
+	}
+	
+	private void highlightOcrMismatches(InwardCheque cheque) {
+		resetFieldMismatchStyles();
+		if (cheque == null)
+			return;
+
+		String status = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim().toUpperCase() : "";
+		boolean isRejected = InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status);
+		boolean isCheckerSentBack = isSentBackStatus(status) 
+				|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status) 
+				|| this.isReworkBatch;
+
+		// Skip highlighting if rejection was requested or if in sent-back rework flow
+		if (isRejected || isCheckerSentBack) {
+			return;
+		}
+
+		OcrDetectedData ocr = loadOcrChequeData(cheque);
+		if (ocr == null) {
+			return;
+		}
+
+		// 1. Payee Name
+		String npciPayee = safe(cheque.getPayeeName()).toUpperCase();
+		String ocrPayee = safe(ocr.detectedPayee).toUpperCase();
+		if (!npciPayee.isEmpty() && !ocrPayee.isEmpty() && !npciPayee.equals(ocrPayee)) {
+			if (txtPayeeName != null) {
+				txtPayeeName.setSclass("cts-input-text field-error-red");
+				txtPayeeName.setTooltiptext("Discrepancy Detected!\nNPCI File: " + cheque.getPayeeName()
+						+ "\nImage OCR: " + ocr.detectedPayee);
+			}
+		}
+
+		// 2. Amount
+		BigDecimal npciAmt = cheque.getChequeAmount();
+		if (npciAmt != null && ocr.detectedAmount != null && !ocr.detectedAmount.trim().isEmpty()) {
+			try {
+				BigDecimal ocrAmt = new BigDecimal(ocr.detectedAmount.trim());
+				if (npciAmt.compareTo(ocrAmt) != 0) {
+					if (txtAmount != null) {
+						txtAmount.setSclass("cts-input-text field-error-red");
+						txtAmount.setTooltiptext("Discrepancy Detected!\nNPCI File: " + npciAmt + "\nImage OCR: " + ocrAmt);
+					}
+				}
+			} catch (Exception ignored) {}
+		}
+
+		// 3. Drawee Account Number
+		String npciAcc = safe(cheque.getDraweeAccountNumber());
+		String ocrAcc = safe(ocr.detectedDrawerAccount);
+		if (!npciAcc.isEmpty() && !ocrAcc.isEmpty() && !npciAcc.equals(ocrAcc)) {
+			if (txtDraweeAccount != null) {
+				txtDraweeAccount.setSclass("cts-input-text field-error-red");
+				txtDraweeAccount.setTooltiptext("Discrepancy Detected!\nNPCI File: " + npciAcc + "\nImage OCR: " + ocrAcc);
+			}
+		}
+
+		// 4. Cheque Date (Normalized Date Comparison)
+		if (cheque.getChequeDate() != null && ocr.detectedDate != null && !ocr.detectedDate.trim().isEmpty()) {
+			LocalDate npciParsed = parseFlexibleDate(cheque.getChequeDate().toString());
+			LocalDate ocrParsed = parseFlexibleDate(ocr.detectedDate.trim());
+
+			if (npciParsed != null && ocrParsed != null) {
+				if (!npciParsed.equals(ocrParsed)) {
+					if (txtChequeDate != null) {
+						txtChequeDate.setSclass("cts-input-text field-error-red");
+						txtChequeDate.setTooltiptext("Date Mismatch!\nNPCI File: " 
+								+ npciParsed.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) 
+								+ "\nImage OCR: " 
+								+ ocrParsed.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+					}
+				}
+			} else {
+				// Fallback to strict string check if parsing fails
+				if (!cheque.getChequeDate().toString().equalsIgnoreCase(ocr.detectedDate.trim())) {
+					if (txtChequeDate != null) {
+						txtChequeDate.setSclass("cts-input-text field-error-red");
+						txtChequeDate.setTooltiptext("Date Mismatch!\nNPCI File: " + cheque.getChequeDate() 
+								+ "\nImage OCR: " + ocr.detectedDate);
+					}
+				}
+			}
+		}
+	}
+
+	private void resetFieldMismatchStyles() {
+		Textbox[] fields = { txtChequeNumber, txtChequeDate, txtAmount, txtPayeeName, txtDraweeAccount, txtDraweeBankName };
+		for (Textbox f : fields) {
+			if (f != null) {
+				f.setSclass("cts-input-text");
+				f.setTooltiptext(null);
+			}
+		}
+	}
+
+	private static class OcrDetectedData {
+		String detectedPayee;
+		String detectedAmount;
+		String detectedDate;
+		String detectedDrawerAccount;
+	}
+
+	private OcrDetectedData loadOcrChequeData(InwardCheque cheque) {
+		if (cheque == null || cheque.getInwardBatchId() == null || cheque.getItemSequenceNumber() == null)
+			return null;
+
+		try {
+			InwardBatch batch = batchService.getBatchById(cheque.getInwardBatchId());
+			if (batch == null || batch.getBatchReferenceId() == null || batch.getBatchReferenceId().trim().isEmpty())
+				return null;
+
+			String resourcePath = "/Inward-data/" + batch.getBatchReferenceId().trim() + "/OCR_Mock.xml";
+			InputStream inputStream = Executions.getCurrent().getDesktop().getWebApp().getResourceAsStream(resourcePath);
+			if (inputStream == null)
+				return null;
+
+			try (InputStream stream = inputStream) {
+				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+				NodeList chequeNodes = document.getElementsByTagName("OCRCheque");
+
+				for (int i = 0; i < chequeNodes.getLength(); i++) {
+					Element ocrCheque = (Element) chequeNodes.item(i);
+					String seqStr = getXmlValue(ocrCheque, "ItemSequenceNumber");
+					if (seqStr == null || seqStr.trim().isEmpty())
+						continue;
+
+					int sequence = Integer.parseInt(seqStr.trim());
+					if (sequence == cheque.getItemSequenceNumber()) {
+						OcrDetectedData data = new OcrDetectedData();
+						data.detectedPayee = getXmlValue(ocrCheque, "DetectedPayee");
+						data.detectedAmount = getXmlValue(ocrCheque, "DetectedAmountText");
+						data.detectedDate = getXmlValue(ocrCheque, "DetectedDate");
+						data.detectedDrawerAccount = getXmlValue(ocrCheque, "DetectedDrawerAccount");
+						return data;
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private String getXmlValue(Element parent, String tagName) {
+		if (parent == null)
+			return "";
+		NodeList nodes = parent.getElementsByTagName(tagName);
+		if (nodes.getLength() == 0 || nodes.item(0).getTextContent() == null)
+			return "";
+		return nodes.item(0).getTextContent().trim();
+	}
+
+	private String safe(String val) {
+		return val == null ? "" : val.trim();
+	}
+	
+	private LocalDate parseFlexibleDate(String dateStr) {
+		if (dateStr == null || dateStr.trim().isEmpty()) {
+			return null;
+		}
+		String clean = dateStr.trim();
+		try {
+			// First try standard ISO YYYY-MM-DD
+			return LocalDate.parse(clean, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+		} catch (Exception ignored) {}
+
+		try {
+			// Then try standard Indian DD-MM-YYYY
+			return LocalDate.parse(clean, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		} catch (Exception ignored) {}
+
+		try {
+			// Try DD/MM/YYYY
+			return LocalDate.parse(clean, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		} catch (Exception ignored) {}
+
+		return null;
 	}
 
 	private void loadChequeAlertReason(InwardCheque item) {
