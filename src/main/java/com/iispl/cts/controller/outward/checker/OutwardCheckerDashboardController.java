@@ -100,8 +100,23 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 		btnSearch.addEventListener(Events.ON_CLICK, event -> {
 
-			pageNumber = 1;
-			loadDashboard();
+		    String batchId = txtBatchId.getValue();
+
+		    if (batchId == null || batchId.trim().isEmpty()) {
+
+		        Messagebox.show(
+		                "Please enter a Batch ID to search.",
+		                "Search",
+		                Messagebox.OK,
+		                Messagebox.INFORMATION
+		        );
+
+		        txtBatchId.focus();
+		        return;
+		    }
+
+		    pageNumber = 1;
+		    loadDashboard();
 		});
 
 		btnClear.addEventListener(Events.ON_CLICK, event -> {
@@ -148,6 +163,16 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId);
 
 				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId);
+				 if (totalBatches == 0) {
+				        Messagebox.show(
+				                "Batch ID '" + batchId + "' not found.",
+				                "Batch Not Found",
+				                Messagebox.OK,
+				                Messagebox.EXCLAMATION
+				        );
+
+				        txtBatchId.focus();
+				    }
 
 			} else {
 
@@ -227,17 +252,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 					item.appendChild(rejectionCell);
 
-					String submittedAt = "-";
-
-					if (batch.getUploadedAt() != null) {
-
-						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-						submittedAt = formatter.format(batch.getUploadedAt());
-					}
-
-					item.appendChild(new Listcell(submittedAt));
-
+					
 					Listcell statusCell = new Listcell();
 
 					statusCell.setStyle("text-align:center;" + "vertical-align:middle;");
@@ -272,22 +287,35 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 					Listcell actionCell = new Listcell();
 
-					Button queueButton = new Button("QUEUE");
+					String buttonLabel;
+
+					if ("PENDING_CHECKER_PROCESS".equalsIgnoreCase(batchStatus)) {
+					    buttonLabel = "Proceed";
+					} else if ("ON_HOLD".equalsIgnoreCase(batchStatus)) {
+					    buttonLabel = "Processing";
+					} else {
+					    buttonLabel = "Proceed";
+					}
+
+					Button queueButton = new Button(buttonLabel);
 
 					queueButton.setSclass("queue-button");
 
 					queueButton.addEventListener(Events.ON_CLICK, event -> {
 
-						OutwardBatch selectedBatch = item.getValue();
+					    OutwardBatch selectedBatch = item.getValue();
 
-						Map<String, Object> args = new HashMap<>();
+					    Map<String, Object> args = new HashMap<>();
 
-						args.put("batchId", selectedBatch.getOutwardBatchId());
+					    args.put("batchId", selectedBatch.getOutwardBatchId());
 
-						Window popup = (Window) Executions.createComponents("/outward/checker/batch-proceed-popup.zul",
-								null, args);
+					    Window popup = (Window) Executions.createComponents(
+					            "/outward/checker/batch-proceed-popup.zul",
+					            null,
+					            args
+					    );
 
-						popup.doModal();
+					    popup.doModal();
 					});
 
 					actionCell.appendChild(queueButton);
