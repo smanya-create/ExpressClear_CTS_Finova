@@ -90,35 +90,46 @@
                              NO BATCH MESSAGE
                              ================================================= -->
 
-                        <vlayout
-                            id="noBatchMessage"
-                            visible="false"
-                            width="100%"
-                            height="100%"
-                            style="align-items:center;
-                                   justify-content:center;">
+<vlayout
+    id="noBatchMessage"
+    visible="false"
+    width="100%"
+    height="100%"
+    sclass="no-batch-container">
 
-                            <vlayout
-                                spacing="15px"
-                                style="text-align:center;">
+    <vlayout
+        width="650px"
+        height="340px"
+        sclass="no-batch-card"
+        spacing="0">
 
-                                <label
-                                    value="No batch has been selected."
-                                    style="font-size:24px;
-                                           font-weight:bold;"/>
+        <vlayout
+            width="100%"
+            height="100%"
+            sclass="no-batch-content"
+            spacing="0">
 
-                                <label
-                                    value="Please select a batch from the Checker Dashboard."
-                                    style="font-size:15px;"/>
+            <div sclass="no-batch-icon-circle">
+                <label
+                    value="▤"
+                    sclass="no-batch-icon"/>
+            </div>
 
-                                <button
-                                    id="btnBackToDashboard"
-                                    label="BACK TO DASHBOARD"
-                                    sclass="back-dashboard-button"/>
+            <label
+                value="No batch has been selected to Process."
+                sclass="no-batch-title"/>
 
-                            </vlayout>
+            <label
+                value="Please select a batch from the Dashboard to process."
+                sclass="no-batch-description"/>
 
-                        </vlayout>
+            <button
+                id="btnBackToDashboard"
+                label="←  Go to Dashboard"
+                sclass="back-dashboard-button"/>
+        </vlayout>
+    </vlayout>
+</vlayout>
 
 
                         <!-- =================================================
