@@ -48,7 +48,7 @@
                             <hlayout spacing="16px" width="100%">
                                 <hlayout hflex="1" valign="middle" sclass="stat-card">
                                     <vlayout spacing="4px">
-                                        <label value="PENDING VERIFICATIONS" sclass="stat-card-title"/>
+                                        <label value="UNPROCESSED VERIFICATIONS" sclass="stat-card-title"/>
                                         <label id="lblTotalVerifyCount" value="0" sclass="stat-card-value"/>
                                     </vlayout>
                                 </hlayout>
@@ -87,9 +87,9 @@
                                     <listheader label="BATCH ID" width="230px" align="center"/>
                                     <listheader label="CHEQUE NO" width="120px" align="center"/>
                                     <listheader label="MICR CODE" width="130px" align="center"/>
-                                    <listheader label="AMOUNT (INR)" width="150px" align="center"/>
-                                    <listheader label="STATUS" width="180px" align="center"/>
-                                    <listheader label="REASON / REMARKS" hflex="1" align="center"/>
+                                    <listheader label="AMOUNT" width="150px" align="center"/>
+                                    <listheader label="STATUS" width="210px" align="center"/>
+                                    <listheader label="REMARKS" hflex="1" align="center"/>
                                     <listheader label="ACTION" width="165px" align="center"/>
                                 </listhead>
                             </listbox>

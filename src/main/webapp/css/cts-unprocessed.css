@@ -317,3 +317,205 @@
     color: #c2410c !important;
     border: 1px solid #fed7aa !important;
 }
+.checker-pill-badge {
+    display: inline-block;
+    margin: 0 auto;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1.2;
+    background: #ede9fe !important;
+    color: #6d28d9 !important;
+    border: 1px solid #ddd6fe !important;
+}
+
+.btn-grid-action {
+    width: 110px !important;
+    height: 32px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    box-sizing: border-box !important;
+    padding: 0 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    background: #173B61 !important;
+    color: #ffffff !important;
+    border: 1px solid #173B61 !important;
+    cursor: pointer !important;
+}
+/* Cell Alignment & Typography Utilities */
+.cell-center {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.cell-left {
+    text-align: left !important;
+    vertical-align: middle !important;
+    padding-left: 14px !important;
+}
+
+.cell-action {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 0 6px !important;
+}
+
+.text-batch-id {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    text-align: center !important;
+    display: block !important;
+}
+
+.text-cheque-no {
+    font-family: monospace !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+.text-micr-code {
+    font-family: monospace !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+.text-amount {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    display: block !important;
+    text-align: center !important;
+}
+
+.text-remarks {
+    font-size: 12px !important;
+    font-style: italic !important;
+    color: #6d28d9 !important;
+    display: block !important;
+    word-break: break-word !important;
+}
+
+.btn-grid-action-disabled {
+    background: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #cbd5e1 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+/* Container Box for Metric Cards */
+.checker-stat-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.checker-stat-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    color: #173B61 !important;
+    display: block !important;
+}
+
+.checker-stat-val {
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    color: #173B61 !important;
+    display: block !important;
+}
+
+/* Enclosed Filter Bar */
+.checker-filter-bar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 10px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.checker-filter-label {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #173B61 !important;
+}
+
+/* Dark Navy Table Header */
+.unprocessed-box .z-listbox-header,
+.unprocessed-box .z-listbox-header-bg,
+.unprocessed-box .z-listhead-bar,
+.unprocessed-box th.z-listhead-bar,
+.unprocessed-box .z-listhead-filler,
+.unprocessed-box th.z-listhead-filler,
+.unprocessed-box .z-auxhead-bar,
+.unprocessed-box th.z-auxhead-bar {
+    background: #173B61 !important;
+    background-color: #173B61 !important;
+    background-image: none !important;
+    border: none !important;
+    border-bottom: 1px solid #0f2640 !important;
+    box-shadow: none !important;
+}
+
+.unprocessed-box .z-listheader {
+    background: #173B61 !important;
+    background-color: #173B61 !important;
+    background-image: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #0f2640 !important;
+}
+
+.unprocessed-box .z-listheader-content {
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 12px 6px !important;
+}
+
+/* Button with Pencil Icon */
+.btn-checker-verify {
+    width: 110px !important;
+    height: 32px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    box-sizing: border-box !important;
+    padding: 0 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    background: #173B61 !important;
+    color: #ffffff !important;
+    border: 1px solid #173B61 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+}
