@@ -333,7 +333,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		}
 	}
 
-	//counting normal cheques,Total cheques,Rejectin request cheques,maker returned cheques
+	//counting normal cheques,Total cheques,Rejection request cheques,maker returned cheques
 	private Map<String, Integer> getChequeCounts(String batchId) throws SQLException {
 
 		Map<String, Integer> countedCheques = new HashMap<>();
