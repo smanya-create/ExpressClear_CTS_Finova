@@ -75,7 +75,7 @@
 							w:onClick="jq('.nav-item').removeClass('active'); jq(this).addClass('active');" />
 
 						<a id="navQueue" label="Unprocessed Cheques"
-							visible="true"
+							visible="false"
 							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToQueue()"
 							w:onClick="jq('.nav-item').removeClass('active'); jq(this).addClass('active');" />
@@ -105,7 +105,7 @@
 							sclass="${arg.activeTab eq 'outward-rejected-cheques' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToOutwardRejectedCheques()" />
 						<a id="navToOutwardCheckerUnprocessedQueue"
-							label="Unprocessed Cheques" visible="true"
+							label="Unprocessed Cheques" visible="false"
 							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToOutwardCheckerUnprocessedQueue()" />
 						<a id="navOutwardCheckerReports" label="Reports"

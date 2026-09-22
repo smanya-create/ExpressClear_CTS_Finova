@@ -136,20 +136,26 @@ public class CheckerUnprocessedChequesController extends GenericForwardComposer<
 
                 // 1. Batch ID & Session Info
                 Listcell cellBatch = new Listcell();
-                cellBatch.setStyle("text-align: left; vertical-align: middle; padding-left: 14px;");
-                Vlayout vBatch = new Vlayout();
-                vBatch.setSpacing("2px");
-                
-                String batchText = dto.getBatchNo() != null ? dto.getBatchNo() : "BAT" + dto.getBatchId();
-                Label lblBNo = new Label(batchText);
-                lblBNo.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block;");
-                
-                Label lblSName = new Label("Rollover: " + (dto.getOriginalSessionName() != null ? dto.getOriginalSessionName() : "Prior EOD"));
-                lblSName.setStyle("font-size: 11px; color: #64748b; display: block;");
-                
-                vBatch.appendChild(lblBNo);
-                vBatch.appendChild(lblSName);
-                cellBatch.appendChild(vBatch);
+                cellBatch.setStyle("text-align: center; vertical-align: middle;");
+
+                String fullBatchNo = dto.getBatchNo() != null ? dto.getBatchNo().trim() : "";
+                String displayBatchId = fullBatchNo;
+
+                if (displayBatchId.matches(".*BAT\\d+.*")) {
+                    java.util.regex.Matcher m = java.util.regex.Pattern.compile("(BAT\\d+)").matcher(displayBatchId);
+                    if (m.find()) {
+                        displayBatchId = m.group(1);
+                    }
+                } else if (dto.getBatchId() != null && dto.getBatchId() > 0) {
+                    displayBatchId = "BAT" + dto.getBatchId();
+                } else if (fullBatchNo.contains("-")) {
+                    displayBatchId = fullBatchNo.substring(fullBatchNo.lastIndexOf('-') + 1);
+                }
+
+                Label lblBNo = new Label(displayBatchId);
+                lblBNo.setStyle("font-size: 13px; font-weight: 700; color: #1e293b; text-align: center; display: block;");
+                cellBatch.appendChild(lblBNo);
+
 
                 // 2. Cheque No
                 Listcell cellChq = new Listcell();
