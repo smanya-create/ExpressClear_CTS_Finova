@@ -9,6 +9,7 @@ import com.iispl.cts.daoimpl.inward.InwardBatchDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeDAOImpl;
 import com.iispl.cts.daoimpl.inward.InwardChequeImageDAOImpl;
 import com.iispl.cts.dto.DashboardSummaryDTO;
+import com.iispl.cts.dto.DataEntryBatchItemDTO;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.entity.inward.InwardCheque;
@@ -163,5 +164,13 @@ public class InwardBatchServiceImpl implements InwardBatchService {
 	public boolean updateProcessingBatchStatus(String batchId, InwardBatchStatus status) {
 
 		return inwardBatchDAO.updateProcessingBatchStatus(batchId, status);
+	}
+	
+	
+	
+	// Added for DE queue controller requirement
+	@Override
+	public List<DataEntryBatchItemDTO> getBatchesForDataEntry() {
+		return inwardBatchDAO.getBatchesForDataEntry();
 	}
 }
