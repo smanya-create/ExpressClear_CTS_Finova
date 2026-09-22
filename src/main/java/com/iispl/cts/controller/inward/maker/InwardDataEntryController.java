@@ -207,58 +207,50 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		List<InwardCheque> allCheques = chequeService.getChequesByBatchAndStatus(batchId, null);
 		this.activeQueue = new ArrayList<>();
 
+		// The batch is in rework if there are active PENDING send-back tickets
+		this.isReworkBatch = hasPendingSendBackRequests(batchId);
+
 		if (allCheques != null && !allCheques.isEmpty()) {
-
-			// Batch is in rework if any cheque is actively sent back OR is an active rework cheque
-			this.isReworkBatch = allCheques.stream().anyMatch(c -> c != null && (
-					isSentBackStatus(c.getChequeStatus()) || isCurrentReworkCheque(c)
-			));
-
 			for (InwardCheque c : allCheques) {
-
 				if (c == null || c.getChequeStatus() == null) {
 					continue;
 				}
 
-				String st = c.getChequeStatus().trim();
+				String st = c.getChequeStatus().trim().toUpperCase();
 
 				if (this.isReworkBatch) {
 					// =========================================================================
 					// REWORK FLOW:
-					// 1. Cheque waiting for Maker rework
-					// 2. Cheque already resolved in this rework cycle (keeps both in queue upon revisit)
+					// 1. Cheques waiting for Data Entry rework (including repaired MICR cheques)
+					// 2. Cheques already approved in this rework session (MAKER_RETURNED)
+					// 3. Cheques where Maker requested rejection in this rework session
 					// =========================================================================
-					if (isSentBackStatus(st) || isCurrentReworkCheque(c)) {
-						this.activeQueue.add(c);
-						continue;
-					}
-
-					// Only include rejection requests belonging to an active send-back rework ticket
-					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
-							&& isReworkRejectionRequest(c)) {
-						this.activeQueue.add(c);
-					}
-
-				} else {
-					// =========================================================================
-					// NORMAL FLOW (First intake pass):
-					// =========================================================================
-					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
-							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-							|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
-
-						this.activeQueue.add(c);
-						continue;
-					}
-
 					if (isSentBackStatus(st)) {
 						this.activeQueue.add(c);
 						continue;
 					}
 
-					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
-							&& isDataEntryRejectionRequest(c)) {
+					if (InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st) && isChequeInCurrentRework(c)) {
+						this.activeQueue.add(c);
+						continue;
+					}
 
+					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st) && isReworkRejectionRequest(c)) {
+						this.activeQueue.add(c);
+					}
+
+				} else {
+					// =========================================================================
+					// NORMAL INTAKE FLOW:
+					// =========================================================================
+					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
+							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
+							|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
+						this.activeQueue.add(c);
+						continue;
+					}
+
+					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st) && isDataEntryRejectionRequest(c)) {
 						this.activeQueue.add(c);
 					}
 				}
@@ -313,21 +305,13 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				|| InwardChequeStatus.SEND_BACK_TO_MAKER.name().equalsIgnoreCase(status);
 	}
 	
-	private boolean isReworkRejectionRequest(InwardCheque cheque) {
-		if (cheque == null || cheque.getInwardChequeId() == null) {
-			return false;
-		}
-
-		// A rejection belongs to rework if this cheque has an inward_send_back_request ticket
-		String sql = "SELECT EXISTS (" 
-				+ "SELECT 1 FROM inward_cheque_send_back_request "
-				+ "WHERE inward_cheque_id = ? "
-				+ "AND inward_batch_id = ?"
+	private boolean hasPendingSendBackRequests(String batchId) {
+		String sql = "SELECT EXISTS ("
+				+ "  SELECT 1 FROM inward_cheque_send_back_request "
+				+ "  WHERE inward_batch_id = ? AND request_status = 'PENDING'"
 				+ ")";
-
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, cheque.getInwardChequeId());
-			ps.setString(2, this.currentBatchId);
+			ps.setString(1, batchId);
 			try (ResultSet rs = ps.executeQuery()) {
 				return rs.next() && rs.getBoolean(1);
 			}
@@ -336,41 +320,21 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 	}
 
-	private boolean isCurrentReworkCheque(InwardCheque cheque) {
+	private boolean isChequeInCurrentRework(InwardCheque cheque) {
 		if (cheque == null || cheque.getInwardChequeId() == null || this.currentBatchId == null) {
 			return false;
 		}
 
-		String sql = "SELECT request_status, requested_at, resolved_at FROM inward_cheque_send_back_request "
+		String sql = "SELECT request_status FROM inward_cheque_send_back_request "
 				+ "WHERE inward_cheque_id = ? AND inward_batch_id = ? "
 				+ "ORDER BY requested_at DESC LIMIT 1";
-
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setString(1, cheque.getInwardChequeId());
 			ps.setString(2, this.currentBatchId);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					String reqStatus = rs.getString("request_status");
-
-					// If the cheque is currently sent back to MICR, Data Entry MUST IGNORE IT!
-					String chqStatus = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim().toUpperCase() : "";
-					if ("SEND_BACK_TO_MAKER_MICR".equals(chqStatus)) {
-						return false;
-					}
-
-					// 1. If still pending for Data Entry, it belongs to the current rework queue
-					if ("PENDING".equalsIgnoreCase(reqStatus) && isSentBackStatus(chqStatus)) {
-						return true;
-					}
-
-					// 2. If already resolved, it ONLY belongs to this round if it was sent back
-					// in the latest round of send-backs (not an old round)
-					if ("RESOLVED".equalsIgnoreCase(reqStatus)
-							&& InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(cheque.getChequeStatus())) {
-						
-						// Check if this cheque's ticket is from the latest round
-						return isFromLatestSendBackRound(cheque.getInwardChequeId());
-					}
+					String status = rs.getString("request_status");
+					return "PENDING".equalsIgnoreCase(status);
 				}
 			}
 		} catch (Exception e) {
@@ -378,29 +342,31 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 		return false;
 	}
-	
-	private boolean isFromLatestSendBackRound(String chequeId) {
+
+	private boolean isReworkRejectionRequest(InwardCheque cheque) {
+		if (cheque == null || cheque.getInwardChequeId() == null) {
+			return false;
+		}
+
 		String sql = "SELECT EXISTS ("
-				+ "  SELECT 1 FROM inward_cheque_send_back_request cur "
-				+ "  WHERE cur.inward_cheque_id = ? AND cur.inward_batch_id = ? "
-				+ "    AND cur.requested_at >= ("
-				+ "        SELECT COALESCE(MAX(requested_at) - INTERVAL '10 minute', MAX(requested_at)) "
-				+ "        FROM inward_cheque_send_back_request "
-				+ "        WHERE inward_batch_id = ?"
-				+ "    )"
+				+ "  SELECT 1 FROM inward_cheque_rejection_request r "
+				+ "  JOIN inward_cheque_send_back_request s "
+				+ "    ON r.inward_cheque_id = s.inward_cheque_id AND r.inward_batch_id = s.inward_batch_id "
+				+ "  WHERE r.inward_cheque_id = ? AND r.inward_batch_id = ? "
+				+ "    AND r.request_status = 'PENDING' AND s.request_status = 'PENDING'"
 				+ ")";
 		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, chequeId);
+			ps.setString(1, cheque.getInwardChequeId());
 			ps.setString(2, this.currentBatchId);
-			ps.setString(3, this.currentBatchId);
 			try (ResultSet rs = ps.executeQuery()) {
 				return rs.next() && rs.getBoolean(1);
 			}
 		} catch (Exception e) {
-			return true;
+			return false;
 		}
 	}
 	
+		
 	private boolean isDataEntryRejectionRequest(InwardCheque cheque) {
 
 		if (cheque == null || cheque.getInwardChequeId() == null
@@ -825,14 +791,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		if (isReworkItem) {
 			current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
-			try {
-				User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
-				String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId()
-						: "Maker";
-				sendBackRequestService.markRequestResolved(current.getInwardChequeId(), userId);
-			} catch (Exception ex) {
-				System.err.println("WARN: Could not mark send-back request resolved: " + ex.getMessage());
-			}
+
 		} else {
 			current.setChequeStatus("DATA_ENTRY_COMPLETED");
 		}
@@ -893,15 +852,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
 		String userId = currentUser != null ? currentUser.getUserId() : "SYSTEM";
-		
-		// IF THIS CHEQUE WAS PREVIOUSLY SENT BACK, CLOSE THE PREVIOUS SEND-BACK TICKET
-				if (isSentBackStatus(current.getChequeStatus())) {
-					try {
-						sendBackRequestService.markRequestResolved(current.getInwardChequeId(), userId);
-					} catch (Exception ex) {
-						System.err.println("WARN: Could not mark send-back request resolved: " + ex.getMessage());
-					}
-				}
 
 		current.setChequeStatus(InwardChequeStatus.REJECTION_REQUESTED.name());
 		chequeService.updateChequeDetails(current);
@@ -986,17 +936,26 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			winCompletionConfirmModal.setVisible(false);
 		}
 
-		try {
-			// For rework batches, preserve CHECKER_PROCESSING. For initial batches, set CHECKER_PROCESSING_PENDING.
-			String targetBatchStatus = this.isReworkBatch ? "CHECKER_PROCESSING" : "CHECKER_PROCESSING_PENDING";
-			batchService.updateBatchStatus(this.currentBatchId, targetBatchStatus);
+		User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
+		String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
 
-			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
-			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId()
-					: "Maker";
+		try {
+			if (this.isReworkBatch) {
+				// Atomically resolve all send-back tickets for this batch to complete Maker handover
+				String sql = "UPDATE inward_cheque_send_back_request "
+						+ "SET request_status = 'RESOLVED', resolved_by = ?, resolved_at = CURRENT_TIMESTAMP "
+						+ "WHERE inward_batch_id = ? AND request_status = 'PENDING'";
+				try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+					ps.setString(1, userId);
+					ps.setString(2, this.currentBatchId);
+					ps.executeUpdate();
+				}
+			} else {
+				batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
+			}
+
 			String notifMsg = this.isReworkBatch
-					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId
-							+ ")."
+					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId + ")."
 					: "Batch " + currentBatchId + " submitted to Checker by Maker (" + userId + ").";
 
 			notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
@@ -1009,8 +968,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		Include mainInclude = null;
 		try {
 			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
-		} catch (Exception ignored) {
-		}
+		} catch (Exception ignored) {}
 
 		if (mainInclude == null && self != null && self.getDesktop() != null) {
 			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
