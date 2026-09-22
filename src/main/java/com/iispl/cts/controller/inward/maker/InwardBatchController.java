@@ -369,69 +369,38 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			Label lblBatch = new Label(valueOrEmpty(batch.getInwardBatchId()));
 
 			lblBatch.setSclass("batch-id-link");
-
 			batchCell.appendChild(lblBatch);
-
 			item.appendChild(batchCell);
-
 			Listcell dateCell = new Listcell();
-
 			Label lblDate = new Label(batch.getUploadedAt() != null
-
-					? new java.text.SimpleDateFormat("yyyy-MM-dd").format(batch.getUploadedAt())
-
+					? new java.text.SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt())
 					: "-");
-
 			lblDate.setSclass("batch-cell-text");
-
 			dateCell.appendChild(lblDate);
-
 			item.appendChild(dateCell);
-
 			Listcell amountCell = new Listcell();
-
 			String amtFormatted = "₹ 0.00";
-
 			if (batch.getActualTotalAmount() != null)
-
 				amtFormatted = "₹ " + CURRENCY_FORMAT.format(batch.getActualTotalAmount());
-
 			Label lblAmt = new Label(amtFormatted);
-
 			lblAmt.setSclass("batch-cell-amount");
-
 			amountCell.appendChild(lblAmt);
-
 			item.appendChild(amountCell);
-
 			Listcell statusCell = new Listcell();
-
 			String status = getDisplayStatus(batch);
-
 			Label statusLabel = new Label(status);
-
 			setStatusStyle(statusLabel, status);
-
 			statusCell.appendChild(statusLabel);
-
 			item.appendChild(statusCell);
-
 			Listcell actionCell = new Listcell();
-
 			createActionButton(item, actionCell, batch);
-
 			item.appendChild(actionCell);
-
 			batchListbox.appendChild(item);
-
 		}
-
 		updateBatchCount(displayList.size());
-
 	}
 
 	private void updateBatchCount(int count) {
-
 		Label batchCountLabel = (Label) currentWindow.getFellowIfAny("batchCountLabel");
 
 		if (batchCountLabel == null)
@@ -1066,17 +1035,11 @@ public class InwardBatchController extends SelectorComposer<Window> {
 			actualAmount = BigDecimal.ZERO;
 		}
 
-		String message =
-				"Batch " + batchId + "\n\n"
-				+ "Actual Count: " + actualCount + "\n"
-				+ "Actual Amount: ₹ " + CURRENCY_FORMAT.format(actualAmount) + "\n\n"
+		String message = "Batch " + batchId + "\n\n" + "Actual Count: " + actualCount + "\n" + "Actual Amount: ₹ "
+				+ CURRENCY_FORMAT.format(actualAmount) + "\n\n"
 				+ "VALIDATION FAILED. Expected count and expected amount do not match the actual batch values.";
 
-		Messagebox.show(
-				message,
-				"Validation Failed",
-				Messagebox.OK,
-				Messagebox.ERROR);
+		Messagebox.show(message, "Validation Failed", Messagebox.OK, Messagebox.ERROR);
 	}
 
 	private String validateParsedBatchAutomatically(ParsedBatchData data, String batchId) {
@@ -2303,6 +2266,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 		displayCheques(filteredCheques);
 	}
+
 	private void updateChequeCount(int count) {
 		if (count == 0) {
 			chequeCountLabel.setValue("No cheque records found");
@@ -2310,29 +2274,36 @@ public class InwardBatchController extends SelectorComposer<Window> {
 		}
 		chequeCountLabel.setValue("Showing 1 to " + count + " of " + count + " cheques");
 	}
+
 	private String valueOrEmpty(String value) {
 		return value == null ? "" : value;
 	}
+
 	private static class ParseResult {
 		private final String batchId;
 		private final ParsedBatchData parsedBatchData;
 		private final String status;
 		private final String message;
+
 		ParseResult(String batchId, ParsedBatchData parsedBatchData, String status, String message) {
 			this.batchId = batchId;
 			this.parsedBatchData = parsedBatchData;
 			this.status = status;
 			this.message = message;
 		}
+
 		String getBatchId() {
 			return batchId;
 		}
+
 		ParsedBatchData getParsedBatchData() {
 			return parsedBatchData;
 		}
+
 		String getStatus() {
 			return status;
 		}
+
 		String getMessage() {
 			return message;
 		}
