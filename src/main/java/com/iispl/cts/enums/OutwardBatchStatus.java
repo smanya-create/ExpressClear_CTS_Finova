@@ -28,7 +28,10 @@ public enum OutwardBatchStatus {
     /**
      * Entire batch cancelled or discarded (e.g., duplicate upload).
      */
-    CANCELLED
+    CANCELLED,
+    
+    PENDING_CHECKER_PROCESS,
+    ON_HOLD;
 
 
 }
