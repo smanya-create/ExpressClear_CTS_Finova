@@ -14,4 +14,5 @@ public interface UserDAO {
     String generateNextUserId();
     String generateNextEmployeeId();
     List<User> findUsersByRoleId(String roleId);
+	User findByIdentifier(String identifier);
 }
