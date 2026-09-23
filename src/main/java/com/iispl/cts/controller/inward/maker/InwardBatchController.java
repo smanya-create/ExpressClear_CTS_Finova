@@ -523,7 +523,7 @@ public class InwardBatchController extends SelectorComposer<Window> {
 
 	private String formatStatus(String status) {
 
-		String[] words = status.replace('_', ' ').trim().toLowerCase().split("\\\s+");
+		String[] words = status.replace('_', ' ').trim().toLowerCase().split("\\s+");
 
 		StringBuilder result = new StringBuilder();
 
