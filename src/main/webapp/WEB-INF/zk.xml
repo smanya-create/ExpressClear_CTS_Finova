@@ -2,8 +2,9 @@
 
     <device-config>
         <device-type>ajax</device-type>
-
         <timeout-uri>/common/login.zul</timeout-uri>
+        <!-- Disables artificial keep-alive pings so unload triggers immediately -->
+        <automatic-timeout>false</automatic-timeout>
 
         <server-push-class>
             org.zkoss.zk.ui.impl.PollingServerPush
@@ -23,6 +24,8 @@
 
     <client-config>
         <keep-alive>false</keep-alive>
+        <!-- Tells the browser to send an immediate drop-desktop beacon on tab close -->
+        <desktop-timeout>-1</desktop-timeout>
     </client-config>
 
     <system-config>

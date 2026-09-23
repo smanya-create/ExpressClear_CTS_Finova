@@ -877,6 +877,9 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			}
 		}
 	}
+	public void onTimer$userRefreshTimer(Event event) {
+	    refreshActiveUsers();
+	}
 
 	private String resolveLoggedInUserId() {
 		String adminUserId = (String) Sessions.getCurrent().getAttribute("USER_ID");

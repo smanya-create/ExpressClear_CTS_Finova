@@ -16,7 +16,8 @@
                 <!-- Fixed Header -->
                 <north size="auto" border="none">
                     <div>
-                        <timer id="timerActiveUsers" delay="3000" repeats="true" onTimer="$composer.refreshActiveUsers()" />
+                        <!-- Active user counter timer: triggers every 3s -->
+                        <timer id="timerActiveUsers" delay="1000" repeats="true" onTimer="$composer.refreshActiveUsers()" />
                         <include src="/components/header.zul" 
                                  pageTitle="Admin Dashboard" 
                                  pageSubtitle=""
@@ -34,7 +35,7 @@
                             <label value="Select EOD or BOD and manage the required CTS session." sclass="cts-main-subtitle" />
                         </vlayout>
 
-                        <!-- 3-Column Stat KPI Ribbon (Pending Cheques Column Removed) -->
+                        <!-- 3-Column Stat KPI Ribbon -->
                         <hlayout sclass="cts-stats-card" hflex="1" spacing="0">
                             
                             <!-- Col 1: CURRENT CLEARING DATE -->
