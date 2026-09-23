@@ -207,63 +207,64 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 			List<InwardDashboardBatchDTO> recentBatches = dashboardService.getRecentBatches("");
 			if (recentBatches != null) {
 				for (InwardDashboardBatchDTO bDto : recentBatches) {
-					if (bDto.getBackToMakerCheques() > 0) {
+					// A batch is in rework if it has pending send-back tickets
+					boolean hasPendingRework = sendBackRequestService.hasPendingSendBackRequests(bDto.getBatchId());
 
-						// Filter by Batch ID Only
-						if (!currentSearchKeyword.isEmpty()) {
-							String bId = bDto.getBatchId() != null ? bDto.getBatchId().toLowerCase() : "";
-							if (!bId.contains(currentSearchKeyword)) {
-								continue;
-							}
+					if (!hasPendingRework) {
+						continue;
+					}
+
+					// Filter by Batch ID Only
+					if (!currentSearchKeyword.isEmpty()) {
+						String bId = bDto.getBatchId() != null ? bDto.getBatchId().toLowerCase() : "";
+						if (!bId.contains(currentSearchKeyword)) {
+							continue;
 						}
+					}
 
-						// Fetch batch cheques and pending send-back audit records
-						List<InwardCheque> batchCheques = chequeService.getChequesByBatchAndStatus(bDto.getBatchId(),
-								null);
-						Map<String, InwardSendBackRequestDTO> pendingRequests = sendBackRequestService
-								.getPendingRequestsByBatchId(bDto.getBatchId());
+					// Fetch batch cheques and pending send-back audit records
+					List<InwardCheque> batchCheques = chequeService.getChequesByBatchAndStatus(bDto.getBatchId(), null);
+					Map<String, InwardSendBackRequestDTO> pendingRequests = sendBackRequestService
+							.getPendingRequestsByBatchId(bDto.getBatchId());
 
-						if (batchCheques != null) {
-							for (InwardCheque chq : batchCheques) {
-								String status = chq.getChequeStatus();
-								if (isSentBackStatus(status)) {
-									String displayStatus = getDisplayStatus(chq);
+					if (batchCheques != null && pendingRequests != null) {
+						for (InwardCheque chq : batchCheques) {
+							// Only display cheques that belong to an active send-back request
+							if (pendingRequests.containsKey(chq.getInwardChequeId())) {
+								String displayStatus = getDisplayStatus(chq);
 
-									// Filter by Status (handles spaces or underscores)
-									if (!"ALL".equalsIgnoreCase(currentStatus)) {
-										String normalizedCurrent = currentStatus.replace("_", " ").trim();
-										String normalizedDisplay = displayStatus.replace("_", " ").trim();
-										if (!normalizedDisplay.equalsIgnoreCase(normalizedCurrent)) {
-											continue;
-										}
+								// Filter by Status (handles spaces or underscores)
+								if (!"ALL".equalsIgnoreCase(currentStatus)) {
+									String normalizedCurrent = currentStatus.replace("_", " ").trim();
+									String normalizedDisplay = displayStatus.replace("_", " ").trim();
+									if (!normalizedDisplay.equalsIgnoreCase(normalizedCurrent)) {
+										continue;
 									}
-
-									InwardSendBackRequestDTO req = (pendingRequests != null)
-											? pendingRequests.get(chq.getInwardChequeId())
-											: null;
-									String displayReason = "-";
-
-									if (req != null) {
-										String rName = req.getReasonName();
-										String rRemarks = req.getRemarks();
-
-										boolean hasName = (rName != null && !rName.trim().isEmpty());
-										boolean hasRemarks = (rRemarks != null && !rRemarks.trim().isEmpty());
-
-										if (hasName && hasRemarks) {
-											displayReason = rName.trim() + " (" + rRemarks.trim() + ")";
-										} else if (hasName) {
-											displayReason = rName.trim();
-										} else if (hasRemarks) {
-											displayReason = rRemarks.trim();
-										} else if (req.getReasonId() != null && req.getReasonId() > 0) {
-											displayReason = "Reason Code " + req.getReasonId();
-										}
-									}
-
-									returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq,
-											displayStatus, displayReason));
 								}
+
+								InwardSendBackRequestDTO req = pendingRequests.get(chq.getInwardChequeId());
+								String displayReason = "-";
+
+								if (req != null) {
+									String rName = req.getReasonName();
+									String rRemarks = req.getRemarks();
+
+									boolean hasName = (rName != null && !rName.trim().isEmpty());
+									boolean hasRemarks = (rRemarks != null && !rRemarks.trim().isEmpty());
+
+									if (hasName && hasRemarks) {
+										displayReason = rName.trim() + " (" + rRemarks.trim() + ")";
+									} else if (hasName) {
+										displayReason = rName.trim();
+									} else if (hasRemarks) {
+										displayReason = rRemarks.trim();
+									} else if (req.getReasonId() != null && req.getReasonId() > 0) {
+										displayReason = "Reason Code " + req.getReasonId();
+									}
+								}
+
+								returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq,
+										displayStatus, displayReason));
 							}
 						}
 					}
@@ -411,44 +412,49 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
 			if (allBatches != null) {
 				for (InwardDashboardBatchDTO b : allBatches) {
-					if (b.getBackToMakerCheques() == 0 && !"SENT_BACK".equalsIgnoreCase(b.getDisplayStatus())
-							&& !"CHECKER_PROCESSING"
-									.equalsIgnoreCase(batchService.getBatchById(b.getBatchId()).getBatchStatus())) {
+					// Check whether the batch has active unresolved rework tickets
+					boolean hasPendingRework = sendBackRequestService.hasPendingSendBackRequests(b.getBatchId());
 
-						if (!currentSearchKeyword.isEmpty()) {
-							String bId = b.getBatchId() != null ? b.getBatchId().toLowerCase() : "";
-							if (!bId.contains(currentSearchKeyword)) {
-								continue;
-							}
-						}
+					// If it has active pending rework, it belongs exclusively to the "Returned from Checker" section
+					if (hasPendingRework) {
+						continue;
+					}
 
-						InwardBatch fullBatch = batchService.getBatchById(b.getBatchId());
-						String bStatus = fullBatch != null ? normalizeStatus(fullBatch.getBatchStatus()) : "";
-
-						String trueStatus;
-
-						if ("CHECKER_PROCESSING_PENDING".equals(bStatus)) {
-							trueStatus = "SUBMITTED_TO_CHECKER";
-						} else if ("PROCESSING".equals(bStatus)) {
-							String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
-
-							trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
-									? "PENDING_MICR_REPAIR"
-									: "PENDING_DATA_ENTRY";
-						} else {
+					if (!currentSearchKeyword.isEmpty()) {
+						String bId = b.getBatchId() != null ? b.getBatchId().toLowerCase() : "";
+						if (!bId.contains(currentSearchKeyword)) {
 							continue;
 						}
-
-						if (!"ALL".equalsIgnoreCase(currentStatus)) {
-							String normalizedCurrent = currentStatus.replace(" ", "_").toUpperCase();
-							String normalizedTrue = trueStatus.replace(" ", "_").toUpperCase();
-							if (!normalizedTrue.equalsIgnoreCase(normalizedCurrent)) {
-								continue;
-							}
-						}
-
-						this.batchList.add(b);
 					}
+
+					InwardBatch fullBatch = batchService.getBatchById(b.getBatchId());
+					String bStatus = fullBatch != null ? normalizeStatus(fullBatch.getBatchStatus()) : "";
+
+					String trueStatus;
+
+					if ("CHECKER_PROCESSING_PENDING".equals(bStatus) || "CHECKER_PROCESSING".equals(bStatus)) {
+						trueStatus = "SUBMITTED_TO_CHECKER";
+					} else if ("COMPLETED".equals(bStatus)) {
+						trueStatus = "COMPLETED";
+					} else if ("REJECTED".equals(bStatus)) {
+						trueStatus = "REJECTED";
+					} else {
+						// Catch all active Maker processing stages
+						String targetZul = dashboardService.resolveWorkspaceTarget(b.getBatchId());
+						trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr"))
+								? "PENDING_MICR_REPAIR"
+								: "PENDING_DATA_ENTRY";
+					}
+
+					if (!"ALL".equalsIgnoreCase(currentStatus)) {
+						String normalizedCurrent = currentStatus.replace(" ", "_").toUpperCase();
+						String normalizedTrue = trueStatus.replace(" ", "_").toUpperCase();
+						if (!normalizedTrue.equalsIgnoreCase(normalizedCurrent)) {
+							continue;
+						}
+					}
+
+					this.batchList.add(b);
 				}
 			}
 
@@ -520,8 +526,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 		Label totalAmountLabel = new Label(formatIndianAmount(totalAmt));
 		totalAmountLabel.setSclass("inward-maker-total-amount");
 
-		String bStatus = fullBatch != null ? fullBatch.getBatchStatus() : "";
-		boolean isCheckerPending = "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus);
+		String bStatus = fullBatch != null ? normalizeStatus(fullBatch.getBatchStatus()) : "";
+		boolean isCheckerPending = "CHECKER_PROCESSING_PENDING".equalsIgnoreCase(bStatus) 
+				|| "CHECKER_PROCESSING".equalsIgnoreCase(bStatus);
+		boolean isCompleted = "COMPLETED".equalsIgnoreCase(bStatus);
 
 		Label statusLabel = new Label();
 		statusLabel.setSclass("inward-maker-status");
@@ -530,6 +538,10 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 			statusLabel.setValue("submitted to checker");
 			statusLabel.setStyle(
 					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 140px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%) !important; color: #0369a1 !important; border: 1px solid #38bdf8 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; white-space: nowrap !important; box-shadow: 0 1px 3px rgba(56, 189, 248, 0.25) !important;");
+		} else if (isCompleted) {
+			statusLabel.setValue("completed");
+			statusLabel.setStyle(
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; white-space: nowrap !important;");
 		} else {
 			String targetZul = dashboardService.resolveWorkspaceTarget(batch.getBatchId());
 			String trueStatus = (targetZul != null && targetZul.toLowerCase().contains("micr")) 
