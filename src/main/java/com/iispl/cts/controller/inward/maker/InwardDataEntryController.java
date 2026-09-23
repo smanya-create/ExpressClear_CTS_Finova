@@ -195,8 +195,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 			if (lblBatchId != null)
 				lblBatchId.setValue(batch.getInwardBatchId());
-			if (lblTotalCheques != null)
-				lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
 			if (lblReceivedDate != null && batch.getUploadedAt() != null) {
 				lblReceivedDate.setValue(new SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
 			}
@@ -252,6 +250,15 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 						this.activeQueue.add(c);
 					}
 				}
+			}
+		}
+		
+		// Update header total count: in rework show rework queue size; in normal show batch total
+		if (lblTotalCheques != null) {
+			if (this.isReworkBatch) {
+				lblTotalCheques.setValue(this.activeQueue != null ? String.valueOf(this.activeQueue.size()) : "0");
+			} else if (batch != null) {
+				lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
 			}
 		}
 		
@@ -664,6 +671,36 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	}
 
 	private void updateProgressBar() {
+		// 1. REWORK QUEUE SCOPE
+		if (this.isReworkBatch) {
+			if (activeQueue == null || activeQueue.isEmpty()) {
+				if (pmBatchProgress != null) pmBatchProgress.setValue(100);
+				if (lblProgressText != null) lblProgressText.setValue("0/0 (100%)");
+				if (btnSubmitToChecker != null) btnSubmitToChecker.setDisabled(false);
+				return;
+			}
+
+			int totalInQueue = activeQueue.size();
+			long resolvedInQueue = activeQueue.stream()
+					.filter(c -> InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
+							|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
+					.count();
+
+			int percentage = (int) Math.round(((double) resolvedInQueue / totalInQueue) * 100);
+
+			if (pmBatchProgress != null)
+				pmBatchProgress.setValue(percentage);
+			if (lblProgressText != null)
+				lblProgressText.setValue(resolvedInQueue + "/" + totalInQueue);
+
+			boolean allResolved = (resolvedInQueue == totalInQueue);
+			if (btnSubmitToChecker != null) {
+				btnSubmitToChecker.setDisabled(!allResolved);
+			}
+			return;
+		}
+
+		// 2. NORMAL INTAKE FULL BATCH SCOPE
 		List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
 		if (fullBatchCheques == null || fullBatchCheques.isEmpty()) {
 			if (pmBatchProgress != null)
@@ -677,18 +714,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		int totalInBatch = fullBatchCheques.size();
 		long resolvedInBatch = fullBatchCheques.stream()
-				.filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.REJECTED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.COMPLETED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
+				.filter(c -> "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus())
+						|| InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
+						|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
-
 		int percentage = (int) Math.round(((double) resolvedInBatch / totalInBatch) * 100);
-
 		if (pmBatchProgress != null)
 			pmBatchProgress.setValue(percentage);
 		if (lblProgressText != null)
@@ -972,19 +1003,42 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	}
 
 	public void onClick$btnSubmitToChecker() {
+		// 1. REWORK MODAL METRICS
+		if (this.isReworkBatch) {
+			if (activeQueue == null || activeQueue.isEmpty())
+				return;
+
+			long accepted = activeQueue.stream()
+					.filter(c -> InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus()))
+					.count();
+			long rejected = activeQueue.stream()
+					.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
+					.count();
+
+			if (lblModalTotal != null)
+				lblModalTotal.setValue(String.valueOf(activeQueue.size()));
+			if (lblModalAccepted != null)
+				lblModalAccepted.setValue(String.valueOf(accepted));
+			if (lblModalRejected != null)
+				lblModalRejected.setValue(String.valueOf(rejected));
+
+			if (winCompletionConfirmModal != null) {
+				winCompletionConfirmModal.setVisible(true);
+			}
+			return;
+		}
+
+		// 2. NORMAL INTAKE MODAL METRICS
 		List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
 		if (fullBatchCheques == null || fullBatchCheques.isEmpty())
 			return;
 
 		long accepted = fullBatchCheques.stream()
-				.filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
+				.filter(c -> "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus())
+						|| InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 		long rejected = fullBatchCheques.stream()
-				.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.REJECTED.name().equalsIgnoreCase(c.getChequeStatus()))
+				.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
 		if (lblModalTotal != null)
