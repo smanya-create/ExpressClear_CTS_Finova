@@ -26,7 +26,6 @@
                     <!-- Page Title -->
                     <vlayout spacing="3px" style="flex: 0 0 auto;">
                         <label value="Reports" sclass="page-title" />
-                        
                     </vlayout>
 
                     <!-- Parameters Card Container -->
@@ -40,7 +39,7 @@
                             <label value="REPORT TYPE" sclass="field-label" />
                             <combobox id="cmbReportType" readonly="true" width="100%" height="38px" style="font-size: 13px;">
                                 <comboitem label="User Activity &amp; Security Audit Report" value="USER_AUDIT" />
-                                <comboitem label="BOD / EOD Session Lifecycle " value="SESSION_LIFECYCLE" />
+                                <comboitem label="BOD / EOD Session Lifecycle" value="SESSION_LIFECYCLE" />
                             </combobox>
                         </vlayout>
                         
@@ -48,26 +47,35 @@
                         <hlayout spacing="24px" hflex="1">
                             <vlayout spacing="6px" hflex="1">
                                 <label value="FROM DATE" sclass="field-label" />
-                                <datebox id="dtFromDate" format="yyyy-MM-dd" height="38px" hflex="1" />
+                                <datebox id="dtFromDate" format="dd-MM-yyyy" height="38px" hflex="1" />
                             </vlayout>
 
                             <vlayout spacing="6px" hflex="1">
                                 <label value="TO DATE" sclass="field-label" />
-                                <datebox id="dtToDate" format="yyyy-MM-dd" height="38px" hflex="1" />
+                                <datebox id="dtToDate" format="dd-MM-yyyy" height="38px" hflex="1" />
                             </vlayout>
                         </hlayout>
+
+                       <!-- Format Selector (Radio Group) -->
+                        <vlayout spacing="8px">
+                            <label value="EXPORT FORMAT" sclass="field-label" />
+                            <radiogroup id="rgExportFormat">
+                                <hlayout spacing="28px" valign="middle" style="padding-top: 2px;">
+                                    <radio id="radPdf" label="PDF Document (.pdf)" value="PDF" selected="true" sclass="cts-radio" />
+                                    <radio id="radCsv" label="CSV Spreadsheet (.csv)" value="CSV" sclass="cts-radio" />
+                                </hlayout>
+                            </radiogroup>
+                        </vlayout>
 
                         <!-- Standard Card Divider -->
                         <div style="height: 1px; background: #e2e8f0; width: 100%; margin: 4px 0;" />
 
-                        <!-- Standardized Action Buttons -->
-                        <vlayout spacing="8px">
-                            <label value="Download Formats" sclass="field-label" />
-                            <hlayout spacing="14px">
-                                <button id="btnExportCsv" label="Download CSV" sclass="btn-primary" height="38px" />
-                                <button id="btnExportPdf" label="Download PDF" sclass="btn-outline" height="38px" />
-                            </hlayout>
-                        </vlayout>
+                        <!-- Single Consolidated Primary Action Button -->
+                        <hlayout>
+                            <button id="btnGenerateReport" label="GENERATE REPORT" 
+                                    iconSclass="z-icon-file-text-o"
+                                    sclass="btn-primary" height="38px" />
+                        </hlayout>
 
                     </vlayout>
 
