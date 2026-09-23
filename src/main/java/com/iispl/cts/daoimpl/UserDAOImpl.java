@@ -256,4 +256,32 @@ public class UserDAOImpl implements UserDAO {
         }
         return null;
     }
+    @Override
+    public User findByIdentifier(String identifier) {
+        if (identifier == null || identifier.trim().isEmpty()) {
+            return null;
+        }
+
+        String clean = identifier.trim();
+        // Uses one query to check both username and email with LIMIT 1
+        String sql = "SELECT * FROM users " +
+                     "WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?) " +
+                     "LIMIT 1";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, clean);
+            ps.setString(2, clean);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
