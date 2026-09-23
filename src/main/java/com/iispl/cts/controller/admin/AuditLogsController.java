@@ -6,12 +6,16 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import org.zkoss.zk.ui.Sessions;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Cell;
-import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
@@ -19,6 +23,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
+import com.iispl.cts.common.util.ClearingTimeMock;
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.AuditLog;
 import com.iispl.cts.service.AuditService;
@@ -28,10 +33,9 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // Filter controls
+    // Filter controls (cmbModuleFilter removed)
     private Datebox dtFrom;
     private Datebox dtTo;
-    private Combobox cmbModuleFilter;
     private Textbox txtSearchAudit;
     private Button btnSearch;
     private Button btnReset;
@@ -57,9 +61,9 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
-    	if(!SecurityUtil.checkAccess(null)) {
-    		return;
-    	}
+        if (!SecurityUtil.checkAccess(null)) {
+            return;
+        }
         super.doAfterCompose(comp);
 
         resetFiltersToToday();
@@ -73,10 +77,6 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         if (dtFrom != null) dtFrom.setValue(todayDate);
         if (dtTo != null) dtTo.setValue(todayDate);
 
-        if (cmbModuleFilter != null && cmbModuleFilter.getItemCount() > 0) {
-            cmbModuleFilter.setSelectedIndex(0);
-        }
-
         if (txtSearchAudit != null) {
             txtSearchAudit.setValue("");
         }
@@ -85,13 +85,11 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     private void loadAuditPage(int pageIndex) {
         Date from = dtFrom != null ? dtFrom.getValue() : null;
         Date to = dtTo != null ? dtTo.getValue() : null;
-        String mod = (cmbModuleFilter != null && cmbModuleFilter.getSelectedItem() != null)
-                     ? cmbModuleFilter.getSelectedItem().getValue() : "ALL";
         String q = (txtSearchAudit != null && txtSearchAudit.getValue() != null) 
                    ? txtSearchAudit.getValue().trim() : "";
 
-        // 1. Fetch total count from DB
-        this.totalRecords = auditService.countAuditLogs(from, to, mod, null, q);
+        // 1. Fetch total count from DB (passing null for module to get all records)
+        this.totalRecords = auditService.countAuditLogs(from, to, null, null, q);
         this.totalPages = (int) Math.ceil((double) this.totalRecords / PAGE_SIZE);
         if (this.totalPages < 1) {
             this.totalPages = 1;
@@ -125,9 +123,9 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         if (btnNextPage != null) btnNextPage.setDisabled(isLast);
         if (btnLastPage != null) btnLastPage.setDisabled(isLast);
 
-        // 3. Query DB with LIMIT & OFFSET
+        // 3. Query DB with LIMIT & OFFSET (null passed for module)
         int offset = this.activePageIndex * PAGE_SIZE;
-        List<AuditLog> logs = auditService.searchAuditLogs(from, to, mod, null, q, offset, PAGE_SIZE);
+        List<AuditLog> logs = auditService.searchAuditLogs(from, to, null, null, q, offset, PAGE_SIZE);
 
         renderAuditRows(logs);
     }
@@ -139,7 +137,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         if (logs == null || logs.isEmpty()) {
             Row emptyRow = new Row();
             Cell cell = new Cell();
-            cell.setColspan(7);
+            cell.setColspan(6); // 6 columns: DATE AND TIME, USER, ACTION, DETAILS, IP ADDRESS, STATUS
             cell.setStyle("text-align: center; padding: 24px;");
 
             Label emptyLbl = new Label("No audit records found for the selected criteria.");
@@ -151,42 +149,61 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             return;
         }
 
+        // 1. Retrieve the session clearing date (same date used by Header)
+        Object sessionDateObj = Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
+        LocalDate clearingDate;
+        if (sessionDateObj instanceof LocalDate) {
+            clearingDate = (LocalDate) sessionDateObj;
+        } else if (sessionDateObj instanceof java.sql.Date) {
+            clearingDate = ((java.sql.Date) sessionDateObj).toLocalDate();
+        } else {
+            clearingDate = LocalDate.now();
+        }
+
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm:ss");
+
         for (AuditLog log : logs) {
             Row row = new Row();
-            row.setStyle("border-bottom: 1px solid #f1f5f9; height: 48px;");
+            row.setStyle("border-bottom: 1px solid #f1f5f9; min-height: 48px;");
+            // 1. DATE AND TIME (Matches Header clearing date & time window)
+            String displayTime;
+            if (log.getTimestamp() != null) {
+                LocalTime logTime = log.getTimestamp().toInstant()
+                        .atZone(ZoneId.systemDefault()).toLocalTime();
+                displayTime = clearingDate.format(dateFmt) + " " + logTime.format(timeFmt);
+            } else {
+                displayTime = clearingDate.format(dateFmt) + " " + ClearingTimeMock.getCurrentTime().format(timeFmt);
+            }
 
-            // 1. Timestamp (Centered)
-            Label lblTime = new Label(log.getTimestamp() != null ? df.format(log.getTimestamp()) : "-");
+            Label lblTime = new Label(displayTime);
             lblTime.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblTime);
 
-            // 2. User / Role (Left aligned)
-            Label lblUser = new Label((log.getUsername() != null ? log.getUsername() : log.getUserId()) 
-                                      + " (" + (log.getRoleName() != null ? log.getRoleName() : "-") + ")");
-            lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block; text-align: left; padding-left: 6px;");
+            // 2. USER (Clean, no brackets or role name)
+            String cleanUser = log.getUsername() != null && !log.getUsername().trim().isEmpty() 
+                             ? log.getUsername().trim() 
+                             : (log.getUserId() != null ? log.getUserId().trim() : "-");
+
+            Label lblUser = new Label(cleanUser);
+            lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block; text-align: center;");
             row.appendChild(lblUser);
 
-            // 3. Module Badge (Centered)
-            Label lblMod = new Label(log.getModule());
-            lblMod.setStyle("font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 4px; font-weight: 600; display: table; margin: 0 auto;");
-            row.appendChild(lblMod);
-
-            // 4. Action (Left aligned)
-            Label lblAction = new Label(log.getAction());
-            lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155; display: block; text-align: left; padding-left: 6px;");
+            // 3. ACTION (Centered)
+            Label lblAction = new Label(log.getAction() != null ? log.getAction() : "-");
+            lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155; display: block; text-align: center;");
             row.appendChild(lblAction);
 
-            // 5. Details (Left aligned)
-            Label lblDetails = new Label(log.getDetails() != null ? log.getDetails() : "-");
-            lblDetails.setStyle("font-size: 12px; color: #475569; display: block; text-align: left; padding-left: 6px;");
-            row.appendChild(lblDetails);
+         // 4. DETAILS (Clean layout with badges)
+            Component detailsCell = createFormattedDetailsCell(log.getDetails());
+            row.appendChild(detailsCell);
 
-            // 6. IP Address (Centered)
+            // 5. IP ADDRESS (Centered)
             Label lblIp = new Label(log.getIpAddress() != null ? log.getIpAddress() : "-");
             lblIp.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblIp);
 
-            // 7. Status Badge (Centered with scrollbar padding)
+            // 6. STATUS BADGE (Centered)
             Label lblStatus = new Label(log.getStatus() != null ? log.getStatus() : "SUCCESS");
             String baseBadgeStyle = "display: table; margin: 0 auto; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
 
@@ -200,6 +217,46 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
             rowsAudit.appendChild(row);
         }
+        
+    }
+    private Component createFormattedDetailsCell(String rawDetails) {
+        org.zkoss.zul.Div container = new org.zkoss.zul.Div();
+        container.setStyle("display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 4px 12px;");
+
+        if (rawDetails == null || rawDetails.trim().isEmpty() || "-".equals(rawDetails.trim())) {
+            Label lbl = new Label("-");
+            lbl.setStyle("color: #94a3b8; font-size: 12px;");
+            container.appendChild(lbl);
+            return container;
+        }
+
+        // If it's a pipe-separated update log (e.g., Updated user: suneesh | Status -> ACTIVE | Role -> OUTWARD_CHECKER)
+        if (rawDetails.contains("|")) {
+            String[] parts = rawDetails.split("\\|");
+            for (int i = 0; i < parts.length; i++) {
+                String segment = parts[i].trim();
+                
+                if (segment.startsWith("Updated user:")) {
+                    Label lblUser = new Label(segment);
+                    // Match normal font size, regular weight (400), and color as standard details text
+                    lblUser.setStyle("font-size: 12px; font-weight: 400; color: #475569; margin-right: 4px;");
+                    container.appendChild(lblUser);
+                } else {
+                    // Turn "Status -> ACTIVE" or "Role -> OUTWARD_CHECKER" into clean pills
+                    Label pill = new Label(segment.replace("->", "→"));
+                    pill.setStyle("font-size: 11px; font-weight: 500; color: #334155; background: #f1f5f9; "
+                            + "border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; white-space: nowrap;");
+                    container.appendChild(pill);
+                }
+            }
+        } else {
+            // Standard single-line detail (e.g. Login messages)
+            Label lbl = new Label(rawDetails);
+            lbl.setStyle("font-size: 12px; color: #475569; line-height: 1.4;");
+            container.appendChild(lbl);
+        }
+
+        return container;
     }
 
     // Filter Actions

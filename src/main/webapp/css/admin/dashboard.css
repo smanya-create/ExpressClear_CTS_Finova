@@ -154,44 +154,53 @@
 
 /* Radio Selection Boxes */
 .cts-choice-box {
-    flex: 1;
-    border: 1px solid #cbd5e1;
+   background: #ffffff;
+    border: 1.5px solid #e2e8f0;
     border-radius: 8px;
-    padding: 18px 20px;
-    background: #ffffff;
+    padding: 14px 18px;
     cursor: pointer;
-    transition: all 0.15s ease-in-out;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
 }
 
 .cts-choice-box:hover {
-    border-color: #94a3b8;
+    border-color: #cbd5e1;
+    background-color: #f8fafc;
 }
 
 .cts-choice-box-active {
-    border: 2px solid #1d4ed8 !important;
-    background: #ffffff;
+   border: 1.5px solid #1e40af !important;
+    background: #f0f7ff !important;
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08) !important;
 }
 
 .cts-choice-inner {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
+   display: flex;
+    align-items: center;
 }
 
 /* Custom Circle Radio */
 .cts-custom-radio-ring {
-    width: 22px;
-    height: 22px;
+   width: 20px;
+    height: 20px;
+    min-width: 20px;
     border-radius: 50%;
-    border: 5px solid #1e3a5f;
+    border: 2px solid #cbd5e1;
     background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 2px;
-    flex-shrink: 0;
 }
-
+.cts-custom-radio-ring.cts-radio-checked {
+    border-color: #1e40af;
+    
+}
+.cts-custom-radio-ring.cts-radio-checked .cts-radio-dot {
+   width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #1e40af;
+}
 .cts-choice-box:not(.cts-choice-box-active) .cts-custom-radio-ring {
     border: 2px solid #94a3b8;
 }
@@ -202,16 +211,16 @@
 }
 
 .cts-choice-title {
-    font-size: 14px;
-    font-weight: 700;
+   font-size: 14px;
+    font-weight: 600;
     color: #1e293b;
+    line-height: 1;
 }
 
 .cts-choice-desc {
     font-size: 12px;
     color: #64748b;
-    margin-top: 2px;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .cts-text-muted {
@@ -219,10 +228,15 @@
 }
 
 .cts-eod-alert {
-    font-size: 12px;
-    font-weight: 700;
-    color: #b45309;
+    display: inline-block;
     margin-top: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #c2410c;
+    background: #fff7ed;
+    border: 1px solid #ffedd5;
+    border-radius: 20px;
 }
 
 /* Start Session Button */
@@ -346,4 +360,65 @@
 .cts-footer-right {
     font-size: 11px;
     color: #94a3b8;
+}
+/* Modal Wrapper & Shadows */
+.cts-custom-modal.z-window-noborder {
+    border-radius: 12px !important;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1) !important;
+    overflow: hidden;
+}
+
+.cts-custom-modal .z-window-content {
+    padding: 0 !important;
+}
+
+/* Icon Warning Circle */
+.cts-modal-icon-badge {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cts-modal-icon-badge.cts-badge-warning {
+    background-color: #fef3c7;
+    border: 1px solid #fde68a;
+}
+
+/* Cancel Button */
+.cts-modal-btn-cancel {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 7px 16px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease;
+}
+
+.cts-modal-btn-cancel:hover {
+    background-color: #e2e8f0 !important;
+}
+
+/* Danger / Action Button */
+.cts-modal-btn-danger {
+    background-color: #0f172a !important; /* Navy CTS Primary or #dc2626 for dark red */
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: 1px solid #0f172a !important;
+    border-radius: 6px !important;
+    padding: 7px 18px !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: background 0.15s ease;
+}
+
+.cts-modal-btn-danger:hover {
+    background-color: #1e293b !important;
 }
