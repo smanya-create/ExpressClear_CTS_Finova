@@ -1,4 +1,5 @@
 <?page title="ExpressClear CTS - Checker Reports" contentType="text/html;charset=UTF-8"?>
+<?link rel="stylesheet" type="text/css" href="/css/admin/role-management.css"?>
 <?link rel="stylesheet" type="text/css" href="/css/outward/cheque-reports.css"?>
 
 <zk>
@@ -51,19 +52,19 @@
 										<label value="Reports" sclass="section-title" style="font-size: 20px; font-weight: 700; color: #0f172a;" />
 									</vlayout>
 
-									<!-- COMPACT REPORT CARD (Matches exact width, padding, and layout) -->
+									<!-- COMPACT REPORT CARD -->
 									<vlayout sclass="report-card"
 											 width="860px"
-											 spacing="16px"
+											 spacing="18px"
 											 style="padding: 24px 28px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
 
 										<!-- Card Header Title -->
 										<label value="Report Parameters" style="font-size: 15px; font-weight: 700; color: #0f172a;" />
 
 										<!-- REPORT TYPE SELECTOR -->
-										<vlayout spacing="5px" hflex="1">
+										<vlayout spacing="6px" hflex="1">
 											<label value="REPORT TYPE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
-											<combobox id="cmbReportType" readonly="true" height="36px" hflex="1">
+											<combobox id="cmbReportType" readonly="true" height="38px" hflex="1" style="font-size: 13px;">
 												<comboitem label="Outward Clearing &amp; Batch Settlement Report (Pending, Verified, NPCI)" value="OUTWARD_CLEARING_SETTLEMENT" />
 												<comboitem label="Outward Cheque Rejection Audit Report (Rejections Only)" value="OUTWARD_REJECTIONS_AUDIT" />
 											</combobox>
@@ -71,38 +72,39 @@
 
 										<!-- SIDE-BY-SIDE DATES -->
 										<hlayout spacing="20px" hflex="1">
-											<vlayout spacing="5px" hflex="1">
+											<vlayout spacing="6px" hflex="1">
 												<label value="FROM DATE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
-												<datebox id="dateFrom" format="yyyy-MM-dd" height="36px" hflex="1" buttonVisible="true" sclass="report-datebox" />
+												<datebox id="dateFrom" format="dd-MM-yyyy" height="38px" hflex="1" buttonVisible="true" sclass="report-datebox" />
 											</vlayout>
 
-											<vlayout spacing="5px" hflex="1">
+											<vlayout spacing="6px" hflex="1">
 												<label value="TO DATE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
-												<datebox id="dateTo" format="yyyy-MM-dd" height="36px" hflex="1" buttonVisible="true" sclass="report-datebox" />
+												<datebox id="dateTo" format="dd-MM-yyyy" height="38px" hflex="1" buttonVisible="true" sclass="report-datebox" />
 											</vlayout>
 										</hlayout>
 
-										<!-- LIGHT DIVIDER -->
-										<separator bar="true" style="border-color: #f1f5f9; margin: 4px 0;" />
-
-										<!-- DOWNLOAD FORMATS & ACTION BUTTONS -->
+										<!-- EXPORT FORMAT SELECTOR -->
 										<vlayout spacing="8px" hflex="1">
-											<label value="DOWNLOAD FORMATS" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
-
-											<hlayout spacing="12px" hflex="1">
-												<button id="btnExportCsv"
-														label="Download CSV"
-														height="36px"
-														style="font-size: 12px; font-weight: 600; padding: 0 18px;"
-														sclass="generate-report-button" />
-
-												<button id="btnExportPdf"
-														label="Download PDF"
-														height="36px"
-														style="font-size: 12px; font-weight: 600; padding: 0 18px; background: #ffffff !important; color: #173b61 !important; border: 1.5px solid #173b61 !important;"
-														sclass="generate-report-button" />
-											</hlayout>
+											<label value="EXPORT FORMAT" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
+											<radiogroup id="rgExportFormat">
+												<hlayout spacing="28px" valign="middle" style="padding-top: 2px;">
+													<radio id="radPdf" label="PDF Document (.pdf)" value="PDF" selected="true" sclass="cts-radio" />
+													<radio id="radCsv" label="CSV Spreadsheet (.csv)" value="CSV" sclass="cts-radio" />
+												</hlayout>
+											</radiogroup>
 										</vlayout>
+
+										<!-- LIGHT DIVIDER -->
+										<div style="height: 1px; background: #e2e8f0; width: 100%; margin: 4px 0;" />
+
+										<!-- CONSOLIDATED PRIMARY ACTION BUTTON -->
+										<hlayout>
+											<button id="btnGenerateReport"
+													label="GENERATE REPORT"
+													iconSclass="z-icon-file-text-o"
+													height="38px"
+													sclass="btn-primary" />
+										</hlayout>
 
 									</vlayout>
 
