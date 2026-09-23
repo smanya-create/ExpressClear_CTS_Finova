@@ -6,23 +6,28 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Filedownload;
-import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Radiogroup;
 
 import com.iispl.cts.common.config.DBConnection;
-import com.iispl.cts.common.util.SecurityUtil;
 
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -41,41 +46,124 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 	private Combobox cmbReportType;
 	private Datebox dateFrom;
 	private Datebox dateTo;
-	private Button btnExportCsv;
-	private Button btnExportPdf;
+	private Radiogroup rgExportFormat;
+	private Button btnGenerateReport;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-		
 		super.doAfterCompose(comp);
 
-		java.util.Date today = new java.util.Date();
-		if (dateFrom != null) dateFrom.setValue(today);
-		if (dateTo != null) dateTo.setValue(today);
+		// Synchronize default dates with the active CTS clearing session
+		LocalDate clearingDate = getClearingDate();
+		java.util.Date defaultDate = java.util.Date.from(clearingDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		if (dateFrom != null) dateFrom.setValue(defaultDate);
+		if (dateTo != null) dateTo.setValue(defaultDate);
 
 		if (cmbReportType != null && cmbReportType.getItemCount() > 0) {
 			cmbReportType.setSelectedIndex(0);
 		}
 	}
 
+	private LocalDate getClearingDate() {
+		Object sessionDateObj = Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
+		if (sessionDateObj instanceof LocalDate) {
+			return (LocalDate) sessionDateObj;
+		} else if (sessionDateObj instanceof Date) {
+			return ((Date) sessionDateObj).toLocalDate();
+		}
+		return LocalDate.now();
+	}
+
+	private String getSelectedReportType() {
+		if (cmbReportType != null && cmbReportType.getSelectedItem() != null) {
+			return cmbReportType.getSelectedItem().getValue();
+		}
+		return "OUTWARD_CLEARING_SETTLEMENT";
+	}
+
 	// =========================================================================
-	// 1. CSV EXPORT DISPATCHER
+	// UNIFIED REPORT GENERATION DISPATCHER
 	// =========================================================================
-	public void onClick$btnExportCsv() {
+	public void onClick$btnGenerateReport(Event event) {
 		java.util.Date fromDate = dateFrom.getValue();
 		java.util.Date toDate = dateTo.getValue();
 
+		// 1. Strict parameter & date validations
 		if (!validateDates(fromDate, toDate)) return;
 
 		String reportType = getSelectedReportType();
-		if ("OUTWARD_REJECTIONS_AUDIT".equals(reportType)) {
-			exportRejectionAuditCsv(fromDate, toDate);
+
+		// 2. Zero-data pre-check guard (Prevents downloading blank reports)
+		if (!hasCheckerReportData(reportType, fromDate, toDate)) {
+			Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
+					"warning", null, "top_center", 3500);
+			return;
+		}
+
+		// 3. Resolve selected format from RadioGroup
+		String selectedFormat = (rgExportFormat != null && rgExportFormat.getSelectedItem() != null)
+				? rgExportFormat.getSelectedItem().getValue() : "PDF";
+
+		if ("CSV".equalsIgnoreCase(selectedFormat)) {
+			if ("OUTWARD_REJECTIONS_AUDIT".equals(reportType)) {
+				exportRejectionAuditCsv(fromDate, toDate);
+			} else {
+				exportClearingSettlementCsv(fromDate, toDate);
+			}
 		} else {
-			exportClearingSettlementCsv(fromDate, toDate);
+			exportReportPdf(fromDate, toDate, reportType);
 		}
 	}
 
+	// =========================================================================
+	// PRE-CHECK DATA AVAILABILITY (ZERO-DATA GUARD)
+	// =========================================================================
+	private boolean hasCheckerReportData(String reportType, java.util.Date fromDate, java.util.Date toDate) {
+		LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+		Timestamp startTs = Timestamp.valueOf(fromLocal.atStartOfDay());
+		Timestamp endTs = Timestamp.valueOf(toLocal.atTime(LocalTime.MAX));
+
+		try (Connection conn = DBConnection.getConnection()) {
+			if ("OUTWARD_REJECTIONS_AUDIT".equals(reportType)) {
+				String countSql = "SELECT COUNT(*) FROM outward_rejected_cheques WHERE rejected_date >= ? AND rejected_date <= ?";
+				try (PreparedStatement ps = conn.prepareStatement(countSql)) {
+					ps.setTimestamp(1, startTs);
+					ps.setTimestamp(2, endTs);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next() && rs.getInt(1) > 0) return true;
+					}
+				}
+			} else {
+				String countBatchSql = "SELECT COUNT(*) FROM outward_batch WHERE uploaded_at >= ? AND uploaded_at <= ?";
+				try (PreparedStatement ps = conn.prepareStatement(countBatchSql)) {
+					ps.setTimestamp(1, startTs);
+					ps.setTimestamp(2, endTs);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next() && rs.getInt(1) > 0) return true;
+					}
+				}
+
+				String countChequeSql = "SELECT COUNT(*) FROM outward_cheque WHERE created_at >= ? AND created_at <= ?";
+				try (PreparedStatement ps = conn.prepareStatement(countChequeSql)) {
+					ps.setTimestamp(1, startTs);
+					ps.setTimestamp(2, endTs);
+					try (ResultSet rs = ps.executeQuery()) {
+						if (rs.next() && rs.getInt(1) > 0) return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return false;
+	}
+
+	// =========================================================================
 	// CSV 1: OUTWARD CLEARING & BATCH SETTLEMENT
+	// =========================================================================
 	private void exportClearingSettlementCsv(java.util.Date fromDate, java.util.Date toDate) {
 		StringBuilder sb = new StringBuilder("\uFEFF");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -95,27 +183,30 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 				+ "       COALESCE(ob.batch_status, 'Pending') AS batch_status "
 				+ "FROM outward_batch ob "
 				+ "LEFT JOIN users u ON ob.uploaded_by = u.user_id "
-				+ "WHERE ob.uploaded_at::date >= ? AND ob.uploaded_at::date <= ? "
+				+ "WHERE ob.uploaded_at >= ? AND ob.uploaded_at <= ? "
 				+ "ORDER BY ob.uploaded_at DESC";
 
 		String chequeSql = "SELECT oc.outward_batch_id, oc.cheque_number, "
 				+ "       COALESCE(oc.drawee_account_number, '-') AS drawee_account_number, "
 				+ "       oc.cheque_amount, oc.cheque_status, oc.created_at "
 				+ "FROM outward_cheque oc "
-				+ "WHERE oc.created_at::date >= ? AND oc.created_at::date <= ? "
+				+ "WHERE oc.created_at >= ? AND oc.created_at <= ? "
 				+ "ORDER BY oc.created_at DESC";
 
+		LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		Timestamp startTs = Timestamp.valueOf(fromLocal.atStartOfDay());
+		Timestamp endTs = Timestamp.valueOf(toLocal.atTime(LocalTime.MAX));
+
 		try (Connection conn = DBConnection.getConnection()) {
-			Date sqlFrom = new Date(fromDate.getTime());
-			Date sqlTo = new Date(toDate.getTime());
+			boolean hasData = false;
 
 			try (PreparedStatement psBatch = conn.prepareStatement(batchSql)) {
-				psBatch.setDate(1, sqlFrom);
-				psBatch.setDate(2, sqlTo);
+				psBatch.setTimestamp(1, startTs);
+				psBatch.setTimestamp(2, endTs);
 				try (ResultSet rs = psBatch.executeQuery()) {
-					boolean hasBatches = false;
 					while (rs.next()) {
-						hasBatches = true;
+						hasData = true;
 						String upTime = rs.getTimestamp("uploaded_at") != null ? sdf.format(rs.getTimestamp("uploaded_at")) : "-";
 						sb.append(String.format("\"%s\",\"%s\",=\"%s\",%d,\"%s\",\"%s\",\"%s\"\n",
 								rs.getString("outward_batch_id"),
@@ -126,7 +217,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 								rs.getString("uploaded_by"),
 								rs.getString("batch_status")));
 					}
-					if (!hasBatches) sb.append("\"No outward batches found for the selected date range.\",,,,,,\n");
 				}
 			}
 
@@ -134,12 +224,11 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 			sb.append("Batch ID,Cheque Number,Drawee Account No,Amount (INR),Cheque Status,Created At\n");
 
 			try (PreparedStatement psCheque = conn.prepareStatement(chequeSql)) {
-				psCheque.setDate(1, sqlFrom);
-				psCheque.setDate(2, sqlTo);
+				psCheque.setTimestamp(1, startTs);
+				psCheque.setTimestamp(2, endTs);
 				try (ResultSet rs = psCheque.executeQuery()) {
-					boolean hasCheques = false;
 					while (rs.next()) {
-						hasCheques = true;
+						hasData = true;
 						String ts = rs.getTimestamp("created_at") != null ? sdf.format(rs.getTimestamp("created_at")) : "-";
 						sb.append(String.format("\"%s\",=\"%s\",=\"%s\",\"%s\",\"%s\",=\"%s\"\n",
 								rs.getString("outward_batch_id"),
@@ -149,21 +238,29 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 								rs.getString("cheque_status"),
 								ts));
 					}
-					if (!hasCheques) sb.append("\"No outward cheques found for the selected date range.\",,,,,\n");
 				}
+			}
+
+			byte[] csvBytes = sb.toString().getBytes(StandardCharsets.UTF_8);
+			if (!hasData || isCsvEmpty(csvBytes)) {
+				Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
+						"warning", null, "top_center", 3500);
+				return;
 			}
 
 			SimpleDateFormat fSdf = new SimpleDateFormat("yyyyMMdd");
 			String fileName = "Checker_Clearing_Settlement_" + fSdf.format(fromDate) + "_to_" + fSdf.format(toDate) + ".csv";
-			Filedownload.save(sb.toString().getBytes(StandardCharsets.UTF_8), "text/csv", fileName);
+			Filedownload.save(csvBytes, "text/csv", fileName);
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Messagebox.show("Failed to export Settlement CSV: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+			Clients.showNotification("Failed to export Settlement CSV: " + e.getMessage(), "error", null, "top_center", 3500);
 		}
 	}
 
-	// CSV 2: REJECTED CHEQUES AUDIT (JOINED WITH OUTWARD_CHEQUE)
+	// =========================================================================
+	// CSV 2: REJECTED CHEQUES AUDIT
+	// =========================================================================
 	private void exportRejectionAuditCsv(java.util.Date fromDate, java.util.Date toDate) {
 		StringBuilder sb = new StringBuilder("\uFEFF");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -183,17 +280,22 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 				+ "FROM outward_rejected_cheques rc "
 				+ "INNER JOIN outward_cheque oc ON rc.outward_cheque_id = oc.outward_cheque_id "
 				+ "LEFT JOIN users u ON rc.rejected_by = u.user_id "
-				+ "WHERE rc.rejected_date::date >= ? AND rc.rejected_date::date <= ? "
+				+ "WHERE rc.rejected_date >= ? AND rc.rejected_date <= ? "
 				+ "ORDER BY rc.rejected_date DESC";
+
+		LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		Timestamp startTs = Timestamp.valueOf(fromLocal.atStartOfDay());
+		Timestamp endTs = Timestamp.valueOf(toLocal.atTime(LocalTime.MAX));
 
 		try (Connection conn = DBConnection.getConnection();
 		     PreparedStatement ps = conn.prepareStatement(sql)) {
 
-			ps.setDate(1, new Date(fromDate.getTime()));
-			ps.setDate(2, new Date(toDate.getTime()));
+			ps.setTimestamp(1, startTs);
+			ps.setTimestamp(2, endTs);
 
+			boolean hasRejections = false;
 			try (ResultSet rs = ps.executeQuery()) {
-				boolean hasRejections = false;
 				while (rs.next()) {
 					hasRejections = true;
 					String ts = rs.getTimestamp("rejected_date") != null ? sdf.format(rs.getTimestamp("rejected_date")) : "-";
@@ -207,45 +309,41 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 							rs.getString("rejected_by_user"),
 							ts));
 				}
-				if (!hasRejections) sb.append("\"No rejected cheques found for the selected date range.\",,,,,,, \n");
+			}
+
+			byte[] csvBytes = sb.toString().getBytes(StandardCharsets.UTF_8);
+			if (!hasRejections || isCsvEmpty(csvBytes)) {
+				Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
+						"warning", null, "top_center", 3500);
+				return;
 			}
 
 			SimpleDateFormat fSdf = new SimpleDateFormat("yyyyMMdd");
 			String fileName = "Checker_Rejections_Audit_" + fSdf.format(fromDate) + "_to_" + fSdf.format(toDate) + ".csv";
-			Filedownload.save(sb.toString().getBytes(StandardCharsets.UTF_8), "text/csv", fileName);
+			Filedownload.save(csvBytes, "text/csv", fileName);
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			Messagebox.show("Failed to export Rejections CSV: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+			Clients.showNotification("Failed to export Rejections CSV: " + e.getMessage(), "error", null, "top_center", 3500);
 		}
 	}
 
 	// =========================================================================
-	// 2. PDF EXPORT (DIRECT MULTI-LOADER JASPER EXECUTION)
+	// PDF EXPORT (DIRECT JASPER EXECUTION)
 	// =========================================================================
-	public void onClick$btnExportPdf() {
-		java.util.Date fromDate = dateFrom.getValue();
-		java.util.Date toDate = dateTo.getValue();
-
-		if (!validateDates(fromDate, toDate)) return;
-
-		String reportType = getSelectedReportType();
+	private void exportReportPdf(java.util.Date fromDate, java.util.Date toDate, String reportType) {
 		String targetPath = "OUTWARD_REJECTIONS_AUDIT".equals(reportType) 
 				? REJECTIONS_REPORT_PATH 
 				: SETTLEMENT_REPORT_PATH;
 
 		try {
-			if (btnExportPdf != null) btnExportPdf.setDisabled(true);
-
 			InputStream stream = locateReportStream(targetPath);
 			if (stream == null) {
 				stream = locateReportStream(LEGACY_FALLBACK_PATH);
 			}
 
 			if (stream == null) {
-				Messagebox.show("Jasper report template not found at:\n" + targetPath 
-						+ "\n\nPlease ensure the .jrxml is deployed in src/main/webapp/reports/", 
-						"Template Not Found", Messagebox.OK, Messagebox.ERROR);
+				Clients.showNotification("Jasper report template not found at: " + targetPath, "error", null, "top_center", 3500);
 				return;
 			}
 
@@ -266,10 +364,17 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 			try (Connection conn = DBConnection.getConnection()) {
 				JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
 				if (jasperPrint.getPages().isEmpty()) {
-					Messagebox.show("No records found for the selected date range.", "No Data", Messagebox.OK, Messagebox.INFORMATION);
+					Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
+							"warning", null, "top_center", 3500);
 					return;
 				}
 				pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
+			}
+
+			if (pdfBytes == null || pdfBytes.length == 0) {
+				Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
+						"warning", null, "top_center", 3500);
+				return;
 			}
 
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -280,9 +385,7 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			Messagebox.show("PDF export failed: " + ex.getMessage(), "Export Error", Messagebox.OK, Messagebox.ERROR);
-		} finally {
-			if (btnExportPdf != null) btnExportPdf.setDisabled(false);
+			Clients.showNotification("PDF export failed: " + ex.getMessage(), "error", null, "top_center", 3500);
 		}
 	}
 
@@ -310,22 +413,55 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		return null;
 	}
 
+	// =========================================================================
+	// STRICT BANKING DATE VALIDATION
+	// =========================================================================
 	private boolean validateDates(java.util.Date fromDate, java.util.Date toDate) {
-		if (fromDate == null || toDate == null) {
-			Messagebox.show("Please select both From Date and To Date.", "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
+		if (cmbReportType.getSelectedItem() == null) {
+			Clients.showNotification("Please select a report type.", "error", cmbReportType, "top_center", 2500);
+			cmbReportType.focus();
+			return false;
+		}
+		if (fromDate == null) {
+			Clients.showNotification("From Date is required.", "error", dateFrom, "top_center", 2500);
+			dateFrom.focus();
+			return false;
+		}
+		if (toDate == null) {
+			Clients.showNotification("To Date is required.", "error", dateTo, "top_center", 2500);
+			dateTo.focus();
 			return false;
 		}
 		if (fromDate.after(toDate)) {
-			Messagebox.show("From Date cannot be later than To Date.", "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
+			Clients.showNotification("From Date cannot be later than To Date.", "error", dateFrom, "top_center", 3000);
+			dateFrom.focus();
 			return false;
 		}
+
+		// Future date restriction relative to active clearing session
+		LocalDate clearingDate = getClearingDate();
+		LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+		if (fromLocal.isAfter(clearingDate)) {
+			Clients.showNotification("From Date cannot be beyond current clearing date (" + clearingDate + ").", 
+					"error", dateFrom, "top_center", 3000);
+			dateFrom.focus();
+			return false;
+		}
+		if (toLocal.isAfter(clearingDate)) {
+			Clients.showNotification("To Date cannot be beyond current clearing date (" + clearingDate + ").", 
+					"error", dateTo, "top_center", 3000);
+			dateTo.focus();
+			return false;
+		}
+
 		return true;
 	}
 
-	private String getSelectedReportType() {
-		if (cmbReportType != null && cmbReportType.getSelectedItem() != null) {
-			return cmbReportType.getSelectedItem().getValue();
-		}
-		return "OUTWARD_CLEARING_SETTLEMENT";
+	private boolean isCsvEmpty(byte[] csvBytes) {
+		String content = new String(csvBytes, StandardCharsets.UTF_8).trim();
+		long lines = content.lines().count();
+		return lines <= 4 || content.contains("No records found");
 	}
 }
