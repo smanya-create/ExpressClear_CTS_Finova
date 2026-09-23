@@ -3,6 +3,7 @@ package com.iispl.cts.entity;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 
 public class ClearingSession implements Serializable {
@@ -17,12 +18,14 @@ public class ClearingSession implements Serializable {
     private String closedBy;
     private Timestamp closedAt;
     private String remarks;
+    private String cyclePhase;
+    private Time sessionTime;
 
     public ClearingSession() {
     }
 
     public ClearingSession(String sessionId, Date clearingDate, String sessionStatus, String openedBy, 
-                           Timestamp openedAt, String closedBy, Timestamp closedAt, String remarks) {
+                           Timestamp openedAt, String closedBy, Timestamp closedAt, String remarks,String cyclePhase) {
         this.sessionId = sessionId;
         this.clearingDate = clearingDate;
         this.sessionStatus = sessionStatus;
@@ -31,6 +34,7 @@ public class ClearingSession implements Serializable {
         this.closedBy = closedBy;
         this.closedAt = closedAt;
         this.remarks = remarks;
+        this.cyclePhase = cyclePhase;
     }
 
 	public String getSessionId() {
@@ -96,6 +100,20 @@ public class ClearingSession implements Serializable {
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
+	public String getCyclePhase() {
+        return cyclePhase;
+    }
+
+    public void setCyclePhase(String cyclePhase) {
+        this.cyclePhase = cyclePhase;
+    }
+    public Time getSessionTime() {
+        return sessionTime;
+    }
+
+    public void setSessionTime(Time sessionTime) {
+        this.sessionTime = sessionTime;
+    }
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
