@@ -525,14 +525,7 @@
                        cursor:pointer;" />
 							</div>
 						</div>
-						<hlayout width="100%" valign="middle"
-							sclass="verification-footer">
-							<label
-								value="CTS Inward Processing • Enterprise Clearing Application"
-								sclass="footer-text" hflex="1" />
-							<label value="v1.0" sclass="footer-version" />
-
-						</hlayout>
+						
 						<window id="rejectReasonWindow" title="Reject Cheque"
 							width="600px" closable="true" sizable="false" mode="modal"
 							visible="false" border="normal">
