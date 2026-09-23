@@ -11,18 +11,14 @@ import org.zkoss.zul.impl.InputElement;
 public class SecurityUtil {
 
     public static boolean hasPermission(String screenKey) {
-    	Session session = Sessions.getCurrent();
-        if (session == null) {
-            return false;
-        }
+        Session session = Sessions.getCurrent();
+        if (session == null) return false;
 
-        // 1. Admins bypass granular screen permission checks
         String role = (String) session.getAttribute("USER_ROLE");
         if (role != null && role.toUpperCase().contains("ADMIN")) {
             return true;
         }
 
-        // 2. Fetch granular permissions
         Object permsObj = session.getAttribute("USER_PERMISSIONS");
         if (permsObj == null || permsObj.toString().trim().isEmpty()) {
             return false;
@@ -37,7 +33,6 @@ public class SecurityUtil {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -64,11 +59,10 @@ public class SecurityUtil {
 
         return true;
     }
+
     public static void applySessionLockdown(Page page) {
         Session session = Sessions.getCurrent();
-        if (session == null || page == null) {
-            return;
-        }
+        if (session == null || page == null) return;
 
         // 1. Admin users bypass lockdown
         String role = (String) session.getAttribute("USER_ROLE");
@@ -77,32 +71,50 @@ public class SecurityUtil {
             return;
         }
 
-        // 2. If clearing session is OPEN, operations remain enabled
         Boolean isOpen = (Boolean) session.getAttribute("CTS_SESSION_OPEN");
-        if (Boolean.TRUE.equals(isOpen)) {
-            return;
-        }
+        String path = (page.getRequestPath() != null) ? page.getRequestPath().toLowerCase() : "";
 
-        // 3. Session is CLOSED: walk entire page tree and disable mutative elements
-        for (Component root : page.getRoots()) {
-            disableActionControls(root);
+        // Condition A: If DB session is CLOSED, lock everything
+        boolean lockAll = !Boolean.TRUE.equals(isOpen);
+
+        // Condition B: If Outward screen and not morning window, lock
+        boolean lockOutward = path.contains("/outward/") && !ClearingTimeMock.isOutwardWindow();
+
+        // Condition C: If Inward screen and not afternoon window, lock
+        boolean lockInward = path.contains("/inward/") && !ClearingTimeMock.isInwardWindow();
+
+        if (lockAll || lockOutward || lockInward) {
+            String reason = lockAll ? "Session is CLOSED by Admin." :
+                           (lockOutward ? "Outward Cutoff reached (02:00 PM). Presentation window closed." :
+                                          "Inward opens after Outward cutoff at 02:00 PM.");
+
+            for (Component root : page.getRoots()) {
+                disableActionControls(root, reason);
+            }
         }
     }
 
-    private static void disableActionControls(Component comp) {
+    private static void disableActionControls(Component comp, String tooltip) {
         if (comp instanceof Button) {
             Button btn = (Button) comp;
             String id = (btn.getId() != null) ? btn.getId().toLowerCase() : "";
-            // Keep navigational and view actions accessible
-            if (!id.contains("logout") && !id.contains("search") && !id.contains("view") && !id.contains("refresh")) {
+            String label = (btn.getLabel() != null) ? btn.getLabel().trim().toLowerCase() : "";
+
+            boolean isSystemControl = id.contains("logout") || id.contains("search") 
+                    || id.contains("view") || id.contains("refresh") || id.contains("page")
+                    || label.equals("«") || label.equals("‹") || label.equals("›") || label.equals("»");
+
+            if (!isSystemControl) {
                 btn.setDisabled(true);
+                btn.setTooltiptext(tooltip);
+                btn.setSclass("btn-grid-action btn-grid-action-disabled");
             }
         } else if (comp instanceof InputElement) {
             ((InputElement) comp).setReadonly(true);
         }
 
         for (Component child : comp.getChildren()) {
-            disableActionControls(child);
+            disableActionControls(child, tooltip);
         }
     }
 }

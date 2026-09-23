@@ -35,6 +35,7 @@ import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.common.util.ActiveUserManager;
+import com.iispl.cts.common.util.ClearingTimeMock;
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.PendingChequeDTO;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -471,8 +472,12 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 
 		String updateSessionSql = "UPDATE clearing_session " +
-				"SET session_status = 'CLOSED', closed_at = ?, closed_by = ?, remarks = ? " +
-				"WHERE clearing_date = ? AND session_status = 'OPEN'";
+		        "SET session_status = 'CLOSED', " +
+		        "    closed_at = ?, " +
+		        "    session_time = ?, " +
+		        "    closed_by = ?, " +
+		        "    remarks = ? " +
+		        "WHERE clearing_date = ? AND session_status = 'OPEN'";
 
 		String updateScanChequesSql = 
 				"UPDATE scan_cheque SET cheque_status = CASE " +
@@ -500,18 +505,20 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
 			try (PreparedStatement ps = conn.prepareStatement(updateSessionSql)) {
-				ps.setTimestamp(1, now);
-				ps.setString(2, adminUserId);
-				ps.setString(3, remarks != null ? remarks : "Normal EOD closed");
-				ps.setDate(4, Date.valueOf(this.currentClearingDate));
-				int rowsUpdated = ps.executeUpdate();
-				if (rowsUpdated == 0) {
-					conn.rollback();
-					Clients.showNotification("No OPEN session found for current date or session already closed.", "error", null, "top_center", 3000);
-					return;
-				}
-			}
+			    // 1. Simulated timestamp (e.g., 2026-09-22 15:30:xx)
+			    java.sql.Timestamp simulatedClosedAt = ClearingTimeMock.getProcessingTimestamp();
+			    
+			    // 2. Simulated time (e.g., 15:30:00)
+			    java.sql.Time finalSessionTime = java.sql.Time.valueOf(ClearingTimeMock.getCurrentTime());
 
+			    ps.setTimestamp(1, simulatedClosedAt);
+			    ps.setTime(2, finalSessionTime);
+			    ps.setString(3, adminUserId); // or your user ID variable
+			    ps.setString(4, remarks);       // or null / reason string
+			    ps.setDate(5, java.sql.Date.valueOf(currentClearingDate));
+
+			    ps.executeUpdate();
+			}
 			int rolledOverScan = 0;
 			int rolledOverOutward = 0;
 			if (isForced) {
@@ -543,6 +550,9 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
 			// Update User Session
 			Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", false);
+			// Broadcast to HeaderController across the active desktop
+			org.zkoss.zk.ui.event.EventQueues.lookup("SESSION_UPDATE_QUEUE", org.zkoss.zk.ui.event.EventQueues.DESKTOP, true)
+			    .publish(new org.zkoss.zk.ui.event.Event("onSessionClosed", null, "CLOSED"));
 			Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
 
 			// Update Application-Wide Scope so Makers & Checkers immediately reflect lock
@@ -580,109 +590,110 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 	}
 
 	private void handleBODFlow() {
-		// Re-verify against DB to eliminate stale state concurrency
-		fetchActiveClearingSession();
-		if (isSessionOpen) {
-			Clients.showNotification("Active clearing session is still OPEN in database. EOD must be completed first.", "error", null, "top_center", 2500);
-			return;
-		}
+	    // Re-verify against DB to eliminate stale state concurrency
+	    fetchActiveClearingSession();
+	    if (isSessionOpen) {
+	        Clients.showNotification("Active clearing session is still OPEN in database. EOD must be completed first.", "error", null, "top_center", 2500);
+	        return;
+	    }
 
-		String adminUserId = resolveLoggedInUserId();
-		LocalDate nextDate = this.currentClearingDate.plusDays(1);
-		Timestamp now = new Timestamp(System.currentTimeMillis());
+	    String adminUserId = resolveLoggedInUserId();
+	    LocalDate nextDate = this.currentClearingDate.plusDays(1);
 
-		String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
-		String countScanUnprocessed = "SELECT COUNT(*) FROM scan_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
-		String countOutwardUnprocessed = "SELECT COUNT(*) FROM outward_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
+	    // 1. Initial simulated morning time
+	    java.time.LocalTime morningTime = java.time.LocalTime.of(10, 30, 0);
+	    java.sql.Time sessionTime = java.sql.Time.valueOf(morningTime);
+	    Timestamp simulatedOpenedAt = Timestamp.valueOf(nextDate.atTime(morningTime));
 
-		Connection conn = null;
-		try {
-			conn = DBConnection.getConnection();
-			conn.setAutoCommit(false);
+	    // 2. Updated SQL: Explicitly insert cycle_phase and session_time
+	    String insertBodSql = "INSERT INTO clearing_session " +
+	            "(clearing_date, session_status, opened_by, opened_at, cycle_phase, session_time) " +
+	            "VALUES (?, 'OPEN', ?, ?, 'MORNING', ?)";
 
-			try (PreparedStatement psSession = conn.prepareStatement(insertBodSql)) {
-				psSession.setDate(1, Date.valueOf(nextDate));
-				psSession.setString(2, adminUserId);
-				psSession.setTimestamp(3, now);
-				psSession.executeUpdate();
-			}
+	    String countScanUnprocessed = "SELECT COUNT(*) FROM scan_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
+	    String countOutwardUnprocessed = "SELECT COUNT(*) FROM outward_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
 
-			int rolledOverScanCheques = 0;
-			int rolledOverCheckerCheques = 0;
+	    Connection conn = null;
+	    try {
+	        conn = DBConnection.getConnection();
+	        conn.setAutoCommit(false);
 
-			try (PreparedStatement ps = conn.prepareStatement(countScanUnprocessed);
-					ResultSet rs = ps.executeQuery()) {
-				if (rs.next()) rolledOverScanCheques = rs.getInt(1);
-			}
+	        try (PreparedStatement psSession = conn.prepareStatement(insertBodSql)) {
+	            psSession.setDate(1, Date.valueOf(nextDate));
+	            psSession.setString(2, adminUserId);
+	            psSession.setTimestamp(3, simulatedOpenedAt); // 2026-09-24 10:30:00
+	            psSession.setTime(4, sessionTime);            // 10:30:00
+	            psSession.executeUpdate();
+	        }
 
-			try (PreparedStatement ps = conn.prepareStatement(countOutwardUnprocessed);
-					ResultSet rs = ps.executeQuery()) {
-				if (rs.next()) rolledOverCheckerCheques = rs.getInt(1);
-			}
+	        int rolledOverScanCheques = 0;
+	        int rolledOverCheckerCheques = 0;
 
-			conn.commit();
+	        try (PreparedStatement ps = conn.prepareStatement(countScanUnprocessed);
+	                ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) rolledOverScanCheques = rs.getInt(1);
+	        }
 
-			String clearingDateStr = nextDate.format(dateFormatter);
+	        try (PreparedStatement ps = conn.prepareStatement(countOutwardUnprocessed);
+	                ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) rolledOverCheckerCheques = rs.getInt(1);
+	        }
 
-//			if (rolledOverScanCheques > 0) {
-//				String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
-//						+ rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
-//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-//						.sendNotification("OUTWARD_MAKER", null, makerMsg);
-//			}
-//
-//			if (rolledOverCheckerCheques > 0) {
-//				String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
-//						+ rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
-//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-//						.sendNotification("OUTWARD_CHECKER", null, checkerMsg);
-//			}
+	        conn.commit();
 
-			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
-					"BOD initialized for date: " + nextDate + " | Unprocessed scan: " + rolledOverScanCheques 
-					+ ", outward: " + rolledOverCheckerCheques, "SUCCESS");
+	        String clearingDateStr = nextDate.format(dateFormatter);
 
-			this.currentClearingDate = nextDate;
-			this.isSessionOpen = true;
-			this.selectedAction = "EOD";
-			this.pendingChequesCount = 0;
+	        AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
+	                "BOD initialized for date: " + nextDate + " | Unprocessed scan: " + rolledOverScanCheques 
+	                + ", outward: " + rolledOverCheckerCheques, "SUCCESS");
 
-			// Update User Session
-			Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", true);
-			Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
+	        this.currentClearingDate = nextDate;
+	        this.isSessionOpen = true;
+	        this.selectedAction = "EOD";
+	        this.pendingChequesCount = 0;
 
-			// Update Application-Wide Scope
-			if (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null) {
-			    getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CTS_SESSION_OPEN", true);
-			    getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CLEARING_DATE", this.currentClearingDate);
-			}
+	        // 3. Initialize ClearingTimeMock explicitly to MORNING
+	        com.iispl.cts.common.util.ClearingTimeMock.setPreset("MORNING");
 
-			Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
-			refreshUI();
+	        // Update User Session
+	        Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", true);
+	        Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
 
-			Clients.showNotification("BOD successfully initiated for " + clearingDateStr, "info", null, "top_center", 3000);
+	        // Update Application-Wide Scope
+	        if (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null) {
+	            getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CTS_SESSION_OPEN", true);
+	            getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CLEARING_DATE", this.currentClearingDate);
+	        }
 
-		} catch (SQLException ex) {
-			if (conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException rbEx) {
-					rbEx.printStackTrace();
-				}
-			}
-			ex.printStackTrace();
-			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_FAILED", "Failed to start BOD: " + ex.getMessage(), "FAILED");
-			Clients.showNotification("Database error starting BOD: " + ex.getMessage(), "error", null, "top_center", 3000);
-		} finally {
-			if (conn != null) {
-				try {
-					conn.setAutoCommit(true);
-					conn.close();
-				} catch (SQLException closeEx) {
-					closeEx.printStackTrace();
-				}
-			}
-		}
+	        Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
+	        refreshUI();
+
+	        Clients.showNotification("BOD successfully initiated for " + clearingDateStr, "info", null, "top_center", 3000);
+
+	        // 4. Force a clean page refresh so HeaderController re-runs doAfterCompose with MORNING
+	        org.zkoss.zk.ui.Executions.sendRedirect(null);
+
+	    } catch (SQLException ex) {
+	        if (conn != null) {
+	            try {
+	                conn.rollback();
+	            } catch (SQLException rbEx) {
+	                rbEx.printStackTrace();
+	            }
+	        }
+	        ex.printStackTrace();
+	        AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_FAILED", "Failed to start BOD: " + ex.getMessage(), "FAILED");
+	        Clients.showNotification("Database error starting BOD: " + ex.getMessage(), "error", null, "top_center", 3000);
+	    } finally {
+	        if (conn != null) {
+	            try {
+	                conn.setAutoCommit(true);
+	                conn.close();
+	            } catch (SQLException closeEx) {
+	                closeEx.printStackTrace();
+	            }
+	        }
+	    }
 	}
 
 	private String resolveLoggedInUserId() {

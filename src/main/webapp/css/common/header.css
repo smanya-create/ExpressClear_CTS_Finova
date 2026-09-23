@@ -78,3 +78,170 @@
     border: 1px solid #e2e8f0 !important;
     overflow: hidden;
 }
+/* ==========================================================================
+   Refined Enterprise Combobox (CTS Header)
+   ========================================================================== */
+
+/* Outer Label */
+.cts-cycle-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+}
+
+/* Master Input Wrapper */
+.cts-modern-select.z-combobox {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 32px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+    transition: all 0.15s ease-in-out !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.cts-modern-select.z-combobox:hover {
+    border-color: #94a3b8 !important;
+}
+
+/* Eliminate Default Blue Ring on Focus */
+.cts-modern-select.z-combobox-focus,
+.cts-modern-select.z-combobox:focus-within {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12) !important;
+    outline: none !important;
+}
+
+/* The Text Input Area */
+.cts-modern-select .z-combobox-input {
+    border: none !important;
+    background: transparent !important;
+    height: 30px !important;
+    line-height: 30px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    padding: 0 8px 0 10px !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+/* Dropdown Arrow Button */
+.cts-modern-select .z-combobox-button {
+    border: none !important;
+    background: transparent !important;
+    height: 30px !important;
+    width: 24px !important;
+    padding-right: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+
+.cts-modern-select .z-combobox-button .z-combobox-icon {
+    font-size: 10px !important;
+    color: #64748b !important;
+    transition: transform 0.2s ease, color 0.15s ease !important;
+}
+
+.cts-modern-select.z-combobox-open .z-combobox-icon {
+    transform: rotate(180deg) !important;
+    color: #0284c7 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown Popup Floating Card
+   -------------------------------------------------------------------------- */
+.z-combobox-popup {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    padding: 4px !important;
+    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 
+                0 4px 6px -4px rgba(15, 23, 42, 0.04) !important;
+    min-width: 210px !important;
+}
+
+/* Dropdown Rows */
+.z-combobox-popup .z-comboitem {
+    display: flex !important;
+    align-items: center !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+/* Row Hover State */
+.z-combobox-popup .z-comboitem:hover {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+/* Selected State */
+.z-combobox-popup .z-comboitem-selected {
+    background: #f0f9ff !important;
+    color: #0284c7 !important;
+    font-weight: 600 !important;
+}
+
+/* Left Icon Alignments */
+.z-combobox-popup .z-comboitem-icon {
+    font-size: 12px !important;
+    width: 18px !important;
+    text-align: left !important;
+    color: #64748b !important;
+    margin-right: 6px !important;
+}
+
+.z-combobox-popup .z-comboitem-selected .z-combobox-icon,
+.z-combobox-popup .z-comboitem-selected .z-comboitem-icon {
+    color: #0284c7 !important;
+}
+/* Ensure the full border renders on all sides without bottom clipping */
+.cts-header-cycle-select.z-combobox {
+    height: 28px !important;
+    line-height: 28px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+.cts-header-cycle-select .z-combobox-input {
+    height: 26px !important;
+    line-height: 26px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 6px 0 10px !important;
+    box-shadow: none !important;
+}
+
+.cts-header-cycle-select .z-combobox-button {
+    height: 26px !important;
+    line-height: 26px !important;
+    border: none !important;
+    background: transparent !important;
+    padding-right: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
