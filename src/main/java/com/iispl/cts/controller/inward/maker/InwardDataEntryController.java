@@ -253,14 +253,17 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 		}
 		
-		// Update header total count: in rework show rework queue size; in normal show batch total
-		if (lblTotalCheques != null) {
-			if (this.isReworkBatch) {
-				lblTotalCheques.setValue(this.activeQueue != null ? String.valueOf(this.activeQueue.size()) : "0");
-			} else if (batch != null) {
-				lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
-			}
-		}
+		// Update header total count: in rework show total rework items in this batch; in normal show batch total
+				if (lblTotalCheques != null) {
+					if (this.isReworkBatch) {
+						long totalReworkInBatch = allCheques != null ? allCheques.stream()
+								.filter(c -> sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId))
+								.count() : 0;
+						lblTotalCheques.setValue(String.valueOf(totalReworkInBatch));
+					} else if (batch != null) {
+						lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
+					}
+				}
 		
 		System.out.println("DEBUG isReworkBatch evaluated to: " + this.isReworkBatch);
 		System.out.println("DEBUG activeQueue size before return: " + (this.activeQueue != null ? this.activeQueue.size() : 0));
@@ -673,29 +676,43 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	private void updateProgressBar() {
 		// 1. REWORK QUEUE SCOPE
 		if (this.isReworkBatch) {
-			if (activeQueue == null || activeQueue.isEmpty()) {
-				if (pmBatchProgress != null) pmBatchProgress.setValue(100);
-				if (lblProgressText != null) lblProgressText.setValue("0/0 (100%)");
-				if (btnSubmitToChecker != null) btnSubmitToChecker.setDisabled(false);
+			List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
+			if (fullBatchCheques == null || fullBatchCheques.isEmpty()) {
+				if (pmBatchProgress != null) pmBatchProgress.setValue(0);
+				if (lblProgressText != null) lblProgressText.setValue("0/0 (0%)");
+				if (btnSubmitToChecker != null) btnSubmitToChecker.setDisabled(true);
 				return;
 			}
 
-			int totalInQueue = activeQueue.size();
-			long resolvedInQueue = activeQueue.stream()
+			// All cheques in this batch that belong to this rework cycle
+			List<InwardCheque> reworkCheques = fullBatchCheques.stream()
+					.filter(c -> sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId))
+					.collect(java.util.stream.Collectors.toList());
+
+			int totalRework = reworkCheques.size();
+			long resolvedRework = reworkCheques.stream()
 					.filter(c -> InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
 							|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
 					.count();
 
-			int percentage = (int) Math.round(((double) resolvedInQueue / totalInQueue) * 100);
+			int percentage = (totalRework > 0) ? (int) Math.round(((double) resolvedRework / totalRework) * 100) : 0;
 
 			if (pmBatchProgress != null)
 				pmBatchProgress.setValue(percentage);
 			if (lblProgressText != null)
-				lblProgressText.setValue(resolvedInQueue + "/" + totalInQueue);
+				lblProgressText.setValue(resolvedRework + "/" + totalRework);
 
-			boolean allResolved = (resolvedInQueue == totalInQueue);
+			// Enable submit ONLY when all rework items in the batch are resolved (and none pending in MICR)
+			boolean allResolved = (totalRework > 0 && resolvedRework == totalRework);
+			boolean micrPending = hasChequesPendingMicrRepair();
+
 			if (btnSubmitToChecker != null) {
-				btnSubmitToChecker.setDisabled(!allResolved);
+				btnSubmitToChecker.setDisabled(!allResolved || micrPending);
+				if (micrPending && allResolved) {
+					btnSubmitToChecker.setTooltiptext("Cannot submit: Cheques are still pending in MICR Repair.");
+				} else {
+					btnSubmitToChecker.setTooltiptext(null);
+				}
 			}
 			return;
 		}
@@ -726,8 +743,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			lblProgressText.setValue(resolvedInBatch + "/" + totalInBatch);
 
 		boolean allResolved = (resolvedInBatch == totalInBatch);
+		boolean micrPending = hasChequesPendingMicrRepair();
+
 		if (btnSubmitToChecker != null) {
-			btnSubmitToChecker.setDisabled(!allResolved);
+			btnSubmitToChecker.setDisabled(!allResolved || micrPending);
 		}
 	}
 
@@ -1289,5 +1308,24 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	    if (btnCancel != null) {
 	        btnCancel.setDisabled(isRejected);
 	    }
+	}
+	
+	private boolean hasChequesPendingMicrRepair() {
+		List<InwardCheque> fullBatch = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
+		if (fullBatch == null || fullBatch.isEmpty()) {
+			return false;
+		}
+		for (InwardCheque c : fullBatch) {
+			if (c != null && c.getChequeStatus() != null) {
+				String st = c.getChequeStatus().trim().toUpperCase();
+				if (st.contains("MICR") || InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(st)) {
+					// Check if it's not yet completed
+					if (!"MICR_REPAIR_COMPLETED".equalsIgnoreCase(st)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }
