@@ -983,7 +983,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String reasonLabel = cmbModalRejectionReason.getSelectedItem().getLabel();
 		String notifMsg = "Rejection requested for Cheque #" + current.getChequeNumber() + " in Batch "
-				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId + ". Stage: DATA_ENTRY.";
+				+ this.currentBatchId + " (" + reasonLabel + ") by Maker. Stage: DATA_ENTRY.";
 
 		notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
 
@@ -1080,7 +1080,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 			String notifMsg = this.isReworkBatch
 					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId + ")."
-					: "Batch " + currentBatchId + " submitted to Checker by Maker (" + userId + ").";
+					: "Batch " + currentBatchId + " submitted to Checker by Maker.";
 
 			notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
 		} catch (Exception e) {
