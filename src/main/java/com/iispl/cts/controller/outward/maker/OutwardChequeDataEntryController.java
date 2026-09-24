@@ -621,8 +621,9 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	/**
-	 * QUEUE FILTERING: If batch is ON_HOLD (rework), load ONLY cheques requiring
-	 * Maker rework (ON_HOLD, MAKER_RETURNED, PENDING_DATA_ENTRY). All
+	 * STRICT QUEUE ISOLATION (MATCHING INWARD PATTERN): When the batch is on hold
+	 * (rework mode), activeQueue ONLY loads cheques that were returned for
+	 * modification (ON_HOLD / MAKER_RETURNED / PENDING_DATA_ENTRY). All
 	 * already-verified cheques (PENDING_VERIFICATION) are completely excluded from
 	 * the queue.
 	 */
@@ -1173,8 +1174,10 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	/**
-	 * SINGLE DYNAMIC ALERT BANNER CONTROLLER (INWARD PATTERN): Updates the single
-	 * banner directly based on the exact status of the cheque.
+	 * SINGLE DYNAMIC ALERT BANNER CONTROLLER (INWARD PATTERN): Accurately detects
+	 * whether the current item is returned by Checker. When the batch is in rework
+	 * (isReworkBatch) and the cheque is pending modification, it displays the
+	 * orange Checker Return alert banner.
 	 */
 	private void updateCurrentChequeStatus(OutwardCheque cheque) {
 		hideBanner();
@@ -1183,18 +1186,27 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		String status = validator.normalizeStatus(cheque.getChequeStatus());
 
-		if (outwardChequeDataEntryLblChequeStatus != null) {
-			outwardChequeDataEntryLblChequeStatus.setValue(validator.formatDisplayStatus(status));
-		}
+		// 1. Orange Box: Returned by Checker (ON_HOLD / SEND_BACK or batch is in
+		// Rework)
+		if (validator.isOnHold(status) || (this.isReworkBatch && !STATUS_MAKER_RETURNED.equals(status))) {
+			if (outwardChequeDataEntryLblChequeStatus != null) {
+				outwardChequeDataEntryLblChequeStatus.setValue("Sent Back");
+			}
 
-		// 1. Orange Box: Returned by Checker (ON_HOLD / SEND_BACK)
-		if (validator.isOnHold(status)) {
-			showBanner("cts-alert-box-single state-orange", "CHECKER RETURNED FOR MODIFICATION",
-					"This cheque was returned by Checker for modification. Please verify and save.");
+			String details = getRejectionDetails(cheque);
+			String message = details.isEmpty()
+					? "This cheque was returned by Checker for modification. Please verify and save."
+					: details;
+
+			showBanner("cts-alert-box-single state-orange", "CHECKER RETURNED FOR MODIFICATION", message);
 			setChequeFieldsEditable(true);
 			updateActionButtons();
 			updateNavigationButtons();
 			return;
+		}
+
+		if (outwardChequeDataEntryLblChequeStatus != null) {
+			outwardChequeDataEntryLblChequeStatus.setValue(validator.formatDisplayStatus(status));
 		}
 
 		// 2. Green Box: Corrected by Maker (MAKER_RETURNED)
