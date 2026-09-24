@@ -19,18 +19,19 @@
 			<borderlayout width="100%" height="100%">
 
 				<north height="70px" border="0">
-				
+
 					<include src="/components/header.zul"
 						pageTitle="Inward Processing" pageSubtitle="Verification" />
 				</north>
 
-			
+
 				<center border="0" autoscroll="false" vflex="1"
 					style="background:#FFFFFF !important;">
 					<vlayout width="100%" spacing="10px" vflex="1"
 						sclass="verification-page">
 						<!-- BREADCRUMB -->
-						<hlayout spacing="8px" valign="middle" sclass="breadcrumb">
+						<hlayout spacing="8px" valign="middle"
+							sclass="breadcrumb">
 
 
 						</hlayout>
@@ -41,13 +42,14 @@
 
 							<vlayout spacing="3px" hflex="1">
 
-								<label value="CHEQUE VERIFICATION" sclass="page-title" />
+								<label value="CHEQUE VERIFICATION"
+									sclass="page-title" />
 
 
 							</vlayout>
 
-							<hlayout id="verificationNavigation" valign="middle"
-								spacing="8px" sclass="cheque-navigation">
+							<hlayout id="verificationNavigation"
+								valign="middle" spacing="8px" sclass="cheque-navigation">
 
 								<button id="btnPrevious" label="← Prev"
 									sclass="cheque-nav-btn" width="70px" height="32px"
@@ -59,45 +61,54 @@
 								<button id="btnNext" label="Next →"
 									sclass="cheque-nav-btn" width="70px" height="32px"
 									style="background:#0B2344;color:white;border:0;border-radius:4px;font-size:12px;" />
-<button id="btnSubmitVerification"
-        label="✓ Submit"
-        visible="false"
-        width="110px"
-        height="30px"
-        style="background:#198754;color:white;border:0;border-radius:4px;font-weight:600;text-align:center;padding:0;line-height:30px;" />
+								<button id="btnSubmitVerification"
+									label="✓ Submit" visible="false" width="110px" height="30px"
+									style="background:#198754;color:white;border:0;border-radius:4px;font-weight:600;text-align:center;padding:0;line-height:30px;" />
 							</hlayout>
 
 						</hlayout>
 
 
-						<div id="batchInfoCard" sclass="batch-info-card">
-							<hlayout width="100%" spacing="0" valign="top">
+						<div id="batchInfoCard"
+							sclass="batch-info-card">
+							<hlayout width="100%" spacing="0"
+								valign="top">
 								<!-- BATCH ID -->
-								<vlayout hflex="1" sclass="batch-info-item">
+								<vlayout hflex="1"
+									sclass="batch-info-item">
 
-									<label value="BATCH ID" sclass="info-label" />
-									<label value="" id="lblBatchId" sclass="info-value bold" />
+									<label value="BATCH ID"
+										sclass="info-label" />
+									<label value="" id="lblBatchId"
+										sclass="info-value bold" />
 								</vlayout>
 
 								<!-- TOTAL CHEQUES -->
 
-								<vlayout hflex="1" sclass="batch-info-item">
-									<label value="TOTAL CHEQUES" sclass="info-label" />
-									<label value="" id="lblTotalCheques" sclass="info-value" />
+								<vlayout hflex="1"
+									sclass="batch-info-item">
+									<label value="TOTAL CHEQUES"
+										sclass="info-label" />
+									<label value="" id="lblTotalCheques"
+										sclass="info-value" />
 								</vlayout>
 								<!-- CHEQUE NUMBER -->
-								<vlayout hflex="1" sclass="batch-info-item">
-									<label value="CHEQUE NO." sclass="info-label" />
+								<vlayout hflex="1"
+									sclass="batch-info-item">
+									<label value="CHEQUE NO."
+										sclass="info-label" />
 									<label value="" id="lblChequeNumber"
 										sclass="info-value bold" />
 
 								</vlayout>
 
 								<!-- CHEQUE STATUS -->
-								<vlayout hflex="1" sclass="batch-info-item"
+								<vlayout hflex="1"
+									sclass="batch-info-item"
 									style="padding-left:5px; padding-right:5px;">
 
-									<label value="CHEQUE STATUS" sclass="info-label" />
+									<label value="CHEQUE STATUS"
+										sclass="info-label" />
 
 									<label value="" id="lblChequeStatus"
 										sclass="status-badge mismatch"
@@ -109,14 +120,20 @@
 								</vlayout>
 
 								<!-- RECEIVED DATE -->
-								<vlayout hflex="1" sclass="batch-info-item">
-									<label value="RECEIVED DATE" sclass="info-label" />
-									<label value="" id="lblReceivedDate" sclass="info-value" />
+								<vlayout hflex="1"
+									sclass="batch-info-item">
+									<label value="RECEIVED DATE"
+										sclass="info-label" />
+									<label value="" id="lblReceivedDate"
+										sclass="info-value" />
 								</vlayout>
 								<!-- VERIFICATION -->
-								<vlayout hflex="1" sclass="batch-info-item">
-									<label value="VERIFICATION" sclass="info-label" />
-									<label value="" id="lblVerification" sclass="info-value" />
+								<vlayout hflex="1"
+									sclass="batch-info-item">
+									<label value="VERIFICATION"
+										sclass="info-label" />
+									<label value="" id="lblVerification"
+										sclass="info-value" />
 								</vlayout>
 
 							</hlayout>
@@ -129,57 +146,61 @@
 
 							<!-- LEFT SIDE - CHEQUE IMAGE -->
 
-							<vlayout sclass="verification-card cheque-image-card"
-								hflex="1" spacing="0">
+							<vlayout
+								sclass="verification-card cheque-image-card" hflex="1"
+								spacing="0">
 								<hlayout width="100%" valign="middle"
 									sclass="cheque-image-header">
 
 									<vlayout spacing="3px" hflex="1"
 										style="margin-bottom: 8px;">
 
-										<label value="CHEQUE IMAGE" sclass="card-title" />
+										<label value="CHEQUE IMAGE"
+											sclass="card-title" />
 
 										<label
 											value="Review the scanned cheque before making your verification decision."
 											sclass="card-description" />
 
 									</vlayout>
-									<hlayout valign="middle" spacing="5px"
-										style="margin-left:10px;margin-right:5px;">
+									<hlayout valign="middle"
+										spacing="5px" style="margin-left:10px;margin-right:5px;">
 
-										<button id="btnFront" label="Front"
-											sclass="cheque-side-btn" />
+										<button id="btnFront"
+											label="Front" sclass="cheque-side-btn" />
 
 										<!-- BACK -->
-										<button id="btnBack" label="Back"
-											sclass="cheque-side-btn" />
+										<button id="btnBack"
+											label="Back" sclass="cheque-side-btn" />
 
 									</hlayout>
 
 								</hlayout>
 
-								<div id="chequePreview" sclass="cheque-preview-area"
+								<div id="chequePreview"
+									sclass="cheque-preview-area"
 									style="height:245px;overflow:hidden;">
 
-									<image id="chequeImage" width="100%" height="100%"
-										style="object-fit:contain;" />
+									<image id="chequeImage" width="100%"
+										height="100%" style="object-fit:contain;" />
 								</div>
 
-								<hlayout spacing="8px" sclass="image-controls"
-									style="margin-top:8px;">
+								<hlayout spacing="8px"
+									sclass="image-controls" style="margin-top:8px;">
 									<button id="btnZoomOut" label="−"
 										sclass="image-control-btn" />
 									<button id="btnZoomReset" label="⌕"
 										sclass="image-control-btn" />
 									<button id="btnZoomIn" label="+"
 										sclass="image-control-btn" />
-									<button id="btnRotate" label="↻ Rotate"
-										sclass="image-control-wide" />
+									<button id="btnRotate"
+										label="↻ Rotate" sclass="image-control-wide" />
 								</hlayout>
 							</vlayout>
 
 							<!-- RIGHT SIDE WRAPPER -->
-							<vlayout hflex="1" vflex="1" spacing="8px">
+							<vlayout hflex="1" vflex="1"
+								spacing="8px">
 								<vlayout
 									sclass="verification-card cheque-verification-card" hflex="1"
 									vflex="1" spacing="0"
@@ -191,17 +212,19 @@
            overflow:hidden;">
 
 									<!-- CARD HEADER -->
-									<hlayout width="100%" valign="middle" spacing="5px"
-										sclass="verification-header-row"
+									<hlayout width="100%"
+										valign="middle" spacing="5px" sclass="verification-header-row"
 										style="padding-right:5px;
                 padding-top:2px;
                 padding-bottom:2px;
                 box-sizing:border-box;">
 
-										<label value="CHEQUE VERIFICATION" sclass="card-title"
-											hflex="1" style="white-space:nowrap;" />
+										<label
+											value="CHEQUE VERIFICATION" sclass="card-title" hflex="1"
+											style="white-space:nowrap;" />
 
-										<label id="lblVerificationStatus" value="PENDING"
+										<label
+											id="lblVerificationStatus" value="PENDING"
 											sclass="verification-status-pending" width="72px"
 											height="24px"
 											style="display:inline-flex;
@@ -227,30 +250,35 @@
            overflow-x:hidden;">
 
 
-										<vlayout id="makerRejectionRequestSection"
-											visible="false" spacing="3px"
+										<vlayout
+											id="makerRejectionRequestSection" visible="false"
+											spacing="3px"
 											style="margin:6px 0 6px 0;
            padding:7px 9px;
            background:#FFF7ED;
            border-left:3px solid #F59E0B;
            border-radius:3px;">
 
-											<label value="MAKER REJECTION REQUEST"
+											<label
+												value="MAKER REJECTION REQUEST"
 												style="font-size:10px;
                font-weight:700;
                color:#B45309;" />
 
-											<label id="lblMakerRejectionReasonCode" value=""
+											<label
+												id="lblMakerRejectionReasonCode" value=""
 												style="font-size:11px;
                color:#475569;
                white-space:normal;" />
 
-											<label id="lblMakerRejectionReasonName" value=""
+											<label
+												id="lblMakerRejectionReasonName" value=""
 												style="font-size:11px;
                color:#475569;
                white-space:normal;" />
 
-											<label id="lblMakerRejectionRemarks" value=""
+											<label
+												id="lblMakerRejectionRemarks" value=""
 												style="font-size:11px;
                color:#475569;
                white-space:normal;" />
@@ -258,30 +286,34 @@
 										</vlayout>
 
 
-										<vlayout id="rejectionDetailsSection" visible="false"
-											spacing="3px"
+										<vlayout
+											id="rejectionDetailsSection" visible="false" spacing="3px"
 											style="margin:6px 0 6px 0;
            padding:7px 9px;
            background:#FFF1F2;
            border-left:3px solid #DC2626;
            border-radius:3px;">
 
-											<label value="REJECTION DETAILS"
+											<label
+												value="REJECTION DETAILS"
 												style="font-size:10px;
                font-weight:700;
                color:#B91C1C;" />
 
-											<label id="lblRejectedReasonCode" value=""
+											<label
+												id="lblRejectedReasonCode" value=""
 												style="font-size:11px;
                color:#475569;
                white-space:normal;" />
 
-											<label id="lblRejectedReasonName" value=""
+											<label
+												id="lblRejectedReasonName" value=""
 												style="font-size:11px;
                color:#475569;
                white-space:normal;" />
 
-											<label id="lblRejectedReasonRemarks" value=""
+											<label
+												id="lblRejectedReasonRemarks" value=""
 												style="font-size:11px;
                color:#475569;
                white-space:normal;" />
@@ -291,18 +323,21 @@
 
 										<!-- CBS VALIDATION -->
 
-										<vlayout spacing="6px" sclass="verification-section">
+										<vlayout spacing="6px"
+											sclass="verification-section">
 
-											<label value="CBS VALIDATION"
-												sclass="verification-section-title" />
-											<vlayout spacing="7px" sclass="cbs-validation-box">
+											<label
+												value="CBS VALIDATION" sclass="verification-section-title" />
+											<vlayout spacing="7px"
+												sclass="cbs-validation-box">
 
 												<!-- MICR CODE -->
 												<hlayout width="100%">
-													<label value="MICR Code"
-														sclass="verification-field-label" hflex="1" />
-													<label value="" id="lblMicrCode"
-														sclass="verification-field-value" />
+													<label
+														value="MICR Code" sclass="verification-field-label"
+														hflex="1" />
+													<label value=""
+														id="lblMicrCode" sclass="verification-field-value" />
 
 												</hlayout>
 
@@ -312,13 +347,14 @@
 
 												<hlayout width="100%">
 
-													<label value="Bank Code"
-														sclass="verification-field-label" hflex="1" />
+													<label
+														value="Bank Code" sclass="verification-field-label"
+														hflex="1" />
 
 
 
-													<label value="" id="lblBankCode"
-														sclass="verification-field-value" />
+													<label value=""
+														id="lblBankCode" sclass="verification-field-value" />
 
 												</hlayout>
 
@@ -328,10 +364,11 @@
 
 												<hlayout width="100%">
 
-													<label value="Branch Code"
-														sclass="verification-field-label" hflex="1" />
-													<label value="" id="lblBranchCode"
-														sclass="verification-field-value" />
+													<label
+														value="Branch Code" sclass="verification-field-label"
+														hflex="1" />
+													<label value=""
+														id="lblBranchCode" sclass="verification-field-value" />
 
 												</hlayout>
 
@@ -341,11 +378,12 @@
 
 												<hlayout width="100%">
 
-													<label value="Transaction Code"
-														sclass="verification-field-label" hflex="1" />
+													<label
+														value="Transaction Code" sclass="verification-field-label"
+														hflex="1" />
 
-													<label value="" id="lblTransactionCode"
-														sclass="verification-field-value" />
+													<label value=""
+														id="lblTransactionCode" sclass="verification-field-value" />
 
 												</hlayout>
 
@@ -354,65 +392,77 @@
 
 										</vlayout>
 
-										<div sclass="verification-separator">
+										<div
+											sclass="verification-separator">
 										</div>
 										<!-- PRESENTING DETAILS -->
-										<vlayout spacing="7px" sclass="verification-section">
-											<label value="PRESENTING DETAILS"
+										<vlayout spacing="7px"
+											sclass="verification-section">
+											<label
+												value="PRESENTING DETAILS"
 												sclass="verification-section-title" />
 											<!-- PRESENTING BANK -->
 											<hlayout width="100%">
-												<label value="Presenting Bank"
-													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblPresentingBank"
-													sclass="verification-field-value" />
+												<label
+													value="Presenting Bank" sclass="verification-field-label"
+													hflex="1" />
+												<label value=""
+													id="lblPresentingBank" sclass="verification-field-value" />
 											</hlayout>
 											<!-- CHEQUE NUMBER -->
 											<hlayout width="100%">
-												<label value="Cheque Number "
-													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblVerificationChequeNumber"
+												<label
+													value="Cheque Number " sclass="verification-field-label"
+													hflex="1" />
+												<label value=""
+													id="lblVerificationChequeNumber"
 													sclass="verification-field-value" />
 											</hlayout>
 											<!-- CHEQUE DATE -->
 											<hlayout width="100%">
-												<label value="Cheque Date"
-													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblChequeDate"
-													sclass="verification-field-value" />
+												<label
+													value="Cheque Date" sclass="verification-field-label"
+													hflex="1" />
+												<label value=""
+													id="lblChequeDate" sclass="verification-field-value" />
 
 											</hlayout>
 											<hlayout width="100%">
 
 												<label value="Amount"
 													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblAmount"
-													sclass="verification-field-value" />
+												<label value=""
+													id="lblAmount" sclass="verification-field-value" />
 
 											</hlayout>
 										</vlayout>
 
-										<div sclass="verification-separator">
+										<div
+											sclass="verification-separator">
 										</div>
 
 
 
-										<vlayout spacing="7px" sclass="verification-section">
+										<vlayout spacing="7px"
+											sclass="verification-section">
 
-											<label value="DRAWEE DETAILS"
-												sclass="verification-section-title" />
+											<label
+												value="DRAWEE DETAILS" sclass="verification-section-title" />
 
 											<hlayout width="100%">
-												<label value="Drawee Name"
-													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblDraweeName"
-													sclass="verification-field-value" />
+												<label
+													value="Drawee Name" sclass="verification-field-label"
+													hflex="1" />
+												<label value=""
+													id="lblDraweeName" sclass="verification-field-value" />
 											</hlayout>
 
 											<hlayout width="100%">
-												<label value="Drawee Account No."
+												<label
+													value="Drawee Account No."
 													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblDraweeAccountNumber"
+												<label value=""
+													id="lblDraweeAccountNumber"
 													sclass="verification-field-value" />
 
 											</hlayout>
@@ -421,17 +471,19 @@
 
 											<hlayout width="100%">
 
-												<label value="Available Balance"
-													sclass="verification-field-label" hflex="1" />
-												<label value="" id="lblAccountBalance"
-													sclass="verification-field-value" />
+												<label
+													value="Available Balance" sclass="verification-field-label"
+													hflex="1" />
+												<label value=""
+													id="lblAccountBalance" sclass="verification-field-value" />
 
 											</hlayout>
 
 										</vlayout>
 
 
-										<div sclass="verification-separator">
+										<div
+											sclass="verification-separator">
 										</div>
 									</div>
 
@@ -439,15 +491,19 @@
 
 								<vlayout spacing="8px"
 									sclass="verification-action-section">
-									<label value="ACTION" sclass="verification-section-title" />
+									<label value="ACTION"
+										sclass="verification-section-title" />
 									<hlayout width="100%" spacing="8px"
 										sclass="verification-action-buttons">
-										<button id="btnAccept" label="✓ Accept"
+										<button id="btnAccept"
+											label="✓ Accept"
 											sclass="verification-action-btn accept-action-btn" hflex="1" />
-										<button id="btnReturn" label="✕ Reject"
+										<button id="btnReturn"
+											label="✕ Reject"
 											sclass="verification-action-btn return-action-btn" hflex="1" />
 
-										<button id="btnSendBack" label="↩ Send Back"
+										<button id="btnSendBack"
+											label="↩ Send Back"
 											sclass="verification-action-btn send-back-action-btn"
 											hflex="1" />
 									</hlayout>
@@ -459,8 +515,8 @@
 
 						</hlayout>
 
-						<div id="noChequesContainer" visible="false" hflex="1"
-							vflex="1"
+						<div id="noChequesContainer" visible="false"
+							hflex="1" vflex="1"
 							style="display:flex;
             justify-content:center;
             align-items:center;
@@ -514,8 +570,8 @@
                       margin-bottom:28px;" />
 
 								<!-- Dashboard Button -->
-								<button id="btnGoToDashboard" label="←  Go to Dashboard"
-									width="190px" height="42px"
+								<button id="btnGoToDashboard"
+									label="←  Go to Dashboard" width="190px" height="42px"
 									style="background:#1D5FBF;
                        color:white;
                        border:0;
@@ -525,10 +581,10 @@
                        cursor:pointer;" />
 							</div>
 						</div>
-						
-						<window id="rejectReasonWindow" title="Reject Cheque"
-							width="600px" closable="true" sizable="false" mode="modal"
-							visible="false" border="normal">
+
+						<window id="rejectReasonWindow"
+							title="Reject Cheque" width="600px" closable="true"
+							sizable="false" mode="modal" visible="false" border="normal">
 
 							<vlayout width="100%" spacing="15px"
 								style="padding:20px;">
@@ -544,9 +600,9 @@
 										value="Select the reason for rejecting this cheque."
 										style="font-size:12px;color:#6B7A90;" />
 
-									<combobox id="cmbRejectedReason" width="100%"
-										placeholder="Select rejected reason" readonly="true"
-										autodrop="true" />
+									<combobox id="cmbRejectedReason"
+										width="100%" placeholder="Select rejected reason"
+										readonly="true" autodrop="true" />
 
 								</vlayout>
 
@@ -557,8 +613,9 @@
 									<label value="Remarks"
 										style="font-weight:bold;font-size:14px;color:#0B2344;" />
 
-									<textbox id="txtRejectRemarks" width="100%"
-										height="90px" multiline="true" placeholder="Enter remarks..." />
+									<textbox id="txtRejectRemarks"
+										width="100%" height="90px" multiline="true"
+										placeholder="Enter remarks..." />
 
 								</vlayout>
 
@@ -567,11 +624,11 @@
 
 								<hlayout width="100%" spacing="8px">
 
-									<button id="btnCancelReject" label="Cancel" width="90px"
-										height="34px" />
+									<button id="btnCancelReject"
+										label="Cancel" width="90px" height="34px" />
 
-									<button id="btnProceedReject" label="✓ Proceed"
-										width="110px" height="34px"
+									<button id="btnProceedReject"
+										label="✓ Proceed" width="110px" height="34px"
 										style="background:#C62828;color:white;border:0;border-radius:4px;" />
 
 								</hlayout>
@@ -596,9 +653,9 @@
 										value="Select the reason for sending this cheque back to Maker."
 										style="font-size:12px;color:#6B7A90;" />
 
-									<combobox id="cmbSendBackReason" width="100%"
-										placeholder="Select send back reason" readonly="true"
-										autodrop="true" />
+									<combobox id="cmbSendBackReason"
+										width="100%" placeholder="Select send back reason"
+										readonly="true" autodrop="true" />
 
 								</vlayout>
 
@@ -608,19 +665,20 @@
 									<label value="Remarks"
 										style="font-weight:bold;font-size:14px;color:#0B2344;" />
 
-									<textbox id="txtSendBackRemarks" width="100%"
-										height="90px" multiline="true" placeholder="Enter remarks..." />
+									<textbox id="txtSendBackRemarks"
+										width="100%" height="90px" multiline="true"
+										placeholder="Enter remarks..." />
 
 								</vlayout>
 
 
 								<hlayout width="100%" spacing="8px">
 
-									<button id="btnCancelSendBack" label="Cancel"
-										width="90px" height="34px" />
+									<button id="btnCancelSendBack"
+										label="Cancel" width="90px" height="34px" />
 
-									<button id="btnProceedSendBack" label="✓ Proceed"
-										width="110px" height="34px"
+									<button id="btnProceedSendBack"
+										label="✓ Proceed" width="110px" height="34px"
 										style="background:#0B2344;color:white;border:0;border-radius:4px;" />
 
 								</hlayout>
@@ -652,7 +710,8 @@
 										<label value="TOTAL"
 											style="font-size:11px;color:#6B7A90;font-weight:600;" />
 
-										<label id="lblSummaryTotal" value="0"
+										<label id="lblSummaryTotal"
+											value="0"
 											style="font-size:24px;font-weight:700;color:#0B2344;" />
 
 									</vlayout>
@@ -663,7 +722,8 @@
 										<label value="ACCEPTED"
 											style="font-size:11px;color:#198754;font-weight:600;" />
 
-										<label id="lblSummaryAccepted" value="0"
+										<label id="lblSummaryAccepted"
+											value="0"
 											style="font-size:24px;font-weight:700;color:#198754;" />
 
 									</vlayout>
@@ -674,7 +734,8 @@
 										<label value="REJECTED"
 											style="font-size:11px;color:#C62828;font-weight:600;" />
 
-										<label id="lblSummaryRejected" value="0"
+										<label id="lblSummaryRejected"
+											value="0"
 											style="font-size:24px;font-weight:700;color:#C62828;" />
 
 									</vlayout>
@@ -697,8 +758,8 @@
 										label="Stay in Verification" sclass="stay-verification-btn"
 										width="150px" height="34px" />
 
-									<button id="btnSubmitBatch" label="✓ Submit"
-										width="110px" height="34px"
+									<button id="btnSubmitBatch"
+										label="✓ Submit" width="110px" height="34px"
 										style="background:#198754;color:white;border:0;border-radius:4px;" />
 
 								</hlayout>
