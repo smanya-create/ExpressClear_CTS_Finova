@@ -265,7 +265,7 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 								}
 							}
 
-							returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq,
+							returnedChequeList.add(new ReturnedChequeDisplayItem(bDto.getBatchId(), chq.getChequeNumber(),
 									displayStatus, displayReason));
 						}
 					}
@@ -314,21 +314,21 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 		for (int i = startIndex; i < endIndex; i++) {
 			ReturnedChequeDisplayItem item = returnedChequeList.get(i);
 			if (item != null) {
-				createReturnedChequeRow(item.batchId, item.cheque, item.displayStatus, item.reasonRemarks);
+				createReturnedChequeRow(item.batchId, item.chequeNumber, item.displayStatus, item.reasonRemarks);
 			}
 		}
 
 		updateReturnPagination();
 	}
 
-	private void createReturnedChequeRow(String batchId, InwardCheque cheque, String displayStatus,
+	private void createReturnedChequeRow(String batchId, String chequeNumber, String displayStatus,
 			String reasonRemarks) {
 		Row row = new Row();
 
 		Label batchIdLabel = new Label(getValue(batchId));
 		batchIdLabel.setSclass("inward-maker-batch-id");
 
-		Label chequeNumberLabel = new Label(getValue(cheque.getChequeNumber()));
+		Label chequeNumberLabel = new Label(getValue(chequeNumber));
 		chequeNumberLabel.setSclass("inward-maker-cheque-number");
 
 		Label statusLabel = new Label(getValue(displayStatus));
@@ -674,13 +674,13 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 
 	private static class ReturnedChequeDisplayItem {
 		final String batchId;
-		final InwardCheque cheque;
+		final String chequeNumber;
 		final String displayStatus;
 		final String reasonRemarks;
 
-		ReturnedChequeDisplayItem(String batchId, InwardCheque cheque, String displayStatus, String reasonRemarks) {
+		ReturnedChequeDisplayItem(String batchId, String chequeNumber, String displayStatus, String reasonRemarks) {
 			this.batchId = batchId;
-			this.cheque = cheque;
+			this.chequeNumber = chequeNumber;
 			this.displayStatus = displayStatus;
 			this.reasonRemarks = reasonRemarks;
 		}
