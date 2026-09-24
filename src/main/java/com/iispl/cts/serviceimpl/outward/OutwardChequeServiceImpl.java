@@ -14,6 +14,7 @@ import com.iispl.cts.dao.outward.OutwardChequeRequestDAO;
 import com.iispl.cts.daoimpl.outward.OutwardBatchDAOImpl;
 import com.iispl.cts.daoimpl.outward.OutwardChequeDAOImpl;
 import com.iispl.cts.daoimpl.outward.OutwardChequeRequestDAOImpl;
+import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.entity.outward.OutwardChequeRequest;
 import com.iispl.cts.service.outward.OutwardChequeService;
@@ -25,8 +26,9 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 	private final OutwardChequeRequestDAO outwardChequeRequestDAO;
 
 	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
-	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
-	private static final String STATUS_REJECTION_REJECT = "REJECTION_REJECT";
+	private static final String STATUS_MAKER_RETURNED = "MAKER_RETURNED";
+	private static final String STATUS_ON_HOLD = "ON_HOLD";
+	private static final String STATUS_REJECT_REQUEST = "REJECT_REQUEST";
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
 	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
 
@@ -142,24 +144,47 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			outwardBatchId = outwardBatchId.trim();
 			cheque.setOutwardBatchId(outwardBatchId);
 
-			// MICR_REJECTED becomes REJECTION_REQUEST in outward_cheque table
-			String currentStatus = cheque.getChequeStatus();
+			// Inspect batch status in DB: check if batch is ON_HOLD from Checker
+			OutwardBatch dbBatch = outwardBatchDAO.getBatchById(outwardBatchId);
+			boolean isBatchOnHold = dbBatch != null && STATUS_ON_HOLD.equalsIgnoreCase(dbBatch.getBatchStatus());
+
+			String currentStatus = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim().toUpperCase()
+					: "";
+			String existingChequeId = cheque.getOutwardChequeId();
+
+			if (existingChequeId != null && !existingChequeId.trim().isEmpty()) {
+				OutwardCheque dbCheque = outwardChequeDAO.getOutwardChequeById(existingChequeId.trim());
+				if (dbCheque != null && dbCheque.getChequeStatus() != null) {
+					String dbStatus = dbCheque.getChequeStatus().trim().toUpperCase();
+					if (STATUS_ON_HOLD.equals(dbStatus) || STATUS_MAKER_RETURNED.equals(dbStatus)) {
+						currentStatus = dbStatus;
+					}
+				}
+			}
+
+			// PERSISTENCE DECISION MATRIX:
 			String nextStatus;
 			if (STATUS_MICR_REJECTED.equalsIgnoreCase(currentStatus)) {
-				nextStatus = STATUS_REJECTION_REQUEST;
+				nextStatus = STATUS_REJECT_REQUEST;
+			} else if (isBatchOnHold || STATUS_ON_HOLD.equals(currentStatus)
+					|| STATUS_MAKER_RETURNED.equals(currentStatus)
+					|| STATUS_MAKER_RETURNED.equalsIgnoreCase(cheque.getChequeStatus())) {
+				// Returned rework cheques must save as MAKER_RETURNED
+				nextStatus = STATUS_MAKER_RETURNED;
 			} else {
+				// Fresh batch cheques must save as PENDING_VERIFICATION
 				nextStatus = STATUS_PENDING_VERIFICATION;
 			}
+
 			cheque.setChequeStatus(nextStatus);
 
-			String existingOutwardChequeId = cheque.getOutwardChequeId();
-			if (existingOutwardChequeId != null && !existingOutwardChequeId.trim().isEmpty()) {
-				existingOutwardChequeId = existingOutwardChequeId.trim();
-				cheque.setOutwardChequeId(existingOutwardChequeId);
+			if (existingChequeId != null && !existingChequeId.trim().isEmpty()) {
+				existingChequeId = existingChequeId.trim();
+				cheque.setOutwardChequeId(existingChequeId);
 
 				boolean updated = outwardChequeDAO.saveDataEntry(connection, cheque);
 				if (!updated) {
-					throw new IllegalStateException("Unable to update outward cheque: " + existingOutwardChequeId);
+					throw new IllegalStateException("Unable to update outward cheque: " + existingChequeId);
 				}
 			} else {
 				String outwardChequeId = outwardChequeDAO.createOutwardChequeFromScan(connection, outwardBatchId,
@@ -170,7 +195,6 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 				cheque.setOutwardChequeId(outwardChequeId.trim());
 			}
 
-			// Batch status remains untouched
 			connection.commit();
 			return cheque;
 
@@ -222,9 +246,8 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 				throw new IllegalStateException("Unable to resolve outward batch ID: " + batchId);
 			}
 
-			// Data Entry rejection sets status to REJECTION_REJECT
 			cheque.setOutwardBatchId(outwardBatchId);
-			cheque.setChequeStatus(STATUS_REJECTION_REJECT);
+			cheque.setChequeStatus(STATUS_REJECT_REQUEST);
 
 			String chequeId = cheque.getOutwardChequeId();
 			if (chequeId == null || chequeId.trim().isEmpty()) {
@@ -259,9 +282,8 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 				throw new IllegalStateException("Unable to save outward cheque rejection record: " + chequeId);
 			}
 
-			// Batch status stays untouched here
 			connection.commit();
-			cheque.setChequeStatus(STATUS_REJECTION_REJECT);
+			cheque.setChequeStatus(STATUS_REJECT_REQUEST);
 			return true;
 
 		} catch (Exception exception) {
@@ -342,7 +364,7 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 						+ " cheques are still pending Maker processing.");
 			}
 
-			// ONLY batch status changes to PENDING_CHECKER_PROCESS
+			// Batch status updates to PENDING_CHECKER_PROCESS
 			boolean updated = outwardBatchDAO.updateOutWardBatchStatus(connection, outwardBatchId,
 					STATUS_PENDING_CHECKER_PROCESS);
 			if (!updated) {
@@ -359,8 +381,6 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 			} catch (Exception ignored) {
 			}
 
-			// Cheques do NOT change to checker status; they stay PENDING_VERIFICATION,
-			// REJECTION_REQUEST, REJECTION_REJECT
 			connection.commit();
 			return true;
 

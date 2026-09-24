@@ -2,9 +2,9 @@ package com.iispl.cts.controller.outward.maker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -26,22 +26,15 @@ import com.iispl.cts.service.outward.ScanService;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
+import com.iispl.cts.validator.OutwardDataEntryValidator;
+import com.iispl.cts.validatorimpl.OutwardDataEntryValidatorImpl;
 
 public class OutwardDataEntryController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
 	private static final int PAGE_SIZE = 5;
 
-	private static final String STATUS_PENDING_MAKER_PROCESS = "PENDING_MAKER_PROCESS";
-	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
-	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
-	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
-	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
-	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
-	private static final String STATUS_REJECTION_REJECT = "REJECTION_REJECT";
-	private static final String STATUS_ON_HOLD = "ON_HOLD";
-
 	private static final String MODE_DATA_ENTRY = "DATA_ENTRY";
 	private static final String RETURN_FROM_CHECKER = "RETURN_FROM_CHECKER";
 	private static final String CHEQUE_DATA_ENTRY_ZUL = "/outward/maker/cheque-data-entry.zul";
@@ -59,6 +52,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 	private final ScanService scanService;
 	private final OutwardBatchService outwardBatchService;
 	private final OutwardChequeService outwardChequeService;
+	private final OutwardDataEntryValidator validator;
 
 	private List<OutwardBatch> outwardDataEntryBatchList;
 	private int outwardDataEntryCurrentPage = 1;
@@ -67,6 +61,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		scanService = new ScanServiceImpl();
 		outwardBatchService = new OutwardBatchServiceImpl();
 		outwardChequeService = new OutwardChequeServiceImpl();
+		validator = new OutwardDataEntryValidatorImpl();
 		outwardDataEntryBatchList = new ArrayList<>();
 	}
 
@@ -77,7 +72,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		outwardDataEntryRowsBatch = (Rows) comp.getFellow("outwardDataEntryRowsBatch");
 		outwardDataEntryEmptyState = (Vlayout) comp.getFellow("outwardDataEntryEmptyState");
 
-		outwardDataEntryLblCurrentPage = (Label) comp.getFellow("outwardDataEntryLblCurrentPage");
+		outwardDataEntryLblCurrentPage = (Label) comp.getFellow("outwardMakerLblCurrentPage");
 		outwardDataEntryLblBatchCount = (Label) comp.getFellow("outwardDataEntryLblBatchCount");
 
 		outwardDataEntryBtnFirst = (Button) comp.getFellow("outwardDataEntryBtnFirst");
@@ -101,37 +96,44 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private void loadInitialDataEntryBatches() {
 		List<ScanBatch> scanBatches = scanService.getMakerDashboardBatches();
-		if (scanBatches == null || scanBatches.isEmpty())
+		if (scanBatches == null || scanBatches.isEmpty()) {
 			return;
+		}
 
 		for (ScanBatch scanBatch : scanBatches) {
-			if (scanBatch == null)
+			if (scanBatch == null) {
 				continue;
+			}
 
-			String scannedBatchId = safeValue(scanBatch.getScannedBatchId());
-			if (scannedBatchId.isEmpty())
+			String scannedBatchId = validator.sanitizeBatchId(scanBatch.getScannedBatchId());
+			if (scannedBatchId.isEmpty()) {
 				continue;
+			}
 
 			List<ScanCheque> scanCheques = scanService.getChequesByBatchId(scannedBatchId);
-			if (scanCheques == null)
+			if (scanCheques == null) {
 				scanCheques = new ArrayList<>();
+			}
 
 			String outwardBatchId = getOutwardBatchId(scannedBatchId);
-			if (outwardBatchId.isEmpty())
+			if (outwardBatchId.isEmpty()) {
 				outwardBatchId = scannedBatchId;
+			}
 
 			int totalCheques = scanBatch.getActualChequeCount();
-			if (totalCheques <= 0)
+			if (totalCheques <= 0) {
 				totalCheques = scanCheques.size();
-			if (totalCheques <= 0)
+			}
+			if (totalCheques <= 0) {
 				continue;
+			}
 
 			OutwardBatch batch = new OutwardBatch();
 			batch.setOutwardBatchId(outwardBatchId);
 			batch.setBatchReferenceId(scanBatch.getBatchReferenceId());
 			batch.setActualChequeCount(totalCheques);
 			batch.setActualTotalAmount(scanBatch.getActualTotalAmount());
-			batch.setBatchStatus(normalizeStatus(scanBatch.getBatchStatus()));
+			batch.setBatchStatus(validator.normalizeStatus(scanBatch.getBatchStatus()));
 			batch.setUploadedBy(scanBatch.getUploadedBy());
 			batch.setUploadedAt(scanBatch.getUploadedAt());
 
@@ -143,20 +145,22 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private void loadExistingDataEntryBatches() {
 		List<OutwardBatch> batches = outwardBatchService.getBatchesReadyForDataEntry();
-		if (batches == null || batches.isEmpty())
+		if (batches == null || batches.isEmpty()) {
 			return;
+		}
 
 		for (OutwardBatch batch : batches) {
-			if (batch == null)
+			if (batch == null) {
 				continue;
+			}
 
-			String batchId = safeValue(batch.getOutwardBatchId());
-			if (batchId.isEmpty())
+			String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
+			if (!validator.isValidBatchId(batchId)) {
 				continue;
+			}
 
-			String status = normalizeStatus(batch.getBatchStatus());
-			if (!STATUS_PENDING_DATA_ENTRY.equals(status) && !STATUS_ON_HOLD.equals(status)
-					&& !STATUS_PENDING_MICR_REPAIR.equals(status) && !STATUS_PENDING_MAKER_PROCESS.equals(status)) {
+			String status = validator.normalizeStatus(batch.getBatchStatus());
+			if (!validator.isDataEntryEligible(status)) {
 				continue;
 			}
 
@@ -168,23 +172,26 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 	}
 
 	private String getOutwardBatchId(String scannedBatchId) {
-		if (isBlank(scannedBatchId))
+		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
 			return "";
+		}
 		try {
 			String outwardBatchId = outwardBatchService.getOutwardBatchIdByScannedBatchId(scannedBatchId);
-			return safeValue(outwardBatchId);
+			return validator.sanitizeBatchId(outwardBatchId);
 		} catch (Exception exception) {
 			return "";
 		}
 	}
 
 	private boolean containsBatch(String batchId) {
-		if (isBlank(batchId))
+		if (batchId == null || batchId.trim().isEmpty()) {
 			return false;
+		}
 		for (OutwardBatch batch : outwardDataEntryBatchList) {
-			if (batch == null)
+			if (batch == null) {
 				continue;
-			if (safeValue(batch.getOutwardBatchId()).equalsIgnoreCase(batchId.trim())) {
+			}
+			if (validator.sanitizeBatchId(batch.getOutwardBatchId()).equalsIgnoreCase(batchId.trim())) {
 				return true;
 			}
 		}
@@ -223,31 +230,32 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		Row row = new Row();
 		row.setSclass("outward-data-entry-row");
 
-		String batchId = safeValue(batch.getOutwardBatchId());
+		// 1. Batch No.
+		String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
 		Label batchLabel = new Label(batchId);
-		batchLabel.setSclass("outward-data-entry-cell outward-data-entry-batch-id");
+		batchLabel.setSclass("outward-data-entry-batch-id");
 
+		// 2. Total Cheques
 		int totalCheques = getTotalChequeCount(batch);
 		Label totalLabel = new Label(String.valueOf(totalCheques));
-		totalLabel.setSclass("outward-data-entry-cell outward-data-entry-number");
+		totalLabel.setSclass("outward-data-entry-number");
 
+		// 3. Pending Progress
 		int completedCheques = getCompletedMakerChequeCount(batch);
 		Label progressLabel = new Label(completedCheques + " / " + totalCheques);
-		progressLabel.setSclass("outward-data-entry-cell outward-data-entry-progress");
+		progressLabel.setSclass("outward-data-entry-progress");
 
+		// 4. MICR Rejected
 		int micrRejected = getMicrRejectedCount(batch);
 		Label micrRejectedLabel = new Label(String.valueOf(micrRejected));
-		if (micrRejected > 0) {
-			micrRejectedLabel.setSclass(
-					"outward-data-entry-cell outward-data-entry-micr-rejected outward-data-entry-micr-rejected-active");
-		} else {
-			micrRejectedLabel.setSclass("outward-data-entry-cell outward-data-entry-micr-rejected");
-		}
+		micrRejectedLabel.setSclass("outward-data-entry-micr-rejected");
 
-		String batchStatus = normalizeStatus(batch.getBatchStatus());
-		Label statusLabel = new Label(formatStatus(batchStatus));
-		statusLabel.setSclass("outward-data-entry-cell outward-data-entry-status " + getStatusClass(batchStatus));
+		// 5. Status Capsule
+		String batchStatus = validator.normalizeStatus(batch.getBatchStatus());
+		Label statusLabel = new Label(validator.formatStatus(batchStatus));
+		statusLabel.setSclass("outward-data-entry-status " + validator.getStatusClass(batchStatus));
 
+		// 6. Action Button: Proceed →
 		Button proceedButton = new Button("Proceed →");
 		proceedButton.setSclass("outward-data-entry-proceed-button");
 		proceedButton.addEventListener(Events.ON_CLICK, (EventListener<Event>) event -> openChequeDataEntry(batch));
@@ -268,7 +276,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		if (batch.getActualChequeCount() > 0)
 			return batch.getActualChequeCount();
 
-		String batchId = safeValue(batch.getOutwardBatchId());
+		String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
 		if (batchId.isEmpty())
 			return 0;
 
@@ -283,7 +291,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 	private int getCompletedMakerChequeCount(OutwardBatch batch) {
 		if (batch == null)
 			return 0;
-		String batchId = safeValue(batch.getOutwardBatchId());
+		String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
 		if (batchId.isEmpty())
 			return 0;
 
@@ -297,14 +305,14 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 	private int getMicrRejectedCount(OutwardBatch batch) {
 		if (batch == null)
 			return 0;
-		String batchId = safeValue(batch.getOutwardBatchId());
+		String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
 		if (batchId.isEmpty())
 			return 0;
 
 		List<OutwardCheque> outwardCheques = getOutwardCheques(batchId);
 		int rejectedCount = 0;
 		for (OutwardCheque cheque : outwardCheques) {
-			if (cheque != null && STATUS_MICR_REJECTED.equals(normalizeStatus(cheque.getChequeStatus()))) {
+			if (cheque != null && STATUS_MICR_REJECTED.equals(validator.normalizeStatus(cheque.getChequeStatus()))) {
 				rejectedCount++;
 			}
 		}
@@ -320,7 +328,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 			return 0;
 		int count = 0;
 		for (ScanCheque cheque : cheques) {
-			if (cheque != null && requiredStatus.equals(normalizeStatus(cheque.getChequeStatus()))) {
+			if (cheque != null && requiredStatus.equals(validator.normalizeStatus(cheque.getChequeStatus()))) {
 				count++;
 			}
 		}
@@ -339,17 +347,24 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 	private void openChequeDataEntry(OutwardBatch batch) {
 		if (batch == null)
 			return;
-		String batchId = safeValue(batch.getOutwardBatchId());
-		if (batchId.isEmpty())
+		String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
+		if (!validator.isValidBatchId(batchId))
 			return;
+
+		if (Sessions.getCurrent() != null) {
+			Sessions.getCurrent().setAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID", batchId);
+			Sessions.getCurrent().setAttribute("ACTIVE_OUTWARD_BATCH_ID", batchId);
+			Sessions.getCurrent().setAttribute("batchId", batchId);
+		}
 
 		Include mainContentArea = findMainContentArea(outwardDataEntryRowsBatch);
 		if (mainContentArea == null)
 			return;
 
-		String batchStatus = normalizeStatus(batch.getBatchStatus());
-		boolean returnedFromChecker = STATUS_ON_HOLD.equals(batchStatus);
-		String scannedBatchId = safeValue(outwardBatchService.getScannedBatchIdByOutwardBatchId(batchId));
+		String batchStatus = validator.normalizeStatus(batch.getBatchStatus());
+		boolean returnedFromChecker = validator.isReturnedFromChecker(batchStatus);
+		String scannedBatchId = validator
+				.sanitizeBatchId(outwardBatchService.getScannedBatchIdByOutwardBatchId(batchId));
 
 		mainContentArea.clearDynamicProperties();
 		mainContentArea.setDynamicProperty("batchId", batchId);
@@ -436,60 +451,5 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		if (outwardDataEntryBatchList == null || outwardDataEntryBatchList.isEmpty())
 			return 1;
 		return (int) Math.ceil((double) outwardDataEntryBatchList.size() / PAGE_SIZE);
-	}
-
-	private String getStatusClass(String status) {
-		String normalized = normalizeStatus(status);
-		if (STATUS_ON_HOLD.equals(normalized))
-			return "send-back";
-		if (STATUS_MICR_REJECTED.equals(normalized))
-			return "rejected";
-		if (STATUS_PENDING_VERIFICATION.equals(normalized))
-			return "completed";
-		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalized))
-			return "processing";
-		if (STATUS_REJECTION_REQUEST.equals(normalized) || STATUS_REJECTION_REJECT.equals(normalized))
-			return "rejection-request";
-		return "pending";
-	}
-
-	private String formatStatus(String status) {
-		String normalized = normalizeStatus(status);
-		if (STATUS_PENDING_MAKER_PROCESS.equals(normalized) || STATUS_PENDING_DATA_ENTRY.equals(normalized)) {
-			return "Pending Data Entry";
-		}
-		if (STATUS_ON_HOLD.equals(normalized)) {
-			return "On Hold (Returned)";
-		}
-		if (normalized.isEmpty())
-			return "-";
-
-		String[] parts = normalized.split("_");
-		StringBuilder result = new StringBuilder();
-		for (String part : parts) {
-			if (part == null || part.isEmpty())
-				continue;
-			if (result.length() > 0)
-				result.append(" ");
-			String lower = part.toLowerCase(Locale.ENGLISH);
-			result.append(Character.toUpperCase(lower.charAt(0)));
-			if (lower.length() > 1)
-				result.append(lower.substring(1));
-		}
-		return result.toString();
-	}
-
-	private String normalizeStatus(String status) {
-		if (status == null || status.trim().isEmpty())
-			return "";
-		return status.trim().replace("-", "_").replace(" ", "_").toUpperCase(Locale.ENGLISH);
-	}
-
-	private String safeValue(String value) {
-		return value == null ? "" : value.trim();
-	}
-
-	private boolean isBlank(String value) {
-		return value == null || value.trim().isEmpty();
 	}
 }

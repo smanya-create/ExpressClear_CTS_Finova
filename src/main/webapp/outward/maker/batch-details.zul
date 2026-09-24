@@ -1,149 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <zk>
-
 	<style src="/css/outward/maker-batch-details.css" />
 
-	<div id="outwardMakerBatchDetailsDiv" width="100%" height="100%"
+	<div id="outwardMakerBatchDetailsDiv"
 		sclass="outward-maker-batch-details"
 		apply="com.iispl.cts.controller.outward.maker.OutwardMakerBatchDetailsController">
 
 		<div sclass="outward-maker-batch-details-scroll">
 
-			<div sclass="outward-maker-batch-details-card">
-
-				<div sclass="outward-maker-batch-details-heading">
-
-					<div>
-						<label value="Batch Details"
-							sclass="outward-maker-batch-details-title" />
-
-						<label
-							value="View and process outward cheques in this batch."
-							sclass="outward-maker-batch-details-subtitle" />
-					</div>
-
-					<button id="outwardMakerBtnBack" label="&lt;- Back"
-						sclass="outward-maker-batch-back-button" />
-
+			<!-- Page Heading -->
+			<div sclass="outward-maker-batch-details-heading">
+				<div
+					sclass="outward-maker-batch-details-title-section">
+					<label value="Batch Details"
+						sclass="outward-maker-batch-details-title" />
+					<label
+						value="View and process outward cheques in this batch."
+						sclass="outward-maker-batch-details-subtitle" />
 				</div>
 
-				<div sclass="outward-maker-batch-summary">
+				<button id="outwardMakerBtnBack" label="Back"
+					iconSclass="z-icon-arrow-left"
+					sclass="outward-maker-btn-action-back" />
+			</div>
 
-					<div sclass="outward-maker-batch-summary-item">
-
-						<label value="BATCH ID"
-							sclass="outward-maker-batch-summary-label" />
-
-						<label id="outwardMakerLblBatchId" value="-"
-							sclass="outward-maker-batch-summary-value outward-maker-batch-id-highlight" />
-
-					</div>
-
-					<div sclass="outward-maker-batch-summary-item">
-
-						<label value="NO. OF CHEQUES"
-							sclass="outward-maker-batch-summary-label" />
-
-						<label id="outwardMakerLblChequeCount" value="0"
-							sclass="outward-maker-batch-summary-value" />
-
-					</div>
-
-					<div sclass="outward-maker-batch-summary-item">
-
-						<label value="TOTAL AMOUNT"
-							sclass="outward-maker-batch-summary-label" />
-
-						<label id="outwardMakerLblTotalAmount"
-							value="₹0.00" sclass="outward-maker-batch-summary-value" />
-
-					</div>
-
+			<!-- Batch Summary Card -->
+			<div sclass="outward-maker-batch-summary">
+				<div sclass="outward-maker-batch-summary-item">
+					<label value="Batch Id"
+						sclass="outward-maker-batch-summary-label" />
+					<label id="outwardMakerLblBatchId" value="-"
+						sclass="outward-maker-batch-summary-value outward-maker-batch-id-highlight" />
 				</div>
 
-				<div sclass="outward-maker-cheque-section">
+				<div sclass="outward-maker-batch-summary-item">
+					<label value="No. Of Cheques"
+						sclass="outward-maker-batch-summary-label" />
+					<label id="outwardMakerLblChequeCount" value="0"
+						sclass="outward-maker-batch-summary-value" />
+				</div>
 
+				<div sclass="outward-maker-batch-summary-item">
+					<label value="Total Amount"
+						sclass="outward-maker-batch-summary-label" />
+					<label id="outwardMakerLblTotalAmount" value="₹0.00"
+						sclass="outward-maker-batch-summary-value" />
+				</div>
+			</div>
+
+			<!-- Cheque Details Section -->
+			<div sclass="outward-maker-cheque-section">
+				<!-- Title with Subtitle stacked directly underneath -->
+				<div sclass="outward-maker-cheque-section-header">
 					<label value="Cheque Details"
 						sclass="outward-maker-cheque-section-title" />
-
 					<label
 						value="Review outward cheque information and take the required action."
 						sclass="outward-maker-cheque-section-subtitle" />
-
 				</div>
 
+				<!-- Pure DIV Table Card -->
 				<div sclass="outward-maker-cheque-table-card">
 
-					<grid id="outwardMakerGridChequeDetails"
-						height="300px" width="100%" sclass="outward-maker-cheque-grid">
+					<!-- Table Header Row (DIV) - Compact 30px / 8.5px -->
+					<div sclass="div-table-header">
+						<div sclass="div-th col-chq-no">
+							<label value="Cheque No." />
+						</div>
+						<div sclass="div-th col-acc-no">
+							<label value="Payee Account No." />
+						</div>
+						<div sclass="div-th col-date">
+							<label value="Cheque Date" />
+						</div>
+						<div sclass="div-th col-micr">
+							<label value="MICR Code" />
+						</div>
+						<div sclass="div-th col-status">
+							<label value="Cheque Status" />
+						</div>
+						<div sclass="div-th col-amount">
+							<label value="Cheque Amount" />
+						</div>
+						<div sclass="div-th col-action">
+							<label value="Action" />
+						</div>
+					</div>
 
-						<columns sizable="true">
+					<!-- Table Body Rows Container (DIV) -->
+					<div id="outwardMakerDivRowsContainer"
+						sclass="div-table-body">
+						<!-- Dynamic Row DIVs are appended here by Controller -->
+					</div>
 
-							<column label="Cheque No." width="14%"
-								align="center" />
-
-							<column label="Drawee Account No."
-								width="17%" align="center" />
-
-							<column label="Cheque Date" width="12%"
-								align="center" />
-
-							<column label="MICR Code" width="14%"
-								align="center" />
-
-							<column label="Cheque Status" width="19%"
-								align="center" />
-
-							<column label="Cheque Amount" width="12%"
-								align="center" />
-
-							<column label="Action" width="12%"
-								align="center" />
-
-						</columns>
-
-						<rows id="outwardMakerRowsChequeDetails" />
-
-					</grid>
-
-					<vlayout id="outwardMakerVlayoutEmptyState"
-						visible="false" sclass="outward-maker-batch-empty-state">
-
-						<label value="No cheques found"
-							sclass="outward-maker-batch-empty-title" />
-
+					<!-- Empty State (DIV) -->
+					<div id="outwardMakerVlayoutEmptyState"
+						visible="false" sclass="outward-maker-empty-state">
+						<label value="No Cheques Found"
+							sclass="outward-maker-empty-title" />
 						<label
 							value="There are currently no cheques available in this batch."
-							sclass="outward-maker-batch-empty-subtitle" />
+							sclass="outward-maker-empty-subtitle" />
+					</div>
 
-					</vlayout>
-
+					<!-- Pinned Centered Pagination Bar -->
+					<div sclass="outward-maker-pagination">
+						<button id="outwardMakerBtnFirst"
+							label="&lt;&lt;" sclass="outward-maker-pagination-button" />
+						<button id="outwardMakerBtnPrevious"
+							label="&lt;" sclass="outward-maker-pagination-button" />
+						<label id="outwardMakerLblCurrentPage"
+							value="1 / 1" sclass="outward-maker-pagination-label" />
+						<button id="outwardMakerBtnNext" label="&gt;"
+							sclass="outward-maker-pagination-button" />
+						<button id="outwardMakerBtnLast"
+							label="&gt;&gt;" sclass="outward-maker-pagination-button" />
+					</div>
 				</div>
-
-				<div sclass="outward-maker-batch-pagination">
-
-					<button id="outwardMakerBtnFirst" label="&lt;&lt;"
-						sclass="outward-maker-pagination-button" />
-
-					<button id="outwardMakerBtnPrevious" label="&lt;"
-						sclass="outward-maker-pagination-button" />
-
-					<label id="outwardMakerLblCurrentPage" value="1 / 1"
-						sclass="outward-maker-pagination-label" />
-
-					<button id="outwardMakerBtnNext" label="&gt;"
-						sclass="outward-maker-pagination-button" />
-
-					<button id="outwardMakerBtnLast" label="&gt;&gt;"
-						sclass="outward-maker-pagination-button" />
-
-				</div>
-
 			</div>
 
 		</div>
-
 	</div>
-
 </zk>
