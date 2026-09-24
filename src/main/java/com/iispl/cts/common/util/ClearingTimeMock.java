@@ -18,13 +18,24 @@ public class ClearingTimeMock {
 
     public static final String APP_KEY_PHASE = "CTS_GLOBAL_CYCLE_PHASE";
     public static final String APP_KEY_OFFSET_START = "CTS_GLOBAL_MOCK_START_INSTANT";
-    public static final LocalTime CUTOFF_TIME = LocalTime.of(14, 0); // 02:00 PM Cutoff
+
+    // --- Window Constants ---
+    // Outward Morning: 09:30 AM to 03:30 PM
+    public static final LocalTime OUTWARD_START   = LocalTime.of(9, 30, 0);
+    public static final LocalTime OUTWARD_CUTOFF  = LocalTime.of(15, 30, 0);
+
+    // Inward Afternoon: 03:30 PM to 06:00 PM
+    public static final LocalTime INWARD_START    = LocalTime.of(15, 30, 0);
+    public static final LocalTime INWARD_CUTOFF   = LocalTime.of(18, 0, 0);
+
+    // Backwards-compatibility alias for legacy calls
+    public static final LocalTime CUTOFF_TIME     = OUTWARD_CUTOFF;
 
     public static String getActivePhase() {
         Session session = Sessions.getCurrent();
         WebApp app = (session != null) ? session.getWebApp() : null;
 
-        // If in-memory cache is present and start instant exists, return it
+        // 1. If in-memory cache is present and start instant exists, return cached phase
         if (app != null) {
             Object cached = app.getAttribute(APP_KEY_PHASE);
             Object startObj = app.getAttribute(APP_KEY_OFFSET_START);
@@ -33,7 +44,7 @@ public class ClearingTimeMock {
             }
         }
 
-        // If cache is empty or start instant was not set, reload from DB
+        // 2. If cache is empty or start instant was not set, reload from DB
         String dbPhase = loadCycleFromDatabase();
         if (dbPhase == null) {
             dbPhase = "LIVE";
@@ -54,9 +65,10 @@ public class ClearingTimeMock {
             return LocalTime.now();
         }
 
+        // Base simulated start times: 09:30 for Morning, 15:30 for Afternoon
         LocalTime baseTime = "MORNING".equalsIgnoreCase(phase) 
-                ? LocalTime.of(10, 30, 0) 
-                : LocalTime.of(15, 30, 0);
+                ? OUTWARD_START 
+                : INWARD_START;
 
         Session session = Sessions.getCurrent();
         if (session != null && session.getWebApp() != null) {
@@ -71,14 +83,38 @@ public class ClearingTimeMock {
         return baseTime;
     }
 
+    /**
+     * Checks if current time is within Outward clearing window (09:30 to 15:30).
+     */
     public static boolean isOutwardWindow() {
         String phase = getActivePhase();
-        return "LIVE".equalsIgnoreCase(phase) || "MORNING".equalsIgnoreCase(phase);
+        if ("LIVE".equalsIgnoreCase(phase)) {
+            LocalTime now = LocalTime.now();
+            return !now.isBefore(OUTWARD_START) && now.isBefore(OUTWARD_CUTOFF);
+        }
+        
+        if ("MORNING".equalsIgnoreCase(phase)) {
+            LocalTime simTime = getCurrentTime();
+            return !simTime.isBefore(OUTWARD_START) && simTime.isBefore(OUTWARD_CUTOFF);
+        }
+        return false;
     }
 
+    /**
+     * Checks if current time is within Inward clearing window (15:30 to 18:00).
+     */
     public static boolean isInwardWindow() {
         String phase = getActivePhase();
-        return "LIVE".equalsIgnoreCase(phase) || "AFTERNOON".equalsIgnoreCase(phase);
+        if ("LIVE".equalsIgnoreCase(phase)) {
+            LocalTime now = LocalTime.now();
+            return !now.isBefore(INWARD_START) && !now.isAfter(INWARD_CUTOFF);
+        }
+        
+        if ("AFTERNOON".equalsIgnoreCase(phase)) {
+            LocalTime simTime = getCurrentTime();
+            return !simTime.isBefore(INWARD_START) && !simTime.isAfter(INWARD_CUTOFF);
+        }
+        return false;
     }
 
     public static void setPreset(String preset) {
@@ -87,10 +123,10 @@ public class ClearingTimeMock {
 
         if ("MORNING".equalsIgnoreCase(preset)) {
             phase = "MORNING";
-            baseTime = LocalTime.of(10, 30, 0);
+            baseTime = OUTWARD_START;  // 09:30:00
         } else if ("AFTERNOON".equalsIgnoreCase(preset)) {
             phase = "AFTERNOON";
-            baseTime = LocalTime.of(15, 30, 0);
+            baseTime = INWARD_START;   // 15:30:00
         }
 
         Session session = Sessions.getCurrent();
@@ -104,7 +140,6 @@ public class ClearingTimeMock {
     }
 
     private static String loadCycleFromDatabase() {
-        // Query the latest active open session first, or the most recent session
         String sql = "SELECT cycle_phase FROM clearing_session "
                    + "ORDER BY clearing_date DESC, opened_at DESC "
                    + "LIMIT 1";

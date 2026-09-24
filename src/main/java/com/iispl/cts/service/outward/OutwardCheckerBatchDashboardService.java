@@ -6,8 +6,7 @@ import java.util.List;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
 public interface OutwardCheckerBatchDashboardService {
-	List<OutwardBatch> searchPendingBatches(int pageNumber, int pageSize, String batchId);
-
-	int getSearchPendingBatchCount(String batchId);
+	List<OutwardBatch> searchPendingBatches(int pageNumber, int pageSize, String batchId, String status);
+	int getSearchPendingBatchCount(String batchId, String status);
 
 }

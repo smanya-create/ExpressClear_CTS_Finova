@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zk>
 
-	<style src="/css/inward/maker-dashboard.css?v=113" />
+	<style src="/css/inward/maker-dashboard.css?v=114" />
 
 	<div id="inwardMakerDivDashboard" width="100%" height="100%"
 		apply="com.iispl.cts.controller.inward.maker.InwardMakerDashboardController"
@@ -72,8 +72,6 @@
 							value="FIX_DATA_ENTRY" />
 						<comboitem label="Repair MICR"
 							value="REPAIR_MICR" />
-						<comboitem label="Needs Rework"
-							value="NEEDS_REWORK" />
 						<comboitem label="Resolved" value="RESOLVED" />
 					</combobox>
 

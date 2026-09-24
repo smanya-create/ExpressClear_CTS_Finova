@@ -120,6 +120,8 @@
     height: 48px;
 
     display: flex;
+    flex-direction: row;
+
     align-items: center;
     justify-content: space-between;
 
@@ -129,7 +131,6 @@
 
     flex-shrink: 0;
 }
-
 
 .section-heading {
     width: auto;
@@ -158,11 +159,14 @@
 /* =========================================================
    PAGINATION CARD
    ========================================================= */
+/* =========================================================
+   PAGINATION CARD - CORRECT ALIGNMENT
+   ========================================================= */
 
 .pagination-card {
-    width: 360px !important;
-    min-width: 360px !important;
-    max-width: 360px !important;
+    width: 380px !important;
+    min-width: 380px !important;
+    max-width: 380px !important;
 
     height: 48px !important;
     min-height: 48px !important;
@@ -171,9 +175,12 @@
     box-sizing: border-box !important;
 
     display: flex !important;
-    align-items: center !important;
+    flex-direction: row !important;
 
-    padding: 0 8px !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 10px !important;
 
     border: 1px solid #cbd5e1 !important;
     border-radius: 6px !important;
@@ -183,26 +190,34 @@
     flex-shrink: 0 !important;
 
     overflow: hidden !important;
+
+    gap: 0 !important;
 }
 
 
 /* =========================================================
    PROGRESS SECTION
+   Enough space for BAR + 13/13 (100%)
    ========================================================= */
 
 .progress-section {
-    width: 125px !important;
-    min-width: 125px !important;
-    max-width: 125px !important;
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
 
     height: 100% !important;
 
     display: flex !important;
-    align-items: center !important;
+    flex-direction: row !important;
 
-    gap: 6px !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 10px !important;
 
     flex-shrink: 0 !important;
+
+    box-sizing: border-box !important;
 }
 
 
@@ -216,19 +231,34 @@
     max-width: 78px !important;
 
     height: 7px !important;
+    min-height: 7px !important;
+    max-height: 7px !important;
 
     flex-shrink: 0 !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
 }
 
 
 /* =========================================================
    PROGRESS TEXT
+   Example:
+   13/13 (100%)
    ========================================================= */
 
 .progress-text {
-    width: 42px !important;
-    min-width: 42px !important;
-    max-width: 42px !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+
+    height: 20px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
 
     color: #475569 !important;
 
@@ -240,6 +270,10 @@
     white-space: nowrap !important;
 
     flex-shrink: 0 !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
 }
 
 
@@ -250,12 +284,13 @@
 .pagination-divider {
     width: 1px !important;
     min-width: 1px !important;
+    max-width: 1px !important;
 
     height: 25px !important;
 
     background: #d2d8e0 !important;
 
-    margin: 0 7px !important;
+    margin: 0 10px !important;
 
     flex-shrink: 0 !important;
 }
@@ -276,7 +311,13 @@
 
     box-sizing: border-box !important;
 
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
     padding: 0 !important;
+    margin: 0 !important;
 
     border: 1px solid #cbd5e1 !important;
     border-radius: 5px !important;
@@ -292,30 +333,28 @@
     white-space: nowrap !important;
 
     flex-shrink: 0 !important;
-}
 
-
-.pagination-button:hover {
-    background: #f1f5f9 !important;
-    border-color: #173b63 !important;
-    color: #173b63 !important;
-}
-
-
-.pagination-button:disabled {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
+    line-height: 30px !important;
 }
 
 
 /* =========================================================
    PAGINATION COUNT
+   Example:
+   13 of 13
    ========================================================= */
 
 .pagination-count {
     width: 55px !important;
     min-width: 55px !important;
     max-width: 55px !important;
+
+    height: 30px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
 
     color: #173b63 !important;
 
@@ -327,8 +366,11 @@
     white-space: nowrap !important;
 
     flex-shrink: 0 !important;
-}
 
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+}
 
 /* =========================================================
    SUMMARY CARD

@@ -4,7 +4,6 @@
 <zk>
 	<style src="/css/inward/batch.css" />
 
-	<!-- Use window as root so InwardBatchController can cast it without ClassCastException -->
 	<window id="inwardBatchQueueWindow" border="none" width="100%"
 		style="margin: 0 !important; padding: 0 !important;"
 		apply="com.iispl.cts.controller.inward.maker.InwardBatchController"
@@ -79,7 +78,6 @@
 						</hlayout>
 					</div>
 
-					<!-- Table with Deep Navy Header, Fixed Height Scroll, and Paging -->
 					<div sclass="batch-table-wrapper">
 						<listbox id="batchListbox" width="100%"
 							mold="paging" pageSize="10" sclass="batch-listbox"
