@@ -1,586 +1,474 @@
 .outward-maker-batch-details {
-	width: 100% !important;
-	height: 100% !important;
-	min-width: 0 !important;
-	min-height: 0 !important;
-	box-sizing: border-box !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #f8fafc !important;
-	overflow-x: hidden !important;
-	overflow-y: hidden !important;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	background: #f8fafc;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0f172a;
 }
 
 .outward-maker-batch-details-scroll {
-	width: 100% !important;
 	box-sizing: border-box !important;
-	margin: 0 !important;
-	padding: 16px 24px 24px 24px !important;
-	overflow-x: hidden !important;
-	overflow-y: hidden !important;
-}
-
-.outward-maker-batch-details-card {
 	width: 100% !important;
-	min-width: 0 !important;
-	box-sizing: border-box !important;
-	background: #ffffff !important;
-	border: 1px solid #dbe2ea !important;
-	border-radius: 12px !important;
-	padding: 20px !important;
-	box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+	padding: 8px 24px 16px 24px !important;
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 6px !important;
 }
 
 .outward-maker-batch-details-heading {
 	width: 100%;
 	box-sizing: border-box;
+	margin-bottom: 2px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 20px;
-	padding-bottom: 16px;
+}
+
+.outward-maker-batch-details-title-section {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
 }
 
 .outward-maker-batch-details-title {
 	display: block;
-	font-size: 24px !important;
-	font-weight: 800 !important;
-	color: #0f172a !important;
-	letter-spacing: 0.2px;
-	line-height: 28px !important;
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	color: #16223d !important;
+	line-height: 1.3 !important;
 }
 
 .outward-maker-batch-details-subtitle {
 	display: block;
-	margin-top: 4px;
-	font-size: 12px !important;
+	font-size: 10px !important;
+	font-weight: 400 !important;
 	color: #64748b !important;
-	line-height: 18px !important;
+	line-height: 1.3 !important;
 }
 
-.outward-maker-batch-back-button {
+/* Back Button */
+.outward-maker-btn-action-back, .outward-maker-btn-action-back.z-button
+	{
 	width: 105px !important;
 	min-width: 105px !important;
-	height: 34px !important;
-	padding: 0 12px !important;
-	box-sizing: border-box !important;
-	background: rgba(23, 37, 84, 0.06) !important;
-	background-color: rgba(23, 37, 84, 0.06) !important;
-	border: 1px solid rgba(23, 37, 84, 0.16) !important;
+	height: 32px !important;
+	min-height: 32px !important;
+	padding: 0 10px !important;
+	background: #172554 !important;
+	background-color: #172554 !important;
+	border: 1px solid #172554 !important;
 	border-radius: 6px !important;
-	color: #172554 !important;
+	color: #ffffff !important;
 	font-size: 11px !important;
 	font-weight: 700 !important;
 	cursor: pointer !important;
-	box-shadow: none !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	text-transform: none !important;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14) !important;
 }
 
-.outward-maker-batch-back-button\:hover {
-	background: rgba(23, 37, 84, 0.10) !important;
-	background-color: rgba(23, 37, 84, 0.10) !important;
-	border-color: rgba(23, 37, 84, 0.24) !important;
-	color: #172554 !important;
+.outward-maker-btn-action-back:hover, .outward-maker-btn-action-back.z-button:hover,
+	.outward-maker-btn-action-back.z-button:focus,
+	.outward-maker-btn-action-back.z-button:active {
+	background: #0f1b3d !important;
+	background-color: #0f1b3d !important;
+	border-color: #0f1b3d !important;
+	color: #ffffff !important;
 }
 
-.outward-maker-batch-back-button\:active {
-	background: rgba(23, 37, 84, 0.14) !important;
-	background-color: rgba(23, 37, 84, 0.14) !important;
-	border-color: rgba(23, 37, 84, 0.30) !important;
-	color: #172554 !important;
+.outward-maker-btn-action-back i {
+	color: #ffffff !important;
+	margin-right: 6px !important;
+	font-size: 11px !important;
 }
 
+/* Summary Card */
 .outward-maker-batch-summary {
 	display: flex;
 	width: 100%;
 	box-sizing: border-box;
-	background: #f8fafc;
-	border: 1px solid #dbe2ea;
+	background: #ffffff;
+	border: 1px solid #cbd5e1;
 	border-radius: 8px;
-	overflow: hidden;
-	margin-bottom: 20px;
+	padding: 8px 14px;
+	margin-bottom: 2px;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .outward-maker-batch-summary-item {
 	flex: 1;
 	min-width: 0;
 	box-sizing: border-box;
-	padding: 14px 20px;
+	padding: 2px 10px;
 	border-right: 1px solid #e2e8f0;
 }
 
-.outward-maker-batch-summary-item\:last-child {
+.outward-maker-batch-summary-item:last-child {
 	border-right: none;
 }
 
 .outward-maker-batch-summary-label {
 	display: block;
-	font-size: 10px !important;
+	font-size: 9px !important;
 	font-weight: 700 !important;
 	color: #64748b !important;
-	letter-spacing: 0.5px;
-	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	text-transform: none !important;
 }
 
 .outward-maker-batch-summary-value {
 	display: block;
-	margin-top: 5px;
-	font-size: 15px !important;
+	margin-top: 1px;
+	font-size: 13px !important;
 	font-weight: 800 !important;
 	color: #0f172a !important;
 }
 
 .outward-maker-batch-id-highlight {
-	color: #172554 !important;
+	color: #1d4ed8 !important;
 }
 
+/* Cheque Section & Vertical Subtitle Placement */
 .outward-maker-cheque-section {
 	width: 100%;
 	box-sizing: border-box;
-	margin-bottom: 10px;
+	margin-top: 4px;
+	display: flex;
+	flex-direction: column;
+}
+
+.outward-maker-cheque-section-header {
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: flex-start !important;
+	justify-content: flex-start !important;
+	gap: 2px !important;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 6px !important;
 }
 
 .outward-maker-cheque-section-title {
 	display: block;
-	font-size: 18px !important;
+	font-size: 13px !important;
 	font-weight: 800 !important;
 	color: #0f172a !important;
-	line-height: 23px !important;
+	line-height: 1.3 !important;
 }
 
 .outward-maker-cheque-section-subtitle {
 	display: block;
-	margin-top: 3px;
-	font-size: 11px !important;
+	font-size: 10px !important;
+	font-weight: 400 !important;
 	color: #64748b !important;
-	line-height: 17px !important;
+	line-height: 1.3 !important;
 }
 
 .outward-maker-cheque-table-card {
-	width: 100% !important;
-	min-width: 0 !important;
-	box-sizing: border-box !important;
-	margin-top: 10px !important;
-	background: #f8fafc !important;
-	border: 1px solid #cbd5e1 !important;
-	border-radius: 8px !important;
-	overflow: hidden !important;
-	padding: 0 !important;
+	width: 100%;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+	display: flex;
+	flex-direction: column;
 }
 
-.outward-maker-cheque-grid {
+/* ==========================================================================
+   COMPACT TABLE HEADER (Reduced to 30px Height, 8.5px Font Size)
+   ========================================================================== */
+.div-table-header {
+	display: flex !important;
 	width: 100% !important;
-	min-width: 0 !important;
-	border: none !important;
-	background: #f8fafc !important;
-	border-spacing: 0 !important;
-	border-collapse: collapse !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	table-layout: fixed !important;
-	height: 300px !important;
-	max-height: 300px !important;
-}
-
-.outward-maker-cheque-grid .z-grid-header {
-	margin: 0 !important;
-	padding: 0 !important;
 	background: #172554 !important;
-	background-color: #172554 !important;
-	border: none !important;
 	border-bottom: 1px solid #2563eb !important;
+	height: 30px !important;
+	min-height: 30px !important;
+	align-items: center !important;
 }
 
-.outward-maker-cheque-grid .z-grid-header table {
-	width: 100% !important;
-	min-width: 0 !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	border-spacing: 0 !important;
-	border-collapse: collapse !important;
-	table-layout: fixed !important;
-}
-
-.outward-maker-cheque-grid .z-column {
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #172554 !important;
-	background-color: #172554 !important;
-	border-right: 1px solid #334e9b !important;
-	border-bottom: none !important;
-}
-
-.outward-maker-cheque-grid .z-column\:last-child {
-	border-right: none !important;
-}
-
-.outward-maker-cheque-grid .z-column-content {
-	width: 100% !important;
-	min-height: 40px !important;
-	margin: 0 !important;
-	padding: 12px 4px !important;
-	box-sizing: border-box !important;
-	background: #172554 !important;
-	color: #ffffff !important;
-	font-size: 11px !important;
-	font-weight: 800 !important;
-	line-height: 16px !important;
-	text-align: center !important;
-	border: none !important;
-	white-space: normal !important;
-	overflow: hidden !important;
-	text-overflow: ellipsis !important;
-}
-
-.outward-maker-cheque-grid .z-grid-body {
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #f8fafc !important;
-	border: none !important;
-	overflow-y: auto !important;
-	overflow-x: hidden !important;
-	max-height: 260px !important;
-}
-
-.outward-maker-cheque-grid .z-grid-body {
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #f8fafc !important;
-	border: none !important;
-	overflow-y: auto !important;
-	overflow-x: hidden !important;
-	max-height: 260px !important;
-}
-
-.outward-maker-cheque-grid .z-grid-body {
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #f8fafc !important;
-	border: none !important;
-	overflow-y: auto !important;
-	overflow-x: hidden !important;
-}
-
-.outward-maker-cheque-grid .z-grid-body table {
-	width: 100% !important;
-	min-width: 0 !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	border-spacing: 0 !important;
-	border-collapse: collapse !important;
-	table-layout: fixed !important;
-	background: #f8fafc !important;
-}
-
-.outward-maker-cheque-grid .z-row {
-	height: 60px !important;
-	min-height: 60px !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #f8fafc !important;
-	border: none !important;
-	border-bottom: 1px solid #e2e8f0 !important;
-}
-
-.outward-maker-cheque-grid .z-row\:last-child {
-	border-bottom: none !important;
-}
-
-.outward-maker-cheque-grid .z-row-inner, .outward-maker-cheque-grid .z-cell
-	{
-	margin: 0 !important;
-	padding: 0 !important;
-	background: #f8fafc !important;
-	border: none !important;
-	text-align: center !important;
-	vertical-align: middle !important;
-}
-
-.outward-maker-cheque-grid .z-cell {
-	border-right: 1px solid #e2e8f0 !important;
-}
-
-.outward-maker-cheque-grid .z-cell\:last-child {
-	border-right: none !important;
-}
-
-.outward-maker-cheque-grid .z-row-content {
-	width: 100% !important;
-	margin: 0 !important;
-	padding: 10px 4px !important;
-	box-sizing: border-box !important;
-	background: #f8fafc !important;
-	color: #334155 !important;
-	font-size: 10px !important;
-	line-height: 16px !important;
-	text-align: center !important;
-	vertical-align: middle !important;
-	border: none !important;
-	white-space: nowrap !important;
-	overflow: hidden !important;
-	text-overflow: ellipsis !important;
-}
-
-.outward-maker-cheque-grid .z-row\:hover, .outward-maker-cheque-grid .z-row\:hover .z-cell,
-	.outward-maker-cheque-grid .z-row\:hover .z-row-content {
-	background: #eef2f7 !important;
-}
-
-.outward-maker-cheque-number {
-	display: inline-block !important;
-	font-size: 10px !important;
-	font-weight: 800 !important;
-	color: #1d4ed8 !important;
-	text-align: center !important;
-	white-space: nowrap !important;
-}
-
-.outward-maker-drawee-account, .outward-maker-cheque-date,
-	.outward-maker-micr-code {
-	display: inline-block !important;
-	font-size: 10px !important;
-	font-weight: 600 !important;
-	color: #334155 !important;
-	text-align: center !important;
-	white-space: nowrap !important;
-}
-
-.outward-maker-cheque-amount {
-	display: inline-block !important;
-	font-size: 10px !important;
-	font-weight: 700 !important;
-	color: #0f172a !important;
-	text-align: center !important;
-	white-space: nowrap !important;
-}
-
-.outward-maker-cheque-status {
+.div-th {
+	height: 30px !important;
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
-	width: 100% !important;
-	height: 32px !important;
-	min-height: 32px !important;
-	margin: 0 !important;
-	padding: 0 8px !important;
+	border-right: 1px solid #2563eb !important;
 	box-sizing: border-box !important;
-	border-radius: 16px !important;
-	font-size: 9.5px !important;
-	font-weight: 800 !important;
-	line-height: 32px !important;
+	padding: 0 4px !important;
 	text-align: center !important;
 	white-space: nowrap !important;
-	color: #334155 !important;
-	overflow: hidden !important;
-	text-overflow: ellipsis !important;
 }
 
-.outward-maker-cheque-status.pending-maker-process {
-	background: rgba(254, 249, 195, 0.85) !important;
-	border: 1px solid rgba(234, 179, 8, 0.32) !important;
-	color: #854d0e !important;
+.div-th .z-label, .div-th label {
+	color: #ffffff !important;
+	font-size: 8.5px !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.2px !important;
 }
 
-.outward-maker-cheque-status.pending-data-entry {
-	background: rgba(255, 237, 213, 0.85) !important;
-	border: 1px solid rgba(249, 115, 22, 0.32) !important;
-	color: #c2410c !important;
+.div-th:last-child {
+	border-right: none !important;
 }
 
-.outward-maker-cheque-status.pending-micr-repair {
-	background: rgba(254, 226, 226, 0.85) !important;
-	border: 1px solid rgba(220, 38, 38, 0.32) !important;
-	color: #b91c1c !important;
+.div-table-body {
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+	background: #ffffff !important;
+	min-height: 150px !important;
 }
 
-.outward-maker-cheque-status.micr-rejected {
-	background: rgba(254, 226, 226, 0.85) !important;
-	border: 1px solid rgba(220, 38, 38, 0.32) !important;
-	color: #b91c1c !important;
+.div-table-row {
+	display: flex !important;
+	width: 100% !important;
+	height: 42px !important;
+	min-height: 42px !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+	align-items: center !important;
+	background: #ffffff !important;
+	transition: background 0.15s ease !important;
 }
 
-.outward-maker-cheque-status.pending-checker-process {
-	background: rgba(224, 231, 255, 0.85) !important;
-	border: 1px solid rgba(79, 70, 229, 0.30) !important;
-	color: #3730a3 !important;
+.div-table-row:hover {
+	background: #f1f5f9 !important;
 }
 
-.outward-maker-cheque-status.pending-verification {
-	background: rgba(219, 234, 254, 0.85) !important;
-	border: 1px solid rgba(59, 130, 246, 0.30) !important;
+.div-td {
+	height: 42px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	border-right: 1px solid #e2e8f0 !important;
+	box-sizing: border-box !important;
+	padding: 0 6px !important;
+	text-align: center !important;
+}
+
+.div-td:last-child {
+	border-right: none !important;
+}
+
+/* Precise Fixed Column Proportions */
+.col-chq-no {
+	width: 14% !important;
+	flex: 0 0 14% !important;
+}
+
+.col-acc-no {
+	width: 18% !important;
+	flex: 0 0 18% !important;
+}
+
+.col-date {
+	width: 13% !important;
+	flex: 0 0 13% !important;
+}
+
+.col-micr {
+	width: 14% !important;
+	flex: 0 0 14% !important;
+}
+
+.col-status {
+	width: 19% !important;
+	flex: 0 0 19% !important;
+}
+
+.col-amount {
+	width: 11% !important;
+	flex: 0 0 11% !important;
+}
+
+.col-action {
+	width: 11% !important;
+	flex: 0 0 11% !important;
+}
+
+/* Cell Content Text */
+.outward-maker-batch-cheque-number {
+	font-size: 9.5px !important;
+	font-weight: 800 !important;
 	color: #1d4ed8 !important;
 }
 
-.outward-maker-cheque-status.on-hold {
-	background: rgba(254, 243, 199, 0.85) !important;
-	border: 1px solid rgba(245, 158, 11, 0.32) !important;
-	color: #b45309 !important;
+.outward-maker-batch-account-no, .outward-maker-batch-cheque-date,
+	.outward-maker-batch-micr-code, .outward-maker-batch-cheque-amount {
+	font-size: 9.5px !important;
+	font-weight: 700 !important;
+	color: #1e293b !important;
 }
 
-.outward-maker-cheque-status.rejection-request {
-	background: rgba(254, 226, 226, 0.82) !important;
-	border: 1px solid rgba(220, 38, 38, 0.28) !important;
-	color: #b91c1c !important;
-}
-
-.outward-maker-action-button {
+/* Status Badges */
+.outward-maker-status {
 	display: inline-flex !important;
 	align-items: center !important;
 	justify-content: center !important;
-	gap: 5px !important;
-	width: auto !important;
-	min-width: 82px !important;
-	height: 32px !important;
-	margin: 0 auto !important;
-	padding: 0 11px !important;
+	min-width: 120px !important;
+	padding: 2px 8px !important;
+	border-radius: 12px !important;
+	font-size: 8.5px !important;
+	font-weight: 800 !important;
+	text-align: center !important;
 	box-sizing: border-box !important;
+}
+
+.outward-maker-status.pending-maker-process, .outward-maker-status.pending-data-entry
+	{
+	background: #fef9c3 !important;
+	border: 1px solid #fde047 !important;
+	color: #854d0e !important;
+}
+
+.outward-maker-status.pending-micr-repair {
+	background: #ffedd5 !important;
+	border: 1px solid #fdba74 !important;
+	color: #9a3412 !important;
+}
+
+.outward-maker-status.micr-rejected {
+	background: #fee2e2 !important;
+	border: 1px solid #fca5a5 !important;
+	color: #991b1b !important;
+}
+
+.outward-maker-status.on-hold {
+	background: #fef3c7 !important;
+	border: 1px solid #fcd34d !important;
+	color: #92400e !important;
+}
+
+.outward-maker-status.pending-checker-process {
+	background: #e0f2fe !important;
+	border: 1px solid #7dd3fc !important;
+	color: #0369a1 !important;
+}
+
+.outward-maker-status.pending-verification {
+	background: #f0fdf4 !important;
+	border: 1px solid #86efac !important;
+	color: #166534 !important;
+}
+
+.outward-maker-status.maker-returned {
+	background: #eff6ff !important;
+	border: 1px solid #93c5fd !important;
+	color: #1d4ed8 !important;
+}
+
+.outward-maker-status.reject-request {
+	background: #fdf2f8 !important;
+	border: 1px solid #fbcfe8 !important;
+	color: #9d174d !important;
+}
+
+/* Action Button */
+.outward-maker-btn-action-modify, .outward-maker-btn-action-modify.z-button
+	{
+	height: 24px !important;
+	min-height: 24px !important;
+	width: 80px !important;
+	min-width: 80px !important;
+	margin: 0 auto !important;
+	padding: 0 !important;
 	background: #172554 !important;
 	background-color: #172554 !important;
 	border: 1px solid #172554 !important;
-	border-radius: 6px !important;
+	border-radius: 5px !important;
 	color: #ffffff !important;
-	font-size: 9px !important;
-	font-weight: 800 !important;
-	line-height: 32px !important;
-	text-align: center !important;
-	white-space: nowrap !important;
+	font-size: 9.5px !important;
+	font-weight: 700 !important;
 	cursor: pointer !important;
-	box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12) !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	text-transform: none !important;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
 }
 
-.outward-maker-action-button\:hover {
+.outward-maker-btn-action-modify:hover, .outward-maker-btn-action-modify.z-button:hover,
+	.outward-maker-btn-action-modify.z-button:focus,
+	.outward-maker-btn-action-modify.z-button:active {
 	background: #0f1b3d !important;
+	background-color: #0f1b3d !important;
 	border-color: #0f1b3d !important;
 	color: #ffffff !important;
 }
 
-.outward-maker-action-button\:active {
-	background: #0b1530 !important;
-	border-color: #0b1530 !important;
-}
-
-.outward-maker-action-button\:disabled {
-	opacity: 0.45 !important;
-	cursor: default !important;
+.outward-maker-btn-action-modify i {
+	color: #ffffff !important;
+	margin-right: 4px !important;
+	font-size: 9.5px !important;
 }
 
 .outward-maker-action-empty {
-	font-size: 11px !important;
-	font-weight: 600 !important;
-	color: #64748b !important;
-	text-align: center !important;
-}
-
-.outward-maker-batch-empty-state {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 40px 20px;
-	text-align: center;
-	background: #f8fafc;
-}
-
-.outward-maker-batch-empty-title {
-	display: block;
-	font-size: 15px !important;
+	font-size: 9.5px !important;
 	font-weight: 700 !important;
-	line-height: 20px !important;
-	color: #475569 !important;
-	text-align: center !important;
+	color: #64748b !important;
 }
 
-.outward-maker-batch-empty-subtitle {
-	display: block;
-	margin-top: 5px;
-	font-size: 12px !important;
-	line-height: 18px !important;
-	color: #94a3b8 !important;
-	text-align: center !important;
-}
-
-.outward-maker-batch-pagination {
+/* Empty State */
+.outward-maker-empty-state {
+	width: 100%;
+	padding: 36px 16px;
+	text-align: center;
+	background: #ffffff;
+	box-sizing: border-box;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+}
+
+.outward-maker-empty-title {
+	display: block;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+	color: #475569 !important;
+}
+
+.outward-maker-empty-subtitle {
+	display: block;
+	margin-top: 2px;
+	font-size: 10px !important;
+	color: #94a3b8 !important;
+	font-weight: 500 !important;
+}
+
+/* Pagination Bar */
+.outward-maker-pagination {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
 	gap: 6px;
-	width: 100%;
-	box-sizing: border-box;
-	padding: 16px 0 4px 0;
+	padding: 6px 0 !important;
+	background: #ffffff;
+	border-top: 1px solid #e2e8f0;
 }
 
 .outward-maker-pagination-button {
-	min-width: 34px !important;
-	height: 32px !important;
-	padding: 0 9px !important;
+	min-width: 26px;
+	height: 22px;
+	padding: 0 5px;
 	background: #ffffff !important;
 	border: 1px solid #cbd5e1 !important;
-	border-radius: 6px !important;
+	border-radius: 4px;
 	color: #334155 !important;
-	font-size: 12px !important;
+	font-size: 10px !important;
 	font-weight: 700 !important;
 	cursor: pointer !important;
 }
 
-.outward-maker-pagination-button\:hover {
-	background: #f1f5f9 !important;
-	border-color: #94a3b8 !important;
-}
-
-.outward-maker-pagination-button\:disabled {
-	opacity: 0.45 !important;
-	cursor: default !important;
-}
-
 .outward-maker-pagination-label {
-	min-width: 58px;
-	text-align: center;
-	font-size: 12px !important;
-	font-weight: 800 !important;
+	font-size: 10px !important;
+	font-weight: 700 !important;
 	color: #334155 !important;
-	line-height: 32px !important;
-}
-
-@media ( max-width : 1000px) {
-	.outward-maker-batch-details-scroll {
-		padding-left: 16px !important;
-		padding-right: 16px !important;
-	}
-	.outward-maker-batch-details-heading {
-		gap: 12px;
-	}
-	.outward-maker-batch-back-button {
-		width: 105px !important;
-		min-width: 105px !important;
-	}
-	.outward-maker-cheque-grid {
-		min-width: 900px !important;
-	}
-	.outward-maker-cheque-table-card {
-		overflow-x: auto !important;
-	}
-}
-
-@media ( max-width : 700px) {
-	.outward-maker-batch-details-heading {
-		flex-direction: column;
-		align-items: flex-start;
-	}
-	.outward-maker-batch-back-button {
-		width: 105px !important;
-		min-width: 105px !important;
-	}
-	.outward-maker-batch-summary {
-		flex-direction: column;
-	}
-	.outward-maker-batch-summary-item {
-		border-right: none;
-		border-bottom: 1px solid #e2e8f0;
-	}
-	.outward-maker-batch-summary-item\:last-child {
-		border-bottom: none;
-	}
-	.outward-maker-cheque-table-card {
-		overflow-x: auto !important;
-	}
-	.outward-maker-cheque-grid {
-		min-width: 900px !important;
-	}
+	min-width: 36px;
+	text-align: center;
 }

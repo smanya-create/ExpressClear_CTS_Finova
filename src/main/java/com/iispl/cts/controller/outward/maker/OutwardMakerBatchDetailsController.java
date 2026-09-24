@@ -1,4 +1,3 @@
-
 package com.iispl.cts.controller.outward.maker;
 
 import java.math.BigDecimal;
@@ -6,18 +5,19 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Grid;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Row;
-import org.zkoss.zul.Rows;
-import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
@@ -29,12 +29,13 @@ import com.iispl.cts.service.outward.ScanService;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
 import com.iispl.cts.serviceimpl.outward.ScanServiceImpl;
+import com.iispl.cts.validator.OutwardMakerBatchDetailsValidator;
+import com.iispl.cts.validatorimpl.OutwardMakerBatchDetailsValidatorImpl;
 
 public class OutwardMakerBatchDetailsController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final int PAGE_SIZE = 10;
+	private static final int PAGE_SIZE = 5;
 
 	private static final String STATUS_PENDING_MAKER_PROCESS = "PENDING_MAKER_PROCESS";
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
@@ -42,15 +43,15 @@ public class OutwardMakerBatchDetailsController extends GenericForwardComposer<C
 	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
 	private static final String STATUS_PENDING_CHECKER_PROCESS = "PENDING_CHECKER_PROCESS";
 	private static final String STATUS_PENDING_VERIFICATION = "PENDING_VERIFICATION";
+	private static final String STATUS_MAKER_RETURNED = "MAKER_RETURNED";
 	private static final String STATUS_ON_HOLD = "ON_HOLD";
-	private static final String STATUS_REJECTION_REQUEST = "REJECTION_REQUEST";
+	private static final String STATUS_REJECT_REQUEST = "REJECT_REQUEST";
 
 	private static final String MODE_DATA_ENTRY = "DATA_ENTRY";
 	private static final String RETURN_FROM_CHECKER = "RETURN_FROM_CHECKER";
 
-	private Grid outwardMakerGridChequeDetails;
-	private Rows outwardMakerRowsChequeDetails;
-	private Vlayout outwardMakerVlayoutEmptyState;
+	private Div outwardMakerDivRowsContainer;
+	private Component outwardMakerVlayoutEmptyState;
 
 	private Label outwardMakerLblBatchId;
 	private Label outwardMakerLblChequeCount;
@@ -66,216 +67,161 @@ public class OutwardMakerBatchDetailsController extends GenericForwardComposer<C
 	private ScanService scanService;
 	private OutwardBatchService outwardBatchService;
 	private OutwardChequeService outwardChequeService;
+	private OutwardMakerBatchDetailsValidator validator;
 
 	private ScanBatch scanBatch;
 	private OutwardBatch outwardBatch;
 
-	private List<ScanCheque> scanChequeList = new ArrayList<>();
-	private List<OutwardCheque> outwardChequeList = new ArrayList<>();
 	private List<ChequeDisplayItem> displayChequeList = new ArrayList<>();
-
 	private boolean returnedBatch;
 	private String currentBatchId;
 	private int currentPage = 1;
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
-
 		super.doAfterCompose(component);
 
 		scanService = new ScanServiceImpl();
 		outwardBatchService = new OutwardBatchServiceImpl();
 		outwardChequeService = new OutwardChequeServiceImpl();
+		validator = new OutwardMakerBatchDetailsValidatorImpl();
 
-		outwardMakerGridChequeDetails = getFellow(component, "outwardMakerGridChequeDetails", Grid.class);
-
-		outwardMakerRowsChequeDetails = getFellow(component, "outwardMakerRowsChequeDetails", Rows.class);
-
-		outwardMakerVlayoutEmptyState = getFellow(component, "outwardMakerVlayoutEmptyState", Vlayout.class);
+		outwardMakerDivRowsContainer = getFellow(component, "outwardMakerDivRowsContainer", Div.class);
+		outwardMakerVlayoutEmptyState = component.getFellowIfAny("outwardMakerVlayoutEmptyState");
 
 		outwardMakerLblBatchId = getFellow(component, "outwardMakerLblBatchId", Label.class);
-
 		outwardMakerLblChequeCount = getFellow(component, "outwardMakerLblChequeCount", Label.class);
-
 		outwardMakerLblTotalAmount = getFellow(component, "outwardMakerLblTotalAmount", Label.class);
-
 		outwardMakerLblCurrentPage = getFellow(component, "outwardMakerLblCurrentPage", Label.class);
 
 		outwardMakerBtnFirst = getFellow(component, "outwardMakerBtnFirst", Button.class);
-
 		outwardMakerBtnPrevious = getFellow(component, "outwardMakerBtnPrevious", Button.class);
-
 		outwardMakerBtnNext = getFellow(component, "outwardMakerBtnNext", Button.class);
-
 		outwardMakerBtnLast = getFellow(component, "outwardMakerBtnLast", Button.class);
-
 		outwardMakerBtnBack = getFellow(component, "outwardMakerBtnBack", Button.class);
 
 		bindEvents();
-
 		loadBatchDetails();
 	}
 
 	private <T extends Component> T getFellow(Component component, String id, Class<T> type) {
-
-		if (component == null || id == null || type == null) {
+		if (component == null || id == null || type == null)
 			return null;
-		}
-
 		Component fellow = component.getFellowIfAny(id);
-
-		if (fellow == null) {
+		if (fellow == null)
 			return null;
-		}
-
 		if (!type.isInstance(fellow)) {
 			throw new IllegalStateException("Component '" + id + "' is not of type " + type.getName());
 		}
-
 		return type.cast(fellow);
 	}
 
 	private void bindEvents() {
-
-		if (outwardMakerBtnFirst != null) {
+		if (outwardMakerBtnFirst != null)
 			outwardMakerBtnFirst.addEventListener("onClick", event -> goToFirstPage());
-		}
-
-		if (outwardMakerBtnPrevious != null) {
+		if (outwardMakerBtnPrevious != null)
 			outwardMakerBtnPrevious.addEventListener("onClick", event -> goToPreviousPage());
-		}
-
-		if (outwardMakerBtnNext != null) {
+		if (outwardMakerBtnNext != null)
 			outwardMakerBtnNext.addEventListener("onClick", event -> goToNextPage());
-		}
-
-		if (outwardMakerBtnLast != null) {
+		if (outwardMakerBtnLast != null)
 			outwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
-		}
-
-		if (outwardMakerBtnBack != null) {
+		if (outwardMakerBtnBack != null)
 			outwardMakerBtnBack.addEventListener("onClick", event -> goBackToDashboard());
-		}
 	}
 
 	private void loadBatchDetails() {
-
 		currentBatchId = resolveBatchId();
 
-		if (currentBatchId == null || currentBatchId.isEmpty()) {
+		if (!validator.isValidBatchId(currentBatchId)) {
 			showEmptyState();
 			return;
 		}
 
 		try {
-
 			if (loadReturnedBatch(currentBatchId)) {
 				return;
 			}
-
-			loadScanBatch(currentBatchId);
-
+			loadBatchWithLiveCheques(currentBatchId);
 		} catch (Exception exception) {
-
 			exception.printStackTrace();
-
 			clearData();
 			showEmptyState();
 		}
 	}
 
 	private String resolveBatchId() {
-
-		Component root = outwardMakerGridChequeDetails;
-
+		Component root = outwardMakerDivRowsContainer;
 		Object value = null;
 
 		if (root != null) {
 			value = root.getAttribute("batchId");
+			if (isEmpty(value))
+				value = root.getAttribute("selectedBatchId");
 		}
-
 		String batchId = toSafeString(value);
+		if (!batchId.isEmpty())
+			return validator.sanitizeBatchId(batchId);
 
-		if (!batchId.isEmpty()) {
-			return batchId;
+		if (root != null && root.getPage() != null) {
+			value = root.getPage().getAttribute("batchId");
+			if (isEmpty(value))
+				value = root.getPage().getAttribute("selectedBatchId");
 		}
-
-		value = outwardMakerGridChequeDetails == null ? null
-				: outwardMakerGridChequeDetails.getPage().getAttribute("batchId");
-
 		batchId = toSafeString(value);
+		if (!batchId.isEmpty())
+			return validator.sanitizeBatchId(batchId);
 
-		if (!batchId.isEmpty()) {
-			return batchId;
-		}
+		if (Executions.getCurrent() != null) {
+			value = Executions.getCurrent().getAttribute("batchId");
+			if (isEmpty(value))
+				value = Executions.getCurrent().getAttribute("selectedBatchId");
+			batchId = toSafeString(value);
+			if (!batchId.isEmpty())
+				return validator.sanitizeBatchId(batchId);
 
-		if (org.zkoss.zk.ui.Executions.getCurrent() != null) {
-
-			Object executionAttribute = org.zkoss.zk.ui.Executions.getCurrent().getAttribute("batchId");
-
-			batchId = toSafeString(executionAttribute);
-
-			if (!batchId.isEmpty()) {
-				return batchId;
+			String parameter = Executions.getCurrent().getParameter("batchId");
+			if (parameter == null || parameter.trim().isEmpty()) {
+				parameter = Executions.getCurrent().getParameter("selectedBatchId");
 			}
-
-			String parameter = org.zkoss.zk.ui.Executions.getCurrent().getParameter("batchId");
-
 			batchId = toSafeString(parameter);
-
-			if (!batchId.isEmpty()) {
-				return batchId;
-			}
+			if (!batchId.isEmpty())
+				return validator.sanitizeBatchId(batchId);
 		}
 
-		if (org.zkoss.zk.ui.Sessions.getCurrent() != null) {
+		if (Sessions.getCurrent() != null) {
+			value = Sessions.getCurrent().getAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID");
+			if (isEmpty(value))
+				value = Sessions.getCurrent().getAttribute("ACTIVE_OUTWARD_BATCH_ID");
+			if (isEmpty(value))
+				value = Sessions.getCurrent().getAttribute("batchId");
+			if (isEmpty(value))
+				value = Sessions.getCurrent().getAttribute("selectedBatchId");
 
-			Object sessionValue = org.zkoss.zk.ui.Sessions.getCurrent().getAttribute("OUTWARD_MAKER_SELECTED_BATCH_ID");
-
-			batchId = toSafeString(sessionValue);
-
-			if (!batchId.isEmpty()) {
-				return batchId;
-			}
-
-			sessionValue = org.zkoss.zk.ui.Sessions.getCurrent().getAttribute("ACTIVE_OUTWARD_BATCH_ID");
-
-			batchId = toSafeString(sessionValue);
-
-			if (!batchId.isEmpty()) {
-				return batchId;
-			}
-
-			sessionValue = org.zkoss.zk.ui.Sessions.getCurrent().getAttribute("batchId");
-
-			batchId = toSafeString(sessionValue);
-
-			if (!batchId.isEmpty()) {
-				return batchId;
-			}
+			batchId = toSafeString(value);
+			if (!batchId.isEmpty())
+				return validator.sanitizeBatchId(batchId);
 		}
 
 		return "";
 	}
 
-	private boolean loadReturnedBatch(String batchId) {
+	private boolean isEmpty(Object obj) {
+		return obj == null || obj.toString().trim().isEmpty();
+	}
 
+	private boolean loadReturnedBatch(String batchId) {
 		returnedBatch = false;
 		outwardBatch = null;
-		outwardChequeList = new ArrayList<>();
 
 		if (outwardBatchService == null || outwardChequeService == null) {
 			return false;
 		}
 
 		OutwardBatch batch = outwardBatchService.getBatchById(batchId);
-
-		if (batch == null) {
+		if (batch == null)
 			return false;
-		}
 
 		String batchStatus = normalizeStatus(batch.getBatchStatus());
-
 		if (!STATUS_ON_HOLD.equals(batchStatus)) {
 			return false;
 		}
@@ -284,318 +230,241 @@ public class OutwardMakerBatchDetailsController extends GenericForwardComposer<C
 		outwardBatch = batch;
 
 		List<OutwardCheque> loadedCheques = outwardChequeService.getOnHoldCheques(batchId);
-
-		if (loadedCheques != null) {
-			outwardChequeList = loadedCheques;
-		}
-
 		displayChequeList = new ArrayList<>();
 
-		for (OutwardCheque cheque : outwardChequeList) {
-
-			if (cheque == null) {
-				continue;
+		if (loadedCheques != null) {
+			for (OutwardCheque cheque : loadedCheques) {
+				if (cheque == null)
+					continue;
+				displayChequeList.add(ChequeDisplayItem.fromOutwardCheque(cheque));
 			}
-
-			displayChequeList.add(ChequeDisplayItem.fromOutwardCheque(cheque));
 		}
 
 		populateReturnedBatchSummary();
-
 		currentPage = 1;
-
 		renderCurrentPage();
-
 		return true;
 	}
 
-	private void loadScanBatch(String batchId) {
-
+	private void loadBatchWithLiveCheques(String batchId) {
 		returnedBatch = false;
 		scanBatch = null;
-
-		scanChequeList = new ArrayList<>();
+		outwardBatch = null;
 		displayChequeList = new ArrayList<>();
+		Set<String> seenChequeNumbers = new HashSet<>();
 
-		ScanBatch loadedBatch = scanService.getBatchById(batchId);
-
-		if (loadedBatch == null) {
-
-			clearData();
-			showEmptyState();
-
-			return;
-		}
-
-		scanBatch = loadedBatch;
-
-		List<ScanCheque> loadedCheques = scanService.getChequesByBatchId(batchId);
-
-		if (loadedCheques != null) {
-			scanChequeList = loadedCheques;
-		}
-
-		for (ScanCheque cheque : scanChequeList) {
-
-			if (cheque == null) {
-				continue;
+		if (outwardBatchService != null) {
+			try {
+				outwardBatch = outwardBatchService.getBatchById(batchId);
+			} catch (Exception ignored) {
 			}
-
-			displayChequeList.add(ChequeDisplayItem.fromScanCheque(cheque));
+		}
+		if (scanService != null) {
+			try {
+				scanBatch = scanService.getBatchById(batchId);
+			} catch (Exception ignored) {
+			}
 		}
 
-		populateBatchSummary();
+		if (outwardChequeService != null) {
+			try {
+				List<OutwardCheque> outwardCheques = outwardChequeService.getChequesByBatchId(batchId);
+				if (outwardCheques != null) {
+					for (OutwardCheque cheque : outwardCheques) {
+						if (cheque == null)
+							continue;
+						displayChequeList.add(ChequeDisplayItem.fromOutwardCheque(cheque));
+						String chqNo = toSafeString(cheque.getChequeNumber());
+						if (!chqNo.isEmpty())
+							seenChequeNumbers.add(chqNo);
+					}
+				}
+			} catch (Exception ignored) {
+			}
+		}
 
+		if (scanService != null) {
+			try {
+				List<ScanCheque> scanCheques = scanService.getChequesByBatchId(batchId);
+				if (scanCheques != null) {
+					for (ScanCheque cheque : scanCheques) {
+						if (cheque == null)
+							continue;
+						String chqNo = toSafeString(cheque.getChequeNumber());
+						if (!chqNo.isEmpty() && seenChequeNumbers.contains(chqNo))
+							continue;
+						displayChequeList.add(ChequeDisplayItem.fromScanCheque(cheque));
+					}
+				}
+			} catch (Exception ignored) {
+			}
+		}
+
+		if (displayChequeList.isEmpty() && outwardChequeService != null) {
+			try {
+				List<OutwardCheque> onHoldCheques = outwardChequeService.getOnHoldCheques(batchId);
+				if (onHoldCheques != null) {
+					for (OutwardCheque cheque : onHoldCheques) {
+						if (cheque == null)
+							continue;
+						displayChequeList.add(ChequeDisplayItem.fromOutwardCheque(cheque));
+					}
+				}
+			} catch (Exception ignored) {
+			}
+		}
+
+		populateLiveBatchSummary(batchId);
 		currentPage = 1;
-
 		renderCurrentPage();
 	}
 
-	private void populateBatchSummary() {
+	private void populateLiveBatchSummary(String batchId) {
+		setLabelValue(outwardMakerLblBatchId, safeDisplayValue(batchId));
 
-		if (scanBatch == null) {
-			return;
-		}
-
-		setLabelValue(outwardMakerLblBatchId, safeDisplayValue(scanBatch.getScannedBatchId()));
-
-		int count = Math.max(0, scanBatch.getActualChequeCount());
-
-		setLabelValue(outwardMakerLblChequeCount, Integer.toString(count));
-
-		setLabelValue(outwardMakerLblTotalAmount, formatIndianAmount(scanBatch.getActualTotalAmount()));
-	}
-
-	private void populateReturnedBatchSummary() {
-
-		if (outwardBatch == null) {
-			return;
-		}
-
-		setLabelValue(outwardMakerLblBatchId, safeDisplayValue(outwardBatch.getOutwardBatchId()));
-
-		int count = displayChequeList == null ? 0 : displayChequeList.size();
-
-		setLabelValue(outwardMakerLblChequeCount, Integer.toString(count));
-
+		int count = 0;
 		BigDecimal totalAmount = BigDecimal.ZERO;
 
-		if (outwardChequeList != null) {
-
-			for (OutwardCheque cheque : outwardChequeList) {
-
-				if (cheque == null) {
-					continue;
-				}
-
-				BigDecimal amount = cheque.getChequeAmount();
-
-				if (amount != null) {
-					totalAmount = totalAmount.add(amount);
+		if (scanBatch != null && scanBatch.getActualChequeCount() > 0) {
+			count = scanBatch.getActualChequeCount();
+			totalAmount = scanBatch.getActualTotalAmount() != null ? scanBatch.getActualTotalAmount() : BigDecimal.ZERO;
+		} else if (outwardBatch != null && outwardBatch.getActualChequeCount() > 0) {
+			count = outwardBatch.getActualChequeCount();
+			totalAmount = outwardBatch.getActualTotalAmount() != null ? outwardBatch.getActualTotalAmount()
+					: BigDecimal.ZERO;
+		} else {
+			count = displayChequeList.size();
+			for (ChequeDisplayItem item : displayChequeList) {
+				if (item.chequeAmount != null) {
+					totalAmount = totalAmount.add(item.chequeAmount);
 				}
 			}
 		}
 
+		setLabelValue(outwardMakerLblChequeCount, Integer.toString(Math.max(0, count)));
+		setLabelValue(outwardMakerLblTotalAmount, formatIndianAmount(totalAmount));
+	}
+
+	private void populateReturnedBatchSummary() {
+		if (outwardBatch == null)
+			return;
+		setLabelValue(outwardMakerLblBatchId, safeDisplayValue(outwardBatch.getOutwardBatchId()));
+		int count = displayChequeList.size();
+		setLabelValue(outwardMakerLblChequeCount, Integer.toString(count));
+
+		BigDecimal totalAmount = BigDecimal.ZERO;
+		for (ChequeDisplayItem item : displayChequeList) {
+			if (item.chequeAmount != null) {
+				totalAmount = totalAmount.add(item.chequeAmount);
+			}
+		}
 		setLabelValue(outwardMakerLblTotalAmount, formatIndianAmount(totalAmount));
 	}
 
 	private void renderCurrentPage() {
-
-		if (outwardMakerRowsChequeDetails == null) {
+		if (outwardMakerDivRowsContainer == null)
 			return;
-		}
+		outwardMakerDivRowsContainer.getChildren().clear();
 
-		outwardMakerRowsChequeDetails.getChildren().clear();
+		boolean hasData = displayChequeList != null && !displayChequeList.isEmpty();
 
-		if (displayChequeList == null || displayChequeList.isEmpty()) {
-
-			showEmptyState();
-
+		if (!hasData) {
+			if (outwardMakerVlayoutEmptyState != null)
+				outwardMakerVlayoutEmptyState.setVisible(true);
+			if (outwardMakerDivRowsContainer != null)
+				outwardMakerDivRowsContainer.setVisible(false);
 			updatePagination();
-
 			return;
 		}
 
-		if (outwardMakerGridChequeDetails != null) {
-			outwardMakerGridChequeDetails.setVisible(true);
-		}
-
-		if (outwardMakerVlayoutEmptyState != null) {
+		if (outwardMakerDivRowsContainer != null)
+			outwardMakerDivRowsContainer.setVisible(true);
+		if (outwardMakerVlayoutEmptyState != null)
 			outwardMakerVlayoutEmptyState.setVisible(false);
-		}
 
 		int totalPages = getTotalPages();
-
 		currentPage = normalizePage(currentPage, totalPages);
 
 		int startIndex = (currentPage - 1) * PAGE_SIZE;
-
 		int endIndex = Math.min(startIndex + PAGE_SIZE, displayChequeList.size());
 
 		for (int index = startIndex; index < endIndex; index++) {
-
 			ChequeDisplayItem item = displayChequeList.get(index);
-
-			if (item == null) {
-				continue;
-			}
-
-			if (item.scanCheque != null) {
-
-				createScanChequeRow(item.scanCheque);
-
-			} else if (item.outwardCheque != null) {
-
-				createReturnedChequeRow(item.outwardCheque);
+			if (item != null) {
+				createUnifiedChequeDivRow(item);
 			}
 		}
 
 		updatePagination();
 	}
 
-	private void createScanChequeRow(ScanCheque cheque) {
+	private void createUnifiedChequeDivRow(ChequeDisplayItem item) {
+		Div row = new Div();
+		row.setSclass("div-table-row");
 
-		if (cheque == null || outwardMakerRowsChequeDetails == null) {
-			return;
-		}
+		// 1. Cheque No.
+		Div tdChqNo = new Div();
+		tdChqNo.setSclass("div-td col-chq-no");
+		tdChqNo.appendChild(createLabel(safeDisplayValue(item.chequeNumber), "outward-maker-batch-cheque-number"));
 
-		Row row = new Row();
+		// 2. Payee Account No. (Prioritized)
+		Div tdAccNo = new Div();
+		tdAccNo.setSclass("div-td col-acc-no");
+		tdAccNo.appendChild(createLabel(safeDisplayValue(item.payeeAccountNumber), "outward-maker-batch-account-no"));
 
-		Label chequeNumberLabel = createLabel(safeDisplayValue(cheque.getChequeNumber()),
-				"outward-maker-cheque-number");
+		// 3. Date
+		Div tdDate = new Div();
+		tdDate.setSclass("div-td col-date");
+		tdDate.appendChild(createLabel(formatIndianDate(item.chequeDate), "outward-maker-batch-cheque-date"));
 
-		Label accountLabel = createLabel(safeDisplayValue(cheque.getDraweeAccountNumber()),
-				"outward-maker-drawee-account");
+		// 4. MICR
+		Div tdMicr = new Div();
+		tdMicr.setSclass("div-td col-micr");
+		tdMicr.appendChild(createLabel(safeDisplayValue(item.micrCode), "outward-maker-batch-micr-code"));
 
-		Label dateLabel = createLabel(formatIndianDate(cheque.getChequeDate()), "outward-maker-cheque-date");
+		// 5. Status
+		String status = normalizeStatus(item.chequeStatus);
+		Div tdStatus = new Div();
+		tdStatus.setSclass("div-td col-status");
+		tdStatus.appendChild(createLabel(getDisplayStatus(status), "outward-maker-status " + getStatusClass(status)));
 
-		Label micrLabel = createLabel(safeDisplayValue(cheque.getMicrCode()), "outward-maker-micr-code");
+		// 6. Amount
+		Div tdAmount = new Div();
+		tdAmount.setSclass("div-td col-amount");
+		tdAmount.appendChild(createLabel(formatIndianAmount(item.chequeAmount), "outward-maker-batch-cheque-amount"));
 
-		String status = normalizeStatus(cheque.getChequeStatus());
+		// 7. Action
+		Div tdAction = new Div();
+		tdAction.setSclass("div-td col-action");
+		tdAction.appendChild(createChequeActionComponent(item, status));
 
-		Label statusLabel = createLabel(getDisplayStatus(status),
-				"outward-maker-cheque-status " + getStatusClass(status));
+		row.appendChild(tdChqNo);
+		row.appendChild(tdAccNo);
+		row.appendChild(tdDate);
+		row.appendChild(tdMicr);
+		row.appendChild(tdStatus);
+		row.appendChild(tdAmount);
+		row.appendChild(tdAction);
 
-		Label amountLabel = createLabel(formatIndianAmount(cheque.getChequeAmount()), "outward-maker-cheque-amount");
-
-		Component actionComponent = createScanActionComponent(cheque);
-
-		row.appendChild(chequeNumberLabel);
-		row.appendChild(accountLabel);
-		row.appendChild(dateLabel);
-		row.appendChild(micrLabel);
-		row.appendChild(statusLabel);
-		row.appendChild(amountLabel);
-
-		if (actionComponent != null) {
-			row.appendChild(actionComponent);
-		}
-
-		outwardMakerRowsChequeDetails.appendChild(row);
-	}
-
-	private void createReturnedChequeRow(OutwardCheque cheque) {
-
-		if (cheque == null || outwardMakerRowsChequeDetails == null) {
-			return;
-		}
-
-		Row row = new Row();
-
-		Label chequeNumberLabel = createLabel(safeDisplayValue(cheque.getChequeNumber()),
-				"outward-maker-cheque-number");
-
-		Label accountLabel = createLabel(safeDisplayValue(cheque.getDraweeAccountNumber()),
-				"outward-maker-drawee-account");
-
-		Label dateLabel = createLabel(formatIndianDate(cheque.getChequeDate()), "outward-maker-cheque-date");
-
-		Label micrLabel = createLabel(safeDisplayValue(cheque.getMicrCode()), "outward-maker-micr-code");
-
-		String status = normalizeStatus(cheque.getChequeStatus());
-
-		Label statusLabel = createLabel(getDisplayStatus(status),
-				"outward-maker-cheque-status " + getStatusClass(status));
-
-		Label amountLabel = createLabel(formatIndianAmount(cheque.getChequeAmount()), "outward-maker-cheque-amount");
-
-		Component actionComponent = createReturnedActionComponent(cheque);
-
-		row.appendChild(chequeNumberLabel);
-		row.appendChild(accountLabel);
-		row.appendChild(dateLabel);
-		row.appendChild(micrLabel);
-		row.appendChild(statusLabel);
-		row.appendChild(amountLabel);
-
-		if (actionComponent != null) {
-			row.appendChild(actionComponent);
-		}
-
-		outwardMakerRowsChequeDetails.appendChild(row);
+		outwardMakerDivRowsContainer.appendChild(row);
 	}
 
 	private Label createLabel(String value, String sclass) {
-
 		Label label = new Label(safeDisplayValue(value));
-
 		label.setSclass(sclass);
-
 		return label;
 	}
 
-	private Component createScanActionComponent(ScanCheque cheque) {
-
-		if (cheque == null) {
+	private Component createChequeActionComponent(ChequeDisplayItem item, String status) {
+		if (item == null)
 			return createEmptyAction();
-		}
 
-		String status = normalizeStatus(cheque.getChequeStatus());
-
-		if (isMicrRepairStatus(status)) {
-
-			Button button = createActionButton("Modify");
-
-			button.addEventListener("onClick", event -> openMicrRepair(cheque));
-
-			return button;
-		}
-
-		if (isDataEntryStatus(status)) {
-
-			Button button = createActionButton("Modify");
-
-			button.addEventListener("onClick", event -> openDataEntry(cheque));
-
-			return button;
-		}
-
-		return createEmptyAction();
-	}
-
-	private Component createReturnedActionComponent(OutwardCheque cheque) {
-
-		if (cheque == null) {
-			return createEmptyAction();
-		}
-
-		String status = normalizeStatus(cheque.getChequeStatus());
-
-		if (isMicrRepairStatus(status)) {
-
-			Button button = createActionButton("Modify");
-
-			button.addEventListener("onClick", event -> openReturnedMicrRepair(cheque));
-
-			return button;
-		}
-
-		if (isDataEntryStatus(status)) {
-
-			Button button = createActionButton("Modify");
-
-			button.addEventListener("onClick", event -> openReturnedDataEntry(cheque));
-
+		if (validator.canModifyCheque(status) || STATUS_PENDING_VERIFICATION.equals(status)
+				|| STATUS_MAKER_RETURNED.equals(status)) {
+			Button button = new Button("Modify");
+			button.setIconSclass("z-icon-edit");
+			button.setSclass("outward-maker-btn-action-modify");
+			button.addEventListener("onClick", event -> openChequeTargetAction(item, status));
 			return button;
 		}
 
@@ -603,509 +472,298 @@ public class OutwardMakerBatchDetailsController extends GenericForwardComposer<C
 	}
 
 	private Label createEmptyAction() {
-
 		return createLabel("-", "outward-maker-action-empty");
 	}
 
-	private Button createActionButton(String label) {
-
-		Button button = new Button(label);
-
-		button.setIconSclass("z-icon-edit");
-
-		button.setSclass("outward-maker-action-button");
-
-		return button;
-	}
-
-	private void openDataEntry(ScanCheque cheque) {
-
-		if (cheque == null) {
+	private void openChequeTargetAction(ChequeDisplayItem item, String status) {
+		if (item == null)
 			return;
-		}
 
-		String chequeId = toSafeString(cheque.getScannedChequeId());
+		String chequeId = toSafeString(item.chequeId);
+		String batchId = toSafeString(currentBatchId);
 
-		String batchId = toSafeString(cheque.getScannedBatchId());
-
-		if (chequeId.isEmpty() || batchId.isEmpty()) {
+		if (chequeId.isEmpty() || batchId.isEmpty())
 			return;
-		}
 
 		Include mainContentArea = findMainContentArea();
-
-		if (mainContentArea == null) {
+		if (mainContentArea == null)
 			return;
-		}
-
-		setCommonNavigationProperties(mainContentArea, batchId, chequeId, false);
-
-		mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
-	}
-
-	private void openMicrRepair(ScanCheque cheque) {
-
-		if (cheque == null) {
-			return;
-		}
-
-		String chequeId = toSafeString(cheque.getScannedChequeId());
-
-		String batchId = toSafeString(cheque.getScannedBatchId());
-
-		if (chequeId.isEmpty() || batchId.isEmpty()) {
-			return;
-		}
-
-		Include mainContentArea = findMainContentArea();
-
-		if (mainContentArea == null) {
-			return;
-		}
-
-		setCommonNavigationProperties(mainContentArea, batchId, chequeId, false);
-
-		mainContentArea.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
-	}
-
-	private void openReturnedDataEntry(OutwardCheque cheque) {
-
-		if (cheque == null) {
-			return;
-		}
-
-		String chequeId = toSafeString(cheque.getOutwardChequeId());
-
-		String batchId = toSafeString(cheque.getOutwardBatchId());
-
-		if (chequeId.isEmpty() || batchId.isEmpty()) {
-			return;
-		}
-
-		Include mainContentArea = findMainContentArea();
-
-		if (mainContentArea == null) {
-			return;
-		}
-
-		setCommonNavigationProperties(mainContentArea, batchId, chequeId, true);
-
-		mainContentArea.setDynamicProperty("outwardChequeId", chequeId);
-
-		mainContentArea.setAttribute("outwardChequeId", chequeId);
-
-		mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
-	}
-
-	private void openReturnedMicrRepair(OutwardCheque cheque) {
-
-		if (cheque == null) {
-			return;
-		}
-
-		String chequeId = toSafeString(cheque.getOutwardChequeId());
-
-		String batchId = toSafeString(cheque.getOutwardBatchId());
-
-		if (chequeId.isEmpty() || batchId.isEmpty()) {
-			return;
-		}
-
-		Include mainContentArea = findMainContentArea();
-
-		if (mainContentArea == null) {
-			return;
-		}
-
-		setCommonNavigationProperties(mainContentArea, batchId, chequeId, true);
-
-		mainContentArea.setDynamicProperty("outwardChequeId", chequeId);
-
-		mainContentArea.setAttribute("outwardChequeId", chequeId);
-
-		mainContentArea.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
-	}
-
-	private void setCommonNavigationProperties(Include mainContentArea, String batchId, String chequeId,
-			boolean returnFromChecker) {
 
 		mainContentArea.clearDynamicProperties();
-
 		mainContentArea.setDynamicProperty("batchId", batchId);
-
 		mainContentArea.setDynamicProperty("chequeId", chequeId);
-
+		mainContentArea.setDynamicProperty("outwardChequeId", chequeId);
 		mainContentArea.setDynamicProperty("mode", MODE_DATA_ENTRY);
-
-		mainContentArea.setDynamicProperty(RETURN_FROM_CHECKER, returnFromChecker);
+		mainContentArea.setDynamicProperty(RETURN_FROM_CHECKER, returnedBatch);
 
 		mainContentArea.setAttribute("batchId", batchId);
-
 		mainContentArea.setAttribute("chequeId", chequeId);
-
+		mainContentArea.setAttribute("outwardChequeId", chequeId);
 		mainContentArea.setAttribute("mode", MODE_DATA_ENTRY);
+		mainContentArea.setAttribute(RETURN_FROM_CHECKER, returnedBatch);
 
-		mainContentArea.setAttribute(RETURN_FROM_CHECKER, returnFromChecker);
+		String targetZul = validator.determineTargetView(status);
+		mainContentArea.setSrc(targetZul);
 	}
 
 	private Include findMainContentArea() {
-
-		Component current = outwardMakerRowsChequeDetails;
-
+		Component current = outwardMakerDivRowsContainer;
 		while (current != null) {
-
-			if (current instanceof Include) {
-
-				Include include = (Include) current;
-
-				if ("mainContentArea".equals(include.getId())) {
-
-					return include;
-				}
+			if (current instanceof Include && "mainContentArea".equals(current.getId())) {
+				return (Include) current;
 			}
-
 			current = current.getParent();
 		}
-
 		return null;
 	}
 
 	private void goBackToDashboard() {
-
 		Include mainContentArea = findMainContentArea();
-
-		if (mainContentArea == null) {
+		if (mainContentArea == null)
 			return;
-		}
 
 		mainContentArea.clearDynamicProperties();
-
 		mainContentArea.setSrc("/outward/maker/dashboard.zul");
 	}
 
 	private void goToFirstPage() {
-
-		if (currentPage <= 1) {
+		if (currentPage <= 1)
 			return;
-		}
-
 		currentPage = 1;
-
 		renderCurrentPage();
 	}
 
 	private void goToPreviousPage() {
-
-		if (currentPage <= 1) {
+		if (currentPage <= 1)
 			return;
-		}
-
 		currentPage--;
-
 		renderCurrentPage();
 	}
 
 	private void goToNextPage() {
-
-		int totalPages = getTotalPages();
-
-		if (currentPage >= totalPages) {
+		if (currentPage >= getTotalPages())
 			return;
-		}
-
 		currentPage++;
-
 		renderCurrentPage();
 	}
 
 	private void goToLastPage() {
-
-		int totalPages = getTotalPages();
-
-		if (currentPage >= totalPages) {
+		if (currentPage >= getTotalPages())
 			return;
-		}
-
-		currentPage = totalPages;
-
+		currentPage = getTotalPages();
 		renderCurrentPage();
 	}
 
 	private int getTotalPages() {
-
-		if (displayChequeList == null || displayChequeList.isEmpty()) {
+		if (displayChequeList == null || displayChequeList.isEmpty())
 			return 1;
-		}
-
 		return (int) Math.ceil((double) displayChequeList.size() / PAGE_SIZE);
 	}
 
 	private void updatePagination() {
-
 		int totalPages = getTotalPages();
-
 		if (outwardMakerLblCurrentPage != null) {
-
 			outwardMakerLblCurrentPage.setValue(currentPage + " / " + totalPages);
 		}
-
-		boolean firstPage = currentPage <= 1;
-
-		boolean lastPage = currentPage >= totalPages;
-
-		if (outwardMakerBtnFirst != null) {
-			outwardMakerBtnFirst.setDisabled(firstPage);
-		}
-
-		if (outwardMakerBtnPrevious != null) {
-			outwardMakerBtnPrevious.setDisabled(firstPage);
-		}
-
-		if (outwardMakerBtnNext != null) {
-			outwardMakerBtnNext.setDisabled(lastPage);
-		}
-
-		if (outwardMakerBtnLast != null) {
-			outwardMakerBtnLast.setDisabled(lastPage);
-		}
+		if (outwardMakerBtnFirst != null)
+			outwardMakerBtnFirst.setDisabled(currentPage <= 1);
+		if (outwardMakerBtnPrevious != null)
+			outwardMakerBtnPrevious.setDisabled(currentPage <= 1);
+		if (outwardMakerBtnNext != null)
+			outwardMakerBtnNext.setDisabled(currentPage >= totalPages);
+		if (outwardMakerBtnLast != null)
+			outwardMakerBtnLast.setDisabled(currentPage >= totalPages);
 	}
 
 	private void showEmptyState() {
-
-		if (outwardMakerGridChequeDetails != null) {
-			outwardMakerGridChequeDetails.setVisible(false);
-		}
-
-		if (outwardMakerVlayoutEmptyState != null) {
+		if (outwardMakerDivRowsContainer != null)
+			outwardMakerDivRowsContainer.setVisible(false);
+		if (outwardMakerVlayoutEmptyState != null)
 			outwardMakerVlayoutEmptyState.setVisible(true);
-		}
-
 		setLabelValue(outwardMakerLblBatchId, "-");
-
 		setLabelValue(outwardMakerLblChequeCount, "0");
-
 		setLabelValue(outwardMakerLblTotalAmount, "₹0.00");
 	}
 
 	private void clearData() {
-
 		scanBatch = null;
 		outwardBatch = null;
 		returnedBatch = false;
-
-		scanChequeList = new ArrayList<>();
-		outwardChequeList = new ArrayList<>();
 		displayChequeList = new ArrayList<>();
-
 		currentPage = 1;
 	}
 
 	private void setLabelValue(Label label, String value) {
-
-		if (label != null) {
+		if (label != null)
 			label.setValue(safeDisplayValue(value));
-		}
 	}
 
 	private String getDisplayStatus(String status) {
-
 		String normalized = normalizeStatus(status);
 
-		if (STATUS_PENDING_MAKER_PROCESS.equals(normalized)) {
+		if (STATUS_PENDING_MAKER_PROCESS.equals(normalized))
 			return "Pending Maker Process";
-		}
-
-		if (STATUS_PENDING_DATA_ENTRY.equals(normalized)) {
+		if (STATUS_PENDING_DATA_ENTRY.equals(normalized))
 			return "Pending Data Entry";
-		}
-
-		if (STATUS_PENDING_MICR_REPAIR.equals(normalized)) {
-			return "Pending MICR Repair";
-		}
-
-		if (STATUS_MICR_REJECTED.equals(normalized)) {
-			return "MICR Rejected";
-		}
-
-		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalized)) {
+		if (STATUS_PENDING_MICR_REPAIR.equals(normalized))
+			return "Pending Micr Repair";
+		if (STATUS_MICR_REJECTED.equals(normalized))
+			return "Micr Rejected";
+		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalized))
 			return "Pending Checker Process";
-		}
-
-		if (STATUS_PENDING_VERIFICATION.equals(normalized)) {
+		if (STATUS_PENDING_VERIFICATION.equals(normalized))
 			return "Pending Verification";
-		}
-
-		if (STATUS_ON_HOLD.equals(normalized)) {
+		if (STATUS_MAKER_RETURNED.equals(normalized))
+			return "Maker Returned";
+		if (STATUS_ON_HOLD.equals(normalized))
 			return "On Hold";
-		}
+		if (STATUS_REJECT_REQUEST.equals(normalized))
+			return "Reject Request";
 
-		if (STATUS_REJECTION_REQUEST.equals(normalized)) {
-			return "Rejection Request";
-		}
+		return toCamelCaseWords(status);
+	}
 
-		return safeDisplayValue(status);
+	private String toCamelCaseWords(String text) {
+		if (text == null || text.trim().isEmpty())
+			return "-";
+		String[] words = text.replace('_', ' ').replace('-', ' ').split("\\s+");
+		StringBuilder sb = new StringBuilder();
+		for (String word : words) {
+			if (!word.isEmpty()) {
+				sb.append(Character.toUpperCase(word.charAt(0)));
+				if (word.length() > 1) {
+					sb.append(word.substring(1).toLowerCase(Locale.ENGLISH));
+				}
+				sb.append(" ");
+			}
+		}
+		return sb.toString().trim();
 	}
 
 	private String getStatusClass(String status) {
-
 		String normalized = normalizeStatus(status);
 
-		if (STATUS_PENDING_MAKER_PROCESS.equals(normalized)) {
+		if (STATUS_PENDING_MAKER_PROCESS.equals(normalized))
 			return "pending-maker-process";
-		}
-
-		if (STATUS_PENDING_DATA_ENTRY.equals(normalized)) {
+		if (STATUS_PENDING_DATA_ENTRY.equals(normalized))
 			return "pending-data-entry";
-		}
-
-		if (STATUS_PENDING_MICR_REPAIR.equals(normalized)) {
+		if (STATUS_PENDING_MICR_REPAIR.equals(normalized))
 			return "pending-micr-repair";
-		}
-
-		if (STATUS_MICR_REJECTED.equals(normalized)) {
+		if (STATUS_MICR_REJECTED.equals(normalized))
 			return "micr-rejected";
-		}
-
-		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalized)) {
+		if (STATUS_PENDING_CHECKER_PROCESS.equals(normalized))
 			return "pending-checker-process";
-		}
-
-		if (STATUS_PENDING_VERIFICATION.equals(normalized)) {
+		if (STATUS_PENDING_VERIFICATION.equals(normalized))
 			return "pending-verification";
-		}
-
-		if (STATUS_ON_HOLD.equals(normalized)) {
+		if (STATUS_MAKER_RETURNED.equals(normalized))
+			return "maker-returned";
+		if (STATUS_ON_HOLD.equals(normalized))
 			return "on-hold";
-		}
-
-		if (STATUS_REJECTION_REQUEST.equals(normalized)) {
-			return "rejection-request";
-		}
+		if (STATUS_REJECT_REQUEST.equals(normalized))
+			return "reject-request";
 
 		return "pending-maker-process";
 	}
 
-	private boolean isDataEntryStatus(String status) {
-
-		return STATUS_PENDING_DATA_ENTRY.equals(normalizeStatus(status));
-	}
-
-	private boolean isMicrRepairStatus(String status) {
-
-		return STATUS_PENDING_MICR_REPAIR.equals(normalizeStatus(status));
-	}
-
 	private String normalizeStatus(String status) {
-
-		if (status == null || status.trim().isEmpty()) {
+		if (status == null || status.trim().isEmpty())
 			return "";
-		}
-
 		return status.trim().toUpperCase(Locale.ENGLISH).replace('-', '_').replace(' ', '_');
 	}
 
 	private String formatIndianAmount(BigDecimal amount) {
-
 		BigDecimal safeAmount = amount == null ? BigDecimal.ZERO : amount;
-
 		DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
-
 		symbols.setGroupingSeparator(',');
-
 		DecimalFormat formatter = new DecimalFormat("##,##,##0.00", symbols);
-
 		return "₹" + formatter.format(safeAmount);
 	}
 
 	private String formatIndianDate(Object date) {
-
-		if (date == null) {
+		if (date == null)
 			return "-";
-		}
-
 		try {
-
 			if (date instanceof java.util.Date) {
-
 				return new SimpleDateFormat("dd-MM-yyyy").format((java.util.Date) date);
 			}
-
 			String value = toSafeString(date);
-
-			if (value.isEmpty()) {
+			if (value.isEmpty())
 				return "-";
-			}
 
 			if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
-
 				java.util.Date parsed = new SimpleDateFormat("yyyy-MM-dd").parse(value);
-
 				return new SimpleDateFormat("dd-MM-yyyy").format(parsed);
 			}
-
 			return value;
-
 		} catch (Exception exception) {
-
 			return safeDisplayValue(date);
 		}
 	}
 
 	private String safeDisplayValue(Object value) {
-
 		String result = toSafeString(value);
-
 		return result.isEmpty() ? "-" : result;
 	}
 
 	private String toSafeString(Object value) {
-
-		if (value == null) {
+		if (value == null)
 			return "";
-		}
-
-		if (value instanceof String) {
+		if (value instanceof String)
 			return ((String) value).trim();
-		}
-
 		return value.toString().trim();
 	}
 
 	private int normalizePage(int page, int totalPages) {
-
 		int safeTotal = Math.max(1, totalPages);
-
-		if (page < 1) {
+		if (page < 1)
 			return 1;
-		}
-
-		if (page > safeTotal) {
+		if (page > safeTotal)
 			return safeTotal;
-		}
-
 		return page;
 	}
 
 	private static class ChequeDisplayItem {
-
-		private ScanCheque scanCheque;
-		private OutwardCheque outwardCheque;
+		private String chequeId;
+		private String chequeNumber;
+		private String payeeAccountNumber;
+		private Object chequeDate;
+		private String micrCode;
+		private String chequeStatus;
+		private BigDecimal chequeAmount;
 
 		private static ChequeDisplayItem fromScanCheque(ScanCheque cheque) {
-
 			ChequeDisplayItem item = new ChequeDisplayItem();
+			item.chequeId = cheque.getScannedChequeId();
+			item.chequeNumber = cheque.getChequeNumber();
 
-			item.scanCheque = cheque;
-
+			// Prioritizes payee account number with fallback to drawee account number
+			String account = cheque.getPayeeAccountNumber();
+			if (account == null || account.trim().isEmpty()) {
+				account = cheque.getDraweeAccountNumber();
+			}
+			item.payeeAccountNumber = account;
+			item.chequeDate = cheque.getChequeDate();
+			item.micrCode = cheque.getMicrCode();
+			item.chequeStatus = cheque.getChequeStatus();
+			item.chequeAmount = cheque.getChequeAmount();
 			return item;
 		}
 
 		private static ChequeDisplayItem fromOutwardCheque(OutwardCheque cheque) {
-
 			ChequeDisplayItem item = new ChequeDisplayItem();
+			item.chequeId = cheque.getOutwardChequeId();
+			item.chequeNumber = cheque.getChequeNumber();
 
-			item.outwardCheque = cheque;
-
+			// Prioritizes payee account number with fallback to drawee account number
+			String account = cheque.getPayeeAccountNumber();
+			if (account == null || account.trim().isEmpty()) {
+				account = cheque.getDraweeAccountNumber();
+			}
+			item.payeeAccountNumber = account;
+			item.chequeDate = cheque.getChequeDate();
+			item.micrCode = cheque.getMicrCode();
+			item.chequeStatus = cheque.getChequeStatus();
+			item.chequeAmount = cheque.getChequeAmount();
 			return item;
 		}
 	}

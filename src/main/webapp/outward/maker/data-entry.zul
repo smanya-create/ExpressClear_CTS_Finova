@@ -1,121 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?page title="CTS - Outward Data Entry" contentType="text/html;charset=UTF-8"?>
-
 <zk>
-
 	<style src="/css/outward/data-entry.css" />
 
-	<window id="outwardDataEntryMain" border="none" width="100%"
-		height="100%"
+	<div id="outwardDataEntryMain" width="100%" height="100%"
+		sclass="outward-data-entry-page"
 		apply="com.iispl.cts.controller.outward.maker.OutwardDataEntryController">
 
-		<vlayout id="outwardDataEntryPage"
-			sclass="outward-data-entry-page" width="100%" vflex="1"
-			spacing="0">
+		<!-- Heading Group: Stacked vertically with title slightly higher -->
+		<div sclass="outward-data-entry-heading">
+			<label value="Data Entry" sclass="outward-data-entry-title" />
+			<label value="Select a batch ready for cheque data entry."
+				sclass="outward-data-entry-subtitle" />
+		</div>
 
-			<vlayout id="outwardDataEntryHeading"
-				sclass="outward-data-entry-heading" width="100%" spacing="3px">
+		<!-- Card Area -->
+		<div sclass="outward-data-entry-table-card">
+			<!-- Header: Title on far left, "1 Batch" pushed to far right corner -->
+			<div sclass="card-top-bar">
+				<label value="Batches Ready For Data Entry"
+					sclass="outward-data-entry-card-title" />
+				<label id="outwardDataEntryLblBatchCount"
+					value="1 Batch" sclass="outward-data-entry-batch-count" />
+			</div>
 
-				<label id="outwardDataEntryLblTitle" value="Data Entry"
-					sclass="outward-data-entry-title" />
+			<!-- Grid Table with Navy Header and Soft Borders -->
+			<grid id="outwardDataEntryGridBatch" width="100%"
+				sclass="outward-data-entry-grid">
+				<columns sizable="false">
+					<column label="Batch No." width="16%"
+						align="center" />
+					<column label="Total No. Of Cheques" width="18%"
+						align="center" />
+					<column label="Pending Data Entry" width="18%"
+						align="center" />
+					<column label="MICR Rejected" width="15%"
+						align="center" />
+					<column label="Status" width="19%" align="center" />
+					<column label="Action" width="14%" align="center" />
+				</columns>
+				<rows id="outwardDataEntryRowsBatch" />
+			</grid>
 
-				<label id="outwardDataEntryLblSubtitle"
-					value="Select a batch ready for cheque data entry"
-					sclass="outward-data-entry-subtitle" />
-
+			<!-- Empty State -->
+			<vlayout id="outwardDataEntryEmptyState" visible="false"
+				sclass="outward-data-entry-empty-state">
+				<label value="No Batches Ready For Data Entry"
+					sclass="outward-data-entry-empty-title" />
+				<label
+					value="There are currently no batches available for data entry."
+					sclass="outward-data-entry-empty-subtitle" />
 			</vlayout>
 
-			<groupbox id="outwardDataEntryTableCard"
-				sclass="outward-data-entry-table-card" width="100%" mold="3d">
-
-				<caption id="outwardDataEntryTableCaption">
-
-					<hlayout id="outwardDataEntryCaptionLayout"
-						sclass="outward-data-entry-caption-layout" width="100%"
-						valign="middle" spacing="0">
-
-						<label id="outwardDataEntryLblTableTitle"
-							value="Batches Ready For Data Entry"
-							sclass="outward-data-entry-card-title" />
-
-						<label id="outwardDataEntryLblCaptionSpacer"
-							value="" hflex="1" sclass="outward-data-entry-caption-spacer" />
-
-						<label id="outwardDataEntryLblBatchCount"
-							value="0 Batches" sclass="outward-data-entry-batch-count" />
-
-					</hlayout>
-
-				</caption>
-
-				<grid id="outwardDataEntryGridBatch" width="100%"
-					sclass="outward-data-entry-grid">
-
-					<columns sizable="false">
-
-						<column label="Batch No." width="17%"
-							align="center" />
-
-						<column label="Total No. Of Cheques" width="19%"
-							align="center" />
-
-						<column label="Pending Data Entry" width="20%"
-							align="center" />
-
-						<column label="MICR Rejected" width="15%"
-							align="center" />
-
-						<column label="Status" width="15%"
-							align="center" />
-
-						<column label="Action" width="14%"
-							align="center" />
-
-					</columns>
-
-					<rows id="outwardDataEntryRowsBatch" />
-
-				</grid>
-
-				<vlayout id="outwardDataEntryEmptyState" visible="false"
-					sclass="outward-data-entry-empty-state" width="100%"
-					spacing="5px">
-
-					<label id="outwardDataEntryLblEmptyTitle"
-						value="No Batches Ready For Data Entry"
-						sclass="outward-data-entry-empty-title" />
-
-					<label id="outwardDataEntryLblEmptySubtitle"
-						value="There Are Currently No Batches Available For Data Entry."
-						sclass="outward-data-entry-empty-subtitle" />
-
-				</vlayout>
-
-			</groupbox>
-
-			<hlayout id="outwardDataEntryPagination"
-				sclass="outward-maker-pagination" width="100%" spacing="6px">
-
+			<!-- Centered Pagination Bar -->
+			<div id="outwardDataEntryPagination"
+				sclass="outward-maker-pagination">
 				<button id="outwardDataEntryBtnFirst" label="&lt;&lt;"
 					sclass="outward-maker-pagination-button" />
-
 				<button id="outwardDataEntryBtnPrevious" label="&lt;"
 					sclass="outward-maker-pagination-button" />
-
-				<label id="outwardDataEntryLblCurrentPage" value="1 / 1"
+				<label id="outwardMakerLblCurrentPage" value="1 / 1"
 					sclass="outward-maker-pagination-label" />
-
 				<button id="outwardDataEntryBtnNext" label="&gt;"
 					sclass="outward-maker-pagination-button" />
-
 				<button id="outwardDataEntryBtnLast" label="&gt;&gt;"
 					sclass="outward-maker-pagination-button" />
+			</div>
+		</div>
 
-			</hlayout>
-
-		</vlayout>
-
-	</window>
-
+	</div>
 </zk>

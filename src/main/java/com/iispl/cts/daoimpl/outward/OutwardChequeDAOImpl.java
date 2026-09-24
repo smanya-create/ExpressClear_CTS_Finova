@@ -16,10 +16,12 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 
 	@Override
 	public boolean saveDataEntry(Connection connection, OutwardCheque cheque) {
-		if (connection == null)
+		if (connection == null) {
 			throw new IllegalArgumentException("Connection cannot be null");
-		if (cheque == null)
+		}
+		if (cheque == null) {
 			throw new IllegalArgumentException("Outward cheque cannot be null");
+		}
 		if (cheque.getOutwardChequeId() == null || cheque.getOutwardChequeId().trim().isEmpty()) {
 			throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
 		}
@@ -85,12 +87,15 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 
 	@Override
 	public String createOutwardChequeFromScan(Connection connection, String outwardBatchId, OutwardCheque cheque) {
-		if (connection == null)
+		if (connection == null) {
 			throw new IllegalArgumentException("Connection cannot be null");
-		if (outwardBatchId == null || outwardBatchId.trim().isEmpty())
+		}
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
 			throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
-		if (cheque == null)
+		}
+		if (cheque == null) {
 			throw new IllegalArgumentException("Outward cheque cannot be null");
+		}
 
 		String idSql = "SELECT 'CH' || (COALESCE(MAX(CASE WHEN outward_cheque_id ~ '^CH[0-9]+$' "
 				+ "THEN CAST(SUBSTRING(outward_cheque_id FROM 3) AS BIGINT) ELSE 0 END), 0) + 1) "
@@ -299,7 +304,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	@Override
 	public int getDataEnteredCountByBatchId(String outwardBatchId) {
 		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) = 'PENDING_VERIFICATION'";
+				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_VERIFICATION', 'MAKER_RETURNED')";
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
 			ps.setString(1, outwardBatchId.trim());
@@ -337,12 +342,15 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	@Override
 	public List<OutwardCheque> getOnHoldCheques(String outwardBatchId) {
 		List<OutwardCheque> chequeList = new ArrayList<>();
-		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
-				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
-				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
-				+ "cheque_image_front, cheque_image_back FROM outward_cheque WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_DATA_ENTRY', 'PENDING_MICR_REPAIR', 'ON_HOLD') "
-				+ "ORDER BY outward_cheque_id";
+		String sql = "SELECT oc.outward_cheque_id, oc.outward_batch_id, oc.cheque_number, oc.micr_code, oc.drawee_name, "
+				+ "oc.drawee_account_number, oc.payee_name, oc.payee_account_number, oc.cheque_amount, oc.cheque_date, "
+				+ "oc.cheque_status, oc.account_id, oc.created_at, oc.city_code, oc.bank_code, oc.branch_code, "
+				+ "oc.cheque_image_front, oc.cheque_image_back " + "FROM outward_cheque oc "
+				+ "LEFT JOIN outward_batch ob ON ob.outward_batch_id = oc.outward_batch_id "
+				+ "WHERE oc.outward_batch_id = ? " + "AND ( "
+				+ "    UPPER(TRIM(oc.cheque_status)) IN ('ON_HOLD', 'MAKER_RETURNED', 'SEND_BACK') "
+				+ "    OR (UPPER(TRIM(COALESCE(ob.batch_status, ''))) = 'ON_HOLD' AND UPPER(TRIM(oc.cheque_status)) NOT IN ('PENDING_VERIFICATION')) "
+				+ ") " + "ORDER BY oc.outward_cheque_id";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -353,7 +361,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 				}
 			}
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch returned cheques", exception);
+			throw new RuntimeException("Unable to fetch returned cheques for batch: " + outwardBatchId, exception);
 		}
 		return chequeList;
 	}
@@ -361,12 +369,15 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	@Override
 	public List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId) {
 		List<OutwardCheque> chequeList = new ArrayList<>();
-		String sql = "SELECT outward_cheque_id, outward_batch_id, cheque_number, micr_code, drawee_name, "
-				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
-				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
-				+ "cheque_image_front, cheque_image_back FROM outward_cheque WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_DATA_ENTRY', 'PENDING_MICR_REPAIR', 'MICR_REJECTED', 'ON_HOLD') "
-				+ "ORDER BY outward_cheque_id";
+		String sql = "SELECT oc.outward_cheque_id, oc.outward_batch_id, oc.cheque_number, oc.micr_code, oc.drawee_name, "
+				+ "oc.drawee_account_number, oc.payee_name, oc.payee_account_number, oc.cheque_amount, oc.cheque_date, "
+				+ "oc.cheque_status, oc.account_id, oc.created_at, oc.city_code, oc.bank_code, oc.branch_code, "
+				+ "oc.cheque_image_front, oc.cheque_image_back " + "FROM outward_cheque oc "
+				+ "LEFT JOIN outward_batch ob ON ob.outward_batch_id = oc.outward_batch_id "
+				+ "WHERE oc.outward_batch_id = ? " + "AND ( "
+				+ "    (UPPER(TRIM(COALESCE(ob.batch_status, ''))) = 'ON_HOLD' AND UPPER(TRIM(oc.cheque_status)) IN ('ON_HOLD', 'MAKER_RETURNED', 'PENDING_DATA_ENTRY')) "
+				+ "    OR (UPPER(TRIM(COALESCE(ob.batch_status, ''))) <> 'ON_HOLD' AND UPPER(TRIM(oc.cheque_status)) IN ('PENDING_DATA_ENTRY', 'ON_HOLD', 'MAKER_RETURNED', 'MICR_REJECTED')) "
+				+ ") " + "ORDER BY oc.outward_cheque_id";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -377,7 +388,8 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 				}
 			}
 		} catch (SQLException exception) {
-			throw new RuntimeException("Unable to fetch Maker data entry cheques", exception);
+			throw new RuntimeException("Unable to fetch Maker data entry cheques for batch: " + outwardBatchId,
+					exception);
 		}
 		return chequeList;
 	}
@@ -385,7 +397,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	@Override
 	public int getCompletedMakerChequeCountByBatchId(String outwardBatchId) {
 		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_VERIFICATION', 'REJECTION_REQUEST', 'REJECTION_REJECT')";
+				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_VERIFICATION', 'MAKER_RETURNED', 'REJECT_REQUEST', 'REJECTION_REQUEST', 'REJECTION_REJECT')";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -422,7 +434,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 			reason = reason.substring(separatorIndex + 1).trim();
 		}
 
-		String updateChequeSql = "UPDATE outward_cheque SET cheque_status = 'REJECTION_REJECT' WHERE outward_cheque_id = ?";
+		String updateChequeSql = "UPDATE outward_cheque SET cheque_status = 'REJECT_REQUEST' WHERE outward_cheque_id = ?";
 		String insertRequestSql = "INSERT INTO outward_cheque_request (cheque_id, batch_id, remarks, reason_id, reason) VALUES (?, ?, ?, ?, ?)";
 
 		try (Connection connection = DBConnection.getConnection()) {
