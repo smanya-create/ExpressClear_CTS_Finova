@@ -1,9 +1,8 @@
 package com.iispl.cts.controller.common;
 
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -16,9 +15,12 @@ import org.zkoss.zul.Button;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Captcha;
+import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.entity.Role;
 import com.iispl.cts.entity.User;
+import com.iispl.cts.service.AuditService;
 import com.iispl.cts.service.RoleService;
 import com.iispl.cts.service.UserService;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -28,16 +30,23 @@ import com.iispl.cts.serviceimpl.UserServiceImpl;
 public class LoginController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-    
- // Dedicated light thread pool for async audit logging
-    private static final ExecutorService ASYNC_AUDIT_POOL = Executors.newFixedThreadPool(4);
 
-    // Component wires
+    
     private Textbox txtIdentifier;
     private Textbox txtPassword;
     private Button btnSignIn;
     private Button btnTogglePassword;
- // Concurrency guard against rapid keypress / double submit
+    
+
+    private Vlayout vlCaptcha;
+    private Captcha cptLogin;
+    private Textbox txtCaptcha;
+    
+
+    private static final String ATTEMPTS_SESSION_KEY = "LOGIN_FAILED_ATTEMPTS";
+    private static final int MAX_FAILED_ATTEMPTS = 3;
+
+    // Concurrency guard against rapid keypress / double submit
     private final java.util.concurrent.atomic.AtomicBoolean isAuthenticating = 
             new java.util.concurrent.atomic.AtomicBoolean(false);
 
@@ -49,12 +58,38 @@ public class LoginController extends GenericForwardComposer<Component> {
 
     private final UserService userService = UserServiceImpl.getInstance();
     private final RoleService roleService = RoleServiceImpl.getInstance();
+    private final AuditService auditService = AuditServiceImpl.getInstance();
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
         clearErrorMessage();
+     // Check if the current session has already exceeded the failed attempt threshold
+        Session session = Sessions.getCurrent();
+        if (session != null) {
+            Integer attempts = (Integer) session.getAttribute(ATTEMPTS_SESSION_KEY);
+            if (attempts != null && attempts >= MAX_FAILED_ATTEMPTS) {
+                enableCaptchaUI();
+            }
+        }
     }
+    private void enableCaptchaUI() {
+        if (vlCaptcha != null) {
+            vlCaptcha.setVisible(true);
+            if (cptLogin != null) {
+                cptLogin.randomValue();
+            }
+        }
+    }
+    public void onRegenerateCaptcha() {
+        if (cptLogin != null) {
+            cptLogin.randomValue();
+        }
+        if (txtCaptcha != null) {
+            txtCaptcha.setValue("");
+        }
+    }
+
     public void onOKIdentifier() {
         if (txtPassword != null) {
             txtPassword.setFocus(true);
@@ -85,16 +120,6 @@ public class LoginController extends GenericForwardComposer<Component> {
         }
     }
 
-    public void onOK$txtIdentifier(Event event) {
-        if (txtPassword != null) {
-            txtPassword.setFocus(true);
-        }
-    }
-
-    public void onOK$txtPassword(Event event) {
-        processLogin();
-    }
-
     public void onChanging$txtIdentifier(Event event) {
         clearErrorMessage();
     }
@@ -120,20 +145,12 @@ public class LoginController extends GenericForwardComposer<Component> {
             lblErrorMessage.setValue("");
         }
     }
- // Helper for non-blocking audit logging
-    private void asyncAuditLog(final String module, final String action, final String details, final String status) {
-        ASYNC_AUDIT_POOL.submit(() -> {
-            try {
-                AuditServiceImpl.getInstance().log(module, action, details, status);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
 
     private void processLogin() {
-        // Atomic check: if an authentication attempt is already running, reject duplicates
+    	System.out.println(">>> [DEBUG LOGIN] processLogin() triggered for identifier: " 
+                + (txtIdentifier != null ? txtIdentifier.getValue() : "null"));
         if (!isAuthenticating.compareAndSet(false, true)) {
+        	System.out.println(">>> [DEBUG LOGIN] Blocked by AtomicBoolean guard");
             return;
         }
 
@@ -152,26 +169,69 @@ public class LoginController extends GenericForwardComposer<Component> {
                 return;
             }
 
-            // 1. Authenticate user credentials
+            Session session = Sessions.getCurrent();
+            Integer attempts = (session != null) ? (Integer) session.getAttribute(ATTEMPTS_SESSION_KEY) : null;
+            if (attempts == null) {
+                attempts = 0;
+            }
+
+            
+            // 1. CAPTCHA ENFORCEMENT CHECK
+            if (attempts >= MAX_FAILED_ATTEMPTS) {
+                String enteredCaptcha = (txtCaptcha != null && txtCaptcha.getValue() != null) 
+                                        ? txtCaptcha.getValue().trim() : "";
+
+                if (enteredCaptcha.isEmpty()) {
+                    showErrorMessage("Please enter the security verification code.");
+                    resetLoginButton();
+                    return;
+                }
+
+                if (cptLogin == null || !enteredCaptcha.equalsIgnoreCase(cptLogin.getValue())) {
+                    onRegenerateCaptcha();
+                    showErrorMessage("Invalid security code. Please try again.");
+                    resetLoginButton();
+                    return;
+                }
+            }         
+            // 2. AUTHENTICATE CREDENTIALS
             User authenticatedUser = userService.authenticate(identifier, password);
 
             if (authenticatedUser == null) {
-                asyncAuditLog("AUTH", "LOGIN_FAILED", "Invalid login attempt for: " + identifier, "FAILED");
-                showErrorMessage("Invalid username/email or password.");
+                attempts++;
+                System.out.println(">>> [DEBUG LOGIN] Failed attempt count: " + attempts);
+                if (session != null) {
+                    session.setAttribute(ATTEMPTS_SESSION_KEY, attempts);
+                }
+
+                if (attempts >= MAX_FAILED_ATTEMPTS) {
+                    enableCaptchaUI();
+                    showErrorMessage("Invalid credentials. Enter the security code to proceed.");
+                } else {
+                    int remaining = MAX_FAILED_ATTEMPTS - attempts;
+                    showErrorMessage("Invalid username/email or password. (" + remaining + " attempts remaining before verification)");
+                }
+
+                auditService.log("-", identifier, "N/A", "AUTH", "LOGIN_FAILED", "Invalid login attempt (" + attempts + ") for: " + identifier, "FAILED");
                 resetLoginButton();
                 return;
             }
+            
+            // 3. SUCCESSFUL LOGIN: CLEAR COUNTER
+            if (session != null) {
+                session.removeAttribute(ATTEMPTS_SESSION_KEY);
+            }
 
-            // 2. Block inactive user accounts
+            // 4. Block inactive user accounts
             if ("INACTIVE".equalsIgnoreCase(authenticatedUser.getStatus())) {
-                asyncAuditLog("AUTH", "LOGIN_BLOCKED",
-                        "Login denied for user " + authenticatedUser.getUsername() + ": Account inactivated by Admin.", "FAILED");
-                showErrorMessage("Your account is deactivated. Please contact your administrator.");
+                auditService.log(authenticatedUser.getUserId(), authenticatedUser.getUsername(), authenticatedUser.getRoleId(),
+                        "AUTH", "LOGIN_BLOCKED", "Login denied for user " + authenticatedUser.getUsername() + ": Account inactivated by Admin.", "FAILED");
+                showErrorMessage("Your account is deactivated.");
                 resetLoginButton();
                 return;
             }
 
-            // 3. Fetch assigned role & permissions (uses in-memory cache)
+            // 5. Fetch assigned role
             String userRoleId = authenticatedUser.getRoleId() != null ? authenticatedUser.getRoleId().trim() : "";
             Role userRole = roleService.getRoleById(userRoleId);
             String userPermissions = (userRole != null && userRole.getPermissions() != null) ? userRole.getPermissions().trim() : "";
@@ -188,31 +248,37 @@ public class LoginController extends GenericForwardComposer<Component> {
                 else computedDbRoleName = "Unknown";
             }
 
-            // 4. Bind Session Attributes
-            Session session = Sessions.getCurrent();
+            // 6. Bind Session Attributes
             String normalizedRole = computedDbRoleName.toUpperCase().replace(" ", "_");
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 
-            session.setAttribute("LOGGED_USER", authenticatedUser.getFullName());
-            session.setAttribute("USER_ID", authenticatedUser.getUserId());
-            session.setAttribute("USERNAME", authenticatedUser.getUsername());
-            session.setAttribute("CTS_USERNAME", authenticatedUser.getUsername());
-            session.setAttribute("USER_ROLE", normalizedRole);
-            session.setAttribute("CTS_USER_ROLE", normalizedRole);
-            session.setAttribute("ROLE_ID", authenticatedUser.getRoleId());
-            session.setAttribute("ROLE_NAME", computedDbRoleName);
-            session.setAttribute("USER_OBJ", authenticatedUser);
-            session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
-            session.setAttribute("USER_PERMISSIONS", userPermissions);
+            if (session != null) {
+                session.setAttribute("LOGGED_USER", authenticatedUser.getFullName());
+                session.setAttribute("USER_ID", authenticatedUser.getUserId());
+                session.setAttribute("USERNAME", authenticatedUser.getUsername());
+                session.setAttribute("CTS_USERNAME", authenticatedUser.getUsername());
+                session.setAttribute("USER_ROLE", normalizedRole);
+                session.setAttribute("CTS_USER_ROLE", normalizedRole);
+                session.setAttribute("ROLE_ID", authenticatedUser.getRoleId());
+                session.setAttribute("ROLE_NAME", computedDbRoleName);
+                session.setAttribute("USER_OBJ", authenticatedUser);
+                session.setAttribute("CLEARING_DATE", sdf.format(new Date()));
+                session.setAttribute("USER_PERMISSIONS", userPermissions);
+            }
             
-            Clients.showBusy("Authenticating... Launching Portal...");
+            Clients.showBusy("Authenticating...");
 
-            // Async audit log - will not block navigation
-            final String successUsername = authenticatedUser.getUsername();
-            final String successRoleName = computedDbRoleName;
-            asyncAuditLog("AUTH", "LOGIN", "User " + successUsername + " logged in successfully with role " + successRoleName, "SUCCESS");
+            auditService.log(
+                    authenticatedUser.getUserId(),
+                    authenticatedUser.getUsername(),
+                    computedDbRoleName,
+                    "AUTH",
+                    "LOGIN",
+                    "User " + authenticatedUser.getUsername() + " logged in successfully with role " + computedDbRoleName,
+                    "SUCCESS"
+            );
 
-            // 5. Navigate user directly to their assigned role dashboard
+            // 7. Navigate to dashboard
             redirectToRoleDashboard(userRoleId, normalizedRole, computedDbRoleName);
 
         } catch (Exception e) {
@@ -221,13 +287,16 @@ public class LoginController extends GenericForwardComposer<Component> {
             e.printStackTrace();
         }
     }
+
     private void resetLoginButton() {
         if (btnSignIn != null) {
             btnSignIn.setDisabled(false);
         }
         isAuthenticating.set(false);
     }
-	private void redirectToRoleDashboard(String roleId, String normalizedRole, String roleName) {
+    
+    //Role-Based Routing (RBAC)
+    private void redirectToRoleDashboard(String roleId, String normalizedRole, String roleName) {
         if ("ROL1001".equalsIgnoreCase(roleId) || normalizedRole.contains("ADMIN")) {
             Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
         } else if ("ROL1002".equalsIgnoreCase(roleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("OUTWARD"))) {
@@ -235,7 +304,7 @@ public class LoginController extends GenericForwardComposer<Component> {
         } else if ("ROL1003".equalsIgnoreCase(roleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("OUTWARD"))) {
             Executions.sendRedirect("/outward/checker/dashboard.zul");
         } else if ("ROL1004".equalsIgnoreCase(roleId) || (normalizedRole.contains("MAKER") && normalizedRole.contains("INWARD"))) {
-        	Executions.sendRedirect("/inward/maker/index.zul");
+            Executions.sendRedirect("/inward/maker/index.zul");
         } else if ("ROL1005".equalsIgnoreCase(roleId) || (normalizedRole.contains("CHECKER") && normalizedRole.contains("INWARD"))) {
             Executions.sendRedirect("/inward/checker/dashboard.zul");
         } else {
