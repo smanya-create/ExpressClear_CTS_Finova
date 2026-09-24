@@ -36,6 +36,9 @@ public enum OutwardChequeStatus {
 	     * Instrument formally rejected (e.g., signature mismatch, technical return).
 	     * Routed to Outward Return memo file (Terminal rejection state).
 	     */
-	    REJECTED
+	    REJECTED,
+	    PENDING_VERIFICATION,
+	    REJECT_REQUEST,
+	    MAKER_RETURNED;
 	}
 

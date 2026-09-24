@@ -23,8 +23,10 @@ import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Window;
 
+import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
+import com.iispl.cts.enums.OutwardBatchStatus;
 import com.iispl.cts.service.outward.OutwardBatchService;
 import com.iispl.cts.service.outward.OutwardChequeService;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
@@ -45,6 +47,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
+		
 		super.doAfterCompose(component);
 
 		restoreGeneratedXmlState();
@@ -85,13 +88,13 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 				generateXmlButton.setAttribute("batch", verifiedBatch);
 
-				if ("COMPLETED".equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
+				if (OutwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
 					generateXmlButton.setDisabled(true);
 				}
 
 				generateXmlButton.addEventListener(Events.ON_CLICK, event -> {
 
-					if ("COMPLETED".equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
+					if (OutwardBatchStatus.COMPLETED.toString().equalsIgnoreCase(verifiedBatch.getBatchStatus())) {
 						return;
 					}
 

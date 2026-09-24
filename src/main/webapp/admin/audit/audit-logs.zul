@@ -30,41 +30,30 @@
                     <!-- Fixed Page Title Header -->
                     <vlayout spacing="2px" style="flex: 0 0 auto;">
                         <label value="Audit Logs" sclass="page-title"/>
-                        
                     </vlayout>
 
-                    <!-- Fixed Filter Controls Card -->
+                    <!-- Fixed Filter Controls Card (MODULE filter removed) -->
                     <vlayout sclass="card-panel" hflex="1" spacing="0" 
                              style="padding: 16px 22px; box-sizing: border-box; flex: 0 0 auto;">
                         <hlayout spacing="16px" valign="bottom" hflex="1">
-                            <vlayout spacing="6px" width="150px">
+                            <vlayout spacing="6px" width="160px">
                                 <label value="FROM DATE" sclass="field-label"/>
-                                <datebox id="dtFrom" format="yyyy-MM-dd" height="38px" width="100%"/>
+                                <datebox id="dtFrom" format="dd-MM-yyyy" height="38px" width="100%"/>
                             </vlayout>
-                            <vlayout spacing="6px" width="150px">
+                            <vlayout spacing="6px" width="160px">
                                 <label value="TO DATE" sclass="field-label"/>
-                                <datebox id="dtTo" format="yyyy-MM-dd" height="38px" width="100%"/>
-                            </vlayout>
-                            <vlayout spacing="6px" width="170px">
-                                <label value="MODULE" sclass="field-label"/>
-                                <combobox id="cmbModuleFilter" readonly="true" width="100%" height="38px">
-                                    <comboitem label="All Modules" value="ALL"/>
-                                    <comboitem label="AUTH" value="AUTH"/>
-                                    <comboitem label="ROLE_MGMT" value="ROLE_MGMT"/>
-                                    <comboitem label="USER_MGMT" value="USER_MGMT"/>
-                                    
-                                </combobox>
+                                <datebox id="dtTo" format="dd-MM-yyyy" height="38px" width="100%"/>
                             </vlayout>
                             <vlayout spacing="6px" hflex="1">
                                 <label value="SEARCH USER / DETAILS" sclass="field-label"/>
-                                <textbox id="txtSearchAudit" placeholder="Search by User ID, Name, or Details..." hflex="1" height="38px" sclass="input-box"/>
+                                <textbox id="txtSearchAudit" placeholder="Search by User or Details..." hflex="1" height="38px" sclass="input-box"/>
                             </vlayout>
                             <button id="btnSearch" label="SEARCH" height="38px" sclass="btn-primary"/>
                             <button id="btnReset" label="RESET" height="38px" sclass="btn-secondary"/>
                         </hlayout>
                     </vlayout>
 
-                    <!-- Audit Log Table Card (Takes up remaining screen height) -->
+                    <!-- Audit Log Table Card -->
                     <vlayout sclass="card-panel" spacing="12px" vflex="1" hflex="1" 
                              style="padding: 16px 22px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;">
                         
@@ -74,14 +63,13 @@
                             <label id="lblAuditCount" value="Loading logs..." style="color: #64748b; font-size: 12px;"/>
                         </hlayout>
 
-                        <!-- ONLY this Grid Body Scrolls Vertically -->
+                        <!-- Streamlined Grid Columns: DATE AND TIME | USER | ACTION | DETAILS | IP ADDRESS | STATUS -->
                         <grid id="gridAudit" sclass="role-grid" span="true" vflex="1" hflex="1" emptyMessage="No audit logs found.">
                             <columns sizable="false">
-                                <column label="TIMESTAMP" hflex="3" align="center"/>
-                                <column label="USER / ROLE" hflex="4" align="center"/>
-                                <column label="MODULE" hflex="2" align="center"/>
+                                <column label="DATE AND TIME" hflex="3" align="center"/>
+                                <column label="USER" hflex="2" align="center"/>
                                 <column label="ACTION" hflex="2" align="center"/>
-                                <column label="DETAILS" hflex="4" align="center"/>
+                                <column label="DETAILS" hflex="7" align="left"/>
                                 <column label="IP ADDRESS" hflex="2" align="center"/>
                                 <column label="STATUS" hflex="2" align="center"/>
                             </columns>

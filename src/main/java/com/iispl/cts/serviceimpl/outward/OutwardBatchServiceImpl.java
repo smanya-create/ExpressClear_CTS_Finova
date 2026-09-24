@@ -1,4 +1,3 @@
-
 package com.iispl.cts.serviceimpl.outward;
 
 import java.sql.Connection;
@@ -6,6 +5,7 @@ import java.util.List;
 
 import com.iispl.cts.dao.outward.OutwardBatchDAO;
 import com.iispl.cts.daoimpl.outward.OutwardBatchDAOImpl;
+import com.iispl.cts.dto.MicrRepairBatch;
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardBatchService;
 
@@ -14,7 +14,14 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 	private final OutwardBatchDAO outwardBatchDAO;
 
 	public OutwardBatchServiceImpl() {
-		outwardBatchDAO = new OutwardBatchDAOImpl();
+		this.outwardBatchDAO = new OutwardBatchDAOImpl();
+	}
+
+	public OutwardBatchServiceImpl(OutwardBatchDAO outwardBatchDAO) {
+		if (outwardBatchDAO == null) {
+			throw new IllegalArgumentException("OutwardBatchDAO cannot be null");
+		}
+		this.outwardBatchDAO = outwardBatchDAO;
 	}
 
 	@Override
@@ -29,7 +36,6 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 	@Override
 	public List<OutwardBatch> searchBatches(String batchId, String status) {
-
 		return outwardBatchDAO.searchBatches(batchId, status);
 	}
 
@@ -40,7 +46,6 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 	@Override
 	public List<OutwardBatch> getPendingBatches(int pageNumber, int pageSize) {
-
 		return outwardBatchDAO.getPendingBatches(pageNumber, pageSize);
 	}
 
@@ -56,47 +61,40 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 
 	@Override
 	public String getScannedBatchIdByOutwardBatchId(String outwardBatchId) {
-
 		return outwardBatchDAO.getScannedBatchIdByOutwardBatchId(outwardBatchId);
 	}
 
 	@Override
-
 	public String getOutwardBatchIdByScannedBatchId(String scannedBatchId) {
-
 		return outwardBatchDAO.getOutwardBatchIdByScannedBatchId(scannedBatchId);
 	}
 
 	@Override
 	public boolean updateOutWardBatchStatus(String outwardBatchId, String batchStatus) {
-
 		return outwardBatchDAO.updateOutWardBatchStatus(outwardBatchId, batchStatus);
 	}
 
 	@Override
 	public boolean updateOutWardBatchStatus(Connection connection, String outwardBatchId, String batchStatus) {
-
 		return outwardBatchDAO.updateOutWardBatchStatus(connection, outwardBatchId, batchStatus);
 	}
 
 	@Override
 	public String createOutwardBatchFromScan(Connection connection, String scannedBatchId) {
-
 		if (connection == null) {
 			throw new IllegalArgumentException("Connection cannot be null");
 		}
 
 		if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
-
 			throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
 		}
 
 		return outwardBatchDAO.createOutwardBatchFromScan(connection, scannedBatchId.trim());
 	}
 
+	@Override
 	public void updateBatchStatus(String batchId, String status) {
 		outwardBatchDAO.updateBatchStatus(batchId, status);
-
 	}
 
 	@Override
@@ -108,5 +106,4 @@ public class OutwardBatchServiceImpl implements OutwardBatchService {
 	public List<OutwardBatch> getScanBatchesReadyForDataEntry() {
 		return outwardBatchDAO.getScanBatchesReadyForDataEntry();
 	}
-
 }

@@ -18,7 +18,7 @@
 
 				<include src="/components/sidebar.zul"
 					role="INWARD_MAKER"
-					activeTab="${param.page == 'batch-intake' ? 'inward-batch-intake' : 'inward-dashboard'}"
+					activeTab="${param.page eq 'batch-intake' ? 'inward-batch-intake' : ((param.page eq 'micr-repair' or param.page eq 'micr-repair-queue') ? 'inward-micr-repair' : ((param.page eq 'data-entry' or param.page eq 'data-entry-queue') ? 'inward-data-entry' : 'inward-dashboard'))}"
 					vflex="1" hflex="1" />
 
 			</west>

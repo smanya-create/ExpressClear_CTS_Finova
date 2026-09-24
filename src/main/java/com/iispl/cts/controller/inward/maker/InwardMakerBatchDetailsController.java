@@ -33,7 +33,7 @@ import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardMakerBatchDetailsController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
+	
 	private static final int PAGE_SIZE = 10;
 
 	private Grid inwardMakerGridChequeDetails;

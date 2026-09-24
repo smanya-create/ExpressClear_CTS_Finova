@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.inward.InwardDashboardDAO;
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardDashboardKpiDTO;
-import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.enums.inward.InwardChequeStatus;
 
 public class InwardDashboardDAOImpl implements InwardDashboardDAO {
@@ -90,10 +88,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
     public List<InwardDashboardBatchDTO> getRecentBatches() {
         List<InwardDashboardBatchDTO> batches = new ArrayList<>();
 
-        // Retains ALL non-completed/non-rejected batches:
-        // 1. Batches actively being processed (even if all cheques are approved and awaiting submit)
-        // 2. Batches submitted to Checker (CHECKER_PROCESSING_PENDING)
-        // 3. Batches with sent-back cheques (CHECKER_PROCESSING)
+        // Stripped of all dead COUNTs: only selects what the UI actually renders
         String sql = 
             "SELECT * FROM ( " +
             "    SELECT " +
@@ -101,18 +96,14 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             "        b.batch_status, " +
             "        b.uploaded_at, " +
             "        COALESCE(b.actual_cheque_count, 0) AS total_count, " +
-            "        COUNT(CASE WHEN c.cheque_status IN ('CHECKER_PROCESSING_PENDING', 'COMPLETED', 'CLEARED', 'ACCEPTED', 'DATA_ENTRY_COMPLETED', 'MAKER_RETURNED') THEN 1 END) AS accepted_count, " +
-            "        COUNT(CASE WHEN c.cheque_status IN ('SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER_MICR', 'SEND_BACK_TO_MAKER') THEN 1 END) AS back_to_maker_count, " +
-            "        COUNT(CASE WHEN c.cheque_status = 'REJECTION_REQUESTED' THEN 1 END) AS return_request_count, " +
-            "        COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'DATA_ENTRY_IN_PROGRESS', 'MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS') THEN 1 END) AS maker_work_count " +
+            "        COALESCE(b.actual_total_amount, 0) AS actual_total_amount, " +
+            "        COUNT(CASE WHEN c.cheque_status IN ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS', 'SEND_BACK_TO_MAKER_MICR', 'MICR_REPAIR_REQUIRED') THEN 1 END) AS micr_pending_count " +
             "    FROM inward_batch b " +
             "    LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
             "    WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
-            "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count " +
+            "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count, b.actual_total_amount " +
             ") sub " +
             "ORDER BY sub.uploaded_at DESC";
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -121,24 +112,10 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
             while (rs.next()) {
                 InwardDashboardBatchDTO dto = new InwardDashboardBatchDTO();
                 dto.setBatchId(rs.getString("inward_batch_id"));
-
-                java.sql.Timestamp ts = rs.getTimestamp("uploaded_at");
-                dto.setBatchDate(ts != null ? sdf.format(ts) : "-");
-
-                dto.setSource("CHI");
                 dto.setTotalCheques(rs.getInt("total_count"));
-                dto.setAcceptedCheques(rs.getInt("accepted_count"));
-                dto.setBackToMakerCheques(rs.getInt("back_to_maker_count"));
-                dto.setReturnRequestCheques(rs.getInt("return_request_count"));
-
-                String batchStatus = rs.getString("batch_status");
-                if ("CHECKER_PROCESSING_PENDING".equalsIgnoreCase(batchStatus)) {
-                    dto.setDisplayStatus("CHECKER_PROCESSING_PENDING");
-                } else if (dto.getBackToMakerCheques() > 0) {
-                    dto.setDisplayStatus("Sent Back");
-                } else {
-                    dto.setDisplayStatus("Partially Processed");
-                }
+                dto.setTotalAmount(rs.getBigDecimal("actual_total_amount"));
+                dto.setBatchStatus(rs.getString("batch_status"));
+                dto.setHasPendingMicr(rs.getInt("micr_pending_count") > 0);
 
                 batches.add(dto);
             }

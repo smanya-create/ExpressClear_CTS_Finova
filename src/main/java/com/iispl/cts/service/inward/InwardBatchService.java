@@ -3,6 +3,7 @@ package com.iispl.cts.service.inward;
 import java.util.List;
 
 import com.iispl.cts.dto.DashboardSummaryDTO;
+import com.iispl.cts.dto.DataEntryBatchItemDTO;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
@@ -34,6 +35,10 @@ public interface InwardBatchService {
 	List<InwardReportChequeDTO> getChequesByBatch();
 	
 	boolean updateProcessingBatchStatus(String batchId, InwardBatchStatus status);
+	
+	
+	// Added for DE queue controller requirement
+	List<DataEntryBatchItemDTO> getBatchesForDataEntry();
 	
 	
 }

@@ -39,4 +39,5 @@ public interface OutwardChequeDAO {
 
 	int getCompletedMakerChequeCountByBatchId(String outwardBatchId);
 
+	boolean saveRejectionRequest(String outwardChequeId, String rejectionReason, String rejectionRemarks);
 }

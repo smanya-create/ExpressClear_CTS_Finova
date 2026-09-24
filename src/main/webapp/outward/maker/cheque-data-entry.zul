@@ -1,491 +1,306 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?page title="CTS - Cheque Data Entry" contentType="text/html;charset=UTF-8"?>
-<zk>
-    <style src="/css/outward/cheque-data-entry.css"/>
-
-    <window id="outwardChequeDataEntryWin"
-        border="none"
-        width="100%"
-        apply="com.iispl.cts.controller.outward.maker.OutwardChequeDataEntryController">
-
-        <div id="outwardChequeDataEntryPage"
-            sclass="outward-cheque-data-entry-page"
-            width="100%">
-
-            <div id="outwardChequeDataEntryTopBar"
-                sclass="outward-cheque-data-entry-topbar"
-                width="100%">
-
-                <div sclass="outward-cheque-data-entry-heading">
-                    <label id="outwardChequeDataEntryLblTitle"
-                        value="Cheque Data Entry"
-                        sclass="outward-cheque-data-entry-title"/>
-
-                    <label id="outwardChequeDataEntryLblSubtitle"
-                        value="Enter and verify cheque transaction details"
-                        sclass="outward-cheque-data-entry-subtitle"/>
-                </div>
-
-                <div sclass="outward-cheque-data-entry-topbar-spacer"/>
-
-                <button id="outwardChequeDataEntryBtnBack"
-                    label="← Back"
-                    sclass="outward-cheque-data-entry-back-button"/>
-            </div>
-
-            <div id="outwardChequeDataEntryBatchCard"
-                sclass="outward-cheque-data-entry-batch-card"
-                width="100%">
-
-                <div id="outwardChequeDataEntryBatchInfo"
-                    sclass="outward-cheque-data-entry-batch-info">
-
-                    <div sclass="outward-cheque-data-entry-meta-block">
-                        <label value="Batch No."
-                            sclass="outward-cheque-data-entry-meta-label"/>
-                        <label id="outwardChequeDataEntryLblBatchId"
-                            value=""
-                            sclass="outward-cheque-data-entry-meta-value outward-cheque-data-entry-batch-value"/>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-meta-block">
-                        <label value="Total Cheques"
-                            sclass="outward-cheque-data-entry-meta-label"/>
-                        <label id="outwardChequeDataEntryLblTotalCheques"
-                            value=""
-                            sclass="outward-cheque-data-entry-meta-value"/>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-progress-block">
-                        <label value="Progress"
-                            sclass="outward-cheque-data-entry-meta-label"/>
-
-                        <div sclass="outward-cheque-data-entry-progress-row">
-                            <progressmeter
-                                id="outwardChequeDataEntryProgress"
-                                value="0"
-                                sclass="outward-cheque-data-entry-progress"/>
-
-                            <label id="outwardChequeDataEntryLblProgress"
-                                value="0%"
-                                sclass="outward-cheque-data-entry-progress-value"/>
-                        </div>
-
-                        <label id="outwardChequeDataEntryLblProgressCount"
-                            value="0 of 0 completed"
-                            sclass="outward-cheque-data-entry-progress-count"/>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-batch-divider"/>
-
-                    <div sclass="outward-cheque-data-entry-navigation">
-                        <button id="outwardChequeDataEntryBtnPrevious"
-                            label="← Previous"
-                            sclass="outward-cheque-data-entry-navigation-button"/>
-
-                        <label id="outwardChequeDataEntryLblChequePosition"
-                            value="0 of 0"
-                            sclass="outward-cheque-data-entry-position"/>
-
-                        <button id="outwardChequeDataEntryBtnNext"
-                            label="Next →"
-                            sclass="outward-cheque-data-entry-navigation-button"/>
-                    </div>
-                </div>
-            </div>
-
-            <div id="outwardChequeDataEntryMainArea"
-                sclass="outward-cheque-data-entry-main-area"
-                width="100%">
-
-                <div id="outwardChequeDataEntryImageCard"
-                    sclass="outward-cheque-data-entry-card outward-cheque-data-entry-image-card">
-
-                    <div sclass="outward-cheque-data-entry-card-header">
-                        <label value="Cheque Image"
-                            sclass="outward-cheque-data-entry-card-title"/>
-
-                        <div sclass="outward-cheque-data-entry-card-header-spacer"/>
-
-                        <div id="outwardChequeDataEntryImageSideActions"
-                            sclass="outward-cheque-data-entry-image-side-actions">
-
-                            <button id="outwardChequeDataEntryBtnFront"
-                                label="Front"
-                                sclass="outward-cheque-data-entry-image-side-button outward-cheque-data-entry-image-side-button-active"/>
-
-                            <button id="outwardChequeDataEntryBtnBackImage"
-                                label="Back"
-                                sclass="outward-cheque-data-entry-image-side-button"/>
-                        </div>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-image-container">
-                        <image id="outwardChequeDataEntryChequeImage"
-                            visible="false"
-                            draggable="false"
-                            sclass="outward-cheque-data-entry-cheque-image"/>
-
-                        <label id="outwardChequeDataEntryLblImageEmpty"
-                            value="Cheque image unavailable."
-                            visible="true"
-                            sclass="outward-cheque-data-entry-image-empty"/>
-                    </div>
-
-                    <div id="outwardChequeDataEntryImageActions"
-                        sclass="outward-cheque-data-entry-image-actions">
-
-                        <button id="outwardChequeDataEntryBtnZoomOut"
-                            label="−"
-                            sclass="outward-cheque-data-entry-image-button outward-cheque-data-entry-zoom-button"/>
-
-                        <button id="outwardChequeDataEntryBtnZoomIn"
-                            label="+"
-                            sclass="outward-cheque-data-entry-image-button outward-cheque-data-entry-zoom-button"/>
-
-                        <button id="outwardChequeDataEntryBtnRotate"
-                            label="↻ Rotate"
-                            sclass="outward-cheque-data-entry-image-button"/>
-
-                        <button id="outwardChequeDataEntryBtnReset"
-                            label="↶ Reset"
-                            sclass="outward-cheque-data-entry-image-button"/>
-                    </div>
-                </div>
-
-                <div id="outwardChequeDataEntryDetailsCard"
-                    sclass="outward-cheque-data-entry-card outward-cheque-data-entry-details-card">
-
-                    <div sclass="outward-cheque-data-entry-details-heading">
-                        <div sclass="outward-cheque-data-entry-details-title-group">
-                            <label value="Transaction Data"
-                                sclass="outward-cheque-data-entry-card-title"/>
-
-                            <label value="Enter the cheque details required for verification"
-                                sclass="outward-cheque-data-entry-card-subtitle"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-card-header-spacer"/>
-
-                        <label id="outwardChequeDataEntryLblStatusBadge"
-                            value="Data Entry Pending"
-                            sclass="outward-cheque-data-entry-status-badge outward-cheque-data-entry-status-pending"/>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-form-grid">
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="Cheque Number *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <textbox id="outwardChequeDataEntryTxtChequeNumber"
-                                width="100%"
-                                maxlength="20"
-                                sclass="outward-cheque-data-entry-input"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="Cheque Amount (₹) *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <decimalbox id="outwardChequeDataEntryTxtAmount"
-                                width="100%"
-                                sclass="outward-cheque-data-entry-input"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="Cheque Date *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <datebox id="outwardChequeDataEntryDtChequeDate"
-                                width="100%"
-                                format="dd-MM-yyyy"
-                                buttonVisible="true"
-                                sclass="outward-cheque-data-entry-input"/>
-                            <label id="outwardChequeDataEntryLblPostDated"
-                                value=""
-                                visible="false"
-                                sclass="outward-cheque-data-entry-postdated"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="Payee Account Number *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <textbox id="outwardChequeDataEntryTxtPayeeAccount"
-                                width="100%"
-                                maxlength="30"
-                                sclass="outward-cheque-data-entry-input"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="Payee Name *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <textbox id="outwardChequeDataEntryTxtPayeeName"
-                                width="100%"
-                                maxlength="100"
-                                sclass="outward-cheque-data-entry-input"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="Drawee Name *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <textbox id="outwardChequeDataEntryTxtDraweeName"
-                                width="100%"
-                                maxlength="100"
-                                sclass="outward-cheque-data-entry-input"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field">
-                            <label value="MICR Code *"
-                                sclass="outward-cheque-data-entry-field-label"/>
-                            <textbox id="outwardChequeDataEntryTxtMicrCode"
-                                width="100%"
-                                readonly="true"
-                                disabled="true"
-                                sclass="outward-cheque-data-entry-input outward-cheque-data-entry-micr-input"/>
-                            <label id="outwardChequeDataEntryLblMicrReason"
-                                value=""
-                                visible="false"
-                                sclass="outward-cheque-data-entry-micr-reason"/>
-                        </div>
-
-                        <div sclass="outward-cheque-data-entry-field-placeholder"/>
-                    </div>
-
-                    <groupbox id="outwardChequeDataEntryMakerRejectionPanel"
-                        visible="false"
-                        width="100%"
-                        sclass="outward-cheque-data-entry-alert-panel outward-cheque-data-entry-rejection-panel">
-                        <vlayout width="100%" spacing="3px">
-                            <label value="Maker Rejection Request"
-                                sclass="outward-cheque-data-entry-alert-title"/>
-                            <label id="outwardChequeDataEntryLblRejectionReason"
-                                value=""
-                                sclass="outward-cheque-data-entry-alert-message"/>
-                            <label id="outwardChequeDataEntryLblRejectionRemarks"
-                                value=""
-                                sclass="outward-cheque-data-entry-alert-message"/>
-                        </vlayout>
-                    </groupbox>
-
-                    <groupbox id="outwardChequeDataEntryCheckerSendBackPanel"
-                        visible="false"
-                        width="100%"
-                        sclass="outward-cheque-data-entry-alert-panel outward-cheque-data-entry-checker-panel">
-                        <vlayout width="100%" spacing="3px">
-                            <label value="Checker Send Back"
-                                sclass="outward-cheque-data-entry-alert-title"/>
-                            <label id="outwardChequeDataEntryLblCheckerSendBackMessage"
-                                value=""
-                                sclass="outward-cheque-data-entry-alert-message"/>
-                        </vlayout>
-                    </groupbox>
-
-                    <groupbox id="outwardChequeDataEntryMicrRejectedPanel"
-                        visible="false"
-                        width="100%"
-                        sclass="outward-cheque-data-entry-alert-panel outward-cheque-data-entry-micr-rejected-panel">
-                        <vlayout width="100%" spacing="3px">
-                            <label value="MICR Rejected"
-                                sclass="outward-cheque-data-entry-alert-title"/>
-                            <label id="outwardChequeDataEntryLblMicrRejectedMessage"
-                                value=""
-                                sclass="outward-cheque-data-entry-alert-message"/>
-                        </vlayout>
-                    </groupbox>
-
-                    <groupbox id="outwardChequeDataEntryMicrPendingPanel"
-                        visible="false"
-                        width="100%"
-                        sclass="outward-cheque-data-entry-alert-panel outward-cheque-data-entry-micr-pending-panel">
-                        <vlayout width="100%" spacing="3px">
-                            <label value="MICR Repair Pending"
-                                sclass="outward-cheque-data-entry-alert-title"/>
-                            <label id="outwardChequeDataEntryLblMicrPendingMessage"
-                                value=""
-                                sclass="outward-cheque-data-entry-alert-message"/>
-                        </vlayout>
-                    </groupbox>
-
-                    <div id="outwardChequeDataEntryActionRow"
-                        sclass="outward-cheque-data-entry-action-row">
-
-                        <button id="outwardChequeDataEntryBtnResetItem"
-                            label="Reset Item"
-                            sclass="outward-cheque-data-entry-action-button outward-cheque-data-entry-reset-button"/>
-
-                        <button id="outwardChequeDataEntryBtnReject"
-                            label="Request Rejection"
-                            sclass="outward-cheque-data-entry-action-button outward-cheque-data-entry-reject-button"/>
-
-                        <button id="outwardChequeDataEntryBtnApprove"
-                            label="Save &amp; Next"
-                            disabled="true"
-                            sclass="outward-cheque-data-entry-action-button outward-cheque-data-entry-approve-button"/>
-                    </div>
-
-                    <button id="outwardChequeDataEntryBtnSubmit"
-                        label="Submit to Checker"
-                        width="100%"
-                        disabled="true"
-                        sclass="outward-cheque-data-entry-submit-button"/>
-
-                    <label id="outwardChequeDataEntryLblFooterStatus"
-                        value=""
-                        sclass="outward-cheque-data-entry-footer-status"/>
-                </div>
-            </div>
-        </div>
-
-        <window id="outwardChequeDataEntryRejectModal"
-            title="Request Rejection"
-            border="normal"
-            width="520px"
-            closable="false"
-            visible="false"
-            mode="modal"
-            sclass="outward-cheque-data-entry-modal">
-
-            <vlayout width="100%" spacing="12px"
-                sclass="outward-cheque-data-entry-modal-content">
-
-                <label value="Request Cheque Rejection"
-                    sclass="outward-cheque-data-entry-modal-title"/>
-
-                <label value="Select a reason and provide remarks for this cheque."
-                    sclass="outward-cheque-data-entry-modal-subtitle"/>
-
-                <div sclass="outward-cheque-data-entry-reject-cheque-card">
-                    <label value="Cheque Number"
-                        sclass="outward-cheque-data-entry-confirm-label"/>
-
-                    <label id="outwardChequeDataEntryLblRejectChequeNumber"
-                        value=""
-                        sclass="outward-cheque-data-entry-confirm-value"/>
-                </div>
-
-                <vlayout width="100%" spacing="5px">
-                    <label value="Reason"
-                        sclass="outward-cheque-data-entry-modal-label"/>
-
-                    <combobox id="outwardChequeDataEntryCmbRejectReason"
-                        width="100%"
-                        readonly="true"
-                        sclass="outward-cheque-data-entry-modal-input"/>
-                </vlayout>
-
-                <vlayout width="100%" spacing="5px">
-                    <label value="Remarks"
-                        sclass="outward-cheque-data-entry-modal-label"/>
-
-                    <textbox id="outwardChequeDataEntryTxtRejectRemarks"
-                        width="100%"
-                        multiline="true"
-                        rows="4"
-                        maxlength="500"
-                        sclass="outward-cheque-data-entry-modal-textarea"/>
-                </vlayout>
-
-                <div sclass="outward-cheque-data-entry-modal-actions">
-                    <div sclass="outward-cheque-data-entry-modal-spacer"/>
-
-                    <button id="outwardChequeDataEntryBtnRejectModalClose"
-                        label="Close"
-                        sclass="outward-cheque-data-entry-modal-close-button"/>
-
-                    <button id="outwardChequeDataEntryBtnRejectModalConfirm"
-                        label="Reject"
-                        sclass="outward-cheque-data-entry-modal-reject-button"/>
-                </div>
-            </vlayout>
-        </window>
-
-        <window id="outwardChequeDataEntrySubmitConfirmModal"
-            title="Submit Batch to Checker"
-            border="normal"
-            width="520px"
-            closable="false"
-            visible="false"
-            mode="modal"
-            sclass="outward-cheque-data-entry-modal">
-
-            <vlayout width="100%" spacing="12px"
-                sclass="outward-cheque-data-entry-modal-content">
-
-                <label value="Submit Batch to Checker"
-                    sclass="outward-cheque-data-entry-modal-title"/>
-
-                <label value="Please confirm that all cheque data entry work is completed."
-                    sclass="outward-cheque-data-entry-modal-subtitle"/>
-
-                <div sclass="outward-cheque-data-entry-confirm-card">
-                    <div sclass="outward-cheque-data-entry-confirm-row">
-                        <label value="Batch ID:"
-                            sclass="outward-cheque-data-entry-confirm-label"/>
-                        <label id="outwardChequeDataEntryLblConfirmBatchId"
-                            value=""
-                            sclass="outward-cheque-data-entry-confirm-value"/>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-confirm-row">
-                        <label value="Total Cheques:"
-                            sclass="outward-cheque-data-entry-confirm-label"/>
-                        <label id="outwardChequeDataEntryLblConfirmTotal"
-                            value=""
-                            sclass="outward-cheque-data-entry-confirm-value"/>
-                    </div>
-
-                    <div sclass="outward-cheque-data-entry-confirm-row">
-                        <label value="Completed Cheques:"
-                            sclass="outward-cheque-data-entry-confirm-label"/>
-                        <label id="outwardChequeDataEntryLblConfirmCompleted"
-                            value=""
-                            sclass="outward-cheque-data-entry-confirm-value"/>
-                    </div>
-                </div>
-
-                <div sclass="outward-cheque-data-entry-modal-actions">
-                    <div sclass="outward-cheque-data-entry-modal-spacer"/>
-
-                    <button id="outwardChequeDataEntryBtnSubmitConfirmCancel"
-                        label="Cancel"
-                        sclass="outward-cheque-data-entry-modal-close-button"/>
-
-                    <button id="outwardChequeDataEntryBtnSubmitConfirm"
-                        label="Confirm Submit"
-                        sclass="outward-cheque-data-entry-modal-submit-button"/>
-                </div>
-            </vlayout>
-        </window>
-
-        <window id="outwardChequeDataEntrySubmitSuccessModal"
-            title="Batch Submitted"
-            border="normal"
-            width="520px"
-            closable="false"
-            visible="false"
-            mode="modal"
-            sclass="outward-cheque-data-entry-modal">
-
-            <vlayout width="100%" spacing="12px"
-                sclass="outward-cheque-data-entry-modal-content">
-
-                <label value="Batch Submitted Successfully"
-                    sclass="outward-cheque-data-entry-modal-title"/>
-
-                <label id="outwardChequeDataEntryLblSubmitSuccess"
-                    value=""
-                    sclass="outward-cheque-data-entry-success-message"/>
-
-                <label id="outwardChequeDataEntryLblSubmitSuccessDetails"
-                    value=""
-                    sclass="outward-cheque-data-entry-modal-subtitle"/>
-
-                <div sclass="outward-cheque-data-entry-modal-actions">
-                    <div sclass="outward-cheque-data-entry-modal-spacer"/>
-
-                    <button id="outwardChequeDataEntryBtnSubmitSuccessGo"
-                        label="Go To Data Entry"
-                        sclass="outward-cheque-data-entry-modal-submit-button"/>
-                </div>
-            </vlayout>
-        </window>
-    </window>
+<zk xmlns:h="xhtml">
+	
+<style src="/css/outward/cheque-data-entry.css" />
+	<div id="outwardChequeDataEntryWin" sclass="cts-data-entry-wrapper"
+		apply="com.iispl.cts.controller.outward.maker.OutwardChequeDataEntryController">
+
+		<!-- Top Header Section -->
+		<div sclass="cts-title-group">
+			<div sclass="header-title-group">
+				<label value="Cheque Data Entry"
+					sclass="cts-main-title" />
+				<label
+					value="Enter and verify outward cheque details for processing."
+					sclass="cts-main-subtitle" />
+			</div>
+
+			<button id="outwardChequeDataEntryBtnBack" label="Back"
+				iconSclass="z-icon-arrow-left" sclass="cts-btn-top-back" />
+		</div>
+
+		<!-- Metadata Card with 4-Column Grid -->
+		<div sclass="cts-metadata-card">
+			<!-- Col 1: Batch ID -->
+			<div sclass="cts-meta-col">
+				<label value="Batch ID" sclass="cts-meta-header" />
+				<label id="outwardChequeDataEntryLblBatchId" value="-"
+					sclass="cts-meta-val cts-meta-val-batch" />
+			</div>
+
+			<!-- Col 2: Total Cheques -->
+			<div sclass="cts-meta-col">
+				<label value="Total Cheques" sclass="cts-meta-header" />
+				<label id="outwardChequeDataEntryLblTotal" value="0"
+					sclass="cts-meta-val" />
+			</div>
+
+			<!-- Col 3: Progress Bar -->
+			<div sclass="cts-meta-col cts-progress-meta-col">
+				<label value="Progress" sclass="cts-meta-header" />
+				<hlayout spacing="8px" valign="middle">
+					<progressmeter id="outwardChequeDataEntryProgress"
+						value="0" sclass="cts-compact-progress" />
+					<label id="outwardChequeDataEntryLblRecord"
+						value="0/0" sclass="cts-data-entry-progress-text" />
+				</hlayout>
+			</div>
+
+			<!-- Col 4: Top Pagination Controls -->
+			<div sclass="cts-meta-col cts-navigation-meta-col">
+				<hlayout spacing="6px" valign="middle">
+					<button id="outwardChequeDataEntryBtnTopPrevious"
+						label="Previous" iconSclass="z-icon-chevron-left"
+						sclass="cts-btn-secondary cts-data-entry-btn-nav" />
+					<label id="outwardChequeDataEntryLblTopRecord"
+						value="1 of 1" sclass="cts-data-entry-nav-counter" />
+					<button id="outwardChequeDataEntryBtnTopNext"
+						label="Next" iconSclass="z-icon-chevron-right" dir="reverse"
+						sclass="cts-btn-secondary cts-data-entry-btn-nav" />
+				</hlayout>
+			</div>
+		</div>
+
+		<!-- 2-Column Main Workspace Grid -->
+		<div sclass="cts-data-entry-grid">
+
+			<!-- Left Card: Cheque Viewer -->
+			<div sclass="cts-work-card">
+				<div
+					style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+					<label value="Cheque Image"
+						sclass="cts-card-title-main" />
+					<button id="outwardChequeDataEntryBtnImageToggle"
+						label="Back View" iconSclass="z-icon-exchange"
+						sclass="cts-btn-secondary" />
+				</div>
+
+				<div sclass="cts-cheque-image-wrapper">
+					<image id="outwardChequeDataEntryChequeImage"
+						sclass="cts-cheque-img-display" />
+					<label id="outwardChequeDataEntryLblImageEmpty"
+						visible="false" style="color: #94a3b8; font-size: 11px;" />
+				</div>
+
+				<!-- Image Controls Toolbar -->
+				<hlayout spacing="8px" width="100%" valign="middle"
+					style="margin-top: 10px;">
+					<button id="outwardChequeDataEntryBtnZoomOut"
+						iconSclass="z-icon-minus" sclass="cts-btn-img-tool"
+						tooltiptext="Zoom Out" />
+					<button id="outwardChequeDataEntryBtnZoomIn"
+						iconSclass="z-icon-plus" sclass="cts-btn-img-tool"
+						tooltiptext="Zoom In" />
+					<button id="outwardChequeDataEntryBtnRotate"
+						label="Rotate" iconSclass="z-icon-repeat"
+						sclass="cts-btn-img-action" />
+					<button id="outwardChequeDataEntryBtnReset"
+						label="Reset" iconSclass="z-icon-undo"
+						sclass="cts-btn-img-action" />
+				</hlayout>
+			</div>
+
+			<!-- Right Card: Form Fields -->
+			<div sclass="cts-work-card">
+				<!-- Title Row with Peach Status Pill -->
+				<div
+					style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+					<label value="Cheque Information"
+						sclass="cts-card-title-main" />
+					<label id="outwardChequeDataEntryLblChequeStatus"
+						value="Pending" sclass="cts-status-pill-peach" />
+				</div>
+				<label
+					value="Enter the cheque details required for verification"
+					sclass="cts-card-subtitle-main" />
+
+				<!-- ONE SINGLE DYNAMIC ALERT BOX (Exact Inward Pattern - Completely Prevents Ghost Outlines) -->
+				<div id="dataEntryAlertBox" visible="false"
+					sclass="cts-alert-box-single">
+					<label id="lblDataEntryAlertTitle"
+						sclass="cts-alert-title" />
+					<label id="lblDataEntryAlertMessage"
+						sclass="cts-alert-msg" />
+				</div>
+				<label id="outwardChequeDataEntryLblValidationStatus"
+					visible="false"
+					style="color: #dc2626; font-size: 10px; margin-bottom: 4px; display: block;" />
+
+				<!-- Row 1: Cheque Number & Cheque Date -->
+				<div sclass="cts-form-row">
+					<div sclass="cts-form-field">
+						<label value="Cheque No."
+							sclass="cts-field-lbl" />
+						<textbox
+							id="outwardChequeDataEntryTxtChequeNumber" maxlength="6"
+							sclass="cts-input-text" />
+					</div>
+					<div sclass="cts-form-field">
+						<label value="Cheque Date (DD-MM-YYYY)"
+							sclass="cts-field-lbl" />
+						<datebox id="outwardChequeDataEntryDtChequeDate"
+							sclass="cts-input-datebox" />
+					</div>
+				</div>
+
+				<!-- Row 2: Cheque Amount & MICR Code -->
+				<div sclass="cts-form-row">
+					<div sclass="cts-form-field">
+						<label value="Cheque Amount"
+							sclass="cts-field-lbl" />
+						<textbox id="outwardChequeDataEntryTxtAmount"
+							sclass="cts-input-text" />
+					</div>
+					<div sclass="cts-form-field">
+						<label value="MICR Code" sclass="cts-field-lbl" />
+						<textbox id="outwardChequeDataEntryTxtMicrCode"
+							readonly="true" sclass="cts-input-text cts-input-readonly" />
+					</div>
+				</div>
+
+				<!-- Row 3: Payee Account No. & Payee Name -->
+				<div sclass="cts-form-row">
+					<div sclass="cts-form-field">
+						<label value="Payee Account No."
+							sclass="cts-field-lbl" />
+						<textbox
+							id="outwardChequeDataEntryTxtPayeeAccount"
+							sclass="cts-input-text" />
+					</div>
+					<div sclass="cts-form-field">
+						<label value="Payee Name"
+							sclass="cts-field-lbl" />
+						<textbox id="outwardChequeDataEntryTxtPayeeName"
+							sclass="cts-input-text" />
+					</div>
+				</div>
+
+				<!-- Row 4: Drawee Bank Name -->
+				<div sclass="cts-form-row">
+					<div sclass="cts-form-field" style="flex: 2;">
+						<label value="Drawee Bank Name"
+							sclass="cts-field-lbl" />
+						<textbox
+							id="outwardChequeDataEntryTxtDraweeName" sclass="cts-input-text" />
+					</div>
+				</div>
+
+				<!-- Action Buttons Row -->
+				<div sclass="cts-form-action-area">
+					<hlayout width="100%" spacing="10px"
+						valign="middle">
+						<button id="outwardChequeDataEntryBtnResetItem"
+							label="Revert Item" iconSclass="z-icon-undo"
+							sclass="cts-btn-secondary" hflex="1" />
+						<button id="outwardChequeDataEntryBtnReject"
+							label="Request Rejection" iconSclass="z-icon-times-circle"
+							sclass="cts-btn-outline-danger" hflex="1.3" />
+						<button id="outwardChequeDataEntryBtnApprove"
+							label="Approve Cheque" iconSclass="z-icon-check"
+							sclass="cts-btn-solid-primary" hflex="1.3" />
+					</hlayout>
+
+					<button id="outwardChequeDataEntryBtnSubmit"
+						label="Submit Batch to Checker" iconSclass="z-icon-paper-plane"
+						sclass="cts-btn-submit-batch" width="100%" disabled="true" />
+				</div>
+			</div>
+
+		</div>
+
+		<!-- Rejection Reason Modal Window -->
+		<window id="outwardChequeDataEntryRejectModal"
+			title="Request Instrument Rejection" border="normal" width="440px"
+			visible="false" closable="true" sclass="modal-window">
+			<div sclass="modal-content">
+				<div sclass="modal-field">
+					<label value="Rejection Reason / Return Code *"
+						sclass="cts-field-lbl" />
+					<combobox id="outwardChequeDataEntryCmbRejectReason"
+						readonly="true" width="100%" sclass="modal-select" />
+				</div>
+				<div sclass="modal-field">
+					<label value="Remarks" sclass="cts-field-lbl" />
+					<textbox id="outwardChequeDataEntryTxtRejectRemarks"
+						rows="3" multiline="true" width="100%" sclass="modal-textarea" />
+				</div>
+				<div sclass="modal-actions">
+					<button id="outwardChequeDataEntryBtnCancelReject"
+						label="Cancel" sclass="btn-modal-cancel" />
+					<button id="outwardChequeDataEntryBtnConfirmReject"
+						label="Confirm Rejection" sclass="btn-modal-confirm-red" />
+				</div>
+			</div>
+		</window>
+
+		<!-- Submit Confirm Modal Window -->
+		<window id="outwardChequeDataEntrySubmitConfirmModal"
+			title="Submit Batch to Checker" border="normal" width="440px"
+			visible="false" closable="true" sclass="modal-window">
+			<div sclass="modal-content">
+				<label
+					value="All cheques in this batch are resolved. Moving this batch will forward it to the Checker verification queue."
+					style="font-size: 11.5px; color: #64748b; line-height: 1.4;" />
+				<div sclass="confirm-summary-box">
+					<div sclass="summary-row">
+						<label value="Batch ID:" sclass="summary-lbl" />
+						<label
+							id="outwardChequeDataEntryLblConfirmBatchId" value="-"
+							sclass="summary-val" />
+					</div>
+					<div sclass="summary-row">
+						<label value="Completed Cheques:"
+							sclass="summary-lbl" />
+						<label
+							id="outwardChequeDataEntryLblConfirmTotal" value="0 / 0"
+							sclass="summary-val" />
+					</div>
+				</div>
+				<div sclass="modal-actions">
+					<button id="outwardChequeDataEntryBtnCancelSubmit"
+						label="Stay in Data Entry" sclass="btn-modal-cancel" />
+					<button id="outwardChequeDataEntryBtnConfirmSubmit"
+						label="Submit to Checker" sclass="btn-modal-confirm-navy" />
+				</div>
+			</div>
+		</window>
+
+		<!-- MICR Pending Modal Window -->
+		<window id="outwardChequeDataEntryMicrPendingModal"
+			title="Cannot Submit Batch" border="normal" width="420px"
+			visible="false" closable="true" sclass="modal-window">
+			<div sclass="modal-content">
+				<label
+					id="outwardChequeDataEntryLblMicrPendingSubmitMessage"
+					value="Batch cannot be submitted yet."
+					style="font-size: 11.5px; color: #0f172a;" />
+				<div sclass="modal-actions">
+					<button
+						id="outwardChequeDataEntryBtnCloseMicrPending" label="Close"
+						sclass="btn-modal-confirm-navy" />
+				</div>
+			</div>
+		</window>
+
+		<!-- Submit Success Modal Window -->
+		<window id="outwardChequeDataEntrySubmitSuccessModal"
+			title="Batch Submitted" border="normal" width="420px" visible="false"
+			closable="false" sclass="modal-window">
+			<div sclass="modal-content">
+				<label id="outwardChequeDataEntryLblSubmitSuccess"
+					value="Batch submitted successfully."
+					style="font-weight: 600; font-size: 13px; color: #16a34a;" />
+				<label
+					id="outwardChequeDataEntryLblSubmitSuccessDetails" value=""
+					style="font-size: 11px; color: #64748b;" />
+				<div sclass="modal-actions"
+					style="justify-content: center;">
+					<button id="outwardChequeDataEntryBtnGoToDataEntry"
+						label="Back to Data Entry" sclass="btn-modal-confirm-navy" />
+				</div>
+			</div>
+		</window>
+
+	</div>
 </zk>

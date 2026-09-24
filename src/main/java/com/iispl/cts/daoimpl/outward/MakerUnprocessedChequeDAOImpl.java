@@ -107,4 +107,37 @@ public class MakerUnprocessedChequeDAOImpl implements MakerUnprocessedChequeDAO 
 	    }
 	    return 0;
 	}
+	public void reactivateChequeAndBatch(long chequeId, String batchIdStr, boolean isDataEntry) {
+	    // Normalizes batch ID if it has a prefix like "BAT"
+	    String cleanBatchId = (batchIdStr != null) ? batchIdStr.replace("BAT", "").trim() : null;
+	    
+	    String updateChequeSql = "UPDATE scan_cheque SET cheque_status = ? " +
+	                             "WHERE scanned_cheque_id = ? AND UPPER(cheque_status) LIKE 'UNPROCESSED%'";
+	    
+	    String updateBatchSql = "UPDATE scan_batch SET batch_status = 'PENDING_MAKER_PROCESS' " +
+	                            "WHERE (scanned_batch_id::text = ? OR batch_reference_id = ?) " +
+	                            "  AND UPPER(batch_status) = 'UNPROCESSED'";
+
+	    try (Connection conn = DBConnection.getConnection()) {
+	        conn.setAutoCommit(false);
+
+	        try (PreparedStatement psChq = conn.prepareStatement(updateChequeSql)) {
+	            psChq.setString(1, isDataEntry ? "PENDING_DATA_ENTRY" : "PENDING_MICR_REPAIR");
+	            psChq.setLong(2, chequeId);
+	            psChq.executeUpdate();
+	        }
+
+	        if (cleanBatchId != null && !cleanBatchId.isEmpty()) {
+	            try (PreparedStatement psBatch = conn.prepareStatement(updateBatchSql)) {
+	                psBatch.setString(1, cleanBatchId);
+	                psBatch.setString(2, batchIdStr);
+	                psBatch.executeUpdate();
+	            }
+	        }
+
+	        conn.commit();
+	    } catch (SQLException ex) {
+	        ex.printStackTrace();
+	    }
+	}
 }

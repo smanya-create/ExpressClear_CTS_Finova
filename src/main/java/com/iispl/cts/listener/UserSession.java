@@ -10,33 +10,44 @@ import com.iispl.cts.common.util.ActiveUserManager;
 
 public class UserSession implements DesktopInit, DesktopCleanup, SessionCleanup {
 
-    @Override
-    public void init(Desktop desktop, Object request) throws Exception {
-        Session sess = desktop.getSession();
-        if (sess != null) {
-            String userId = getUserId(sess);
-            // Only register if user is authenticated and not on login page
-            String requestPath = desktop.getRequestPath();
-            if (userId != null && !userId.trim().isEmpty()) {
-                if (requestPath == null || !requestPath.contains("login.zul")) {
-                    ActiveUserManager.registerDesktop(userId, desktop.getId());
-                }
-            }
-        }
-    }
+	@Override
+	public void init(Desktop desktop, Object request) throws Exception {
+	    Session sess = desktop.getSession();
+	    if (sess != null) {
+	        String userId = getUserId(sess);
+	        String requestPath = desktop.getRequestPath();
+	        if (userId != null && !userId.trim().isEmpty()) {
+	            if (requestPath == null || !requestPath.contains("login.zul")) {
+	                // Attach directly to the desktop instance
+	                desktop.setAttribute("CTS_DESKTOP_USER_ID", userId.trim());
+	                ActiveUserManager.registerDesktop(userId.trim(), desktop.getId());
+	            }
+	        }
+	    }
+	}
 
-    @Override
-    public void cleanup(Desktop desktop) throws Exception {
-        Session sess = desktop.getSession();
-        if (sess != null) {
-            String userId = getUserId(sess);
-            String requestPath = desktop.getRequestPath();
-            // Do not unregister using the login page desktop
-            if (userId != null && (requestPath == null || !requestPath.contains("login.zul"))) {
-                ActiveUserManager.unregisterDesktop(userId, desktop.getId());
-            }
-        }
-    }
+	@Override
+	public void cleanup(Desktop desktop) throws Exception {
+	    if (desktop == null) return;
+
+	    // First check the desktop's own attribute map
+	    String userId = (String) desktop.getAttribute("CTS_DESKTOP_USER_ID");
+	    
+	    // Fallback if not found on desktop
+	    if (userId == null) {
+	        try {
+	            Session sess = desktop.getSession();
+	            if (sess != null) {
+	                userId = getUserId(sess);
+	            }
+	        } catch (Exception ignored) {}
+	    }
+
+	    String requestPath = desktop.getRequestPath();
+	    if (userId != null && (requestPath == null || !requestPath.contains("login.zul"))) {
+	        ActiveUserManager.unregisterDesktop(userId.trim(), desktop.getId());
+	    }
+	}
 
     @Override
     public void cleanup(Session sess) throws Exception {

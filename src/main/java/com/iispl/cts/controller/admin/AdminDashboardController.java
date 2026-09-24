@@ -24,8 +24,8 @@ import org.zkoss.zul.Columns;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Hbox;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Radio;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
@@ -35,6 +35,7 @@ import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.common.util.ActiveUserManager;
+import com.iispl.cts.common.util.ClearingTimeMock;
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.PendingChequeDTO;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -94,7 +95,6 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 	private void loadSessionData() {
 		fetchActiveClearingSession();
 		fetchActiveUsersCount();
-		loadPendingCheques();
 		this.selectedAction = this.isSessionOpen ? "EOD" : "BOD";
 	}
 
@@ -134,33 +134,39 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 	private void loadPendingCheques() {
 		pendingTransactionsList.clear();
 
-		// Include PENDING_MICR_REPAIR and prefix matching
 		String sql = 
+				// 1. SCAN STAGE: Exclude cheques whose parent batch or cheque has already progressed to outward clearing
 				"SELECT sc.scanned_batch_id AS batch_id, " +
-						"       sb.batch_reference_id, " +
-						"       sc.cheque_number, " +
-						"       sc.cheque_status, " +
-						"       sc.cheque_amount, " +
-						"       sc.created_at, " +
-						"       'SCAN_STAGE' AS pipeline_source " +
-						"FROM scan_cheque sc " +
-						"LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
-						"WHERE UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'RAW', 'PENDING') " +
+				"       sb.batch_reference_id, " +
+				"       sc.cheque_number, " +
+				"       sc.cheque_status, " +
+				"       sc.cheque_amount, " +
+				"       sc.created_at, " +
+				"       'SCAN_STAGE' AS pipeline_source " +
+				"FROM scan_cheque sc " +
+				"LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+				"WHERE UPPER(sc.cheque_status) IN ('PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'RAW', 'PENDING') " +
+				"  AND UPPER(COALESCE(sb.batch_status, '')) NOT IN ('COMPLETED', 'PROMOTED', 'PENDING_CHECKER_PROCESS') " +
+				"  AND NOT EXISTS ( " +
+				"      SELECT 1 FROM outward_batch ob " +
+				"      WHERE ob.outward_batch_id = sc.scanned_batch_id " +
+				"  ) " +
 
-            "UNION ALL " +
+				"UNION ALL " +
 
-            "SELECT oc.outward_batch_id AS batch_id, " +
-            "       ob.batch_reference_id, " +
-            "       oc.cheque_number, " +
-            "       oc.cheque_status, " +
-            "       oc.cheque_amount, " +
-            "       oc.created_at, " +
-            "       'OUTWARD_STAGE' AS pipeline_source " +
-            "FROM outward_cheque oc " +
-            "LEFT JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id " +
-            "WHERE UPPER(oc.cheque_status) IN ('PENDING_VERIFICATION', 'PENDING_CHECKER_VERIFICATION', 'PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'PENDING') " +
+				// 2. OUTWARD STAGE: Items currently awaiting Checker review or verification
+				"SELECT oc.outward_batch_id AS batch_id, " +
+				"       ob.batch_reference_id, " +
+				"       oc.cheque_number, " +
+				"       oc.cheque_status, " +
+				"       oc.cheque_amount, " +
+				"       oc.created_at, " +
+				"       'OUTWARD_STAGE' AS pipeline_source " +
+				"FROM outward_cheque oc " +
+				"LEFT JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id " +
+				"WHERE UPPER(oc.cheque_status) IN ('PENDING_VERIFICATION', 'PENDING_CHECKER_VERIFICATION', 'PENDING_DATA_ENTRY', 'PENDING_REPAIR', 'PENDING_MICR_REPAIR', 'PENDING') " +
 
-            "ORDER BY created_at ASC";
+				"ORDER BY created_at ASC";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);
@@ -190,11 +196,11 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 				pendingTransactionsList.add(new PendingChequeDTO(
 						displayBatch,
 						chqNo != null ? chqNo : "------",
-								"OUTWARD",
-								status,
-								assignedQueue,
-								"Amount: " + String.format("%.2f", amount)
-						));
+						"OUTWARD",
+						status,
+						assignedQueue,
+						"Amount: " + String.format("%.2f", amount)
+				));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -208,21 +214,8 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 		if (lblHeaderDate != null) lblHeaderDate.setValue(formattedDate);
 		if (lblClearingDate != null) lblClearingDate.setValue(formattedDate);
 		if (lblLoggedInUsers != null) lblLoggedInUsers.setValue(String.valueOf(loggedInUsersCount));
-		if (lblPendingCount != null) lblPendingCount.setValue(String.valueOf(pendingChequesCount));
 
 		refreshStatusBadge();
-
-		if (pendingChequesCount > 0 && isSessionOpen) {
-			if (lblPendingTag != null) lblPendingTag.setValue("Requires attention before EOD");
-			if (lblEODWarnText != null) lblEODWarnText.setValue(pendingChequesCount + " pending cheques detected");
-			if (lblWarningMsg != null) lblWarningMsg.setValue(pendingChequesCount + " cheques are currently pending. Review their processing stage before performing EOD.");
-			if (boxWarningBanner != null) boxWarningBanner.setVisible(true);
-		} else {
-			if (lblPendingTag != null) lblPendingTag.setValue("");
-			if (lblEODWarnText != null) lblEODWarnText.setValue("");
-			if (boxWarningBanner != null) boxWarningBanner.setVisible(false);
-		}
-
 		updateCardStyles();
 	}
 
@@ -247,11 +240,19 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			if (cardBOD != null) cardBOD.setSclass("cts-choice-box");
 			if (ringEOD != null) ringEOD.setSclass("cts-custom-radio-ring cts-radio-checked");
 			if (ringBOD != null) ringBOD.setSclass("cts-custom-radio-ring");
+
+			if (btnStartSession != null) {
+				btnStartSession.setLabel("CLOSE SESSION");
+			}
 		} else {
 			if (cardEOD != null) cardEOD.setSclass("cts-choice-box");
 			if (cardBOD != null) cardBOD.setSclass("cts-choice-box cts-choice-box-active");
 			if (ringEOD != null) ringEOD.setSclass("cts-custom-radio-ring");
 			if (ringBOD != null) ringBOD.setSclass("cts-custom-radio-ring cts-radio-checked");
+
+			if (btnStartSession != null) {
+				btnStartSession.setLabel("START SESSION");
+			}
 		}
 	}
 
@@ -392,16 +393,87 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			return;
 		}
 
-		if (pendingChequesCount > 0) {
-			openForcedEODModal();
-		} else {
-			Messagebox.show("Are you sure you want to close the clearing day (" + currentClearingDate.format(dateFormatter) + ")?",
-					"Confirm EOD", Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, evt -> {
-						if (Messagebox.ON_YES.equals(evt.getName())) {
-							executeEOD(false, null);
-						}
-					});
-		}
+		openConfirmEODModal();
+	}
+
+	private void openConfirmEODModal() {
+		final Window modal = new Window();
+		modal.setWidth("440px");
+		modal.setBorder("none");
+		modal.setClosable(false);
+		modal.setSclass("cts-custom-modal");
+
+		Vlayout container = new Vlayout();
+		container.setSpacing("16px");
+		container.setStyle("padding: 24px 24px 20px 24px; background: #ffffff; border-radius: 12px;");
+
+		// Header icon + title row
+		Hlayout headerLayout = new Hlayout();
+		headerLayout.setSpacing("12px");
+		headerLayout.setValign("middle");
+
+		Div iconBadge = new Div();
+		iconBadge.setSclass("cts-modal-icon-badge cts-badge-warning");
+		Label iconSymbol = new Label("!");
+		iconSymbol.setStyle("font-weight: 800; font-size: 15px; color: #b45309; line-height: 1;");
+		iconBadge.appendChild(iconSymbol);
+
+		Vlayout headerText = new Vlayout();
+		headerText.setSpacing("2px");
+		Label modalTitle = new Label("Confirm End of Day (EOD)");
+		modalTitle.setStyle("font-weight: 700; font-size: 16px; color: #0f172a; line-height: 1.3;");
+
+		Label modalSub = new Label("Clearing session closure");
+		modalSub.setStyle("font-size: 12px; color: #64748b;");
+		headerText.appendChild(modalTitle);
+		headerText.appendChild(modalSub);
+
+		headerLayout.appendChild(iconBadge);
+		headerLayout.appendChild(headerText);
+		container.appendChild(headerLayout);
+
+		// Description box
+		Vlayout bodyBox = new Vlayout();
+		bodyBox.setSpacing("8px");
+		bodyBox.setStyle("background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 14px; border-radius: 8px;");
+
+		Label descLine1 = new Label("You are about to close the clearing day for:");
+		descLine1.setStyle("font-size: 13px; color: #334155;");
+
+		Label dateHighlight = new Label(currentClearingDate.format(dateFormatter));
+		dateHighlight.setStyle("font-size: 14px; font-weight: 700; color: #0f172a;");
+
+		Label descLine2 = new Label("Once closed, Makers and Checkers cannot post new batches until BOD is initiated for the next business day.");
+		descLine2.setStyle("font-size: 12px; color: #64748b; line-height: 1.4;");
+
+		bodyBox.appendChild(descLine1);
+		bodyBox.appendChild(dateHighlight);
+		bodyBox.appendChild(descLine2);
+		container.appendChild(bodyBox);
+
+		// Footer buttons
+		Hlayout buttonBar = new Hlayout();
+		buttonBar.setWidth("100%");
+		buttonBar.setStyle("justify-content: flex-end; gap: 10px; margin-top: 4px;");
+
+		Button btnCancel = new Button("Cancel");
+		btnCancel.setSclass("cts-modal-btn-cancel");
+		btnCancel.addEventListener(Events.ON_CLICK, (EventListener<Event>) e -> modal.detach());
+
+		Button btnConfirm = new Button("Close Session");
+		btnConfirm.setSclass("cts-modal-btn-danger");
+		btnConfirm.addEventListener(Events.ON_CLICK, (EventListener<Event>) e -> {
+			modal.detach();
+			executeEOD(false, null);
+		});
+
+		buttonBar.appendChild(btnCancel);
+		buttonBar.appendChild(btnConfirm);
+		container.appendChild(buttonBar);
+
+		modal.appendChild(container);
+		modal.setPage(page);
+		modal.doModal();
 	}
 
 	private void openForcedEODModal() {
@@ -465,8 +537,12 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 
 		String updateSessionSql = "UPDATE clearing_session " +
-				"SET session_status = 'CLOSED', closed_at = ?, closed_by = ?, remarks = ? " +
-				"WHERE clearing_date = ? AND session_status = 'OPEN'";
+		        "SET session_status = 'CLOSED', " +
+		        "    closed_at = ?, " +
+		        "    session_time = ?, " +
+		        "    closed_by = ?, " +
+		        "    remarks = ? " +
+		        "WHERE clearing_date = ? AND session_status = 'OPEN'";
 
 		String updateScanChequesSql = 
 				"UPDATE scan_cheque SET cheque_status = CASE " +
@@ -487,22 +563,27 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 				"UPDATE outward_batch SET batch_status = 'UNPROCESSED' " +
 						"WHERE UPPER(batch_status) IN ('PENDING_CHECKER_PROCESS', 'PENDING')";
 
-		try (Connection conn = DBConnection.getConnection()) {
+		Connection conn = null;
+		try {
+			conn = DBConnection.getConnection();
 			conn.setAutoCommit(false);
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
 			try (PreparedStatement ps = conn.prepareStatement(updateSessionSql)) {
-				ps.setTimestamp(1, now);
-				ps.setString(2, adminUserId);
-				ps.setString(3, remarks != null ? remarks : "Normal EOD closed");
-				ps.setDate(4, Date.valueOf(this.currentClearingDate));
-				int rowsUpdated = ps.executeUpdate();
-				if (rowsUpdated == 0) {
-					conn.rollback();
-					Clients.showNotification("No OPEN session found for current date.", "error", null, "top_center", 3000);
-					return;
-				}
-			}
+			    // 1. Simulated timestamp (e.g., 2026-09-22 15:30:xx)
+			    java.sql.Timestamp simulatedClosedAt = ClearingTimeMock.getProcessingTimestamp();
+			    
+			    // 2. Simulated time (e.g., 15:30:00)
+			    java.sql.Time finalSessionTime = java.sql.Time.valueOf(ClearingTimeMock.getCurrentTime());
 
+			    ps.setTimestamp(1, simulatedClosedAt);
+			    ps.setTime(2, finalSessionTime);
+			    ps.setString(3, adminUserId); // or your user ID variable
+			    ps.setString(4, remarks);       // or null / reason string
+			    ps.setDate(5, java.sql.Date.valueOf(currentClearingDate));
+
+			    ps.executeUpdate();
+			}
 			int rolledOverScan = 0;
 			int rolledOverOutward = 0;
 			if (isForced) {
@@ -524,7 +605,7 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
 			String auditDetail = isForced
 					? "Forced EOD completed with " + pendingChequesCount + " pending cheques paused. Reason: " + remarks
-							: "Normal EOD closed successfully for date " + currentClearingDate;
+					: "Normal EOD closed successfully for date " + currentClearingDate;
 			AuditServiceImpl.getInstance().log("EOD_BOD", "EOD_COMPLETED", auditDetail, "SUCCESS");
 
 			this.isSessionOpen = false;
@@ -532,8 +613,17 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			this.pendingTransactionsList.clear();
 			this.pendingChequesCount = 0;
 
+			// Update User Session
 			Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", false);
+			// Broadcast to HeaderController across the active desktop
+			org.zkoss.zk.ui.event.EventQueues.lookup("SESSION_UPDATE_QUEUE", org.zkoss.zk.ui.event.EventQueues.DESKTOP, true)
+			    .publish(new org.zkoss.zk.ui.event.Event("onSessionClosed", null, "CLOSED"));
 			Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
+
+			// Update Application-Wide Scope so Makers & Checkers immediately reflect lock
+			if (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null) {
+			    getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CTS_SESSION_OPEN", false);
+			}
 
 			Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), false));
 			refreshUI();
@@ -542,35 +632,178 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			Clients.showNotification(msg, "info", null, "top_center", 3000);
 
 		} catch (SQLException ex) {
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException rbEx) {
+					rbEx.printStackTrace();
+				}
+			}
 			ex.printStackTrace();
 			AuditServiceImpl.getInstance().log("EOD_BOD", "EOD_FAILED", "EOD execution failed: " + ex.getMessage(), "FAILED");
 			Clients.showNotification("Database error closing EOD: " + ex.getMessage(), "error", null, "top_center", 3000);
+		} finally {
+			if (conn != null) {
+				try {
+					conn.setAutoCommit(true);
+					conn.close();
+				} catch (SQLException closeEx) {
+					closeEx.printStackTrace();
+				}
+			}
 		}
 	}
 
 	private void handleBODFlow() {
+		fetchActiveClearingSession();
 		if (isSessionOpen) {
-			Clients.showNotification("Previous session EOD is not completed. BOD cannot proceed.", "error", null, "top_center", 2500);
+			Clients.showNotification("Active clearing session is still OPEN in database. EOD must be completed first.", "error", null, "top_center", 2500);
 			return;
 		}
 
+		openConfirmBODModal();
+	}
+	private void openConfirmBODModal() {
+		// DYNAMIC: Resolves to today unless today is already closed
+		final LocalDate nextDate = resolveTargetBODDate();
+
+		final Window modal = new Window();
+		modal.setWidth("440px");
+		modal.setBorder("none");
+		modal.setClosable(false);
+		modal.setSclass("cts-custom-modal");
+
+		Vlayout container = new Vlayout();
+		container.setSpacing("16px");
+		container.setStyle("padding: 24px 24px 20px 24px; background: #ffffff; border-radius: 12px;");
+
+		// Header icon + title row
+		Hlayout headerLayout = new Hlayout();
+		headerLayout.setSpacing("12px");
+		headerLayout.setValign("middle");
+
+		Div iconBadge = new Div();
+		iconBadge.setSclass("cts-modal-icon-badge cts-badge-success");
+		Label iconSymbol = new Label("▶");
+		iconSymbol.setStyle("font-weight: 800; font-size: 13px; color: #15803d; line-height: 1; margin-left: 2px;");
+		iconBadge.appendChild(iconSymbol);
+
+		Vlayout headerText = new Vlayout();
+		headerText.setSpacing("2px");
+		Label modalTitle = new Label("Confirm Begin of Day (BOD)");
+		modalTitle.setStyle("font-weight: 700; font-size: 16px; color: #0f172a; line-height: 1.3;");
+
+		Label modalSub = new Label("Clearing session initiation");
+		modalSub.setStyle("font-size: 12px; color: #64748b;");
+		headerText.appendChild(modalTitle);
+		headerText.appendChild(modalSub);
+
+		headerLayout.appendChild(iconBadge);
+		headerLayout.appendChild(headerText);
+		container.appendChild(headerLayout);
+
+		// Description box
+		Vlayout bodyBox = new Vlayout();
+		bodyBox.setSpacing("8px");
+		bodyBox.setStyle("background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 14px; border-radius: 8px;");
+
+		Label descLine1 = new Label("You are about to open the clearing session for:");
+		descLine1.setStyle("font-size: 13px; color: #334155;");
+
+		Label dateHighlight = new Label(nextDate.format(dateFormatter));
+		dateHighlight.setStyle("font-size: 14px; font-weight: 700; color: #0f172a;");
+
+		Label descLine2 = new Label("Opening the session will unlock the clearing queues, allowing Makers and Checkers to process cheques and upload batches.");
+		descLine2.setStyle("font-size: 12px; color: #64748b; line-height: 1.4;");
+
+		bodyBox.appendChild(descLine1);
+		bodyBox.appendChild(dateHighlight);
+		bodyBox.appendChild(descLine2);
+		container.appendChild(bodyBox);
+
+		// Footer buttons
+		Hlayout buttonBar = new Hlayout();
+		buttonBar.setWidth("100%");
+		buttonBar.setStyle("justify-content: flex-end; gap: 10px; margin-top: 4px;");
+
+		Button btnCancel = new Button("Cancel");
+		btnCancel.setSclass("cts-modal-btn-cancel");
+		btnCancel.addEventListener(Events.ON_CLICK, (EventListener<Event>) e -> modal.detach());
+
+		Button btnConfirm = new Button("Start Session");
+		btnConfirm.setSclass("cts-modal-btn-primary");
+		btnConfirm.addEventListener(Events.ON_CLICK, (EventListener<Event>) e -> {
+			modal.detach();
+			executeBOD(nextDate);
+		});
+
+		buttonBar.appendChild(btnCancel);
+		buttonBar.appendChild(btnConfirm);
+		container.appendChild(buttonBar);
+
+		modal.appendChild(container);
+		modal.setPage(page);
+		modal.doModal();
+	}
+	private LocalDate resolveTargetBODDate() {
+		LocalDate today = LocalDate.now();
+
+		// If currentClearingDate is null or before today, use today
+		if (this.currentClearingDate == null || this.currentClearingDate.isBefore(today)) {
+			return today;
+		}
+
+		// If the clearing date is today, check if today's session is already CLOSED in DB
+		if (this.currentClearingDate.equals(today)) {
+			String checkStatusSql = "SELECT session_status FROM clearing_session " +
+			                        "WHERE clearing_date = ? ORDER BY session_id DESC LIMIT 1";
+			try (Connection conn = DBConnection.getConnection();
+			     PreparedStatement ps = conn.prepareStatement(checkStatusSql)) {
+				ps.setDate(1, java.sql.Date.valueOf(today));
+				try (ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						String status = rs.getString("session_status");
+						// Only if today's session is CLOSED does BOD advance to next day
+						if ("CLOSED".equalsIgnoreCase(status)) {
+							return today.plusDays(1);
+						}
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return today;
+		}
+
+		// If currentClearingDate is already set to today or future, use it
+		return this.currentClearingDate;
+	}
+	private void executeBOD(LocalDate nextDate) {
 		String adminUserId = resolveLoggedInUserId();
-		LocalDate nextDate = this.currentClearingDate.plusDays(1);
-		Timestamp now = new Timestamp(System.currentTimeMillis());
 
-		String insertBodSql = "INSERT INTO clearing_session (clearing_date, session_status, opened_by, opened_at) VALUES (?, 'OPEN', ?, ?)";
+		// 1. Initial simulated morning time
+		java.time.LocalTime morningTime = java.time.LocalTime.of(10, 30, 0);
+		java.sql.Time sessionTime = java.sql.Time.valueOf(morningTime);
+		Timestamp simulatedOpenedAt = Timestamp.valueOf(nextDate.atTime(morningTime));
 
-		// Corrected to prefix match UNPROCESSED_MICR, UNPROCESSED_DATA_ENTRY, and UNPROCESSED_VERIFY
+		// 2. Updated SQL: Explicitly insert cycle_phase and session_time
+		String insertBodSql = "INSERT INTO clearing_session " +
+				"(clearing_date, session_status, opened_by, opened_at, cycle_phase, session_time) " +
+				"VALUES (?, 'OPEN', ?, ?, 'MORNING', ?)";
+
 		String countScanUnprocessed = "SELECT COUNT(*) FROM scan_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
 		String countOutwardUnprocessed = "SELECT COUNT(*) FROM outward_cheque WHERE UPPER(cheque_status) LIKE 'UNPROCESSED%'";
 
-		try (Connection conn = DBConnection.getConnection()) {
+		Connection conn = null;
+		try {
+			conn = DBConnection.getConnection();
 			conn.setAutoCommit(false);
 
 			try (PreparedStatement psSession = conn.prepareStatement(insertBodSql)) {
 				psSession.setDate(1, Date.valueOf(nextDate));
 				psSession.setString(2, adminUserId);
-				psSession.setTimestamp(3, now);
+				psSession.setTimestamp(3, simulatedOpenedAt); // 2026-09-24 10:30:00
+				psSession.setTime(4, sessionTime);            // 10:30:00
 				psSession.executeUpdate();
 			}
 
@@ -591,20 +824,6 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 
 			String clearingDateStr = nextDate.format(dateFormatter);
 
-//			if (rolledOverScanCheques > 0) {
-//				String makerMsg = "BOD initialized for " + clearingDateStr + ". " 
-//						+ rolledOverScanCheques + " rollover item(s) pending in your Unprocessed Queue.";
-//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-//				.sendNotification("OUTWARD_MAKER", null, makerMsg);
-//			}
-//
-//			if (rolledOverCheckerCheques > 0) {
-//				String checkerMsg = "BOD initialized for " + clearingDateStr + ". " 
-//						+ rolledOverCheckerCheques + " rollover item(s) pending in your Unprocessed Queue.";
-//				com.iispl.cts.serviceimpl.NotificationServiceImpl.getInstance()
-//				.sendNotification("OUTWARD_CHECKER", null, checkerMsg);
-//			}
-
 			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_STARTED", 
 					"BOD initialized for date: " + nextDate + " | Unprocessed scan: " + rolledOverScanCheques 
 					+ ", outward: " + rolledOverCheckerCheques, "SUCCESS");
@@ -614,17 +833,52 @@ public class AdminDashboardController extends GenericForwardComposer<Component> 
 			this.selectedAction = "EOD";
 			this.pendingChequesCount = 0;
 
+			// 3. Initialize ClearingTimeMock explicitly to MORNING
+			com.iispl.cts.common.util.ClearingTimeMock.setPreset("MORNING");
+
+			// Update User Session
 			Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", true);
 			Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", this.currentClearingDate);
+
+			// Update Application-Wide Scope
+			if (getPage() != null && getPage().getDesktop() != null && getPage().getDesktop().getWebApp() != null) {
+				getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CTS_SESSION_OPEN", true);
+				getPage().getDesktop().getWebApp().setAttribute("GLOBAL_CLEARING_DATE", this.currentClearingDate);
+			}
 
 			Events.postEvent(new Event("onSessionStatusChanged", getPage().getFirstRoot(), true));
 			refreshUI();
 
+			Clients.showNotification("BOD successfully initiated for " + clearingDateStr, "info", null, "top_center", 3000);
+
+			// 4. Force a clean page refresh so HeaderController re-runs doAfterCompose with MORNING
+			org.zkoss.zk.ui.Executions.sendRedirect(null);
+
 		} catch (SQLException ex) {
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException rbEx) {
+					rbEx.printStackTrace();
+				}
+			}
 			ex.printStackTrace();
-			AuditServiceImpl.getInstance().log("EOD_BOD", "BOD_FAILED", "Failed to start BOD: " + ex.getMessage(), "FAILED");
+			AuditServiceImpl.getInstance(
+					).log("EOD_BOD", "BOD_FAILED", "Failed to start BOD: " + ex.getMessage(), "FAILED");
 			Clients.showNotification("Database error starting BOD: " + ex.getMessage(), "error", null, "top_center", 3000);
+		} finally {
+			if (conn != null) {
+				try {
+					conn.setAutoCommit(true);
+					conn.close();
+				} catch (SQLException closeEx) {
+					closeEx.printStackTrace();
+				}
+			}
 		}
+	}
+	public void onTimer$userRefreshTimer(Event event) {
+	    refreshActiveUsers();
 	}
 
 	private String resolveLoggedInUserId() {

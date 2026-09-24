@@ -26,12 +26,10 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 		}
 
 		if (request.getChequeId() == null || request.getChequeId().trim().isEmpty()) {
-
 			throw new IllegalArgumentException("Cheque ID cannot be null or empty");
 		}
 
 		if (request.getBatchId() == null || request.getBatchId().trim().isEmpty()) {
-
 			throw new IllegalArgumentException("Batch ID cannot be null or empty");
 		}
 
@@ -41,42 +39,30 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
 			preparedStatement.setString(1, request.getChequeId().trim());
-
 			preparedStatement.setString(2, request.getBatchId().trim());
 
 			if (request.getRemarks() == null || request.getRemarks().trim().isEmpty()) {
-
 				preparedStatement.setNull(3, java.sql.Types.LONGVARCHAR);
-
 			} else {
-
 				preparedStatement.setString(3, request.getRemarks().trim());
 			}
 
 			if (request.getReasonId() == null || request.getReasonId().trim().isEmpty()) {
-
 				preparedStatement.setNull(4, java.sql.Types.VARCHAR);
-
 			} else {
-
 				preparedStatement.setString(4, request.getReasonId().trim());
 			}
 
 			if (request.getReason() == null || request.getReason().trim().isEmpty()) {
-
 				preparedStatement.setNull(5, java.sql.Types.VARCHAR);
-
 			} else {
-
 				preparedStatement.setString(5, request.getReason().trim());
 			}
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				if (resultSet.next()) {
-
 					request.setRequestId(resultSet.getString("request_id"));
-
 					return true;
 				}
 			}
@@ -87,16 +73,20 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 
 			String message = exception.getMessage();
 
-			throw new RuntimeException("Unable to save outward cheque request. " + "Cheque ID: " + request.getChequeId()
-					+ ". Cause: " + (message == null ? "Unknown database error" : message), exception);
+			throw new RuntimeException("Unable to save outward cheque rejection request. Cheque ID: "
+					+ request.getChequeId() + ". Cause: " + (message == null ? "Unknown database error" : message),
+					exception);
 		}
 	}
 
 	@Override
 	public boolean existsByChequeId(Connection connection, String chequeId) {
 
-		if (connection == null || chequeId == null || chequeId.trim().isEmpty()) {
+		if (connection == null) {
+			throw new IllegalArgumentException("Connection cannot be null");
+		}
 
+		if (chequeId == null || chequeId.trim().isEmpty()) {
 			return false;
 		}
 
@@ -107,13 +97,12 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 			preparedStatement.setString(1, chequeId.trim());
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
 				return resultSet.next();
 			}
 
 		} catch (SQLException exception) {
 
-			throw new RuntimeException("Unable to check outward cheque request " + "for cheque ID: " + chequeId,
+			throw new RuntimeException("Unable to check outward cheque rejection request for cheque ID: " + chequeId,
 					exception);
 		}
 	}
@@ -122,7 +111,6 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 	public boolean existsByChequeId(String chequeId) {
 
 		if (chequeId == null || chequeId.trim().isEmpty()) {
-
 			return false;
 		}
 
@@ -134,13 +122,12 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 			preparedStatement.setString(1, chequeId.trim());
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-
 				return resultSet.next();
 			}
 
 		} catch (SQLException exception) {
 
-			throw new RuntimeException("Unable to check outward cheque request " + "for cheque ID: " + chequeId,
+			throw new RuntimeException("Unable to check outward cheque rejection request for cheque ID: " + chequeId,
 					exception);
 		}
 	}
@@ -149,12 +136,12 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 	public OutwardChequeRequest getRequestByChequeId(String chequeId) {
 
 		if (chequeId == null || chequeId.trim().isEmpty()) {
-
 			return null;
 		}
 
-		String sql = "SELECT " + "request_id, " + "cheque_id, " + "batch_id, " + "remarks, " + "reason_id, " + "reason "
-				+ "FROM outward_cheque_request " + "WHERE cheque_id = ? " + "LIMIT 1";
+		String sql = "SELECT " + "request_id, " + "cheque_id, " + "batch_id, " + "remarks, " + "reason_id, "
+				+ "reason, " + "time_stamp " + "FROM outward_cheque_request " + "WHERE cheque_id = ? "
+				+ "ORDER BY time_stamp DESC " + "LIMIT 1";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -170,7 +157,7 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 
 		} catch (SQLException exception) {
 
-			throw new RuntimeException("Unable to fetch outward cheque request " + "for cheque ID: " + chequeId,
+			throw new RuntimeException("Unable to fetch outward cheque rejection request for cheque ID: " + chequeId,
 					exception);
 		}
 
@@ -181,14 +168,14 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 	public List<OutwardChequeRequest> getRequestsByBatchId(String batchId) {
 
 		if (batchId == null || batchId.trim().isEmpty()) {
-
 			return Collections.emptyList();
 		}
 
 		List<OutwardChequeRequest> requests = new ArrayList<>();
 
-		String sql = "SELECT " + "request_id, " + "cheque_id, " + "batch_id, " + "remarks, " + "reason_id, " + "reason "
-				+ "FROM outward_cheque_request " + "WHERE batch_id = ? " + "ORDER BY request_id";
+		String sql = "SELECT " + "request_id, " + "cheque_id, " + "batch_id, " + "remarks, " + "reason_id, "
+				+ "reason, " + "time_stamp " + "FROM outward_cheque_request " + "WHERE batch_id = ? "
+				+ "ORDER BY time_stamp DESC, request_id";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -198,14 +185,13 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 				while (resultSet.next()) {
-
 					requests.add(mapRequest(resultSet));
 				}
 			}
 
 		} catch (SQLException exception) {
 
-			throw new RuntimeException("Unable to fetch outward cheque requests " + "for batch ID: " + batchId,
+			throw new RuntimeException("Unable to fetch outward cheque rejection requests for batch ID: " + batchId,
 					exception);
 		}
 
@@ -217,17 +203,56 @@ public class OutwardChequeRequestDAOImpl implements OutwardChequeRequestDAO {
 		OutwardChequeRequest request = new OutwardChequeRequest();
 
 		request.setRequestId(resultSet.getString("request_id"));
-
 		request.setChequeId(resultSet.getString("cheque_id"));
-
 		request.setBatchId(resultSet.getString("batch_id"));
-
 		request.setRemarks(resultSet.getString("remarks"));
-
 		request.setReasonId(resultSet.getString("reason_id"));
-
 		request.setReason(resultSet.getString("reason"));
 
 		return request;
+	}
+
+	@Override
+	public boolean saveRejectionRequest(Connection connection, String chequeId, String batchId, String remarks,
+			String reasonId, String reason) {
+
+		if (connection == null) {
+			throw new IllegalArgumentException("Connection cannot be null");
+		}
+
+		if (chequeId == null || chequeId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Cheque ID cannot be null or empty");
+		}
+
+		if (batchId == null || batchId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Batch ID cannot be null or empty");
+		}
+
+		String sql = "INSERT INTO outward_cheque_request " + "(cheque_id, batch_id, remarks, reason_id, reason) "
+				+ "VALUES (?, ?, ?, ?, ?)";
+
+		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+			preparedStatement.setString(1, chequeId.trim());
+			preparedStatement.setString(2, batchId.trim());
+			preparedStatement.setString(3, remarks);
+
+			if (reasonId != null && !reasonId.trim().isEmpty()) {
+				preparedStatement.setString(4, reasonId.trim());
+			} else {
+				preparedStatement.setNull(4, java.sql.Types.VARCHAR);
+			}
+
+			preparedStatement.setString(5, reason);
+
+			return preparedStatement.executeUpdate() == 1;
+
+		} catch (SQLException exception) {
+
+			String message = exception.getMessage();
+
+			throw new RuntimeException("Unable to save rejection request for cheque: " + chequeId + ". Cause: "
+					+ (message == null ? "Unknown database error" : message), exception);
+		}
 	}
 }

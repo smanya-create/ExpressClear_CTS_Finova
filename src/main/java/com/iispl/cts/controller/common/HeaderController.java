@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +13,9 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Popup;
@@ -23,6 +23,7 @@ import org.zkoss.zul.Timer;
 import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.ClearingTimeMock;
 import com.iispl.cts.entity.Notification;
 import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.serviceimpl.NotificationServiceImpl;
@@ -31,8 +32,8 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // Auto-wired by component ID match
     private Timer headerTimer;
+    private Combobox cmbSimulateCycle;
     private Label lblHeaderSessionStatus;
     private Label lblHeaderSessionDate;
     private Label lblHeaderClock;
@@ -43,6 +44,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
     private Label lblHeaderRole;
     private Popup popupNotifications;
     private Vlayout containerNotificationList;
+    private Label lblOperatorCycleBadge;
 
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
@@ -50,31 +52,36 @@ public class HeaderController extends GenericForwardComposer<Component> {
     private final List<NotificationItem> notificationQueue = new ArrayList<>();
     private final NotificationService notificationService = NotificationServiceImpl.getInstance();
 
-    // Timer tick accumulator to poll the DB every 30 seconds instead of every second
     private int pollTicks = 0;
+    
+    
+    
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        // 1. Initialize user details first to guarantee UI components get populated
+        // 1. Profile details first
         initUserProfile();
 
-        // 2. Hide notification bell safely without null pointer exceptions
-        String currentRole = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "";
+        // 2. Load DB Session State
+        loadSessionState();
+
+        // 3. Configure Cycle Display strictly by session role
+        configureCycleDisplay();
+
+        // 4. Hide notification bell for Admin if applicable
+        String currentRole = getResolvedRole();
         Object showNotifArg = Executions.getCurrent().getArg().get("showNotifications");
         boolean suppressNotif = showNotifArg != null && "false".equalsIgnoreCase(String.valueOf(showNotifArg));
 
-        if ("ADMIN".equalsIgnoreCase(currentRole) || suppressNotif) {
+        if (isAdminRole(currentRole) || suppressNotif) {
             if (divNotificationBell != null) {
                 divNotificationBell.setVisible(false);
             }
         }
 
-        // 3. Load Session State (Database Date & Status)
-        loadSessionState();
-
-        // 4. Safely load notifications (isolated in try-catch to keep header rendering intact)
+        // 5. Security & Notifications...
         if (divNotificationBell != null && divNotificationBell.isVisible()) {
             try {
                 loadDatabaseNotifications();
@@ -83,7 +90,6 @@ public class HeaderController extends GenericForwardComposer<Component> {
             }
         }
 
-        // 5. Apply Security Lockdown
         if (comp != null && comp.getPage() != null) {
             try {
                 com.iispl.cts.common.util.SecurityUtil.applySessionLockdown(comp.getPage());
@@ -92,54 +98,164 @@ public class HeaderController extends GenericForwardComposer<Component> {
             }
         }
 
-        // 6. Attach Session Status Listener
-        if (getPage() != null && getPage().getFirstRoot() != null) {
-            getPage().getFirstRoot().addEventListener("onSessionStatusChanged", new EventListener<Event>() {
-                @Override
-                public void onEvent(Event event) {
-                    Boolean isOpen = (Boolean) event.getData();
-                    updateSessionBadge(isOpen != null && isOpen);
+        // Initial badge update
+        syncSessionBadge();
 
-                    LocalDate clearingDate = (LocalDate) Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
-                    if (clearingDate != null && lblHeaderSessionDate != null) {
-                        lblHeaderSessionDate.setValue(clearingDate.format(dateFormatter));
-                    }
-                }
-            });
+        // Start timer/polling
+        updateClockAndPoll();
+    }
+    private void syncSessionBadge() {
+		// TODO Auto-generated method stub
+    	boolean isOpen = false;
+
+        // Check application-wide status first (reflects Admin EOD across all tabs)
+        if (Sessions.getCurrent() != null && Sessions.getCurrent().getWebApp() != null) {
+            Object globalOpen = Sessions.getCurrent().getWebApp().getAttribute("GLOBAL_CTS_SESSION_OPEN");
+            if (globalOpen != null) {
+                isOpen = Boolean.TRUE.equals(globalOpen);
+            } else {
+                isOpen = Boolean.TRUE.equals(Sessions.getCurrent().getAttribute("CTS_SESSION_OPEN"));
+            }
         }
+
+        updateHeaderBadge(isOpen);
+		
+	}
+    private void updateHeaderBadge(boolean isOpen) {
+        if (lblHeaderSessionStatus == null) return;
+
+        if (isOpen) {
+            lblHeaderSessionStatus.setValue("● OPEN");
+            lblHeaderSessionStatus.setStyle(
+                "display:inline-flex; align-items:center; justify-content:center; " +
+                "font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; " +
+                "box-sizing:border-box; color:#15803d; background-color:#dcfce7; border:1px solid #bbf7d0;"
+            );
+        } else {
+            lblHeaderSessionStatus.setValue("● CLOSED");
+            lblHeaderSessionStatus.setStyle(
+                "display:inline-flex; align-items:center; justify-content:center; " +
+                "font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; " +
+                "box-sizing:border-box; color:#b91c1c; background-color:#fee2e2; border:1px solid #fecaca;"
+            );
+        }
+    }
+    
+    private boolean isAdminRole(String role) {
+        return role != null && role.contains("ADMIN");
+    }
+    private void configureCycleDisplay() {
+        String currentRole = getResolvedRole();
+        boolean isAdmin = isAdminRole(currentRole);
+
+        if (cmbSimulateCycle != null) {
+            cmbSimulateCycle.setVisible(isAdmin);
+        }
+        if (lblOperatorCycleBadge != null) {
+            lblOperatorCycleBadge.setVisible(!isAdmin);
+        }
+
+        String activePhase = ClearingTimeMock.getActivePhase(); // "MORNING", "AFTERNOON", "LIVE"
+
+        if (isAdmin && cmbSimulateCycle != null) {
+            if ("MORNING".equalsIgnoreCase(activePhase)) {
+                cmbSimulateCycle.setSelectedIndex(1);
+            } else if ("AFTERNOON".equalsIgnoreCase(activePhase)) {
+                cmbSimulateCycle.setSelectedIndex(2);
+            } else {
+                cmbSimulateCycle.setSelectedIndex(0);
+            }
+        } else if (lblOperatorCycleBadge != null) {
+            if ("MORNING".equalsIgnoreCase(activePhase)) {
+                lblOperatorCycleBadge.setValue("● OUTWARD (AM)");
+                lblOperatorCycleBadge.setStyle("display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; box-sizing:border-box; color:#0369a1; background-color:#e0f2fe; border:1px solid #bae6fd;");
+            } else if ("AFTERNOON".equalsIgnoreCase(activePhase)) {
+                lblOperatorCycleBadge.setValue("● INWARD (PM)");
+                lblOperatorCycleBadge.setStyle("display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; box-sizing:border-box; color:#7c2d12; background-color:#ffedd5; border:1px solid #fed7aa;");
+            } else {
+                lblOperatorCycleBadge.setValue("● ACTIVE (ALL)");
+                lblOperatorCycleBadge.setStyle("display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; box-sizing:border-box; color:#15803d; background-color:#dcfce7; border:1px solid #bbf7d0;");
+            }
+        }
+    }
+    private String getResolvedRole() {
+		// TODO Auto-generated method stub
+    	if (Sessions.getCurrent() == null) return "GUEST";
+
+        String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
+        if (role == null) role = (String) Sessions.getCurrent().getAttribute("USER_ROLE");
+        if (role == null) role = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
+        if (role == null) role = (String) Sessions.getCurrent().getAttribute("ROLE");
+
+        return (role != null) ? role.trim().toUpperCase() : "MAKER";
+	}
+    private void updateOperatorCycleBadge() {
+        if (lblOperatorCycleBadge == null) return;
+
+        String phase = ClearingTimeMock.getActivePhase();
+
+        if ("LIVE".equalsIgnoreCase(phase)) {
+            lblOperatorCycleBadge.setValue("● ACTIVE (ALL)");
+            lblOperatorCycleBadge.setStyle(
+                "font-size:10.5px; font-weight:700; padding:6px 12px; border-radius:9999px; " +
+                "color:#15803d; background:#ecfdf5; border:1px solid #a7f3d0; display:inline-block;"
+            );
+        } else if (ClearingTimeMock.isOutwardWindow()) {
+            lblOperatorCycleBadge.setValue("● OUTWARD (AM)");
+            lblOperatorCycleBadge.setStyle(
+                "font-size:10.5px; font-weight:700; padding:6px 12px; border-radius:9999px; " +
+                "color:#0369a1; background:#f0f9ff; border:1px solid #bae6fd; display:inline-block;"
+            );
+        } else {
+            lblOperatorCycleBadge.setValue("● INWARD (PM)");
+            lblOperatorCycleBadge.setStyle(
+                "font-size:10.5px; font-weight:700; padding:6px 12px; border-radius:9999px; " +
+                "color:#b45309; background:#fffbeb; border:1px solid #fde68a; display:inline-block;"
+            );
+        }
+    }
+    
+    public void syncSimulationDropdown() {
+        if (cmbSimulateCycle == null) return;
+
+        String currentPhase = ClearingTimeMock.getActivePhase(); // Will now return "MORNING"
+
+        for (Comboitem item : cmbSimulateCycle.getItems()) {
+            if (currentPhase.equalsIgnoreCase(item.getValue())) {
+                if (cmbSimulateCycle.getSelectedItem() != item) {
+                    cmbSimulateCycle.setSelectedItem(item);
+                }
+                break;
+            }
+        }
+    }
+    public void onSelectSimulationCycle() {
+    	if (cmbSimulateCycle == null || cmbSimulateCycle.getSelectedItem() == null) {
+            return;
+        }
+
+        String selectedPhase = cmbSimulateCycle.getSelectedItem().getValue();
+        ClearingTimeMock.setPreset(selectedPhase);
+
+        // Immediately update the clock on change
+        updateClockAndPoll();
     }
 
     private void initUserProfile() {
-        // Fallback check across all potential session attribute keys for username
         String username = (String) Sessions.getCurrent().getAttribute("CTS_USERNAME");
-        if (username == null) {
-            username = (String) Sessions.getCurrent().getAttribute("USERNAME");
-        }
-        if (username == null || username.trim().isEmpty()) {
-            username = "User";
-        }
+        if (username == null) username = (String) Sessions.getCurrent().getAttribute("USERNAME");
+        if (username == null || username.trim().isEmpty()) username = "User";
 
-        // Fallback check across all potential session attribute keys for role
         String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
-        if (role == null) {
-            role = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
-        }
-        if (role == null || role.trim().isEmpty()) {
-            role = "ADMIN";
-        }
+        if (role == null) role = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
+        if (role == null || role.trim().isEmpty()) role = "ADMIN";
 
-        // Assign values to header labels
-        if (lblHeaderUsername != null) {
-            lblHeaderUsername.setValue(username);
-        }
-        if (lblHeaderRole != null) {
-            lblHeaderRole.setValue(role);
-        }
+        if (lblHeaderUsername != null) lblHeaderUsername.setValue(username);
+        if (lblHeaderRole != null) lblHeaderRole.setValue(role);
         if (lblUserInitial != null && !username.isEmpty()) {
             lblUserInitial.setValue(username.substring(0, 1).toUpperCase());
         }
 
-        // Role check for visible bell icon
         boolean isOperationalRole = "OUTWARD_MAKER".equalsIgnoreCase(role)
                 || "OUTWARD_CHECKER".equalsIgnoreCase(role)
                 || "INWARD_MAKER".equalsIgnoreCase(role)
@@ -155,7 +271,6 @@ public class HeaderController extends GenericForwardComposer<Component> {
         boolean isSessionOpen = false;
         LocalDate clearingDate = null;
 
-        // 1. Fetch from Database
         String sql = "SELECT clearing_date, session_status "
                 + "FROM clearing_session "
                 + "ORDER BY clearing_date DESC, opened_at DESC "
@@ -166,38 +281,28 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
             if (rs.next()) {
                 Date dbDate = rs.getDate("clearing_date");
-                if (dbDate != null) {
-                    clearingDate = dbDate.toLocalDate();
-                }
+                if (dbDate != null) clearingDate = dbDate.toLocalDate();
                 isSessionOpen = "OPEN".equalsIgnoreCase(rs.getString("session_status"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // 2. Fallback to today's date if table is empty or date is null
-        if (clearingDate == null) {
-            clearingDate = LocalDate.now();
-        }
+        if (clearingDate == null) clearingDate = LocalDate.now();
 
-        // 3. Save into Session Attributes
         Sessions.getCurrent().setAttribute("CTS_SESSION_OPEN", isSessionOpen);
         Sessions.getCurrent().setAttribute("CTS_CLEARING_DATE", clearingDate);
 
-        // 4. Force update the Label
         if (lblHeaderSessionDate != null) {
             lblHeaderSessionDate.setValue(clearingDate.format(dateFormatter));
             lblHeaderSessionDate.setVisible(true);
         }
 
-        // 5. Update Status Badge
         updateSessionBadge(isSessionOpen);
     }
 
     private void updateSessionBadge(boolean isOpen) {
-        if (lblHeaderSessionStatus == null) {
-            return;
-        }
+        if (lblHeaderSessionStatus == null) return;
 
         String basePill = "display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; line-height:1; padding:5px 12px; border-radius:9999px; box-sizing:border-box; ";
 
@@ -210,7 +315,6 @@ public class HeaderController extends GenericForwardComposer<Component> {
         }
     }
 
-    // Handles onTimer event from <timer id="headerTimer" .../>
     public void onTimer$headerTimer(Event event) {
         updateClockAndPoll();
     }
@@ -220,27 +324,18 @@ public class HeaderController extends GenericForwardComposer<Component> {
     }
 
     private void updateClockAndPoll() {
-        if (lblHeaderClock != null) {
-            lblHeaderClock.setValue(LocalTime.now().format(timeFormatter));
+    	if (lblHeaderClock != null) {
+            java.time.LocalTime mockTime = ClearingTimeMock.getCurrentTime();
+            String formattedTime = mockTime.format(java.time.format.DateTimeFormatter.ofPattern("hh:mm:ss a"));
+            lblHeaderClock.setValue(formattedTime);
         }
-
-        // Background polling: check database for notifications every 30 seconds
-        pollTicks++;
-        if (pollTicks >= 30) {
-            pollTicks = 0;
-            loadDatabaseNotifications();
-        }
+    	syncSessionBadge();
     }
 
-    /**
-     * Reads unread notifications from DB for the active session user/role
-     */
     private void loadDatabaseNotifications() {
         String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
         String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
-        if (userId == null) {
-            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
-        }
+        if (userId == null) userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
 
         List<Notification> dbList = notificationService.getUnreadNotifications(role, userId);
 
@@ -260,22 +355,17 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
     private String calculateRelativeTime(java.sql.Timestamp ts) {
         if (ts == null) return "Just now";
-
-        long diffMillis = System.currentTimeMillis() - ts.getTime();
-        long seconds = diffMillis / 1000;
-
+        long seconds = (System.currentTimeMillis() - ts.getTime()) / 1000;
         if (seconds < 60) return "Just now";
         long minutes = seconds / 60;
         if (minutes < 60) return minutes + " mins ago";
         long hours = minutes / 60;
         if (hours < 24) return hours + " hrs ago";
-        long days = hours / 24;
-        return days + " days ago";
+        return (hours / 24) + " days ago";
     }
 
     private void renderNotifications() {
         if (containerNotificationList == null) return;
-
         containerNotificationList.getChildren().clear();
 
         if (notificationQueue.isEmpty()) {
@@ -320,11 +410,8 @@ public class HeaderController extends GenericForwardComposer<Component> {
             itemLayout.appendChild(timeLabel);
             notifRow.appendChild(itemLayout);
 
-            // Click action: Close popup and redirect to target page
             notifRow.addEventListener("onClick", (Event event) -> {
-                if (popupNotifications != null) {
-                    popupNotifications.close();
-                }
+                if (popupNotifications != null) popupNotifications.close();
                 handleNotificationClick(activeRole, item.message);
             });
 
@@ -332,15 +419,10 @@ public class HeaderController extends GenericForwardComposer<Component> {
         }
     }
 
-    /**
-     * Inspects the target role and message intent, routing the user to the appropriate screen.
-     */
     private void handleNotificationClick(String role, String message) {
         if (role == null) return;
-
         String normalizedRole = role.trim().toUpperCase();
 
-        // Outward Role Navigation
         if ("OUTWARD_MAKER".equals(normalizedRole)) {
             Executions.sendRedirect("/outward/maker/unprocessed-cheques.zul");
             return;
@@ -349,8 +431,6 @@ public class HeaderController extends GenericForwardComposer<Component> {
             Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
             return;
         }
-
-        // Inward Role Navigation
         if ("INWARD_MAKER".equals(normalizedRole)) {
             Executions.sendRedirect("/inward/maker/inward-maker-dashboard.zul");
             return;
@@ -360,7 +440,6 @@ public class HeaderController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // Fallback routing based on message keywords
         if (message != null) {
             String lowerMsg = message.toLowerCase();
             if (lowerMsg.contains("checker")) {
@@ -374,16 +453,13 @@ public class HeaderController extends GenericForwardComposer<Component> {
     public void onClickMarkAllRead() {
         String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
         String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
-        if (userId == null) {
-            userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
-        }
+        if (userId == null) userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
 
         notificationService.markAllNotificationsAsRead(role, userId);
         notificationQueue.clear();
         renderNotifications();
     }
 
-    // Helper Model Class
     private static class NotificationItem {
         final Long id;
         final String message;
@@ -395,4 +471,5 @@ public class HeaderController extends GenericForwardComposer<Component> {
             this.timeAgo = timeAgo;
         }
     }
+    
 }

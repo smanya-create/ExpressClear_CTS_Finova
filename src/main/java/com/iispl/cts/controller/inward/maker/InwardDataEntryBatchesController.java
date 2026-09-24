@@ -32,11 +32,12 @@ import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.DataEntryBatchItemDTO;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.enums.inward.InwardChequeStatus;
+import com.iispl.cts.service.inward.InwardBatchService;
+import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
 public class InwardDataEntryBatchesController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
-
+	
 	private Grid grdDataEntryBatches;
 	private Rows rowsDataEntryBatches;
 	private Paging pagingDataEntry;
@@ -46,6 +47,8 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 	private Combobox cmbStatusFilter;
 	private Button btnClearSearch;
 	private Label lblBatchResultCount;
+	
+	private final InwardBatchService batchService = new InwardBatchServiceImpl();
 
 	private List<DataEntryBatchItemDTO> allBatches = new ArrayList<>();
 	private List<DataEntryBatchItemDTO> filteredBatches = new ArrayList<>();
@@ -74,7 +77,12 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 	}
 
 	private void loadBatches() {
-		this.allBatches = fetchEligibleBatches();
+		try {
+			this.allBatches = batchService.getBatchesForDataEntry();
+		} catch (Exception e) {
+			this.allBatches = new ArrayList<>();
+			Messagebox.show("Error loading batches: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+		}
 		applyCombinedFilter(null, null);
 	}
 
@@ -260,70 +268,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 		rowsDataEntryBatches.appendChild(row);
 	}
 
-	private List<DataEntryBatchItemDTO> fetchEligibleBatches() {
-		List<DataEntryBatchItemDTO> batches = new ArrayList<>();
-
-		String sql = "SELECT " + "    b.inward_batch_id, " + "    b.actual_cheque_count, "
-				+ "    b.actual_total_amount, " + "    b.batch_status, " + "    COUNT(CASE WHEN c.cheque_status IN ('"
-				+ InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '"
-				+ InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques, "
-				+ "    COUNT(CASE WHEN c.cheque_status IN ('" + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name()
-				+ "', '" + InwardChequeStatus.SEND_BACK_TO_MAKER.name()
-				+ "', 'MAKER_RETURNED') THEN 1 END) AS sent_back_cheques " + "FROM inward_batch b "
-				+ "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id "
-				+ "WHERE (b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING', 'COMPLETED', 'REJECTED') "
-				+ "       OR EXISTS (SELECT 1 FROM inward_cheque rc "
-				+ "                  WHERE rc.inward_batch_id = b.inward_batch_id "
-				+ "                    AND rc.cheque_status IN ('SEND_BACK_TO_MAKER_DATA_ENTRY', 'SEND_BACK_TO_MAKER'))) "
-				+ "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status "
-				+ "HAVING COUNT(CASE WHEN c.cheque_status IN ('" + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '"
-				+ InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', '" + "DATA_ENTRY_COMPLETED" + "') THEN 1 END) > 0 "
-				+ "ORDER BY b.inward_batch_id ASC";
-
-		try (Connection conn = DBConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql);
-				ResultSet rs = ps.executeQuery()) {
-
-			while (rs.next()) {
-				DataEntryBatchItemDTO dto = new DataEntryBatchItemDTO();
-				dto.setBatchId(rs.getString("inward_batch_id"));
-				dto.setTotalCheques(rs.getInt("actual_cheque_count"));
-				dto.setTotalAmount(rs.getBigDecimal("actual_total_amount"));
-
-				int sentBackCount = rs.getInt("sent_back_cheques");
-				String bStatus = rs.getString("batch_status");
-
-				if (sentBackCount > 0) {
-					dto.setBatchStatus(InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name());
-				} else {
-					dto.setBatchStatus(bStatus);
-				}
-
-				dto.setPendingCheques(rs.getInt("pending_cheques"));
-				batches.add(dto);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			Messagebox.show("Database error loading batches: " + e.getMessage(), "Error", Messagebox.OK,
-					Messagebox.ERROR);
-		}
-
-		batches.sort((b1, b2) -> {
-			boolean b1Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b1.getBatchStatus());
-			boolean b2Sb = InwardBatchStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(b2.getBatchStatus());
-			if (b1Sb && !b2Sb)
-				return -1;
-			if (!b1Sb && b2Sb)
-				return 1;
-			return 0;
-		});
-
-		return batches;
-	}
 
 	private void processBatch(DataEntryBatchItemDTO batch) {
 		Sessions.getCurrent().setAttribute("ACTIVE_INWARD_BATCH_ID", batch.getBatchId());

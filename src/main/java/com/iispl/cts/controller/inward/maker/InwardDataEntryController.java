@@ -1,5 +1,6 @@
 package com.iispl.cts.controller.inward.maker;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
@@ -7,11 +8,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -48,8 +56,7 @@ import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
 public class InwardDataEntryController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
-
+	
 	private final InwardBatchService batchService = new InwardBatchServiceImpl();
 	private final InwardChequeService chequeService = new InwardChequeServiceImpl();
 	private final InwardSendBackRequestService sendBackRequestService = new InwardSendBackRequestServiceImpl();
@@ -139,16 +146,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		
 		super.doAfterCompose(comp);
 
-		if (btnConfirmCompletionModal != null) {
-			btnConfirmCompletionModal.addEventListener("onClick", event -> executeSubmitToChecker());
-		}
-		if (btnCancelCompletionModal != null) {
-			btnCancelCompletionModal.addEventListener("onClick", event -> {
-				if (winCompletionConfirmModal != null) {
-					winCompletionConfirmModal.setVisible(false);
-				}
-			});
-		}
 
 		String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_INWARD_BATCH_ID");
 		if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
@@ -184,6 +181,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 	public void loadBatch(String batchId) {
 		this.currentBatchId = batchId;
+		System.out.println("DEBUG loadBatch called for batchId: " + batchId);
 
 		InwardBatch batch = batchService.getBatchById(batchId);
 		if (batch != null) {
@@ -197,8 +195,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 			if (lblBatchId != null)
 				lblBatchId.setValue(batch.getInwardBatchId());
-			if (lblTotalCheques != null)
-				lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
 			if (lblReceivedDate != null && batch.getUploadedAt() != null) {
 				lblReceivedDate.setValue(new SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
 			}
@@ -207,40 +203,71 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		List<InwardCheque> allCheques = chequeService.getChequesByBatchAndStatus(batchId, null);
 		this.activeQueue = new ArrayList<>();
 
+		// The batch is in rework if there are active PENDING send-back tickets
+		this.isReworkBatch = sendBackRequestService.hasPendingSendBackRequests(batchId);
+
 		if (allCheques != null && !allCheques.isEmpty()) {
-
-			this.isReworkBatch = allCheques.stream().anyMatch(c -> c != null && isSentBackStatus(c.getChequeStatus()));
-
 			for (InwardCheque c : allCheques) {
-
 				if (c == null || c.getChequeStatus() == null) {
 					continue;
 				}
 
-				String st = c.getChequeStatus().trim();
+				String st = c.getChequeStatus().trim().toUpperCase();
 
-				if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
-						|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
+				if (this.isReworkBatch) {
+					// =========================================================================
+					// REWORK FLOW:
+					// 1. Cheques waiting for Data Entry rework (including repaired MICR cheques)
+					// 2. Cheques already approved in this rework session (MAKER_RETURNED)
+					// 3. Cheques where Maker requested rejection in this rework session
+					// =========================================================================
+					if (isSentBackStatus(st)) {
+						this.activeQueue.add(c);
+						continue;
+					}
 
-					this.activeQueue.add(c);
-					continue;
-				}
+					if (InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(st) && sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId)) {
+						this.activeQueue.add(c);
+						continue;
+					}
 
-				if (isSentBackStatus(st)) {
-					this.activeQueue.add(c);
-					continue;
-				}
+					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st) && chequeService.isReworkRejectionRequest(c.getInwardChequeId(), this.currentBatchId)) {
+						this.activeQueue.add(c);
+					}
 
-				if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st)
-						&& isDataEntryRejectionRequest(c)) {
+				} else {
+					// =========================================================================
+					// NORMAL INTAKE FLOW:
+					// =========================================================================
+					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
+							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
+							|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
+						this.activeQueue.add(c);
+						continue;
+					}
 
-					this.activeQueue.add(c);
+					if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st) && chequeService.isDataEntryRejectionRequest(c.getInwardChequeId())) {
+						this.activeQueue.add(c);
+					}
 				}
 			}
 		}
+		
+		// Update header total count: in rework show total rework items in this batch; in normal show batch total
+				if (lblTotalCheques != null) {
+					if (this.isReworkBatch) {
+						long totalReworkInBatch = allCheques != null ? allCheques.stream()
+								.filter(c -> sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId))
+								.count() : 0;
+						lblTotalCheques.setValue(String.valueOf(totalReworkInBatch));
+					} else if (batch != null) {
+						lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
+					}
+				}
+		
+		System.out.println("DEBUG isReworkBatch evaluated to: " + this.isReworkBatch);
+		System.out.println("DEBUG activeQueue size before return: " + (this.activeQueue != null ? this.activeQueue.size() : 0));
 
-		//
 
 		String targetChequeId = execution.getParameter("chequeId");
 		if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
@@ -285,43 +312,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(status)
 				|| InwardChequeStatus.SEND_BACK_TO_MAKER.name().equalsIgnoreCase(status);
 	}
+	
 
-	private boolean isMicrRepairStatus(String status) {
-		if (status == null)
-			return false;
-		String s = status.trim().toUpperCase();
-		return "MICR_REPAIR_PENDING".equals(s) || "MICR_REPAIR_IN_PROGRESS".equals(s)
-				|| "MICR_REPAIR_REQUIRED".equals(s) || "SEND_BACK_TO_MAKER_MICR".equals(s);
-	}
 
-	private boolean isDataEntryRejectionRequest(InwardCheque cheque) {
 
-		if (cheque == null || cheque.getInwardChequeId() == null
-				|| !InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(cheque.getChequeStatus())) {
-			return false;
-		}
-
-		String sql = "SELECT EXISTS (" + "SELECT 1 " + "FROM inward_cheque_rejection_request "
-				+ "WHERE inward_cheque_id = ? " + "AND request_stage IN ('DATA_ENTRY', 'MICR_REPAIR') "
-				+ "AND request_status = 'PENDING'" + ")";
-
-		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-			ps.setString(1, cheque.getInwardChequeId());
-
-			try (ResultSet rs = ps.executeQuery()) {
-				return rs.next() && rs.getBoolean(1);
-			}
-
-		} catch (Exception e) {
-
-			System.err.println(
-					"Unable to determine Data Entry rejection ownership for cheque " + cheque.getInwardChequeId());
-
-			e.printStackTrace();
-			return false;
-		}
-	}
+	
+		
 
 	private int findFirstPendingIndex() {
 		if (activeQueue == null || activeQueue.isEmpty())
@@ -370,6 +366,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			lblChequeNo.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "-");
 		if (lblChequePosition != null)
 			lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
+		
+		// Apply field & button lock based on cheque status
+	    applyChequeActionLock(item);
 
 		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
 		if (lblDataStatus != null) {
@@ -378,7 +377,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			if (isSentBackStatus(status)) {
 				lblDataStatus.setValue("Sent Back");
 			} else if (InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status)) {
-				lblDataStatus.setValue("Returned To Checker");
+				lblDataStatus.setValue("Return To Checker");
 			} else if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)
 					|| "REJECTION REQUESTED".equalsIgnoreCase(status) || "REJECT REQ".equalsIgnoreCase(status)) {
 				lblDataStatus.setValue("Rejection Requested");
@@ -403,8 +402,14 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		if (txtChequeNumber != null)
 			txtChequeNumber.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "");
-		if (txtChequeDate != null)
-			txtChequeDate.setValue(item.getChequeDate() != null ? item.getChequeDate().toString() : "");
+
+		if (txtChequeDate != null) {
+		    if (item.getChequeDate() != null) {
+		        txtChequeDate.setValue(new SimpleDateFormat("dd-MM-yyyy").format(item.getChequeDate()));
+		    } else {
+		        txtChequeDate.setValue("");
+		    }
+		}
 		if (txtAmount != null)
 			txtAmount.setValue(item.getChequeAmount() != null ? "₹ " + item.getChequeAmount().toPlainString() : "");
 		if (txtAmountInWords != null)
@@ -417,9 +422,190 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtPayeeName.setValue(item.getPayeeName() != null ? item.getPayeeName() : "");
 		if (txtEntryRemark != null)
 			txtEntryRemark.setValue("");
+		
+		// Highlight OCR discrepancies in red (normal intake only)
+				highlightOcrMismatches(item);
 
 		updateNavigationState();
 		updateProgressBar();
+	}
+	
+	private void highlightOcrMismatches(InwardCheque cheque) {
+		resetFieldMismatchStyles();
+		if (cheque == null)
+			return;
+
+		String status = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim().toUpperCase() : "";
+		boolean isRejected = InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status);
+		boolean isCheckerSentBack = isSentBackStatus(status) 
+				|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(status) 
+				|| this.isReworkBatch;
+
+		// Skip highlighting if rejection was requested or if in sent-back rework flow
+		if (isRejected || isCheckerSentBack) {
+			return;
+		}
+
+		OcrDetectedData ocr = loadOcrChequeData(cheque);
+		if (ocr == null) {
+			return;
+		}
+
+		// 1. Payee Name
+		String npciPayee = safe(cheque.getPayeeName()).toUpperCase();
+		String ocrPayee = safe(ocr.detectedPayee).toUpperCase();
+		if (!npciPayee.isEmpty() && !ocrPayee.isEmpty() && !npciPayee.equals(ocrPayee)) {
+			if (txtPayeeName != null) {
+				txtPayeeName.setSclass("cts-input-text field-error-red");
+				txtPayeeName.setTooltiptext("Discrepancy Detected!\nNPCI File: " + cheque.getPayeeName()
+						+ "\nImage OCR: " + ocr.detectedPayee);
+			}
+		}
+
+		// 2. Amount
+		BigDecimal npciAmt = cheque.getChequeAmount();
+		if (npciAmt != null && ocr.detectedAmount != null && !ocr.detectedAmount.trim().isEmpty()) {
+			try {
+				BigDecimal ocrAmt = new BigDecimal(ocr.detectedAmount.trim());
+				if (npciAmt.compareTo(ocrAmt) != 0) {
+					if (txtAmount != null) {
+						txtAmount.setSclass("cts-input-text field-error-red");
+						txtAmount.setTooltiptext("Discrepancy Detected!\nNPCI File: " + npciAmt + "\nImage OCR: " + ocrAmt);
+					}
+				}
+			} catch (Exception ignored) {}
+		}
+
+		// 3. Drawee Account Number
+		String npciAcc = safe(cheque.getDraweeAccountNumber());
+		String ocrAcc = safe(ocr.detectedDrawerAccount);
+		if (!npciAcc.isEmpty() && !ocrAcc.isEmpty() && !npciAcc.equals(ocrAcc)) {
+			if (txtDraweeAccount != null) {
+				txtDraweeAccount.setSclass("cts-input-text field-error-red");
+				txtDraweeAccount.setTooltiptext("Discrepancy Detected!\nNPCI File: " + npciAcc + "\nImage OCR: " + ocrAcc);
+			}
+		}
+
+		// 4. Cheque Date (Normalized Date Comparison)
+		if (cheque.getChequeDate() != null && ocr.detectedDate != null && !ocr.detectedDate.trim().isEmpty()) {
+			LocalDate npciParsed = parseFlexibleDate(cheque.getChequeDate().toString());
+			LocalDate ocrParsed = parseFlexibleDate(ocr.detectedDate.trim());
+
+			if (npciParsed != null && ocrParsed != null) {
+				if (!npciParsed.equals(ocrParsed)) {
+					if (txtChequeDate != null) {
+						txtChequeDate.setSclass("cts-input-text field-error-red");
+						txtChequeDate.setTooltiptext("Date Mismatch!\nNPCI File: " 
+								+ npciParsed.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) 
+								+ "\nImage OCR: " 
+								+ ocrParsed.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+					}
+				}
+			} else {
+				// Fallback to strict string check if parsing fails
+				if (!cheque.getChequeDate().toString().equalsIgnoreCase(ocr.detectedDate.trim())) {
+					if (txtChequeDate != null) {
+						txtChequeDate.setSclass("cts-input-text field-error-red");
+						txtChequeDate.setTooltiptext("Date Mismatch!\nNPCI File: " + cheque.getChequeDate() 
+								+ "\nImage OCR: " + ocr.detectedDate);
+					}
+				}
+			}
+		}
+	}
+
+	private void resetFieldMismatchStyles() {
+		Textbox[] fields = { txtChequeNumber, txtChequeDate, txtAmount, txtPayeeName, txtDraweeAccount, txtDraweeBankName };
+		for (Textbox f : fields) {
+			if (f != null) {
+				f.setSclass("cts-input-text");
+				f.setTooltiptext(null);
+			}
+		}
+	}
+
+	private static class OcrDetectedData {
+		String detectedPayee;
+		String detectedAmount;
+		String detectedDate;
+		String detectedDrawerAccount;
+	}
+
+	private OcrDetectedData loadOcrChequeData(InwardCheque cheque) {
+		if (cheque == null || cheque.getInwardBatchId() == null || cheque.getItemSequenceNumber() == null)
+			return null;
+
+		try {
+			InwardBatch batch = batchService.getBatchById(cheque.getInwardBatchId());
+			if (batch == null || batch.getBatchReferenceId() == null || batch.getBatchReferenceId().trim().isEmpty())
+				return null;
+
+			String resourcePath = "/Inward-data/" + batch.getBatchReferenceId().trim() + "/OCR_Mock.xml";
+			InputStream inputStream = Executions.getCurrent().getDesktop().getWebApp().getResourceAsStream(resourcePath);
+			if (inputStream == null)
+				return null;
+
+			try (InputStream stream = inputStream) {
+				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
+				NodeList chequeNodes = document.getElementsByTagName("OCRCheque");
+
+				for (int i = 0; i < chequeNodes.getLength(); i++) {
+					Element ocrCheque = (Element) chequeNodes.item(i);
+					String seqStr = getXmlValue(ocrCheque, "ItemSequenceNumber");
+					if (seqStr == null || seqStr.trim().isEmpty())
+						continue;
+
+					int sequence = Integer.parseInt(seqStr.trim());
+					if (sequence == cheque.getItemSequenceNumber()) {
+						OcrDetectedData data = new OcrDetectedData();
+						data.detectedPayee = getXmlValue(ocrCheque, "DetectedPayee");
+						data.detectedAmount = getXmlValue(ocrCheque, "DetectedAmountText");
+						data.detectedDate = getXmlValue(ocrCheque, "DetectedDate");
+						data.detectedDrawerAccount = getXmlValue(ocrCheque, "DetectedDrawerAccount");
+						return data;
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private String getXmlValue(Element parent, String tagName) {
+		if (parent == null)
+			return "";
+		NodeList nodes = parent.getElementsByTagName(tagName);
+		if (nodes.getLength() == 0 || nodes.item(0).getTextContent() == null)
+			return "";
+		return nodes.item(0).getTextContent().trim();
+	}
+
+	private String safe(String val) {
+		return val == null ? "" : val.trim();
+	}
+	
+	private LocalDate parseFlexibleDate(String dateStr) {
+		if (dateStr == null || dateStr.trim().isEmpty()) {
+			return null;
+		}
+		String clean = dateStr.trim();
+		try {
+			// First try standard ISO YYYY-MM-DD
+			return LocalDate.parse(clean, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+		} catch (Exception ignored) {}
+
+		try {
+			// Then try standard Indian DD-MM-YYYY
+			return LocalDate.parse(clean, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		} catch (Exception ignored) {}
+
+		try {
+			// Try DD/MM/YYYY
+			return LocalDate.parse(clean, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		} catch (Exception ignored) {}
+
+		return null;
 	}
 
 	private void loadChequeAlertReason(InwardCheque item) {
@@ -461,40 +647,20 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		// 2. Case: Maker Rejection Request
 		if (InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(status)) {
-			String sql = "SELECT rr.rejected_reason_code, rr.rejected_reason_name, r.remarks "
-					+ "FROM inward_cheque_rejection_request r "
-					+ "LEFT JOIN rejected_reasons rr ON rr.rejected_reason_id::text = r.rejected_reason_id::text "
-					+ "WHERE r.inward_cheque_id = ? " + "ORDER BY r.requested_at DESC LIMIT 1";
-			try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-				ps.setString(1, item.getInwardChequeId());
-				try (ResultSet rs = ps.executeQuery()) {
-					if (rs.next()) {
-						if (lblDataEntryAlertTitle != null)
-							lblDataEntryAlertTitle.setValue("MAKER REJECTION REQUEST");
-						if (lblDataEntryCodeTitle != null)
-							lblDataEntryCodeTitle.setValue("Reason Code:");
-						if (lblDataEntryReasonCode != null)
-							lblDataEntryReasonCode.setValue(
-									rs.getString("rejected_reason_code") != null ? rs.getString("rejected_reason_code")
-											: "-");
-						if (lblDataEntryNameTitle != null)
-							lblDataEntryNameTitle.setValue("Reason:");
-						if (lblDataEntryReasonName != null)
-							lblDataEntryReasonName.setValue(
-									rs.getString("rejected_reason_name") != null ? rs.getString("rejected_reason_name")
-											: "Rejection Requested");
-						if (lblDataEntryRemarksTitle != null)
-							lblDataEntryRemarksTitle.setValue("Remarks:");
-						if (lblDataEntryRemarks != null) {
-							String rem = rs.getString("remarks");
-							lblDataEntryRemarks
-									.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
-						}
-						dataEntryAlertBox.setVisible(true);
-						return;
-					}
+			java.util.Map<String, String> details = chequeService.getMakerRejectionAlertDetails(item.getInwardChequeId());
+			if (details != null && !details.isEmpty()) {
+				if (lblDataEntryAlertTitle != null) lblDataEntryAlertTitle.setValue("MAKER REJECTION REQUEST");
+				if (lblDataEntryCodeTitle != null) lblDataEntryCodeTitle.setValue("Reason Code:");
+				if (lblDataEntryReasonCode != null) lblDataEntryReasonCode.setValue(details.get("code") != null ? details.get("code") : "-");
+				if (lblDataEntryNameTitle != null) lblDataEntryNameTitle.setValue("Reason:");
+				if (lblDataEntryReasonName != null) lblDataEntryReasonName.setValue(details.get("name") != null ? details.get("name") : "Rejection Requested");
+				if (lblDataEntryRemarksTitle != null) lblDataEntryRemarksTitle.setValue("Remarks:");
+				if (lblDataEntryRemarks != null) {
+					String rem = details.get("remarks");
+					lblDataEntryRemarks.setValue(rem != null && !rem.trim().isEmpty() ? rem.trim() : "None provided");
 				}
-			} catch (Exception ignored) {
+				dataEntryAlertBox.setVisible(true);
+				return;
 			}
 		}
 
@@ -508,6 +674,50 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	}
 
 	private void updateProgressBar() {
+		// 1. REWORK QUEUE SCOPE
+		if (this.isReworkBatch) {
+			List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
+			if (fullBatchCheques == null || fullBatchCheques.isEmpty()) {
+				if (pmBatchProgress != null) pmBatchProgress.setValue(0);
+				if (lblProgressText != null) lblProgressText.setValue("0/0 (0%)");
+				if (btnSubmitToChecker != null) btnSubmitToChecker.setDisabled(true);
+				return;
+			}
+
+			// All cheques in this batch that belong to this rework cycle
+			List<InwardCheque> reworkCheques = fullBatchCheques.stream()
+					.filter(c -> sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId))
+					.collect(java.util.stream.Collectors.toList());
+
+			int totalRework = reworkCheques.size();
+			long resolvedRework = reworkCheques.stream()
+					.filter(c -> InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
+							|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
+					.count();
+
+			int percentage = (totalRework > 0) ? (int) Math.round(((double) resolvedRework / totalRework) * 100) : 0;
+
+			if (pmBatchProgress != null)
+				pmBatchProgress.setValue(percentage);
+			if (lblProgressText != null)
+				lblProgressText.setValue(resolvedRework + "/" + totalRework);
+
+			// Enable submit ONLY when all rework items in the batch are resolved (and none pending in MICR)
+			boolean allResolved = (totalRework > 0 && resolvedRework == totalRework);
+			boolean micrPending = hasChequesPendingMicrRepair();
+
+			if (btnSubmitToChecker != null) {
+				btnSubmitToChecker.setDisabled(!allResolved || micrPending);
+				if (micrPending && allResolved) {
+					btnSubmitToChecker.setTooltiptext("Cannot submit: Cheques are still pending in MICR Repair.");
+				} else {
+					btnSubmitToChecker.setTooltiptext(null);
+				}
+			}
+			return;
+		}
+
+		// 2. NORMAL INTAKE FULL BATCH SCOPE
 		List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
 		if (fullBatchCheques == null || fullBatchCheques.isEmpty()) {
 			if (pmBatchProgress != null)
@@ -521,26 +731,22 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		int totalInBatch = fullBatchCheques.size();
 		long resolvedInBatch = fullBatchCheques.stream()
-				.filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.REJECTED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.COMPLETED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
+				.filter(c -> "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus())
+						|| InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
+						|| InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
-
 		int percentage = (int) Math.round(((double) resolvedInBatch / totalInBatch) * 100);
-
 		if (pmBatchProgress != null)
 			pmBatchProgress.setValue(percentage);
 		if (lblProgressText != null)
 			lblProgressText.setValue(resolvedInBatch + "/" + totalInBatch);
 
 		boolean allResolved = (resolvedInBatch == totalInBatch);
+		boolean micrPending = hasChequesPendingMicrRepair();
+
 		if (btnSubmitToChecker != null) {
-			btnSubmitToChecker.setDisabled(!allResolved);
+			btnSubmitToChecker.setDisabled(!allResolved || micrPending);
 		}
 	}
 
@@ -575,10 +781,16 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		}
 
 		if (txtChequeDate != null && !txtChequeDate.getValue().trim().isEmpty()) {
-			try {
-				current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
-			} catch (Exception ignored) {
-			}
+		    String val = txtChequeDate.getValue().trim();
+		    try {
+		        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		        LocalDate parsed = LocalDate.parse(val, dtf);
+		        current.setChequeDate(Date.valueOf(parsed));
+		    } catch (Exception e) {
+		        try {
+		            current.setChequeDate(Date.valueOf(val));
+		        } catch (Exception ignored) {}
+		    }
 		}
 
 		chequeService.updateChequeDetails(current);
@@ -707,23 +919,24 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String rawAmount = txtAmount.getValue().replace("₹", "").replace(",", "").trim();
 		current.setChequeAmount(new BigDecimal(rawAmount));
-		current.setChequeDate(Date.valueOf(txtChequeDate.getValue().trim()));
+		
 
-		boolean wasSentBack = isSentBackStatus(current.getChequeStatus());
+	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	    LocalDate parsedDate = LocalDate.parse(txtChequeDate.getValue().trim(), dtf);
+	    current.setChequeDate(Date.valueOf(parsedDate));
+		
 
-		if (wasSentBack) {
+		boolean isReworkItem = isSentBackStatus(current.getChequeStatus())
+				|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(current.getChequeStatus())
+				|| this.isReworkBatch;
+
+		if (isReworkItem) {
 			current.setChequeStatus(InwardChequeStatus.MAKER_RETURNED.name());
-			try {
-				User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
-				String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId()
-						: "Maker";
-				sendBackRequestService.markRequestResolved(current.getInwardChequeId(), userId);
-			} catch (Exception ex) {
-				System.err.println("WARN: Could not mark send-back request resolved: " + ex.getMessage());
-			}
+
 		} else {
 			current.setChequeStatus("DATA_ENTRY_COMPLETED");
 		}
+		
 		chequeService.updateChequeDetails(current);
 
 		if (currentIndex < activeQueue.size() - 1) {
@@ -789,7 +1002,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String reasonLabel = cmbModalRejectionReason.getSelectedItem().getLabel();
 		String notifMsg = "Rejection requested for Cheque #" + current.getChequeNumber() + " in Batch "
-				+ this.currentBatchId + " (" + reasonLabel + ") by Maker " + userId + ". Stage: DATA_ENTRY.";
+				+ this.currentBatchId + " (" + reasonLabel + ") by Maker. Stage: DATA_ENTRY.";
 
 		notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
 
@@ -805,36 +1018,46 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 	private void saveRejectionRequestRecord(String chequeId, String batchId, String reasonId, String remarks,
 			String userId, String stage) {
-		String sql = "INSERT INTO inward_cheque_rejection_request "
-				+ "(inward_cheque_id, inward_batch_id, rejected_reason_id, remarks, requested_by, request_stage, request_status, requested_at) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)";
-		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, chequeId);
-			ps.setString(2, batchId);
-			ps.setString(3, reasonId);
-			ps.setString(4, remarks);
-			ps.setString(5, userId);
-			ps.setString(6, stage);
-			ps.executeUpdate();
-		} catch (Exception e) {
-			System.err.println("WARN: Failed to persist inward_cheque_rejection_request: " + e.getMessage());
-		}
+		chequeService.saveRejectionRequest(chequeId, batchId, reasonId, remarks, userId, stage);
 	}
 
 	public void onClick$btnSubmitToChecker() {
+		// 1. REWORK MODAL METRICS
+		if (this.isReworkBatch) {
+			if (activeQueue == null || activeQueue.isEmpty())
+				return;
+
+			long accepted = activeQueue.stream()
+					.filter(c -> InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus()))
+					.count();
+			long rejected = activeQueue.stream()
+					.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
+					.count();
+
+			if (lblModalTotal != null)
+				lblModalTotal.setValue(String.valueOf(activeQueue.size()));
+			if (lblModalAccepted != null)
+				lblModalAccepted.setValue(String.valueOf(accepted));
+			if (lblModalRejected != null)
+				lblModalRejected.setValue(String.valueOf(rejected));
+
+			if (winCompletionConfirmModal != null) {
+				winCompletionConfirmModal.setVisible(true);
+			}
+			return;
+		}
+
+		// 2. NORMAL INTAKE MODAL METRICS
 		List<InwardCheque> fullBatchCheques = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
 		if (fullBatchCheques == null || fullBatchCheques.isEmpty())
 			return;
 
 		long accepted = fullBatchCheques.stream()
-				.filter(c -> InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.MAKER_RETURNED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| "ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-						|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus()))
+				.filter(c -> "DATA_ENTRY_COMPLETED".equalsIgnoreCase(c.getChequeStatus())
+						|| InwardChequeStatus.CHECKER_PROCESSING_PENDING.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 		long rejected = fullBatchCheques.stream()
-				.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus())
-						|| InwardChequeStatus.REJECTED.name().equalsIgnoreCase(c.getChequeStatus()))
+				.filter(c -> InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(c.getChequeStatus()))
 				.count();
 
 		if (lblModalTotal != null)
@@ -864,17 +1087,19 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			winCompletionConfirmModal.setVisible(false);
 		}
 
+		User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
+		String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId() : "Maker";
+
 		try {
+			if (this.isReworkBatch) {
+				sendBackRequestService.resolveAllPendingByBatchId(this.currentBatchId, userId);
+			} else {
+				batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
+			}
 
-			batchService.updateBatchStatus(this.currentBatchId, "CHECKER_PROCESSING_PENDING");
-
-			User currentUser = (User) Sessions.getCurrent().getAttribute("LOGGED_IN_USER");
-			String userId = (currentUser != null && currentUser.getUserId() != null) ? currentUser.getUserId()
-					: "Maker";
 			String notifMsg = this.isReworkBatch
-					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId
-							+ ")."
-					: "Batch " + currentBatchId + " submitted to Checker by Maker (" + userId + ").";
+					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId + ")."
+					: "Batch " + currentBatchId + " submitted to Checker by Maker.";
 
 			notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
 		} catch (Exception e) {
@@ -886,11 +1111,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		Include mainInclude = null;
 		try {
 			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
-		} catch (Exception ignored) {
-		}
+		} catch (Exception ignored) {}
 
 		if (mainInclude == null && self != null && self.getDesktop() != null) {
-			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+			for (Page p : self.getDesktop().getPages()) {
 				Component comp = p.getFellowIfAny("mainContentArea", true);
 				if (comp instanceof Include) {
 					mainInclude = (Include) comp;
@@ -914,11 +1138,12 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String dtStr = txtChequeDate != null ? txtChequeDate.getValue().trim() : "";
 		if (dtStr.isEmpty())
-			return "Cheque Date is mandatory.";
+		    return "Cheque Date is mandatory.";
 		try {
-			LocalDate.parse(dtStr);
+		    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		    LocalDate.parse(dtStr, dtf);
 		} catch (Exception e) {
-			return "Invalid Cheque Date format. Expected format: YYYY-MM-DD.";
+		    return "Invalid Cheque Date format. Expected format: DD-MM-YYYY.";
 		}
 
 		String amtStr = txtAmount != null ? txtAmount.getValue().replace("₹", "").replace(",", "").trim() : "";
@@ -1030,26 +1255,77 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	public void onClick$btnBackToList() {
 		Sessions.getCurrent().removeAttribute("ACTIVE_INWARD_BATCH_ID");
 
+		// Locate the Sidebar controller and trigger native navigation
+		if (self != null && self.getDesktop() != null) {
+			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
+				Component sidebar = p.getFellowIfAny("sidebarComponent", true);
+				if (sidebar == null) {
+					sidebar = p.getFellowIfAny("divInwardMakerMenu", true);
+				}
+				if (sidebar != null && sidebar.getAttribute("$composer") instanceof com.iispl.cts.controller.common.SidebarController) {
+					com.iispl.cts.controller.common.SidebarController sc = 
+						(com.iispl.cts.controller.common.SidebarController) sidebar.getAttribute("$composer");
+					sc.navToInwardDataEntry();
+					return;
+				}
+			}
+		}
+
+		// Fallback: in-place include swap + tab styling
 		Include mainInclude = null;
 		try {
 			mainInclude = (Include) Path.getComponent("/inwardMakerRootWin/mainContentArea");
 		} catch (Exception ignored) {}
 
-		if (mainInclude == null && self != null && self.getDesktop() != null) {
-			for (org.zkoss.zk.ui.Page p : self.getDesktop().getPages()) {
-				Component comp = p.getFellowIfAny("mainContentArea", true);
-				if (comp instanceof Include) {
-					mainInclude = (Include) comp;
-					break;
-				}
-			}
-		}
-
 		if (mainInclude != null) {
 			mainInclude.invalidate();
 			mainInclude.setSrc("/inward/maker/data-entry/data-entry-batches.zul");
-		} else {
-			Executions.sendRedirect("/inward/maker/index.zul?page=data-entry-batches");
 		}
+	}
+	
+	private void applyChequeActionLock(InwardCheque cheque) {
+	    if (cheque == null) return;
+
+	    String st = cheque.getChequeStatus() != null ? cheque.getChequeStatus().trim().toUpperCase() : "";
+
+	    // ONLY lock actions if this item has an active Rejection Request
+	    boolean isRejected = InwardChequeStatus.REJECTION_REQUESTED.name().equalsIgnoreCase(st);
+	    
+	 // 1. Textbox Readonly Flags
+	    if (txtChequeNumber != null) txtChequeNumber.setReadonly(isRejected);
+	    if (txtChequeDate != null) txtChequeDate.setReadonly(isRejected);
+	    if (txtAmount != null) txtAmount.setReadonly(isRejected);
+	    if (txtDraweeAccount != null) txtDraweeAccount.setReadonly(isRejected);
+	    if (txtPayeeName != null) txtPayeeName.setReadonly(isRejected);
+	    if (txtDraweeBankName != null) txtDraweeBankName.setReadonly(isRejected); 
+
+	    if (btnApproveCheque != null) {
+	        btnApproveCheque.setDisabled(isRejected);
+	    }
+	    if (btnRequestRejection != null) {
+	        btnRequestRejection.setDisabled(isRejected);
+	    }
+	    if (btnCancel != null) {
+	        btnCancel.setDisabled(isRejected);
+	    }
+	}
+	
+	private boolean hasChequesPendingMicrRepair() {
+		List<InwardCheque> fullBatch = chequeService.getChequesByBatchAndStatus(this.currentBatchId, null);
+		if (fullBatch == null || fullBatch.isEmpty()) {
+			return false;
+		}
+		for (InwardCheque c : fullBatch) {
+			if (c != null && c.getChequeStatus() != null) {
+				String st = c.getChequeStatus().trim().toUpperCase();
+				if (st.contains("MICR") || InwardChequeStatus.SEND_BACK_TO_MAKER_MICR.name().equalsIgnoreCase(st)) {
+					// Check if it's not yet completed
+					if (!"MICR_REPAIR_COMPLETED".equalsIgnoreCase(st)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

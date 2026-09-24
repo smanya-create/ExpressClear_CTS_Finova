@@ -1052,4 +1052,100 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 			return new CbsValidationResult(false, "Unable to perform CBS validation because of a database error.");
 		}
 	}
+	
+	
+	
+	//Added for data entry controller requirement
+	@Override
+    public boolean isReworkRejectionRequest(String inwardChequeId, String inwardBatchId) {
+        if (inwardChequeId == null || inwardBatchId == null) {
+            return false;
+        }
+        String sql = "SELECT EXISTS ("
+                + "  SELECT 1 FROM inward_cheque_rejection_request r "
+                + "  JOIN inward_cheque_send_back_request s "
+                + "    ON r.inward_cheque_id = s.inward_cheque_id AND r.inward_batch_id = s.inward_batch_id "
+                + "  WHERE r.inward_cheque_id = ? AND r.inward_batch_id = ? "
+                + "    AND r.request_status = 'PENDING' AND s.request_status = 'PENDING'"
+                + ")";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, inwardChequeId);
+            ps.setString(2, inwardBatchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isDataEntryRejectionRequest(String inwardChequeId) {
+        if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
+            return false;
+        }
+        String sql = "SELECT EXISTS ("
+                + "  SELECT 1 FROM inward_cheque_rejection_request "
+                + "  WHERE inward_cheque_id = ? "
+                + "  AND request_stage IN ('DATA_ENTRY', 'MICR_REPAIR') "
+                + "  AND request_status = 'PENDING'"
+                + ")";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, inwardChequeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public java.util.Map<String, String> getMakerRejectionAlertDetails(String inwardChequeId) {
+        java.util.Map<String, String> details = new java.util.HashMap<>();
+        String sql = "SELECT rr.rejected_reason_code, rr.rejected_reason_name, r.remarks "
+                + "FROM inward_cheque_rejection_request r "
+                + "LEFT JOIN rejected_reasons rr ON rr.rejected_reason_id::text = r.rejected_reason_id::text "
+                + "WHERE r.inward_cheque_id = ? "
+                + "ORDER BY r.requested_at DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, inwardChequeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    details.put("code", rs.getString("rejected_reason_code"));
+                    details.put("name", rs.getString("rejected_reason_name"));
+                    details.put("remarks", rs.getString("remarks"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return details;
+    }
+
+    @Override
+    public boolean saveRejectionRequest(String inwardChequeId, String inwardBatchId, String reasonId, 
+                                        String remarks, String requestedBy, String requestStage) {
+        String sql = "INSERT INTO inward_cheque_rejection_request "
+                + "(inward_cheque_id, inward_batch_id, rejected_reason_id, remarks, requested_by, request_stage, request_status, requested_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, inwardChequeId);
+            ps.setString(2, inwardBatchId);
+            ps.setString(3, reasonId);
+            ps.setString(4, remarks);
+            ps.setString(5, requestedBy);
+            ps.setString(6, requestStage);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

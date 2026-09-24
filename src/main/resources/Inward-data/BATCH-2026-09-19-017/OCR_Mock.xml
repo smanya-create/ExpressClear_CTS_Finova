@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<CTSBatchOCR>
+    <BatchHeader>
+        <BatchReferenceId>BATCH-2026-09-19-017</BatchReferenceId>
+        <PresentingBranchId>BR001</PresentingBranchId>
+        <ScannerDeviceModel>Canon CR-190II</ScannerDeviceModel>
+        <CapturedTimestamp>2026-09-19T09:30:00</CapturedTimestamp>
+        <ItemCount>5</ItemCount>
+        <OCRStatus>MOCK_OCR</OCRStatus>
+    </BatchHeader>
+    <Instruments>
+        <OCRCheque>
+            <ItemSequenceNumber>1</ItemSequenceNumber>
+            <ChequeNumber>704002</ChequeNumber>
+            <DetectedPayee>GREENFIELD SUPPLIERS</DetectedPayee>
+            <DetectedAmountText>137500.00</DetectedAmountText>
+            <DetectedDate>2026-09-10</DetectedDate>
+            <DetectedDrawerAccount>1000400274</DetectedDrawerAccount>
+            <DetectedPayeeAccount>7001234502</DetectedPayeeAccount>
+            <RawMICRRead>
+                <RawLine>704002 4000?2012 400274 29</RawLine>
+                <SortCode>4000?2012</SortCode>
+                <AccountShortCode>400274</AccountShortCode>
+                <TransCode>29</TransCode>
+                <OcrConfidenceScore>45.0</OcrConfidenceScore>
+                <NeedsRepair>true</NeedsRepair>
+                <RepairReason>CITY_CODE_UNREADABLE</RepairReason>
+            </RawMICRRead>
+            <ScannedImages>
+                <FrontImage path="BATCH-2026-09-19-017/images/CHQ001_front.jpg" type="FRONT"/>
+                <BackImage path="BATCH-2026-09-19-017/images/CHQ001_back.png" type="BACK"/>
+            </ScannedImages>
+            <OCRSource>CHEQUE_IMAGE</OCRSource>
+        </OCRCheque>
+        <OCRCheque>
+            <ItemSequenceNumber>2</ItemSequenceNumber>
+            <ChequeNumber>704003</ChequeNumber>
+            <DetectedPayee>BLUEWAVE SYSTEMS</DetectedPayee>
+            <DetectedAmountText>62000.00</DetectedAmountText>
+            <DetectedDate>2026-09-11</DetectedDate>
+            <DetectedDrawerAccount>1000400411</DetectedDrawerAccount>
+            <DetectedPayeeAccount>7001234503</DetectedPayeeAccount>
+            <RawMICRRead>
+                <RawLine>704003 40000201? 400411 29</RawLine>
+                <SortCode>40000201?</SortCode>
+                <AccountShortCode>400411</AccountShortCode>
+                <TransCode>29</TransCode>
+                <OcrConfidenceScore>48.7</OcrConfidenceScore>
+                <NeedsRepair>true</NeedsRepair>
+                <RepairReason>BANK_CODE_UNREADABLE</RepairReason>
+            </RawMICRRead>
+            <ScannedImages>
+                <FrontImage path="BATCH-2026-09-19-017/images/CHQ002_front.jpg" type="FRONT"/>
+                <BackImage path="BATCH-2026-09-19-017/images/CHQ002_back.png" type="BACK"/>
+            </ScannedImages>
+            <OCRSource>CHEQUE_IMAGE</OCRSource>
+        </OCRCheque>
+        <OCRCheque>
+            <ItemSequenceNumber>3</ItemSequenceNumber>
+            <ChequeNumber>704004</ChequeNumber>
+            <DetectedPayee>SILVERLINE LOGISTICS</DetectedPayee>
+            <DetectedAmountText>184000.00</DetectedAmountText>
+            <DetectedDate>2026-09-12</DetectedDate>
+            <DetectedDrawerAccount>1000400548</DetectedDrawerAccount>
+            <DetectedPayeeAccount>7001234504</DetectedPayeeAccount>
+            <RawMICRRead>
+                <RawLine>704004 40?002012 400548 29</RawLine>
+                <SortCode>40?002012</SortCode>
+                <AccountShortCode>400548</AccountShortCode>
+                <TransCode>29</TransCode>
+                <OcrConfidenceScore>52.4</OcrConfidenceScore>
+                <NeedsRepair>true</NeedsRepair>
+                <RepairReason>BRANCH_CODE_UNREADABLE</RepairReason>
+            </RawMICRRead>
+            <ScannedImages>
+                <FrontImage path="BATCH-2026-09-19-017/images/CHQ003_front.jpg" type="FRONT"/>
+                <BackImage path="BATCH-2026-09-19-017/images/CHQ003_back.png" type="BACK"/>
+            </ScannedImages>
+            <OCRSource>CHEQUE_IMAGE</OCRSource>
+        </OCRCheque>
+        <OCRCheque>
+            <ItemSequenceNumber>4</ItemSequenceNumber>
+            <ChequeNumber>704005</ChequeNumber>
+            <DetectedPayee>ORBITAL TECHNOLOGIES</DetectedPayee>
+            <DetectedAmountText>225000.00</DetectedAmountText>
+            <DetectedDate>2026-09-13</DetectedDate>
+            <DetectedDrawerAccount>1000400685</DetectedDrawerAccount>
+            <DetectedPayeeAccount>7001234505</DetectedPayeeAccount>
+            <RawMICRRead>
+                <RawLine>704005 400?02012 400685 29</RawLine>
+                <SortCode>400?02012</SortCode>
+                <AccountShortCode>400685</AccountShortCode>
+                <TransCode>29</TransCode>
+                <OcrConfidenceScore>56.1</OcrConfidenceScore>
+                <NeedsRepair>true</NeedsRepair>
+                <RepairReason>CITY_CODE_UNREADABLE</RepairReason>
+            </RawMICRRead>
+            <ScannedImages>
+                <FrontImage path="BATCH-2026-09-19-017/images/CHQ004_front.jpg" type="FRONT"/>
+                <BackImage path="BATCH-2026-09-19-017/images/CHQ004_back.png" type="BACK"/>
+            </ScannedImages>
+            <OCRSource>CHEQUE_IMAGE</OCRSource>
+        </OCRCheque>
+        <OCRCheque>
+            <ItemSequenceNumber>5</ItemSequenceNumber>
+            <ChequeNumber>704006</ChequeNumber>
+            <DetectedPayee>MAPLE RETAIL SOLUTIONS</DetectedPayee>
+            <DetectedAmountText>91500.00</DetectedAmountText>
+            <DetectedDate>2026-09-14</DetectedDate>
+            <DetectedDrawerAccount>1000400822</DetectedDrawerAccount>
+            <DetectedPayeeAccount>7001234506</DetectedPayeeAccount>
+            <RawMICRRead>
+                <RawLine>704006 4000020?2 400822 29</RawLine>
+                <SortCode>4000020?2</SortCode>
+                <AccountShortCode>400822</AccountShortCode>
+                <TransCode>29</TransCode>
+                <OcrConfidenceScore>59.8</OcrConfidenceScore>
+                <NeedsRepair>true</NeedsRepair>
+                <RepairReason>BRANCH_CODE_UNREADABLE</RepairReason>
+            </RawMICRRead>
+            <ScannedImages>
+                <FrontImage path="BATCH-2026-09-19-017/images/CHQ005_front.jpg" type="FRONT"/>
+                <BackImage path="BATCH-2026-09-19-017/images/CHQ005_back.png" type="BACK"/>
+            </ScannedImages>
+            <OCRSource>CHEQUE_IMAGE</OCRSource>
+        </OCRCheque>
+    </Instruments>
+</CTSBatchOCR>
