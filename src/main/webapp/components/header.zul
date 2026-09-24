@@ -35,7 +35,7 @@
 						onSelect="$composer.onSelectSimulationCycle()">
 						<comboitem label="⚡ Live Clock (All Active)"
 							value="LIVE" />
-						<comboitem label="☀ Morning (Outward 09:30)"
+						<comboitem label="☀ Morning (Outward 10:30)"
 							value="MORNING" />
 						<comboitem label="🌙 Afternoon (Inward 03:30)"
 							value="AFTERNOON" />
