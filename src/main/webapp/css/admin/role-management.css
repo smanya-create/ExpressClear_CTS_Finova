@@ -584,3 +584,20 @@
     background-color: #fee2e2;
     color: #b91c1c;
 }
+.role-grid .z-row-inner {
+    padding: 8px 6px !important;
+    vertical-align: middle !important;
+}
+.cts-radio {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.cts-radio .z-radio-content {
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    padding-left: 6px;
+    cursor: pointer;
+}

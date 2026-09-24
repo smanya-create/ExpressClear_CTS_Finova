@@ -1,55 +1,54 @@
 package com.iispl.cts.dto;
 
-import java.io.Serializable;
+import java.math.BigDecimal;
 
-public class InwardDashboardBatchDTO implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class InwardDashboardBatchDTO {
 
     private String batchId;
-    private String batchDate;
-    private String source;
     private int totalCheques;
-    private int acceptedCheques;
-    private int backToMakerCheques;
-    private int returnRequestCheques;
-    private String displayStatus;
+    private BigDecimal totalAmount = BigDecimal.ZERO;
+    private String batchStatus;
+    private boolean hasPendingMicr = false;
 
     public InwardDashboardBatchDTO() {}
 
-    public String getBatchId() { return batchId; }
-    public void setBatchId(String batchId) { this.batchId = batchId; }
+    public String getBatchId() {
+        return batchId;
+    }
 
-    public String getBatchDate() { return batchDate; }
-    public void setBatchDate(String batchDate) { this.batchDate = batchDate; }
+    public void setBatchId(String batchId) {
+        this.batchId = batchId;
+    }
 
-    public String getSource() { return source; }
-    public void setSource(String source) { this.source = source; }
+    public int getTotalCheques() {
+        return totalCheques;
+    }
 
-    public int getTotalCheques() { return totalCheques; }
-    public void setTotalCheques(int totalCheques) { this.totalCheques = totalCheques; }
+    public void setTotalCheques(int totalCheques) {
+        this.totalCheques = totalCheques;
+    }
 
-    public int getAcceptedCheques() { return acceptedCheques; }
-    public void setAcceptedCheques(int acceptedCheques) { this.acceptedCheques = acceptedCheques; }
+    public BigDecimal getTotalAmount() {
+        return totalAmount != null ? totalAmount : BigDecimal.ZERO;
+    }
 
-    public int getBackToMakerCheques() { return backToMakerCheques; }
-    public void setBackToMakerCheques(int backToMakerCheques) { this.backToMakerCheques = backToMakerCheques; }
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
 
-    public int getReturnRequestCheques() { return returnRequestCheques; }
-    public void setReturnRequestCheques(int returnRequestCheques) { this.returnRequestCheques = returnRequestCheques; }
+    public String getBatchStatus() {
+        return batchStatus;
+    }
 
-    public String getDisplayStatus() { return displayStatus; }
-    public void setDisplayStatus(String displayStatus) { this.displayStatus = displayStatus; }
+    public void setBatchStatus(String batchStatus) {
+        this.batchStatus = batchStatus;
+    }
 
-    public String getStatusBadgeStyle() {
-        if ("Sent Back".equalsIgnoreCase(displayStatus)) {
-            return "background-color: #fff7ed; color: #c2410c; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #fdba74; display: inline-block;";
-        } else if ("Partially Processed".equalsIgnoreCase(displayStatus)) {
-            return "background-color: #fef3c7; color: #d97706; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #fde68a; display: inline-block;";
-        } else if ("Completed".equalsIgnoreCase(displayStatus)) {
-            return "background-color: #dcfce7; color: #15803d; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #bbf7d0; display: inline-block;";
-        } else {
-            return "background-color: #e0f2fe; color: #0284c7; padding: 4px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; border: 1px solid #bae6fd; display: inline-block;";
-        }
+    public boolean isHasPendingMicr() {
+        return hasPendingMicr;
+    }
+
+    public void setHasPendingMicr(boolean hasPendingMicr) {
+        this.hasPendingMicr = hasPendingMicr;
     }
 }

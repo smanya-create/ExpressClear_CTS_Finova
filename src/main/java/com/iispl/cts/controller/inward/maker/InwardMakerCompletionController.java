@@ -30,7 +30,7 @@ import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardMakerCompletionController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+    
 
     // Services
     private final InwardBatchService batchService = new InwardBatchServiceImpl();

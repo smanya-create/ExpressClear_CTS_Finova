@@ -3,14 +3,22 @@
    ========================================================================== */
 /* Fix ZK combobox popup overflowing/stretching across the entire screen */
 .z-combobox-popup {
-    min-width: 180px !important;
-    max-width: 260px !important;
     width: auto !important;
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
+    min-width: 220px !important;
+    max-width: 280px !important; /* Prevents it from stretching across the screen */
+    box-sizing: border-box !important;
     border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-    padding: 4px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    padding: 4px 0 !important;
+}
+.z-combobox-popup .z-comboitem {
+    font-size: 13px !important;
+    padding: 6px 14px !important;
+    color: #334155 !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
 }
 
 .z-comboitem {
@@ -18,6 +26,11 @@
     font-size: 13px !important;
     color: #334155 !important;
     border-radius: 4px !important;
+}
+.z-combobox-popup .z-comboitem:hover,
+.z-combobox-popup .z-comboitem-selected {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
 }
 
 .z-comboitem:hover,
@@ -143,7 +156,7 @@
 
 /* Customizing ZK native Combobox */
 .cts-combobox {
-    display: block !important;
+   position: relative;
     width: 100% !important;
 }
 
@@ -742,4 +755,208 @@
 .badge-inactive {
     background-color: #fee2e2;
     color: #b91c1c;
+}
+/* =========================================================
+   1. COMBOBOX FIX (Prevents bottom line from being cut)
+   ========================================================= */
+.z-combobox.cts-combobox {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+
+.z-combobox.cts-combobox:focus-within {
+    border-color: #1e3a8a !important;
+    box-shadow: 0 0 0 1px #1e3a8a !important;
+}
+
+.z-combobox.cts-combobox .z-combobox-input {
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    color: #1e293b !important;
+    padding: 0 12px !important;
+}
+
+.z-combobox.cts-combobox .z-combobox-button {
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding-right: 8px !important;
+    color: #64748b !important;
+}
+
+.z-combobox.cts-combobox .z-combobox-button:hover {
+    background: transparent !important;
+    color: #0f172a !important;
+}
+
+
+/* =========================================================
+   2. PASSWORD TOGGLE ICON BUTTON
+   ========================================================= */
+.cts-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cts-password-input {
+    padding-right: 36px !important; /* leaves room so text doesn't overlap eye */
+}
+
+.cts-toggle-pw-btn {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: #64748b !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.cts-toggle-pw-btn:hover {
+    color: #0f172a !important;
+}
+
+.cts-toggle-pw-btn .z-icon-eye,
+.cts-toggle-pw-btn .z-icon-eye-slash {
+    font-size: 15px;
+}
+/* Status Pills */
+.cts-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cts-status-badge-active {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.cts-status-badge-disabled {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.cts-status-dot-active {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981; /* Green dot */
+}
+
+/* Status Action Buttons */
+.cts-btn-status-toggle {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    padding: 6px 14px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+}
+
+.cts-btn-status-disable {
+    background: #ffffff !important;
+    color: #dc2626 !important;
+    border: 1.5px solid #fca5a5 !important;
+}
+
+.cts-btn-status-disable:hover {
+    background: #fef2f2 !important;
+    border-color: #dc2626 !important;
+}
+
+.cts-btn-status-enable {
+    background: #ffffff !important;
+    color: #16a34a !important;
+    border: 1.5px solid #86efac !important;
+}
+/* Inactive (Red) State */
+.cts-status-badge-inactive {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+.cts-status-dot-inactive {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ef4444; /* Red dot */
+}
+.cts-btn-status-enable:hover {
+    background: #f0fdf4 !important;
+    border-color: #16a34a !important;
+}
+
+/* Checkbox Style */
+.cts-role-checkbox .z-checkbox-content {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    padding-left: 4px;
+}
+
+/* Combobox Fix (Prevents bottom line from being cut) */
+.z-combobox.cts-combobox {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+
+.z-combobox.cts-combobox:focus-within {
+    border-color: #1e3a8a !important;
+    box-shadow: 0 0 0 1px #1e3a8a !important;
+}
+
+.z-combobox.cts-combobox .z-combobox-input {
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    color: #1e293b !important;
+    padding: 0 12px !important;
+}
+
+.z-combobox.cts-combobox .z-combobox-button {
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding-right: 8px !important;
+    color: #64748b !important;
 }

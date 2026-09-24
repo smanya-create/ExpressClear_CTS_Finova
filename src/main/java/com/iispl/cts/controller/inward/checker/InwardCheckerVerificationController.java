@@ -57,7 +57,6 @@ import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
 	private Label lblBatchId;
 	private Label lblTotalCheques;
 	private Label lblChequeNumber;
@@ -225,10 +224,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		btnStayVerification.addEventListener(Events.ON_CLICK, event -> onClick$btnStayVerification());
 
 		btnSubmitBatch.addEventListener(Events.ON_CLICK, event -> onClick$btnSubmitBatch());
-		
+
 		verificationSummaryWindow.addEventListener(Events.ON_CLOSE, event -> {
-		    event.stopPropagation();
-		    verificationSummaryWindow.setVisible(false);
+			event.stopPropagation();
+			verificationSummaryWindow.setVisible(false);
 		});
 
 		String batchId = Executions.getCurrent().getParameter("batchId");
@@ -241,8 +240,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 		} else {
 
-			// No URL batchId.
-			// Check whether an active verification batch already exists in session.
 			String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_VERIFICATION_BATCH_ID");
 
 			if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
@@ -251,7 +248,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 			} else {
 
-				// Nothing selected yet
 				currentBatchId = null;
 
 				showNoChequesToVerify();
@@ -387,8 +383,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			loadRejectedReason(cheque);
 
 			if (lblReceivedDate != null && cheque.getCreatedAt() != null) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
+				SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 				lblReceivedDate.setValue(dateFormat.format(cheque.getCreatedAt()));
 			}
 			updateVerificationCount();
@@ -420,8 +415,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 
 			if (lblChequeDate != null && cheque.getChequeDate() != null) {
-
-				lblChequeDate.setValue(cheque.getChequeDate().toString());
+				SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+				lblChequeDate.setValue(dateFormat.format(cheque.getChequeDate()));
 			}
 
 			if (lblAmount != null && cheque.getChequeAmount() != null) {
@@ -900,8 +895,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 
 			if (lblChequeStatus != null) {
-			    lblChequeStatus.setValue("ACCEPTED");
-			    lblChequeStatus.setSclass("status-badge");
+				lblChequeStatus.setValue("ACCEPTED");
+				lblChequeStatus.setSclass("status-badge");
 			}
 
 			if (lblVerificationStatus != null) {
@@ -1542,6 +1537,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 
 				return;
 			}
+			loadRejectedReason(cheque);
 			if (lblChequeStatus != null) {
 
 				lblChequeStatus.setValue("REJECTED");
@@ -2021,18 +2017,13 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				lblSummaryRejected.setValue(String.valueOf(rejected));
 			}
 
-			
-			if (verificationSummaryWindow != null
-			        && verificationSummaryWindow.getPage() != null) {
+			if (verificationSummaryWindow != null && verificationSummaryWindow.getPage() != null) {
 
-			    verificationSummaryWindow.doModal();
+				verificationSummaryWindow.doModal();
 
 			} else {
-			    Messagebox.show(
-			            "Verification summary window is no longer available.",
-			            "Verification Error",
-			            Messagebox.OK,
-			            Messagebox.ERROR);
+				Messagebox.show("Verification summary window is no longer available.", "Verification Error",
+						Messagebox.OK, Messagebox.ERROR);
 			}
 
 		} catch (Exception e) {

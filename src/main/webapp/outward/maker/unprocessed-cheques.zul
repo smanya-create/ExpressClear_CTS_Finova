@@ -78,7 +78,7 @@
                 <hlayout hflex="1" valign="middle" 
                          style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
                     <vlayout spacing="4px">
-                        <label value="TOTAL MAKER PENDING" 
+                        <label value="TOTAL MAKER UNPROCESSED" 
                                style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #173B61; text-transform: uppercase;"/>
                         <label id="lblTotalCount" value="0" 
                                style="font-size: 26px; font-weight: 800; color: #173B61; line-height: 1.2;"/>
@@ -89,7 +89,7 @@
                 <hlayout hflex="1" valign="middle" 
                          style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
                     <vlayout spacing="4px">
-                        <label value="MICR REPAIR PENDING" 
+                        <label value="UNPROCESSED MICR" 
                                style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #173B61; text-transform: uppercase;"/>
                         <label id="lblRepairCount" value="0" 
                                style="font-size: 26px; font-weight: 800; color: #173B61; line-height: 1.2;"/>
@@ -100,7 +100,7 @@
                 <hlayout hflex="1" valign="middle" 
                          style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
                     <vlayout spacing="4px">
-                        <label value="DATA ENTRY PENDING" 
+                        <label value="UNPROCESSED DATA ENTRY" 
                                style="font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: #173B61; text-transform: uppercase;"/>
                         <label id="lblDataEntryCount" value="0" 
                                style="font-size: 26px; font-weight: 800; color: #173B61; line-height: 1.2;"/>
@@ -120,9 +120,9 @@
                           width="190px"
                           height="36px"
                           onSelect="$composer.onFilterChanged()">
-                    <comboitem label="All Maker Actions" value="ALL"/>
-                    <comboitem label="Needs MICR Repair" value="PENDING_REPAIR"/>
-                    <comboitem label="Needs Data Entry" value="PENDING_DATA_ENTRY"/>
+                    <comboitem label="Maker Unprocessed" value="ALL"/>
+                    <comboitem label="Unprocessed MICR Repair" value="PENDING_REPAIR"/>
+                    <comboitem label="Unprocessed Data Entry" value="PENDING_DATA_ENTRY"/>
                 </combobox>
 
                 <textbox id="txtSearchBatch"
@@ -144,9 +144,9 @@
                     <listheader label="BATCH ID" width="230px" align="center"/>
                     <listheader label="CHEQUE NO" width="120px" align="center"/>
                     <listheader label="MICR CODE" width="130px" align="center"/>
-                    <listheader label="AMOUNT (INR)" width="150px" align="center"/>
+                    <listheader label="AMOUNT" width="150px" align="center"/>
                     <listheader label="STATUS" width="210px" align="center" sort="auto(status)"/>
-                    <listheader label="REASON / REMARKS" hflex="1" align="center"/>
+                    <listheader label="REMARKS" hflex="1" align="center"/>
                     <listheader label="ACTION" width="165px" align="center"/>
                 </listhead>
             </listbox>

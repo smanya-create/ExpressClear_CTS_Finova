@@ -1,0 +1,8 @@
+PIBF-MOCK-1.0
+BatchReferenceId=BATCH-2026-09-18-015
+Content=Mock cheque image manifest; image payloads are in images/.
+ITEM=1;FRONT=images/CHQ001_front.jpg;BACK=images/CHQ001_back.png
+ITEM=2;FRONT=images/CHQ002_front.jpg;BACK=images/CHQ002_back.png
+ITEM=3;FRONT=images/CHQ003_front.jpg;BACK=images/CHQ003_back.png
+ITEM=4;FRONT=images/CHQ004_front.jpg;BACK=images/CHQ004_back.png
+ITEM=5;FRONT=images/CHQ005_front.jpg;BACK=images/CHQ005_back.png

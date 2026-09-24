@@ -1,7 +1,6 @@
 package com.iispl.cts.controller.admin;
 
 import java.sql.Timestamp;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -16,6 +15,7 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.A;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
@@ -97,6 +97,16 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	private Button btnCancelModifications;
 	private String selectedModifyAction = "CHANGE_ROLE";
 	private User currentModUser;
+	private Div dotUserStatus;
+
+	private Label lblModStatusText;
+	private Div badgeUserStatus;
+	private Button btnToggleUserStatus;
+	private Checkbox chkChangeRole;
+
+
+	// Tracks current in-memory status changes before hitting DB
+	private boolean modUserActiveState;
 
 	private final UserService userService = UserServiceImpl.getInstance();
 	private final RoleService roleService = RoleServiceImpl.getInstance();
@@ -354,6 +364,16 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
 	// --- SCREEN 2: ADD USER VIEW ---
 
+	private static final java.util.regex.Pattern NAME_PATTERN = 
+			java.util.regex.Pattern.compile("^[a-zA-Z][a-zA-Z0-9._\\s]{2,49}$");
+	private static final java.util.regex.Pattern EMAIL_PATTERN = 
+			java.util.regex.Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
+	private static final java.util.regex.Pattern PHONE_PATTERN = 
+			java.util.regex.Pattern.compile("^[6-9]\\d{9}$"); // Standard 10-digit mobile starting 6-9
+	// Password must contain at least: 8 chars, 1 uppercase, 1 lowercase, 1 number, and 1 special character
+	private static final java.util.regex.Pattern STRONG_PASSWORD_PATTERN = 
+			java.util.regex.Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#^()_+\\-=])[A-Za-z\\d@$!%*?&#^()_+\\-=]{8,}$");
+
 	public void onClick$btnAddUser(Event event) {
 		txtAddEmployeeId.setValue(userService.generateNextEmployeeId());
 		txtAddUsername.setValue("");
@@ -362,11 +382,15 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		txtAddPassword.setValue("");
 		isPasswordVisible = false;
 		txtAddPassword.setType("password");
-		btnTogglePassword.setLabel("Show");
+		updatePasswordToggleIcon(false);
 
 		refreshRoleCache();
 		populateAddRoleDropdown();
-		cmbAddRole.setValue(null);
+
+		// Fix initial glitch: clear selection, reset text, and close popup
+		cmbAddRole.setSelectedIndex(-1);
+		cmbAddRole.setValue("");
+		cmbAddRole.close();
 
 		switchView("ADD");
 	}
@@ -374,37 +398,86 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	public void onClick$btnTogglePassword(Event event) {
 		isPasswordVisible = !isPasswordVisible;
 		txtAddPassword.setType(isPasswordVisible ? "text" : "password");
-		btnTogglePassword.setLabel(isPasswordVisible ? "Hide" : "Show");
+		updatePasswordToggleIcon(isPasswordVisible);
+	}
+	private void updatePasswordToggleIcon(boolean isVisible) {
+		if (btnTogglePassword != null) {
+			btnTogglePassword.getChildren().clear();
+			org.zkoss.zul.Span icon = new org.zkoss.zul.Span();
+			icon.setSclass(isVisible ? "z-icon-eye-slash" : "z-icon-eye");
+			btnTogglePassword.appendChild(icon);
+		}
 	}
 
 	public void onClick$btnSubmitAddUser(Event event) {
 		String empId = txtAddEmployeeId.getValue();
-		String username = txtAddUsername.getValue();
-		String email = txtAddEmail.getValue();
-		String phone = txtAddPhone.getValue();
-		String password = txtAddPassword.getValue();
+		String username = txtAddUsername.getValue() != null ? txtAddUsername.getValue().trim() : "";
+		String email = txtAddEmail.getValue() != null ? txtAddEmail.getValue().trim() : "";
+		String phone = txtAddPhone.getValue() != null ? txtAddPhone.getValue().trim() : "";
+		String password = txtAddPassword.getValue() != null ? txtAddPassword.getValue().trim() : "";
 		Comboitem selectedRole = cmbAddRole.getSelectedItem();
 
-		if (username == null || username.trim().isEmpty()) {
-			Clients.showNotification("Username is required.", "error", txtAddUsername, "top_center", 2000);
+		// 1. Username / Name Validation
+		if (username.isEmpty()) {
+			Clients.showNotification("User Name is required.", "error", txtAddUsername, "top_center", 2500);
+			txtAddUsername.focus();
 			return;
 		}
-		if (email == null || email.trim().isEmpty()) {
-			Clients.showNotification("Email is required.", "error", txtAddEmail, "top_center", 2000);
+		if (!NAME_PATTERN.matcher(username).matches()) {
+			Clients.showNotification("User Name must be 3-50 characters (letters, numbers, underscores, dots).", "error", txtAddUsername, "top_center", 3000);
+			txtAddUsername.focus();
 			return;
 		}
-		if (password == null || password.trim().isEmpty()) {
-			Clients.showNotification("Password is required.", "error", txtAddPassword, "top_center", 2000);
+
+		// 2. Email Validation
+		if (email.isEmpty()) {
+			Clients.showNotification("Email is required.", "error", txtAddEmail, "top_center", 2500);
+			txtAddEmail.focus();
 			return;
 		}
-		if (selectedRole == null) {
-			Clients.showNotification("Please select a role.", "error", cmbAddRole, "top_center", 2000);
+		if (!EMAIL_PATTERN.matcher(email).matches()) {
+			Clients.showNotification("Enter a valid email address (e.g. user@domain.com).", "error", txtAddEmail, "top_center", 3000);
+			txtAddEmail.focus();
+			return;
+		}
+
+		// 3. Phone Number Validation
+		if (phone.isEmpty()) {
+			Clients.showNotification("Phone number is required.", "error", txtAddPhone, "top_center", 2500);
+			txtAddPhone.focus();
+			return;
+		}
+		if (!PHONE_PATTERN.matcher(phone).matches()) {
+			Clients.showNotification("Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.", "error", txtAddPhone, "top_center", 3000);
+			txtAddPhone.focus();
+			return;
+		}
+
+		// 4. Password Combination Validation
+		if (password.isEmpty()) {
+			Clients.showNotification("Password is required.", "error", txtAddPassword, "top_center", 2500);
+			txtAddPassword.focus();
+			return;
+		}
+		if (!STRONG_PASSWORD_PATTERN.matcher(password).matches()) {
+			Clients.showNotification(
+					"Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character (e.g., User@123#).", 
+					"error", txtAddPassword, "top_center", 4000);
+			txtAddPassword.focus();
+			return;
+		}
+
+		// 5. Role Selection Validation
+		if (selectedRole == null || selectedRole.getValue() == null) {
+			Clients.showNotification("Please select a role.", "error", cmbAddRole, "top_center", 2500);
+			cmbAddRole.focus();
 			return;
 		}
 
 		// Duplicate username pre-check
-		if (userService.findByUsername(username.trim()) != null) {
-			Clients.showNotification("Username '" + username.trim() + "' already exists.", "error", txtAddUsername, "top_center", 3000);
+		if (userService.findByUsername(username) != null) {
+			Clients.showNotification("Username '" + username + "' already exists.", "error", txtAddUsername, "top_center", 3000);
+			txtAddUsername.focus();
 			return;
 		}
 
@@ -414,25 +487,25 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		User newUser = new User();
 		newUser.setUserId(userService.generateNextUserId());
 		newUser.setRoleId(assignedRoleId);
-		newUser.setEmployeeId(empId != null ? empId.trim() : userService.generateNextEmployeeId());
-		newUser.setUsername(username.trim());
-		newUser.setFullName(username.trim());
-		newUser.setEmail(email.trim());
-		newUser.setMobileNumber(phone != null ? phone.trim() : "");
+		newUser.setEmployeeId(empId != null && !empId.isEmpty() ? empId.trim() : userService.generateNextEmployeeId());
+		newUser.setUsername(username);
+		newUser.setFullName(username);
+		newUser.setEmail(email);
+		newUser.setMobileNumber(phone);
 		newUser.setStatus("ACTIVE");
 		newUser.setUserCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-		boolean success = userService.registerOrUpdateUser(newUser, password.trim());
+		boolean success = userService.registerOrUpdateUser(newUser, password);
 		if (success) {
 			AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER", 
-					"Created user: " + username.trim() + " (Emp ID: " + newUser.getEmployeeId() + ", Role: " + roleDisplayName + ")", "SUCCESS");
+					"Created user: " + username + " (Emp ID: " + newUser.getEmployeeId() + ", Role: " + roleDisplayName + ")", "SUCCESS");
 
-			Clients.showNotification("User " + username.trim() + " created successfully!", "info", null, "top_center", 2500);
+			Clients.showNotification("User " + username + " created successfully!", "info", null, "top_center", 2500);
 			loadUserData();
 			switchView("LIST");
 		} else {
 			AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER_FAILED", 
-					"Failed to register user: " + username.trim() + " (Emp ID: " + newUser.getEmployeeId() + ")", "FAILED");
+					"Failed to register user: " + username + " (Emp ID: " + newUser.getEmployeeId() + ")", "FAILED");
 
 			Clients.showNotification("Failed to save user in database. Ensure Employee ID or Username is not duplicated.", "error", null, "top_center", 3000);
 		}
@@ -459,6 +532,12 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		txtModEmail.setValue(user.getEmail());
 		txtModCurrentRole.setValue(getRoleDisplayName(user.getRoleId()));
 
+		// 1. Determine active status from DB record
+		String status = user.getStatus();
+		this.modUserActiveState = "ACTIVE".equalsIgnoreCase(status);
+		syncStatusUI();
+
+		// 2. Populate available roles excluding current role
 		refreshRoleCache();
 		cmbNewRole.getChildren().clear();
 		for (Map.Entry<String, String> entry : roleMap.entrySet()) {
@@ -469,75 +548,96 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 			}
 		}
 
-		// Set CHANGE_ROLE as active by default when entering the view
-		this.selectedModifyAction = "CHANGE_ROLE";
-		updateModifyActionStyles();
+		// 3. Reset Role picker: hidden and unselected by default
+		chkChangeRole.setChecked(false);
+		divNewRoleContainer.setVisible(false);
+		cmbNewRole.setSelectedIndex(-1);
+		cmbNewRole.setValue("");
+		cmbNewRole.close();
+
 		switchView("MODIFY");
 	}
 
-	public void onClick$btnActionEnable(Event event) {
-		this.selectedModifyAction = "ENABLE";
-		updateModifyActionStyles();
+	private void syncStatusUI() {
+		if (modUserActiveState) {
+			lblModStatusText.setValue("ACTIVE");
+			badgeUserStatus.setSclass("cts-status-badge cts-status-badge-active");
+			if (dotUserStatus != null) {
+				dotUserStatus.setSclass("cts-status-dot-active");
+			}
+			btnToggleUserStatus.setLabel("DEACTIVATE USER"); // or "DISABLE USER"
+			btnToggleUserStatus.setSclass("cts-btn-status-toggle cts-btn-status-disable");
+		} else {
+			lblModStatusText.setValue("INACTIVE");
+			badgeUserStatus.setSclass("cts-status-badge cts-status-badge-inactive");
+			if (dotUserStatus != null) {
+				dotUserStatus.setSclass("cts-status-dot-inactive");
+			}
+			btnToggleUserStatus.setLabel("ACTIVATE USER"); // or "ENABLE USER"
+			btnToggleUserStatus.setSclass("cts-btn-status-toggle cts-btn-status-enable");
+		}
 	}
 
-	public void onClick$btnActionDisable(Event event) {
-		this.selectedModifyAction = "DISABLE";
-		updateModifyActionStyles();
+	public void onClick$btnToggleUserStatus(Event event) {
+		this.modUserActiveState = !this.modUserActiveState;
+		syncStatusUI();
 	}
 
-	public void onClick$btnActionChangeRole(Event event) {
-		this.selectedModifyAction = "CHANGE_ROLE";
-		updateModifyActionStyles();
-	}
-
-	private void updateModifyActionStyles() {
-		btnActionEnable.setSclass("ENABLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
-		btnActionDisable.setSclass("DISABLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
-		btnActionChangeRole.setSclass("CHANGE_ROLE".equals(selectedModifyAction) ? "cts-segment-btn cts-segment-btn-active" : "cts-segment-btn");
-
-		if (divNewRoleContainer != null) {
-			divNewRoleContainer.setVisible("CHANGE_ROLE".equals(selectedModifyAction));
+	public void onCheck$chkChangeRole(Event event) {
+		boolean isChecked = chkChangeRole.isChecked();
+		divNewRoleContainer.setVisible(isChecked);
+		if (!isChecked) {
+			cmbNewRole.setSelectedIndex(-1);
+			cmbNewRole.setValue("");
 		}
 	}
 
 	public void onClick$btnSaveModifications(Event event) {
 		if (currentModUser == null) return;
 
-		if (selectedModifyAction == null || selectedModifyAction.trim().isEmpty()) {
-			Clients.showNotification("Please choose an action: ENABLE, DISABLE, or CHANGE ROLE.", "warning", null, "top_center", 2500);
+		String newStatus = modUserActiveState ? "ACTIVE" : "INACTIVE";
+		boolean statusChanged = !newStatus.equalsIgnoreCase(currentModUser.getStatus());
+
+		boolean roleChanged = false;
+		String newRoleId = currentModUser.getRoleId();
+		String newRoleName = "";
+
+		if (chkChangeRole.isChecked()) {
+			Comboitem selectedItem = cmbNewRole.getSelectedItem();
+			if (selectedItem == null || selectedItem.getValue() == null) {
+				Clients.showNotification("Please select a new role or uncheck 'Reassign user's role'.", "error", cmbNewRole, "top_center", 2500);
+				cmbNewRole.focus();
+				return;
+			}
+			newRoleId = (String) selectedItem.getValue();
+			newRoleName = selectedItem.getLabel();
+			roleChanged = !newRoleId.equalsIgnoreCase(currentModUser.getRoleId());
+		}
+
+		if (!statusChanged && !roleChanged) {
+			Clients.showNotification("No modifications were made.", "info", null, "top_center", 2000);
+			switchView("LIST");
 			return;
 		}
 
-		String auditAction = "";
-		String auditDetail = "";
-
-		if ("ENABLE".equals(selectedModifyAction)) {
-			currentModUser.setStatus("ACTIVE");
-			auditAction = "ENABLE_USER";
-			auditDetail = "Enabled user account: " + currentModUser.getUsername();
-		} else if ("DISABLE".equals(selectedModifyAction)) {
-			currentModUser.setStatus("INACTIVE");
-			auditAction = "DISABLE_USER";
-			auditDetail = "Disabled user account: " + currentModUser.getUsername();
-		} else if ("CHANGE_ROLE".equals(selectedModifyAction)) {
-			Comboitem selectedItem = cmbNewRole.getSelectedItem();
-			if (selectedItem == null) {
-				Clients.showNotification("Please select a new role from the list.", "error", cmbNewRole, "top_center", 2500);
-				return;
-			}
-			currentModUser.setRoleId((String) selectedItem.getValue());
-			auditAction = "CHANGE_ROLE";
-			auditDetail = "Changed role of user " + currentModUser.getUsername() + " to " + selectedItem.getLabel();
+		// Apply changes to current user object
+		currentModUser.setStatus(newStatus);
+		if (roleChanged) {
+			currentModUser.setRoleId(newRoleId);
 		}
 
 		boolean saved = userService.registerOrUpdateUser(currentModUser, null);
 		if (saved) {
-			AuditServiceImpl.getInstance().log("USER_MGMT", auditAction, auditDetail, "SUCCESS");
-			Clients.showNotification("User " + currentModUser.getUsername() + " updated in database!", "info", null, "top_center", 2500);
+			StringBuilder auditMsg = new StringBuilder("Updated user: ").append(currentModUser.getUsername());
+			if (statusChanged) auditMsg.append(" | Status -> ").append(newStatus);
+			if (roleChanged) auditMsg.append(" | Role -> ").append(newRoleName);
+
+			AuditServiceImpl.getInstance().log("USER_MGMT", "MODIFY_USER", auditMsg.toString(), "SUCCESS");
+			Clients.showNotification("User " + currentModUser.getUsername() + " updated successfully!", "info", null, "top_center", 2500);
 			loadUserData();
 			switchView("LIST");
 		} else {
-			AuditServiceImpl.getInstance().log("USER_MGMT", auditAction + "_FAILED", 
+			AuditServiceImpl.getInstance().log("USER_MGMT", "MODIFY_USER_FAILED", 
 					"Failed to update user: " + currentModUser.getUsername() + " (" + currentModUser.getEmployeeId() + ")", "FAILED");
 			Clients.showNotification("Failed to update user in database.", "error", null, "top_center", 2500);
 		}

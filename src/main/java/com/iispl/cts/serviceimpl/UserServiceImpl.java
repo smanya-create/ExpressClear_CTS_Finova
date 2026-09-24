@@ -24,13 +24,8 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
-        String trimmedId = identifier.trim();
-
-        // 1. Look up user by username first, fallback to email if not found
-        User user = userDAO.findByUsername(trimmedId);
-        if (user == null && trimmedId.contains("@")) {
-            user = userDAO.findByEmail(trimmedId);
-        }
+        // Single DB round-trip instead of findByUsername followed by findByEmail
+        User user = userDAO.findByIdentifier(identifier);
 
         if (user == null || user.getPassword() == null) {
             return null;
@@ -39,26 +34,18 @@ public class UserServiceImpl implements UserService {
         String dbPassword = user.getPassword().trim();
         boolean passwordMatches = false;
 
-        // 2. Check if DB password is a BCrypt hash (starts with $2a$, $2b$, or $2y$)
         if (dbPassword.startsWith("$2a$") || dbPassword.startsWith("$2b$") || dbPassword.startsWith("$2y$")) {
             try {
                 passwordMatches = BCrypt.checkpw(rawPassword, dbPassword);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } 
-        // 3. Fallback to direct comparison if stored as plain text
-        else if (dbPassword.equals(rawPassword)) {
+        } else if (dbPassword.equals(rawPassword)) {
             passwordMatches = true;
         }
 
-        if (!passwordMatches) {
-            return null; // Password mismatch
-        }
-
-        return user;
+        return passwordMatches ? user : null;
     }
-
     @Override
     public String hashPassword(String plainTextPassword) {
         if (plainTextPassword == null || plainTextPassword.trim().isEmpty()) {

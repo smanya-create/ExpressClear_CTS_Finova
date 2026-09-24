@@ -24,8 +24,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     @Override
     public List<MicrRepairBatch> getScanMicrRepairBatches() {
 
-        List<MicrRepairBatch> batchList =
-                new ArrayList<MicrRepairBatch>();
+        List<MicrRepairBatch> batchList = new ArrayList<MicrRepairBatch>();
 
         String sql =
                 "SELECT "
@@ -38,10 +37,10 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "JOIN scan_cheque sc "
               + "ON sc.scanned_batch_id = sb.scanned_batch_id "
               + "WHERE UPPER(TRIM(sc.cheque_status)) IN ("
-              + "'PENDING_MICR_REPAIR', "
-                        + "'MICR_REJECTION_PENDING', "
-              + "'MICR_REPAIRED' "
-        
+              + "    'PENDING_MICR_REPAIR', "
+              + "    'MICR_REJECTION_PENDING', "
+              + "    'MICR_REPAIRED', "
+              + "    'UNPROCESSED_MICR'"
               + ") "
               + "GROUP BY "
               + "sb.scanned_batch_id, "
@@ -51,49 +50,26 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "ORDER BY sb.uploaded_at DESC";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql);
-
-                ResultSet resultSet =
-                        preparedStatement.executeQuery()
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ResultSet resultSet = preparedStatement.executeQuery()
         ) {
 
             while (resultSet.next()) {
 
-                MicrRepairBatch batch =
-                        new MicrRepairBatch();
+                MicrRepairBatch batch = new MicrRepairBatch();
 
-                batch.setBatchId(
-                        resultSet.getString(
-                                "scanned_batch_id"));
-
-                batch.setScanDate(
-                        resultSet.getTimestamp(
-                                "uploaded_at"));
-
-                batch.setTotalCheques(
-                        resultSet.getInt(
-                                "actual_cheque_count"));
-
-                batch.setMicrErrors(
-                        resultSet.getInt(
-                                "micr_errors"));
-
-                batch.setStatus(
-                        resultSet.getString(
-                                "batch_status"));
+                batch.setBatchId(resultSet.getString("scanned_batch_id"));
+                batch.setScanDate(resultSet.getTimestamp("uploaded_at"));
+                batch.setTotalCheques(resultSet.getInt("actual_cheque_count"));
+                batch.setMicrErrors(resultSet.getInt("micr_errors"));
+                batch.setStatus(resultSet.getString("batch_status"));
 
                 batchList.add(batch);
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to fetch scan MICR repair batches",
-                    e);
+            throw new RuntimeException("Unable to fetch scan MICR repair batches", e);
         }
 
         return batchList;
@@ -104,23 +80,15 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public List<MicrRepairChequeDTO> getScanMicrRepairCheques(
-            String scannedBatchId) {
+    public List<MicrRepairChequeDTO> getScanMicrRepairCheques(String scannedBatchId) {
 
-        if (scannedBatchId == null
-                || scannedBatchId.trim().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Scanned batch ID cannot be null or empty");
+        if (scannedBatchId == null || scannedBatchId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Scanned batch ID cannot be null or empty");
         }
 
-        List<MicrRepairChequeDTO> chequeList =
-                new ArrayList<MicrRepairChequeDTO>();
+        List<MicrRepairChequeDTO> chequeList = new ArrayList<MicrRepairChequeDTO>();
+        String targetBatch = scannedBatchId.trim();
 
-        /*
-         * Retrieve only the latest rejection request
-         * for each cheque based on time_stamp.
-         */
         String sql =
                 "SELECT "
               + "sc.scanned_cheque_id, "
@@ -137,6 +105,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "sc.cheque_image_front, "
               + "sc.cheque_image_back "
               + "FROM scan_cheque sc "
+              + "LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id "
               + "LEFT JOIN LATERAL ("
               + "    SELECT "
               + "        r.remarks, "
@@ -147,97 +116,49 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "    ORDER BY r.time_stamp DESC, r.request_id DESC "
               + "    LIMIT 1 "
               + ") ocr ON TRUE "
-              + "WHERE sc.scanned_batch_id = ? "
+              + "WHERE (sc.scanned_batch_id = ? OR sb.batch_reference_id = ?) "
               + "AND UPPER(TRIM(sc.cheque_status)) IN ("
-              + "'PENDING_MICR_REPAIR', "
-                        + "'MICR_REJECTION_PENDING', "
-              + "'MICR_REPAIRED'"
-            
+              + "    'PENDING_MICR_REPAIR', "
+              + "    'MICR_REJECTION_PENDING', "
+              + "    'MICR_REPAIRED', "
+              + "    'UNPROCESSED_MICR'"
               + ") "
-              + "ORDER BY sc.scanned_cheque_id";
+              + "ORDER BY sc.scanned_cheque_id ASC";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql)
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)
         ) {
 
-            preparedStatement.setString(
-                    1,
-                    scannedBatchId.trim());
+            preparedStatement.setString(1, targetBatch);
+            preparedStatement.setString(2, targetBatch);
 
-            try (ResultSet resultSet =
-                    preparedStatement.executeQuery()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 while (resultSet.next()) {
 
-                    MicrRepairChequeDTO cheque =
-                            new MicrRepairChequeDTO();
+                    MicrRepairChequeDTO cheque = new MicrRepairChequeDTO();
 
-                    cheque.setChequeId(
-                            resultSet.getString(
-                                    "scanned_cheque_id"));
-
-                    cheque.setBatchId(
-                            resultSet.getString(
-                                    "scanned_batch_id"));
-
-                    cheque.setChequeNumber(
-                            resultSet.getString(
-                                    "cheque_number"));
-
-                    cheque.setFullMicr(
-                            resultSet.getString(
-                                    "micr_code"));
-
-                    cheque.setChequeStatus(
-                            resultSet.getString(
-                                    "cheque_status"));
-
-                    cheque.setCityCode(
-                            resultSet.getString(
-                                    "city_code"));
-
-                    cheque.setBankCode(
-                            resultSet.getString(
-                                    "bank_code"));
-
-                    cheque.setBranchCode(
-                            resultSet.getString(
-                                    "branch_code"));
-
-                    cheque.setRemarks(
-                            resultSet.getString(
-                                    "remarks"));
-
-                    cheque.setReasonId(
-                            resultSet.getString(
-                                    "reason_id"));
-
-                    cheque.setReason(
-                            resultSet.getString(
-                                    "reason"));
-
-                    cheque.setChequeImageFront(
-                            resultSet.getString(
-                                    "cheque_image_front"));
-
-                    cheque.setChequeImageBack(
-                            resultSet.getString(
-                                    "cheque_image_back"));
+                    cheque.setChequeId(resultSet.getString("scanned_cheque_id"));
+                    cheque.setBatchId(resultSet.getString("scanned_batch_id"));
+                    cheque.setChequeNumber(resultSet.getString("cheque_number"));
+                    cheque.setFullMicr(resultSet.getString("micr_code"));
+                    cheque.setChequeStatus(resultSet.getString("cheque_status"));
+                    cheque.setCityCode(resultSet.getString("city_code"));
+                    cheque.setBankCode(resultSet.getString("bank_code"));
+                    cheque.setBranchCode(resultSet.getString("branch_code"));
+                    cheque.setRemarks(resultSet.getString("remarks"));
+                    cheque.setReasonId(resultSet.getString("reason_id"));
+                    cheque.setReason(resultSet.getString("reason"));
+                    cheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
+                    cheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
 
                     chequeList.add(cheque);
                 }
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to fetch scan MICR repair cheques "
-                  + "for batch: " + scannedBatchId,
-                    e);
+            throw new RuntimeException("Unable to fetch scan MICR repair cheques for batch: " + scannedBatchId, e);
         }
 
         return chequeList;
@@ -248,20 +169,14 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public void saveScanMicrRepair(
-            MicrRepairChequeDTO cheque) {
+    public void saveScanMicrRepair(MicrRepairChequeDTO cheque) {
 
         if (cheque == null) {
-
-            throw new IllegalArgumentException(
-                    "Scan MICR repair cheque cannot be null");
+            throw new IllegalArgumentException("Scan MICR repair cheque cannot be null");
         }
 
-        if (cheque.getChequeId() == null
-                || cheque.getChequeId().trim().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Scanned cheque ID cannot be null or empty");
+        if (cheque.getChequeId() == null || cheque.getChequeId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Scanned cheque ID cannot be null or empty");
         }
 
         String updateChequeSql =
@@ -273,96 +188,42 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "cheque_status = ? "
               + "WHERE scanned_cheque_id = ?";
 
-        /*
-         * Rejection requests are INSERT only.
-         *
-         * request_id and time_stamp are generated by DB.
-         */
         String insertRequestSql =
                 "INSERT INTO outward_cheque_request "
               + "(cheque_id, batch_id, remarks, reason_id, reason) "
               + "VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection =
-                DBConnection.getConnection()) {
+        try (Connection connection = DBConnection.getConnection()) {
 
             connection.setAutoCommit(false);
 
             try {
 
-                // =================================================
-                // Update scan cheque
-                // =================================================
+                try (PreparedStatement statement = connection.prepareStatement(updateChequeSql)) {
 
-                try (PreparedStatement statement =
-                        connection.prepareStatement(
-                                updateChequeSql)) {
+                    statement.setString(1, cheque.getFullMicr());
+                    statement.setString(2, cheque.getCityCode());
+                    statement.setString(3, cheque.getBankCode());
+                    statement.setString(4, cheque.getBranchCode());
+                    statement.setString(5, cheque.getChequeStatus());
+                    statement.setString(6, cheque.getChequeId());
 
-                    statement.setString(
-                            1,
-                            cheque.getFullMicr());
-
-                    statement.setString(
-                            2,
-                            cheque.getCityCode());
-
-                    statement.setString(
-                            3,
-                            cheque.getBankCode());
-
-                    statement.setString(
-                            4,
-                            cheque.getBranchCode());
-
-                    statement.setString(
-                            5,
-                            cheque.getChequeStatus());
-
-                    statement.setString(
-                            6,
-                            cheque.getChequeId());
-
-                    int rowsUpdated =
-                            statement.executeUpdate();
+                    int rowsUpdated = statement.executeUpdate();
 
                     if (rowsUpdated == 0) {
-
-                        throw new IllegalStateException(
-                                "Scan cheque not found for ID: "
-                              + cheque.getChequeId());
+                        throw new IllegalStateException("Scan cheque not found for ID: " + cheque.getChequeId());
                     }
                 }
 
-                // =================================================
-                // INSERT REJECTION REQUEST
-                // =================================================
+                if ("MICR_REJECTION_PENDING".equalsIgnoreCase(cheque.getChequeStatus())) {
 
-                if ("MICR_REJECTION_PENDING".equalsIgnoreCase(
-                        cheque.getChequeStatus())) {
+                    try (PreparedStatement statement = connection.prepareStatement(insertRequestSql)) {
 
-                    try (PreparedStatement statement =
-                            connection.prepareStatement(
-                                    insertRequestSql)) {
-
-                        statement.setString(
-                                1,
-                                cheque.getChequeId());
-
-                        statement.setString(
-                                2,
-                                cheque.getBatchId());
-
-                        statement.setString(
-                                3,
-                                cheque.getRemarks());
-
-                        statement.setString(
-                                4,
-                                cheque.getReasonId());
-
-                        statement.setString(
-                                5,
-                                cheque.getReason());
+                        statement.setString(1, cheque.getChequeId());
+                        statement.setString(2, cheque.getBatchId());
+                        statement.setString(3, cheque.getRemarks());
+                        statement.setString(4, cheque.getReasonId());
+                        statement.setString(5, cheque.getReason());
 
                         statement.executeUpdate();
                     }
@@ -371,22 +232,16 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
                 connection.commit();
 
             } catch (Exception e) {
-
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackException) {
                     e.addSuppressed(rollbackException);
                 }
-
                 throw e;
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Failed to save MICR repair for scan cheque: "
-                  + cheque.getChequeId(),
-                    e);
+            throw new RuntimeException("Failed to save MICR repair for scan cheque: " + cheque.getChequeId(), e);
         }
     }
 
@@ -395,103 +250,81 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public void submitScanMicrRepair(
-            List<MicrRepairChequeDTO> cheques) {
+    public void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques) {
 
-        if (cheques == null
-                || cheques.isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Scan MICR repair cheque list "
-                  + "cannot be null or empty");
+        if (cheques == null || cheques.isEmpty()) {
+            throw new IllegalArgumentException("Scan MICR repair cheque list cannot be null or empty");
         }
 
+        // When maker completes repair, cheques advance to PENDING_DATA_ENTRY
         String sql =
                 "UPDATE scan_cheque SET "
               + "micr_code = ?, "
               + "city_code = ?, "
               + "bank_code = ?, "
               + "branch_code = ?, "
-              + "cheque_status = ? "
+              + "cheque_status = 'PENDING_DATA_ENTRY' "
               + "WHERE scanned_cheque_id = ?";
 
-        try (Connection connection =
-                DBConnection.getConnection()) {
+        String updateBatchSql =
+                "UPDATE scan_batch SET batch_status = 'PENDING_MAKER_PROCESS' "
+              + "WHERE scanned_batch_id = ?";
+
+        try (Connection connection = DBConnection.getConnection()) {
 
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement =
-                    connection.prepareStatement(sql)) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+                String batchId = null;
 
                 for (MicrRepairChequeDTO cheque : cheques) {
 
                     if (cheque == null) {
-
-                        throw new IllegalArgumentException(
-                                "Scan MICR repair cheque cannot be null");
+                        throw new IllegalArgumentException("Scan MICR repair cheque cannot be null");
                     }
 
-                    if (cheque.getChequeId() == null
-                            || cheque.getChequeId()
-                                    .trim().isEmpty()) {
-
-                        throw new IllegalArgumentException(
-                                "Scanned cheque ID cannot be null or empty");
+                    if (cheque.getChequeId() == null || cheque.getChequeId().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Scanned cheque ID cannot be null or empty");
                     }
 
-                    statement.setString(
-                            1,
-                            cheque.getFullMicr());
+                    if (batchId == null && cheque.getBatchId() != null) {
+                        batchId = cheque.getBatchId().trim();
+                    }
 
-                    statement.setString(
-                            2,
-                            cheque.getCityCode());
+                    statement.setString(1, cheque.getFullMicr());
+                    statement.setString(2, cheque.getCityCode());
+                    statement.setString(3, cheque.getBankCode());
+                    statement.setString(4, cheque.getBranchCode());
+                    statement.setString(5, cheque.getChequeId());
 
-                    statement.setString(
-                            3,
-                            cheque.getBankCode());
-
-                    statement.setString(
-                            4,
-                            cheque.getBranchCode());
-
-                    statement.setString(
-                            5,
-                            cheque.getChequeStatus());
-
-                    statement.setString(
-                            6,
-                            cheque.getChequeId());
-
-                    int rowsUpdated =
-                            statement.executeUpdate();
+                    int rowsUpdated = statement.executeUpdate();
 
                     if (rowsUpdated == 0) {
+                        throw new IllegalStateException("Scan cheque not found for ID: " + cheque.getChequeId());
+                    }
+                }
 
-                        throw new IllegalStateException(
-                                "Scan cheque not found for ID: "
-                              + cheque.getChequeId());
+                if (batchId != null) {
+                    try (PreparedStatement psBatch = connection.prepareStatement(updateBatchSql)) {
+                        psBatch.setString(1, batchId);
+                        psBatch.executeUpdate();
                     }
                 }
 
                 connection.commit();
 
             } catch (Exception e) {
-
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackException) {
                     e.addSuppressed(rollbackException);
                 }
-
                 throw e;
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Failed to submit SCAN MICR repair",
-                    e);
+            throw new RuntimeException("Failed to submit SCAN MICR repair", e);
         }
     }
 
@@ -502,8 +335,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     @Override
     public List<MicrRepairBatch> getOutwardMicrRepairBatches() {
 
-        List<MicrRepairBatch> batchList =
-                new ArrayList<MicrRepairBatch>();
+        List<MicrRepairBatch> batchList = new ArrayList<MicrRepairBatch>();
 
         String sql =
                 "SELECT "
@@ -515,11 +347,9 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "FROM outward_batch ob "
               + "JOIN outward_cheque oc "
               + "ON oc.outward_batch_id = ob.outward_batch_id "
-              + "WHERE UPPER(TRIM(oc.cheque_status)) IN ("
-              + "'PENDING_MICR_REPAIR', "
-                        + "'MICR_REJECTION_PENDING', "
-              + "'MICR_REPAIRED'"
-         
+              + "WHERE ( "
+              + "    UPPER(TRIM(oc.cheque_status)) IN ('PENDING_MICR_REPAIR', 'MICR_REJECTION_PENDING', 'MICR_REPAIRED', 'UNPROCESSED_MICR') "
+              + "    OR UPPER(TRIM(oc.cheque_status)) LIKE 'UNPROCESSED%' "
               + ") "
               + "GROUP BY "
               + "ob.outward_batch_id, "
@@ -529,49 +359,26 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "ORDER BY ob.uploaded_at DESC";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql);
-
-                ResultSet resultSet =
-                        preparedStatement.executeQuery()
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ResultSet resultSet = preparedStatement.executeQuery()
         ) {
 
             while (resultSet.next()) {
 
-                MicrRepairBatch batch =
-                        new MicrRepairBatch();
+                MicrRepairBatch batch = new MicrRepairBatch();
 
-                batch.setBatchId(
-                        resultSet.getString(
-                                "outward_batch_id"));
-
-                batch.setScanDate(
-                        resultSet.getTimestamp(
-                                "uploaded_at"));
-
-                batch.setTotalCheques(
-                        resultSet.getInt(
-                                "actual_cheque_count"));
-
-                batch.setMicrErrors(
-                        resultSet.getInt(
-                                "micr_errors"));
-
-                batch.setStatus(
-                        resultSet.getString(
-                                "batch_status"));
+                batch.setBatchId(resultSet.getString("outward_batch_id"));
+                batch.setScanDate(resultSet.getTimestamp("uploaded_at"));
+                batch.setTotalCheques(resultSet.getInt("actual_cheque_count"));
+                batch.setMicrErrors(resultSet.getInt("micr_errors"));
+                batch.setStatus(resultSet.getString("batch_status"));
 
                 batchList.add(batch);
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to fetch outward MICR repair batches",
-                    e);
+            throw new RuntimeException("Unable to fetch outward MICR repair batches", e);
         }
 
         return batchList;
@@ -582,29 +389,15 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public List<MicrRepairChequeDTO>
-            getOutwardMicrRepairCheques(
-                    String outwardBatchId) {
+    public List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(String outwardBatchId) {
 
-        if (outwardBatchId == null
-                || outwardBatchId.trim().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Outward batch ID cannot be null or empty");
+        if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Outward batch ID cannot be null or empty");
         }
 
-        List<MicrRepairChequeDTO> chequeList =
-                new ArrayList<MicrRepairChequeDTO>();
+        List<MicrRepairChequeDTO> chequeList = new ArrayList<MicrRepairChequeDTO>();
+        String targetBatch = outwardBatchId.trim();
 
-        /*
-         * Retrieve only the latest request for the cheque.
-         *
-         * The latest record is determined by:
-         *
-         *     time_stamp DESC
-         *
-         * request_id DESC is used as a tie-breaker.
-         */
         String sql =
                 "SELECT "
               + "oc.outward_cheque_id, "
@@ -621,6 +414,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "ocr.reason_id, "
               + "ocr.reason "
               + "FROM outward_cheque oc "
+              + "LEFT JOIN outward_batch ob ON oc.outward_batch_id = ob.outward_batch_id "
               + "LEFT JOIN LATERAL ("
               + "    SELECT "
               + "        r.remarks, "
@@ -631,97 +425,47 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "    ORDER BY r.time_stamp DESC, r.request_id DESC "
               + "    LIMIT 1 "
               + ") ocr ON TRUE "
-              + "WHERE oc.outward_batch_id = ? "
-              + "AND UPPER(TRIM(oc.cheque_status)) IN ("
-              + "'PENDING_MICR_REPAIR', "
-                        + "'MICR_REJECTION_PENDING', "
-              + "'MICR_REPAIRED'"
-
+              + "WHERE (oc.outward_batch_id = ? OR ob.batch_reference_id = ?) "
+              + "AND ( "
+              + "    UPPER(TRIM(oc.cheque_status)) IN ('PENDING_MICR_REPAIR', 'MICR_REJECTION_PENDING', 'MICR_REPAIRED', 'UNPROCESSED_MICR') "
+              + "    OR UPPER(TRIM(oc.cheque_status)) LIKE 'UNPROCESSED%' "
               + ") "
-              + "ORDER BY oc.outward_cheque_id";
+              + "ORDER BY oc.outward_cheque_id ASC";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql)
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)
         ) {
 
-            preparedStatement.setString(
-                    1,
-                    outwardBatchId.trim());
+            preparedStatement.setString(1, targetBatch);
+            preparedStatement.setString(2, targetBatch);
 
-            try (ResultSet resultSet =
-                    preparedStatement.executeQuery()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 while (resultSet.next()) {
 
-                    MicrRepairChequeDTO cheque =
-                            new MicrRepairChequeDTO();
+                    MicrRepairChequeDTO cheque = new MicrRepairChequeDTO();
 
-                    cheque.setChequeId(
-                            resultSet.getString(
-                                    "outward_cheque_id"));
-
-                    cheque.setBatchId(
-                            resultSet.getString(
-                                    "outward_batch_id"));
-
-                    cheque.setChequeNumber(
-                            resultSet.getString(
-                                    "cheque_number"));
-
-                    cheque.setFullMicr(
-                            resultSet.getString(
-                                    "micr_code"));
-
-                    cheque.setChequeStatus(
-                            resultSet.getString(
-                                    "cheque_status"));
-
-                    cheque.setCityCode(
-                            resultSet.getString(
-                                    "city_code"));
-
-                    cheque.setBankCode(
-                            resultSet.getString(
-                                    "bank_code"));
-
-                    cheque.setBranchCode(
-                            resultSet.getString(
-                                    "branch_code"));
-
-                    cheque.setChequeImageFront(
-                            resultSet.getString(
-                                    "cheque_image_front"));
-
-                    cheque.setChequeImageBack(
-                            resultSet.getString(
-                                    "cheque_image_back"));
-
-                    cheque.setRemarks(
-                            resultSet.getString(
-                                    "remarks"));
-
-                    cheque.setReasonId(
-                            resultSet.getString(
-                                    "reason_id"));
-
-                    cheque.setReason(
-                            resultSet.getString(
-                                    "reason"));
+                    cheque.setChequeId(resultSet.getString("outward_cheque_id"));
+                    cheque.setBatchId(resultSet.getString("outward_batch_id"));
+                    cheque.setChequeNumber(resultSet.getString("cheque_number"));
+                    cheque.setFullMicr(resultSet.getString("micr_code"));
+                    cheque.setChequeStatus(resultSet.getString("cheque_status"));
+                    cheque.setCityCode(resultSet.getString("city_code"));
+                    cheque.setBankCode(resultSet.getString("bank_code"));
+                    cheque.setBranchCode(resultSet.getString("branch_code"));
+                    cheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
+                    cheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
+                    cheque.setRemarks(resultSet.getString("remarks"));
+                    cheque.setReasonId(resultSet.getString("reason_id"));
+                    cheque.setReason(resultSet.getString("reason"));
 
                     chequeList.add(cheque);
                 }
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to fetch outward MICR repair cheques "
-                  + "for batch: " + outwardBatchId,
-                    e);
+            throw new RuntimeException("Unable to fetch outward MICR repair cheques for batch: " + outwardBatchId, e);
         }
 
         return chequeList;
@@ -732,20 +476,14 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public void saveOutwardMicrRepair(
-            MicrRepairChequeDTO cheque) {
+    public void saveOutwardMicrRepair(MicrRepairChequeDTO cheque) {
 
         if (cheque == null) {
-
-            throw new IllegalArgumentException(
-                    "Outward MICR repair cheque cannot be null");
+            throw new IllegalArgumentException("Outward MICR repair cheque cannot be null");
         }
 
-        if (cheque.getChequeId() == null
-                || cheque.getChequeId().trim().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Outward cheque ID cannot be null or empty");
+        if (cheque.getChequeId() == null || cheque.getChequeId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
         }
 
         String updateChequeSql =
@@ -757,96 +495,42 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "cheque_status = ? "
               + "WHERE outward_cheque_id = ?";
 
-        /*
-         * Rejection requests are INSERT only.
-         *
-         * request_id and time_stamp are generated by DB.
-         */
         String insertRequestSql =
                 "INSERT INTO outward_cheque_request "
               + "(cheque_id, batch_id, remarks, reason_id, reason) "
               + "VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection =
-                DBConnection.getConnection()) {
+        try (Connection connection = DBConnection.getConnection()) {
 
             connection.setAutoCommit(false);
 
             try {
 
-                // =================================================
-                // Update outward cheque
-                // =================================================
+                try (PreparedStatement statement = connection.prepareStatement(updateChequeSql)) {
 
-                try (PreparedStatement statement =
-                        connection.prepareStatement(
-                                updateChequeSql)) {
+                    statement.setString(1, cheque.getFullMicr());
+                    statement.setString(2, cheque.getCityCode());
+                    statement.setString(3, cheque.getBankCode());
+                    statement.setString(4, cheque.getBranchCode());
+                    statement.setString(5, cheque.getChequeStatus());
+                    statement.setString(6, cheque.getChequeId());
 
-                    statement.setString(
-                            1,
-                            cheque.getFullMicr());
-
-                    statement.setString(
-                            2,
-                            cheque.getCityCode());
-
-                    statement.setString(
-                            3,
-                            cheque.getBankCode());
-
-                    statement.setString(
-                            4,
-                            cheque.getBranchCode());
-
-                    statement.setString(
-                            5,
-                            cheque.getChequeStatus());
-
-                    statement.setString(
-                            6,
-                            cheque.getChequeId());
-
-                    int rowsUpdated =
-                            statement.executeUpdate();
+                    int rowsUpdated = statement.executeUpdate();
 
                     if (rowsUpdated == 0) {
-
-                        throw new IllegalStateException(
-                                "Outward cheque not found for ID: "
-                              + cheque.getChequeId());
+                        throw new IllegalStateException("Outward cheque not found for ID: " + cheque.getChequeId());
                     }
                 }
 
-                // =================================================
-                // INSERT REJECTION REQUEST
-                // =================================================
+                if ("MICR_REJECTION_PENDING".equalsIgnoreCase(cheque.getChequeStatus())) {
 
-                if ("MICR_REJECTION_PENDING".equalsIgnoreCase(
-                        cheque.getChequeStatus())) {
+                    try (PreparedStatement statement = connection.prepareStatement(insertRequestSql)) {
 
-                    try (PreparedStatement statement =
-                            connection.prepareStatement(
-                                    insertRequestSql)) {
-
-                        statement.setString(
-                                1,
-                                cheque.getChequeId());
-
-                        statement.setString(
-                                2,
-                                cheque.getBatchId());
-
-                        statement.setString(
-                                3,
-                                cheque.getRemarks());
-
-                        statement.setString(
-                                4,
-                                cheque.getReasonId());
-
-                        statement.setString(
-                                5,
-                                cheque.getReason());
+                        statement.setString(1, cheque.getChequeId());
+                        statement.setString(2, cheque.getBatchId());
+                        statement.setString(3, cheque.getRemarks());
+                        statement.setString(4, cheque.getReasonId());
+                        statement.setString(5, cheque.getReason());
 
                         statement.executeUpdate();
                     }
@@ -855,22 +539,16 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
                 connection.commit();
 
             } catch (Exception e) {
-
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackException) {
                     e.addSuppressed(rollbackException);
                 }
-
                 throw e;
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Failed to save MICR repair for outward cheque: "
-                  + cheque.getChequeId(),
-                    e);
+            throw new RuntimeException("Failed to save MICR repair for outward cheque: " + cheque.getChequeId(), e);
         }
     }
 
@@ -879,15 +557,10 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public void submitOutwardMicrRepair(
-            List<MicrRepairChequeDTO> cheques) {
+    public void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques) {
 
-        if (cheques == null
-                || cheques.isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Outward MICR repair cheque list "
-                  + "cannot be null or empty");
+        if (cheques == null || cheques.isEmpty()) {
+            throw new IllegalArgumentException("Outward MICR repair cheque list cannot be null or empty");
         }
 
         String sql =
@@ -896,86 +569,68 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "city_code = ?, "
               + "bank_code = ?, "
               + "branch_code = ?, "
-              + "cheque_status = ? "
+              + "cheque_status = 'PENDING_DATA_ENTRY' "
               + "WHERE outward_cheque_id = ?";
 
-        try (Connection connection =
-                DBConnection.getConnection()) {
+        String updateBatchSql =
+                "UPDATE outward_batch SET batch_status = 'PENDING_MAKER_PROCESS' "
+              + "WHERE outward_batch_id = ?";
+
+        try (Connection connection = DBConnection.getConnection()) {
 
             connection.setAutoCommit(false);
 
-            try (PreparedStatement statement =
-                    connection.prepareStatement(sql)) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+                String batchId = null;
 
                 for (MicrRepairChequeDTO cheque : cheques) {
 
                     if (cheque == null) {
-
-                        throw new IllegalArgumentException(
-                                "Outward MICR repair cheque cannot be null");
+                        throw new IllegalArgumentException("Outward MICR repair cheque cannot be null");
                     }
 
-                    if (cheque.getChequeId() == null
-                            || cheque.getChequeId()
-                                    .trim().isEmpty()) {
-
-                        throw new IllegalArgumentException(
-                                "Outward cheque ID cannot be null or empty");
+                    if (cheque.getChequeId() == null || cheque.getChequeId().trim().isEmpty()) {
+                        throw new IllegalArgumentException("Outward cheque ID cannot be null or empty");
                     }
 
-                    statement.setString(
-                            1,
-                            cheque.getFullMicr());
+                    if (batchId == null && cheque.getBatchId() != null) {
+                        batchId = cheque.getBatchId().trim();
+                    }
 
-                    statement.setString(
-                            2,
-                            cheque.getCityCode());
+                    statement.setString(1, cheque.getFullMicr());
+                    statement.setString(2, cheque.getCityCode());
+                    statement.setString(3, cheque.getBankCode());
+                    statement.setString(4, cheque.getBranchCode());
+                    statement.setString(5, cheque.getChequeId());
 
-                    statement.setString(
-                            3,
-                            cheque.getBankCode());
-
-                    statement.setString(
-                            4,
-                            cheque.getBranchCode());
-
-                    statement.setString(
-                            5,
-                            cheque.getChequeStatus());
-
-                    statement.setString(
-                            6,
-                            cheque.getChequeId());
-
-                    int rowsUpdated =
-                            statement.executeUpdate();
+                    int rowsUpdated = statement.executeUpdate();
 
                     if (rowsUpdated == 0) {
+                        throw new IllegalStateException("Outward cheque not found for ID: " + cheque.getChequeId());
+                    }
+                }
 
-                        throw new IllegalStateException(
-                                "Outward cheque not found for ID: "
-                              + cheque.getChequeId());
+                if (batchId != null) {
+                    try (PreparedStatement psBatch = connection.prepareStatement(updateBatchSql)) {
+                        psBatch.setString(1, batchId);
+                        psBatch.executeUpdate();
                     }
                 }
 
                 connection.commit();
 
             } catch (Exception e) {
-
                 try {
                     connection.rollback();
                 } catch (SQLException rollbackException) {
                     e.addSuppressed(rollbackException);
                 }
-
                 throw e;
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Failed to submit OUTWARD MICR repair",
-                    e);
+            throw new RuntimeException("Failed to submit OUTWARD MICR repair", e);
         }
     }
 
@@ -986,8 +641,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     @Override
     public List<RejectedReason> getRejectedReasons() {
 
-        List<RejectedReason> reasons =
-                new ArrayList<RejectedReason>();
+        List<RejectedReason> reasons = new ArrayList<RejectedReason>();
 
         String sql =
                 "SELECT rejected_reason_id, "
@@ -998,51 +652,25 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "ORDER BY rejected_reason_id";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql);
-
-                ResultSet resultSet =
-                        preparedStatement.executeQuery()
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ResultSet resultSet = preparedStatement.executeQuery()
         ) {
 
             while (resultSet.next()) {
 
-                RejectedReason reason =
-                        new RejectedReason();
+                RejectedReason reason = new RejectedReason();
 
-                reason.setRejectedReasonId(
-                        resultSet.getString(
-                                "rejected_reason_id"));
-
-                reason.setRejectedReasonCode(
-                        resultSet.getString(
-                                "rejected_reason_code"));
-
-                reason.setRejectedReasonName(
-                        resultSet.getString(
-                                "rejected_reason_name"));
-
-                reason.setRejectedReasonDescription(
-                        resultSet.getString(
-                                "rejected_reason_description"));
+                reason.setRejectedReasonId(resultSet.getString("rejected_reason_id"));
+                reason.setRejectedReasonCode(resultSet.getString("rejected_reason_code"));
+                reason.setRejectedReasonName(resultSet.getString("rejected_reason_name"));
+                reason.setRejectedReasonDescription(resultSet.getString("rejected_reason_description"));
 
                 reasons.add(reason);
             }
 
-            System.out.println(
-                    "Rejected Reasons Loaded = "
-                  + reasons.size());
-
         } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw new RuntimeException(
-                    "Unable to load rejected reasons.",
-                    e);
+            throw new RuntimeException("Unable to load rejected reasons.", e);
         }
 
         return reasons;
@@ -1053,19 +681,10 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // =========================================================
 
     @Override
-    public boolean existsChequeNumberAndAccount(
-            String chequeNumber,
-            String accountNumber) {
+    public boolean existsChequeNumberAndAccount(String chequeNumber, String accountNumber) {
 
-        if (chequeNumber == null
-                || chequeNumber.trim().isEmpty()) {
-
-            return false;
-        }
-
-        if (accountNumber == null
-                || accountNumber.trim().isEmpty()) {
-
+        if (chequeNumber == null || chequeNumber.trim().isEmpty() ||
+            accountNumber == null || accountNumber.trim().isEmpty()) {
             return false;
         }
 
@@ -1076,37 +695,21 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "AND TRIM(drawee_account_number) = ?";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql)
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)
         ) {
 
-            preparedStatement.setString(
-                    1,
-                    chequeNumber.trim());
+            preparedStatement.setString(1, chequeNumber.trim());
+            preparedStatement.setString(2, accountNumber.trim());
 
-            preparedStatement.setString(
-                    2,
-                    accountNumber.trim());
-
-            try (ResultSet resultSet =
-                    preparedStatement.executeQuery()) {
-
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-
                     return resultSet.getInt(1) > 0;
                 }
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to check duplicate cheque. "
-                  + "Cheque number: " + chequeNumber
-                  + ", Account number: " + accountNumber,
-                    e);
+            throw new RuntimeException("Unable to check duplicate cheque.", e);
         }
 
         return false;
@@ -1115,9 +718,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     @Override
     public ScanBatch getMakerBatch(String batchId) {
 
-        if (batchId == null
-                || batchId.trim().isEmpty()) {
-
+        if (batchId == null || batchId.trim().isEmpty()) {
             return null;
         }
 
@@ -1132,7 +733,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "sb.uploaded_by, "
               + "sb.uploaded_at "
               + "FROM scan_batch sb "
-              + "WHERE sb.scanned_batch_id = ? "
+              + "WHERE (sb.scanned_batch_id = ? OR sb.batch_reference_id = ?) "
               + "AND NOT EXISTS ("
               + "    SELECT 1 "
               + "    FROM outward_batch ob "
@@ -1140,67 +741,34 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + ")";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql)
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)
         ) {
 
-            preparedStatement.setString(
-                    1,
-                    batchId.trim());
+            preparedStatement.setString(1, batchId.trim());
+            preparedStatement.setString(2, batchId.trim());
 
-            try (ResultSet resultSet =
-                    preparedStatement.executeQuery()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 if (resultSet.next()) {
 
-                    ScanBatch batch =
-                            new ScanBatch();
+                    ScanBatch batch = new ScanBatch();
 
-                    batch.setScannedBatchId(
-                            resultSet.getString(
-                                    "scanned_batch_id"));
-
-                    batch.setBatchReferenceId(
-                            resultSet.getString(
-                                    "batch_reference_id"));
-
-                    batch.setActualChequeCount(
-                            resultSet.getInt(
-                                    "actual_cheque_count"));
-
-                    batch.setActualTotalAmount(
-                            resultSet.getBigDecimal(
-                                    "actual_total_amount"));
-
-                    batch.setStagingStatus(
-                            resultSet.getString(
-                                    "staging_status"));
-
-                    batch.setBatchStatus(
-                            resultSet.getString(
-                                    "batch_status"));
-
-                    batch.setUploadedBy(
-                            resultSet.getString(
-                                    "uploaded_by"));
-
-                    batch.setUploadedAt(
-                            resultSet.getTimestamp(
-                                    "uploaded_at"));
+                    batch.setScannedBatchId(resultSet.getString("scanned_batch_id"));
+                    batch.setBatchReferenceId(resultSet.getString("batch_reference_id"));
+                    batch.setActualChequeCount(resultSet.getInt("actual_cheque_count"));
+                    batch.setActualTotalAmount(resultSet.getBigDecimal("actual_total_amount"));
+                    batch.setStagingStatus(resultSet.getString("staging_status"));
+                    batch.setBatchStatus(resultSet.getString("batch_status"));
+                    batch.setUploadedBy(resultSet.getString("uploaded_by"));
+                    batch.setUploadedAt(resultSet.getTimestamp("uploaded_at"));
 
                     return batch;
                 }
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to fetch maker batch: "
-                  + batchId,
-                    e);
+            throw new RuntimeException("Unable to fetch maker batch: " + batchId, e);
         }
 
         return null;
@@ -1209,15 +777,11 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     @Override
     public List<ScanCheque> getMakerBatchCheques(String batchId) {
 
-        if (batchId == null
-                || batchId.trim().isEmpty()) {
-
-            throw new IllegalArgumentException(
-                    "Batch ID cannot be null or empty");
+        if (batchId == null || batchId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Batch ID cannot be null or empty");
         }
 
-        List<ScanCheque> chequeList =
-                new ArrayList<ScanCheque>();
+        List<ScanCheque> chequeList = new ArrayList<ScanCheque>();
 
         String sql =
                 "SELECT "
@@ -1240,111 +804,49 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "sc.cheque_image_front, "
               + "sc.cheque_image_back "
               + "FROM scan_cheque sc "
-              + "WHERE sc.scanned_batch_id = ? "
-              + "ORDER BY sc.scanned_cheque_id";
+              + "LEFT JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id "
+              + "WHERE sc.scanned_batch_id = ? OR sb.batch_reference_id = ? "
+              + "ORDER BY sc.scanned_cheque_id ASC";
 
         try (
-                Connection connection =
-                        DBConnection.getConnection();
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(sql)
+                Connection connection = DBConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)
         ) {
 
-            preparedStatement.setString(
-                    1,
-                    batchId.trim());
+            preparedStatement.setString(1, batchId.trim());
+            preparedStatement.setString(2, batchId.trim());
 
-            try (ResultSet resultSet =
-                    preparedStatement.executeQuery()) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
                 while (resultSet.next()) {
 
-                    ScanCheque cheque =
-                            new ScanCheque();
+                    ScanCheque cheque = new ScanCheque();
 
-                    cheque.setScannedChequeId(
-                            resultSet.getString(
-                                    "scanned_cheque_id"));
-
-                    cheque.setScannedBatchId(
-                            resultSet.getString(
-                                    "scanned_batch_id"));
-
-                    cheque.setChequeNumber(
-                            resultSet.getString(
-                                    "cheque_number"));
-
-                    cheque.setMicrCode(
-                            resultSet.getString(
-                                    "micr_code"));
-
-                    cheque.setDraweeName(
-                            resultSet.getString(
-                                    "drawee_name"));
-
-                    cheque.setDraweeAccountNumber(
-                            resultSet.getString(
-                                    "drawee_account_number"));
-
-                    cheque.setPayeeName(
-                            resultSet.getString(
-                                    "payee_name"));
-
-                    cheque.setPayeeAccountNumber(
-                            resultSet.getString(
-                                    "payee_account_number"));
-
-                    cheque.setChequeAmount(
-                            resultSet.getBigDecimal(
-                                    "cheque_amount"));
-
-                    cheque.setChequeDate(
-                            resultSet.getDate(
-                                    "cheque_date"));
-
-                    cheque.setChequeStatus(
-                            resultSet.getString(
-                                    "cheque_status"));
-
-                    cheque.setAccountId(
-                            resultSet.getString(
-                                    "account_id"));
-
-                    cheque.setCreatedAt(
-                            resultSet.getTimestamp(
-                                    "created_at"));
-
-                    cheque.setCityCode(
-                            resultSet.getString(
-                                    "city_code"));
-
-                    cheque.setBankCode(
-                            resultSet.getString(
-                                    "bank_code"));
-
-                    cheque.setBranchCode(
-                            resultSet.getString(
-                                    "branch_code"));
-
-                    cheque.setChequeImageFront(
-                            resultSet.getString(
-                                    "cheque_image_front"));
-
-                    cheque.setChequeImageBack(
-                            resultSet.getString(
-                                    "cheque_image_back"));
+                    cheque.setScannedChequeId(resultSet.getString("scanned_cheque_id"));
+                    cheque.setScannedBatchId(resultSet.getString("scanned_batch_id"));
+                    cheque.setChequeNumber(resultSet.getString("cheque_number"));
+                    cheque.setMicrCode(resultSet.getString("micr_code"));
+                    cheque.setDraweeName(resultSet.getString("drawee_name"));
+                    cheque.setDraweeAccountNumber(resultSet.getString("drawee_account_number"));
+                    cheque.setPayeeName(resultSet.getString("payee_name"));
+                    cheque.setPayeeAccountNumber(resultSet.getString("payee_account_number"));
+                    cheque.setChequeAmount(resultSet.getBigDecimal("cheque_amount"));
+                    cheque.setChequeDate(resultSet.getDate("cheque_date"));
+                    cheque.setChequeStatus(resultSet.getString("cheque_status"));
+                    cheque.setAccountId(resultSet.getString("account_id"));
+                    cheque.setCreatedAt(resultSet.getTimestamp("created_at"));
+                    cheque.setCityCode(resultSet.getString("city_code"));
+                    cheque.setBankCode(resultSet.getString("bank_code"));
+                    cheque.setBranchCode(resultSet.getString("branch_code"));
+                    cheque.setChequeImageFront(resultSet.getString("cheque_image_front"));
+                    cheque.setChequeImageBack(resultSet.getString("cheque_image_back"));
 
                     chequeList.add(cheque);
                 }
             }
 
         } catch (SQLException e) {
-
-            throw new RuntimeException(
-                    "Unable to fetch maker batch cheques "
-                  + "for batch: " + batchId,
-                    e);
+            throw new RuntimeException("Unable to fetch maker batch cheques for batch: " + batchId, e);
         }
 
         return chequeList;

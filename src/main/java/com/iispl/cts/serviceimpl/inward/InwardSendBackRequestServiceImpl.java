@@ -39,4 +39,22 @@ public class InwardSendBackRequestServiceImpl implements InwardSendBackRequestSe
         }
         return sendBackRequestDao.markRequestResolved(inwardChequeId.trim(), resolvedBy);
     }
+    
+    
+    
+    // Added for data entry controller requirement
+    @Override
+    public boolean hasPendingSendBackRequests(String batchId) {
+        return sendBackRequestDao.hasPendingSendBackRequests(batchId);
+    }
+
+    @Override
+    public boolean isChequeInCurrentRework(String inwardChequeId, String inwardBatchId) {
+        return sendBackRequestDao.isChequeInCurrentRework(inwardChequeId, inwardBatchId);
+    }
+
+    @Override
+    public boolean resolveAllPendingByBatchId(String batchId, String resolvedBy) {
+        return sendBackRequestDao.resolveAllPendingByBatchId(batchId, resolvedBy);
+    }
 }

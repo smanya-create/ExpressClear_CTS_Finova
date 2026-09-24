@@ -37,7 +37,7 @@
 								<vlayout spacing="2px" hflex="1">
 									<label value="User Management"
 										sclass="cts-main-title" style="font-size: 20px;" />
-									
+
 								</vlayout>
 								<button id="btnAddUser"
 									label="+ Add User" sclass="cts-btn-add-user" />
@@ -115,9 +115,9 @@
 								</panelchildren>
 							</panel>
 
-							
+
 							<!-- Users Table Card -->
-							
+
 							<panel sclass="cts-table-panel" vflex="1"
 								hflex="1" border="none"
 								style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;">
@@ -255,16 +255,20 @@
 														spacing="6px">
 														<label
 															value="PASSWORD" sclass="cts-input-label" />
-														<hlayout
-															valign="middle" hflex="1">
+														<!-- Modern floating eye toggle layout -->
+														<div
+															sclass="cts-password-wrapper" hflex="1">
 															<textbox
 																id="txtAddPassword" type="password"
 																placeholder="Create temporary password"
-																sclass="cts-textbox" hflex="1" />
+																sclass="cts-textbox cts-password-input" hflex="1" />
 															<a
-																id="btnTogglePassword" label="Show"
-																sclass="cts-toggle-pw-btn" />
-														</hlayout>
+																id="btnTogglePassword" sclass="cts-toggle-pw-btn"
+																tooltiptext="Toggle visibility">
+																<span
+																	id="iconTogglePassword" sclass="z-icon-eye" />
+															</a>
+														</div>
 													</vlayout>
 													<vlayout
 														spacing="6px">
@@ -272,7 +276,7 @@
 															value="ROLE" sclass="cts-input-label" />
 														<combobox
 															id="cmbAddRole" readonly="true" placeholder="Select role"
-															sclass="cts-combobox" hflex="1" />
+															autocomplete="false" sclass="cts-combobox" hflex="1" />
 													</vlayout>
 												</row>
 											</rows>
@@ -295,7 +299,7 @@
 							</panel>
 						</vlayout>
 
-						
+
 						<vlayout id="viewModifyUser" visible="false"
 							vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;"
 							spacing="18px">
@@ -304,7 +308,7 @@
 								<label value="Modify User"
 									sclass="cts-main-title" />
 								<label
-									value="Manage user status and role."
+									value="Manage user account status and assigned security role."
 									sclass="cts-main-subtitle" />
 							</vlayout>
 
@@ -360,50 +364,67 @@
 															sclass="cts-textbox cts-textbox-disabled" hflex="1" />
 													</vlayout>
 												</row>
+
+												<!-- Banking Style Status & Role Management Row -->
+												<row
+													style="border:none; background:transparent;">
+													<!-- Dynamic Status Badge & Action -->
+													<vlayout
+														spacing="6px">
+														<label
+															value="ACCOUNT STATUS" sclass="cts-input-label" />
+														<hlayout
+															valign="middle" spacing="12px"
+															style="min-height: 38px;">
+															<div
+																id="badgeUserStatus"
+																sclass="cts-status-badge cts-status-badge-active">
+																<div
+																	id="dotUserStatus" sclass="cts-status-dot-active" />
+																<label
+																	id="lblModStatusText" value="ACTIVE"
+																	sclass="cts-status-label" />
+															</div>
+															<button
+																id="btnToggleUserStatus" label="DISABLE USER"
+																sclass="cts-btn-status-toggle" />
+														</hlayout>
+													</vlayout>
+
+													<!-- Reassign Role Trigger -->
+													<vlayout
+														spacing="6px">
+														<label
+															value="ROLE REASSIGNMENT" sclass="cts-input-label" />
+														<hlayout
+															valign="middle" style="min-height: 38px;">
+															<checkbox
+																id="chkChangeRole" label="Reassign user's role"
+																sclass="cts-role-checkbox" />
+														</hlayout>
+													</vlayout>
+												</row>
 											</rows>
 										</grid>
 
-										<!-- Action Switcher -->
-										<vlayout spacing="6px">
-											<label value="ACTION"
-												sclass="cts-input-label" />
-											<hlayout spacing="12px">
-												<button
-													id="btnActionEnable" label="ENABLE"
-													sclass="cts-segment-btn" />
-												<button
-													id="btnActionDisable" label="DISABLE"
-													sclass="cts-segment-btn" />
-												<button
-													id="btnActionChangeRole" label="CHANGE ROLE"
-													sclass="cts-segment-btn cts-segment-btn-active" />
-											</hlayout>
-										</vlayout>
-
-										<!-- New Role Container -->
+										<!-- New Role Dropdown (Hidden until checkbox is checked) -->
 										<vlayout
-											id="divNewRoleContainer" visible="true" spacing="6px"
-											style="margin-top: 14px;">
-											<label value="NEW ROLE"
-												sclass="cts-input-label" />
+											id="divNewRoleContainer" visible="false" spacing="8px"
+											style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-top: 6px;">
+											<label
+												value="SELECT NEW ROLE" sclass="cts-input-label" />
 											<hlayout spacing="16px"
 												valign="middle">
 												<combobox
 													id="cmbNewRole" readonly="true"
-													placeholder="Select new role" sclass="cts-combobox"
-													width="280px" />
-												<vlayout
-													spacing="2px">
-													<label
-														value="Select a different role from the list."
-														sclass="cts-side-note" />
-													<label
-														value="The current role is excluded from the choices."
-														sclass="cts-side-note" />
-												</vlayout>
+													placeholder="Select new role" autocomplete="false"
+													sclass="cts-combobox" width="240px" popupWidth="240px" />
+												<label
+													value="Current role is excluded from this list."
+													sclass="cts-side-note"
+													style="font-size: 12px; color: #64748b;" />
 											</hlayout>
 										</vlayout>
-
 
 										<hlayout spacing="12px"
 											style="margin-top: 16px;">
@@ -422,8 +443,7 @@
 						<!-- Pinned Page Footer -->
 						<hlayout sclass="cts-portal-footer" hflex="1"
 							style="padding: 6px 28px 10px 28px; box-sizing: border-box;">
-							<label
-								value="Express Clear CTS · Admin "
+							<label value="Express Clear CTS · Admin "
 								sclass="cts-footer-left" />
 							<label value="User Management"
 								sclass="cts-footer-right" />

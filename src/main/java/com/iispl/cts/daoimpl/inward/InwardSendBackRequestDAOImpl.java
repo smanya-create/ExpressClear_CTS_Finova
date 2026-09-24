@@ -90,4 +90,66 @@ public class InwardSendBackRequestDAOImpl implements InwardSendBackRequestDAO {
         dto.setResolvedAt(rs.getTimestamp("resolved_at"));
         return dto;
     }
+    
+    
+    
+    
+    
+    // Added for data entry controller requirement
+    @Override
+    public boolean hasPendingSendBackRequests(String batchId) {
+        String sql = "SELECT EXISTS ("
+                + "  SELECT 1 FROM inward_cheque_send_back_request "
+                + "  WHERE inward_batch_id = ? AND request_status = 'PENDING'"
+                + ")";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, batchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isChequeInCurrentRework(String inwardChequeId, String inwardBatchId) {
+        if (inwardChequeId == null || inwardBatchId == null) {
+            return false;
+        }
+        String sql = "SELECT request_status FROM inward_cheque_send_back_request "
+                + "WHERE inward_cheque_id = ? AND inward_batch_id = ? "
+                + "ORDER BY requested_at DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, inwardChequeId);
+            ps.setString(2, inwardBatchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return "PENDING".equalsIgnoreCase(rs.getString("request_status"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean resolveAllPendingByBatchId(String batchId, String resolvedBy) {
+        String sql = "UPDATE inward_cheque_send_back_request "
+                + "SET request_status = 'RESOLVED', resolved_by = ?, resolved_at = CURRENT_TIMESTAMP "
+                + "WHERE inward_batch_id = ? AND request_status = 'PENDING'";
+        try (Connection conn = DBConnection.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, resolvedBy);
+            ps.setString(2, batchId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

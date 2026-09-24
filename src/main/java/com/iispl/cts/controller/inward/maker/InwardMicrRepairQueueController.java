@@ -31,7 +31,7 @@ import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
 public class InwardMicrRepairQueueController extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
+	
 
 	private Grid grdMicrRepairBatches;
 	private Rows rowsMicrRepairBatches;

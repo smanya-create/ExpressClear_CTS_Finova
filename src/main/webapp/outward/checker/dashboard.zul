@@ -150,10 +150,6 @@
                                                 width="17%" />
 
                                             <listheader
-                                                label="SUBMITTED AT"
-                                                width="16%" />
-
-                                            <listheader
                                                 label="BATCH STATUS"
                                                 width="16%" />
 
