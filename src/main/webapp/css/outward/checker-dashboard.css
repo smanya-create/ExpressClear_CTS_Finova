@@ -222,7 +222,7 @@
     border: none;
     box-shadow: none;
     outline: none;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 800;
     text-align: center;
     white-space: nowrap;
@@ -485,7 +485,7 @@
 }
 
 .outward-checker-search-button .z-icon-search {
-    font-size: 9px;
+    font-size: 14px;
     margin-right: 3px;
 }
 
@@ -678,4 +678,48 @@
     border: none;
     border-bottom: none;
     box-shadow: none;
+}
+.outward-checker-status-filter.z-combobox {
+    height: 32px;
+    width: 160px;
+}
+
+.outward-checker-status-filter .z-combobox-input {
+    height: 32px;
+    font-size: 12px;
+    padding: 0 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px 0 0 5px;
+    box-sizing: border-box;
+}
+
+.outward-checker-status-filter .z-combobox-input:focus {
+    border-color: #173b61;
+    box-shadow: 0 0 0 2px rgba(23, 59, 97, 0.10);
+}
+
+.outward-checker-status-filter .z-combobox-button {
+    height: 32px;
+    width: 30px;
+    border: 1px solid #cbd5e1;
+    border-left: none;
+    border-radius: 0 5px 5px 0;
+    background-color: #ffffff;
+    box-sizing: border-box;
+}
+
+.outward-checker-status-filter .z-combobox-button:hover {
+    background-color: #f1f5f9;
+}
+
+.z-combobox-popup {
+    font-size: 12px;
+}
+
+.z-comboitem {
+    min-height: 26px;
+    height: 26px;
+    font-size: 14px;
+    padding: 5px 8px;
+    box-sizing: border-box;
 }

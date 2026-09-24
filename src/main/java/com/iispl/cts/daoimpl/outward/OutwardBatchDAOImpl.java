@@ -331,18 +331,18 @@ public class OutwardBatchDAOImpl implements OutwardBatchDAO {
 		return 0;
 	}
 
+	//Getting verified batches
 	@Override
 	public List<OutwardBatch> getVerifiedBatches() {
 		List<OutwardBatch> batches = new ArrayList<>();
 		String sql = "SELECT outward_batch_id, batch_reference_id, actual_cheque_count, actual_total_amount, "
 				+ "batch_status, uploaded_by, uploaded_at FROM outward_batch "
-				+ "WHERE UPPER(TRIM(batch_status)) IN (?, ?) ORDER BY uploaded_at DESC";
+				+ "WHERE UPPER(TRIM(batch_status)) = ? ORDER BY uploaded_at DESC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
 
 			ps.setString(1, "VERIFIED");
-			ps.setString(2, "COMPLETED");
 
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
