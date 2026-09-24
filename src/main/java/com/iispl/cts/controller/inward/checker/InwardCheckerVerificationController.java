@@ -320,6 +320,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 				lblReceivedDate.setValue(dateFormat.format(cheque.getCreatedAt()));
 			}
+			
 			updateVerificationCount();
 			if (lblMicrCode != null) {
 				lblMicrCode.setValue(safeValue(cheque.getMicrCode()));
