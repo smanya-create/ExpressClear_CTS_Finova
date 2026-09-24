@@ -10,6 +10,8 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
@@ -28,8 +30,10 @@ import com.iispl.cts.enums.OutwardBatchStatus;
 import com.iispl.cts.enums.OutwardChequeStatus;
 import com.iispl.cts.service.outward.OutwardBatchService;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
+import com.iispl.cts.service.outward.OutwardChequeService;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardCheckerQueueServiceImpl;
+import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
 
 public class OutwardCheckerDashboardController extends GenericForwardComposer<Component> {
 
@@ -37,6 +41,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 	private Button btnSearch;
 	private Button btnClear;
+	private Combobox cmbStatus;
 
 	private Listbox lstBatches;
 
@@ -48,6 +53,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	private Label lblPage;
 
 	private final OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
+	private final OutwardChequeService outwardChequeService = new OutwardChequeServiceImpl();
 
 	private final OutwardCheckerQueueService outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
 
@@ -59,7 +65,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		super.doAfterCompose(comp);
-
+		cmbStatus.setSelectedIndex(0);
 		setupPagination();
 		setupSearch();
 		setupClear();
@@ -67,11 +73,9 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		loadDashboard();
 	}
 
-	
+	// handling pagenation
 	private void setupPagination() {
-
 		btnPrevious.addEventListener(Events.ON_CLICK, event -> {
-
 			if (pageNumber > 1) {
 				pageNumber--;
 				loadDashboard();
@@ -79,26 +83,20 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		});
 
 		btnNext.addEventListener(Events.ON_CLICK, event -> {
-
 			int totalBatches = getTotalBatchCount();
 			int totalPages = calculateTotalPages(totalBatches);
-
 			if (pageNumber < totalPages) {
 				pageNumber++;
 				loadDashboard();
 			}
 		});
-
 		btnFirst.addEventListener(Events.ON_CLICK, event -> {
-
 			if (pageNumber > 1) {
 				pageNumber = 1;
 				loadDashboard();
 			}
 		});
-
 		btnLast.addEventListener(Events.ON_CLICK, event -> {
-
 			int totalBatches = getTotalBatchCount();
 			int totalPages = calculateTotalPages(totalBatches);
 
@@ -110,52 +108,51 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	}
 
 	private void setupSearch() {
-
 		btnSearch.addEventListener(Events.ON_CLICK, event -> {
-
-			String batchId = txtBatchId.getValue();
-
-			if (batchId == null || batchId.trim().isEmpty()) {
-
-				Messagebox.show("Please enter a Batch ID to search.", "Search", Messagebox.OK, Messagebox.INFORMATION);
-
-				txtBatchId.focus();
-				return;
-			}
-
 			pageNumber = 1;
 			loadDashboard();
 		});
 	}
 
 	private void setupClear() {
-
 		btnClear.addEventListener(Events.ON_CLICK, event -> {
-
 			txtBatchId.setValue("");
+			cmbStatus.setSelectedIndex(0);
 			pageNumber = 1;
-
 			loadDashboard();
 		});
 	}
 
 	// checking search is in active or not
 	private boolean isSearchActive() {
-
 		String batchId = txtBatchId.getValue();
 
-		return batchId != null && !batchId.trim().isEmpty();
+		boolean batchIdEntered = batchId != null && !batchId.trim().isEmpty();
+
+		boolean statusSelected = !"ALL".equalsIgnoreCase(getSelectedStatus());
+
+		return batchIdEntered || statusSelected;
 	}
 
 	// Getting total batch count
 	private int getTotalBatchCount() {
-
 		if (isSearchActive()) {
-
-			return outwardBatchDashboardDAO.getSearchPendingBatchCount(txtBatchId.getValue());
+			return outwardBatchDashboardDAO.getSearchPendingBatchCount(txtBatchId.getValue(), getSelectedStatus());
 		}
 
 		return outwardBatchService.getPendingBatchCount();
+	}
+
+	private String getSelectedStatus() {
+		Comboitem selectedItem = cmbStatus.getSelectedItem();
+
+		if (selectedItem == null) {
+			return "ALL";
+		}
+
+		String status = selectedItem.getValue();
+
+		return status == null ? "ALL" : status;
 	}
 
 	private int calculateTotalPages(int totalBatches) {
@@ -174,17 +171,19 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 			if (isSearchActive()) {
 
 				String batchId = txtBatchId.getValue();
+				String status = getSelectedStatus();
 
-				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId);
+				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId, status);
 
-				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId);
+				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId, status);
 
 				if (totalBatches == 0) {
-
-					Messagebox.show("Batch ID '" + batchId + "' not found.", "Batch Not Found", Messagebox.OK,
+					Messagebox.show("No batches found for the given search criteria.", "No Results", Messagebox.OK,
 							Messagebox.INFORMATION);
 
-					txtBatchId.focus();
+					if (batchId != null && !batchId.trim().isEmpty()) {
+						txtBatchId.focus();
+					}
 				}
 
 			} else {
@@ -225,11 +224,9 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 			return;
 		}
-
 		if (pageNumber < 1) {
 			pageNumber = 1;
 		}
-
 		if (pageNumber > totalPages) {
 			pageNumber = totalPages;
 		}
@@ -250,12 +247,10 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		ListModelList<OutwardBatch> model = new ListModelList<>(pendingBatches);
 
 		lstBatches.setModel(model);
-
 		lstBatches.setItemRenderer(new ListitemRenderer<OutwardBatch>() {
 
 			@Override
 			public void render(Listitem item, OutwardBatch batch, int index) throws Exception {
-
 				addBatchRow(item, batch);
 			}
 		});
@@ -264,17 +259,13 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	private void addBatchRow(Listitem item, OutwardBatch batch) throws SQLException {
 
 		item.setValue(batch);
-
 		item.appendChild(new Listcell(batch.getOutwardBatchId()));
 
 		Map<String, Integer> chequeCounts = getChequeCounts(batch.getOutwardBatchId());
 
 		int totalCheques = chequeCounts.get("total");
-
 		int normalCheques = chequeCounts.get("normal");
-
 		int makerReturned = chequeCounts.get("makerReturned");
-
 		int rejectionRequests = chequeCounts.get("rejection");
 
 		item.appendChild(new Listcell(String.valueOf(totalCheques)));
@@ -282,72 +273,55 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		item.appendChild(new Listcell(String.valueOf(normalCheques)));
 
 		Listcell makerReturnedCell = new Listcell(String.valueOf(makerReturned));
-
 		makerReturnedCell.setSclass("maker-returned-count");
-
 		item.appendChild(makerReturnedCell);
 
 		Listcell rejectionCell = new Listcell(String.valueOf(rejectionRequests));
-
 		rejectionCell.setSclass("rejection-request-count");
 
 		item.appendChild(rejectionCell);
 
 		addStatusCell(item, batch);
-
 		addActionCell(item, batch);
 	}
 
 	private void addStatusCell(Listitem item, OutwardBatch batch) {
-
 		Listcell statusCell = new Listcell();
-
 		statusCell.setStyle("text-align:center;" + "vertical-align:middle;");
 
 		String batchStatus = batch.getBatchStatus();
-
 		String displayStatus = getDisplayStatus(batchStatus);
 
 		Label statusLabel = new Label(displayStatus);
-
 		statusLabel.setSclass("status-pending");
-
+		
 		statusLabel.setStyle("display:inline-block;" + "background:#fff7ed;" + "color:#b45309;"
 				+ "border:1px solid #f59e0b;" + "border-radius:16px;" + "font-size:8px;" + "font-weight:800;"
 				+ "text-align:center;" + "white-space:nowrap;");
 
 		statusCell.appendChild(statusLabel);
-
 		item.appendChild(statusCell);
 	}
 
 	private String getDisplayStatus(String batchStatus) {
-
 		if (OutwardBatchStatus.PENDING_CHECKER_PROCESS.toString().equalsIgnoreCase(batchStatus)) {
-
 			return "Pending";
 		}
-
 		if (OutwardBatchStatus.ON_HOLD.toString().equalsIgnoreCase(batchStatus)) {
-
 			return "On Hold";
 		}
-
 		return batchStatus;
 	}
 
 	private void addActionCell(Listitem item, OutwardBatch batch) {
-
 		Listcell actionCell = new Listcell();
 
 		String batchStatus = batch.getBatchStatus();
-
 		String buttonLabel = getButtonLabel(batchStatus);
-
+		
 		Button queueButton = new Button(buttonLabel);
 
 		queueButton.setSclass("queue-button");
-
 		queueButton.addEventListener(Events.ON_CLICK, event -> openBatchPopup(item));
 
 		actionCell.appendChild(queueButton);
@@ -356,80 +330,60 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	}
 
 	private String getButtonLabel(String batchStatus) {
-
 		if (OutwardBatchStatus.PENDING_CHECKER_PROCESS.toString().equalsIgnoreCase(batchStatus)) {
-
 			return "Proceed";
 		}
-
 		if (OutwardBatchStatus.ON_HOLD.toString().equalsIgnoreCase(batchStatus)) {
-
-			return "Processing";
+			return "Proceed";
 		}
-
 		return "Proceed";
 	}
 
+	//batch proceed popup is displaying when we click on proceed button 
 	private void openBatchPopup(Listitem item) {
 
 		OutwardBatch selectedBatch = item.getValue();
-
 		Map<String, Object> args = new HashMap<>();
-
 		args.put("batchId", selectedBatch.getOutwardBatchId());
-
 		Window popup = (Window) Executions.createComponents("/outward/checker/batch-proceed-popup.zul", null, args);
-
 		popup.doModal();
 	}
 
 	// counting normal cheques,Total cheques,Rejection request cheques,maker
-	// returned cheques
 	private Map<String, Integer> getChequeCounts(String batchId) throws SQLException {
 
 		Map<String, Integer> allChequesCount = new HashMap<>();
 
 		int totalCheques = 0;
 		int normalCheques = 0;
-		int rejectionRequests = 0;
-		int makerReturned = 0;
+		int rejectionRequestsCheques = 0;
+		int makerReturnedCheques = 0;
 
-		List<OutwardCheque> cheques = outwardCheckerQueueService.getChequesByBatchId(batchId);
+		List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId);
 
 		if (cheques != null) {
-
 			totalCheques = cheques.size();
-
 			for (OutwardCheque cheque : cheques) {
-
 				if (cheque == null) {
 					continue;
 				}
+				String chequeStatus = cheque.getChequeStatus();
+				if (OutwardChequeStatus.MAKER_RETURNED.toString().equalsIgnoreCase(chequeStatus)) {
+					makerReturnedCheques++;
 
-				String status = cheque.getChequeStatus();
-
-				if (OutwardChequeStatus.MAKER_RETURNED.toString().equalsIgnoreCase(status)) {
-
-					makerReturned++;
-
-				} else if (OutwardChequeStatus.REJECT_REQUEST.toString().equalsIgnoreCase(status)) {
-
-					rejectionRequests++;
+				} else if (OutwardChequeStatus.REJECT_REQUEST.toString().equalsIgnoreCase(chequeStatus)) {
+					rejectionRequestsCheques++;
 
 				} else {
-
 					normalCheques++;
 				}
 			}
 		}
 
 		allChequesCount.put("total", totalCheques);
-
 		allChequesCount.put("normal", normalCheques);
-
-		allChequesCount.put("rejection", rejectionRequests);
-
-		allChequesCount.put("makerReturned", makerReturned);
+		allChequesCount.put("rejection", rejectionRequestsCheques);
+		allChequesCount.put("makerReturned", makerReturnedCheques);
 
 		return allChequesCount;
 	}

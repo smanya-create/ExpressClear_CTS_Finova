@@ -68,44 +68,59 @@
                                         value="Dashboard"
                                         sclass="outward-checker-welcome-title" />
 
-                                    <label
-                                        value="Batches received from Maker and awaiting Checker action."
-                                        sclass="outward-checker-welcome-subtitle" />
-
                                 </div>
 
                                 <div
-                                    sclass="outward-checker-search-section">
+    sclass="outward-checker-search-section">
 
-                                    <label
-                                        value="Search"
-                                        sclass="outward-checker-search-title" />
+    <label
+        value="Search"
+        sclass="outward-checker-search-title" />
 
-                                    <hlayout
-                                        sclass="outward-checker-search-row"
-                                        spacing="8px">
+    <hlayout
+        sclass="outward-checker-search-row"
+        spacing="8px">
 
-                                        <textbox
-                                            id="txtBatchId"
-                                            hflex="1"
-                                            placeholder="Search by Batch ID..."
-                                            sclass="outward-checker-search-input" />
+        <textbox
+            id="txtBatchId"
+            hflex="1"
+            placeholder="Search by Batch ID..."
+            sclass="outward-checker-search-input" />
 
-                                        <button
-                                            id="btnSearch"
-                                            label="SEARCH"
-                                            iconSclass="z-icon-search"
-                                            sclass="outward-checker-search-button" />
+        <combobox
+            id="cmbStatus"
+            readonly="true"
+            width="160px"
+            sclass="outward-checker-status-filter">
 
-                                        <button
-                                            id="btnClear"
-                                            label="CLEAR"
-                                            sclass="outward-checker-clear-button" />
+            <comboitem
+                label="All Status"
+                value="ALL" />
 
-                                    </hlayout>
+            <comboitem
+                label="Pending"
+                value="PENDING_CHECKER_PROCESS" />
 
-                                </div>
+            <comboitem
+                label="On Hold"
+                value="ON_HOLD" />
 
+        </combobox>
+
+        <button
+            id="btnSearch"
+            label="SEARCH"
+            iconSclass="z-icon-search"
+            sclass="outward-checker-search-button" />
+
+        <button
+            id="btnClear"
+            label="CLEAR"
+            sclass="outward-checker-clear-button" />
+
+    </hlayout>
+
+</div>
                                 <div
                                     sclass="outward-checker-section-header">
 
@@ -113,9 +128,7 @@
                                         value="Batches Received from Maker"
                                         sclass="outward-checker-section-title" />
 
-                                    <label
-                                        value="Completed Maker processing and submitted for Checker verification."
-                                        sclass="outward-checker-section-subtitle" />
+           
 
                                 </div>
 

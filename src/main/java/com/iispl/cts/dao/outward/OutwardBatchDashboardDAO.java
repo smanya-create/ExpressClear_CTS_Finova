@@ -7,10 +7,7 @@ import com.iispl.cts.daoimpl.outward.OutwardBatchDashboardDAOImpl;
 import com.iispl.cts.entity.outward.OutwardBatch;
 
 public interface OutwardBatchDashboardDAO {
-	List<OutwardBatch> searchPendingBatches(
-			int pageNumber,
-			int pageSize,
-			String batchId);
-	int getSearchPendingBatchCount(String batchId);
+	List<OutwardBatch> searchPendingBatches(int pageNumber, int pageSize, String batchId, String status);
+	int getSearchPendingBatchCount(String batchId, String status);
 
 }
