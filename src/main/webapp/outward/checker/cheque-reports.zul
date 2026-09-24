@@ -25,7 +25,7 @@
 			<borderlayout width="100%" vflex="1">
 
 				<!-- SIDEBAR -->
-				<west width="220px" border="none" collapsible="false" splittable="false">
+				<west width="205px" border="none" collapsible="false" splittable="false">
 					<include src="/components/sidebar.zul" width="100%" height="100%" activeTab="outward-checker-reports" />
 				</west>
 

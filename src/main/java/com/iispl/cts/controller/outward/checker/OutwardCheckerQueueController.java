@@ -406,6 +406,70 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			return;
 		}
+		
+		
+		if ("MAKER_RETURNED".equalsIgnoreCase(status)) {
+
+		    if (makerRejectionRequestSection == null) {
+		        return;
+		    }
+
+		    // SHOW MESSAGE
+		    makerRejectionRequestSection.setVisible(true);
+
+		    // LIGHT ORANGE MESSAGE BOX
+		    makerRejectionRequestSection.setStyle(
+		            "margin:6px 0 6px 0;"
+		          + "padding:8px 10px;"
+		          + "background:#FFF7ED;"
+		          + "border-left:3px solid #F59E0B;"
+		          + "border-radius:3px;"
+		    );
+
+		    // Heading
+		    if (lblMakerStatusHeading != null) {
+
+		        lblMakerStatusHeading.setValue("MAKER RETURNED");
+
+		        lblMakerStatusHeading.setStyle(
+		                "font-size:10px;"
+		              + "font-weight:700;"
+		              + "color:#B45309;"
+		        );
+		    }
+
+		    // Message
+		    if (lblMakerRejectionReasonCode != null) {
+
+		        lblMakerRejectionReasonCode.setValue(
+		                "Cheque returned to Maker for correction"
+		        );
+
+		        lblMakerRejectionReasonCode.setStyle(
+		                "font-size:11px;"
+		              + "color:#475569;"
+		              + "white-space:normal;"
+		        );
+		    }
+
+		    // Clear unused fields
+		    if (lblMakerRejectionReasonName != null) {
+		        lblMakerRejectionReasonName.setValue("");
+		    }
+
+		    if (lblMakerRejectionRemarks != null) {
+		        lblMakerRejectionRemarks.setValue("");
+		    }
+
+		    System.out.println(
+		            "Cheque " + cheque.getChequeNumber()
+		          + " is MAKER_RETURNED"
+		          + " -> showing MAKER RETURNED"
+		    );
+
+		    return;
+		}
+		
 
 		if ("VERIFIED_BY_CHECKER".equalsIgnoreCase(status)) {
 
