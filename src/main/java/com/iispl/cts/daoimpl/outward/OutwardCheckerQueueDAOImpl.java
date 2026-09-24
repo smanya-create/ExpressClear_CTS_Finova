@@ -51,7 +51,7 @@ public class OutwardCheckerQueueDAOImpl
               + "       cheque_image_back "
               + "FROM outward_cheque "
               + "WHERE outward_batch_id = ? "
-              + "AND cheque_status IN ('PENDING_VERIFICATION', 'REJECT_REQUEST', 'VERIFIED_BY_CHECKER') "
+              + "AND cheque_status IN ('PENDING_VERIFICATION', 'REJECT_REQUEST', 'VERIFIED_BY_CHECKER', 'MAKER_RETURNED') "
               + "ORDER BY outward_cheque_id";
 
         try (Connection con = DBConnection.getConnection();
