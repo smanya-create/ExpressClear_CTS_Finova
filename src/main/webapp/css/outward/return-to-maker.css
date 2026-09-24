@@ -1,0 +1,430 @@
+@charset "UTF-8";
+/* ============================================================
+   RETURN TO MAKER WINDOW
+   ============================================================ */
+
+.return-maker-window {
+    background: #ffffff;
+    border: none !important;
+    border-radius: 10px;
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.return-header {
+    height: 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 22px;
+
+    background: #173b63;
+
+    color: #ffffff;
+}
+
+
+/* LEFT SIDE */
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+
+/* BACK ICON */
+
+.header-back-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 27px;
+    font-weight: 300;
+
+    color: #ffffff;
+}
+
+
+/* DIVIDER */
+
+.header-divider {
+    width: 1px;
+    height: 30px;
+
+    margin-left: 18px;
+    margin-right: 18px;
+
+    background: rgba(255, 255, 255, 0.35);
+}
+
+
+/* TITLE */
+
+.return-title {
+    font-size: 22px;
+    font-weight: 600;
+
+    color: #ffffff;
+}
+
+
+/* CLOSE */
+
+.header-close-icon {
+    font-size: 30px;
+    font-weight: 300;
+
+    color: #ffffff;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.return-content {
+    padding: 28px 30px 25px 30px;
+
+    background: #ffffff;
+}
+
+
+/* ============================================================
+   INFORMATION BOX
+   ============================================================ */
+
+.info-box {
+    display: flex;
+    align-items: center;
+
+    min-height: 60px;
+
+    padding: 0 20px;
+
+    margin-bottom: 30px;
+
+    background: #eef5ff;
+
+    border-radius: 8px;
+}
+
+
+/* INFO ICON */
+
+.info-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 16px;
+
+    border-radius: 50%;
+
+    background: #1769aa;
+}
+
+.info-icon label {
+    color: #ffffff;
+
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+/* INFO TEXT */
+
+.info-text {
+    font-size: 15px;
+    font-weight: 400;
+
+    color: #173b63;
+}
+
+
+/* ============================================================
+   TWO COLUMN
+   ============================================================ */
+
+.two-column {
+    display: flex;
+
+    width: 100%;
+
+    gap: 30px;
+
+    margin-bottom: 25px;
+}
+
+
+.two-column > .field-group {
+    flex: 1;
+}
+
+
+/* ============================================================
+   FIELD GROUP
+   ============================================================ */
+
+.field-group {
+    margin-bottom: 24px;
+}
+
+
+/* ============================================================
+   FIELD LABEL
+   ============================================================ */
+
+.field-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+
+    color: #526b8a;
+}
+
+
+/* ============================================================
+   READONLY FIELD
+   ============================================================ */
+
+.readonly-field {
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 16px;
+
+    box-sizing: border-box;
+
+    background: #f7f9fc;
+
+    border: 1px solid #d6e0ec;
+
+    border-radius: 8px;
+}
+
+
+/* ICON */
+
+.field-icon {
+    width: 30px;
+
+    margin-right: 14px;
+
+    font-size: 22px;
+
+    color: #526b8a;
+
+    text-align: center;
+}
+
+
+/* VALUE */
+
+.readonly-value {
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #173b63;
+}
+
+
+/* ============================================================
+   COMBOBOX
+   ============================================================ */
+
+.reason-combobox {
+    height: 52px;
+
+    border: 1px solid #c9d9eb !important;
+
+    border-radius: 8px !important;
+
+    background: #ffffff !important;
+
+    font-size: 15px;
+
+    color: #526b8a;
+}
+
+
+/* COMBOBOX FOCUS */
+
+.reason-combobox:focus,
+.reason-combobox:focus-within {
+    border-color: #1769aa !important;
+
+    box-shadow:
+        0 0 0 2px rgba(23, 105, 170, 0.10);
+}
+
+
+/* ============================================================
+   REMARKS
+   ============================================================ */
+
+.remarks-group {
+    margin-bottom: 0;
+}
+
+
+.remarks-field {
+    min-height: 125px;
+
+    padding: 14px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #c9d9eb !important;
+
+    border-radius: 8px !important;
+
+    background: #ffffff !important;
+
+    font-size: 15px;
+
+    color: #173b63;
+}
+
+
+/* TEXTBOX FOCUS */
+
+.remarks-field:focus,
+.remarks-field:focus-within {
+    border-color: #1769aa !important;
+
+    box-shadow:
+        0 0 0 2px rgba(23, 105, 170, 0.10);
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.return-footer {
+    display: flex;
+
+    justify-content: flex-end;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 22px 30px;
+
+    border-top: 1px solid #e4eaf1;
+
+    background: #ffffff;
+}
+
+
+/* ============================================================
+   CANCEL BUTTON
+   ============================================================ */
+
+.cancel-button {
+    min-width: 120px;
+    height: 42px;
+
+    padding: 0 22px;
+
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+
+    color: #173b63 !important;
+
+    border: 2px solid #173b63 !important;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* CANCEL HOVER */
+
+.cancel-button:hover {
+    background: #f1f5fa !important;
+}
+
+
+/* ============================================================
+   RETURN BUTTON
+   ============================================================ */
+
+.return-confirm-button {
+    min-width: 120px;
+    height: 42px;
+
+    padding: 0 22px;
+
+    background: #173b63 !important;
+    background-color: #173b63 !important;
+
+    color: #ffffff !important;
+
+    border: 2px solid #173b63 !important;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* RETURN HOVER */
+
+.return-confirm-button:hover {
+    background: #214d7d !important;
+    border-color: #214d7d !important;
+}
+
+
+/* ============================================================
+   BUTTON ACTIVE
+   ============================================================ */
+
+.cancel-button:active,
+.return-confirm-button:active {
+    transform: translateY(1px);
+}
+
+
+/* ============================================================
+   ZK BUTTON TEXT
+   ============================================================ */
+
+.cancel-button .z-button-content,
+.return-confirm-button .z-button-content {
+    font-size: 14px;
+    font-weight: 600;
+}

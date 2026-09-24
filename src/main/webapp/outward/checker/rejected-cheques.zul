@@ -59,12 +59,12 @@
 
                         <vlayout sclass="search-field date-field" width="200px" spacing="4px">
                             <label value="DATE" sclass="field-label"/>
-                            <datebox id="dateRejected"
-                                     format="dd-MM-yyyy"
-                                     placeholder="Select rejected date"
-                                     hflex="1"
-                                     buttonVisible="true"
-                                     sclass="search-datebox"/>
+                       <datebox id="dateRejected"
+         format="dd-MM-yyyy"
+         placeholder="Select rejected date"
+         hflex="1"
+         buttonVisible="true"
+         sclass="search-datebox"/>
                         </vlayout>
 
                         <button id="btnSearch" label="SEARCH" sclass="search-button"/>

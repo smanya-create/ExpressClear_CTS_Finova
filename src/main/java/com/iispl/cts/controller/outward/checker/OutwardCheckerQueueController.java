@@ -1,6 +1,8 @@
 package com.iispl.cts.controller.outward.checker;
 
-import java.net.URLEncoder;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,11 +28,10 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
-import com.iispl.cts.common.util.SecurityUtil;
+import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dto.RejectRequestDTO;
 import com.iispl.cts.entity.User;
 import com.iispl.cts.entity.outward.OutwardCheque;
-import com.iispl.cts.entity.outward.OutwardChequeImage;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
@@ -2042,6 +2043,11 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 										finalRemarks);
 
 								outwardCheckerQueueService.updateBatchStatus(batchId, "ON_HOLD");
+								
+								
+								// Send notification to Maker
+								sendReturnToMakerNotificationAsync(cheque, reasonId);
+
 								// ====================================================
 								// UPDATE CONTROLLER MEMORY
 								// ====================================================
@@ -2197,11 +2203,60 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			showError("Unable to return cheque to Maker.", e);
 		}
 	}
-	/*
-	 * ============================================================ REJECT
-	 * ============================================================
-	 */
+	
+	private void sendReturnToMakerNotificationAsync(
+	        OutwardCheque cheque,
+	        String reasonId) {
 
+	    Thread notificationThread = new Thread(() -> {
+
+	        String returnType;
+
+	        if ("11".equals(reasonId)
+	                || "12".equals(reasonId)) {
+
+	            returnType = "MICR Repair";
+
+	        } else {
+
+	            returnType = "Data Entry";
+	        }
+
+	        String message =
+	                "Cheque "
+	                + cheque.getChequeNumber()
+	                + " has been returned to Maker for "
+	                + returnType
+	                + ".";
+
+	        String sql =
+	                "INSERT INTO public.notifications "
+	              + "(recipient_role, recipient_user_id, message, "
+	              + "is_read, created_at) "
+	              + "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
+
+	        try (Connection conn = DBConnection.getConnection();
+	             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	            ps.setString(1, "OUTWARD_MAKER");
+	            ps.setString(2, null);
+	            ps.setString(3, message);
+	            ps.setBoolean(4, false);
+
+	            ps.executeUpdate();
+
+	        } catch (Exception e) {
+
+	            e.printStackTrace();
+	        }
+	    });
+
+	    notificationThread.setName(
+	            "ReturnToMakerNotification-"
+	            + cheque.getChequeNumber());
+
+	    notificationThread.start();
+	}
 	// ============================================================
 	// REJECT BUTTON
 	// ============================================================

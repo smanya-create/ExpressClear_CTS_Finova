@@ -8,6 +8,8 @@ import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.InputEvent;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Datebox;
@@ -31,14 +33,10 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
 
     private static final long serialVersionUID = 1L;
 
-    // =========================================================
-    // COMPONENTS
-    // =========================================================
     private Listbox lstRejectedCheques;
     private Textbox txtSearch;
     private Datebox dateRejected;
 
-    // Pagination Controls (« ‹ [1] / 1 › »)
     private Button btnFirst;
     private Button btnPrevious;
     private Intbox ibCurrentPage;
@@ -49,34 +47,27 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
     private Label lblTotalRejected;
     private Component windowHost;
 
-    // =========================================================
-    // SERVICE & FORMATTERS
-    // =========================================================
+    
     private final OutwardCheckerRejectionService rejectionService = new OutwardCheckerRejectionServiceImpl();
     private final DecimalFormat df = new DecimalFormat("##,##,##0.00");
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 
-    // =========================================================
-    // PAGINATION VARIABLES
-    // =========================================================
     private static final int PAGE_SIZE = 10;
     private int currentPage = 1;
     private int totalRecords = 0;
     private int totalPages = 1;
 
-    // =========================================================
-    // INITIAL LOAD
-    // =========================================================
     @Override
     public void doAfterCompose(Component comp) throws Exception {
     	
         super.doAfterCompose(comp);
+        if (dateRejected != null) {
+            dateRejected.setFormat("dd-MM-yyyy");
+        }
         loadRejectedCheques();
     }
 
-    // =========================================================
-    // LOAD REJECTED CHEQUES
-    // =========================================================
+        // LOAD REJECTED CHEQUES
     private void loadRejectedCheques() {
         try {
             String searchValue = getSearchValue();
@@ -111,14 +102,14 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
         }
     }
 
-    // =========================================================
-    // DISPLAY REJECTED CHEQUES (Strict Column Alignment)
-    // =========================================================
+    // DISPLAY REJECTED CHEQUES 
     private void displayRejectedCheques(List<OutwardRejectedCheques> rejectedCheques) {
         ListModelList<OutwardRejectedCheques> model = new ListModelList<>(rejectedCheques);
         lstRejectedCheques.setModel(model);
 
         lstRejectedCheques.setItemRenderer(new ListitemRenderer<OutwardRejectedCheques>() {
+        	
+        	
             @Override
             public void render(Listitem item, OutwardRejectedCheques cheque, int index) throws Exception {
                 item.setValue(cheque);
@@ -182,11 +173,62 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
             }
         });
     }
+    
+    public void onChanging$dateRejected(InputEvent event) {
 
-    // =========================================================
-    // SEARCH & FILTER EVENTS
-    // =========================================================
-    public void onClick$btnSearch(Event event) {
+        if (dateRejected == null || event == null) {
+            return;
+        }
+
+        String value = event.getValue();
+
+        if (value == null) {
+            return;
+        }
+
+        // Keep numbers only
+        value = value.replaceAll("[^0-9]", "");
+
+        // Maximum 8 digits: ddMMyyyy
+        if (value.length() > 8) {
+            value = value.substring(0, 8);
+        }
+
+        // Add hyphen after DD
+        if (value.length() > 4) {
+
+            value = value.substring(0, 2)
+                    + "-"
+                    + value.substring(2, 4)
+                    + "-"
+                    + value.substring(4);
+
+        } else if (value.length() > 2) {
+
+            value = value.substring(0, 2)
+                    + "-"
+                    + value.substring(2);
+        }
+
+        final String formattedValue = value;
+
+        Clients.evalJavaScript(
+                "var w = zk.Widget.$('#" + dateRejected.getUuid() + "');"
+              + "if (w) {"
+              + "    var input = w.getInputNode();"
+              + "    if (input) {"
+              + "        input.value = '" + formattedValue + "';"
+              + "    }"
+              + "}"
+        );
+    }
+    
+    
+    
+    
+    
+        // SEARCH & FILTER EVENTS
+        public void onClick$btnSearch(Event event) {
         currentPage = 1;
         loadRejectedCheques();
     }
@@ -202,10 +244,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
         loadRejectedCheques();
     }
 
-    // =========================================================
-    // PAGINATION EVENTS (« ‹ [1] / 1 › »)
-    // =========================================================
-    public void onClick$btnFirst(Event event) {
+            public void onClick$btnFirst(Event event) {
         if (currentPage > 1) {
             currentPage = 1;
             loadRejectedCheques();
@@ -272,9 +311,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
         if (btnLastPage != null) btnLastPage.setDisabled(isLast);
     }
 
-    // =========================================================
     // PARAMETER RETRIEVAL
-    // =========================================================
     private String getSearchValue() {
         if (txtSearch == null) return null;
         String value = txtSearch.getValue();
@@ -286,9 +323,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
         return new java.sql.Date(dateRejected.getValue().getTime());
     }
 
-    // =========================================================
     // SHOW DETAILS MODAL
-    // =========================================================
     private void showRejectedCheque(OutwardRejectedCheques cheque) {
         try {
             Window window = (Window) Executions.createComponents("/outward/checker/rejected-cheque-view.zul",
@@ -316,9 +351,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
             }
 
             
-            // ---------------------------------------------------------
-            // REJECTION REASON
-            // ---------------------------------------------------------
+                        // REJECTION REASON
 
             Label lblReason =
                     (Label) window.getFellowIfAny("lblReason");
@@ -329,9 +362,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
                 );
             }
 
-            // ---------------------------------------------------------
             // REMARKS
-            // ---------------------------------------------------------
 
             Label lblRemarks =
                     (Label) window.getFellowIfAny("lblRemarks");

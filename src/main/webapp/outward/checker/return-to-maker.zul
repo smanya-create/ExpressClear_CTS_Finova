@@ -1,134 +1,407 @@
 <?page title="Return to Maker" contentType="text/html;charset=UTF-8"?>
 
-<?link rel="stylesheet" type="text/css" href="/css/return-to-maker.css"?>
-
 <zk>
+
+    <!-- ========================================================= -->
+    <!-- RETURN TO MAKER WINDOW -->
+    <!-- ========================================================= -->
 
     <window
         id="returnMakerWindow"
-        title="Return to Maker"
-        border="normal"
-        width="680px"
+        title=""
+        border="none"
+        width="540px"
         closable="true"
         sizable="false"
-        sclass="return-maker-window">
+        style="
+            background:#ffffff;
+            border:none;
+            border-radius:10px;
+            overflow:visible;
+            box-shadow:0 6px 25px rgba(0,0,0,0.20);
+        ">
 
+        <!-- ===================================================== -->
         <!-- HEADER -->
-        <div sclass="return-header">
-            <label
-                value="Return to Maker"
-                sclass="return-title"/>
+        <!-- ===================================================== -->
+
+        <div
+            style="
+                height:52px;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                padding:0 16px;
+                background:#173b63;
+                color:#ffffff;
+                box-sizing:border-box;
+            ">
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                ">
+
+                <label
+                    value="↩"
+                    style="
+                        font-size:21px;
+                        color:#ffffff;
+                        margin-right:12px;
+                    "/>
+
+                <div
+                    style="
+                        width:1px;
+                        height:24px;
+                        background:rgba(255,255,255,0.35);
+                        margin-right:14px;
+                    "/>
+
+                <label
+                    value="Return to Maker"
+                    style="
+                        font-size:18px;
+                        font-weight:600;
+                        color:#ffffff;
+                    "/>
+
+            </div>
+
+            <!-- CLOSE BUTTON -->
 
             <label
-                value="Send this cheque back to the Maker for correction."
-                sclass="return-description"/>
+                id="btnCloseReturnMaker"
+                value="×"
+                onClick="returnMakerWindow.setVisible(false);"
+                style="
+                    font-size:26px;
+                    font-weight:400;
+                    color:#ffffff;
+                    cursor:pointer;
+                    line-height:1;
+                    user-select:none;
+                "/>
+
         </div>
 
+
+        <!-- ===================================================== -->
         <!-- CONTENT -->
-        <div sclass="return-content">
+        <!-- ===================================================== -->
 
-            <!-- BATCH AND CHEQUE NUMBER -->
-            <div sclass="two-column">
+        <div
+            style="
+                padding:18px 22px 16px 22px;
+                background:#ffffff;
+                box-sizing:border-box;
+            ">
 
-                <div sclass="field-group">
+
+            <!-- ================================================= -->
+            <!-- INFORMATION MESSAGE -->
+            <!-- ================================================= -->
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    min-height:42px;
+                    padding:0 12px;
+                    margin-bottom:18px;
+                    background:#eef5ff;
+                    border-radius:6px;
+                    box-sizing:border-box;
+                ">
+
+                <div
+                    style="
+                        width:26px;
+                        height:26px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        margin-right:10px;
+                        border-radius:50%;
+                        background:#1769aa;
+                    ">
+
                     <label
-                        value="BATCH"
-                        sclass="field-label"/>
+                        value="i"
+                        style="
+                            color:#ffffff;
+                            font-size:15px;
+                            font-weight:bold;
+                        "/>
 
-                    <label
-                        id="lblReturnBatch"
-                        value="-"
-                        sclass="readonly-field"
-                        style="font-weight:bold;"/>
                 </div>
 
-                <div sclass="field-group">
-                    <label
-                        value="CHEQUE NUMBER"
-                        sclass="field-label"/>
+                <label
+                    value="Send this cheque back to the Maker for correction."
+                    style="
+                        font-size:13px;
+                        color:#173b63;
+                    "/>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- BATCH + CHEQUE NUMBER -->
+            <!-- ================================================= -->
+
+            <div
+                style="
+                    display:flex;
+                    gap:16px;
+                    width:100%;
+                    margin-bottom:17px;
+                ">
+
+
+                <!-- BATCH -->
+
+                <div style="flex:1;">
 
                     <label
-                        id="lblReturnCheque"
-                        value="-"
-                        sclass="readonly-field"
-                        style="font-weight:bold;"/>
+                        value="BATCH"
+                        style="
+                            display:block;
+                            margin-bottom:5px;
+                            font-size:11px;
+                            font-weight:700;
+                            color:#526b8a;
+                        "/>
+
+                    <div
+                        style="
+                            height:42px;
+                            display:flex;
+                            align-items:center;
+                            padding:0 10px;
+                            background:#f7f9fc;
+                            border:1px solid #d6e0ec;
+                            border-radius:6px;
+                            box-sizing:border-box;
+                        ">
+
+                        <label
+                            value="▱"
+                            style="
+                                font-size:17px;
+                                color:#526b8a;
+                                margin-right:9px;
+                            "/>
+
+                        <label
+                            id="lblReturnBatch"
+                            value="-"
+                            style="
+                                font-size:14px;
+                                font-weight:600;
+                                color:#173b63;
+                            "/>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CHEQUE NUMBER -->
+
+                <div style="flex:1;">
+
+                    <label
+                        value="CHEQUE NUMBER"
+                        style="
+                            display:block;
+                            margin-bottom:5px;
+                            font-size:11px;
+                            font-weight:700;
+                            color:#526b8a;
+                        "/>
+
+                    <div
+                        style="
+                            height:42px;
+                            display:flex;
+                            align-items:center;
+                            padding:0 10px;
+                            background:#f7f9fc;
+                            border:1px solid #d6e0ec;
+                            border-radius:6px;
+                            box-sizing:border-box;
+                        ">
+
+                        <label
+                            value="▣"
+                            style="
+                                font-size:17px;
+                                color:#526b8a;
+                                margin-right:9px;
+                            "/>
+
+                        <label
+                            id="lblReturnCheque"
+                            value="-"
+                            style="
+                                font-size:14px;
+                                font-weight:600;
+                                color:#173b63;
+                            "/>
+
+                    </div>
+
                 </div>
 
             </div>
 
+
+            <!-- ================================================= -->
             <!-- REASON -->
-            <div sclass="field-group">
+            <!-- ================================================= -->
+
+            <div
+                style="
+                    width:100%;
+                    margin-bottom:16px;
+                ">
+
                 <label
                     value="REASON FOR SENDING BACK"
-                    sclass="field-label"/>
+                    style="
+                        display:block;
+                        margin-bottom:5px;
+                        font-size:11px;
+                        font-weight:700;
+                        color:#526b8a;
+                    "/>
+
+
+                <!--
+                    IMPORTANT:
+                    No outer DIV with border is used here.
+                    The combobox itself is the only dropdown.
+                -->
 
                 <combobox
                     id="cmbSendBackReason"
                     width="100%"
+                    height="42px"
                     placeholder="Select reason"
                     readonly="true"
-                    sclass="reason-combobox"/>
+                    style="
+                        width:100%;
+                        height:42px;
+                        margin:0;
+                        padding:0;
+                        border:none !important;
+                        background:transparent !important;
+                        box-shadow:none !important;
+                        outline:none !important;
+                    "/>
+
             </div>
 
+
+            <!-- ================================================= -->
             <!-- REMARKS -->
-            <div sclass="field-group">
+            <!-- ================================================= -->
+
+            <div>
+
                 <label
                     value="REMARKS"
-                    sclass="field-label"/>
+                    style="
+                        display:block;
+                        margin-bottom:5px;
+                        font-size:11px;
+                        font-weight:700;
+                        color:#526b8a;
+                    "/>
 
                 <textbox
                     id="txtReturnRemarks"
                     multiline="true"
-                    rows="4"
+                    rows="3"
                     width="100%"
                     placeholder="Enter remarks for Maker..."
-                    sclass="remarks-field"/>
+                    style="
+                        width:100%;
+                        height:80px;
+                        min-height:80px;
+                        padding:10px;
+                        box-sizing:border-box;
+                        border:1px solid #c9d9eb !important;
+                        border-radius:6px !important;
+                        background:#ffffff !important;
+                        font-size:13px;
+                        color:#173b63;
+                        outline:none;
+                        box-shadow:none;
+                    "/>
+
             </div>
 
         </div>
 
-       <!-- FOOTER -->
-<div
-    sclass="return-footer"
-    style="margin-top:20px;">
 
-    <button
-        id="btnReturnCancel"
-        label="CANCEL"
-        sclass="cancel-button"
-        style="
-            background:#173b63 !important;
-            background-color:#173b63 !important;
-            color:#ffffff !important;
-            border:1px solid #173b63 !important;
-            border-radius:5px;
-            font-weight:600;
-            font-size:12px;
-            padding:5px 14px;
-            min-width:80px;
-            height:32px;
-            cursor:pointer;
-        "/>
+        <!-- ===================================================== -->
+        <!-- FOOTER BUTTONS -->
+        <!-- ===================================================== -->
 
-    <button
-        id="btnReturnConfirm"
-        label="RETURN"
-        sclass="return-confirm-button"
-        style="
-            background:#173b63 !important;
-            background-color:#173b63 !important;
-            color:#ffffff !important;
-            border:1px solid #173b63 !important;
-            border-radius:5px;
-            font-weight:600;
-            font-size:12px;
-            padding:5px 14px;
-            min-width:80px;
-            height:32px;
-            cursor:pointer;
-        "/>
+        <div
+            style="
+                display:flex;
+                justify-content:flex-end;
+                align-items:center;
+                gap:10px;
+                padding:13px 22px;
+                border-top:1px solid #e4eaf1;
+                background:#ffffff;
+                box-sizing:border-box;
+            ">
 
-</div>
+
+            <!-- CANCEL -->
+
+            <button
+                id="btnReturnCancel"
+                label="CANCEL"
+                style="
+                    width:85px;
+                    height:34px;
+                    background:#ffffff !important;
+                    background-color:#ffffff !important;
+                    color:#173b63 !important;
+                    border:1px solid #173b63 !important;
+                    border-radius:5px;
+                    font-size:12px;
+                    font-weight:600;
+                    cursor:pointer;
+                "/>
+
+
+            <!-- RETURN -->
+
+            <button
+                id="btnReturnConfirm"
+                label="RETURN"
+                style="
+                    width:85px;
+                    height:34px;
+                    background:#173b63 !important;
+                    background-color:#173b63 !important;
+                    color:#ffffff !important;
+                    border:1px solid #173b63 !important;
+                    border-radius:5px;
+                    font-size:12px;
+                    font-weight:600;
+                    cursor:pointer;
+                "/>
+
+        </div>
 
     </window>
 
