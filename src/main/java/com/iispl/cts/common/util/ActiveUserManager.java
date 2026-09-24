@@ -47,9 +47,8 @@ public class ActiveUserManager {
     public static int getActiveUserCount() {
         return userDesktopMap.size();
     }
-    /**
-     * Returns active user count excluding a specific user (e.g. the supervising admin).
-     */
+    
+    //Returns active user count excluding admin. 
     public static int getActiveUserCount(String excludeUserId) {
         if (excludeUserId == null || excludeUserId.trim().isEmpty()) {
             return userDesktopMap.size();

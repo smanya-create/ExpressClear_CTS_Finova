@@ -2,16 +2,14 @@ package com.iispl.cts.controller.admin;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import org.zkoss.zk.ui.Sessions;
+import java.util.Date;
+import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
@@ -25,6 +23,7 @@ import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.common.util.ClearingTimeMock;
 import com.iispl.cts.common.util.SecurityUtil;
+import com.iispl.cts.dto.AuditSearchResult;
 import com.iispl.cts.entity.AuditLog;
 import com.iispl.cts.service.AuditService;
 import com.iispl.cts.serviceimpl.AuditServiceImpl;
@@ -33,7 +32,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // Filter controls (cmbModuleFilter removed)
+    // Filter controls
     private Datebox dtFrom;
     private Datebox dtTo;
     private Textbox txtSearchAudit;
@@ -82,29 +81,38 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         }
     }
 
+    /**
+     * Executes the record retrieval and the count calculation in parallel
+     */
     private void loadAuditPage(int pageIndex) {
         Date from = dtFrom != null ? dtFrom.getValue() : null;
         Date to = dtTo != null ? dtTo.getValue() : null;
         String q = (txtSearchAudit != null && txtSearchAudit.getValue() != null) 
                    ? txtSearchAudit.getValue().trim() : "";
 
-        // 1. Fetch total count from DB (passing null for module to get all records)
-        this.totalRecords = auditService.countAuditLogs(from, to, null, null, q);
+        // Safe index boundary check
+        int targetIndex = Math.max(0, pageIndex);
+        int offset = targetIndex * PAGE_SIZE;
+
+        // 1. Single non-blocking call: dispatches both count & search SQL queries simultaneously
+        AuditSearchResult result = auditService.searchAuditLogsConcurrently(
+                from, to, null, null, q, offset, PAGE_SIZE
+        );
+
+        // 2. Extract results
+        this.totalRecords = result.getTotalCount();
         this.totalPages = (int) Math.ceil((double) this.totalRecords / PAGE_SIZE);
         if (this.totalPages < 1) {
             this.totalPages = 1;
         }
 
-        // Validate index boundaries
-        if (pageIndex >= this.totalPages) {
-            pageIndex = this.totalPages - 1;
+        // Adjust index if out of bounds (e.g., after applying a stricter filter while on a later page)
+        if (targetIndex >= this.totalPages) {
+            targetIndex = this.totalPages - 1;
         }
-        if (pageIndex < 0) {
-            pageIndex = 0;
-        }
-        this.activePageIndex = pageIndex;
+        this.activePageIndex = targetIndex;
 
-        // 2. Update pagination toolbar display
+        // 3. Update pagination toolbar display
         if (lblAuditCount != null) {
             lblAuditCount.setValue(this.totalRecords + " records found");
         }
@@ -123,11 +131,8 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         if (btnNextPage != null) btnNextPage.setDisabled(isLast);
         if (btnLastPage != null) btnLastPage.setDisabled(isLast);
 
-        // 3. Query DB with LIMIT & OFFSET (null passed for module)
-        int offset = this.activePageIndex * PAGE_SIZE;
-        List<AuditLog> logs = auditService.searchAuditLogs(from, to, null, null, q, offset, PAGE_SIZE);
-
-        renderAuditRows(logs);
+        // 4. Render the returned rows
+        renderAuditRows(result.getLogs());
     }
 
     private void renderAuditRows(List<AuditLog> logs) {
@@ -137,7 +142,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         if (logs == null || logs.isEmpty()) {
             Row emptyRow = new Row();
             Cell cell = new Cell();
-            cell.setColspan(6); // 6 columns: DATE AND TIME, USER, ACTION, DETAILS, IP ADDRESS, STATUS
+            cell.setColspan(6);
             cell.setStyle("text-align: center; padding: 24px;");
 
             Label emptyLbl = new Label("No audit records found for the selected criteria.");
@@ -149,7 +154,6 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // 1. Retrieve the session clearing date (same date used by Header)
         Object sessionDateObj = Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
         LocalDate clearingDate;
         if (sessionDateObj instanceof LocalDate) {
@@ -166,7 +170,8 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         for (AuditLog log : logs) {
             Row row = new Row();
             row.setStyle("border-bottom: 1px solid #f1f5f9; min-height: 48px;");
-            // 1. DATE AND TIME (Matches Header clearing date & time window)
+
+            // 1. DATE AND TIME
             String displayTime;
             if (log.getTimestamp() != null) {
                 LocalTime logTime = log.getTimestamp().toInstant()
@@ -180,7 +185,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             lblTime.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblTime);
 
-            // 2. USER (Clean, no brackets or role name)
+            // 2. USER
             String cleanUser = log.getUsername() != null && !log.getUsername().trim().isEmpty() 
                              ? log.getUsername().trim() 
                              : (log.getUserId() != null ? log.getUserId().trim() : "-");
@@ -189,21 +194,21 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block; text-align: center;");
             row.appendChild(lblUser);
 
-            // 3. ACTION (Centered)
+            // 3. ACTION
             Label lblAction = new Label(log.getAction() != null ? log.getAction() : "-");
             lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155; display: block; text-align: center;");
             row.appendChild(lblAction);
 
-         // 4. DETAILS (Clean layout with badges)
+            // 4. DETAILS
             Component detailsCell = createFormattedDetailsCell(log.getDetails());
             row.appendChild(detailsCell);
 
-            // 5. IP ADDRESS (Centered)
+            // 5. IP ADDRESS
             Label lblIp = new Label(log.getIpAddress() != null ? log.getIpAddress() : "-");
             lblIp.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblIp);
 
-            // 6. STATUS BADGE (Centered)
+            // 6. STATUS BADGE
             Label lblStatus = new Label(log.getStatus() != null ? log.getStatus() : "SUCCESS");
             String baseBadgeStyle = "display: table; margin: 0 auto; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
 
@@ -214,11 +219,10 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             }
 
             row.appendChild(lblStatus);
-
             rowsAudit.appendChild(row);
         }
-        
     }
+
     private Component createFormattedDetailsCell(String rawDetails) {
         org.zkoss.zul.Div container = new org.zkoss.zul.Div();
         container.setStyle("display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 4px 12px;");
@@ -230,7 +234,6 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             return container;
         }
 
-        // If it's a pipe-separated update log (e.g., Updated user: suneesh | Status -> ACTIVE | Role -> OUTWARD_CHECKER)
         if (rawDetails.contains("|")) {
             String[] parts = rawDetails.split("\\|");
             for (int i = 0; i < parts.length; i++) {
@@ -238,11 +241,9 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
                 
                 if (segment.startsWith("Updated user:")) {
                     Label lblUser = new Label(segment);
-                    // Match normal font size, regular weight (400), and color as standard details text
                     lblUser.setStyle("font-size: 12px; font-weight: 400; color: #475569; margin-right: 4px;");
                     container.appendChild(lblUser);
                 } else {
-                    // Turn "Status -> ACTIVE" or "Role -> OUTWARD_CHECKER" into clean pills
                     Label pill = new Label(segment.replace("->", "→"));
                     pill.setStyle("font-size: 11px; font-weight: 500; color: #334155; background: #f1f5f9; "
                             + "border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 4px; white-space: nowrap;");
@@ -250,7 +251,6 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
                 }
             }
         } else {
-            // Standard single-line detail (e.g. Login messages)
             Label lbl = new Label(rawDetails);
             lbl.setStyle("font-size: 12px; color: #475569; line-height: 1.4;");
             container.appendChild(lbl);

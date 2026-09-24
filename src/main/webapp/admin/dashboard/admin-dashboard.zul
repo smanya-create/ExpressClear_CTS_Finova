@@ -2,108 +2,140 @@
 <?page title="CTS - Admin - Session Management"?>
 <?link rel="stylesheet" type="text/css" href="/css/admin/dashboard.css"?>
 <zk>
-    <borderlayout sclass="main-layout" vflex="1" hflex="1" apply="com.iispl.cts.controller.admin.AdminDashboardController">
-        
-        <!-- Reusable Left Sidebar -->
-        <west width="220px" border="none" collapsible="false">
-            <include src="/components/sidebar.zul" role="ADMIN" activeTab="admin-dashboard" />
-        </west>
+	<borderlayout sclass="main-layout" vflex="1" hflex="1"
+		apply="com.iispl.cts.controller.admin.AdminDashboardController">
 
-        <!-- Main Body Area -->
-        <center border="none">
-            <borderlayout vflex="1" hflex="1">
-                
-                <!-- Fixed Header -->
-                <north size="auto" border="none">
-                    <div>
-                        <!-- Active user counter timer: triggers every 3s -->
-                        <timer id="timerActiveUsers" delay="1000" repeats="true" onTimer="$composer.refreshActiveUsers()" />
-                        <include src="/components/header.zul" 
-                                 pageTitle="Admin Dashboard" 
-                                 pageSubtitle=""
-                                 showNotifications="false" />
-                    </div>
-                </north>
+		<west width="220px" border="none" collapsible="false">
+			<include src="/components/sidebar.zul" role="ADMIN"
+				activeTab="admin-dashboard" />
+		</west>
 
-                <!-- Non-Scrollable Main Content Area -->
-                <center border="none" autoscroll="false" style="background: #eef3f8; overflow: hidden;">
-                    <vlayout sclass="cts-content-wrapper" spacing="12px" hflex="1" vflex="1" style="overflow: hidden; padding: 14px 20px;">
-                        
-                        <!-- Top Heading -->
-                        <vlayout sclass="cts-section-header" spacing="2px">
-                            <label value="Session Management" sclass="cts-main-title" />
-                            <label value="Select EOD or BOD and manage the required CTS session." sclass="cts-main-subtitle" />
-                        </vlayout>
+		<center border="none">
+			<borderlayout vflex="1" hflex="1">
+			
+				<north size="auto" border="none">
+					<div>
+						<!-- Active user counter timer: triggers every 3s -->
+						<timer id="timerActiveUsers" delay="1000"
+							repeats="true" onTimer="$composer.refreshActiveUsers()" />
+						<include src="/components/header.zul"
+							pageTitle="Admin Dashboard" pageSubtitle=""
+							showNotifications="false" />
+					</div>
+				</north>
 
-                        <!-- 3-Column Stat KPI Ribbon -->
-                        <hlayout sclass="cts-stats-card" hflex="1" spacing="0">
-                            
-                            <!-- Col 1: CURRENT CLEARING DATE -->
-                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="padding: 10px 16px;">
-                                <label value="CURRENT CLEARING DATE" sclass="cts-stat-header" />
-                                <label id="lblClearingDate" sclass="cts-stat-num" />
-                            </vlayout>
-                            
-                            <!-- Col 2: SESSION STATUS -->
-                            <vlayout sclass="cts-stat-col" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
-                                <label value="SESSION STATUS" sclass="cts-stat-header" />
-                                <hlayout sclass="cts-status-container" valign="middle" spacing="6px">
-                                    <div id="dotSessionStatus" sclass="cts-status-dot-open" />
-                                    <label id="lblSessionStatus" value="OPEN" sclass="cts-status-text-open" />
-                                </hlayout>
-                            </vlayout>
-                            
-                            <!-- Col 3: LOGGED-IN USERS -->
-                            <vlayout sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px" style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
-                                <label value="LOGGED-IN USERS" sclass="cts-stat-header" />
-                                <label id="lblLoggedInUsers" value="0" sclass="cts-stat-num" />
-                            </vlayout>
+				<!-- Main Content Area -->
+				<center border="none" autoscroll="false"
+					style="background: #eef3f8; overflow: hidden;">
+					<vlayout sclass="cts-content-wrapper" spacing="12px"
+						hflex="1" vflex="1"
+						style="overflow: hidden; padding: 14px 20px;">
 
-                        </hlayout>
+						<!-- Top Heading -->
+						<vlayout sclass="cts-section-header"
+							spacing="2px">
+							<label value="Session Management"
+								sclass="cts-main-title" />
+							<label
+								value="Select EOD or BOD and manage the required CTS session."
+								sclass="cts-main-subtitle" />
+						</vlayout>
 
-                        <!-- Session Action Selection Card -->
-                        <vlayout sclass="cts-action-card" spacing="14px">
-                            <vlayout spacing="2px">
-                                <label value="Session Action" sclass="cts-card-title" />
-                                <label value="Choose the session operation you want to perform." sclass="cts-card-subtitle" />
-                            </vlayout>
+						<!-- 3-Column Stat KPI Ribbon -->
+						<hlayout sclass="cts-stats-card" hflex="1"
+							spacing="0">
 
-                            <!-- Simplified Clean EOD and BOD Option Cards -->
-                            <hlayout sclass="cts-options-grid" spacing="16px" hflex="1">
-                                <!-- End of Day (EOD) Card -->
-                                <div id="cardEOD" sclass="cts-choice-box cts-choice-box-active" hflex="1">
-                                    <hlayout sclass="cts-choice-inner" spacing="12px" valign="middle">
-                                        <div id="ringEOD" sclass="cts-custom-radio-ring cts-radio-checked">
-                                            <div sclass="cts-radio-dot" />
-                                        </div>
-                                        <label value="End of Day (EOD)" sclass="cts-choice-title" />
-                                    </hlayout>
-                                </div>
+							<!-- Col 1: CURRENT CLEARING DATE -->
+							<vlayout sclass="cts-stat-col" hflex="1"
+								spacing="4px" style="padding: 10px 16px;">
+								<label value="CURRENT CLEARING DATE"
+									sclass="cts-stat-header" />
+								<label id="lblClearingDate"
+									sclass="cts-stat-num" />
+							</vlayout>
 
-                                <!-- Begin of Day (BOD) Card -->
-                                <div id="cardBOD" sclass="cts-choice-box" hflex="1">
-                                    <hlayout sclass="cts-choice-inner" spacing="12px" valign="middle">
-                                        <div id="ringBOD" sclass="cts-custom-radio-ring">
-                                            <div sclass="cts-radio-dot" />
-                                        </div>
-                                        <label value="Begin of Day (BOD)" sclass="cts-choice-title" />
-                                    </hlayout>
-                                </div>
-                            </hlayout>
+							<!-- Col 2: SESSION STATUS -->
+							<vlayout sclass="cts-stat-col" hflex="1"
+								spacing="4px"
+								style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
+								<label value="SESSION STATUS"
+									sclass="cts-stat-header" />
+								<hlayout sclass="cts-status-container"
+									valign="middle" spacing="6px">
+									<div id="dotSessionStatus"
+										sclass="cts-status-dot-open" />
+									<label id="lblSessionStatus"
+										value="OPEN" sclass="cts-status-text-open" />
+								</hlayout>
+							</vlayout>
 
-                            <!-- Dynamic Action Button (CLOSE SESSION / START SESSION) -->
-                            <button id="btnStartSession" label="START SESSION" sclass="cts-btn-primary" />
-                        </vlayout>
+							<!-- Col 3: LOGGED-IN USERS -->
+							<vlayout
+								sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px"
+								style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
+								<label value="LOGGED-IN USERS"
+									sclass="cts-stat-header" />
+								<label id="lblLoggedInUsers" value="0"
+									sclass="cts-stat-num" />
+							</vlayout>
+							
+							
 
-                        <!-- Portal Footer -->
-                        <hlayout sclass="cts-portal-footer" hflex="1" style="justify-content: space-between; margin-top: auto; padding-top: 8px;">
-                            <label value="Express Clear CTS · Admin " sclass="cts-footer-left" />
-                            <label value="Secure Session Management" sclass="cts-footer-right" />
-                        </hlayout>
+						</hlayout>
 
-                    </vlayout>
-                </center>
-            </borderlayout>
-        </center>
-    </borderlayout>
+						<!-- Session Action Selection Card -->
+						<vlayout sclass="cts-action-card"
+							spacing="14px">
+							<vlayout spacing="2px">
+								<label value="Session Action"
+									sclass="cts-card-title" />
+								<label
+									value="Choose the session operation you want to perform."
+									sclass="cts-card-subtitle" />
+							</vlayout>
+
+							<!-- EOD and BOD Option Cards -->
+							<hlayout sclass="cts-options-grid"
+								spacing="16px" hflex="1">
+								<!-- End of Day (EOD) Card -->
+								<div id="cardEOD"
+									sclass="cts-choice-box cts-choice-box-active" hflex="1">
+									<hlayout sclass="cts-choice-inner"
+										spacing="12px" valign="middle">
+										<div id="ringEOD"
+											sclass="cts-custom-radio-ring cts-radio-checked">
+											<div sclass="cts-radio-dot" />
+										</div>
+										<label value="End of Day (EOD)"
+											sclass="cts-choice-title" />
+									</hlayout>
+								</div>
+
+								<!-- Begin of Day (BOD) Card -->
+								<div id="cardBOD"
+									sclass="cts-choice-box" hflex="1">
+									<hlayout sclass="cts-choice-inner"
+										spacing="12px" valign="middle">
+										<div id="ringBOD"
+											sclass="cts-custom-radio-ring">
+											<div sclass="cts-radio-dot" />
+										</div>
+										<label
+											value="Begin of Day (BOD)" sclass="cts-choice-title" />
+									</hlayout>
+								</div>
+							</hlayout>
+
+							<!-- Dynamic Action Button (CLOSE SESSION / START SESSION) -->
+							<button id="btnStartSession"
+								label="START SESSION" sclass="cts-btn-primary" />
+						</vlayout>
+
+
+
+					</vlayout>
+				</center>
+			</borderlayout>
+		</center>
+	</borderlayout>
 </zk>

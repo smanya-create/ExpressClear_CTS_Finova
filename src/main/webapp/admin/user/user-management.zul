@@ -5,17 +5,17 @@
 	<borderlayout sclass="main-layout" height="100vh"
 		apply="com.iispl.cts.controller.admin.UserManagementController">
 
-		<!-- Left Sidebar Navigation -->
+		<!--  Sidebar  -->
 		<west width="220px" border="none" collapsible="false">
 			<include src="/components/sidebar.zul" role="ADMIN"
 				activeTab="user-management" />
 		</west>
 
-		<!-- Main Body Area -->
+		<!-- Main Body  -->
 		<center border="none">
 			<borderlayout vflex="1" hflex="1">
 
-				<!-- Fixed Header (Does NOT scroll) -->
+				<!-- Fixed Header -->
 				<north size="auto" border="none">
 					<include id="incHeader" src="/components/header.zul"
 						pageTitle="Admin Dashboard" pageSubtitle="User Management" />

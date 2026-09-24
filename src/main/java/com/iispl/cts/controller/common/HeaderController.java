@@ -394,9 +394,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
         for (NotificationItem item : notificationQueue) {
             Div notifRow = new Div();
             notifRow.setStyle("padding: 10px 14px; border-bottom: 1px solid #edf2f7; cursor: pointer; transition: background 0.2s;");
-            notifRow.setWidgetListener("onMouseOver", "this.style.background='#f7fafc'");
-            notifRow.setWidgetListener("onMouseOut", "this.style.background='white'");
-
+            
             Vlayout itemLayout = new Vlayout();
             itemLayout.setSpacing("2px");
 
@@ -409,47 +407,11 @@ public class HeaderController extends GenericForwardComposer<Component> {
             itemLayout.appendChild(msgLabel);
             itemLayout.appendChild(timeLabel);
             notifRow.appendChild(itemLayout);
-
-            notifRow.addEventListener("onClick", (Event event) -> {
-                if (popupNotifications != null) popupNotifications.close();
-                handleNotificationClick(activeRole, item.message);
-            });
-
             containerNotificationList.appendChild(notifRow);
         }
     }
 
-    private void handleNotificationClick(String role, String message) {
-        if (role == null) return;
-        String normalizedRole = role.trim().toUpperCase();
-
-        if ("OUTWARD_MAKER".equals(normalizedRole)) {
-            Executions.sendRedirect("/outward/maker/unprocessed-cheques.zul");
-            return;
-        }
-        if ("OUTWARD_CHECKER".equals(normalizedRole)) {
-            Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
-            return;
-        }
-        if ("INWARD_MAKER".equals(normalizedRole)) {
-            Executions.sendRedirect("/inward/maker/inward-maker-dashboard.zul");
-            return;
-        }
-        if ("INWARD_CHECKER".equals(normalizedRole)) {
-            Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
-            return;
-        }
-
-        if (message != null) {
-            String lowerMsg = message.toLowerCase();
-            if (lowerMsg.contains("checker")) {
-                Executions.sendRedirect("/inward/checker/inward-checker-dashboard.zul");
-            } else if (lowerMsg.contains("maker")) {
-                Executions.sendRedirect("/inward/maker/inward-maker-dashboard.zul");
-            }
-        }
-    }
-
+   
     public void onClickMarkAllRead() {
         String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";
         String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
