@@ -18,7 +18,6 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Vlayout;
@@ -75,13 +74,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		if (inwardMakerBtnLast != null) inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
 		if (inwardMakerBtnBack != null) inwardMakerBtnBack.addEventListener("onClick", event -> goBackToDashboard());
 
-		comp.addEventListener("onInitialDataLoad", new EventListener<Event>() {
-			@Override
-			public void onEvent(Event event) throws Exception {
-				renderCurrentPage();
-			}
-		});
-
 		loadBatchDetails(comp);
 	}
 
@@ -132,10 +124,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 			this.currentPage = 1;
 
 			renderCurrentPage();
-
-			if (comp != null) {
-				Events.echoEvent("onInitialDataLoad", comp, null);
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -218,16 +206,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		row.appendChild(actionComponent);
 
 		inwardMakerRowsChequeDetails.appendChild(row);
-	}
-
-	private boolean doesBatchHavePendingMicrRepair() {
-		if (inwardChequeList == null) return false;
-		for (InwardCheque chq : inwardChequeList) {
-			if (chq != null && isMicrRepairStatus(normalizeStatus(chq.getChequeStatus()))) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private Component createActionComponent(InwardCheque cheque) {
