@@ -4,11 +4,6 @@
 
     <style src="/css/inward/reports.css"/>
 
-    <!--  <zscript>
-    org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USER_ROLE", "INWARD_CHECKER");
-    org.zkoss.zk.ui.Sessions.getCurrent().setAttribute("CTS_USERNAME", "Alex");
-</zscript>-->
-
     <borderlayout width="100%"
                   height="100%"
                   apply="com.iispl.cts.controller.inward.checker.InwardCheckerReportsController">
@@ -24,7 +19,7 @@
 
                 <north height="70px"
                        border="0">
-                    <!-- FIXED HEADER INCLUDE -->
+                       
                     <include src="/components/header.zul" 
                              pageTitle="Inward Processing" 
                              pageSubtitle="Reports"/>
@@ -115,7 +110,7 @@
                                             align="center"
                                             width="20%"/>
 
-                                <listheader label="BSF"
+                                <listheader label="Confirmation File"
                                             align="center"
                                             width="20%"/>
 
