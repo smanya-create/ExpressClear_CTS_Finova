@@ -74,13 +74,12 @@
 					sclass="inward-maker-cheque-grid">
 
 					<columns sizable="true">
-						<column label="Cheque No." width="11%" align="center" />
-						<column label="Drawee Account No." width="16%" align="center" />
-						<column label="Cheque Date" width="12%" align="center" />
-						<column label="MICR Code" width="12%" align="center" />
-						<column label="Cheque Status" width="18%" align="center" />
-						<column label="Cheque Amount" width="14%" align="center" />
-						<column label="Action" width="17%" align="center" />
+					    <column label="Cheque No." width="13%" align="center" />
+					    <column label="Drawee Account No." width="19%" align="center" />
+					    <column label="Cheque Date" width="14%" align="center" />
+					    <column label="Cheque Status" width="20%" align="center" />
+					    <column label="Cheque Amount" width="16%" align="center" />
+					    <column label="Action" width="18%" align="center" />
 					</columns>
 
 					<rows id="inwardMakerRowsChequeDetails" />
