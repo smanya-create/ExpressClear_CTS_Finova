@@ -522,36 +522,313 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	private void updatePaginationProgress() {
 
-		if (cheques == null || cheques.isEmpty()) {
+	    if (cheques == null || cheques.isEmpty()) {
 
-			progressBar.setValue(0);
+	        if (progressBar != null) {
+	            progressBar.setValue(0);
+	        }
 
-			lblProgress.setValue("0/0 (0%)");
+	        if (lblProgress != null) {
+	            lblProgress.setValue("0/0 (0%)");
+	        }
 
-			lblCurrentChequeNavigation.setValue("0 of 0");
+	        if (lblCurrentChequeNavigation != null) {
+	            lblCurrentChequeNavigation.setValue("0 of 0");
+	        }
 
-			btnPrevious.setDisabled(true);
+	        if (lblCurrentCheque != null) {
+	            lblCurrentCheque.setValue("0");
+	        }
 
-			btnNext.setDisabled(true);
+	        if (lblRemaining != null) {
+	            lblRemaining.setValue("0");
+	        }
 
-			return;
-		}
+	        if (lblChequeCount != null) {
+	            lblChequeCount.setValue("0");
+	        }
 
-		int total = cheques.size();
+	        if (btnPrevious != null) {
+	            btnPrevious.setDisabled(true);
+	        }
 
-		int current = currentIndex + 1;
+	        if (btnNext != null) {
+	            btnNext.setDisabled(true);
+	        }
 
-		int percentage = (current * 100) / total;
+	        return;
+	    }
 
-		progressBar.setValue(percentage);
+	    int total = cheques.size();
 
-		lblProgress.setValue(current + "/" + total + " (" + percentage + "%)");
+	    // Safety check
+	    if (currentIndex < 0) {
+	        currentIndex = 0;
+	    }
 
-		lblCurrentChequeNavigation.setValue(current + " of " + total);
+	    if (currentIndex >= total) {
+	        currentIndex = total - 1;
+	    }
 
-		btnPrevious.setDisabled(currentIndex <= 0);
+	    int current = currentIndex + 1;
 
-		btnNext.setDisabled(currentIndex >= total - 1);
+	    int percentage = (current * 100) / total;
+
+	    // Progress bar
+	    if (progressBar != null) {
+	        progressBar.setValue(percentage);
+	    }
+
+	    // Example: 2/5 (40%)
+	    if (lblProgress != null) {
+	        lblProgress.setValue(
+	                current + "/" + total + " (" + percentage + "%)"
+	        );
+	    }
+
+	    // Example: 2 of 5
+	    if (lblCurrentChequeNavigation != null) {
+	        lblCurrentChequeNavigation.setValue(
+	                current + " of " + total
+	        );
+	    }
+
+	    // Current cheque number
+	    if (lblCurrentCheque != null) {
+	        lblCurrentCheque.setValue(
+	                String.valueOf(current)
+	        );
+	    }
+
+	    // Remaining
+	    if (lblRemaining != null) {
+	        lblRemaining.setValue(
+	                String.valueOf(total - current)
+	        );
+	    }
+
+	    // Total cheque count
+	    if (lblChequeCount != null) {
+	        lblChequeCount.setValue(
+	                String.valueOf(total)
+	        );
+	    }
+
+	    // Previous button
+	    if (btnPrevious != null) {
+	        btnPrevious.setDisabled(currentIndex <= 0);
+	    }
+
+	    // Next button
+	    if (btnNext != null) {
+	        btnNext.setDisabled(currentIndex >= total - 1);
+	    }
+	}
+	
+	
+	private void refreshQueueAfterAction() {
+
+	    try {
+
+	        System.out.println("====================================");
+	        System.out.println("REFRESHING CHECKER QUEUE");
+	        System.out.println("====================================");
+
+	        /*
+	         * ---------------------------------------------------------
+	         * SAVE CURRENT CHEQUE NUMBER
+	         * ---------------------------------------------------------
+	         *
+	         * We remember the current cheque before reloading.
+	         */
+	        String currentChequeNumber = null;
+
+	        if (cheques != null
+	                && !cheques.isEmpty()
+	                && currentIndex >= 0
+	                && currentIndex < cheques.size()) {
+
+	            OutwardCheque selectedCheque = cheques.get(currentIndex);
+
+	            if (selectedCheque != null) {
+	                currentChequeNumber =
+	                        selectedCheque.getChequeNumber();
+	            }
+	        }
+
+	        /*
+	         * ---------------------------------------------------------
+	         * RELOAD FROM DATABASE
+	         * ---------------------------------------------------------
+	         *
+	         * This gets the latest queue from DB.
+	         */
+	        cheques = outwardCheckerQueueService
+	                .getChequesByBatchId(batchId);
+
+	        if (cheques == null) {
+	            cheques = new ArrayList<>();
+	        }
+
+	        /*
+	         * ---------------------------------------------------------
+	         * CLEAR ACCOUNT VALIDATION RESULTS
+	         * ---------------------------------------------------------
+	         */
+	        accountValidationResults.clear();
+
+	        /*
+	         * Restore VALID status for already verified cheques.
+	         */
+	        for (OutwardCheque loadedCheque : cheques) {
+
+	            if (loadedCheque == null) {
+	                continue;
+	            }
+
+	            String chequeId =
+	                    nullSafe(loadedCheque.getOutwardChequeId());
+
+	            String status =
+	                    nullSafe(loadedCheque.getChequeStatus());
+
+	            if ("VERIFIED_BY_CHECKER".equalsIgnoreCase(status)) {
+
+	                accountValidationResults.put(
+	                        chequeId,
+	                        "VALID"
+	                );
+	            }
+	        }
+
+	        /*
+	         * ---------------------------------------------------------
+	         * RELOAD BATCH STATUS
+	         * ---------------------------------------------------------
+	         */
+	        loadBatchStatus();
+
+	        /*
+	         * ---------------------------------------------------------
+	         * NO CHEQUES LEFT
+	         * ---------------------------------------------------------
+	         */
+	        if (cheques.isEmpty()) {
+
+	            currentIndex = 0;
+	            currentCheque = null;
+
+	            updatePaginationProgress();
+
+	            updateXmlGenerationButton();
+
+	            System.out.println(
+	                    "No cheques remaining in checker queue."
+	            );
+
+	            return;
+	        }
+
+	        /*
+	         * ---------------------------------------------------------
+	         * FIND CURRENT CHEQUE AGAIN
+	         * ---------------------------------------------------------
+	         *
+	         * If the current cheque still exists, stay on it.
+	         *
+	         * If it was rejected/returned and removed from the
+	         * queue, keep the same position if possible.
+	         */
+	        int newIndex = -1;
+
+	        if (currentChequeNumber != null) {
+
+	            for (int i = 0; i < cheques.size(); i++) {
+
+	                OutwardCheque cheque = cheques.get(i);
+
+	                if (cheque == null) {
+	                    continue;
+	                }
+
+	                if (currentChequeNumber.equals(
+	                        cheque.getChequeNumber())) {
+
+	                    newIndex = i;
+	                    break;
+	                }
+	            }
+	        }
+
+	        /*
+	         * Current cheque still exists.
+	         */
+	        if (newIndex >= 0) {
+
+	            currentIndex = newIndex;
+
+	        } else {
+
+	            /*
+	             * Current cheque was removed.
+	             *
+	             * Stay at the same index if possible.
+	             */
+	            if (currentIndex >= cheques.size()) {
+
+	                currentIndex = cheques.size() - 1;
+	            }
+
+	            if (currentIndex < 0) {
+	                currentIndex = 0;
+	            }
+	        }
+
+	        /*
+	         * ---------------------------------------------------------
+	         * DISPLAY NEW CURRENT CHEQUE
+	         * ---------------------------------------------------------
+	         */
+	        displayCheque();
+
+	        /*
+	         * ---------------------------------------------------------
+	         * UPDATE PAGINATION
+	         * ---------------------------------------------------------
+	         */
+	        updatePaginationProgress();
+
+	        /*
+	         * ---------------------------------------------------------
+	         * UPDATE APPROVE BATCH BUTTON
+	         * ---------------------------------------------------------
+	         */
+	        updateXmlGenerationButton();
+
+	        System.out.println(
+	                "Checker queue refreshed successfully."
+	        );
+
+	        System.out.println(
+	                "Total cheques = " + cheques.size()
+	        );
+
+	        System.out.println(
+	                "Current index = " + currentIndex
+	        );
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        Messagebox.show(
+	                "Unable to refresh checker queue.\n\n"
+	                        + e.getMessage(),
+	                "Checker Queue",
+	                Messagebox.OK,
+	                Messagebox.ERROR
+	        );
+	    }
 	}
 
 	private void loadRejectedReasons() {
@@ -2177,75 +2454,24 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 								}
 
 								// ============================================================
-								// REMOVE RETURNED CHEQUE FROM CURRENT QUEUE
+								// REFRESH QUEUE FROM DATABASE
 								// ============================================================
 
-								cheques.remove(currentIndex);
+								refreshQueueAfterAction();
 
 								// ============================================================
-								// CHECK IF ANY CHEQUE IS REMAINING
+								// CHECK IF NO CHEQUES REMAIN
 								// ============================================================
 
-								if (cheques.isEmpty()) {
+								if (cheques == null || cheques.isEmpty()) {
 
-									// --------------------------------------------------------
-									// NO CHEQUE REMAINING
-									// --------------------------------------------------------
+								    Executions.sendRedirect(
+								            "/outward/checker/dashboard.zul"
+								    );
 
-									currentIndex = 0;
-
-									if (lblCurrentCheque != null) {
-										lblCurrentCheque.setValue("0");
-									}
-
-									if (lblRemaining != null) {
-										lblRemaining.setValue("0");
-									}
-
-									if (lblCurrentChequeNavigation != null) {
-										lblCurrentChequeNavigation.setValue("Cheque 0 of 0 · 0 remaining");
-									}
-
-									updateXmlGenerationButton();
-
-									// --------------------------------------------------------
-									// REFRESH BATCH STATUS
-									// --------------------------------------------------------
-
-									loadChequeStatus();
-
-									// --------------------------------------------------------
-									// GO TO CHECKER DASHBOARD
-									// --------------------------------------------------------
-
-									Executions.sendRedirect("/outward/checker/dashboard.zul");
-
-									return;
+								    return;
 								}
-
-							
-								if (currentIndex >= cheques.size()) {
-
-									currentIndex = cheques.size() - 1;
-								}
-
-								// ============================================================
-								// DISPLAY NEXT CHEQUE
-								// ============================================================
-
-								displayCheque();
-
-								// ============================================================
-								// REFRESH BATCH STATUS
-								// ============================================================
-
-								loadChequeStatus();
-
-								// ============================================================
-								// UPDATE XML BUTTON
-								// ============================================================
-
-								updateXmlGenerationButton();
+								
 								Messagebox.show(
 										"Cheque returned to Maker.\n\n" + "Cheque Status: " + chequeStatus + "\n"
 												+ "Batch Status: ON_HOLD",
@@ -2286,12 +2512,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	            returnType = "Data Entry";
 	        }
 
-	        String message =
-	                "Cheque "
-	                + cheque.getChequeNumber()
-	                + " has been returned to Maker for "
-	                + returnType
-	                + ".";
+	        String message = "Cheque " + cheque.getChequeNumber() + " from Batch " + cheque.getOutwardBatchId() + " has been returned to Maker for " + returnType + ".";
 
 	        String sql =
 	                "INSERT INTO public.notifications "
@@ -2795,37 +3016,17 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 							closeRejectWindow();
 
-							cheques.remove(currentIndex);
-
-							if (cheques.isEmpty()) {
-
-								currentIndex = 0;
-
-								if (lblCurrentCheque != null) {
-									lblCurrentCheque.setValue("0");
-								}
-
-								if (lblRemaining != null) {
-									lblRemaining.setValue("0");
-								}
-
-								if (lblCurrentChequeNavigation != null) {
-
-									lblCurrentChequeNavigation.setValue("Cheque 0 of 0 · 0 remaining");
-								}
-
-								updateXmlGenerationButton();
-
-							} else {
-
-								if (currentIndex >= cheques.size()) {
-
-									currentIndex = cheques.size() - 1;
-								}
-
-								displayCheque();
-							}
-
+							/*
+							 * ---------------------------------------------------------
+							 * REFRESH QUEUE AFTER REJECTION
+							 * ---------------------------------------------------------
+							 *
+							 * Do NOT manually remove the cheque here.
+							 *
+							 * The refresh method reloads the latest queue from DB.
+							 */
+							refreshQueueAfterAction();
+							
 							Messagebox.show(
 									"Cheque rejected successfully.\n\n" + "Cheque Number: " + cheque.getChequeNumber()
 											+ "\n" + "Reason: " + reasonName,
