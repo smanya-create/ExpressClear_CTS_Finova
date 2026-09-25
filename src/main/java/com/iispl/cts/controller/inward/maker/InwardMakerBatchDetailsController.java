@@ -301,29 +301,37 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		String s = normalizeStatus(status);
 
 		if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) {
-			return "checker pending";
+			return "Checker Pending";
 		}
 		if (isMicrRepairStatus(s)) {
-			return "pending micr repair";
+			return "Pending MICR Repair";
 		}
 		if (isDataEntryStatus(s)) {
-			return "pending data entry";
+			return "Pending Data Entry";
 		}
 		if ("REJECTION_REQUESTED".equals(s)) {
-			return "rejection requested";
+			return "Rejection Requested";
 		}
 		if ("REJECTED".equals(s)) {
-			return "rejected";
+			return "Rejected";
+		}
+		if ("ACCEPTED".equals(s)) {
+			return "Accepted";
 		}
 		if ("COMPLETED".equals(s)) {
-			return "completed";
-		}
-		if ("SEND_BACK_TO_MAKER".equals(s) || "ON_HOLD".equals(s)) {
-			return "on hold";
+			return "Completed";
 		}
 
-		// Fallback: strip underscores, lowercase, and let CSS capitalize
-		return s.replace("_", " ").toLowerCase().trim();
+		// Fallback: Title Case
+		StringBuilder sb = new StringBuilder();
+		for (String word : s.replace("_", " ").split("\\s+")) {
+			if (!word.isEmpty()) {
+				sb.append(Character.toUpperCase(word.charAt(0)))
+				  .append(word.substring(1).toLowerCase())
+				  .append(" ");
+			}
+		}
+		return sb.toString().trim();
 	}
 
 	private String getStatusClass(String status) {

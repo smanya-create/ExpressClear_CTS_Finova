@@ -337,6 +337,9 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 		if ("RESOLVED".equalsIgnoreCase(displayStatus)) {
 			statusLabel.setStyle(
 					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 110px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 55%, #86efac 100%) !important; color: #15803d !important; border: 1px solid #4ade80 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.25) !important;");
+		} else if ("REJECTION REQUESTED".equalsIgnoreCase(displayStatus)) {
+			statusLabel.setStyle(
+					"display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 130px !important; height: 24px !important; padding: 0 12px !important; box-sizing: border-box !important; background: linear-gradient(90deg, #ffe4e6 0%, #fecdd3 55%, #fda4af 100%) !important; color: #9f1239 !important; border: 1px solid #fb7185 !important; border-radius: 9999px !important; font-size: 10px !important; font-weight: 800 !important; letter-spacing: 0.3px !important; text-transform: capitalize !important; text-align: center !important; box-shadow: 0 1px 3px rgba(251, 113, 133, 0.25) !important;");
 		}
 
 		Label reasonLabel = new Label(getValue(reasonRemarks));
@@ -667,8 +670,24 @@ public class InwardMakerDashboardController extends GenericForwardComposer<Compo
 	                || chq.getMicrCode().contains("*") || chq.getMicrCode().length() < 9)) {
 	        return "Repair MICR";
 	    }
+	    if ("REJECTION_REQUESTED".equalsIgnoreCase(s)) {
+			return "Rejection Requested";
+		}
 
-	    return (s != null) ? s.replace("_", " ").trim() : "-";
+	    return toTitleCase(s != null ? s.replace("_", " ") : "-");
+	}
+	
+	private String toTitleCase(String input) {
+		if (input == null || input.trim().isEmpty()) return "-";
+		StringBuilder sb = new StringBuilder();
+		for (String word : input.trim().split("\\s+")) {
+			if (!word.isEmpty()) {
+				sb.append(Character.toUpperCase(word.charAt(0)))
+				  .append(word.substring(1).toLowerCase())
+				  .append(" ");
+			}
+		}
+		return sb.toString().trim();
 	}
 
 
