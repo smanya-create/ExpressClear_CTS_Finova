@@ -106,9 +106,9 @@ public class AdminReportController extends GenericForwardComposer<Component> {
         } else {
             // PDF Export via JasperReports
             if ("SESSION_LIFECYCLE".equals(reportType)) {
-                exportReportPdf("/reports/cts_consolidated_report.jrxml", fromDate, toDate, "CTS_Batch_Lifecycle");
+                exportReportPdf("/reports/cts_consolidated_report.jrxml", fromDate, toDate, "CTS_Batch_Lifecycle", reportType);
             } else {
-                exportReportPdf("/reports/cts_consolidated_report.jrxml", fromDate, toDate, "User_Security_Audit");
+                exportReportPdf("/reports/cts_consolidated_report.jrxml", fromDate, toDate, "User_Security_Audit", reportType);
             }
         }
     }
@@ -117,8 +117,10 @@ public class AdminReportController extends GenericForwardComposer<Component> {
     // =========================================================================
     private boolean hasReportData(String reportType, Date fromDate, Date toDate) {
         if ("SESSION_LIFECYCLE".equals(reportType)) {
-            String checkSessionSql = "SELECT COUNT(*) FROM clearing_session WHERE clearing_date >= ? AND clearing_date <= ?";
-            String checkBatchSql = "SELECT COUNT(*) FROM outward_batch WHERE uploaded_at::date >= ? AND uploaded_at::date <= ?";
+        	String checkSessionSql = "SELECT COUNT(*) FROM clearing_session WHERE clearing_date >= ? AND clearing_date <= ?";
+            String checkBatchSql = "SELECT COUNT(DISTINCT sb.scanned_batch_id) FROM scan_batch sb "
+                                 + "LEFT JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id "
+                                 + "WHERE CAST(GREATEST(sb.uploaded_at, COALESCE(sc.created_at, sb.uploaded_at)) AS DATE) BETWEEN ? AND ?";
 
             try (Connection conn = DBConnection.getConnection()) {
                 // Check if either sessions or batches exist
@@ -273,31 +275,39 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 }
             }
 
-            // Section 2: Outward Clearing Batches Processed
+         // Section 2: Outward Clearing Batches Processed
             sb.append("\n\n");
             sb.append("========================================================================================\n");
             sb.append("                     OUTWARD CLEARING BATCHES PROCESSED IN PERIOD                       \n");
             sb.append("========================================================================================\n");
             sb.append("Batch ID,Reference ID,Uploaded At,Cheque Count,Total Amount (INR),Uploaded By,Status\n");
 
-            String batchSql = "SELECT ob.outward_batch_id, ob.batch_reference_id, ob.uploaded_at, "
-                            + "       COALESCE(ob.actual_cheque_count, 0) AS cheque_count, "
-                            + "       COALESCE(ob.actual_total_amount, 0.00) AS total_amount, "
-                            + "       COALESCE(u.username, ob.uploaded_by) AS uploaded_by, "
-                            + "       COALESCE(ob.batch_status, 'Pending') AS batch_status "
-                            + "FROM outward_batch ob "
-                            + "LEFT JOIN users u ON ob.uploaded_by = u.user_id "
-                            + "WHERE ob.uploaded_at::date >= ? AND ob.uploaded_at::date <= ? "
-                            + "ORDER BY ob.uploaded_at DESC";
+            String batchSql = "SELECT " +
+                              "    sb.scanned_batch_id AS outward_batch_id, " +
+                              "    sb.batch_reference_id, " +
+                              "    sb.uploaded_at, " +
+                              "    COALESCE(sb.actual_cheque_count, 0) AS cheque_count, " +
+                              "    COALESCE(sb.actual_total_amount, 0.00) AS total_amount, " +
+                              "    COALESCE(u.username, sb.uploaded_by) AS uploaded_by, " +
+                              "    COALESCE(sb.batch_status, 'PENDING_CHECKER_PROCESS') AS batch_status " +
+                              "FROM scan_batch sb " +
+                              "LEFT JOIN users u ON sb.uploaded_by = u.user_id " +
+                              "LEFT JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
+                              "WHERE CAST(GREATEST(sb.uploaded_at, COALESCE(sc.created_at, sb.uploaded_at)) AS DATE) BETWEEN ? AND ? " +
+                              "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.uploaded_at, sb.actual_cheque_count, " +
+                              "         sb.actual_total_amount, u.username, sb.uploaded_by, sb.batch_status " +
+                              "ORDER BY sb.uploaded_at DESC";
 
             try (PreparedStatement psBatch = conn.prepareStatement(batchSql)) {
                 psBatch.setDate(1, new java.sql.Date(fromDate.getTime()));
                 psBatch.setDate(2, new java.sql.Date(toDate.getTime()));
 
                 try (ResultSet rsBatch = psBatch.executeQuery()) {
+                    boolean hasBatches = false;
                     while (rsBatch.next()) {
+                        hasBatches = true;
                         String uploadTime = rsBatch.getTimestamp("uploaded_at") != null 
-                                ? sdf.format(rsBatch.getTimestamp("uploaded_at")) : "-";
+                                          ? sdf.format(rsBatch.getTimestamp("uploaded_at")) : "-";
                         String formattedTime = uploadTime.equals("-") ? "\"-\"" : "=\"" + uploadTime + "\"";
 
                         sb.append(String.format("\"%s\",\"%s\",%s,\"%d\",\"%s\",\"%s\",\"%s\"\n",
@@ -309,12 +319,11 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                                 rsBatch.getString("uploaded_by"),
                                 rsBatch.getString("batch_status")));
                     }
+                    if (!hasBatches) {
+                        sb.append("\"No outward batches processed for this period.\",,,,,,\n");
+                    }
                 }
             }
-
-            SimpleDateFormat fSdf = new SimpleDateFormat("yyyyMMdd");
-            String fileName = "CTS_BOD_EOD_Clearing_Report_" + fSdf.format(fromDate) + "_to_" + fSdf.format(toDate) + ".csv";
-            Filedownload.save(sb.toString().getBytes(StandardCharsets.UTF_8), "text/csv", fileName);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -325,7 +334,10 @@ public class AdminReportController extends GenericForwardComposer<Component> {
     // =========================================================================
     // REUSABLE PDF EXPORTER (JASPERREPORTS)
     // =========================================================================
-    private void exportReportPdf(String jrxmlRelativePath, Date fromDate, Date toDate, String filePrefix) {
+ // =========================================================================
+    // REUSABLE PDF EXPORTER (JASPERREPORTS)
+    // =========================================================================
+    private void exportReportPdf(String jrxmlRelativePath, Date fromDate, Date toDate, String filePrefix, String reportType) {
         try (Connection conn = DBConnection.getConnection()) {
             String reportPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath(jrxmlRelativePath);
             File jrxmlFile = new File(reportPath);
@@ -340,6 +352,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             parameters.put("FROM_DATE", new java.sql.Date(fromDate.getTime()));
             parameters.put("TO_DATE", new java.sql.Date(toDate.getTime()));
             parameters.put("GENERATED_BY", "ADMIN");
+            parameters.put("REPORT_TYPE", reportType); // Passed to Jasper
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
             byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
@@ -354,7 +367,6 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             Clients.showNotification("PDF export failed: " + e.getMessage(), "error", null, "top_center", 3500);
         }
     }
-
     // =========================================================================
     // DATE & INPUT VALIDATIONS
     // =========================================================================
