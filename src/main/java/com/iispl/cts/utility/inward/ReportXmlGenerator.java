@@ -1,7 +1,6 @@
 package com.iispl.cts.utility.inward;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -37,14 +36,9 @@ public class ReportXmlGenerator {
             writer.writeStartElement("RRFReport");
     
             writer.writeCharacters("\n    ");
-            writer.writeStartElement("ReportInformation");
-
-            writeElement(writer, "RRFReferenceNo", getRrfReferenceNo(batchId), 8);
-            writeElement(writer, "BatchId", batchId, 8);
-            writeElement(writer, "GeneratedDate", LocalDate.now().format(DATE_FORMATTER), 8);
+            
 
             writer.writeCharacters("\n    ");
-            writer.writeEndElement();
 
             int totalRejectedCheques = rejectedCheques == null ? 0 : rejectedCheques.size();
             BigDecimal totalRejectedAmount = BigDecimal.ZERO;
@@ -56,16 +50,14 @@ public class ReportXmlGenerator {
                     }
                 }
             }
+            writer.writeStartElement("ReportInformation");
 
-            writer.writeCharacters("\n    ");
-            writer.writeStartElement("Summary");
-
+            writeElement(writer, "RRFReferenceNo", getRrfReferenceNo(batchId), 8);
+            writeElement(writer, "BatchId", batchId, 8);
             writeElement(writer, "TotalRejectedCheques", totalRejectedCheques, 8);
             writeElement(writer, "TotalRejectedAmount", formatAmount(totalRejectedAmount), 8);
-
-            writer.writeCharacters("\n    ");
+            writeElement(writer, "GeneratedDate", LocalDate.now().format(DATE_FORMATTER), 8);
             writer.writeEndElement();
-
             writer.writeCharacters("\n    ");
             writer.writeStartElement("RejectedCheques");
 
@@ -96,105 +88,52 @@ public class ReportXmlGenerator {
         }
     }
 
-    public static String generateBatchSummaryXml(String batchId, List<InwardReportChequeDTO> cheques) throws Exception {
+    public static String generateConfirmationFileXml(String batchId, List<InwardReportChequeDTO> cheques) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         XMLStreamWriter writer = null;
 
         try {
+            // 1. Calculate totals FIRST before writing XML elements
+            int totalConfirmedCheques = 0;
+            BigDecimal totalConfirmedAmount = BigDecimal.ZERO;
+
+            if (cheques != null) {
+                for (InwardReportChequeDTO cheque : cheques) {
+                    if (cheque != null && InwardChequeStatus.ACCEPTED.toString().equalsIgnoreCase(cheque.getChequeStatus())) {
+                        totalConfirmedCheques++;
+                        BigDecimal amount = cheque.getChequeAmount() == null ? BigDecimal.ZERO : cheque.getChequeAmount();
+                        totalConfirmedAmount = totalConfirmedAmount.add(amount);
+                    }
+                }
+            }
+
             XMLOutputFactory factory = XMLOutputFactory.newFactory();
             writer = factory.createXMLStreamWriter(outputStream, StandardCharsets.UTF_8.name());
 
             writer.writeStartDocument(StandardCharsets.UTF_8.name(), "1.0");
             writer.writeCharacters("\n");
 
-            writer.writeStartElement("BatchSummaryReport");
+            writer.writeStartElement("ConfirmationReport");
 
             writer.writeCharacters("\n    ");
             writer.writeStartElement("ReportInformation");
 
             writeElement(writer, "BatchId", batchId, 8);
+            writeElement(writer, "TotalConfirmedCheques", totalConfirmedCheques, 8);
+            writeElement(writer, "TotalConfirmedAmount", formatAmount(totalConfirmedAmount), 8);
             writeElement(writer, "GeneratedAt", LocalDate.now().format(DATE_FORMATTER), 8);
 
             writer.writeCharacters("\n    ");
             writer.writeEndElement();
 
-            int totalCheques = 0;
-            int approvedCheques = 0;
-            int rejectedCheques = 0;
+            writer.writeCharacters("\n    ");
+            writer.writeStartElement("ConfirmedCheques");
 
-            BigDecimal totalAmount = BigDecimal.ZERO;
-            BigDecimal approvedAmount = BigDecimal.ZERO;
-            BigDecimal rejectedAmount = BigDecimal.ZERO;
-
+            // 2. Output the cheque details
             if (cheques != null) {
                 for (InwardReportChequeDTO cheque : cheques) {
-
-                    if (cheque == null) {
-                        continue;
-                    }
-
-                    totalCheques++;
-
-                    BigDecimal amount = cheque.getChequeAmount() == null ? BigDecimal.ZERO : cheque.getChequeAmount();
-                    totalAmount = totalAmount.add(amount);
-
-                    String status = cheque.getChequeStatus();
-
-                    if (InwardChequeStatus.ACCEPTED.toString().equalsIgnoreCase(status)) {
-                        approvedCheques++;
-                        approvedAmount = approvedAmount.add(amount);
-
-                    } else if (InwardChequeStatus.REJECTED.toString().equalsIgnoreCase(status)) {
-                        rejectedCheques++;
-                        rejectedAmount = rejectedAmount.add(amount);
-                    }
-                }
-            }
-
-            writer.writeCharacters("\n    ");
-            writer.writeStartElement("Summary");
-
-            writeElement(writer, "TotalCheques", totalCheques, 8);
-            writeElement(writer, "ApprovedCheques", approvedCheques, 8);
-            writeElement(writer, "RejectedCheques", rejectedCheques, 8);
-            writeElement(writer, "TotalAmount", formatAmount(totalAmount), 8);
-            writeElement(writer, "ApprovedAmount", formatAmount(approvedAmount), 8);
-            writeElement(writer, "RejectedAmount", formatAmount(rejectedAmount), 8);
-
-            writer.writeCharacters("\n    ");
-            writer.writeEndElement();
-
-            writer.writeCharacters("\n    ");
-            writer.writeStartElement("ApprovedCheques");
-
-            if (cheques != null) {
-                for (InwardReportChequeDTO cheque : cheques) {
-
-                    if (cheque == null) {
-                        continue;
-                    }
-
-                    if (InwardChequeStatus.ACCEPTED.toString().equalsIgnoreCase(cheque.getChequeStatus())) {
+                    if (cheque != null && InwardChequeStatus.ACCEPTED.toString().equalsIgnoreCase(cheque.getChequeStatus())) {
                         writeCheque(writer, cheque, false);
-                    }
-                }
-            }
-
-            writer.writeCharacters("\n    ");
-            writer.writeEndElement();
-
-            writer.writeCharacters("\n    ");
-            writer.writeStartElement("RejectedCheques");
-
-            if (cheques != null) {
-                for (InwardReportChequeDTO cheque : cheques) {
-
-                    if (cheque == null) {
-                        continue;
-                    }
-
-                    if (InwardChequeStatus.REJECTED.toString().equalsIgnoreCase(cheque.getChequeStatus())) {
-                        writeCheque(writer, cheque, true);
                     }
                 }
             }
@@ -211,13 +150,12 @@ public class ReportXmlGenerator {
             return outputStream.toString(StandardCharsets.UTF_8.name());
 
         } catch (XMLStreamException e) {
-            throw new RuntimeException("Error while generating Batch Summary XML", e);
+            throw new RuntimeException("Error while generating Confirmation File XML", e);
 
         } finally {
             closeWriter(writer);
         }
     }
-
     private static void writeCheque(XMLStreamWriter writer, InwardReportChequeDTO cheque, boolean includeRejection) throws XMLStreamException {
 
         writer.writeCharacters("\n        ");

@@ -89,22 +89,27 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
         List<InwardDashboardBatchDTO> batches = new ArrayList<>();
 
         // Stripped of all dead COUNTs: only selects what the UI actually renders
-        String sql = 
-            "SELECT * FROM ( " +
-            "    SELECT " +
-            "        b.inward_batch_id, " +
-            "        b.batch_status, " +
-            "        b.uploaded_at, " +
-            "        COALESCE(b.actual_cheque_count, 0) AS total_count, " +
-            "        COALESCE(b.actual_total_amount, 0) AS actual_total_amount, " +
-            "        COUNT(CASE WHEN c.cheque_status IN ('MICR_REPAIR_PENDING', 'MICR_REPAIR_IN_PROGRESS', 'SEND_BACK_TO_MAKER_MICR', 'MICR_REPAIR_REQUIRED') THEN 1 END) AS micr_pending_count " +
-            "    FROM inward_batch b " +
-            "    LEFT JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id " +
-            "    WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') " +
-            "    GROUP BY b.inward_batch_id, b.batch_status, b.uploaded_at, b.actual_cheque_count, b.actual_total_amount " +
-            ") sub " +
-            "ORDER BY sub.uploaded_at DESC";
+        String sql = "SELECT "
+	            + "    b.inward_batch_id, "
+	            + "    b.batch_status, "
+	            + "    b.uploaded_at, "
+	            + "    COALESCE(b.actual_cheque_count, 0) AS total_count, "
+	            + "    COALESCE(b.actual_total_amount, 0) AS actual_total_amount, "
+	            + "    EXISTS ( "
+	            + "        SELECT 1 FROM inward_cheque c "
+	            + "        WHERE c.inward_batch_id = b.inward_batch_id "
+	            + "          AND c.cheque_status IN ( "
+	            + "              'MICR_REPAIR_PENDING', "
+	            + "              'MICR_REPAIR_IN_PROGRESS', "
+	            + "              'SEND_BACK_TO_MAKER_MICR', "
+	            + "              'MICR_REPAIR_REQUIRED' "
+	            + "          ) "
+	            + "    ) AS has_pending_micr "
+	            + "FROM inward_batch b "
+	            + "WHERE b.batch_status NOT IN ('COMPLETED', 'REJECTED') "
+	            + "ORDER BY b.uploaded_at DESC";
 
+        		
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -115,7 +120,7 @@ public class InwardDashboardDAOImpl implements InwardDashboardDAO {
                 dto.setTotalCheques(rs.getInt("total_count"));
                 dto.setTotalAmount(rs.getBigDecimal("actual_total_amount"));
                 dto.setBatchStatus(rs.getString("batch_status"));
-                dto.setHasPendingMicr(rs.getInt("micr_pending_count") > 0);
+                dto.setHasPendingMicr(rs.getBoolean("has_pending_micr"));
 
                 batches.add(dto);
             }

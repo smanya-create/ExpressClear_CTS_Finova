@@ -55,7 +55,6 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         
-    	
     	super.doAfterCompose(comp);
     	
         service = new InwardBatchServiceImpl();
@@ -204,23 +203,23 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
         rrfCell.appendChild(exportRrfButton);
         item.appendChild(rrfCell);
 
-        // ---- BSF button ----
-        Listcell exportBSFCell = new Listcell();
-        Button bsfButton = new Button("Export BSF(XML)");
-        bsfButton.setIconSclass("z-icon-file-text");
+        // ---- CONF button ----
+        Listcell exportConfCell = new Listcell();
+        Button confButton = new Button("Export Conf(XML)");
+        confButton.setIconSclass("z-icon-file-text");
         
-        bsfButton.setStyle("background-color: green; color: white;");
+        confButton.setStyle("background-color: green; color: white;");
 
         String exportBatchId = (summary != null && summary.getBatchId() != null) ? summary.getBatchId() : "";
-        bsfButton.setAttribute("batchId", exportBatchId);
+        confButton.setAttribute("batchId", exportBatchId);
 
-        bsfButton.addEventListener("onClick", event -> {
-            String clickedBatchId = (String) bsfButton.getAttribute("batchId");
-            generateBatchSummary(clickedBatchId);
+        confButton.addEventListener("onClick", event -> {
+            String clickedBatchId = (String) confButton.getAttribute("batchId");
+            generateConfirmationFile(exportBatchId);
         });
 
-        exportBSFCell.appendChild(bsfButton);
-        item.appendChild(exportBSFCell);
+        exportConfCell.appendChild(confButton);
+        item.appendChild(exportConfCell);
 
         reportListbox.appendChild(item);
     }
@@ -257,7 +256,7 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
                 "RRF_" + batchId + ".xml");
     }
     
-    public void generateBatchSummary(String batchId) throws Exception {
+    public void generateConfirmationFile(String batchId) throws Exception {
 
         List<InwardReportChequeDTO> batchCheques = service.getChequesByBatch().stream()
                 .filter(c -> c != null && batchId.equals(c.getInwardBatchId()))
@@ -275,14 +274,14 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
         String generatedBy = String.valueOf(
                 Sessions.getCurrent().getAttribute("LOGGED_USER"));
 
-        String xml = ReportXmlGenerator.generateBatchSummaryXml(
+        String xml = ReportXmlGenerator.generateConfirmationFileXml(
                 batchId,
                 batchCheques);
 
         Filedownload.save(
                 xml.getBytes(StandardCharsets.UTF_8),
                 "application/xml",
-                "Batch_Summary_" + batchId + ".xml");
+                "ConfirmationFile_" + batchId + ".xml");
     }
     
 }
