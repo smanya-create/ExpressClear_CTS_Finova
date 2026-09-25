@@ -39,13 +39,19 @@
                             <textbox id="txtRoleId" readonly="true" placeholder="Auto generated" hflex="1" height="38px" sclass="input-box input-box-readonly"/>
                         </vlayout>
                         <vlayout spacing="6px" hflex="1">
-                            <label value="ROLE NAME" sclass="field-label"/>
+                            <hlayout spacing="4px" valign="middle">
+                                <label value="ROLE NAME" sclass="field-label"/>
+                                <label value="*" style="color: #dc2626; font-size: 13px; font-weight: 700;"/>
+                            </hlayout>
                             <textbox id="txtRoleName" placeholder="Enter role name" hflex="1" height="38px" sclass="input-box"/>
                         </vlayout>
                     </hlayout>
 
                     <vlayout spacing="6px" hflex="1">
-                        <label value="DESCRIPTION" sclass="field-label"/>
+                        <hlayout spacing="4px" valign="middle">
+                            <label value="DESCRIPTION" sclass="field-label"/>
+                            <label value="*" style="color: #dc2626; font-size: 13px; font-weight: 700;"/>
+                        </hlayout>
                         <textbox id="txtDescription" placeholder="Enter role description" hflex="1" height="38px" sclass="input-box"/>
                     </vlayout>
 

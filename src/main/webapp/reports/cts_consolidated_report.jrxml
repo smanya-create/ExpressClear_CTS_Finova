@@ -16,7 +16,43 @@
 
     <property name="net.sf.jasperreports.export.character.encoding" value="UTF-8"/>
 
-    <!-- 1. Subdataset for Audit Logs -->
+    <!-- =========================================================================
+         1. SUBDATASET: CLEARING SESSIONS (BOD / EOD LIFECYCLE)
+         ========================================================================= -->
+    <subDataset name="SessionDataset" uuid="3b49e01a-8e2b-4d51-8742-192a82f3ef80">
+        <parameter name="P_FROM_DATE" class="java.sql.Date"/>
+        <parameter name="P_TO_DATE" class="java.sql.Date"/>
+        <queryString language="SQL">
+            <![CDATA[
+                SELECT cs.session_id, 
+                       cs.clearing_date, 
+                       cs.session_status, 
+                       COALESCE(u1.username, cs.opened_by) AS opened_by_user, 
+                       cs.opened_at, 
+                       COALESCE(u2.username, cs.closed_by) AS closed_by_user, 
+                       cs.closed_at, 
+                       COALESCE(cs.remarks, '-') AS remarks 
+                FROM clearing_session cs 
+                LEFT JOIN users u1 ON cs.opened_by = u1.user_id 
+                LEFT JOIN users u2 ON cs.closed_by = u2.user_id 
+                WHERE cs.clearing_date >= $P{P_FROM_DATE} 
+                  AND cs.clearing_date <= $P{P_TO_DATE} 
+                ORDER BY cs.clearing_date DESC, cs.session_id DESC
+            ]]>
+        </queryString>
+        <field name="session_id" class="java.lang.String"/>
+        <field name="clearing_date" class="java.sql.Date"/>
+        <field name="session_status" class="java.lang.String"/>
+        <field name="opened_by_user" class="java.lang.String"/>
+        <field name="opened_at" class="java.sql.Timestamp"/>
+        <field name="closed_by_user" class="java.lang.String"/>
+        <field name="closed_at" class="java.sql.Timestamp"/>
+        <field name="remarks" class="java.lang.String"/>
+    </subDataset>
+
+    <!-- =========================================================================
+         2. SUBDATASET: AUDIT LOGS
+         ========================================================================= -->
     <subDataset name="AuditDataset" uuid="6243fb3c-c9d3-4903-8820-c83ec83a3028">
         <parameter name="P_FROM_DATE" class="java.sql.Date"/>
         <parameter name="P_TO_DATE" class="java.sql.Date"/>
@@ -49,62 +85,81 @@
         <field name="status" class="java.lang.String"/>
     </subDataset>
 
-    <!-- 2. Main Parameters -->
+    <!-- =========================================================================
+         3. MAIN PARAMETERS
+         ========================================================================= -->
     <parameter name="FROM_DATE" class="java.sql.Date"/>
     <parameter name="TO_DATE" class="java.sql.Date"/>
     <parameter name="GENERATED_BY" class="java.lang.String">
         <defaultValueExpression><![CDATA["ADMIN"]]></defaultValueExpression>
     </parameter>
+    <parameter name="REPORT_TYPE" class="java.lang.String">
+        <defaultValueExpression><![CDATA["SESSION_LIFECYCLE"]]></defaultValueExpression>
+    </parameter>
 
-    <!-- 3. Main Query (Outward Batches) -->
+    <!-- =========================================================================
+         4. MAIN QUERY (OUTWARD SCAN BATCHES)
+         ========================================================================= -->
     <queryString language="SQL">
         <![CDATA[
             SELECT 
-                ob.outward_batch_id,
-                ob.batch_reference_id,
-                ob.uploaded_at,
-                COALESCE(ob.actual_cheque_count, 0) AS cheque_count,
-                COALESCE(ob.actual_total_amount, 0.00) AS total_amount,
-                COALESCE(u.username, ob.uploaded_by) AS uploaded_by,
-                COALESCE(ob.batch_status, 'Pending') AS batch_status
-            FROM outward_batch ob
-            LEFT JOIN users u ON ob.uploaded_by = u.user_id
-            WHERE ob.uploaded_at::date >= $P{FROM_DATE}
-              AND ob.uploaded_at::date <= $P{TO_DATE}
-            ORDER BY ob.uploaded_at DESC
+                sb.scanned_batch_id AS outward_batch_id,
+                sb.batch_reference_id,
+                sb.uploaded_at,
+                COALESCE(sb.actual_cheque_count, 0) AS cheque_count,
+                COALESCE(sb.actual_total_amount, 0.00) AS total_amount,
+                COALESCE(u.username, sb.uploaded_by) AS uploaded_by,
+                COALESCE(sb.batch_status, 'PENDING_CHECKER_PROCESS') AS batch_status
+            FROM scan_batch sb
+            LEFT JOIN users u ON sb.uploaded_by = u.user_id
+            LEFT JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id
+            WHERE CAST(GREATEST(sb.uploaded_at, COALESCE(sc.created_at, sb.uploaded_at)) AS DATE) BETWEEN $P{FROM_DATE} AND $P{TO_DATE}
+            GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.uploaded_at, sb.actual_cheque_count, 
+                     sb.actual_total_amount, u.username, sb.uploaded_by, sb.batch_status
+            ORDER BY sb.uploaded_at DESC
         ]]>
     </queryString>
 
-    <!-- 4. Main Fields -->
+    <!-- 5. Main Fields -->
     <field name="outward_batch_id" class="java.lang.String"/>
     <field name="batch_reference_id" class="java.lang.String"/>
     <field name="uploaded_at" class="java.sql.Timestamp"/>
     <field name="cheque_count" class="java.lang.Integer"/>
-    <field name="total_amount" class="java.lang.Double"/>
+    <field name="total_amount" class="java.math.BigDecimal"/>
     <field name="uploaded_by" class="java.lang.String"/>
     <field name="batch_status" class="java.lang.String"/>
 
-    <!-- 5. Document Header (CTS Dark Navy Theme #173B61) -->
+    <!-- =========================================================================
+         6. TITLE BAND
+         ========================================================================= -->
     <title>
-        <band height="62">
+        <band height="145">
             <rectangle>
                 <reportElement x="0" y="0" width="802" height="52" backcolor="#173B61" uuid="ce1cb904-747f-4428-9844-326e5e8e8ba6"/>
                 <graphicElement><pen lineWidth="0.0"/></graphicElement>
             </rectangle>
-            <staticText>
+            <textField>
                 <reportElement x="16" y="8" width="460" height="20" forecolor="#FFFFFF" uuid="9c8f9db4-b223-42e5-a0c3-bcfa9d06b4b4"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="SansSerif" size="14" isBold="true"/>
                 </textElement>
-                <text><![CDATA[EXPRESS CLEAR CTS - CONSOLIDATED ADMIN REPORT]]></text>
-            </staticText>
-            <staticText>
+                <textFieldExpression><![CDATA[
+                    "SESSION_LIFECYCLE".equals($P{REPORT_TYPE})
+                    ? "EXPRESS CLEAR CTS - CLEARING SESSION LIFECYCLE & RECONCILIATION"
+                    : "EXPRESS CLEAR CTS - USER ACTIVITY & SECURITY AUDIT"
+                ]]></textFieldExpression>
+            </textField>
+            <textField>
                 <reportElement x="16" y="28" width="460" height="15" forecolor="#94A3B8" uuid="8a54d588-e219-482f-876f-1f0607d721eb"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="SansSerif" size="8"/>
                 </textElement>
-                <text><![CDATA[Section 1: Outward Batch Processing  |  Section 2: System Audit Logs & Authentication Trail]]></text>
-            </staticText>
+                <textFieldExpression><![CDATA[
+                    "SESSION_LIFECYCLE".equals($P{REPORT_TYPE})
+                    ? "Clearing Sessions (BOD/EOD) and Outward Batches Processed in Period"
+                    : "System Audit Logs, User Activity & Authentication Trail"
+                ]]></textFieldExpression>
+            </textField>
             <textField>
                 <reportElement x="490" y="8" width="296" height="15" forecolor="#FFFFFF" uuid="39f3796d-7cb8-48b4-9271-e9496a7593c1"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle">
@@ -119,238 +174,164 @@
                 </textElement>
                 <textFieldExpression><![CDATA["Generated By: " + $P{GENERATED_BY} + " | " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())]]></textFieldExpression>
             </textField>
+
+            <!-- SESSION TABLE (Renders only for SESSION_LIFECYCLE) -->
+            <staticText>
+                <reportElement positionType="Float" x="0" y="60" width="802" height="18" forecolor="#0F172A" uuid="3a19e42a-5b41-4770-b747-d5d4d38cbb11">
+                    <printWhenExpression><![CDATA["SESSION_LIFECYCLE".equals($P{REPORT_TYPE})]]></printWhenExpression>
+                </reportElement>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="10" isBold="true"/></textElement>
+                <text><![CDATA[1. CLEARING SESSIONS (BOD / EOD LIFECYCLE)]]></text>
+            </staticText>
+
+            <componentElement>
+                <reportElement positionType="Float" x="0" y="80" width="802" height="40" uuid="7cf424fa-4b8f-4a0b-8d76-e82205566370">
+                    <printWhenExpression><![CDATA["SESSION_LIFECYCLE".equals($P{REPORT_TYPE})]]></printWhenExpression>
+                </reportElement>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                    <datasetRun subDataset="SessionDataset" uuid="3d539cf9-fb50-4ff6-8367-17fa003e8c90">
+                        <datasetParameter name="P_FROM_DATE"><datasetParameterExpression><![CDATA[$P{FROM_DATE}]]></datasetParameterExpression></datasetParameter>
+                        <datasetParameter name="P_TO_DATE"><datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression></datasetParameter>
+                        <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                    </datasetRun>
+
+                    <jr:column width="85">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="85" height="20" backcolor="#F1F5F9" uuid="4fa815e1-9556-4257-8178-57d47228a1d1"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[SESSION ID]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="85" height="18" uuid="a6593539-7a0e-4361-9c60-e64e1c75c8d1"/><box leftPadding="4"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{session_id}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="80">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="80" height="20" backcolor="#F1F5F9" uuid="ea654924-1188-4a60-bfae-214436ae34d2"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CLEARING DATE]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField pattern="yyyy-MM-dd"><reportElement x="0" y="0" width="80" height="18" uuid="939c71c6-2c93-41a4-9467-f3c559810dd2"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{clearing_date}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="75">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="75" height="20" backcolor="#F1F5F9" uuid="169d2757-0a37-47b1-ba9d-72fb1c2b5bd3"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="75" height="18" uuid="80b7e289-e58f-4d3f-9fe3-c9172bc9dad3"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{session_status}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="90">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="90" height="20" backcolor="#F1F5F9" uuid="8ea6f874-5fe5-4c07-b31c-c0c1694f72d4"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[OPENED BY]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="90" height="18" uuid="88a53164-9be1-4a4b-9723-64b5952fefd4"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{opened_by_user}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="120">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="120" height="20" backcolor="#F1F5F9" uuid="8ea6f874-5fe5-4c07-b31c-c0c1694f72d5"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[OPENED AT]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField pattern="yyyy-MM-dd HH:mm:ss"><reportElement x="0" y="0" width="120" height="18" uuid="88a53164-9be1-4a4b-9723-64b5952fefd5"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{opened_at} != null ? $F{opened_at} : "-"]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="90">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="90" height="20" backcolor="#F1F5F9" uuid="c24a6fa1-12c8-47a3-b91c-8e4348fafe84"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CLOSED BY]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="90" height="18" uuid="0c0e7fb4-0d32-4e5a-939e-8742ba552210"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{closed_by_user} != null ? $F{closed_by_user} : "-"]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="120">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="120" height="20" backcolor="#F1F5F9" uuid="2e46b9ec-b0dc-4a17-8025-06a9d7efc4d6"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CLOSED AT]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField pattern="yyyy-MM-dd HH:mm:ss"><reportElement x="0" y="0" width="120" height="18" uuid="9e4d5885-eeeb-410e-a612-4aa4f451fd6"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{closed_at} != null ? $F{closed_at} : "-"]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                    <jr:column width="142">
+                        <jr:columnHeader height="20"><staticText><reportElement mode="Opaque" x="0" y="0" width="142" height="20" backcolor="#F1F5F9" uuid="2e46b9ec-b0dc-4a17-8025-06a9d7efc4d7"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[REMARKS]]></text></staticText></jr:columnHeader>
+                        <jr:detailCell height="18"><textField><reportElement x="0" y="0" width="142" height="18" uuid="9e4d5885-eeeb-410e-a612-4aa4f451fd7"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{remarks}]]></textFieldExpression></textField></jr:detailCell>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
         </band>
     </title>
 
-    <!-- 6. Section 1 Header (Batches) -->
+    <!-- =========================================================================
+         7. BATCH OPERATIONS HEADER
+         ========================================================================= -->
     <columnHeader>
         <band height="44">
+            <printWhenExpression><![CDATA["SESSION_LIFECYCLE".equals($P{REPORT_TYPE})]]></printWhenExpression>
             <staticText>
                 <reportElement x="0" y="0" width="802" height="18" forecolor="#0F172A" uuid="e04c0048-cda6-46c5-af45-bc098c4adfa2"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="10" isBold="true"/>
-                </textElement>
-                <text><![CDATA[SECTION 1: OUTWARD CLEARING BATCH OPERATIONS]]></text>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="10" isBold="true"/></textElement>
+                <text><![CDATA[2. OUTWARD CLEARING BATCH OPERATIONS]]></text>
             </staticText>
             <rectangle>
                 <reportElement x="0" y="20" width="802" height="24" backcolor="#F1F5F9" uuid="29fc0a5c-5645-429a-ae18-c2b64da3e9e3"/>
                 <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
             </rectangle>
-            <staticText>
-                <reportElement x="8" y="24" width="85" height="16" uuid="e8184d0b-6ae9-42b7-83eb-568eaecad970"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[BATCH ID]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="95" y="24" width="165" height="16" uuid="53e6d2bc-681b-4f9e-9904-45377f525bfb"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[REFERENCE ID]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="265" y="24" width="120" height="16" uuid="c24cf16a-ff99-4cce-91ba-43d9b43aa698"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[UPLOADED AT]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="390" y="24" width="65" height="16" uuid="3ae30e70-cfcf-4da8-963d-4c3e387c9f65"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[CHEQUES]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="465" y="24" width="130" height="16" uuid="d614833d-c11f-4e00-8438-6cf4041e17d2"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[TOTAL AMOUNT (INR)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="610" y="24" width="95" height="16" uuid="e2646d6b-586b-4e67-93d3-fcf30f81d184"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[UPLOADED BY]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="710" y="24" width="85" height="16" uuid="cfd01e14-d830-4e38-9276-87cfa3748281"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[STATUS]]></text>
-            </staticText>
+            <staticText><reportElement x="8" y="24" width="85" height="16" uuid="e8184d0b-6ae9-42b7-83eb-568eaecad970"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[BATCH ID]]></text></staticText>
+            <staticText><reportElement x="95" y="24" width="165" height="16" uuid="53e6d2bc-681b-4f9e-9904-45377f525bfb"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[REFERENCE ID]]></text></staticText>
+            <staticText><reportElement x="265" y="24" width="120" height="16" uuid="c24cf16a-ff99-4cce-91ba-43d9b43aa698"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[UPLOADED AT]]></text></staticText>
+            <staticText><reportElement x="390" y="24" width="65" height="16" uuid="3ae30e70-cfcf-4da8-963d-4c3e387c9f65"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[CHEQUES]]></text></staticText>
+            <staticText><reportElement x="465" y="24" width="130" height="16" uuid="d614833d-c11f-4e00-8438-6cf4041e17d2"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[TOTAL AMOUNT (INR)]]></text></staticText>
+            <staticText><reportElement x="610" y="24" width="95" height="16" uuid="e2646d6b-586b-4e67-93d3-fcf30f81d184"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[UPLOADED BY]]></text></staticText>
+            <staticText><reportElement x="710" y="24" width="85" height="16" uuid="cfd01e14-d830-4e38-9276-87cfa3748281"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText>
         </band>
     </columnHeader>
 
-    <!-- 7. Main Detail Rows (Batches) -->
+    <!-- =========================================================================
+         8. BATCH DETAIL ROWS
+         ========================================================================= -->
     <detail>
         <band height="18">
+            <printWhenExpression><![CDATA["SESSION_LIFECYCLE".equals($P{REPORT_TYPE})]]></printWhenExpression>
             <rectangle>
                 <reportElement x="0" y="0" width="802" height="18" backcolor="#F8FAFC" uuid="d433b95a-3f41-4770-b747-d5d4d38cbb29">
                     <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
                 </reportElement>
                 <graphicElement><pen lineWidth="0.0"/></graphicElement>
             </rectangle>
-            <textField>
-                <reportElement x="8" y="1" width="85" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa691"/>
-                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="95" y="1" width="165" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa692"/>
-                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression>
-            </textField>
-            <textField pattern="yyyy-MM-dd HH:mm">
-                <reportElement x="265" y="1" width="120" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa693"/>
-                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="390" y="1" width="65" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa694"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$F{cheque_count}]]></textFieldExpression>
-            </textField>
-            <textField pattern="#,##0.00">
-                <reportElement x="465" y="1" width="130" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa695"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$F{total_amount}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="610" y="1" width="95" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa696"/>
-                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$F{uploaded_by}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="710" y="1" width="85" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa697"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression>
-            </textField>
+            <textField><reportElement x="8" y="1" width="85" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa691"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{outward_batch_id}]]></textFieldExpression></textField>
+            <textField><reportElement x="95" y="1" width="165" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa692"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{batch_reference_id}]]></textFieldExpression></textField>
+            <textField pattern="yyyy-MM-dd HH:mm"><reportElement x="265" y="1" width="120" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa693"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{uploaded_at}]]></textFieldExpression></textField>
+            <textField><reportElement x="390" y="1" width="65" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa694"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{cheque_count}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="465" y="1" width="130" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa695"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{total_amount}]]></textFieldExpression></textField>
+            <textField><reportElement x="610" y="1" width="95" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa696"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{uploaded_by}]]></textFieldExpression></textField>
+            <textField><reportElement x="710" y="1" width="85" height="16" uuid="aa43315a-5f99-4cce-91ba-43d9b43aa697"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{batch_status}]]></textFieldExpression></textField>
         </band>
     </detail>
 
-    <!-- 8. Page Footer -->
+    <!-- =========================================================================
+         9. PAGE FOOTER
+         ========================================================================= -->
     <pageFooter>
         <band height="20">
-            <textField>
-                <reportElement x="680" y="2" width="80" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea043"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " of "]]></textFieldExpression>
-            </textField>
-            <textField evaluationTime="Report">
-                <reportElement x="762" y="2" width="35" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea044"/>
-                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
-            </textField>
+            <textField><reportElement x="680" y="2" width="80" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea043"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " of "]]></textFieldExpression></textField>
+            <textField evaluationTime="Report"><reportElement x="762" y="2" width="35" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea044"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression></textField>
         </band>
     </pageFooter>
 
-    <!-- 9. Summary Band: Section 2 (System Audit Logs) -->
+    <!-- =========================================================================
+         10. SUMMARY BAND (AUDIT LOGS - ONLY FOR USER_AUDIT)
+         ========================================================================= -->
     <summary>
         <band height="100">
-            <!-- Section 2 Header -->
+            <printWhenExpression><![CDATA["USER_AUDIT".equals($P{REPORT_TYPE})]]></printWhenExpression>
+            
             <staticText>
-                <reportElement x="0" y="20" width="802" height="18" forecolor="#0F172A" uuid="3eb5bce1-383f-42ee-a4d3-fc7d4982635c"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="SansSerif" size="10" isBold="true"/>
-                </textElement>
-                <text><![CDATA[SECTION 2: SYSTEM AUDIT & USER ACCESS LOGS]]></text>
+                <reportElement x="0" y="10" width="802" height="18" forecolor="#0F172A" uuid="3eb5bce1-383f-42ee-a4d3-fc7d4982635c"/>
+                <textElement verticalAlignment="Middle"><font fontName="SansSerif" size="10" isBold="true"/></textElement>
+                <text><![CDATA[SYSTEM AUDIT & USER ACCESS LOGS]]></text>
             </staticText>
 
-            <!-- Table Header for Audit Logs -->
             <rectangle>
-                <reportElement x="0" y="40" width="802" height="24" backcolor="#F1F5F9" uuid="2a0bb5f9-5f21-4f9e-a89e-2dc307eb8e42"/>
+                <reportElement x="0" y="30" width="802" height="24" backcolor="#F1F5F9" uuid="2a0bb5f9-5f21-4f9e-a89e-2dc307eb8e42"/>
                 <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
             </rectangle>
-            <staticText>
-                <reportElement x="8" y="44" width="112" height="16" uuid="525fb843-030b-4835-94f7-34fa1b1bc270"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[TIMESTAMP]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="124" y="44" width="76" height="16" uuid="d6141a02-5360-4965-9a8c-ce499d63d6b0"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[USER]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="204" y="44" width="100" height="16" uuid="61f0088d-2947-4184-b0db-5509ba249f05"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[ROLE]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="308" y="44" width="66" height="16" uuid="096a6671-55c4-428a-aaef-e3ec920cfb2e"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[MODULE]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="378" y="44" width="76" height="16" uuid="454b1f60-ea79-4d2c-a2b1-5e5d3fa96a5f"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[ACTION]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="458" y="44" width="192" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486a"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[DETAILS]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="654" y="44" width="86" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486b"/>
-                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[IP ADDRESS]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="744" y="44" width="52" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486c"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                <text><![CDATA[STATUS]]></text>
-            </staticText>
+            <staticText><reportElement x="8" y="34" width="112" height="16" uuid="525fb843-030b-4835-94f7-34fa1b1bc270"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[TIMESTAMP]]></text></staticText>
+            <staticText><reportElement x="124" y="34" width="76" height="16" uuid="d6141a02-5360-4965-9a8c-ce499d63d6b0"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[USER]]></text></staticText>
+            <staticText><reportElement x="204" y="34" width="100" height="16" uuid="61f0088d-2947-4184-b0db-5509ba249f05"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[ROLE]]></text></staticText>
+            <staticText><reportElement x="308" y="34" width="66" height="16" uuid="096a6671-55c4-428a-aaef-e3ec920cfb2e"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[MODULE]]></text></staticText>
+            <staticText><reportElement x="378" y="34" width="76" height="16" uuid="454b1f60-ea79-4d2c-a2b1-5e5d3fa96a5f"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[ACTION]]></text></staticText>
+            <staticText><reportElement x="458" y="34" width="192" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486a"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[DETAILS]]></text></staticText>
+            <staticText><reportElement x="654" y="34" width="86" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486b"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[IP ADDRESS]]></text></staticText>
+            <staticText><reportElement x="744" y="34" width="52" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486c"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText>
 
-            <!-- Audit Logs List Component -->
             <componentElement>
-                <reportElement x="0" y="64" width="802" height="18" uuid="70a8d672-8356-4c4f-a720-7f28876c342b"/>
-                <jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
-                         xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
-                         printOrder="Vertical">
+                <reportElement x="0" y="54" width="802" height="18" uuid="70a8d672-8356-4c4f-a720-7f28876c342b"/>
+                <jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
                     <datasetRun subDataset="AuditDataset" uuid="69a19c53-bfa5-45d2-a7d2-7c91fa093c4f">
-                        <datasetParameter name="P_FROM_DATE">
-                            <datasetParameterExpression><![CDATA[$P{FROM_DATE}]]></datasetParameterExpression>
-                        </datasetParameter>
-                        <datasetParameter name="P_TO_DATE">
-                            <datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression>
-                        </datasetParameter>
+                        <datasetParameter name="P_FROM_DATE"><datasetParameterExpression><![CDATA[$P{FROM_DATE}]]></datasetParameterExpression></datasetParameter>
+                        <datasetParameter name="P_TO_DATE"><datasetParameterExpression><![CDATA[$P{TO_DATE}]]></datasetParameterExpression></datasetParameter>
                         <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
                     </datasetRun>
                     <jr:listContents height="18">
-                        <textField pattern="yyyy-MM-dd HH:mm:ss">
-                            <reportElement x="8" y="1" width="112" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000001"/>
-                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                            <textFieldExpression><![CDATA[$F{log_time}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                            <reportElement x="124" y="1" width="76" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000002"/>
-                            <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                            <textFieldExpression><![CDATA[$F{username}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                            <reportElement x="204" y="1" width="100" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000003"/>
-                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                            <textFieldExpression><![CDATA[$F{role_name}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                            <reportElement x="308" y="1" width="66" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000004"/>
-                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                            <textFieldExpression><![CDATA[$F{module}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                            <reportElement x="378" y="1" width="76" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000005"/>
-                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                            <textFieldExpression><![CDATA[$F{action}]]></textFieldExpression>
-                        </textField>
-                        <textField textAdjust="StretchHeight">
-                            <reportElement x="458" y="1" width="192" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000006"/>
-                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                            <textFieldExpression><![CDATA[$F{details}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                            <reportElement x="654" y="1" width="86" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000007"/>
-                            <textElement verticalAlignment="Middle"><font size="8"/></textElement>
-                            <textFieldExpression><![CDATA[$F{ip_address}]]></textFieldExpression>
-                        </textField>
-                        <textField>
-                            <reportElement x="744" y="1" width="52" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000008"/>
-                            <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
-                            <textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
-                        </textField>
+                        <textField pattern="yyyy-MM-dd HH:mm:ss"><reportElement x="8" y="1" width="112" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000001"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{log_time}]]></textFieldExpression></textField>
+                        <textField><reportElement x="124" y="1" width="76" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000002"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{username}]]></textFieldExpression></textField>
+                        <textField><reportElement x="204" y="1" width="100" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000003"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{role_name}]]></textFieldExpression></textField>
+                        <textField><reportElement x="308" y="1" width="66" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000004"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{module}]]></textFieldExpression></textField>
+                        <textField><reportElement x="378" y="1" width="76" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000005"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{action}]]></textFieldExpression></textField>
+                        <textField textAdjust="StretchHeight"><reportElement x="458" y="1" width="192" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000006"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{details}]]></textFieldExpression></textField>
+                        <textField><reportElement x="654" y="1" width="86" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000007"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$F{ip_address}]]></textFieldExpression></textField>
+                        <textField><reportElement x="744" y="1" width="52" height="16" uuid="e3a89a01-4471-4a88-a9fa-000000000008"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><textFieldExpression><![CDATA[$F{status}]]></textFieldExpression></textField>
                     </jr:listContents>
                 </jr:list>
             </componentElement>
