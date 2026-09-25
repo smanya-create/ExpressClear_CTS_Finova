@@ -244,7 +244,7 @@
 }
 
 /* --- Column Alignment Overrides for Role Grid Rows --- */
-/* Column 1 (ROLE ID): Center aligned */
+/* Column 1 (DATE / ID): Center aligned */
 .role-grid .z-row .z-cell:nth-child(1),
 .role-grid .z-row .z-row-inner:nth-child(1),
 .role-grid .z-row .z-cell:nth-child(1) .z-cell-content,
@@ -253,36 +253,47 @@
     justify-content: center !important;
 }
 
-/* Column 2 (ROLE NAME): Left aligned */
+/* Column 2 (USER / NAME): Center aligned for Audit, Left for Role */
 .role-grid .z-row .z-cell:nth-child(2),
 .role-grid .z-row .z-row-inner:nth-child(2),
 .role-grid .z-row .z-cell:nth-child(2) .z-cell-content,
 .role-grid .z-row .z-cell:nth-child(2) .z-label {
-    text-align: left !important;
-    justify-content: flex-start !important;
-}
-
-/* Column 3 (DESCRIPTION): Left aligned */
-.role-grid .z-row .z-cell:nth-child(3),
-.role-grid .z-row .z-row-inner:nth-child(3),
-.role-grid .z-row .z-cell:nth-child(3) .z-cell-content,
-.role-grid .z-row .z-cell:nth-child(3) .z-label {
-    text-align: left !important;
-    justify-content: flex-start !important;
-}
-
-/* Column 4 (STATUS): Center aligned */
-.role-grid .z-row .z-cell:nth-child(4),
-.role-grid .z-row .z-row-inner:nth-child(4),
-.role-grid .z-row .z-cell:nth-child(4) .z-cell-content {
     text-align: center !important;
     justify-content: center !important;
 }
 
-/* Column 5 (ACTIONS): Center aligned */
+/* Column 3 (ACTION / DESC): Center aligned */
+.role-grid .z-row .z-cell:nth-child(3),
+.role-grid .z-row .z-row-inner:nth-child(3),
+.role-grid .z-row .z-cell:nth-child(3) .z-cell-content,
+.role-grid .z-row .z-cell:nth-child(3) .z-label {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* Column 4 (DETAILS): Left aligned! */
+.role-grid .z-row .z-cell:nth-child(4),
+.role-grid .z-row .z-row-inner:nth-child(4),
+.role-grid .z-row .z-cell:nth-child(4) .z-cell-content,
+.role-grid .z-row .z-cell:nth-child(4) .z-label,
+.role-grid .z-row .z-cell:nth-child(4) span {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    padding-left: 12px !important;
+}
+
+/* Column 5 (IP ADDRESS / ACTIONS): Center aligned */
 .role-grid .z-row .z-cell:nth-child(5),
 .role-grid .z-row .z-row-inner:nth-child(5),
 .role-grid .z-row .z-cell:nth-child(5) .z-cell-content {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* Column 6 (STATUS): Center aligned */
+.role-grid .z-row .z-cell:nth-child(6),
+.role-grid .z-row .z-row-inner:nth-child(6),
+.role-grid .z-row .z-cell:nth-child(6) .z-cell-content {
     text-align: center !important;
     justify-content: center !important;
 }

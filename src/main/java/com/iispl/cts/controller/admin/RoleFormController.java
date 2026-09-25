@@ -162,6 +162,11 @@ public class RoleFormController extends GenericForwardComposer<Component> {
             Messagebox.show("Please enter Role Name.", "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
             return;
         }
+        if (desc.isEmpty()) {
+            Messagebox.show("Please enter Role Description.", "Validation Error", Messagebox.OK, Messagebox.EXCLAMATION);
+            if (txtDescription != null) txtDescription.focus();
+            return;
+        }
 
         // 2. Duplicate Role Name Validation
         if (!isModifyMode) {
