@@ -2,112 +2,77 @@
 <?page title="Express Clear - Login"?>
 <?link rel="stylesheet" type="text/css" href="/css/common/login.css"?>
 <zk>
-	<vlayout apply="com.iispl.cts.controller.common.LoginController"
-		hflex="1" vflex="1" spacing="0">
+<vlayout apply="com.iispl.cts.controller.common.LoginController"
+         hflex="1" vflex="1" spacing="0">
+    
+    <!-- Top Header Ribbon -->
+    <hlayout sclass="top-header" valign="middle" hflex="1" style="justify-content: space-between;">
+        <hlayout valign="middle" spacing="12px">
+            <div sclass="logo-box">CTS</div>
+            <vlayout spacing="2px">
+                <label value="Express Clear" style="font-size: 18px; font-weight: bold; color: white; display: block;"/>
+                <label value="CHEQUE TRUNCATION SYSTEM" style="font-size: 8px; color: #a0aec0; letter-spacing: 1px;"/>
+            </vlayout>
+        </hlayout>
+        <label value="SECURE BANKING OPERATIONS" style="font-size: 11px; color: #a0aec0; letter-spacing: 1px;"/>
+    </hlayout>
 
-		<!-- Top Header Ribbon -->
-		<hlayout sclass="top-header" valign="middle" hflex="1"
-			style="justify-content: space-between;">
-			<hlayout valign="middle" spacing="12px">
-				<div sclass="logo-box">CTS</div>
-				<vlayout spacing="2px">
-					<label value="Express Clear"
-						style="font-size: 18px; font-weight: bold; color: white; display: block;" />
-					<label value="CHEQUE TRUNCATION SYSTEM"
-						style="font-size: 8px; color: #a0aec0; letter-spacing: 1px;" />
-				</vlayout>
-			</hlayout>
-			<label value="SECURE BANKING OPERATIONS"
-				style="font-size: 11px; color: #a0aec0; letter-spacing: 1px;" />
-		</hlayout>
+    <!-- Login Card Container -->
+    <vlayout vflex="1" hflex="1" style="align-items: center; justify-content: center; padding: 40px 0;">
+        <vlayout sclass="login-card" spacing="0" style="margin-top: 50px !important; margin-bottom: 40px !important;">
+            
+            <vlayout spacing="6px" style="text-align: center; margin-bottom: 30px;">
+                <label value="Welcome back" style="font-size: 26px; font-weight: bold; color: #1a202c; display: block;"/>
+                <label value="Sign in to access Express Clear CTS." style="color: #718096; font-size: 13px;"/>
+            </vlayout>
 
-		<!-- Login Card Container -->
-		<vlayout vflex="1" hflex="1"
-			style="align-items: center; justify-content: center; padding: 40px 0;">
-			<vlayout sclass="login-card" spacing="0"
-				style="margin-top: 50px !important; margin-bottom: 40px !important;">
+            <vlayout spacing="18px">
+                <!-- Username or Email Field -->
+                <vlayout spacing="4px">
+                    <label value="USERNAME OR EMAIL" sclass="field-label"/>
+                    <textbox id="txtIdentifier" placeholder="Enter your username or email" 
+                             constraint="no empty: Username or email is required."
+                             sclass="input-field" hflex="1" height="42px" 
+                             onOK="$composer.onOKIdentifier()"/>
+                </vlayout>
 
-				<vlayout spacing="6px"
-					style="text-align: center; margin-bottom: 30px;">
-					<label value="Welcome back"
-						style="font-size: 26px; font-weight: bold; color: #1a202c; display: block;" />
-					<label value="Sign in to access Express Clear CTS."
-						style="color: #718096; font-size: 13px;" />
-				</vlayout>
+                <!-- Password Field -->
+                <vlayout spacing="4px">
+                    <label value="PASSWORD" sclass="field-label"/>
+                    <hlayout style="position: relative; width: 100%;" valign="middle">
+                        <textbox id="txtPassword" type="password" placeholder="Enter your password" 
+                                 constraint="no empty: Password is required."
+                                 sclass="input-field" hflex="1" height="42px"
+                                 style="padding-right: 42px; box-sizing: border-box;" 
+                                 onOK="$composer.onOKPassword()"/>
+                        <button id="btnTogglePassword" 
+                                iconSclass="z-icon-eye"
+                                onClick="$composer.onTogglePasswordVisibility()"
+                                style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; color: #718096; font-size: 15px; box-shadow: none; padding: 0; min-height: unset;" />
+                    </hlayout>
+                </vlayout>
 
-				<vlayout spacing="18px">
-					<!-- Username or Email Field -->
-					<vlayout spacing="4px">
-						<label value="USERNAME OR EMAIL"
-							sclass="field-label" />
-						<textbox id="txtIdentifier"
-							placeholder="Enter your username or email"
-							constraint="no empty: Username or email is required."
-							sclass="input-field" hflex="1" height="42px"
-							onOK="$composer.onOKIdentifier()" />
-					</vlayout>
+                <!-- Inline Error Banner (Hidden by default) -->
+                <div id="divErrorBox" visible="false" 
+                     style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
+                    <span class="z-icon-exclamation-circle" style="color: #e53e3e; font-size: 14px;" />
+                    <label id="lblErrorMessage" style="color: #c53030; font-size: 12px; font-weight: 600; line-height: 1.4;" />
+                </div>
 
-					<!-- Password Field -->
-					<vlayout spacing="4px">
-						<label value="PASSWORD" sclass="field-label" />
-						<hlayout
-							style="position: relative; width: 100%;" valign="middle">
-							<textbox id="txtPassword" type="password"
-								placeholder="Enter your password"
-								constraint="no empty: Password is required."
-								sclass="input-field" hflex="1" height="42px"
-								style="padding-right: 42px; box-sizing: border-box;"
-								onOK="$composer.onOKPassword()" />
-							<button id="btnTogglePassword"
-								iconSclass="z-icon-eye"
-								onClick="$composer.onTogglePasswordVisibility()"
-								style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; color: #718096; font-size: 15px; box-shadow: none; padding: 0; min-height: unset;" />
-						</hlayout>
-					</vlayout>
-					<!-- Insert immediately below the Password Field </vlayout> -->
-					<vlayout id="vlCaptcha" visible="false"
-						spacing="4px">
-						<label value="SECURITY VERIFICATION"
-							sclass="field-label" />
-						<hlayout valign="middle" spacing="10px">
-							<captcha id="cptLogin" length="5"
-								width="140px" height="40px" noise="true" fontColor="#0d2342"
-								bgColor="#f1f5f9" />
-							<button id="btnRegenCaptcha"
-								iconSclass="z-icon-refresh"
-								onClick="$composer.onRegenerateCaptcha()"
-								tooltiptext="Get new image"
-								style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; padding: 6px 10px; border-radius: 4px; cursor: pointer;" />
-						</hlayout>
-						<textbox id="txtCaptcha"
-							placeholder="Enter characters above" sclass="input-field"
-							hflex="1" height="38px" onOK="$composer.onOKPassword()" />
-					</vlayout>
+                <separator height="4px"/>
 
-					<!-- Inline Error Banner -->
-					<div id="divErrorBox" visible="false"
-						style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
-						<span class="z-icon-exclamation-circle"
-							style="color: #e53e3e; font-size: 14px;" />
-						<label id="lblErrorMessage"
-							style="color: #c53030; font-size: 12px; font-weight: 600; line-height: 1.4;" />
-					</div>
+                <!-- Sign In Button -->
+                <button id="btnSignIn" label="Sign In" hflex="1" height="42px" 
+                        style="background: #0d2342 !important; background-color: #0d2342 !important; border: 1px solid #0d2342 !important; color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; border-radius: 6px !important; box-shadow: none !important; cursor: pointer;" />
+            </vlayout>
 
-					<separator height="4px" />
+        </vlayout>
+    </vlayout>
 
-					<!-- Sign In Button -->
-					<button id="btnSignIn" label="Sign In" hflex="1"
-						height="42px"
-						style="background: #0d2342 !important; background-color: #0d2342 !important; border: 1px solid #0d2342 !important; color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; border-radius: 6px !important; box-shadow: none !important; cursor: pointer;" />
-				</vlayout>
+    <!-- Footer Ribbon -->
+    <div sclass="footer-text" hflex="1">
+        <label value="© Express Clear CTS · TEAM FINOVA"/>
+    </div>
 
-			</vlayout>
-		</vlayout>
-
-		<!-- Footer Ribbon -->
-		<div sclass="footer-text" hflex="1">
-			<label value="© Express Clear CTS · TEAM FINOVA" />
-		</div>
-
-	</vlayout>
+</vlayout>
 </zk>
