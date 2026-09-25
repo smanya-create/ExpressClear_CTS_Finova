@@ -19,6 +19,7 @@ import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
@@ -26,6 +27,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.entity.Role;
@@ -98,16 +100,43 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	private String selectedModifyAction = "CHANGE_ROLE";
 	private User currentModUser;
 	private Div dotUserStatus;
+	
 
 	private Label lblModStatusText;
 	private Div badgeUserStatus;
 	private Button btnToggleUserStatus;
 	private Checkbox chkChangeRole;
+	
+    
+ // Modal Components - Auto-wired automatically
+ 	private Div modalConfirmUser;
+ 	private Label lblModalHeaderTitle;
+ 	private Label lblModalHeaderSubtitle;
+ 	private Label lblModalNoticeTop;
+ 	private Label lblModalEmpId;
+ 	private Label lblModalUsername;
+ 	private Hlayout rowModalEmail;
+ 	private Label lblModalEmail;
+ 	private Label lblModalRole;
+ 	private Label lblModalStatus;
+ 	private Label lblModalNoticeBottom;
+ 	private Button btnConfirmUserModal;
+ 	private Button btnCancelUserModal;
+
+ 	// Staged values
+ 	private String modalActionType = "";
+ 	private User stagedNewUser;
+ 	private String stagedNewPassword;
+ 	private String stagedModStatus;
+ 	private String stagedModRoleId;
+ 	private String stagedModRoleName;
+ 	private boolean stagedModRoleChanged;
+ 	private boolean stagedModStatusChanged;
 
 
 	// Tracks current in-memory status changes before hitting DB
 	private boolean modUserActiveState;
-
+	
 	private final UserService userService = UserServiceImpl.getInstance();
 	private final RoleService roleService = RoleServiceImpl.getInstance();
 
@@ -417,64 +446,37 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		String password = txtAddPassword.getValue() != null ? txtAddPassword.getValue().trim() : "";
 		Comboitem selectedRole = cmbAddRole.getSelectedItem();
 
-		// 1. Username / Name Validation
+		// 1. Validations
 		if (username.isEmpty()) {
 			Clients.showNotification("User Name is required.", "error", txtAddUsername, "top_center", 2500);
 			txtAddUsername.focus();
 			return;
 		}
 		if (!NAME_PATTERN.matcher(username).matches()) {
-			Clients.showNotification("User Name must be 3-50 characters (letters, numbers, underscores, dots).", "error", txtAddUsername, "top_center", 3000);
+			Clients.showNotification("User Name must be 3-50 characters.", "error", txtAddUsername, "top_center", 3000);
 			txtAddUsername.focus();
 			return;
 		}
-
-		// 2. Email Validation
-		if (email.isEmpty()) {
-			Clients.showNotification("Email is required.", "error", txtAddEmail, "top_center", 2500);
+		if (email.isEmpty() || !EMAIL_PATTERN.matcher(email).matches()) {
+			Clients.showNotification("Enter a valid email address.", "error", txtAddEmail, "top_center", 2500);
 			txtAddEmail.focus();
 			return;
 		}
-		if (!EMAIL_PATTERN.matcher(email).matches()) {
-			Clients.showNotification("Enter a valid email address (e.g. user@domain.com).", "error", txtAddEmail, "top_center", 3000);
-			txtAddEmail.focus();
-			return;
-		}
-
-		// 3. Phone Number Validation
-		if (phone.isEmpty()) {
-			Clients.showNotification("Phone number is required.", "error", txtAddPhone, "top_center", 2500);
+		if (phone.isEmpty() || !PHONE_PATTERN.matcher(phone).matches()) {
+			Clients.showNotification("Enter a valid 10-digit mobile number.", "error", txtAddPhone, "top_center", 2500);
 			txtAddPhone.focus();
 			return;
 		}
-		if (!PHONE_PATTERN.matcher(phone).matches()) {
-			Clients.showNotification("Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.", "error", txtAddPhone, "top_center", 3000);
-			txtAddPhone.focus();
-			return;
-		}
-
-		// 4. Password Combination Validation
-		if (password.isEmpty()) {
-			Clients.showNotification("Password is required.", "error", txtAddPassword, "top_center", 2500);
+		if (password.isEmpty() || !STRONG_PASSWORD_PATTERN.matcher(password).matches()) {
+			Clients.showNotification("Password must be 8+ chars with uppercase, lowercase, number & special char.", "error", txtAddPassword, "top_center", 3500);
 			txtAddPassword.focus();
 			return;
 		}
-		if (!STRONG_PASSWORD_PATTERN.matcher(password).matches()) {
-			Clients.showNotification(
-					"Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character (e.g., User@123#).", 
-					"error", txtAddPassword, "top_center", 4000);
-			txtAddPassword.focus();
-			return;
-		}
-
-		// 5. Role Selection Validation
 		if (selectedRole == null || selectedRole.getValue() == null) {
 			Clients.showNotification("Please select a role.", "error", cmbAddRole, "top_center", 2500);
 			cmbAddRole.focus();
 			return;
 		}
-
-		// Duplicate username pre-check
 		if (userService.findByUsername(username) != null) {
 			Clients.showNotification("Username '" + username + "' already exists.", "error", txtAddUsername, "top_center", 3000);
 			txtAddUsername.focus();
@@ -484,33 +486,39 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		String assignedRoleId = (String) selectedRole.getValue();
 		String roleDisplayName = getRoleDisplayName(assignedRoleId);
 
-		User newUser = new User();
-		newUser.setUserId(userService.generateNextUserId());
-		newUser.setRoleId(assignedRoleId);
-		newUser.setEmployeeId(empId != null && !empId.isEmpty() ? empId.trim() : userService.generateNextEmployeeId());
-		newUser.setUsername(username);
-		newUser.setFullName(username);
-		newUser.setEmail(email);
-		newUser.setMobileNumber(phone);
-		newUser.setStatus("ACTIVE");
-		newUser.setUserCreatedAt(new Timestamp(System.currentTimeMillis()));
+		// 2. Stage new user object
+		stagedNewUser = new User();
+		stagedNewUser.setUserId(userService.generateNextUserId());
+		stagedNewUser.setRoleId(assignedRoleId);
+		stagedNewUser.setEmployeeId(empId != null && !empId.isEmpty() ? empId.trim() : userService.generateNextEmployeeId());
+		stagedNewUser.setUsername(username);
+		stagedNewUser.setFullName(username);
+		stagedNewUser.setEmail(email);
+		stagedNewUser.setMobileNumber(phone);
+		stagedNewUser.setStatus("ACTIVE");
+		stagedNewUser.setUserCreatedAt(new Timestamp(System.currentTimeMillis()));
+		stagedNewPassword = password;
 
-		boolean success = userService.registerOrUpdateUser(newUser, password);
-		if (success) {
-			AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER", 
-					"Created user: " + username + " (Emp ID: " + newUser.getEmployeeId() + ", Role: " + roleDisplayName + ")", "SUCCESS");
+		modalActionType = "ADD";
 
-			Clients.showNotification("User " + username + " created successfully!", "info", null, "top_center", 2500);
-			loadUserData();
-			switchView("LIST");
-		} else {
-			AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER_FAILED", 
-					"Failed to register user: " + username + " (Emp ID: " + newUser.getEmployeeId() + ")", "FAILED");
+		// 3. Populate modal directly (no getFellow needed)
+		lblModalHeaderTitle.setValue("Confirm New User");
+		lblModalHeaderSubtitle.setValue("User account creation");
+		lblModalNoticeTop.setValue("You are about to create a new system user for:");
+		lblModalEmpId.setValue(stagedNewUser.getEmployeeId());
+		lblModalUsername.setValue(stagedNewUser.getUsername());
+		rowModalEmail.setVisible(true);
+		lblModalEmail.setValue(stagedNewUser.getEmail());
+		lblModalRole.setValue(roleDisplayName);
+		lblModalRole.setStyle("color: #0f172a; font-weight: 600;");
+		lblModalStatus.setValue("ACTIVE");
+		lblModalStatus.setStyle("color: #0f172a; font-weight: 600;");
+		lblModalNoticeBottom.setValue("Once confirmed, the user will be provisioned with active system credentials.");
+		btnConfirmUserModal.setLabel("Create User");
 
-			Clients.showNotification("Failed to save user in database. Ensure Employee ID or Username is not duplicated.", "error", null, "top_center", 3000);
-		}
+		// 4. Open modal
+		modalConfirmUser.setVisible(true);
 	}
-
 	public void onClick$btnClearAddForm(Event event) {
 		txtAddUsername.setValue("");
 		txtAddEmail.setValue("");
@@ -595,12 +603,12 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	public void onClick$btnSaveModifications(Event event) {
 		if (currentModUser == null) return;
 
-		String newStatus = modUserActiveState ? "ACTIVE" : "INACTIVE";
-		boolean statusChanged = !newStatus.equalsIgnoreCase(currentModUser.getStatus());
+		stagedModStatus = modUserActiveState ? "ACTIVE" : "INACTIVE";
+		stagedModStatusChanged = !stagedModStatus.equalsIgnoreCase(currentModUser.getStatus());
 
-		boolean roleChanged = false;
-		String newRoleId = currentModUser.getRoleId();
-		String newRoleName = "";
+		stagedModRoleChanged = false;
+		stagedModRoleId = currentModUser.getRoleId();
+		stagedModRoleName = getRoleDisplayName(currentModUser.getRoleId());
 
 		if (chkChangeRole.isChecked()) {
 			Comboitem selectedItem = cmbNewRole.getSelectedItem();
@@ -609,39 +617,98 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 				cmbNewRole.focus();
 				return;
 			}
-			newRoleId = (String) selectedItem.getValue();
-			newRoleName = selectedItem.getLabel();
-			roleChanged = !newRoleId.equalsIgnoreCase(currentModUser.getRoleId());
+			stagedModRoleId = (String) selectedItem.getValue();
+			stagedModRoleName = selectedItem.getLabel();
+			stagedModRoleChanged = !stagedModRoleId.equalsIgnoreCase(currentModUser.getRoleId());
 		}
 
-		if (!statusChanged && !roleChanged) {
+		if (!stagedModStatusChanged && !stagedModRoleChanged) {
 			Clients.showNotification("No modifications were made.", "info", null, "top_center", 2000);
 			switchView("LIST");
 			return;
 		}
 
-		// Apply changes to current user object
-		currentModUser.setStatus(newStatus);
-		if (roleChanged) {
-			currentModUser.setRoleId(newRoleId);
+		modalActionType = "MODIFY";
+
+		// Direct element population (no getFellow needed)
+		lblModalHeaderTitle.setValue("Confirm User Modifications");
+		lblModalHeaderSubtitle.setValue("Security & role parameter changes");
+		lblModalNoticeTop.setValue("You are about to update account details for:");
+		lblModalEmpId.setValue(currentModUser.getEmployeeId());
+		lblModalUsername.setValue(currentModUser.getUsername());
+		rowModalEmail.setVisible(false);
+
+		if (stagedModRoleChanged) {
+			lblModalRole.setValue(stagedModRoleName + " (Changed)");
+			lblModalRole.setStyle("color: #b45309; font-weight: 700;");
+		} else {
+			lblModalRole.setValue(getRoleDisplayName(currentModUser.getRoleId()) + " (Unchanged)");
+			lblModalRole.setStyle("color: #0f172a; font-weight: 600;");
 		}
 
-		boolean saved = userService.registerOrUpdateUser(currentModUser, null);
-		if (saved) {
-			StringBuilder auditMsg = new StringBuilder("Updated user: ").append(currentModUser.getUsername());
-			if (statusChanged) auditMsg.append(" | Status -> ").append(newStatus);
-			if (roleChanged) auditMsg.append(" | Role -> ").append(newRoleName);
-
-			AuditServiceImpl.getInstance().log("USER_MGMT", "MODIFY_USER", auditMsg.toString(), "SUCCESS");
-			Clients.showNotification("User " + currentModUser.getUsername() + " updated successfully!", "info", null, "top_center", 2500);
-			loadUserData();
-			switchView("LIST");
+		if (stagedModStatusChanged) {
+			lblModalStatus.setValue(stagedModStatus + " (Changed)");
+			lblModalStatus.setStyle("color: #b45309; font-weight: 700;");
 		} else {
-			AuditServiceImpl.getInstance().log("USER_MGMT", "MODIFY_USER_FAILED", 
-					"Failed to update user: " + currentModUser.getUsername() + " (" + currentModUser.getEmployeeId() + ")", "FAILED");
-			Clients.showNotification("Failed to update user in database.", "error", null, "top_center", 2500);
+			lblModalStatus.setValue(currentModUser.getStatus() + " (Unchanged)");
+			lblModalStatus.setStyle("color: #0f172a; font-weight: 600;");
+		}
+
+		lblModalNoticeBottom.setValue("Once confirmed, permission and status changes will take effect immediately.");
+		btnConfirmUserModal.setLabel("Save Changes");
+
+		modalConfirmUser.setVisible(true);
+	}
+	// -------------------------------------------------------------
+    // MODAL BUTTON ACTIONS
+    // -------------------------------------------------------------
+	public void onClick$btnCancelUserModal(Event event) {
+		if (modalConfirmUser != null) {
+			modalConfirmUser.setVisible(false);
 		}
 	}
+	public void onClick$btnConfirmUserModal(Event event) {
+		if (modalConfirmUser != null) {
+			modalConfirmUser.setVisible(false);
+		}
+
+		if ("ADD".equals(modalActionType)) {
+			boolean success = userService.registerOrUpdateUser(stagedNewUser, stagedNewPassword);
+			if (success) {
+				AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER",
+						"Created user: " + stagedNewUser.getUsername() + " (Emp ID: " + stagedNewUser.getEmployeeId() + ")", "SUCCESS");
+				Clients.showNotification("User " + stagedNewUser.getUsername() + " created successfully!", "info", null, "top_center", 2500);
+				loadUserData();
+				switchView("LIST");
+			} else {
+				AuditServiceImpl.getInstance().log("USER_MGMT", "CREATE_USER_FAILED",
+						"Failed to register user: " + stagedNewUser.getUsername(), "FAILED");
+				Clients.showNotification("Failed to save user in database.", "error", null, "top_center", 3000);
+			}
+		} else if ("MODIFY".equals(modalActionType)) {
+			currentModUser.setStatus(stagedModStatus);
+			if (stagedModRoleChanged) {
+				currentModUser.setRoleId(stagedModRoleId);
+			}
+
+			boolean saved = userService.registerOrUpdateUser(currentModUser, null);
+			if (saved) {
+				StringBuilder auditMsg = new StringBuilder("Updated user: ").append(currentModUser.getUsername());
+				if (stagedModStatusChanged) auditMsg.append(" | Status -> ").append(stagedModStatus);
+				if (stagedModRoleChanged) auditMsg.append(" | Role -> ").append(stagedModRoleName);
+
+				AuditServiceImpl.getInstance().log("USER_MGMT", "MODIFY_USER", auditMsg.toString(), "SUCCESS");
+				Clients.showNotification("User " + currentModUser.getUsername() + " updated successfully!", "info", null, "top_center", 2500);
+				loadUserData();
+				switchView("LIST");
+			} else {
+				AuditServiceImpl.getInstance().log("USER_MGMT", "MODIFY_USER_FAILED",
+						"Failed to update user: " + currentModUser.getUsername(), "FAILED");
+				Clients.showNotification("Failed to update user in database.", "error", null, "top_center", 2500);
+			}
+		}
+	}
+
 
 	public void onClick$btnCancelModifications(Event event) {
 		switchView("LIST");
