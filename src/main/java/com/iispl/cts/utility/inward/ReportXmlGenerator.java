@@ -36,14 +36,9 @@ public class ReportXmlGenerator {
             writer.writeStartElement("RRFReport");
     
             writer.writeCharacters("\n    ");
-            writer.writeStartElement("ReportInformation");
-
-            writeElement(writer, "RRFReferenceNo", getRrfReferenceNo(batchId), 8);
-            writeElement(writer, "BatchId", batchId, 8);
-            writeElement(writer, "GeneratedDate", LocalDate.now().format(DATE_FORMATTER), 8);
+            
 
             writer.writeCharacters("\n    ");
-            writer.writeEndElement();
 
             int totalRejectedCheques = rejectedCheques == null ? 0 : rejectedCheques.size();
             BigDecimal totalRejectedAmount = BigDecimal.ZERO;
@@ -55,16 +50,14 @@ public class ReportXmlGenerator {
                     }
                 }
             }
+            writer.writeStartElement("ReportInformation");
 
-            writer.writeCharacters("\n    ");
-            writer.writeStartElement("Summary");
-
+            writeElement(writer, "RRFReferenceNo", getRrfReferenceNo(batchId), 8);
+            writeElement(writer, "BatchId", batchId, 8);
             writeElement(writer, "TotalRejectedCheques", totalRejectedCheques, 8);
             writeElement(writer, "TotalRejectedAmount", formatAmount(totalRejectedAmount), 8);
-
-            writer.writeCharacters("\n    ");
+            writeElement(writer, "GeneratedDate", LocalDate.now().format(DATE_FORMATTER), 8);
             writer.writeEndElement();
-
             writer.writeCharacters("\n    ");
             writer.writeStartElement("RejectedCheques");
 
