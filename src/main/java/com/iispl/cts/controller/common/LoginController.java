@@ -195,7 +195,7 @@ public class LoginController extends GenericForwardComposer<Component> {
                 session.setAttribute("USER_PERMISSIONS", userPermissions);
             }
 
-            Clients.showBusy("Authenticating... Launching Application...");
+            Clients.showBusy("Authenticating...");
 
             auditService.log(
                     authenticatedUser.getUserId(),
