@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <zk>
-	<style src="/css/inward/maker-batch-details.css?v=11" />
+	<style src="/css/inward/maker-batch-details.css?v=13" />
 
 	<div id="inwardMakerBatchDetailsDiv" width="100%"
 		sclass="inward-maker-batch-details"

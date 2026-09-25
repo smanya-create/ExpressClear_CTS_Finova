@@ -18,7 +18,6 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Vlayout;
@@ -75,13 +74,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		if (inwardMakerBtnLast != null) inwardMakerBtnLast.addEventListener("onClick", event -> goToLastPage());
 		if (inwardMakerBtnBack != null) inwardMakerBtnBack.addEventListener("onClick", event -> goBackToDashboard());
 
-		comp.addEventListener("onInitialDataLoad", new EventListener<Event>() {
-			@Override
-			public void onEvent(Event event) throws Exception {
-				renderCurrentPage();
-			}
-		});
-
 		loadBatchDetails(comp);
 	}
 
@@ -132,10 +124,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 			this.currentPage = 1;
 
 			renderCurrentPage();
-
-			if (comp != null) {
-				Events.echoEvent("onInitialDataLoad", comp, null);
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -218,16 +206,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		row.appendChild(actionComponent);
 
 		inwardMakerRowsChequeDetails.appendChild(row);
-	}
-
-	private boolean doesBatchHavePendingMicrRepair() {
-		if (inwardChequeList == null) return false;
-		for (InwardCheque chq : inwardChequeList) {
-			if (chq != null && isMicrRepairStatus(normalizeStatus(chq.getChequeStatus()))) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private Component createActionComponent(InwardCheque cheque) {
@@ -323,29 +301,37 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		String s = normalizeStatus(status);
 
 		if ("CHECKER_PROCESSING_PENDING".equals(s) || "CHECKER_PENDING".equals(s)) {
-			return "checker pending";
+			return "Checker Pending";
 		}
 		if (isMicrRepairStatus(s)) {
-			return "pending micr repair";
+			return "Pending MICR Repair";
 		}
 		if (isDataEntryStatus(s)) {
-			return "pending data entry";
+			return "Pending Data Entry";
 		}
 		if ("REJECTION_REQUESTED".equals(s)) {
-			return "rejection requested";
+			return "Rejection Requested";
 		}
 		if ("REJECTED".equals(s)) {
-			return "rejected";
+			return "Rejected";
+		}
+		if ("ACCEPTED".equals(s)) {
+			return "Accepted";
 		}
 		if ("COMPLETED".equals(s)) {
-			return "completed";
-		}
-		if ("SEND_BACK_TO_MAKER".equals(s) || "ON_HOLD".equals(s)) {
-			return "on hold";
+			return "Completed";
 		}
 
-		// Fallback: strip underscores, lowercase, and let CSS capitalize
-		return s.replace("_", " ").toLowerCase().trim();
+		// Fallback: Title Case
+		StringBuilder sb = new StringBuilder();
+		for (String word : s.replace("_", " ").split("\\s+")) {
+			if (!word.isEmpty()) {
+				sb.append(Character.toUpperCase(word.charAt(0)))
+				  .append(word.substring(1).toLowerCase())
+				  .append(" ");
+			}
+		}
+		return sb.toString().trim();
 	}
 
 	private String getStatusClass(String status) {
