@@ -1098,7 +1098,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 
 			String notifMsg = this.isReworkBatch
-					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker (" + userId + ")."
+					? "Rework for Batch " + currentBatchId + " completed and submitted to Checker by Maker."
 					: "Batch " + currentBatchId + " submitted to Checker by Maker.";
 
 			notificationService.sendNotification("INWARD_CHECKER", null, notifMsg);
