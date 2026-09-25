@@ -294,7 +294,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 		Label statusLabel = new Label(displayStatus);
 		statusLabel.setSclass("status-pending");
-		
+
 		statusLabel.setStyle("display:inline-block;" + "background:#fff7ed;" + "color:#b45309;"
 				+ "border:1px solid #f59e0b;" + "border-radius:16px;" + "font-size:8px;" + "font-weight:800;"
 				+ "text-align:center;" + "white-space:nowrap;");
@@ -318,7 +318,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 
 		String batchStatus = batch.getBatchStatus();
 		String buttonLabel = getButtonLabel(batchStatus);
-		
+
 		Button queueButton = new Button(buttonLabel);
 
 		queueButton.setSclass("queue-button");
@@ -339,7 +339,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		return "Proceed";
 	}
 
-	//batch proceed popup is displaying when we click on proceed button 
+	// batch proceed popup is displaying when we click on proceed button
 	private void openBatchPopup(Listitem item) {
 
 		OutwardBatch selectedBatch = item.getValue();
@@ -353,8 +353,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	private Map<String, Integer> getChequeCounts(String batchId) throws SQLException {
 
 		Map<String, Integer> allChequesCount = new HashMap<>();
-
-		int totalCheques = 0;
 		int normalCheques = 0;
 		int rejectionRequestsCheques = 0;
 		int makerReturnedCheques = 0;
@@ -362,7 +360,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId);
 
 		if (cheques != null) {
-			totalCheques = cheques.size();
 			for (OutwardCheque cheque : cheques) {
 				if (cheque == null) {
 					continue;
@@ -374,11 +371,12 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 				} else if (OutwardChequeStatus.REJECT_REQUEST.toString().equalsIgnoreCase(chequeStatus)) {
 					rejectionRequestsCheques++;
 
-				} else {
+				} else if (OutwardChequeStatus.PENDING_VERIFICATION.toString().equalsIgnoreCase(chequeStatus)) {
 					normalCheques++;
 				}
 			}
 		}
+		int totalCheques = normalCheques + makerReturnedCheques + rejectionRequestsCheques;
 
 		allChequesCount.put("total", totalCheques);
 		allChequesCount.put("normal", normalCheques);
