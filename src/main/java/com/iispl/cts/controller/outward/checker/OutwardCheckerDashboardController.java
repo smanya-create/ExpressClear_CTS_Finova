@@ -371,7 +371,7 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 				} else if (OutwardChequeStatus.REJECT_REQUEST.toString().equalsIgnoreCase(chequeStatus)) {
 					rejectionRequestsCheques++;
 
-				} else if (OutwardChequeStatus.PENDING_VERIFICATION.toString().equalsIgnoreCase(chequeStatus)) {
+				} else if (OutwardChequeStatus.PENDING_VERIFICATION.toString().equalsIgnoreCase(chequeStatus) || OutwardChequeStatus.VERIFIED_BY_CHECKER.toString().equalsIgnoreCase(chequeStatus)) {
 					normalCheques++;
 				}
 			}

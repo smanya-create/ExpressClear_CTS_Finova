@@ -39,6 +39,7 @@ public enum OutwardChequeStatus {
 	    REJECTED,
 	    PENDING_VERIFICATION,
 	    REJECT_REQUEST,
+	    VERIFIED_BY_CHECKER,
 	    MAKER_RETURNED;
 	}
 
