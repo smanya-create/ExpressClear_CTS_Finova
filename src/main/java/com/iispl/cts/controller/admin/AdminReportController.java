@@ -221,6 +221,9 @@ public class AdminReportController extends GenericForwardComposer<Component> {
     // =========================================================================
     // REPORT 2: BOD / EOD CLEARING SESSION LIFECYCLE & BATCH RECONCILIATION
     // =========================================================================
+ // =========================================================================
+    // REPORT 2: BOD / EOD CLEARING SESSION LIFECYCLE & BATCH RECONCILIATION
+    // =========================================================================
     private void exportSessionLifecycleCsv(Date fromDate, Date toDate) {
         StringBuilder sb = new StringBuilder("\uFEFF");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -254,18 +257,21 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 try (ResultSet rs = psSession.executeQuery()) {
                     while (rs.next()) {
                         String openedAt = rs.getTimestamp("opened_at") != null 
-                                ? sdf.format(rs.getTimestamp("opened_at")) : "-";
+                                        ? sdf.format(rs.getTimestamp("opened_at")) : "-";
                         String closedAt = rs.getTimestamp("closed_at") != null 
-                                ? sdf.format(rs.getTimestamp("closed_at")) : "-";
+                                        ? sdf.format(rs.getTimestamp("closed_at")) : "-";
 
                         String formattedOpenedAt = openedAt.equals("-") ? "\"-\"" : "=\"" + openedAt + "\"";
                         String formattedClosedAt = closedAt.equals("-") ? "\"-\"" : "=\"" + closedAt + "\"";
-                        String remarksEscaped = rs.getString("remarks").replace("\"", "\"\"");
+                        
+                        // Safe null check for remarks
+                        String rawRemarks = rs.getString("remarks");
+                        String remarksEscaped = (rawRemarks != null) ? rawRemarks.replace("\"", "\"\"") : "-";
 
                         sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",%s,\"%s\",%s,\"%s\"\n",
-                                rs.getString("session_id"),
-                                rs.getDate("clearing_date"),
-                                rs.getString("session_status"),
+                                rs.getString("session_id") != null ? rs.getString("session_id") : "-",
+                                rs.getDate("clearing_date") != null ? rs.getDate("clearing_date") : "-",
+                                rs.getString("session_status") != null ? rs.getString("session_status") : "-",
                                 rs.getString("opened_by_user") != null ? rs.getString("opened_by_user") : "-",
                                 formattedOpenedAt,
                                 rs.getString("closed_by_user") != null ? rs.getString("closed_by_user") : "-",
@@ -275,7 +281,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 }
             }
 
-         // Section 2: Outward Clearing Batches Processed
+            // Section 2: Outward Clearing Batches Processed
             sb.append("\n\n");
             sb.append("========================================================================================\n");
             sb.append("                     OUTWARD CLEARING BATCHES PROCESSED IN PERIOD                       \n");
@@ -311,13 +317,13 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                         String formattedTime = uploadTime.equals("-") ? "\"-\"" : "=\"" + uploadTime + "\"";
 
                         sb.append(String.format("\"%s\",\"%s\",%s,\"%d\",\"%s\",\"%s\",\"%s\"\n",
-                                rsBatch.getString("outward_batch_id"),
-                                rsBatch.getString("batch_reference_id"),
+                                rsBatch.getString("outward_batch_id") != null ? rsBatch.getString("outward_batch_id") : "-",
+                                rsBatch.getString("batch_reference_id") != null ? rsBatch.getString("batch_reference_id") : "-",
                                 formattedTime,
                                 rsBatch.getInt("cheque_count"),
                                 df.format(rsBatch.getDouble("total_amount")),
-                                rsBatch.getString("uploaded_by"),
-                                rsBatch.getString("batch_status")));
+                                rsBatch.getString("uploaded_by") != null ? rsBatch.getString("uploaded_by") : "-",
+                                rsBatch.getString("batch_status") != null ? rsBatch.getString("batch_status") : "-"));
                     }
                     if (!hasBatches) {
                         sb.append("\"No outward batches processed for this period.\",,,,,,\n");
@@ -325,12 +331,16 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 }
             }
 
+            // TRIGGER THE DOWNLOAD
+            SimpleDateFormat fSdf = new SimpleDateFormat("yyyyMMdd");
+            String fileName = "CTS_Session_Lifecycle_Report_" + fSdf.format(fromDate) + "_to_" + fSdf.format(toDate) + ".csv";
+            Filedownload.save(sb.toString().getBytes(StandardCharsets.UTF_8), "text/csv", fileName);
+
         } catch (Exception e) {
             e.printStackTrace();
             Clients.showNotification("Failed to export Clearing Lifecycle CSV: " + e.getMessage(), "error", null, "top_center", 3500);
         }
     }
-
     // =========================================================================
     // REUSABLE PDF EXPORTER (JASPERREPORTS)
     // =========================================================================

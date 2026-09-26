@@ -11,67 +11,127 @@
 
     <!-- Main Workspace -->
     <center border="none" autoscroll="true" style="background-color: #f1f5f9;">
-        <vlayout spacing="0" hflex="1">
-            
-            <!-- Shared Header -->
-            <include id="incHeader" src="/components/header.zul" 
-                     pageTitle="Admin Dashboard" 
-                     pageSubtitle="Role Management / Add Role"
-                      />
+        <div>
+            <vlayout spacing="0" hflex="1">
+                <!-- Shared Header -->
+                <include id="incHeader" src="/components/header.zul" 
+                         pageTitle="Admin Dashboard" 
+                         pageSubtitle="Role Management / Add Role"/>
 
-            <!-- Form Content Container -->
-            <vlayout spacing="22px" style="padding: 28px 36px;" hflex="1">
-                <vlayout spacing="3px">
-                    <label value="Add Role" sclass="page-title"/>
-                    <label value="Create a new system role definition for operator assignment." sclass="page-subtitle"/>
-                </vlayout>
-
-                <!-- Card Panel -->
-                <vlayout sclass="card-panel" spacing="20px" style="padding: 24px 28px;" hflex="1">
-                    <vlayout spacing="2px">
-                        <label value="Role Details" sclass="cts-card-title" />
-                        <label value="Enter the basic specifications and system status for this role." sclass="cts-card-subtitle" />
+                <!-- Form Content Container -->
+                <vlayout spacing="22px" style="padding: 28px 36px;" hflex="1">
+                    <vlayout spacing="3px">
+                        <label value="Add Role" sclass="page-title"/>
+                        <label value="Create a new system role definition for operator assignment." sclass="page-subtitle"/>
                     </vlayout>
 
-                    <hlayout spacing="20px" hflex="1">
-                        <vlayout spacing="6px" hflex="1">
-                            <label value="ROLE ID" sclass="field-label"/>
-                            <textbox id="txtRoleId" readonly="true" placeholder="Auto generated" hflex="1" height="38px" sclass="input-box input-box-readonly"/>
+                    <!-- Card Panel -->
+                    <vlayout sclass="card-panel" spacing="20px" style="padding: 24px 28px;" hflex="1">
+                        <vlayout spacing="2px">
+                            <label value="Role Details" sclass="cts-card-title" />
+                            <label value="Enter the basic specifications and system status for this role." sclass="cts-card-subtitle" />
                         </vlayout>
+
+                        <hlayout spacing="20px" hflex="1">
+                            <vlayout spacing="6px" hflex="1">
+                                <hlayout height="18px" valign="middle">
+                                    <label value="ROLE ID" sclass="field-label"/>
+                                </hlayout>
+                                <textbox id="txtRoleId" readonly="true" placeholder="Auto generated" hflex="1" height="38px" sclass="input-box input-box-readonly"/>
+                            </vlayout>
+                            <vlayout spacing="6px" hflex="1">
+                                <hlayout spacing="4px" height="18px" valign="middle">
+                                    <label value="ROLE NAME" sclass="field-label"/>
+                                    <label value="*" style="color: #dc2626; font-size: 13px; font-weight: 700; line-height: 1;"/>
+                                </hlayout>
+                                <textbox id="txtRoleName" placeholder="Enter role name" maxlength="50" hflex="1" height="38px" sclass="input-box"/>
+                            </vlayout>
+                        </hlayout>
+
                         <vlayout spacing="6px" hflex="1">
                             <hlayout spacing="4px" valign="middle">
-                                <label value="ROLE NAME" sclass="field-label"/>
+                                <label value="DESCRIPTION" sclass="field-label"/>
                                 <label value="*" style="color: #dc2626; font-size: 13px; font-weight: 700;"/>
                             </hlayout>
-                            <textbox id="txtRoleName" placeholder="Enter role name" hflex="1" height="38px" sclass="input-box"/>
+                            <textbox id="txtDescription" placeholder="Enter role description" hflex="1" height="38px" sclass="input-box"/>
                         </vlayout>
-                    </hlayout>
 
-                    <vlayout spacing="6px" hflex="1">
-                        <hlayout spacing="4px" valign="middle">
-                            <label value="DESCRIPTION" sclass="field-label"/>
-                            <label value="*" style="color: #dc2626; font-size: 13px; font-weight: 700;"/>
+                        <vlayout spacing="6px" width="49%">
+                            <label value="STATUS" sclass="field-label"/>
+                            <combobox id="cmbStatus" readonly="true" width="100%" height="38px">
+                                <comboitem label="Active" value="Active"/>
+                                <comboitem label="Inactive" value="Inactive"/>
+                            </combobox>
+                        </vlayout>
+
+                        <!-- Actions -->
+                        <hlayout hflex="1" spacing="10px" style="margin-top: 14px;">
+                            <button id="btnSave" label="CREATE ROLE" sclass="btn-primary"/>
+                            <button id="btnCancel" label="CANCEL" sclass="btn-outline"/>
                         </hlayout>
-                        <textbox id="txtDescription" placeholder="Enter role description" hflex="1" height="38px" sclass="input-box"/>
                     </vlayout>
-
-                    <vlayout spacing="6px" width="49%">
-                        <label value="STATUS" sclass="field-label"/>
-                        <combobox id="cmbStatus" readonly="true" width="100%" height="38px">
-                            <comboitem label="Active" value="Active"/>
-                            <comboitem label="Inactive" value="Inactive"/>
-                        </combobox>
-                    </vlayout>
-
-                    <!-- Actions (Left-aligned, matching Add User) -->
-                    <hlayout hflex="1" spacing="10px" style="margin-top: 14px;">
-                        <button id="btnSave" label="CREATE ROLE" sclass="btn-primary"/>
-                        <button id="btnCancel" label="CANCEL" sclass="btn-outline"/>
-                    </hlayout>
                 </vlayout>
             </vlayout>
 
-        </vlayout>
+            <!-- Confirmation Modal placed inside <center>, NOT directly under <borderlayout> -->
+            <window id="winConfirmModal" title="" border="none" width="460px" visible="false"
+                    style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25); background: #ffffff;">
+
+                <vlayout spacing="18px" style="padding: 24px 28px;">
+                    <!-- Header with Warning Icon -->
+                    <hlayout spacing="14px" valign="middle">
+                        <div style="background-color: #fef3c7; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <label value="!" style="color: #d97706; font-size: 20px; font-weight: 800; line-height: 1;"/>
+                        </div>
+                        <vlayout spacing="2px">
+                            <label id="lblModalTitle" value="Confirm New Role" style="font-size: 16px; font-weight: 700; color: #1e293b;"/>
+                            <label id="lblModalSubtitle" value="Role specification creation" style="font-size: 12px; color: #64748b;"/>
+                        </vlayout>
+                    </hlayout>
+
+                    <!-- Summary Details Box -->
+                    <vlayout spacing="12px" style="background-color: #f8fafc; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0;">
+                        <label value="You are about to create a new system role definition for:" style="font-size: 12px; color: #64748b;"/>
+
+                        <grid style="border: none; background: transparent;">
+                            <columns>
+                                <column width="110px"/>
+                                <column/>
+                            </columns>
+                            <rows>
+                                <row style="background: transparent; border: none; padding: 3px 0;">
+                                    <label value="Role ID:" style="color: #64748b; font-size: 13px; font-weight: 500;"/>
+                                    <label id="lblConfirmRoleId" style="color: #0f172a; font-size: 13px; font-weight: 700;"/>
+                                </row>
+                                <row style="background: transparent; border: none; padding: 3px 0;">
+                                    <label value="Role Name:" style="color: #64748b; font-size: 13px; font-weight: 500;"/>
+                                    <label id="lblConfirmRoleName" style="color: #0f172a; font-size: 13px; font-weight: 700;"/>
+                                </row>
+                                <row style="background: transparent; border: none; padding: 3px 0;">
+                                    <label value="Description:" style="color: #64748b; font-size: 13px; font-weight: 500;"/>
+                                    <label id="lblConfirmDesc" style="color: #0f172a; font-size: 13px; font-weight: 600;"/>
+                                </row>
+                                <row style="background: transparent; border: none; padding: 3px 0;">
+                                    <label value="Status:" style="color: #64748b; font-size: 13px; font-weight: 500;"/>
+                                    <label id="lblConfirmStatus" style="color: #0f172a; font-size: 13px; font-weight: 700;"/>
+                                </row>
+                            </rows>
+                        </grid>
+
+                        <label value="Once confirmed, this role will be available for operator assignment." style="font-size: 11px; color: #94a3b8; margin-top: 4px;"/>
+                    </vlayout>
+
+                    <!-- Action Buttons -->
+                    <hlayout spacing="10px" style="justify-content: flex-end; margin-top: 6px;">
+                        <button id="btnCancelModal" label="Cancel" 
+                                style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 6px; cursor: pointer;"/>
+                        <button id="btnConfirmAction" label="Create Role" 
+                                style="background: #0f172a; border: 1px solid #0f172a; color: #ffffff; font-size: 13px; font-weight: 600; padding: 8px 20px; border-radius: 6px; cursor: pointer;"/>
+                    </hlayout>
+                </vlayout>
+            </window>
+        </div>
     </center>
+
 </borderlayout>
 </zk>
