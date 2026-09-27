@@ -2,10 +2,7 @@ package com.iispl.cts.controller.inward.maker;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -34,8 +31,6 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Progressmeter;
 import org.zkoss.zul.Textbox;
 
-import com.iispl.cts.common.config.DBConnection;
-import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.entity.User;
@@ -56,22 +51,17 @@ import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
 public class InwardDataEntryController extends GenericForwardComposer<Component> {
 
-	
 	private final InwardBatchService batchService = new InwardBatchServiceImpl();
 	private final InwardChequeService chequeService = new InwardChequeServiceImpl();
 	private final InwardSendBackRequestService sendBackRequestService = new InwardSendBackRequestServiceImpl();
 	private final RejectedReasonService rejectedReasonService = RejectedReasonServiceImpl.getInstance();
 	private final NotificationService notificationService = NotificationServiceImpl.getInstance();
 
-	// Top Metadata Card Labels
 	private Label lblBatchId;
-	private Label lblSource;
 	private Label lblTotalCheques;
-	private Label lblChequeNo;
-	private Label lblDataStatus;
-	private Label lblReceivedDate;
 
-	// Navigation & Submission Controls
+	private Label lblDataStatus;
+	
 	private Progressmeter pmBatchProgress;
 	private Label lblProgressText;
 	private Label lblChequePosition;
@@ -106,7 +96,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	private Textbox txtDraweeAccount;
 	private Textbox txtDraweeBankName;
 	private Textbox txtPayeeName;
-	private Textbox txtEntryRemark;
 
 	// Form Action Buttons
 	private Button btnCancel;
@@ -142,10 +131,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 		
-	
-		
 		super.doAfterCompose(comp);
-
 
 		String sessionBatch = (String) Sessions.getCurrent().getAttribute("ACTIVE_INWARD_BATCH_ID");
 		if (sessionBatch != null && !sessionBatch.trim().isEmpty()) {
@@ -181,7 +167,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 	public void loadBatch(String batchId) {
 		this.currentBatchId = batchId;
-		System.out.println("DEBUG loadBatch called for batchId: " + batchId);
 
 		InwardBatch batch = batchService.getBatchById(batchId);
 		if (batch != null) {
@@ -195,9 +180,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 			if (lblBatchId != null)
 				lblBatchId.setValue(batch.getInwardBatchId());
-			if (lblReceivedDate != null && batch.getUploadedAt() != null) {
-				lblReceivedDate.setValue(new SimpleDateFormat("dd-MM-yyyy").format(batch.getUploadedAt()));
-			}
 		}
 
 		List<InwardCheque> allCheques = chequeService.getChequesByBatchAndStatus(batchId, null);
@@ -215,12 +197,10 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 				String st = c.getChequeStatus().trim().toUpperCase();
 
 				if (this.isReworkBatch) {
-					// =========================================================================
 					// REWORK FLOW:
 					// 1. Cheques waiting for Data Entry rework (including repaired MICR cheques)
 					// 2. Cheques already approved in this rework session (MAKER_RETURNED)
 					// 3. Cheques where Maker requested rejection in this rework session
-					// =========================================================================
 					if (isSentBackStatus(st)) {
 						this.activeQueue.add(c);
 						continue;
@@ -236,9 +216,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 					}
 
 				} else {
-					// =========================================================================
 					// NORMAL INTAKE FLOW:
-					// =========================================================================
 					if (InwardChequeStatus.DATA_ENTRY_PENDING.name().equalsIgnoreCase(st)
 							|| InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name().equalsIgnoreCase(st)
 							|| "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)) {
@@ -253,22 +231,18 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			}
 		}
 		
-		// Update header total count: in rework show total rework items in this batch; in normal show batch total
-				if (lblTotalCheques != null) {
-					if (this.isReworkBatch) {
-						long totalReworkInBatch = allCheques != null ? allCheques.stream()
-								.filter(c -> sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId))
-								.count() : 0;
-						lblTotalCheques.setValue(String.valueOf(totalReworkInBatch));
-					} else if (batch != null) {
-						lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
-					}
-				}
+		// Update header total count: in rework show total rework items in this batch, in normal show batch total
+		if (lblTotalCheques != null) {
+			if (this.isReworkBatch) {
+				long totalReworkInBatch = allCheques != null ? allCheques.stream()
+						.filter(c -> sendBackRequestService.isChequeInCurrentRework(c.getInwardChequeId(), this.currentBatchId))
+						.count() : 0;
+				lblTotalCheques.setValue(String.valueOf(totalReworkInBatch));
+			} else if (batch != null) {
+				lblTotalCheques.setValue(String.valueOf(batch.getActualChequeCount()));
+			}
+		}
 		
-		System.out.println("DEBUG isReworkBatch evaluated to: " + this.isReworkBatch);
-		System.out.println("DEBUG activeQueue size before return: " + (this.activeQueue != null ? this.activeQueue.size() : 0));
-
-
 		String targetChequeId = execution.getParameter("chequeId");
 		if (targetChequeId == null || targetChequeId.trim().isEmpty()) {
 			targetChequeId = execution.getParameter("amp;chequeId");
@@ -312,12 +286,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		return InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name().equalsIgnoreCase(status)
 				|| InwardChequeStatus.SEND_BACK_TO_MAKER.name().equalsIgnoreCase(status);
 	}
-	
-
-
-
-	
-		
 
 	private int findFirstPendingIndex() {
 		if (activeQueue == null || activeQueue.isEmpty())
@@ -341,8 +309,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	private void displayCurrentCheque() {
 		if (activeQueue == null || activeQueue.isEmpty()) {
 			clearForm();
-			if (lblChequeNo != null)
-				lblChequeNo.setValue("-");
 			if (lblDataStatus != null) {
 				lblDataStatus.setValue("NO CHEQUES");
 				lblDataStatus.setStyle(null);
@@ -362,8 +328,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		InwardCheque item = activeQueue.get(currentIndex);
 
-		if (lblChequeNo != null)
-			lblChequeNo.setValue(item.getChequeNumber() != null ? item.getChequeNumber() : "-");
 		if (lblChequePosition != null)
 			lblChequePosition.setValue((currentIndex + 1) + " of " + activeQueue.size());
 		
@@ -372,7 +336,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 
 		String status = item.getChequeStatus() != null ? item.getChequeStatus().trim().toUpperCase() : "";
 		if (lblDataStatus != null) {
-			lblDataStatus.setStyle(null); // Clear inline gradient style so the CSS peach pill is respected
+			lblDataStatus.setStyle(null); 
 
 			if (isSentBackStatus(status)) {
 				lblDataStatus.setValue("Sent Back");
@@ -420,11 +384,9 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtDraweeBankName.setValue(item.getDraweeName() != null ? item.getDraweeName() : "");
 		if (txtPayeeName != null)
 			txtPayeeName.setValue(item.getPayeeName() != null ? item.getPayeeName() : "");
-		if (txtEntryRemark != null)
-			txtEntryRemark.setValue("");
 		
 		// Highlight OCR discrepancies in red (normal intake only)
-				highlightOcrMismatches(item);
+		highlightOcrMismatches(item);
 
 		updateNavigationState();
 		updateProgressBar();
@@ -1181,8 +1143,6 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtDraweeBankName.setValue("");
 		if (txtPayeeName != null)
 			txtPayeeName.setValue("");
-		if (txtEntryRemark != null)
-			txtEntryRemark.setValue("");
 	}
 
 	private static final String[] UNITS = { "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
