@@ -40,8 +40,8 @@
 
 						<!-- 3. Roles Table Card (Locked to ~420px to match Audit Trail card height) -->
 						<vlayout sclass="card-panel" spacing="12px"
-							hflex="1"
-							style="padding: 16px 22px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; height: 420px; flex: 0 0 auto !important;">
+							hflex="1" vflex="1"
+							style="padding: 16px 22px; box-sizing: border-box; overflow: hidden;">
 
 							<!-- Top Bar: Counter & Add Button -->
 							<hlayout valign="middle" hflex="1"

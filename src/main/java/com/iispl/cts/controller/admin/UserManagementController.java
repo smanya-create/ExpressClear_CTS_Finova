@@ -394,11 +394,11 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	// --- SCREEN 2: ADD USER VIEW ---
 
 	private static final java.util.regex.Pattern NAME_PATTERN = 
-			java.util.regex.Pattern.compile("^[a-zA-Z][a-zA-Z0-9._\\s]{2,49}$");
+			java.util.regex.Pattern.compile("^[a-zA-Z][a-zA-Z._]{2,49}$");
 	private static final java.util.regex.Pattern EMAIL_PATTERN = 
 			java.util.regex.Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
 	private static final java.util.regex.Pattern PHONE_PATTERN = 
-			java.util.regex.Pattern.compile("^[6-9]\\d{9}$"); // Standard 10-digit mobile starting 6-9
+			java.util.regex.Pattern.compile("^(\\+91[\\-\\s]?|0)?[6-9]\\d{9}$"); // Standard 10-digit mobile starting 6-9
 	// Password must contain at least: 8 chars, 1 uppercase, 1 lowercase, 1 number, and 1 special character
 	private static final java.util.regex.Pattern STRONG_PASSWORD_PATTERN = 
 			java.util.regex.Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#^()_+\\-=])[A-Za-z\\d@$!%*?&#^()_+\\-=]{8,}$");
@@ -420,7 +420,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		cmbAddRole.setSelectedIndex(-1);
 		cmbAddRole.setValue("");
 		cmbAddRole.close();
-
+ 
 		switchView("ADD");
 	}
 
@@ -449,6 +449,11 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		// 1. Validations
 		if (username.isEmpty()) {
 			Clients.showNotification("User Name is required.", "error", txtAddUsername, "top_center", 2500);
+			txtAddUsername.focus();
+			return;
+		}
+		if(username.matches(".*\\d")) {
+			Clients.showNotification("Username should not contain numbers.","error",txtAddUsername,"top_center", 3000);
 			txtAddUsername.focus();
 			return;
 		}

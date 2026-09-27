@@ -144,9 +144,9 @@
 								<hlayout hflex="1" spacing="10px"
 									style="margin-top: 18px;">
 									<button id="btnSave"
-										label="UPDATE ROLE" sclass="btn-primary" />
+										label="Update Role" sclass="btn-primary" />
 									<button id="btnCancel"
-										label="CANCEL" sclass="btn-outline" />
+										label="Cancel" sclass="btn-outline" />
 								</hlayout>
 							</vlayout>
 						</vlayout>
