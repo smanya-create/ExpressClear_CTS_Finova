@@ -85,14 +85,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 		applyCombinedFilter(null, null);
 	}
 
-	public void onChanging$txtSearchBatch(InputEvent event) {
-		applyCombinedFilter(event.getValue(), null);
-	}
-
-	public void onChange$txtSearchBatch() {
-		applyCombinedFilter(null, null);
-	}
-
 	private void onClearFilter() {
 		if (txtSearchBatch != null) {
 			txtSearchBatch.setValue("");
