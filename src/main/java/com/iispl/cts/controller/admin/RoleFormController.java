@@ -252,8 +252,8 @@ public class RoleFormController extends GenericForwardComposer<Component> {
             return;
         }
 
-        if (!roleName.matches("^[a-zA-Z0-9 _-]+$")) {
-            Clients.showNotification("Only letters, numbers, spaces, hyphens, and underscores allowed.", "error", txtRoleName, "end_center", 3000);
+        if (!roleName.matches("^[a-zA-Z _-]+$")) {
+            Clients.showNotification("Only letters, spaces, hyphens, and underscores allowed.", "error", txtRoleName, "end_center", 3000);
             if (txtRoleName != null) txtRoleName.focus();
             return;
         }

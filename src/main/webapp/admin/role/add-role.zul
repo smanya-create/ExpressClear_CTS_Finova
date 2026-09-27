@@ -5,7 +5,7 @@
 <borderlayout apply="com.iispl.cts.controller.admin.RoleFormController" hflex="1" vflex="1">
 
     <!-- Shared Left Sidebar Navigation -->
-    <west width="220px" border="none" collapsible="false">
+    <west width="240px" border="none" collapsible="false">
         <include src="/components/sidebar.zul" role="ADMIN" activeTab="role-management" />
     </west>
 
@@ -29,7 +29,7 @@
                     <vlayout sclass="card-panel" spacing="20px" style="padding: 24px 28px;" hflex="1">
                         <vlayout spacing="2px">
                             <label value="Role Details" sclass="cts-card-title" />
-                            <label value="Enter the basic specifications and system status for this role." sclass="cts-card-subtitle" />
+                          
                         </vlayout>
 
                         <hlayout spacing="20px" hflex="1">
@@ -66,8 +66,8 @@
 
                         <!-- Actions -->
                         <hlayout hflex="1" spacing="10px" style="margin-top: 14px;">
-                            <button id="btnSave" label="CREATE ROLE" sclass="btn-primary"/>
-                            <button id="btnCancel" label="CANCEL" sclass="btn-outline"/>
+                            <button id="btnSave" label="Create Role" sclass="btn-primary"/>
+                            <button id="btnCancel" label="Cancel" sclass="btn-outline"/>
                         </hlayout>
                     </vlayout>
                 </vlayout>
