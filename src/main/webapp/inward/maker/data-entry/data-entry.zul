@@ -151,7 +151,7 @@
 					</div>
 					<div sclass="cts-form-field">
 						<label value="Drawee Customer Name" sclass="cts-field-lbl" />
-						<textbox id="txtDraweeBankName" sclass="cts-input-text" width="100%" />
+						<textbox id="txtDraweeCustomerName" sclass="cts-input-text" width="100%" />
 					</div>
 				</div>
 
