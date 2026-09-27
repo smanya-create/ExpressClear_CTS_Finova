@@ -38,8 +38,7 @@
                             <textbox id="txtSearchBatch"
                                      placeholder="Enter full or partial Batch ID"
                                      width="340px"
-                                     sclass="data-entry-filter-input"
-                                     onChanging="$composer.onChanging$txtSearchBatch(event)" />
+                                     sclass="data-entry-filter-input" />
 
                             <!-- Status Filter Combobox -->
                             <combobox id="cmbStatusFilter"
@@ -54,8 +53,7 @@
 
                             <button id="btnClearSearch"
                                     label="Clear"
-                                    sclass="data-entry-clear-button"
-                                    onClick="$composer.onClick$btnClearSearch()" />
+                                    sclass="data-entry-clear-button" />
                         </hlayout>
                     </div>
 
