@@ -38,6 +38,8 @@ public interface OutwardChequeDAO {
 	List<OutwardCheque> getMakerDataEntryCheques(String outwardBatchId);
 
 	int getCompletedMakerChequeCountByBatchId(String outwardBatchId);
+	
+	int getPendingMakerChequeCountByBatchId(String outwardBatchId);
 
 	boolean saveRejectionRequest(String outwardChequeId, String rejectionReason, String rejectionRemarks);
 }

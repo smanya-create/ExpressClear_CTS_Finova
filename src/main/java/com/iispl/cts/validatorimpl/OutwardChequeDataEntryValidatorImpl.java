@@ -20,6 +20,7 @@ public class OutwardChequeDataEntryValidatorImpl implements OutwardChequeDataEnt
 	private static final String STATUS_REJECTION_REJECT = "REJECTION_REJECT";
 	private static final String STATUS_MICR_REJECTED = "MICR_REJECTED";
 	private static final String STATUS_PENDING_MICR_REPAIR = "PENDING_MICR_REPAIR";
+	private static final String STATUS_VERIFIED_BY_CHECKER = "VERIFIED_BY_CHECKER";
 
 	@Override
 	public ValidationResult validateChequeFields(String chequeNumber, String amountText, BigDecimal amount,
@@ -175,7 +176,7 @@ public class OutwardChequeDataEntryValidatorImpl implements OutwardChequeDataEnt
 				return false;
 			String status = normalizeStatus(cheque.getChequeStatus());
 
-			boolean isCompleted = STATUS_PENDING_VERIFICATION.equals(status) || STATUS_MAKER_RETURNED.equals(status)
+			boolean isCompleted = STATUS_PENDING_VERIFICATION.equals(status) || STATUS_MAKER_RETURNED.equals(status) || STATUS_VERIFIED_BY_CHECKER.equals(status)
 					|| isRejectRequest(status);
 
 			if (!isCompleted) {

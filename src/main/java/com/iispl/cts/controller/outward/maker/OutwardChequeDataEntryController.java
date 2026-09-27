@@ -526,8 +526,11 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 
 		try {
 			List<OutwardCheque> existing = outwardChequeService.getChequesByBatchId(outwardBatchId);
+			System.out.println("existing size: " + existing.size());
+			System.out.println("allBatchCheques size before : " + allBatchCheques.size());
 			if (existing != null)
 				allBatchCheques.addAll(existing);
+			System.out.println("allBatchCheques size after : " + allBatchCheques.size());
 		} catch (Exception ignored) {
 			allBatchCheques = new ArrayList<>();
 		}
@@ -536,6 +539,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	private void mergeScanAndOutwardCheques() {
 		List<OutwardCheque> merged = new ArrayList<>();
 
+		System.out.println("scanChequeList size: " + scanChequeList.size());
 		if (scanChequeList != null && !scanChequeList.isEmpty()) {
 			for (int i = 0; i < scanChequeList.size(); i++) {
 				ScanCheque sc = scanChequeList.get(i);
@@ -553,6 +557,7 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 			merged.addAll(allBatchCheques);
 		}
 
+		System.out.println("merged size: " + merged.size());
 		allBatchCheques = merged;
 	}
 
@@ -621,43 +626,54 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 	}
 
 	/**
-	 * STRICT QUEUE ISOLATION (MATCHING INWARD PATTERN): When the batch is on hold
-	 * (rework mode), activeQueue ONLY loads cheques that were returned for
-	 * modification (ON_HOLD / MAKER_RETURNED / PENDING_DATA_ENTRY). All
-	 * already-verified cheques (PENDING_VERIFICATION) are completely excluded from
-	 * the queue.
+	 * Determines whether a cheque belongs to the Maker Data Entry queue. Excludes
+	 * cheques that are pending verification / checker verified, awaiting MICR
+	 * repair, or not actionable.
+	 */
+	private boolean isChequeEligibleForDataEntryQueue(OutwardCheque cheque) {
+		if (cheque == null) {
+			return false;
+		}
+
+		String status = validator.normalizeStatus(cheque.getChequeStatus());
+
+		// 1. Never show already-verified cheques in Maker Data Entry
+		if (STATUS_PENDING_VERIFICATION.equals(status)) {
+			return false;
+		}
+
+		// 2. Never show cheques still pending MICR repair
+		if (validator.isMicrPending(status)) {
+			return false;
+		}
+
+		// 3. Batch in Rework mode (batch ON_HOLD or has Checker-returned cheques)
+		if (this.isReworkBatch) {
+			return validator.isOnHold(status) || STATUS_MAKER_RETURNED.equals(status)
+					|| STATUS_PENDING_DATA_ENTRY.equals(status) || status.isEmpty();
+		}
+
+		// 4. Fresh batch or post-MICR repair return: include actionable data entry
+		// items
+		return STATUS_PENDING_DATA_ENTRY.equals(status) || validator.isOnHold(status)
+				|| STATUS_MAKER_RETURNED.equals(status) || validator.isMicrRejected(status)
+				|| validator.isRejectRequest(status) || status.isEmpty();
+	}
+
+	/**
+	 * STRICT QUEUE ISOLATION: Filters cheques through
+	 * isChequeEligibleForDataEntryQueue to ensure already-verified cheques are
+	 * completely excluded from the queue.
 	 */
 	private void rebuildActiveQueue() {
 		activeQueue = new ArrayList<>();
+		System.out.println(allBatchCheques.size() + " all batch cheques size ");
 		if (allBatchCheques == null)
 			return;
 
-		if (this.isReworkBatch) {
-			for (OutwardCheque cheque : allBatchCheques) {
-				if (cheque == null)
-					continue;
-				String status = validator.normalizeStatus(cheque.getChequeStatus());
-
-				// Exclude already verified items when in rework mode
-				if (STATUS_PENDING_VERIFICATION.equals(status)) {
-					continue;
-				}
-
-				// Only load returned/rework items
-				if (validator.isOnHold(status) || STATUS_MAKER_RETURNED.equals(status)
-						|| STATUS_PENDING_DATA_ENTRY.equals(status) || status.isEmpty()) {
-					activeQueue.add(cheque);
-				}
-			}
-		} else {
-			// Fresh batch: include all non-MICR-pending cheques
-			for (OutwardCheque cheque : allBatchCheques) {
-				if (cheque == null)
-					continue;
-				String status = validator.normalizeStatus(cheque.getChequeStatus());
-				if (!validator.isMicrPending(status)) {
-					activeQueue.add(cheque);
-				}
+		for (OutwardCheque cheque : allBatchCheques) {
+			if (isChequeEligibleForDataEntryQueue(cheque)) {
+				activeQueue.add(cheque);
 			}
 		}
 	}
@@ -1173,12 +1189,6 @@ public class OutwardChequeDataEntryController extends SelectorComposer<Component
 		outwardChequeDataEntryBtnSubmit.setDisabled(!ready);
 	}
 
-	/**
-	 * SINGLE DYNAMIC ALERT BANNER CONTROLLER (INWARD PATTERN): Accurately detects
-	 * whether the current item is returned by Checker. When the batch is in rework
-	 * (isReworkBatch) and the cheque is pending modification, it displays the
-	 * orange Checker Return alert banner.
-	 */
 	private void updateCurrentChequeStatus(OutwardCheque cheque) {
 		hideBanner();
 		if (cheque == null)

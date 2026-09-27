@@ -174,11 +174,19 @@ public class ScanBatchDAOImpl implements ScanBatchDAO {
 
 		List<ScanBatch> batchList = new ArrayList<>();
 
+//		String sql = "SELECT " + "scanned_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
+//				+ "actual_total_amount, " + "staging_status, " + "batch_status, " + "uploaded_by, " + "uploaded_at "
+//				+ "FROM scan_batch " + "WHERE UPPER(TRIM(batch_status)) = 'PENDING_MAKER_PROCESS' " + "AND NOT EXISTS ("
+//				+ "SELECT 1 " + "FROM outward_batch ob " + "WHERE ob.outward_batch_id = scan_batch.scanned_batch_id"
+//				+ ") " + "ORDER BY uploaded_at ASC";
+		
+		
+		//Added new conditions to fetch respective data only. - VK
 		String sql = "SELECT " + "scanned_batch_id, " + "batch_reference_id, " + "actual_cheque_count, "
 				+ "actual_total_amount, " + "staging_status, " + "batch_status, " + "uploaded_by, " + "uploaded_at "
 				+ "FROM scan_batch " + "WHERE UPPER(TRIM(batch_status)) = 'PENDING_MAKER_PROCESS' " + "AND NOT EXISTS ("
 				+ "SELECT 1 " + "FROM outward_batch ob " + "WHERE ob.outward_batch_id = scan_batch.scanned_batch_id"
-				+ ") " + "ORDER BY uploaded_at ASC";
+				+ ") AND BATCH_STATUS = 'PENDING_MAKER_PROCESS'" + "ORDER BY uploaded_at ASC";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(sql);

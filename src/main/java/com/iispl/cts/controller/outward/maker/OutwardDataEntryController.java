@@ -110,7 +110,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 				continue;
 			}
 
-			List<ScanCheque> scanCheques = scanService.getChequesByBatchId(scannedBatchId);
+			List<ScanCheque> scanCheques = scanService.getChequesByBatchId(scannedBatchId);//2
 			if (scanCheques == null) {
 				scanCheques = new ArrayList<>();
 			}
@@ -241,8 +241,8 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		totalLabel.setSclass("outward-data-entry-number");
 
 		// 3. Pending Progress
-		int completedCheques = getCompletedMakerChequeCount(batch);
-		Label progressLabel = new Label(completedCheques + " / " + totalCheques);
+		int pendingCheques = getPendingMakerChequeCount(batch);
+		Label progressLabel = new Label(pendingCheques + " / " + totalCheques);
 		progressLabel.setSclass("outward-data-entry-progress");
 
 		// 4. MICR Rejected
@@ -288,6 +288,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 		return scanCheques != null ? scanCheques.size() : 0;
 	}
 
+	//Changed from getting COMPLETED to PENDING count, since it's not being used
 	private int getCompletedMakerChequeCount(OutwardBatch batch) {
 		if (batch == null)
 			return 0;
@@ -297,6 +298,20 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 		try {
 			return outwardChequeService.getCompletedMakerChequeCountByBatchId(batchId);
+		} catch (Exception ignored) {
+			return 0;
+		}
+	}
+	
+	private int getPendingMakerChequeCount(OutwardBatch batch) {
+		if (batch == null)
+			return 0;
+		String batchId = validator.sanitizeBatchId(batch.getOutwardBatchId());
+		if (batchId.isEmpty())
+			return 0;
+
+		try {
+			return outwardChequeService.getPendingMakerChequeCountByBatchId(batchId);
 		} catch (Exception ignored) {
 			return 0;
 		}
@@ -337,7 +352,7 @@ public class OutwardDataEntryController extends GenericForwardComposer<Component
 
 	private List<OutwardCheque> getOutwardCheques(String batchId) {
 		try {
-			List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId);
+			List<OutwardCheque> cheques = outwardChequeService.getChequesByBatchId(batchId); //1
 			return cheques != null ? cheques : new ArrayList<>();
 		} catch (Exception exception) {
 			return new ArrayList<>();

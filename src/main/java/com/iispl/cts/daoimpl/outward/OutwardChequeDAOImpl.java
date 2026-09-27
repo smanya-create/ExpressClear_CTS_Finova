@@ -212,13 +212,15 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 				+ "drawee_account_number, payee_name, payee_account_number, cheque_amount, cheque_date, "
 				+ "cheque_status, account_id, created_at, city_code, bank_code, branch_code, "
 				+ "cheque_image_front, cheque_image_back FROM outward_cheque "
-				+ "WHERE outward_batch_id = ? ORDER BY outward_cheque_id";
+				+ "WHERE outward_batch_id = ? "// AND cheque_status IN ('PENDING_DATA_ENTRY','MICR_REJECTED','MAKER_RETURNED', 'REJECT_REQUEST')" // added cheque status condition 
+				+ " ORDER BY outward_cheque_id"; 
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
 			ps.setString(1, outwardBatchId.trim());
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
+					System.out.println(rs.getString("outward_cheque_id") + "  " + rs.getString("drawee_name") + "  " + rs.getString("cheque_status"));
 					chequeList.add(mapOutwardCheque(rs));
 				}
 			}
@@ -397,7 +399,7 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 	@Override
 	public int getCompletedMakerChequeCountByBatchId(String outwardBatchId) {
 		String sql = "SELECT COUNT(outward_cheque_id) FROM outward_cheque WHERE outward_batch_id = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_VERIFICATION', 'MAKER_RETURNED', 'REJECT_REQUEST', 'REJECTION_REQUEST', 'REJECTION_REJECT')";
+				+ "AND UPPER(TRIM(cheque_status)) IN ('PENDING_VERIFICATION', 'MAKER_RETURNED', 'REJECT_REQUEST', 'REJECTION_REQUEST', 'REJECTION_REJECT', 'VERIFIED_BY_CHECKER')";
 
 		try (Connection connection = DBConnection.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -408,6 +410,24 @@ public class OutwardChequeDAOImpl implements OutwardChequeDAO {
 			}
 		} catch (SQLException exception) {
 			throw new RuntimeException("Unable to fetch completed Maker cheque count", exception);
+		}
+		return 0;
+	}
+	
+	@Override
+	public int getPendingMakerChequeCountByBatchId(String outwardBatchId) {
+		String sql1 = "SELECT COUNT(*) FROM SCAN_CHEQUE A LEFT JOIN OUTWARD_CHEQUE B ON A.SCANNED_BATCH_ID = B.OUTWARD_BATCH_ID AND A.cheque_number = B.cheque_number WHERE A.SCANNED_BATCH_ID = ? AND (B.OUTWARD_BATCH_ID IS NULL OR B.CHEQUE_STATUS = 'PENDING_DATA_ENTRY')";
+		try (Connection connection = DBConnection.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql1)) {
+			ps.setString(1, outwardBatchId.trim());
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+				{
+					return rs.getInt(1);
+				}
+			}
+		} catch (SQLException exception) {
+			throw new RuntimeException("Unable to fetch Pending Maker cheque count from outward cheque", exception);
 		}
 		return 0;
 	}
