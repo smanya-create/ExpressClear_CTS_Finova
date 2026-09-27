@@ -94,7 +94,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	private Textbox txtAmount;
 	private Textbox txtAmountInWords;
 	private Textbox txtDraweeAccount;
-	private Textbox txtDraweeBankName;
+	private Textbox txtDraweeCustomerName;
 	private Textbox txtPayeeName;
 
 	// Form Action Buttons
@@ -380,8 +380,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtAmountInWords.setValue(convertToIndianCurrencyWords(item.getChequeAmount()));
 		if (txtDraweeAccount != null)
 			txtDraweeAccount.setValue(item.getDraweeAccountNumber() != null ? item.getDraweeAccountNumber() : "");
-		if (txtDraweeBankName != null)
-			txtDraweeBankName.setValue(item.getDraweeName() != null ? item.getDraweeName() : "");
+		if (txtDraweeCustomerName != null)
+			txtDraweeCustomerName.setValue(item.getDraweeName() != null ? item.getDraweeName() : "");
 		if (txtPayeeName != null)
 			txtPayeeName.setValue(item.getPayeeName() != null ? item.getPayeeName() : "");
 		
@@ -477,7 +477,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	}
 
 	private void resetFieldMismatchStyles() {
-		Textbox[] fields = { txtChequeNumber, txtChequeDate, txtAmount, txtPayeeName, txtDraweeAccount, txtDraweeBankName };
+		Textbox[] fields = { txtChequeNumber, txtChequeDate, txtAmount, txtPayeeName, txtDraweeAccount, txtDraweeCustomerName };
 		for (Textbox f : fields) {
 			if (f != null) {
 				f.setSclass("cts-input-text");
@@ -729,8 +729,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			current.setChequeNumber(txtChequeNumber.getValue().trim());
 		if (txtDraweeAccount != null)
 			current.setDraweeAccountNumber(txtDraweeAccount.getValue().trim());
-		if (txtDraweeBankName != null)
-			current.setDraweeName(txtDraweeBankName.getValue().trim());
+		if (txtDraweeCustomerName != null)
+			current.setDraweeName(txtDraweeCustomerName.getValue().trim());
 		if (txtPayeeName != null)
 			current.setPayeeName(txtPayeeName.getValue().trim());
 
@@ -876,7 +876,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 		InwardCheque current = activeQueue.get(currentIndex);
 		current.setChequeNumber(txtChequeNumber.getValue().trim());
 		current.setDraweeAccountNumber(txtDraweeAccount.getValue().trim());
-		current.setDraweeName(txtDraweeBankName.getValue().trim());
+		current.setDraweeName(txtDraweeCustomerName.getValue().trim());
 		current.setPayeeName(txtPayeeName.getValue().trim());
 
 		String rawAmount = txtAmount.getValue().replace("₹", "").replace(",", "").trim();
@@ -1139,8 +1139,8 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 			txtAmountInWords.setValue("");
 		if (txtDraweeAccount != null)
 			txtDraweeAccount.setValue("");
-		if (txtDraweeBankName != null)
-			txtDraweeBankName.setValue("");
+		if (txtDraweeCustomerName != null)
+			txtDraweeCustomerName.setValue("");
 		if (txtPayeeName != null)
 			txtPayeeName.setValue("");
 	}
@@ -1257,7 +1257,7 @@ public class InwardDataEntryController extends GenericForwardComposer<Component>
 	    if (txtAmount != null) txtAmount.setReadonly(isRejected);
 	    if (txtDraweeAccount != null) txtDraweeAccount.setReadonly(isRejected);
 	    if (txtPayeeName != null) txtPayeeName.setReadonly(isRejected);
-	    if (txtDraweeBankName != null) txtDraweeBankName.setReadonly(isRejected); 
+	    if (txtDraweeCustomerName != null) txtDraweeCustomerName.setReadonly(isRejected); 
 
 	    if (btnApproveCheque != null) {
 	        btnApproveCheque.setDisabled(isRejected);
