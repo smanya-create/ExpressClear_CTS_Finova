@@ -22,9 +22,7 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		outwardCheckerQueueDAO = new OutwardCheckerQueueDAOImpl();
 	}
 
-	// ============================================================
 	// GET CHEQUES BY BATCH
-	// ============================================================
 
 	@Override
 	public List<OutwardCheque> getChequesByBatchId(String batchId) throws SQLException {
@@ -32,9 +30,7 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		return outwardCheckerQueueDAO.getChequesByBatchId(batchId);
 	}
 
-	// ============================================================
 	// GET BATCH STATUS
-	// ============================================================
 
 	@Override
 	public String getBatchStatus(String batchId) throws SQLException {
@@ -42,9 +38,7 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		return outwardCheckerQueueDAO.getBatchStatus(batchId);
 	}
 
-	// ============================================================
 	// VERIFY CHEQUE
-	// ============================================================
 
 	@Override
 	public void verifyCheque(String chequeNo) throws SQLException {
@@ -52,46 +46,23 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		outwardCheckerQueueDAO.updateChequeStatus(chequeNo, "VERIFIED");
 	}
 
-
-	// ============================================================
 	// RETURN TO MAKER
-	// ============================================================
 
 	@Override
-	public void returnChequeToMaker(
-	        String chequeNo,
-	        String reasonId,
-	        String remarks)
-	        throws SQLException {
+	public void returnChequeToMaker(String chequeNo, String reasonId, String remarks) throws SQLException {
 
-	    outwardCheckerQueueDAO.returnChequeToMaker(
-	            chequeNo,
-	            reasonId,
-	            remarks);
+		outwardCheckerQueueDAO.returnChequeToMaker(chequeNo, reasonId, remarks);
 	}
 
-	// ============================================================
 	// REJECT CHEQUE
-	// ============================================================
 
 	@Override
-	public void rejectCheque(
-	        String chequeNo,
-	        String username,
-	        String reasonId,
-	        String remarks)
-	        throws SQLException {
+	public void rejectCheque(String chequeNo, String username, String reasonId, String remarks) throws SQLException {
 
-	    outwardCheckerQueueDAO.rejectCheque(
-	            chequeNo,
-	            username,
-	            reasonId,
-	            remarks);
+		outwardCheckerQueueDAO.rejectCheque(chequeNo, username, reasonId, remarks);
 	}
 
-	// ============================================================
 	// GET IMAGES
-	// ============================================================
 
 	@Override
 	public List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId) throws Exception {
@@ -99,9 +70,7 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		return outwardCheckerQueueDAO.getImagesByChequeId(outwardChequeId);
 	}
 
-	// ============================================================
 	// GET SEND BACK REASONS
-	// ============================================================
 
 	@Override
 	public List<SendBackReason> getSendBackReasons() throws SQLException {
@@ -109,9 +78,7 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		return outwardCheckerQueueDAO.getSendBackReasons();
 	}
 
-	// ============================================================
 	// CHECK PAYEE ACCOUNT
-	// ============================================================
 
 	@Override
 	public boolean isPayeeAccountExists(String accountNumber) throws SQLException {
@@ -119,45 +86,34 @@ public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueServic
 		return outwardCheckerQueueDAO.isPayeeAccountExists(accountNumber);
 	}
 
-	// ============================================================
 	// UPDATE BATCH STATUS
-	// ============================================================
 
 	@Override
 	public void updateBatchStatus(String batchId, String status) throws SQLException {
 
 		outwardCheckerQueueDAO.updateBatchStatus(batchId, status);
 	}
-	
+
 	@Override
 	public void updateChequeStatus(String chequeNo, String status) throws SQLException {
-	    outwardCheckerQueueDAO.updateChequeStatus(chequeNo, status);
-	}
-	
-	@Override
-	public List<RejectedReason> getRejectedReasons()
-	        throws SQLException {
-
-	    return outwardCheckerQueueDAO.getRejectedReasons();
+		outwardCheckerQueueDAO.updateChequeStatus(chequeNo, status);
 	}
 
 	@Override
-	public void saveRejectedCheque(
-	        OutwardRejectedCheques rejectedCheque)
-	        throws SQLException {
+	public List<RejectedReason> getRejectedReasons() throws SQLException {
 
-	    outwardCheckerQueueDAO.saveRejectedCheque(
-	            rejectedCheque
-	    );
+		return outwardCheckerQueueDAO.getRejectedReasons();
 	}
-	
-	
 
-    @Override
-    public RejectRequestDTO getRejectRequestByChequeId(
-            String chequeId) throws SQLException {
+	@Override
+	public void saveRejectedCheque(OutwardRejectedCheques rejectedCheque) throws SQLException {
 
-        return outwardCheckerQueueDAO
-                .getRejectRequestByChequeId(chequeId);
-    }
+		outwardCheckerQueueDAO.saveRejectedCheque(rejectedCheque);
+	}
+
+	@Override
+	public RejectRequestDTO getRejectRequestByChequeId(String chequeId) throws SQLException {
+
+		return outwardCheckerQueueDAO.getRejectRequestByChequeId(chequeId);
+	}
 }

@@ -1,19 +1,12 @@
 package com.iispl.cts.controller.inward.maker;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
-import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.InputEvent;
-import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
@@ -27,11 +20,7 @@ import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Textbox;
 
-import com.iispl.cts.common.config.DBConnection;
-import com.iispl.cts.common.util.SecurityUtil;
 import com.iispl.cts.dto.DataEntryBatchItemDTO;
-import com.iispl.cts.enums.inward.InwardBatchStatus;
-import com.iispl.cts.enums.inward.InwardChequeStatus;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
@@ -55,8 +44,6 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
-		
-		
 		super.doAfterCompose(comp);
 
 		// Default dropdown selection to index 0 ("All Statuses")
@@ -64,13 +51,25 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 			cmbStatusFilter.setSelectedIndex(0);
 		}
 
-		if (pagingDataEntry != null) {
-			pagingDataEntry.addEventListener("onPaging", new EventListener<Event>() {
-				@Override
-				public void onEvent(Event event) throws Exception {
-					renderPage();
-				}
+		// Centralized UI Event Listeners
+		if (txtSearchBatch != null) {
+			txtSearchBatch.addEventListener("onChanging", event -> {
+				InputEvent inputEvent = (InputEvent) event;
+				applyCombinedFilter(inputEvent.getValue(), null);
 			});
+			txtSearchBatch.addEventListener("onChange", event -> applyCombinedFilter(null, null));
+		}
+
+		if (cmbStatusFilter != null) {
+			cmbStatusFilter.addEventListener("onSelect", event -> applyCombinedFilter(null, null));
+		}
+
+		if (btnClearSearch != null) {
+			btnClearSearch.addEventListener("onClick", event -> onClearFilter());
+		}
+
+		if (pagingDataEntry != null) {
+			pagingDataEntry.addEventListener("onPaging", event -> renderPage());
 		}
 
 		loadBatches();
@@ -86,28 +85,7 @@ public class InwardDataEntryBatchesController extends GenericForwardComposer<Com
 		applyCombinedFilter(null, null);
 	}
 
-	public void onChanging$txtSearchBatch(InputEvent event) {
-		applyCombinedFilter(event.getValue(), null);
-	}
-
-	public void onChange$txtSearchBatch() {
-		applyCombinedFilter(null, null);
-	}
-
-	// Overloaded onSelect methods to satisfy ZK forward and runtime SelectEvent
-	public void onSelect$cmbStatusFilter(SelectEvent<?, ?> event) {
-		applyCombinedFilter(null, null);
-	}
-
-	public void onSelect$cmbStatusFilter(Event event) {
-		applyCombinedFilter(null, null);
-	}
-
-	public void onSelect$cmbStatusFilter() {
-		applyCombinedFilter(null, null);
-	}
-
-	public void onClick$btnClearSearch() {
+	private void onClearFilter() {
 		if (txtSearchBatch != null) {
 			txtSearchBatch.setValue("");
 		}

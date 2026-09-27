@@ -249,6 +249,10 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // SCAN MICR REPAIR - SUBMIT
     // =========================================================
 
+ // =========================================================
+    // SCAN MICR REPAIR - SUBMIT
+    // =========================================================
+
     @Override
     public void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques) {
 
@@ -256,14 +260,14 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
             throw new IllegalArgumentException("Scan MICR repair cheque list cannot be null or empty");
         }
 
-        // When maker completes repair, cheques advance to PENDING_DATA_ENTRY
+        // Dynamically set cheque_status instead of hardcoding PENDING_DATA_ENTRY
         String sql =
                 "UPDATE scan_cheque SET "
               + "micr_code = ?, "
               + "city_code = ?, "
               + "bank_code = ?, "
               + "branch_code = ?, "
-              + "cheque_status = 'PENDING_DATA_ENTRY' "
+              + "cheque_status = ? "
               + "WHERE scanned_cheque_id = ?";
 
         String updateBatchSql =
@@ -296,7 +300,8 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
                     statement.setString(2, cheque.getCityCode());
                     statement.setString(3, cheque.getBankCode());
                     statement.setString(4, cheque.getBranchCode());
-                    statement.setString(5, cheque.getChequeId());
+                    statement.setString(5, cheque.getChequeStatus()); // Sets MICR_REJECTED or PENDING_DATA_ENTRY
+                    statement.setString(6, cheque.getChequeId());
 
                     int rowsUpdated = statement.executeUpdate();
 
@@ -556,6 +561,10 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
     // OUTWARD MICR REPAIR - SUBMIT
     // =========================================================
 
+ // =========================================================
+    // OUTWARD MICR REPAIR - SUBMIT
+    // =========================================================
+
     @Override
     public void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques) {
 
@@ -563,13 +572,14 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
             throw new IllegalArgumentException("Outward MICR repair cheque list cannot be null or empty");
         }
 
+        // Dynamically set cheque_status instead of hardcoding PENDING_DATA_ENTRY
         String sql =
                 "UPDATE outward_cheque SET "
               + "micr_code = ?, "
               + "city_code = ?, "
               + "bank_code = ?, "
               + "branch_code = ?, "
-              + "cheque_status = 'PENDING_DATA_ENTRY' "
+              + "cheque_status = ? "
               + "WHERE outward_cheque_id = ?";
 
         String updateBatchSql =
@@ -602,7 +612,8 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
                     statement.setString(2, cheque.getCityCode());
                     statement.setString(3, cheque.getBankCode());
                     statement.setString(4, cheque.getBranchCode());
-                    statement.setString(5, cheque.getChequeId());
+                    statement.setString(5, cheque.getChequeStatus()); // Sets MICR_REJECTED or PENDING_DATA_ENTRY
+                    statement.setString(6, cheque.getChequeId());
 
                     int rowsUpdated = statement.executeUpdate();
 

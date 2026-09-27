@@ -41,7 +41,7 @@ public class MakerReportServiceImpl implements MakerReportService {
             params.put("FROM_DATE", new java.sql.Date(fromDate.getTime()));
             params.put("TO_DATE", new java.sql.Date(toDate.getTime()));
             params.put("MAKER_ID", makerId);
-            params.put("REPORT_TYPE", reportType);
+            params.put("REPORT_TYPE", reportType); // Passed to Jasper
 
             try (Connection conn = DBConnection.getConnection()) {
                 JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, conn);
@@ -77,29 +77,55 @@ public class MakerReportServiceImpl implements MakerReportService {
        
 
         switch (reportType) {
-            case "MICR_REPAIRS": {
-                sb.append("========================================================================================\n");
-                sb.append("                         BATCHES WITH MICR REPAIRS                                      \n");
-                sb.append("========================================================================================\n");
-                sb.append("Batch ID,Batch Reference,Total Cheques,Repaired Count,Total Amount (INR),Uploaded Time\n");
+        case "MICR_REPAIRS": {
+            sb.append("========================================================================================\n");
+            sb.append("                         BATCHES WITH MICR REPAIRS (ITEM LEVEL)                         \n");
+            sb.append("========================================================================================\n");
+            sb.append("Batch ID,Batch Reference,Cheque ID,Cheque No,MICR Code,Drawee Name,Payee Name,Amount (INR),Status,Scanned/Created Time\n");
 
-                List<Map<String, Object>> rows = makerReportDAO.getMicrRepairsReport(makerId, sqlFrom, sqlTo);
-                if (rows.isEmpty()) {
-                    sb.append("\"No MICR repairs found for this period.\",,,,,\n");
-                } else {
-                    for (Map<String, Object> r : rows) {
-                        String ts = r.get("uploaded_at") != null ? "=\"" + sdf.format(r.get("uploaded_at")) + "\"" : "-";
-                        sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s Items\",\"%s\",%s\n",
-                                r.get("scanned_batch_id"),
-                                r.get("batch_reference_id"),
-                                r.get("total_cheques"),
-                                r.get("repaired_count"),
-                                df.format(Double.parseDouble(String.valueOf(r.get("total_amount")))),
-                                ts));
+            List<Map<String, Object>> rows = makerReportDAO.getMicrRepairsReport(makerId, sqlFrom, sqlTo);
+            if (rows == null || rows.isEmpty()) {
+                sb.append("\"No MICR repair items found for this period.\",,,,,,,,,\n");
+            } else {
+                for (Map<String, Object> r : rows) {
+                    String ts = "-";
+                    Object timeObj = r.get("created_at") != null ? r.get("created_at") : r.get("uploaded_at");
+                    if (timeObj != null) {
+                        try {
+                            ts = "=\"" + sdf.format(timeObj) + "\"";
+                        } catch (Exception ignored) {
+                            ts = "=\"" + timeObj.toString() + "\"";
+                        }
                     }
+
+                    // Safe numeric parsing for amount
+                    double amountVal = 0.00;
+                    Object amtObj = r.get("cheque_amount");
+                    if (amtObj != null && !"null".equalsIgnoreCase(amtObj.toString().trim())) {
+                        try {
+                            if (amtObj instanceof Number) {
+                                amountVal = ((Number) amtObj).doubleValue();
+                            } else {
+                                amountVal = Double.parseDouble(amtObj.toString().trim());
+                            }
+                        } catch (Exception ignored) {}
+                    }
+
+                    sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s\n",
+                            r.get("scanned_batch_id") != null ? r.get("scanned_batch_id") : "-",
+                            r.get("batch_reference_id") != null ? r.get("batch_reference_id") : "-",
+                            r.get("scanned_cheque_id") != null ? r.get("scanned_cheque_id") : "-",
+                            r.get("cheque_number") != null ? r.get("cheque_number") : "-",
+                            r.get("micr_code") != null ? r.get("micr_code") : "-",
+                            r.get("drawee_name") != null ? r.get("drawee_name") : "-",
+                            r.get("payee_name") != null ? r.get("payee_name") : "-",
+                            df.format(amountVal),
+                            r.get("cheque_status") != null ? r.get("cheque_status") : "-",
+                            ts));
                 }
-                break;
             }
+            break;
+        }
 
             case "DATA_ENTRY": {
                 sb.append("========================================================================================\n");
@@ -168,27 +194,51 @@ public class MakerReportServiceImpl implements MakerReportService {
                 sb.append("========================================================================================\n");
                 sb.append("                         BATCHES SUBMITTED TO CHECKER                                   \n");
                 sb.append("========================================================================================\n");
-                sb.append("Batch ID,Batch Reference,Total Cheques,Total Amount (INR),Status,Submitted Time\n");
+                sb.append("Batch ID,Batch Reference,Total Cheques,Total Amount (INR),Batch Status,Submitted Time\n");
 
                 List<Map<String, Object>> rows = makerReportDAO.getSubmittedToCheckerReport(makerId, sqlFrom, sqlTo);
-                if (rows.isEmpty()) {
+                if (rows == null || rows.isEmpty()) {
                     sb.append("\"No batches submitted to Checker for this period.\",,,,,\n");
                 } else {
                     for (Map<String, Object> r : rows) {
-                        String ts = r.get("uploaded_at") != null ? "=\"" + sdf.format(r.get("uploaded_at")) + "\"" : "-";
+                        String ts = "-";
+                        if (r.get("uploaded_at") != null) {
+                            try {
+                                ts = "=\"" + sdf.format(r.get("uploaded_at")) + "\"";
+                            } catch (Exception ignored) {
+                                ts = "=\"" + r.get("uploaded_at").toString() + "\"";
+                            }
+                        }
+
+                        double totalAmount = 0.00;
+                        Object amtObj = r.get("actual_total_amount");
+                        if (amtObj != null && !"null".equalsIgnoreCase(amtObj.toString().trim())) {
+                            try {
+                                if (amtObj instanceof Number) {
+                                    totalAmount = ((Number) amtObj).doubleValue();
+                                } else {
+                                    totalAmount = Double.parseDouble(amtObj.toString().trim());
+                                }
+                            } catch (Exception ignored) {}
+                        }
+
+                        Object batchId = r.get("scanned_batch_id") != null 
+                                       ? r.get("scanned_batch_id") 
+                                       : r.get("outward_batch_id");
+
                         sb.append(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%s\n",
-                                r.get("outward_batch_id"),
-                                r.get("batch_reference_id"),
-                                r.get("actual_cheque_count"),
-                                df.format(Double.parseDouble(String.valueOf(r.get("actual_total_amount")))),
-                                r.get("batch_status"),
+                                batchId != null ? batchId : "-",
+                                r.get("batch_reference_id") != null ? r.get("batch_reference_id") : "-",
+                                r.get("actual_cheque_count") != null ? r.get("actual_cheque_count") : "0",
+                                df.format(totalAmount),
+                                r.get("batch_status") != null ? r.get("batch_status") : "-",
                                 ts));
                     }
                 }
                 break;
             }
-        }
 
+        }
         return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 

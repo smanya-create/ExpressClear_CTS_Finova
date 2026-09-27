@@ -16,6 +16,7 @@ public class AuditLog implements Serializable {
     private String details;
     private String ipAddress;
     private String status;
+    private java.sql.Timestamp clearingTime;
 
     public AuditLog() {}
 
@@ -116,6 +117,13 @@ public class AuditLog implements Serializable {
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+	public java.sql.Timestamp getClearingTime() {
+	    return clearingTime;
+	}
+
+	public void setClearingTime(java.sql.Timestamp clearingTime) {
+	    this.clearingTime = clearingTime;
 	}
 
    

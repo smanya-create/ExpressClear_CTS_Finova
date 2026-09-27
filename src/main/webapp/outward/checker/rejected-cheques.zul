@@ -33,8 +33,7 @@
                     <!-- PAGE HEADING -->
                     <vlayout spacing="2px">
                         <label value="Rejected Cheques" sclass="section-title"/>
-                        <label value="Only individual cheques rejected by the Checker are listed here."
-                               sclass="section-description"/>
+                       
                     </vlayout>
 
                     <!-- ================= SUMMARY CARD ================= -->
@@ -79,7 +78,6 @@
          style="min-height: 0; overflow: hidden !important;">
                         <vlayout sclass="list-title-section" spacing="1px">
                             <label value="Rejected Cheques List" sclass="list-title"/>
-                            <label value="List of cheques rejected by the Checker" sclass="list-subtitle"/>
                         </vlayout>
 
                         <!-- Exclusively scrollable listbox -->

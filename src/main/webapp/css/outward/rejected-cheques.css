@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+
+/* =========================================================
+   COMMON FONT
+   ========================================================= */
+
 .section-title,
 .section-description,
 .summary-card,
@@ -11,12 +16,18 @@
 .table-card .z-label,
 .table-card .z-listcell,
 .table-card .z-button {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Roboto, sans-serif;
 }
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
 
 .section-title {
     font-size: 12px;
-    font-weight: 700;		
+    font-weight: 700;
     color: #0f172a;
     display: block;
 }
@@ -26,6 +37,11 @@
     color: #64748b;
     display: block;
 }
+
+
+/* =========================================================
+   SUMMARY CARD
+   ========================================================= */
 
 .summary-card {
     background: #ffffff;
@@ -56,6 +72,11 @@
     line-height: 1.1;
 }
 
+
+/* =========================================================
+   SEARCH CARD
+   ========================================================= */
+
 .search-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -82,6 +103,11 @@
     line-height: 11px;
 }
 
+
+/* =========================================================
+   SEARCH INPUT
+   ========================================================= */
+
 .search-input.z-textbox {
     height: 30px;
     border: 1px solid #cbd5e1;
@@ -93,9 +119,14 @@
 }
 
 .search-input.z-textbox:focus {
-    border-color: #173b61;
-    box-shadow: 0 0 0 2px rgba(23, 59, 97, 0.10);
+    border-color: #172554;
+    box-shadow: 0 0 0 2px rgba(23, 37, 84, 0.10);
 }
+
+
+/* =========================================================
+   DATE BOX
+   ========================================================= */
 
 .search-card .z-datebox {
     display: inline-flex;
@@ -147,8 +178,13 @@
     line-height: 1;
 }
 
+
+/* =========================================================
+   SEARCH BUTTON
+   ========================================================= */
+
 .search-button.z-button {
-    background-color: #173b61;
+    background-color: #172554;
     color: #ffffff;
     height: 30px;
     padding: 0 15px;
@@ -162,8 +198,13 @@
 }
 
 .search-button.z-button:hover {
-    background-color: #0f2847;
+    background-color: #0f1b3d;
 }
+
+
+/* =========================================================
+   CLEAR BUTTON
+   ========================================================= */
 
 .clear-button.z-button {
     background-color: #334155;
@@ -182,6 +223,11 @@
 .clear-button.z-button:hover {
     background-color: #1e293b;
 }
+
+
+/* =========================================================
+   TABLE CARD
+   ========================================================= */
 
 .table-card {
     background: #ffffff;
@@ -209,62 +255,125 @@
     margin-top: 1px;
 }
 
+
+/* =========================================================
+   REJECTED CHEQUES LISTBOX
+   ========================================================= */
+
 .rejected-listbox.z-listbox {
     border: 1px solid #e2e8f0;
     border-radius: 5px;
     overflow: hidden;
 }
 
+
+/* =========================================================
+   REJECTED CHEQUES TABLE HEADER
+   SAME COLOR AS DASHBOARD TABLE
+   ========================================================= */
+
+/* Main header area */
 .rejected-listbox.z-listbox .z-listbox-header,
-.rejected-listbox.z-listbox .z-listhead {
-    background: #173b61;
-    background-color: #173b61;
-    border: none;
+.rejected-listbox.z-listbox .z-listhead,
+.rejected-listbox.z-listbox .z-listbox-header table {
+    background: #172554 !important;
+    background-color: #172554 !important;
+    background-image: none !important;
+    border: none !important;
 }
 
+
+/* Individual header cells */
 .rejected-listbox.z-listbox th.z-listheader {
-    background: #173b61;
-    background-color: #173b61;
-    border: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 8px 6px;
-    text-align: center;
+    background: #172554 !important;
+    background-color: #172554 !important;
+    background-image: none !important;
+
+    border: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.18) !important;
+
+    height: 36px !important;
+    padding: 0 !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    box-sizing: border-box;
 }
 
+
+/* Last header cell */
 .rejected-listbox.z-listbox th.z-listheader:last-child {
-    border-right: none;
+    border-right: none !important;
 }
 
+
+/* Header text */
 .rejected-listbox.z-listbox th.z-listheader .z-listheader-content {
-    background: transparent;
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 8px;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+
+    color: #ffffff !important;
+
+    font-size: 9px !important;
+    font-weight: 800 !important;
+
     letter-spacing: 0.03em;
-    text-align: center;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 0;
+
+    text-align: center !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    height: 36px !important;
+
+    padding: 0 6px !important;
+    margin: 0 !important;
+
+    border: none !important;
+    box-shadow: none !important;
 }
 
+
+/* Prevent ZK hover from changing header */
+.rejected-listbox.z-listbox th.z-listheader:hover,
+.rejected-listbox.z-listbox th.z-listheader:hover .z-listheader-content {
+    background: #172554 !important;
+    background-color: #172554 !important;
+    color: #ffffff !important;
+}
+
+
+/* Remove unwanted ZK header elements */
 .rejected-listbox .z-listbox-header-bg,
 .rejected-listbox .z-listheader-checkable,
 .rejected-listbox .z-listitem-checkable,
 .rejected-listbox .z-listhead-bar {
-    display: none;
-    width: 0;
+    background: #172554 !important;
+    background-color: #172554 !important;
+    border: none !important;
 }
+
+
+/* =========================================================
+   TABLE BODY
+   ========================================================= */
 
 .rejected-listbox.z-listbox .z-listbox-body {
     min-height: 220px;
     max-height: 225px;
+
     overflow-y: auto;
     overflow-x: hidden;
+
     background: #ffffff;
 }
 
+
+/* Keep header visible */
 .rejected-listbox.z-listbox .z-listbox-header {
     overflow: hidden;
     position: sticky;
@@ -272,17 +381,30 @@
     z-index: 5;
 }
 
+
+/* =========================================================
+   TABLE ROW
+   ========================================================= */
+
 .rejected-listbox .z-listitem {
     height: 50px;
     min-height: 50px;
+
     background: #ffffff;
+
     border-bottom: 1px solid #f1f5f9;
+
     transition: background-color 0.15s ease;
 }
 
 .rejected-listbox .z-listitem:hover {
     background: #f8fafc;
 }
+
+
+/* =========================================================
+   TABLE CELL
+   ========================================================= */
 
 .rejected-listbox .z-listcell {
     height: 50px;
@@ -292,87 +414,144 @@
 .rejected-listbox .z-listcell-content {
     font-size: 9px;
     color: #1e293b;
+
     padding: 8px 6px;
+
     vertical-align: middle;
 }
 
+
+/* =========================================================
+   EMPTY TABLE MESSAGE
+   ========================================================= */
+
 .rejected-listbox .z-listbox-emptybody td {
     height: 180px;
+
     text-align: center;
     vertical-align: middle;
+
     font-size: 9px;
     color: #94a3b8;
 }
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
 
 .pagination-bar {
     display: flex;
     align-items: center;
     justify-content: center;
+
     gap: 6px;
+
     margin-top: 8px;
+
     height: 28px;
 }
 
+
+/* Pagination buttons */
 .pagination-button.z-button {
     height: 28px;
     width: 28px;
     min-width: 28px;
+
     padding: 0;
+
     background: #ffffff;
+
     border: 1px solid #cbd5e1;
     border-radius: 5px;
+
     color: #0369a1;
+
     font-size: 13px;
     font-weight: 700;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     box-sizing: border-box;
+
     cursor: pointer;
 }
 
 .pagination-button.z-button:hover {
     background: #f0f9ff;
+
     border-color: #7dd3fc;
+
     color: #0284c7;
 }
 
+
+/* Disabled pagination */
 .pagination-button.z-button[disabled] {
     background: #f8fafc;
+
     border-color: #e2e8f0;
+
     color: #cbd5e1;
+
     cursor: not-allowed;
+
     box-shadow: none;
 }
 
+
+/* Page number */
 .pagination-input.z-intbox {
     height: 28px;
     width: 38px;
+
     text-align: center;
+
     background: #ffffff;
+
     border: 1px solid #cbd5e1;
     border-radius: 5px;
+
     color: #0f172a;
+
     font-size: 10px;
     font-weight: 700;
+
     outline: none;
+
     padding: 0;
+
     box-sizing: border-box;
 }
 
 .pagination-input.z-intbox:focus {
     border-color: #0284c7;
+
     box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
 }
 
+
+/* Total pages */
 .pagination-total.z-label {
     font-size: 10px;
     font-weight: 700;
+
     color: #0369a1;
+
     padding: 0 2px;
+
     display: inline-block;
+
     line-height: 28px;
 }
+
+
+/* =========================================================
+   ZK LAYOUT
+   ========================================================= */
 
 .z-borderlayout {
     border: none;
@@ -391,4 +570,83 @@
 .z-center-body {
     border: none;
     padding: 0;
+    margin: 0;
+}
+
+
+/* =========================================================
+   EXTRA ZK HEADER OVERRIDE
+   ========================================================= */
+
+.rejected-listbox.z-listbox .z-listbox-header-bg,
+.rejected-listbox.z-listbox .z-listhead,
+.rejected-listbox.z-listbox .z-listheader {
+    background: #172554 !important;
+    background-color: #172554 !important;
+    background-image: none !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE HEADER
+   ========================================================= */
+
+@media (max-width: 1400px) {
+
+    .rejected-listbox.z-listbox th.z-listheader {
+        height: 36px !important;
+        padding: 0 !important;
+        background: #172554 !important;
+        background-color: #172554 !important;
+    }
+
+    .rejected-listbox.z-listbox th.z-listheader
+    .z-listheader-content {
+        height: 36px !important;
+
+        padding: 0 6px !important;
+
+        background: transparent !important;
+
+        color: #ffffff !important;
+
+        font-size: 8px !important;
+        font-weight: 800 !important;
+    }
+    
+    /* =========================================================
+   TABLE HEADER COLOUR ONLY
+   ========================================================= */
+
+.rejected-listbox.z-listbox .z-listbox-header,
+.rejected-listbox.z-listbox .z-listhead,
+.rejected-listbox.z-listbox .z-listheader,
+.rejected-listbox.z-listbox .z-listbox-header table {
+
+    background: #172554 !important;
+    background-color: #172554 !important;
+    background-image: none !important;
+}
+
+
+/* Header text */
+
+.rejected-listbox.z-listbox
+.z-listheader-content {
+
+    color: #ffffff !important;
+}
+
+
+/* Keep same colour when hovering */
+
+.rejected-listbox.z-listbox
+.z-listheader:hover,
+.rejected-listbox.z-listbox
+.z-listheader:hover .z-listheader-content {
+
+    background: #172554 !important;
+    background-color: #172554 !important;
+    color: #ffffff !important;
+}
 }

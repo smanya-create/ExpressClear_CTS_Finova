@@ -13,21 +13,17 @@
 
 		<vlayout width="100%" spacing="16px">
 
-			<!-- ================================================= -->
-			<!-- PAGE TITLE (Outward Header Style) -->
-			<!-- ================================================= -->
+			
 			<vlayout spacing="4px" sclass="micr-repair-view-title-section">
 				<label value="MICR Repair" sclass="micr-repair-view-title" />
 			</vlayout>
 
-			<!-- ================================================= -->
-			<!-- SINGLE TABLE CARD -->
-			<!-- ================================================= -->
+			
 			<div sclass="micr-repair-section-card" width="100%">
 
 				<vlayout width="100%" spacing="12px">
 
-					<!-- Section Header & Result Count -->
+					
 					<hlayout width="100%" valign="middle" style="display: flex; justify-content: space-between; align-items: center;">
 						<vlayout spacing="3px">
 							<label value="Batches Requiring MICR Repair" sclass="micr-repair-section-title" />
@@ -35,7 +31,7 @@
 						<label id="batchResultCount" value="0 Batches" sclass="batch-result-count" />
 					</hlayout>
 
-					<!-- Filter Toolbar -->
+					
 					<div sclass="micr-repair-filter-bar">
 						<hlayout valign="middle" spacing="12px">
 							<label value="Search Batch ID" sclass="filter-label" />
@@ -45,7 +41,7 @@
 								sclass="batch-filter-input"
 								onChanging="$composer.onChanging$batchIdFilter(event)" />
 
-							<!-- Status Filter Combobox -->
+							
 							<combobox id="cmbStatusFilter"
 								readonly="true"
 								width="170px"
@@ -63,7 +59,7 @@
 						</hlayout>
 					</div>
 
-					<!-- Single Outward-style Grid -->
+					
 					<grid id="grdMicrRepairBatches" width="100%" sclass="micr-repair-grid">
 						<columns sizable="false">
 							<column label="Batch" width="18%" align="center" />
@@ -76,13 +72,13 @@
 						<rows id="rowsMicrRepairBatches" />
 					</grid>
 
-					<!-- Outward-style Pagination -->
+					
 					<paging id="pagingMicrRepair"
 						pageSize="10"
 						detailed="true"
 						sclass="micr-repair-paging" />
 
-					<!-- Empty Message Card -->
+					
 					<div id="divMicrRepairEmpty" width="100%" visible="false" sclass="micr-repair-empty-card">
 						<vlayout width="100%" spacing="6px">
 							<label value="No MICR repair required" sclass="micr-repair-empty-title" />

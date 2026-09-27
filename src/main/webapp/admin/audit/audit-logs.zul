@@ -48,8 +48,8 @@
                                 <label value="SEARCH USER / DETAILS" sclass="field-label"/>
                                 <textbox id="txtSearchAudit" placeholder="Search by User or Details..." hflex="1" height="38px" sclass="input-box"/>
                             </vlayout>
-                            <button id="btnSearch" label="SEARCH" height="38px" sclass="btn-primary"/>
-                            <button id="btnReset" label="RESET" height="38px" sclass="btn-secondary"/>
+                            <button id="btnSearch" label="Search" height="38px" sclass="btn-primary"/>
+                            <button id="btnReset" label="Reset" height="38px" sclass="btn-secondary"/>
                         </hlayout>
                     </vlayout>
 

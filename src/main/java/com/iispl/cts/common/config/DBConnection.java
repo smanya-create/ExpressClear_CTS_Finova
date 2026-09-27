@@ -14,9 +14,13 @@ public class DBConnection {
     private static final String DB_USER = "postgres.wrqvispigpddkbanlxfw";
     private static final String DB_PASSWORD = "Imageinfo@123";
 
-    private static HikariDataSource dataSource;
+    private static volatile HikariDataSource dataSource;
 
-    static {
+    private static synchronized void initializeDataSource() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            return;
+        }
+
         try {
             HikariConfig config = new HikariConfig();
 
@@ -31,25 +35,27 @@ public class DBConnection {
             config.setUsername(DB_USER.trim());
             config.setPassword(DB_PASSWORD.trim());
             config.setDriverClassName("org.postgresql.Driver");
-            
-            // Pool Sizing: Keep 10 warm connections ready
-            config.setMaximumPoolSize(15);
-            config.setMinimumIdle(10);
 
-            config.setConnectionTimeout(15000);
-            config.setValidationTimeout(3000);
+            // Conservative pool sizing suited for Supabase pooler
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+
+            config.setConnectionTimeout(20000);
+            config.setValidationTimeout(4000);
             config.setLeakDetectionThreshold(10000);
 
-            // Keep connections warm: 10 minutes idle, 30 minutes lifetime
-            config.setIdleTimeout(600000); 
-            config.setMaxLifetime(1800000);
+            // Shorter idle timeout to release idle pooler connections promptly
+            config.setIdleTimeout(120000); // 2 minutes
+            config.setMaxLifetime(600000);  // 10 minutes
 
-            // Pre-fill pool on startup to eliminate cold-start latency
-            config.setInitializationFailTimeout(10000);
+            // Critical: -1 prevents Hikari from permanently dying if initial ping fails
+            config.setInitializationFailTimeout(-1);
 
             config.setPoolName("CTS-HikariPool");
 
             dataSource = new HikariDataSource(config);
+            initError = null;
+            System.out.println(">>> [HikariCP] DataSource successfully initialized.");
 
         } catch (Throwable e) {
             initError = e;
@@ -58,7 +64,15 @@ public class DBConnection {
         }
     }
 
+    static {
+        initializeDataSource();
+    }
+
     public static Connection getConnection() throws SQLException {
+        if (dataSource == null || dataSource.isClosed()) {
+            initializeDataSource();
+        }
+
         if (dataSource == null) {
             String cause = (initError != null) ? initError.getMessage() : "Unknown init failure";
             throw new SQLException("DataSource is not initialized properly. Cause: " + cause, initError);

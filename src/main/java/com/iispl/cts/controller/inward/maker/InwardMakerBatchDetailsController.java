@@ -11,9 +11,7 @@ import java.util.Locale;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
-import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
+
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
@@ -185,9 +183,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		Label chequeDateLabel = new Label(formatIndianDate(cheque.getChequeDate()));
 		chequeDateLabel.setSclass("inward-maker-cheque-date");
 
-		Label micrCodeLabel = new Label(getValue(cheque.getMicrCode()));
-		micrCodeLabel.setSclass("inward-maker-micr-code");
-
 		String actualStatus = normalizeStatus(cheque.getChequeStatus());
 		Label chequeStatusLabel = new Label(getDisplayStatus(actualStatus));
 		chequeStatusLabel.setSclass("inward-maker-cheque-status " + getStatusClass(actualStatus));
@@ -200,7 +195,6 @@ public class InwardMakerBatchDetailsController extends GenericForwardComposer<Co
 		row.appendChild(chequeNumberLabel);
 		row.appendChild(accountLabel);
 		row.appendChild(chequeDateLabel);
-		row.appendChild(micrCodeLabel);
 		row.appendChild(chequeStatusLabel);
 		row.appendChild(chequeAmountLabel);
 		row.appendChild(actionComponent);

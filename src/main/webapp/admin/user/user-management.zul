@@ -88,8 +88,8 @@
 
 											<!-- Action Buttons -->
 											<hlayout spacing="8px" valign="bottom">
-												<button id="btnSearch" label="SEARCH" sclass="cts-btn-filter-search" />
-												<button id="btnClearFilter" label="CLEAR" sclass="cts-btn-filter-clear" />
+												<button id="btnSearch" label="Search" sclass="cts-btn-filter-search" />
+												<button id="btnClearFilter" label="Clear" sclass="cts-btn-filter-clear" />
 											</hlayout>
 										</hlayout>
 									</vlayout>

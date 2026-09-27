@@ -18,10 +18,8 @@ import org.zkoss.zul.Radiogroup;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -41,8 +39,8 @@ public class MakerReportController extends GenericForwardComposer<Component> {
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        // Default combobox to first item
-        if (cmbReportType != null && cmbReportType.getItemCount() > 0) {
+        // Default combobox to first item if none selected
+        if (cmbReportType != null && cmbReportType.getItemCount() > 0 && cmbReportType.getSelectedIndex() < 0) {
             cmbReportType.setSelectedIndex(0);
         }
 
@@ -114,7 +112,6 @@ public class MakerReportController extends GenericForwardComposer<Component> {
             if ("CSV".equalsIgnoreCase(selectedFormat)) {
                 byte[] csvBytes = makerReportService.generateMakerReportCsv(makerId, reportType, fromDate, toDate);
                 
-                // Block header-only CSVs
                 if (csvBytes == null || csvBytes.length == 0 || isCsvEmpty(csvBytes)) {
                     Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
                             "warning", null, "top_center", 3500);
@@ -148,6 +145,9 @@ public class MakerReportController extends GenericForwardComposer<Component> {
         return lines <= 4 || content.contains("No records found");
     }
   
+    // =========================================================================
+    // PRE-CHECK DATA AVAILABILITY (ZERO-DATA GUARD)
+    // =========================================================================
  // =========================================================================
     // PRE-CHECK DATA AVAILABILITY (ZERO-DATA GUARD)
     // =========================================================================
@@ -155,61 +155,75 @@ public class MakerReportController extends GenericForwardComposer<Component> {
         LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        Timestamp startTs = Timestamp.valueOf(fromLocal.atStartOfDay());
-        Timestamp endTs = Timestamp.valueOf(toLocal.atTime(LocalTime.MAX));
+        java.sql.Date sqlFromDate = java.sql.Date.valueOf(fromLocal);
+        java.sql.Date sqlToDate = java.sql.Date.valueOf(toLocal);
+
+        System.out.println(">>> [REPORT PRE-CHECK] Type: [" + reportType + "] Range: " + sqlFromDate + " to " + sqlToDate);
 
         String sql;
         switch (reportType) {
-            case "MICR_REPAIRS":
-                sql = "SELECT COUNT(*) FROM scan_cheque sc " +
-                      "JOIN scan_batch sb ON sc.batch_id = sb.batch_id " +
-                      "WHERE UPPER(sc.micr_status) = 'REPAIRED' " +
-                      "AND sb.scanned_at >= ? AND sb.scanned_at <= ?";
-                break;
+        case "MICR_REPAIRS":
+            sql = "SELECT COUNT(sc.scanned_cheque_id) " +
+                  "FROM scan_batch sb " +
+                  "JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
+                  "WHERE (UPPER(sc.cheque_status) LIKE '%MICR%' " +
+                  "   OR UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'MICR_REPAIRED', 'MICR_REJECTION_PENDING', 'REJECTED_MICR')) " +
+                  "  AND CAST(GREATEST(sb.uploaded_at, sc.created_at) AS DATE) BETWEEN ? AND ?";
+            break;
 
             case "DATA_ENTRY":
-                sql = "SELECT COUNT(*) FROM scan_cheque sc " +
-                      "JOIN scan_batch sb ON sc.batch_id = sb.batch_id " +
-                      "WHERE UPPER(sc.cheque_status) LIKE '%DATA_ENTRY%' " +
-                      "AND sb.scanned_at >= ? AND sb.scanned_at <= ?";
+                sql = "SELECT COUNT(sc.scanned_cheque_id) " +
+                      "FROM scan_cheque sc " +
+                      "JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id " +
+                      "WHERE (UPPER(sc.cheque_status) LIKE '%DATA_ENTRY%' " +
+                      "   OR UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY')) " +
+                      "  AND CAST(GREATEST(sc.created_at, sb.uploaded_at) AS DATE) BETWEEN ? AND ?";
                 break;
 
             case "REQUEST_REJECTED":
-                sql = "SELECT COUNT(*) FROM scan_cheque sc " +
-                      "JOIN scan_batch sb ON sc.batch_id = sb.batch_id " +
-                      "WHERE UPPER(sc.cheque_status) LIKE '%REJECT%' " +
-                      "AND sb.scanned_at >= ? AND sb.scanned_at <= ?";
+                sql = "SELECT COUNT(rc.outward_rejected_cheque_id) " +
+                      "FROM outward_rejected_cheques rc " +
+                      "WHERE CAST(rc.rejected_date AS DATE) BETWEEN ? AND ?";
                 break;
 
             case "SUBMITTED_CHECKER":
-                sql = "SELECT COUNT(*) FROM outward_batch ob " +
-                      "WHERE ob.uploaded_at >= ? AND ob.uploaded_at <= ?";
+                sql = "SELECT COUNT(DISTINCT sb.scanned_batch_id) " +
+                      "FROM scan_batch sb " +
+                      "LEFT JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
+                      "WHERE (UPPER(sb.batch_status) LIKE '%CHECKER%' " +
+                      "    OR UPPER(sb.batch_status) LIKE '%SUBMIT%') " +
+                      "  AND CAST(GREATEST(sb.uploaded_at, COALESCE(sc.created_at, sb.uploaded_at)) AS DATE) BETWEEN ? AND ?";
                 break;
 
             default:
-                sql = "SELECT COUNT(*) FROM outward_batch ob " +
-                      "WHERE ob.uploaded_at >= ? AND ob.uploaded_at <= ?";
+                sql = "SELECT COUNT(ob.outward_batch_id) " +
+                      "FROM outward_batch ob " +
+                      "WHERE CAST(ob.uploaded_at AS DATE) BETWEEN ? AND ?";
                 break;
         }
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setTimestamp(1, startTs);
-            ps.setTimestamp(2, endTs);
+            // Exactly 2 parameters for every single query
+            ps.setDate(1, sqlFromDate);
+            ps.setDate(2, sqlToDate);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     int count = rs.getInt(1);
+                    System.out.println(">>> [REPORT PRE-CHECK] Result COUNT: " + count);
                     return count > 0;
                 }
             }
         } catch (Exception e) {
+            System.err.println(">>> [REPORT PRE-CHECK ERROR] " + e.getMessage());
             e.printStackTrace();
-            return false; // Crucial: Always return false on error so it never creates an empty file
+            return false;
         }
         return false;
     }
+
     // =========================================================================
     // STRICT BANKING DATE VALIDATION
     // =========================================================================
@@ -235,7 +249,6 @@ public class MakerReportController extends GenericForwardComposer<Component> {
             return false;
         }
 
-        // Strict future date check against active session clearing date
         LocalDate clearingDate = getClearingDate();
         LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

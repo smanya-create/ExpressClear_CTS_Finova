@@ -124,7 +124,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
                 // 2. Cheque Number (Center, Monospace)
                 Listcell cellCheque = new Listcell();
                 cellCheque.setStyle("text-align: center; vertical-align: middle;");
-                Label lblChq = new Label(safe(cheque.getOutwardChequeId()));
+                Label lblChq = new Label(safe(cheque.getChequeNumber()));
                 lblChq.setStyle("font-family: monospace; font-size: 13px; font-weight: 600; color: #334155; display: block; text-align: center;");
                 cellCheque.appendChild(lblChq);
 
@@ -333,7 +333,7 @@ public class OutwardCheckerRejectionController extends GenericForwardComposer<Co
             if (lblBatchId != null) lblBatchId.setValue(safe(cheque.getOutwardBatchId()));
 
             Label lblChequeNumber = (Label) window.getFellowIfAny("lblChequeNumber");
-            if (lblChequeNumber != null) lblChequeNumber.setValue(safe(cheque.getOutwardChequeId()));
+            if (lblChequeNumber != null) lblChequeNumber.setValue(safe(cheque.getChequeNumber()));
 
             Label lblAmount = (Label) window.getFellowIfAny("lblAmount");
             if (lblAmount != null) {

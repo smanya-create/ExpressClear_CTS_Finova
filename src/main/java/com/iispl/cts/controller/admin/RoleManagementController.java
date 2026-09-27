@@ -42,7 +42,7 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
     }
 
     private void loadRoles() {
-    	// Fetch all roles directly without search queries or status filters
+        // Fetch all roles directly without search queries or status filters
         List<Role> roles = roleService.searchRoles("", "ALL");
 
         if (lblRoleCount != null) {
@@ -57,22 +57,25 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
             Row row = new Row();
             row.setStyle("border-bottom: 1px solid #f1f5f9; height: 50px;");
 
-            // 1. Role ID
+            // 1. Role ID (Left aligned)
             Label lblId = new Label(role.getRoleId());
-            lblId.setStyle("color: #475569; font-size: 13px; font-weight: 600;");
+            lblId.setStyle("color: #475569; font-size: 13px; font-weight: 600; text-align: left; display: block; padding-left: 12px;");
             row.appendChild(lblId);
 
-            // 2. Role Name
+            // 2. Role Name (Left aligned)
             Label lblName = new Label(role.getRoleName());
-            lblName.setStyle("color: #1e293b; font-weight: 500; font-size: 13px;");
+            lblName.setStyle("color: #1e293b; font-weight: 500; font-size: 13px; text-align: left; display: block; padding-left: 12px;");
             row.appendChild(lblName);
 
-            // 3. Description
+            // 3. Description (Left aligned)
             Label lblDesc = new Label(role.getDescription() != null ? role.getDescription() : "-");
-            lblDesc.setStyle("color: #64748b; font-size: 13px;");
+            lblDesc.setStyle("color: #64748b; font-size: 13px; text-align: left; display: block; padding-left: 12px;");
             row.appendChild(lblDesc);
 
-            // 4. Status Badge (Dynamic Active / Inactive)
+            // 4. Status Badge (Center aligned wrapper)
+            org.zkoss.zul.Div statusWrapper = new org.zkoss.zul.Div();
+            statusWrapper.setStyle("text-align: center; width: 100%;");
+
             String status = (role.getStatus() != null && !role.getStatus().trim().isEmpty()) 
                             ? role.getStatus().trim() 
                             : "Active";
@@ -83,20 +86,25 @@ public class RoleManagementController extends GenericForwardComposer<Component> 
             } else {
                 lblStatus.setStyle("background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block;");
             }
-            row.appendChild(lblStatus);
+            statusWrapper.appendChild(lblStatus);
+            row.appendChild(statusWrapper);
 
-            // 5. Modify Action Link
+            // 5. Modify Action Button (Center aligned wrapper)
+            org.zkoss.zul.Div actionWrapper = new org.zkoss.zul.Div();
+            actionWrapper.setStyle("text-align: center; width: 100%;");
+
             Button btnModify = new Button("Modify");
             btnModify.setIconSclass("z-icon-pencil");
             btnModify.setSclass("btn-action-modify");
             btnModify.addEventListener("onClick", e -> {
                 Executions.sendRedirect("/admin/role/modify-role.zul?roleId=" + role.getRoleId());
             });
-            row.appendChild(btnModify);
+            actionWrapper.appendChild(btnModify);
+            row.appendChild(actionWrapper);
+
             rowsRoles.appendChild(row);
         }
     }
-
    
 
     public void onClick$btnAddRole(Event event) {

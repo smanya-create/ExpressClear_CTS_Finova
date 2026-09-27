@@ -23,9 +23,12 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 		List<OutwardRejectedCheques> rejectedCheques = new ArrayList<>();
 
-		String sql = "SELECT " + "outward_rejected_cheque_id, " + "outward_cheque_id, " + "rejected_by, "
-				+ "rejected_date, " + "remarks, " + "outward_batch_id, " + "cheque_amount, " + "reason_id, " + "reason "
-				+ "FROM public.outward_rejected_cheques " + "ORDER BY rejected_date DESC " + "LIMIT ? OFFSET ?";
+		String sql = "SELECT " + "orc.outward_rejected_cheque_id, " + "orc.outward_cheque_id, " + "oc.cheque_number, "
+				+ "orc.rejected_by, " + "orc.rejected_date, " + "orc.remarks, " + "orc.outward_batch_id, "
+				+ "orc.cheque_amount, " + "orc.reason_id, " + "orc.reason "
+				+ "FROM public.outward_rejected_cheques orc " + "LEFT JOIN public.outward_cheque oc "
+				+ "ON orc.outward_cheque_id = oc.outward_cheque_id " + "ORDER BY orc.rejected_date DESC "
+				+ "LIMIT ? OFFSET ?";
 
 		try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -58,9 +61,11 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 		StringBuilder sql = new StringBuilder();
 
-		sql.append("SELECT " + "outward_rejected_cheque_id, " + "outward_cheque_id, " + "rejected_by, "
-				+ "rejected_date, " + "remarks, " + "outward_batch_id, " + "cheque_amount, " + "reason_id, " + "reason "
-				+ "FROM public.outward_rejected_cheques " + "WHERE 1=1 ");
+		sql.append("SELECT " + "orc.outward_rejected_cheque_id, " + "orc.outward_cheque_id, " + "oc.cheque_number, "
+				+ "orc.rejected_by, " + "orc.rejected_date, " + "orc.remarks, " + "orc.outward_batch_id, "
+				+ "orc.cheque_amount, " + "orc.reason_id, " + "orc.reason "
+				+ "FROM public.outward_rejected_cheques orc " + "LEFT JOIN public.outward_cheque oc "
+				+ "ON orc.outward_cheque_id = oc.outward_cheque_id " + "WHERE 1=1 ");
 
 		List<Object> parameters = new ArrayList<>();
 
@@ -70,19 +75,22 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 		if (searchValue != null && !searchValue.trim().isEmpty()) {
 
-			sql.append("AND (" + "LOWER(outward_rejected_cheque_id) LIKE ? " + "OR LOWER(outward_cheque_id) LIKE ? "
-					+ "OR LOWER(outward_batch_id) LIKE ? " + "OR LOWER(rejected_by) LIKE ? "
-					+ "OR LOWER(reason_id) LIKE ? " + "OR LOWER(reason) LIKE ? " + "OR LOWER(remarks) LIKE ?" + ") ");
+			sql.append("AND (" + "LOWER(orc.outward_rejected_cheque_id) LIKE ? "
+					+ "OR LOWER(orc.outward_cheque_id) LIKE ? " + "OR LOWER(oc.cheque_number) LIKE ? "
+					+ "OR LOWER(orc.outward_batch_id) LIKE ? " + "OR LOWER(orc.rejected_by) LIKE ? "
+					+ "OR LOWER(orc.reason_id) LIKE ? " + "OR LOWER(orc.reason) LIKE ? "
+					+ "OR LOWER(orc.remarks) LIKE ?" + ") ");
 
 			String searchPattern = "%" + searchValue.trim().toLowerCase() + "%";
 
-			parameters.add(searchPattern);
-			parameters.add(searchPattern);
-			parameters.add(searchPattern);
-			parameters.add(searchPattern);
-			parameters.add(searchPattern);
-			parameters.add(searchPattern);
-			parameters.add(searchPattern);
+			parameters.add(searchPattern); // rejected cheque ID
+			parameters.add(searchPattern); // outward cheque ID
+			parameters.add(searchPattern); // cheque number
+			parameters.add(searchPattern); // batch ID
+			parameters.add(searchPattern); // rejected by
+			parameters.add(searchPattern); // reason ID
+			parameters.add(searchPattern); // reason
+			parameters.add(searchPattern); // remarks
 		}
 
 		// -----------------------------------------------------
@@ -272,6 +280,8 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		rejectedCheque.setOutwardRejectedChequeId(rs.getString("outward_rejected_cheque_id"));
 
 		rejectedCheque.setOutwardChequeId(rs.getString("outward_cheque_id"));
+		
+		rejectedCheque.setChequeNumber(rs.getString("cheque_number"));
 
 		rejectedCheque.setRejectedBy(rs.getString("rejected_by"));
 
