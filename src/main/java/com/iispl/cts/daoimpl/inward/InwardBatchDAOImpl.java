@@ -415,7 +415,10 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 				+ "       OR EXISTS (SELECT 1 FROM inward_cheque_send_back_request sbr "
 				+ "                  WHERE sbr.inward_batch_id = b.inward_batch_id AND sbr.request_status = 'PENDING')) "
 				+ "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status "
-				+ "HAVING COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY', 'DATA_ENTRY_COMPLETED') THEN 1 END) > 0 ";
+				+ "HAVING COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY', 'DATA_ENTRY_COMPLETED') THEN 1 END) > 0 "
+				+ "   OR EXISTS (SELECT 1 FROM inward_cheque_send_back_request sbr "
+				+ "              WHERE sbr.inward_batch_id = b.inward_batch_id "
+				+ "                AND sbr.request_status = 'PENDING') ";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);
