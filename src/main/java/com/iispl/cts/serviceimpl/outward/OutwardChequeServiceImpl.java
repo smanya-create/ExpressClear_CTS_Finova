@@ -331,6 +331,14 @@ public class OutwardChequeServiceImpl implements OutwardChequeService {
 		}
 		return outwardChequeDAO.getCompletedMakerChequeCountByBatchId(outwardBatchId.trim());
 	}
+	
+	@Override
+	public int getPendingMakerChequeCountByBatchId(String outwardBatchId) {
+		if (outwardBatchId == null || outwardBatchId.trim().isEmpty()) {
+			return 0;
+		}
+		return outwardChequeDAO.getPendingMakerChequeCountByBatchId(outwardBatchId.trim());
+	}
 
 	@Override
 	public boolean submitMakerBatchToChecker(String scannedBatchId) {
