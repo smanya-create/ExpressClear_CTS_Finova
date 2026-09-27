@@ -406,34 +406,16 @@ public class InwardBatchDAOImpl implements InwardBatchDAO {
 	public List<DataEntryBatchItemDTO> getBatchesForDataEntry() {
 		List<DataEntryBatchItemDTO> batches = new ArrayList<>();
 
-		String sql = "SELECT " 
-				+ "    b.inward_batch_id, " 
-				+ "    b.actual_cheque_count, "
-				+ "    b.actual_total_amount, " 
-				+ "    b.batch_status, " 
-				+ "    COUNT(CASE WHEN c.cheque_status IN ('"
-				+ InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '"
-				+ InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "') THEN 1 END) AS pending_cheques, "
-				+ "    COUNT(CASE WHEN c.cheque_status IN ('" + InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name()
-				+ "', '" + InwardChequeStatus.SEND_BACK_TO_MAKER.name()
-				+ "', 'MAKER_RETURNED') THEN 1 END) AS sent_back_cheques " 
+		String sql = "SELECT b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status, " 
+				+ "    COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY') THEN 1 END) AS pending_cheques, "
+				+ "    COUNT(CASE WHEN c.cheque_status IN ('SEND_BACK_TO_MAKER_DATA_ENTRY', 'MAKER_RETURNED') THEN 1 END) AS sent_back_cheques " 
 				+ "FROM inward_batch b "
 				+ "JOIN inward_cheque c ON b.inward_batch_id = c.inward_batch_id "
 				+ "WHERE (b.batch_status NOT IN ('CHECKER_PROCESSING_PENDING', 'CHECKER_PROCESSING', 'COMPLETED', 'REJECTED') "
 				+ "       OR EXISTS (SELECT 1 FROM inward_cheque_send_back_request sbr "
-				+ "                  WHERE sbr.inward_batch_id = b.inward_batch_id "
-				+ "                    AND sbr.request_status = 'PENDING')) "
+				+ "                  WHERE sbr.inward_batch_id = b.inward_batch_id AND sbr.request_status = 'PENDING')) "
 				+ "GROUP BY b.inward_batch_id, b.actual_cheque_count, b.actual_total_amount, b.batch_status "
-				+ "HAVING COUNT(CASE WHEN c.cheque_status IN ('" + InwardChequeStatus.DATA_ENTRY_PENDING.name() + "', '"
-				+ InwardChequeStatus.DATA_ENTRY_IN_PROGRESS.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER_DATA_ENTRY.name() + "', '"
-				+ InwardChequeStatus.SEND_BACK_TO_MAKER.name() + "', '" + "DATA_ENTRY_COMPLETED" + "') THEN 1 END) > 0 "
-				+ "   OR EXISTS (SELECT 1 FROM inward_cheque_send_back_request sbr "
-				+ "              WHERE sbr.inward_batch_id = b.inward_batch_id "
-				+ "                AND sbr.request_status = 'PENDING') "
-				+ "ORDER BY b.inward_batch_id ASC";
+				+ "HAVING COUNT(CASE WHEN c.cheque_status IN ('DATA_ENTRY_PENDING', 'SEND_BACK_TO_MAKER_DATA_ENTRY', 'DATA_ENTRY_COMPLETED') THEN 1 END) > 0 ";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql);
