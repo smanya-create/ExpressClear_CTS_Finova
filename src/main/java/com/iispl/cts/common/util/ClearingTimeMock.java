@@ -79,10 +79,10 @@ public class ClearingTimeMock {
     }
 
     public static boolean isOutwardWindow() {
-        String phase = getActivePhase();
+    	String phase = getActivePhase();
+        // In LIVE mode for testing, both windows remain open
         if ("LIVE".equalsIgnoreCase(phase)) {
-            // Live clock check: must be strictly before 02:30 PM
-            return LocalTime.now().isBefore(CUTOFF_TIME);
+            return true; 
         }
         // MORNING phase presentation window is active
         return "MORNING".equalsIgnoreCase(phase);
@@ -90,8 +90,9 @@ public class ClearingTimeMock {
 
     public static boolean isInwardWindow() {
         String phase = getActivePhase();
+     // In LIVE mode for testing, both windows remain open
         if ("LIVE".equalsIgnoreCase(phase)) {
-            return !LocalTime.now().isBefore(CUTOFF_TIME);
+            return true; 
         }
         return "AFTERNOON".equalsIgnoreCase(phase);
     }
