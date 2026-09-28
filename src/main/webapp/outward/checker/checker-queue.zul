@@ -20,10 +20,7 @@
         apply="com.iispl.cts.controller.outward.checker.OutwardCheckerQueueController"
         sclass="checker-queue-root">
 
-        <!-- =====================================================
-             SIDEBAR
-             ===================================================== -->
-
+     
         <west
             size="220px"
             border="none"
@@ -38,10 +35,6 @@
         </west>
 
 
-        <!-- =====================================================
-             MAIN AREA
-             ===================================================== -->
-
         <center
             border="none"
             autoscroll="false">
@@ -50,9 +43,7 @@
                 width="100%"
                 height="100%">
 
-                <!-- =================================================
-                     COMMON HEADER
-                     ================================================= -->
+
 
                 <north
                     id="checkerQueueHeaderArea"
@@ -72,10 +63,7 @@
                 </north>
 
 
-                <!-- =================================================
-                     CONTENT
-                     ================================================= -->
-
+              
                 <center
                     border="none"
                     autoscroll="false">
@@ -85,10 +73,6 @@
                         height="100%"
                         sclass="content-wrapper">
 
-
-                        <!-- =================================================
-                             NO BATCH MESSAGE
-                             ================================================= -->
 
 <vlayout
     id="noBatchMessage"
@@ -132,10 +116,7 @@
 </vlayout>
 
 
-                        <!-- =================================================
-                             CHECKER QUEUE CONTENT
-                             ================================================= -->
-
+                       
                         <div
                             id="checkerQueueContent"
                             sclass="main-page"
@@ -144,10 +125,7 @@
                             <div sclass="main-content">
 
 
-                                <!-- =================================================
-                                     VERIFICATION HEADER + PAGINATION
-                                     ================================================= -->
-
+                          
                                 <div sclass="queue-header-row">
 
                                     <div sclass="section-heading">
@@ -159,7 +137,6 @@
                                     </div>
 
 
-                                    <!-- PAGINATION -->
 
                                     <div sclass="pagination-card">
 
@@ -204,13 +181,8 @@
                                 </div>
 
 
-                                <!-- =================================================
-                                     SUMMARY
-                                     ================================================= -->
-
                                 <div sclass="summary-card">
 
-                                    <!-- BATCH ID -->
 
                                     <div sclass="summary-item">
 
@@ -226,7 +198,6 @@
                                     </div>
 
 
-                                    <!-- CHEQUE COUNT -->
 
                                     <div sclass="summary-item">
 
@@ -242,7 +213,6 @@
                                     </div>
 
 
-                                    <!-- CHEQUE NUMBER -->
 
                                     <div sclass="summary-item">
 
@@ -258,7 +228,6 @@
                                     </div>
 
 
-                                    <!-- CHEQUE STATUS -->
 
                                     <div sclass="summary-item">
 
@@ -274,7 +243,6 @@
                                     </div>
 
 
-                                    <!-- CURRENT CHEQUE -->
 
                                     <div sclass="summary-item">
 
@@ -290,7 +258,6 @@
                                     </div>
 
 
-                                    <!-- REMAINING -->
 
                                     <div sclass="summary-item last">
 
@@ -308,20 +275,12 @@
                                 </div>
 
 
-                                <!-- =================================================
-                                     VERIFICATION ROW
-                                     ================================================= -->
-
                                 <div sclass="verification-row">
 
 
-                                    <!-- =================================================
-                                         CHEQUE IMAGE CARD
-                                         ================================================= -->
-
+                                   
                                     <div sclass="image-card">
 
-                                        <!-- IMAGE HEADER -->
 
                                         <div sclass="image-card-header">
 
@@ -346,7 +305,6 @@
                                         </div>
 
 
-                                        <!-- CHEQUE IMAGE -->
 
                                         <div sclass="cheque-image-container">
 
@@ -357,7 +315,6 @@
                                         </div>
 
 
-                                        <!-- ZOOM CONTROLS -->
 
                                         <div sclass="zoom-controls">
 
@@ -392,17 +349,11 @@
                                     </div>
 
 
-                                    <!-- =================================================
-                                         CHEQUE DETAILS CARD
-                                         ================================================= -->
-
+                                  
                                     <div sclass="details-card">
 
 
-                                        <!-- =================================================
-                                             DETAILS HEADER
-                                             ================================================= -->
-
+                                    
                                         <div sclass="details-card-header">
 
                                             <div sclass="details-card-title-area">
@@ -426,16 +377,7 @@
                                         </div>
 
 
-                                        <!-- =================================================
-                                             FIXED MAKER REJECTION / WARNING AREA
-
-                                             IMPORTANT:
-                                             Keep visible="true".
-                                             This reserves fixed space so the
-                                             action buttons do not move when
-                                             clicking NEXT/PREV.
-                                             ================================================= -->
-
+                                        
                                         <vlayout
                                             id="makerRejectionRequestSection"
                                             visible="true"
@@ -487,10 +429,6 @@
                                         </vlayout>
 
 
-                                        <!-- =================================================
-                                             CHEQUE NUMBER + MICR
-                                             ================================================= -->
-
                                         <div sclass="two-column-fields">
 
                                             <div sclass="field-group">
@@ -524,10 +462,6 @@
 
                                         </div>
 
-
-                                        <!-- =================================================
-                                             PAYEE + ACCOUNT
-                                             ================================================= -->
 
                                         <div sclass="two-column-fields">
 
@@ -563,10 +497,6 @@
                                         </div>
 
 
-                                        <!-- =================================================
-                                             AMOUNT + DATE
-                                             ================================================= -->
-
                                         <div sclass="two-column-fields">
 
                                             <div sclass="field-group">
@@ -601,10 +531,6 @@
                                         </div>
 
 
-                                        <!-- =================================================
-                                             CHECKER ACTION AREA
-                                             ================================================= -->
-
                                         <div sclass="details-action-area">
 
                                             <label
@@ -614,7 +540,6 @@
 
                                             <div sclass="details-action-buttons">
 
-                                                <!-- VERIFY -->
 
                                                 <button
                                                     id="btnVerified"
@@ -622,7 +547,6 @@
                                                     sclass="verified-button"/>
 
 
-                                                <!-- RETURN TO MAKER -->
 
                                                 <button
                                                     id="btnReturn"
@@ -630,7 +554,6 @@
                                                     sclass="return-button"/>
 
 
-                                                <!-- REJECT -->
 
                                                 <button
                                                     id="btnReject"
@@ -640,7 +563,6 @@
                                             </div>
 
 
-                                            <!-- APPROVE BATCH -->
 
                                             <button
                                                 id="btnXmlGeneration"
@@ -655,10 +577,7 @@
                                 </div>
 
 
-                                <!-- =================================================
-                                     FOOTER
-                                     ================================================= -->
-
+                             
                                 <div sclass="page-footer">
 
                                     <label

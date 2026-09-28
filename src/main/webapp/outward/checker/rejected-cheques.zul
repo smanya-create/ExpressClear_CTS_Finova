@@ -5,7 +5,6 @@
     <borderlayout apply="com.iispl.cts.controller.outward.checker.OutwardCheckerRejectionController"
                   hflex="1" vflex="1" style="overflow: hidden !important;">
 
-        <!-- ================= SIDEBAR ================= -->
         <west width="220px"
               border="none"
               collapsible="false"
@@ -16,27 +15,26 @@
                      hflex="1" vflex="1" />
         </west>
 
-        <!-- ================= MAIN WORKSPACE (LOCKED ZERO SCROLL) ================= -->
         <center border="none" autoscroll="false" style=" overflow: hidden !important;">
             <vlayout spacing="0" hflex="1" vflex="1" style="overflow: hidden !important;">
 
-                <!-- Shared Application Header -->
+               
                 <include id="incHeader" src="/components/header.zul"
                          pageTitle="Outward Processing" />
 
-                <!-- Modal Window Host -->
+               
                 <vlayout id="windowHost" spacing="0"/>
 
-                <!-- Content Area -->
+               
                 <vlayout spacing="12px" style="padding: 16px 24px; overflow: hidden !important;" hflex="1" vflex="1">
 
-                    <!-- PAGE HEADING -->
+                
                     <vlayout spacing="2px">
                         <label value="Rejected Cheques" sclass="section-title"/>
                        
                     </vlayout>
 
-                    <!-- ================= SUMMARY CARD ================= -->
+                 
                     <hlayout sclass="summary-card" hflex="1" valign="middle">
                         <vlayout sclass="summary-item" spacing="2px">
                             <label value="TOTAL REJECTED CHEQUES" sclass="summary-label"/>
@@ -46,7 +44,7 @@
                         
                     </hlayout>
 
-                    <!-- ================= SEARCH BAR ================= -->
+                   
                     <hlayout sclass="search-card" hflex="1" valign="bottom">
                         <vlayout sclass="search-field" hflex="1" spacing="4px">
                             <label value="SEARCH" sclass="field-label"/>
@@ -70,7 +68,7 @@
                         <button id="btnClear" label="CLEAR" sclass="clear-button"/>
                     </hlayout>
 
-                    <!-- ================= TABLE SECTION ================= -->
+                 
                    <vlayout sclass="table-card"
          hflex="1"
          vflex="1"
@@ -96,7 +94,7 @@
                             </listhead>
                         </listbox>
 
-                        <!-- PAGINATION -->
+                      
                         <hlayout sclass="pagination-bar" hflex="1" valign="middle">
                             <button id="btnFirst" label="«" sclass="pagination-button"/>
                             <button id="btnPrevious" label="‹" sclass="pagination-button"/>

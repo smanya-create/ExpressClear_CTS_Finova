@@ -503,11 +503,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	private void updatePaginationProgress() {
 
-		/*
-		 * ========================================================= NO CHEQUES
-		 * =========================================================
-		 */
-
 		if (cheques == null || cheques.isEmpty()) {
 
 			if (progressBar != null) {
@@ -578,11 +573,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			}
 		}
 
-		/*
-		 * ========================================================= CALCULATE
-		 * VERIFICATION PROGRESS
-		 * =========================================================
-		 */
+		// VERIFICATION PROGRESS
 
 		int percentage = 0;
 
@@ -601,39 +592,17 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			lblProgress.setValue(verifiedCount + "/" + total + " (" + percentage + "%)");
 		}
 
-		/*
-		 * ========================================================= CURRENT CHEQUE
-		 * NAVIGATION
-		 *
-		 * This still changes when Next / Previous is clicked.
-		 *
-		 * Example:
-		 *
-		 * 1 of 5 2 of 5 3 of 5
-		 *
-		 * This is navigation position, NOT verification progress.
-		 * =========================================================
-		 */
+		// NAVIGATION
 
 		if (lblCurrentChequeNavigation != null) {
 
 			lblCurrentChequeNavigation.setValue(current + " of " + total);
 		}
 
-		/*
-		 * ========================================================= CURRENT CHEQUE
-		 * NUMBER / POSITION =========================================================
-		 */
-
 		if (lblCurrentCheque != null) {
 
 			lblCurrentCheque.setValue(String.valueOf(current));
 		}
-
-		/*
-		 * ========================================================= REMAINING CHEQUES
-		 * =========================================================
-		 */
 
 		if (lblRemaining != null) {
 
@@ -737,9 +706,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				}
 			}
 
-			/*
-			 * Current cheque still exists.
-			 */
+			// Current cheque still exists.
+
 			if (newIndex >= 0) {
 
 				currentIndex = newIndex;
@@ -859,9 +827,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				btnReturnCancel.addEventListener("onClick", event -> closeReturnMakerWindow());
 			}
 
-			/*
-			 * Initially hidden.
-			 */
 			returnMakerWindow.setVisible(false);
 
 			System.out.println("Return to Maker window created and attached.");
@@ -951,10 +916,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			currentIndex = 0;
 
-			/*
-			 * 
-			 * displayCheque() does NOT validate account number.
-			 */
 			displayCheque();
 
 			updateXmlGenerationButton();
@@ -1409,9 +1370,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			String result = accountValidationResults.get(chequeId);
 
-			/*
-			 * Already verified by Checker.
-			 */
 			if ("VERIFIED_BY_CHECKER".equalsIgnoreCase(status)) {
 
 				System.out.println("Cheque " + cheque.getChequeNumber() + " = VALID (VERIFIED_BY_CHECKER)");
@@ -1419,9 +1377,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				continue;
 			}
 
-			/*
-			 * Normal validation result.
-			 */
 			System.out.println("Cheque " + cheque.getChequeNumber() + " = " + result);
 
 			if (!"VALID".equalsIgnoreCase(nullSafe(result))) {
@@ -1678,9 +1633,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			if (!showingBackImage) {
 
-				/*
-				 * FRONT -> BACK
-				 */
+				// FRONT -> BACK
+
 				if (backImagePath == null || backImagePath.isEmpty()) {
 
 					Messagebox.show("Back side image is not available.", "Cheque Image", Messagebox.OK,
@@ -1700,9 +1654,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			} else {
 
-				/*
-				 * BACK -> FRONT
-				 */
+				// BACK -> FRONT
+
 				if (frontImagePath == null || frontImagePath.isEmpty()) {
 
 					Messagebox.show("Front side image is not available.", "Cheque Image", Messagebox.OK,
@@ -2549,14 +2502,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 							closeRejectWindow();
 
-							/*
-							 * --------------------------------------------------------- REFRESH QUEUE AFTER
-							 * REJECTION ---------------------------------------------------------
-							 *
-							 * Do NOT manually remove the cheque here.
-							 *
-							 * The refresh method reloads the latest queue from DB.
-							 */
 							refreshQueueAfterAction();
 
 							Messagebox.show(

@@ -4,36 +4,27 @@
 
 <zk>
 
-	<!-- =========================================================
-		MAIN WINDOW
-		========================================================= -->
+	
 	<window id="reportsWindow" border="none" width="100%" height="100%"
 		sclass="reports-window"
 		apply="com.iispl.cts.controller.outward.checker.OutwardChequeReportController">
 
-		<!-- =====================================================
-			WINDOW HOST
-			===================================================== -->
+	
 		<div id="windowHost" />
 
 		<vlayout width="100%" height="100%" spacing="0">
 
-			<!-- TOP PAGE GAP -->
 			<div width="100%" height="10px" sclass="top-page-gap" />
 
-			<!-- MAIN BORDER LAYOUT -->
 			<borderlayout width="100%" vflex="1">
 
-				<!-- SIDEBAR -->
 				<west width="205px" border="none" collapsible="false" splittable="false">
 					<include src="/components/sidebar.zul" width="100%" height="100%" activeTab="outward-checker-reports" />
 				</west>
 
-				<!-- MAIN CENTER -->
 				<center border="none">
 					<borderlayout width="100%" height="100%">
 
-						<!-- HEADER -->
 						<north height="90px" border="none">
 							<div sclass="header-wrapper" width="100%" height="90px">					
 								<div sclass="common-header-container">
@@ -42,26 +33,25 @@
 							</div>
 						</north>
 
-						<!-- MAIN CONTENT -->
 						<center border="none" autoscroll="false">
 							<div sclass="main-page" width="100%" height="100%" style="padding: 24px 32px; background: #f8fafc; overflow-y: auto;">
 								<vlayout spacing="16px" hflex="1">
 
-									<!-- PAGE HEADING -->
+									
 									<vlayout spacing="2px">
 										<label value="Reports" sclass="section-title" style="font-size: 20px; font-weight: 700; color: #0f172a;" />
 									</vlayout>
 
-									<!-- COMPACT REPORT CARD -->
+								
 									<vlayout sclass="report-card"
 											 width="860px"
 											 spacing="18px"
 											 style="padding: 24px 28px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
 
-										<!-- Card Header Title -->
+									
 										<label value="Report Parameters" style="font-size: 15px; font-weight: 700; color: #0f172a;" />
 
-										<!-- REPORT TYPE SELECTOR -->
+									
 										<vlayout spacing="6px" hflex="1">
 											<label value="REPORT TYPE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
 											<combobox id="cmbReportType" readonly="true" height="38px" hflex="1" style="font-size: 13px;">
@@ -70,7 +60,7 @@
 											</combobox>
 										</vlayout>
 
-										<!-- SIDE-BY-SIDE DATES -->
+									
 										<hlayout spacing="20px" hflex="1">
 											<vlayout spacing="6px" hflex="1">
 												<label value="FROM DATE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
@@ -83,7 +73,7 @@
 											</vlayout>
 										</hlayout>
 
-										<!-- EXPORT FORMAT SELECTOR -->
+										
 										<vlayout spacing="8px" hflex="1">
 											<label value="EXPORT FORMAT" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
 											<radiogroup id="rgExportFormat">
@@ -94,10 +84,10 @@
 											</radiogroup>
 										</vlayout>
 
-										<!-- LIGHT DIVIDER -->
+										
 										<div style="height: 1px; background: #e2e8f0; width: 100%; margin: 4px 0;" />
 
-										<!-- CONSOLIDATED PRIMARY ACTION BUTTON -->
+									
 										<hlayout>
 											<button id="btnGenerateReport"
 													label="GENERATE REPORT"

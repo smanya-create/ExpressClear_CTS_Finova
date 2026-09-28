@@ -15,10 +15,7 @@
         position="center"
         sclass="rejected-details-window">
 
-        <!-- =====================================================
-             POPUP HEADER
-             ===================================================== -->
-
+       
         <div sclass="popup-header">
 
             <vlayout spacing="4px">
@@ -42,17 +39,11 @@
         </div>
 
 
-        <!-- =====================================================
-             CONTENT
-             ===================================================== -->
-
+      
         <div sclass="popup-content">
 
 
-            <!-- =================================================
-                 INFORMATION GRID
-                 ================================================= -->
-
+         
             <grid sclass="information-grid">
 
                 <columns>
@@ -66,13 +57,9 @@
                 <rows>
 
 
-                    <!-- =================================================
-                         ROW 1
-                         ================================================= -->
-
+                   
                     <row sclass="information-row">
 
-                        <!-- BATCH ID -->
 
                         <vlayout sclass="info-item">
 
@@ -95,7 +82,6 @@
                         </vlayout>
 
 
-                        <!-- CHEQUE NUMBER -->
 
                         <vlayout sclass="info-item">
 
@@ -120,13 +106,10 @@
                     </row>
 
 
-                    <!-- =================================================
-                         ROW 2
-                         ================================================= -->
-
+                  
                     <row sclass="information-row">
 
-                        <!-- AMOUNT -->
+                      
 
                         <vlayout sclass="info-item">
 
@@ -149,7 +132,7 @@
                         </vlayout>
 
 
-                        <!-- REJECTED BY -->
+                     
 
                         <vlayout sclass="info-item">
 
@@ -174,10 +157,7 @@
                     </row>
 
 
-                    <!-- =================================================
-                         ROW 3
-                         ================================================= -->
-
+                    
                     <row sclass="information-row">
 
                         <!-- REJECTED ON -->
@@ -203,7 +183,7 @@
                         </vlayout>
 
 
-                        <!-- STATUS -->
+                   
 
                         <vlayout sclass="info-item">
 
@@ -223,16 +203,10 @@
                     </row>
 
 
-                   <!-- =================================================
-     ROW 4 - REJECTION REASON + REMARKS
-     ================================================= -->
-
+              
 <row sclass="reason-row">
 
-    <!-- =================================================
-         REJECTION REASON - LEFT SIDE
-         ================================================= -->
-
+    
     <cell sclass="reason-cell">
 
         <vlayout sclass="reason-container"
@@ -262,10 +236,7 @@
     </cell>
 
 
-    <!-- =================================================
-         REMARKS - RIGHT SIDE
-         ================================================= -->
-
+   
     <cell sclass="reason-cell">
 
         <vlayout sclass="reason-container"
@@ -304,10 +275,7 @@
             </grid>
 
 
-            <!-- =====================================================
-                 FOOTER
-                 ===================================================== -->
-
+         
             <div sclass="popup-footer">
 
                 <button id="btnClose"

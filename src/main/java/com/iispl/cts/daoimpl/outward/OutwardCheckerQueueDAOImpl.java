@@ -317,9 +317,7 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				System.out.println("=================================");
 			}
 
-			// ====================================================
-			// 6. UPDATE OUTWARD CHEQUE STATUS
-			// ====================================================
+			// UPDATE OUTWARD CHEQUE STATUS
 
 			String updateSql = "UPDATE outward_cheque " + "SET cheque_status = 'REJECTED' " + "WHERE cheque_number = ?";
 
@@ -450,9 +448,7 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 		return images;
 	}
 
-	// ============================================================
 	// GET SEND BACK REASONS
-	// ============================================================
 
 	@Override
 	public List<SendBackReason> getSendBackReasons() throws SQLException {
