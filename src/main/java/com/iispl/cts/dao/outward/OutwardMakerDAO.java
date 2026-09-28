@@ -10,9 +10,6 @@ import com.iispl.cts.entity.outward.ScanCheque;
 
 public interface OutwardMakerDAO {
 
-	// =========================================================
-	// SCAN MICR REPAIR
-	// =========================================================
 
 	List<MicrRepairBatch> getScanMicrRepairBatches();
 
@@ -22,9 +19,6 @@ public interface OutwardMakerDAO {
 
 	void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques);
 
-	// =========================================================
-	// OUTWARD MICR REPAIR
-	// =========================================================
 
 	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 
@@ -34,17 +28,13 @@ public interface OutwardMakerDAO {
 
 	void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques);
 
-	// =========================================================
-	// COMMON
-	// =========================================================
+	
 
 	List<RejectedReason> getRejectedReasons();
 
 	boolean existsChequeNumberAndAccount(String chequeNumber, String accountNumber);
 	
-	// =========================================================
-	// BATCH UPLOAD
-	// =========================================================
+	
 
 	ScanBatch getMakerBatch(String batchId);
 

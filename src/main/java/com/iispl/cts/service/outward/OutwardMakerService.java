@@ -10,9 +10,7 @@ import com.iispl.cts.entity.outward.ScanCheque;
 
 public interface OutwardMakerService {
 
-	// =========================================================
-	// Scan MICR Repair
-	// =========================================================
+	
 
 	List<MicrRepairBatch> getScanMicrRepairBatches();
 
@@ -22,9 +20,7 @@ public interface OutwardMakerService {
 
 	void saveScanMicrRepair(MicrRepairChequeDTO cheque);
 
-	// =========================================================
-	// Outward MICR Repair
-	// =========================================================
+	
 
 	List<MicrRepairBatch> getOutwardMicrRepairBatches();
 

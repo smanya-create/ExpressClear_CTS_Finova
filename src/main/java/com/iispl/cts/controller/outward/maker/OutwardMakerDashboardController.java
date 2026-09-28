@@ -632,45 +632,65 @@ public class OutwardMakerDashboardController extends GenericForwardComposer<Comp
 	}
 
 	private void openReturnedChequeAction(OutwardCheque cheque, String status) {
-		if (cheque == null)
-			return;
+	    if (cheque == null)
+	        return;
 
-		String chequeId = toSafeString(cheque.getOutwardChequeId()).trim();
-		String batchId = toSafeString(cheque.getOutwardBatchId()).trim();
+	    String chequeId = toSafeString(cheque.getOutwardChequeId()).trim();
+	    String batchId = toSafeString(cheque.getOutwardBatchId()).trim();
 
-		if (chequeId.isEmpty() || batchId.isEmpty())
-			return;
+	    if (chequeId.isEmpty() || batchId.isEmpty())
+	        return;
 
-		Include mainContentArea = findMainContentArea();
-		if (mainContentArea == null)
-			return;
+	    Include mainContentArea = findMainContentArea();
+	    if (mainContentArea == null)
+	        return;
 
-		try {
-			mainContentArea.clearDynamicProperties();
-			mainContentArea.setDynamicProperty("batchId", batchId);
-			mainContentArea.setDynamicProperty("chequeId", chequeId);
-			mainContentArea.setDynamicProperty("outwardChequeId", chequeId);
-			mainContentArea.setDynamicProperty("mode", MODE_DATA_ENTRY);
-			mainContentArea.setDynamicProperty(RETURN_FROM_CHECKER, true);
+	    try {
+	        mainContentArea.clearDynamicProperties();
 
-			mainContentArea.setAttribute("batchId", batchId);
-			mainContentArea.setAttribute("chequeId", chequeId);
-			mainContentArea.setAttribute("outwardChequeId", chequeId);
-			mainContentArea.setAttribute("mode", MODE_DATA_ENTRY);
-			mainContentArea.setAttribute(RETURN_FROM_CHECKER, true);
+	        if (STATUS_PENDING_MICR_REPAIR.equals(status)) {
+	            // --- FOR RETURNED MICR REPAIR: SOURCE IS OUTWARD ---
+	            mainContentArea.setDynamicProperty("MICR_REPAIR_SOURCE", "OUTWARD");
+	            mainContentArea.setDynamicProperty("MICR_REPAIR_BATCH_ID", batchId);
+	            mainContentArea.setDynamicProperty("MICR_REPAIR_CHEQUE_ID", chequeId);
+	            mainContentArea.setDynamicProperty("source", "OUTWARD");
+	            mainContentArea.setDynamicProperty("batchId", batchId);
+	            mainContentArea.setDynamicProperty("chequeId", chequeId);
 
-			if (STATUS_PENDING_MICR_REPAIR.equals(status)) {
-				mainContentArea.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
-				return;
-			}
+	            mainContentArea.setAttribute("MICR_REPAIR_SOURCE", "OUTWARD");
+	            mainContentArea.setAttribute("MICR_REPAIR_BATCH_ID", batchId);
+	            mainContentArea.setAttribute("MICR_REPAIR_CHEQUE_ID", chequeId);
+	            mainContentArea.setAttribute("source", "OUTWARD");
+	            mainContentArea.setAttribute("batchId", batchId);
+	            mainContentArea.setAttribute("chequeId", chequeId);
+	            mainContentArea.setAttribute(RETURN_FROM_CHECKER, true);
 
-			if (STATUS_PENDING_DATA_ENTRY.equals(status)) {
-				mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
-			}
+	            mainContentArea.setSrc(null); // force re-render if already on the page
+	            mainContentArea.setSrc("/outward/maker/micr-repair/micr-repair.zul");
+	            return;
+	        }
 
-		} catch (Exception exception) {
-			exception.printStackTrace();
-		}
+	        if (STATUS_PENDING_DATA_ENTRY.equals(status)) {
+	            // --- FOR DATA ENTRY ---
+	            mainContentArea.setDynamicProperty("batchId", batchId);
+	            mainContentArea.setDynamicProperty("chequeId", chequeId);
+	            mainContentArea.setDynamicProperty("outwardChequeId", chequeId);
+	            mainContentArea.setDynamicProperty("mode", MODE_DATA_ENTRY);
+	            mainContentArea.setDynamicProperty(RETURN_FROM_CHECKER, true);
+
+	            mainContentArea.setAttribute("batchId", batchId);
+	            mainContentArea.setAttribute("chequeId", chequeId);
+	            mainContentArea.setAttribute("outwardChequeId", chequeId);
+	            mainContentArea.setAttribute("mode", MODE_DATA_ENTRY);
+	            mainContentArea.setAttribute(RETURN_FROM_CHECKER, true);
+
+	            mainContentArea.setSrc(null);
+	            mainContentArea.setSrc("/outward/maker/cheque-data-entry.zul");
+	        }
+
+	    } catch (Exception exception) {
+	        exception.printStackTrace();
+	    }
 	}
 
 	private void openBatchDetails(String batchId, String status) {

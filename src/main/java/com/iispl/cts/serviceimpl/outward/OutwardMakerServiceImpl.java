@@ -15,24 +15,15 @@ import com.iispl.cts.service.outward.OutwardMakerService;
 
 public class OutwardMakerServiceImpl implements OutwardMakerService {
 
-	// =========================================================
-	// DAO
-	// =========================================================
 
 	private final OutwardMakerDAO outwardMakerDAO;
 
-	// =========================================================
-	// CONSTRUCTOR
-	// =========================================================
 
 	public OutwardMakerServiceImpl() {
 
 		outwardMakerDAO = new OutwardMakerDAOImpl();
 	}
 
-	// =========================================================
-	// SCAN MICR REPAIR BATCHES
-	// =========================================================
 
 	@Override
 	public List<MicrRepairBatch> getScanMicrRepairBatches() {
@@ -48,9 +39,6 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		return batches;
 	}
 
-	// =========================================================
-	// SCAN MICR REPAIR CHEQUES
-	// =========================================================
 
 	@Override
 	public List<MicrRepairChequeDTO> getScanMicrRepairCheques(String scannedBatchId) {
@@ -58,9 +46,6 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		return outwardMakerDAO.getScanMicrRepairCheques(scannedBatchId);
 	}
 
-	// =========================================================
-	// SAVE SCAN MICR REPAIR
-	// =========================================================
 
 	@Override
 	public void saveScanMicrRepair(MicrRepairChequeDTO cheque) {
@@ -73,9 +58,7 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		outwardMakerDAO.saveScanMicrRepair(cheque);
 	}
 
-	// =========================================================
-	// SUBMIT SCAN MICR REPAIR
-	// =========================================================
+
 
 	@Override
 	public void submitScanMicrRepair(List<MicrRepairChequeDTO> cheques) {
@@ -88,9 +71,6 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		outwardMakerDAO.submitScanMicrRepair(cheques);
 	}
 
-	// =========================================================
-	// OUTWARD MICR REPAIR BATCHES
-	// =========================================================
 
 	@Override
 	public List<MicrRepairBatch> getOutwardMicrRepairBatches() {
@@ -98,9 +78,7 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		return outwardMakerDAO.getOutwardMicrRepairBatches();
 	}
 
-	// =========================================================
-	// OUTWARD MICR REPAIR CHEQUES
-	// =========================================================
+
 
 	@Override
 	public List<MicrRepairChequeDTO> getOutwardMicrRepairCheques(String outwardBatchId) {
@@ -108,9 +86,7 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		return outwardMakerDAO.getOutwardMicrRepairCheques(outwardBatchId);
 	}
 
-	// =========================================================
-	// SAVE OUTWARD MICR REPAIR
-	// =========================================================
+	
 
 	@Override
 	public void saveOutwardMicrRepair(MicrRepairChequeDTO cheque) {
@@ -123,9 +99,7 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		outwardMakerDAO.saveOutwardMicrRepair(cheque);
 	}
 
-	// =========================================================
-	// SUBMIT OUTWARD MICR REPAIR
-	// =========================================================
+	
 
 	@Override
 	public void submitOutwardMicrRepair(List<MicrRepairChequeDTO> cheques) {
@@ -138,9 +112,7 @@ public class OutwardMakerServiceImpl implements OutwardMakerService {
 		outwardMakerDAO.submitOutwardMicrRepair(cheques);
 	}
 
-	// =========================================================
-	// GET REJECTED REASONS
-	// =========================================================
+
 
 	@Override
 	public List<RejectedReason> getRejectedReasons() {
