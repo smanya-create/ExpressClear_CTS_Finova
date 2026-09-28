@@ -405,7 +405,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		try {
 			String details = inwardChequeService.getMakerRejectionRequestDetails(chequeId.trim());
 			if (details == null || details.trim().isEmpty()) {
-				System.out.println("DEBUG: No pending Maker rejection request for cheque: " + chequeId);
 				return;
 			}
 			String[] parts = details.split("\\|\\|", -1);
@@ -446,12 +445,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			if (makerRejectionRequestSection != null) {
 				makerRejectionRequestSection.setVisible(true);
 			}
-			System.out.println("DEBUG: Maker rejection request loaded for cheque: " + chequeId);
-			System.out.println("DEBUG: Rejected Reason ID: " + rejectedReasonId);
-			System.out.println("DEBUG: Rejected Reason: "
-					+ (reason != null ? reason.getRejectedReasonCode() + " - " + reason.getRejectedReasonName()
-							: "NOT FOUND"));
-			System.out.println("DEBUG: Maker Remarks: " + remarks);
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (makerRejectionRequestSection != null) {
@@ -480,7 +473,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		try {
 			String inwardChequeId = cheque.getInwardChequeId();
 			if (inwardChequeId == null || inwardChequeId.trim().isEmpty()) {
-				System.out.println("Verification: Cheque ID is empty.");
+			
 				return;
 			}
 			InwardChequeImage image;
@@ -490,12 +483,10 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				image = inwardChequeService.getFrontImage(inwardChequeId);
 			}
 			if (image == null) {
-				System.out.println("Verification: No " + imageType + " image found for cheque -> " + inwardChequeId);
 				return;
 			}
 			String imagePath = image.getImagePath();
 			if (imagePath == null || imagePath.trim().isEmpty()) {
-				System.out.println("Verification: Image path is empty for cheque -> " + inwardChequeId);
 				return;
 			}
 			imagePath = imagePath.trim();
@@ -503,12 +494,9 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				imagePath = imagePath.substring(1);
 			}
 			String imageSrc = "/Inward-data/" + imagePath;
-			System.out.println("Verification: Loading image URL -> " + imageSrc);
 			chequeImage.setSrc(imageSrc);
 			chequeImage.setVisible(true);
 		} catch (Exception e) {
-			System.err.println(
-					"Verification: Failed to load " + imageType + " image for cheque -> " + cheque.getInwardChequeId());
 			e.printStackTrace();
 			chequeImage.setVisible(false);
 			chequeImage.setSrc(null);
@@ -540,14 +528,8 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		finalOrder.addAll(makerReturnedCheques);
 		finalOrder.addAll(rejectionRequests);
 		finalOrder.addAll(normalCheques);
-		System.out.println("DEBUG: Maker Returned count = " + makerReturnedCheques.size());
-		System.out.println("DEBUG: Rejection Request count = " + rejectionRequests.size());
-		System.out.println("DEBUG: Remaining cheque count = " + normalCheques.size());
-		System.out.println("DEBUG: Final verification order:");
 		for (int i = 0; i < finalOrder.size(); i++) {
 			InwardCheque cheque = finalOrder.get(i);
-			System.out.println((i + 1) + " -> " + cheque.getInwardChequeId() + " / " + cheque.getChequeNumber() + " / "
-					+ cheque.getChequeStatus());
 		}
 		return finalOrder;
 	}
@@ -1379,10 +1361,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 				try {
 					boolean notificationSent = notificationService.sendNotification("INWARD_MAKER", null,
 							notificationMessage);
-
-					if (!notificationSent) {
-						System.out.println("WARNING: Send Back notification failed.");
-					}
 
 				} catch (Exception e) {
 					e.printStackTrace();
