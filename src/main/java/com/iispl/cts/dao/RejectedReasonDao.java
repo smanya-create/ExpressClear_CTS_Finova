@@ -4,12 +4,10 @@ import java.util.List;
 
 import com.iispl.cts.entity.RejectedReason;
 
-public  interface RejectedReasonDao {
-	
-	
-   List<RejectedReason> getAllRejectedReasons();
+public interface RejectedReasonDao {
 
-   
-   RejectedReason findById(String rejectedReasonId);
+	List<RejectedReason> getAllRejectedReasons();
+
+	RejectedReason findById(String rejectedReasonId);
 
 }

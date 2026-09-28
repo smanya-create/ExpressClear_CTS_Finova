@@ -15,7 +15,7 @@
 			
 				<north size="auto" border="none">
 					<div>
-						<!-- Active user counter timer: triggers every 3s -->
+						<!-- Active user counter timer: triggers every 1s -->
 						<timer id="timerActiveUsers" delay="1000"
 							repeats="true" onTimer="$composer.refreshActiveUsers()" />
 						<include src="/components/header.zul"
@@ -128,7 +128,7 @@
 
 							<!-- Dynamic Action Button (CLOSE SESSION / START SESSION) -->
 							<button id="btnStartSession"
-								label="START SESSION" sclass="cts-btn-primary" />
+								label="Start Session" sclass="cts-btn-primary" />
 						</vlayout>
 
 

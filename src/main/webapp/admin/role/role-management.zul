@@ -7,7 +7,7 @@
 		hflex="1" vflex="1">
 
 		<!-- 1. Match Shared Left Sidebar Navigation (240px) -->
-		<west width="240px" border="none" collapsible="false">
+		<west width="220px" border="none" collapsible="false">
 			<include src="/components/sidebar.zul" role="ADMIN"
 				activeTab="role-management" />
 		</west>

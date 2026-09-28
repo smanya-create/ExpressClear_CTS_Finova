@@ -54,14 +54,14 @@ public class GlobalSessionLockInterceptor implements EventInterceptor {
 
                 if (isOutwardPage && !ClearingTimeMock.isOutwardWindow()) {
                     event.stopPropagation();
-                    Clients.showNotification("Outward Cutoff reached (03:30 PM). Presentation window is closed.",
+                    Clients.showNotification("Outward Cutoff reached (02:30 PM). Presentation window is closed.",
                             "warning", null, "top_center", 3000);
                     return null;
                 }
 
                 if (isInwardPage && !ClearingTimeMock.isInwardWindow()) {
                     event.stopPropagation();
-                    Clients.showNotification("Inward processing opens only after Outward cutoff at 03:30 PM.",
+                    Clients.showNotification("Inward processing opens only after Outward cutoff at 02:30 PM.",
                             "warning", null, "top_center", 3000);
                     return null;
                 }

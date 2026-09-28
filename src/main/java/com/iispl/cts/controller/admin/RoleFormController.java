@@ -32,317 +32,333 @@ import com.iispl.cts.serviceimpl.UserServiceImpl;
 
 public class RoleFormController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    // Form inputs (Matched by ID automatically by GenericForwardComposer)
-    private Textbox txtRoleId;
-    private Textbox txtRoleName;
-    private Textbox txtDescription;
-    private Combobox cmbStatus;
-    private Listbox lstAssignedUsers;
+	// Form inputs
+	private Textbox txtRoleId;
+	private Textbox txtRoleName;
+	private Textbox txtDescription;
+	private Combobox cmbStatus;
+	private Listbox lstAssignedUsers;
 
-    private Button btnSave;
-    private Button btnCancel;
-    private Window winConfirmModal;
-    
-    // Status Badge UI components (used in Modify Role)
-    private Hlayout boxStatusBadge;
-    private Div dotStatus;
-    private Label lblCurrentStatus;
-    private Button btnToggleStatus;
-    
-    private final UserService userService = new UserServiceImpl();
-    private final RoleService roleService = RoleServiceImpl.getInstance();
-    
-    private String roleIdParam;
-    private boolean isModifyMode = false;
-    private boolean isRoleActive = true;
+	private Button btnSave;
+	private Button btnCancel;
+	private Window winConfirmModal;
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
-        if (!SecurityUtil.checkAccess(null)) {
-            return;
-        }
-        super.doAfterCompose(comp);
-        
-        // Attach listeners directly to the modal buttons
-        if (winConfirmModal != null) {
-            Button btnCancelModal = (Button) winConfirmModal.getFellow("btnCancelModal");
-            btnCancelModal.addEventListener("onClick", event -> {
-                winConfirmModal.setVisible(false);
-            });
+	// Status badge components
+	private Hlayout boxStatusBadge;
+	private Div dotStatus;
+	private Label lblCurrentStatus;
+	private Button btnToggleStatus;
 
-            Button btnConfirmAction = (Button) winConfirmModal.getFellow("btnConfirmAction");
-            btnConfirmAction.addEventListener("onClick", event -> {
-                winConfirmModal.setVisible(false);
-                processSaveRole();
-            });
-        }
+	private final UserService userService = new UserServiceImpl();
+	private final RoleService roleService = RoleServiceImpl.getInstance();
 
-        roleIdParam = Executions.getCurrent().getParameter("roleId");
-        if (roleIdParam == null || roleIdParam.trim().isEmpty()) {
-            Object argVal = Executions.getCurrent().getArg().get("roleId");
-            if (argVal != null) {
-                roleIdParam = String.valueOf(argVal);
-            }
-        }
+	private String roleIdParam;
+	private boolean isModifyMode = false;
+	private boolean isRoleActive = true;
 
-        if (roleIdParam != null && !roleIdParam.trim().isEmpty()) {
-            isModifyMode = true;
-            loadRoleForEdit(roleIdParam.trim());
-        } else {
-            isModifyMode = false;
-            String nextId = roleService.generateNextRoleId();
-            if (txtRoleId != null) {
-                txtRoleId.setValue(nextId);
-            }
-            if (cmbStatus != null && cmbStatus.getItemCount() > 0) {
-                cmbStatus.setSelectedIndex(0);
-            }
-            this.isRoleActive = true;
-            updateStatusDisplay();
-        }
-    }
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
+		if (!SecurityUtil.checkAccess(null)) {
+			return;
+		}
+		super.doAfterCompose(comp);
 
-    private void loadRoleForEdit(String id) {
-        Role role = roleService.getRoleById(id);
-        if (role == null) {
-            Messagebox.show("Role not found!", "Error", Messagebox.OK, Messagebox.ERROR, e -> {
-                Executions.sendRedirect("/admin/role/role-management.zul");
-            });
-            return;
-        }
+		// Modal button listeners
+		if (winConfirmModal != null) {
+			Button btnCancelModal = (Button) winConfirmModal.getFellow("btnCancelModal");
+			btnCancelModal.addEventListener("onClick", event -> {
+				winConfirmModal.setVisible(false);
+			});
 
-        if (txtRoleId != null) txtRoleId.setValue(role.getRoleId());
-        if (txtRoleName != null) txtRoleName.setValue(role.getRoleName());
-        if (txtDescription != null) txtDescription.setValue(role.getDescription());
+			Button btnConfirmAction = (Button) winConfirmModal.getFellow("btnConfirmAction");
+			btnConfirmAction.addEventListener("onClick", event -> {
+				winConfirmModal.setVisible(false);
+				processSaveRole();
+			});
+		}
 
-        // Sync combobox if present
-        if (cmbStatus != null) {
-            for (Comboitem item : cmbStatus.getItems()) {
-                if (item.getLabel().equalsIgnoreCase(role.getStatus())) {
-                    cmbStatus.setSelectedItem(item);
-                    break;
-                }
-            }
-        }
+		// Check if roleId passed via query param or execution arg
+		roleIdParam = Executions.getCurrent().getParameter("roleId");
+		if (roleIdParam == null || roleIdParam.trim().isEmpty()) {
+			Object argVal = Executions.getCurrent().getArg().get("roleId");
+			if (argVal != null) {
+				roleIdParam = String.valueOf(argVal);
+			}
+		}
 
-        // Sync badge state if present
-        this.isRoleActive = "ACTIVE".equalsIgnoreCase(role.getStatus());
-        updateStatusDisplay();
+		if (roleIdParam != null && !roleIdParam.trim().isEmpty()) {
+			isModifyMode = true;
+			loadRoleForEdit(roleIdParam.trim());
+		} else {
+			isModifyMode = false;
+			String nextId = roleService.generateNextRoleId();
+			if (txtRoleId != null) {
+				txtRoleId.setValue(nextId);
+			}
+			if (cmbStatus != null && cmbStatus.getItemCount() > 0) {
+				cmbStatus.setSelectedIndex(0);
+			}
+			this.isRoleActive = true;
+			updateStatusDisplay();
+		}
+	}
 
-        // Load the assigned users for this role
-        populateAssignedUsers(id);
-    }
+	private void loadRoleForEdit(String id) {
+		Role role = roleService.getRoleById(id);
+		if (role == null) {
+			Messagebox.show("Role not found!", "Error", Messagebox.OK, Messagebox.ERROR, e -> {
+				Executions.sendRedirect("/admin/role/role-management.zul");
+			});
+			return;
+		}
 
-    // Toggle button listener for modify-role.zul
-    public void onClick$btnToggleStatus(Event event) {
-        this.isRoleActive = !this.isRoleActive;
-        updateStatusDisplay();
-    }
+		if (txtRoleId != null)
+			txtRoleId.setValue(role.getRoleId());
+		if (txtRoleName != null)
+			txtRoleName.setValue(role.getRoleName());
+		if (txtDescription != null)
+			txtDescription.setValue(role.getDescription());
 
-    private void updateStatusDisplay() {
-        if (lblCurrentStatus == null) return;
+		// Set status combobox if present
+		if (cmbStatus != null) {
+			for (Comboitem item : cmbStatus.getItems()) {
+				if (item.getLabel().equalsIgnoreCase(role.getStatus())) {
+					cmbStatus.setSelectedItem(item);
+					break;
+				}
+			}
+		}
 
-        if (isRoleActive) {
-            if (boxStatusBadge != null) {
-                boxStatusBadge.setStyle("background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; padding: 6px 14px;");
-            }
-            if (dotStatus != null) {
-                dotStatus.setStyle("width: 8px; height: 8px; border-radius: 50%; background-color: #059669;");
-            }
-            lblCurrentStatus.setValue("ACTIVE");
-            lblCurrentStatus.setStyle("color: #065f46; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; line-height: 1;");
+		// Set status badge state
+		this.isRoleActive = "ACTIVE".equalsIgnoreCase(role.getStatus());
+		updateStatusDisplay();
 
-            if (btnToggleStatus != null) {
-                btnToggleStatus.setLabel("DEACTIVATE ROLE");
-                btnToggleStatus.setStyle("background: #ffffff; border: 1px solid #fca5a5; color: #dc2626; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 6px; cursor: pointer; height: 32px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);");
-            }
-        } else {
-            if (boxStatusBadge != null) {
-                boxStatusBadge.setStyle("background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 9999px; padding: 6px 14px;");
-            }
-            if (dotStatus != null) {
-                dotStatus.setStyle("width: 8px; height: 8px; border-radius: 50%; background-color: #dc2626;");
-            }
-            lblCurrentStatus.setValue("INACTIVE");
-            lblCurrentStatus.setStyle("color: #991b1b; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; line-height: 1;");
+		populateAssignedUsers(id);
+	}
 
-            if (btnToggleStatus != null) {
-                btnToggleStatus.setLabel("ACTIVATE ROLE");
-                btnToggleStatus.setStyle("background: #ffffff; border: 1px solid #86efac; color: #16a34a; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 6px; cursor: pointer; height: 32px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);");
-            }
-        }
-    }
+	public void onClick$btnToggleStatus(Event event) {
+		this.isRoleActive = !this.isRoleActive;
+		updateStatusDisplay();
+	}
 
-    private String getResolvedStatus() {
-        if (lblCurrentStatus != null) {
-            return isRoleActive ? "Active" : "Inactive";
-        } else if (cmbStatus != null && cmbStatus.getSelectedItem() != null) {
-            return cmbStatus.getSelectedItem().getLabel();
-        }
-        return "Active";
-    }
+	private void updateStatusDisplay() {
+		if (lblCurrentStatus == null)
+			return;
 
-    private void populateAssignedUsers(String roleId) {
-        if (lstAssignedUsers == null) {
-            return;
-        }
+		if (isRoleActive) {
+			if (boxStatusBadge != null) {
+				boxStatusBadge.setStyle(
+						"background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; padding: 6px 14px;");
+			}
+			if (dotStatus != null) {
+				dotStatus.setStyle("width: 8px; height: 8px; border-radius: 50%; background-color: #059669;");
+			}
+			lblCurrentStatus.setValue("ACTIVE");
+			lblCurrentStatus.setStyle(
+					"color: #065f46; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; line-height: 1;");
 
-        lstAssignedUsers.getItems().clear();
+			if (btnToggleStatus != null) {
+				btnToggleStatus.setLabel("DEACTIVATE ROLE");
+				btnToggleStatus.setStyle(
+						"background: #ffffff; border: 1px solid #fca5a5; color: #dc2626; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 6px; cursor: pointer; height: 32px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);");
+			}
+		} else {
+			if (boxStatusBadge != null) {
+				boxStatusBadge.setStyle(
+						"background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 9999px; padding: 6px 14px;");
+			}
+			if (dotStatus != null) {
+				dotStatus.setStyle("width: 8px; height: 8px; border-radius: 50%; background-color: #dc2626;");
+			}
+			lblCurrentStatus.setValue("INACTIVE");
+			lblCurrentStatus.setStyle(
+					"color: #991b1b; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; line-height: 1;");
 
-        List<User> users = userService.findUsersByRoleId(roleId);
+			if (btnToggleStatus != null) {
+				btnToggleStatus.setLabel("ACTIVATE ROLE");
+				btnToggleStatus.setStyle(
+						"background: #ffffff; border: 1px solid #86efac; color: #16a34a; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 6px; cursor: pointer; height: 32px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);");
+			}
+		}
+	}
 
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                Listitem item = new Listitem();
+	private String getResolvedStatus() {
+		if (lblCurrentStatus != null) {
+			return isRoleActive ? "Active" : "Inactive";
+		} else if (cmbStatus != null && cmbStatus.getSelectedItem() != null) {
+			return cmbStatus.getSelectedItem().getLabel();
+		}
+		return "Active";
+	}
 
-                // 1. Employee ID
-                String empId = (user.getEmployeeId() != null && !user.getEmployeeId().isEmpty()) 
-                               ? user.getEmployeeId() : user.getUserId();
-                item.appendChild(new Listcell(empId));
+	private void populateAssignedUsers(String roleId) {
+		if (lstAssignedUsers == null) {
+			return;
+		}
 
-                // 2. Operator Name
-                item.appendChild(new Listcell(user.getFullName() != null ? user.getFullName() : "-"));
+		lstAssignedUsers.getItems().clear();
 
-                // 3. Username
-                item.appendChild(new Listcell(user.getUsername() != null ? user.getUsername() : "-"));
+		List<User> users = userService.findUsersByRoleId(roleId);
 
-                // 4. Email
-                item.appendChild(new Listcell(user.getEmail() != null ? user.getEmail() : "-"));
+		if (users != null && !users.isEmpty()) {
+			for (User user : users) {
+				Listitem item = new Listitem();
 
-                // 5. Mobile (Center aligned)
-                Listcell mobileCell = new Listcell(user.getMobileNumber() != null ? user.getMobileNumber() : "-");
-                mobileCell.setStyle("text-align: center;");
-                item.appendChild(mobileCell);
+				// Employee ID fallback to userId
+				String empId = (user.getEmployeeId() != null && !user.getEmployeeId().isEmpty()) ? user.getEmployeeId()
+						: user.getUserId();
+				item.appendChild(new Listcell(empId));
 
-                // 6. Status (Center aligned badge)
-                Listcell statusCell = new Listcell();
-                statusCell.setStyle("text-align: center;");
+				// Operator details
+				item.appendChild(new Listcell(user.getFullName() != null ? user.getFullName() : "-"));
+				item.appendChild(new Listcell(user.getUsername() != null ? user.getUsername() : "-"));
+				item.appendChild(new Listcell(user.getEmail() != null ? user.getEmail() : "-"));
 
-                boolean isActive = "ACTIVE".equalsIgnoreCase(user.getStatus());
+				Listcell mobileCell = new Listcell(user.getMobileNumber() != null ? user.getMobileNumber() : "-");
+				mobileCell.setStyle("text-align: center;");
+				item.appendChild(mobileCell);
 
-                org.zkoss.zul.Label lblStatus = new org.zkoss.zul.Label(isActive ? "Active" : "Inactive");
-                lblStatus.setSclass(isActive ? "badge-status badge-active" : "badge-status badge-inactive");
+				// User active status badge
+				Listcell statusCell = new Listcell();
+				statusCell.setStyle("text-align: center;");
 
-                statusCell.appendChild(lblStatus);
-                item.appendChild(statusCell);
+				boolean isActive = "ACTIVE".equalsIgnoreCase(user.getStatus());
 
-                lstAssignedUsers.appendChild(item);
-            }
-        }
-    }
+				org.zkoss.zul.Label lblStatus = new org.zkoss.zul.Label(isActive ? "Active" : "Inactive");
+				lblStatus.setSclass(isActive ? "badge-status badge-active" : "badge-status badge-inactive");
 
-    public void onClick$btnSave(Event event) {
-        String roleId = (txtRoleId != null && txtRoleId.getValue() != null) ? txtRoleId.getValue().trim() : "";
-        String roleName = (txtRoleName != null && txtRoleName.getValue() != null) ? txtRoleName.getValue().trim() : "";
-        String desc = (txtDescription != null && txtDescription.getValue() != null) ? txtDescription.getValue().trim() : "";
-        String status = getResolvedStatus();
+				statusCell.appendChild(lblStatus);
+				item.appendChild(statusCell);
 
-        // 1. Validations
-        if (roleName.isEmpty()) {
-            Clients.showNotification("Please enter Role Name.", "error", txtRoleName, "end_center", 3000);
-            if (txtRoleName != null) txtRoleName.focus();
-            return;
-        }
+				lstAssignedUsers.appendChild(item);
+			}
+		}
+	}
 
-        if (roleName.length() < 3 || roleName.length() > 50) {
-            Clients.showNotification("Role Name must be between 3 and 50 characters.", "error", txtRoleName, "end_center", 3000);
-            if (txtRoleName != null) txtRoleName.focus();
-            return;
-        }
+	public void onClick$btnSave(Event event) {
+		String roleId = (txtRoleId != null && txtRoleId.getValue() != null) ? txtRoleId.getValue().trim() : "";
+		String roleName = (txtRoleName != null && txtRoleName.getValue() != null) ? txtRoleName.getValue().trim() : "";
+		String desc = (txtDescription != null && txtDescription.getValue() != null) ? txtDescription.getValue().trim()
+				: "";
+		String status = getResolvedStatus();
 
-        if (!roleName.matches("^[a-zA-Z _-]+$")) {
-            Clients.showNotification("Only letters, spaces, hyphens, and underscores allowed.", "error", txtRoleName, "end_center", 3000);
-            if (txtRoleName != null) txtRoleName.focus();
-            return;
-        }
+		// Field validations
+		if (roleName.isEmpty()) {
+			Clients.showNotification("Please enter Role Name.", "error", txtRoleName, "end_center", 3000);
+			if (txtRoleName != null)
+				txtRoleName.focus();
+			return;
+		}
 
-        if (desc.isEmpty()) {
-            Clients.showNotification("Please enter Role Description.", "error", txtDescription, "end_center", 3000);
-            if (txtDescription != null) txtDescription.focus();
-            return;
-        }
+		if (roleName.length() < 3 || roleName.length() > 50) {
+			Clients.showNotification("Role Name must be between 3 and 50 characters.", "error", txtRoleName,
+					"end_center", 3000);
+			if (txtRoleName != null)
+				txtRoleName.focus();
+			return;
+		}
 
-        // Duplicate Check
-        if (!isModifyMode) {
-            if (roleService.isRoleNameExists(roleName)) {
-                Clients.showNotification("A role named '" + roleName + "' already exists.", "error", txtRoleName, "end_center", 3500);
-                if (txtRoleName != null) txtRoleName.focus();
-                return;
-            }
-        } else {
-            if (roleService.isRoleNameExists(roleName, roleId)) {
-                Clients.showNotification("Another role with the name '" + roleName + "' already exists.", "error", txtRoleName, "end_center", 3500);
-                if (txtRoleName != null) txtRoleName.focus();
-                return;
-            }
-        }
+		if (!roleName.matches("^[a-zA-Z _-]+$")) {
+			Clients.showNotification("Only letters, spaces, hyphens, and underscores allowed.", "error", txtRoleName,
+					"end_center", 3000);
+			if (txtRoleName != null)
+				txtRoleName.focus();
+			return;
+		}
 
-        // 2. Fetch components safely via winConfirmModal.getFellow(...)
-        Label lblConfirmRoleId = (Label) winConfirmModal.getFellow("lblConfirmRoleId");
-        Label lblConfirmRoleName = (Label) winConfirmModal.getFellow("lblConfirmRoleName");
-        Label lblConfirmDesc = (Label) winConfirmModal.getFellow("lblConfirmDesc");
-        Label lblConfirmStatus = (Label) winConfirmModal.getFellow("lblConfirmStatus");
-        Label lblModalTitle = (Label) winConfirmModal.getFellow("lblModalTitle");
-        Button btnConfirmAction = (Button) winConfirmModal.getFellow("btnConfirmAction");
+		if (desc.isEmpty()) {
+			Clients.showNotification("Please enter Role Description.", "error", txtDescription, "end_center", 3000);
+			if (txtDescription != null)
+				txtDescription.focus();
+			return;
+		}
 
-        lblConfirmRoleId.setValue(roleId);
-        lblConfirmRoleName.setValue(roleName);
-        lblConfirmDesc.setValue(desc);
-        lblConfirmStatus.setValue(status);
+		// Duplicate name validation
+		if (!isModifyMode) {
+			if (roleService.isRoleNameExists(roleName)) {
+				Clients.showNotification("A role named '" + roleName + "' already exists.", "error", txtRoleName,
+						"end_center", 3500);
+				if (txtRoleName != null)
+					txtRoleName.focus();
+				return;
+			}
+		} else {
+			if (roleService.isRoleNameExists(roleName, roleId)) {
+				Clients.showNotification("Another role with the name '" + roleName + "' already exists.", "error",
+						txtRoleName, "end_center", 3500);
+				if (txtRoleName != null)
+					txtRoleName.focus();
+				return;
+			}
+		}
 
-        if (isModifyMode) {
-            lblModalTitle.setValue("Confirm Role Update");
-            btnConfirmAction.setLabel("Update Role");
-        } else {
-            lblModalTitle.setValue("Confirm New Role");
-            btnConfirmAction.setLabel("Create Role");
-        }
+		// Populate confirmation modal fields
+		Label lblConfirmRoleId = (Label) winConfirmModal.getFellow("lblConfirmRoleId");
+		Label lblConfirmRoleName = (Label) winConfirmModal.getFellow("lblConfirmRoleName");
+		Label lblConfirmDesc = (Label) winConfirmModal.getFellow("lblConfirmDesc");
+		Label lblConfirmStatus = (Label) winConfirmModal.getFellow("lblConfirmStatus");
+		Label lblModalTitle = (Label) winConfirmModal.getFellow("lblModalTitle");
+		Button btnConfirmAction = (Button) winConfirmModal.getFellow("btnConfirmAction");
 
-        // Show modal popup
-        winConfirmModal.doModal();
-    }
+		lblConfirmRoleId.setValue(roleId);
+		lblConfirmRoleName.setValue(roleName);
+		lblConfirmDesc.setValue(desc);
+		lblConfirmStatus.setValue(status);
 
-    private void processSaveRole() {
-        String roleId = (txtRoleId != null && txtRoleId.getValue() != null) ? txtRoleId.getValue().trim() : "";
-        String roleName = (txtRoleName != null && txtRoleName.getValue() != null) ? txtRoleName.getValue().trim() : "";
-        String desc = (txtDescription != null && txtDescription.getValue() != null) ? txtDescription.getValue().trim() : "";
-        String status = getResolvedStatus();
+		if (isModifyMode) {
+			lblModalTitle.setValue("Confirm Role Update");
+			btnConfirmAction.setLabel("Update Role");
+		} else {
+			lblModalTitle.setValue("Confirm New Role");
+			btnConfirmAction.setLabel("Create Role");
+		}
 
-        Role role = new Role(roleId, roleName, desc, status, null, new Timestamp(System.currentTimeMillis()));
+		winConfirmModal.doModal();
+	}
 
-        boolean success;
-        if (isModifyMode) {
-            success = roleService.updateRole(role);
-            if (success) {
-                AuditServiceImpl.getInstance().log("ROLE_MGMT", "MODIFY_ROLE", 
-                    "Updated role details for: " + roleName + " (" + roleId + ")", "SUCCESS");
-            } else {
-                AuditServiceImpl.getInstance().log("ROLE_MGMT", "MODIFY_ROLE_FAILED", 
-                    "Failed to update role: " + roleName + " (" + roleId + ")", "FAILED");
-            }
-        } else {
-            success = roleService.saveRole(role);
-            if (success) {
-                AuditServiceImpl.getInstance().log("ROLE_MGMT", "CREATE_ROLE", 
-                    "Created new role: " + roleName + " (" + roleId + ")", "SUCCESS");
-            } else {
-                AuditServiceImpl.getInstance().log("ROLE_MGMT", "CREATE_ROLE_FAILED", 
-                    "Failed to create role: " + roleName + " (" + roleId + ")", "FAILED");
-            }
-        }
+	private void processSaveRole() {
+		String roleId = (txtRoleId != null && txtRoleId.getValue() != null) ? txtRoleId.getValue().trim() : "";
+		String roleName = (txtRoleName != null && txtRoleName.getValue() != null) ? txtRoleName.getValue().trim() : "";
+		String desc = (txtDescription != null && txtDescription.getValue() != null) ? txtDescription.getValue().trim()
+				: "";
+		String status = getResolvedStatus();
 
-        if (success) {
-            Messagebox.show("Role " + (isModifyMode ? "updated" : "created") + " successfully.", "Success", Messagebox.OK, Messagebox.INFORMATION, e -> {
-                Executions.sendRedirect("/admin/role/role-management.zul");
-            });
-        } else {
-            Messagebox.show("Failed to save role. Please verify input.", "Error", Messagebox.OK, Messagebox.ERROR);
-        }
-    }
+		Role role = new Role(roleId, roleName, desc, status, null, new Timestamp(System.currentTimeMillis()));
 
-    public void onClick$btnCancel(Event event) {
-        Executions.sendRedirect("/admin/role/role-management.zul");
-    }
+		boolean success;
+		if (isModifyMode) {
+			success = roleService.updateRole(role);
+			if (success) {
+				AuditServiceImpl.getInstance().log("ROLE_MGMT", "MODIFY_ROLE",
+						"Updated role details for: " + roleName + " (" + roleId + ")", "SUCCESS");
+			} else {
+				AuditServiceImpl.getInstance().log("ROLE_MGMT", "MODIFY_ROLE_FAILED",
+						"Failed to update role: " + roleName + " (" + roleId + ")", "FAILED");
+			}
+		} else {
+			success = roleService.saveRole(role);
+			if (success) {
+				AuditServiceImpl.getInstance().log("ROLE_MGMT", "CREATE_ROLE",
+						"Created new role: " + roleName + " (" + roleId + ")", "SUCCESS");
+			} else {
+				AuditServiceImpl.getInstance().log("ROLE_MGMT", "CREATE_ROLE_FAILED",
+						"Failed to create role: " + roleName + " (" + roleId + ")", "FAILED");
+			}
+		}
+
+		if (success) {
+			Messagebox.show("Role " + (isModifyMode ? "updated" : "created") + " successfully.", "Success",
+					Messagebox.OK, Messagebox.INFORMATION, e -> {
+						Executions.sendRedirect("/admin/role/role-management.zul");
+					});
+		} else {
+			Messagebox.show("Failed to save role. Please verify input.", "Error", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
+
+	public void onClick$btnCancel(Event event) {
+		Executions.sendRedirect("/admin/role/role-management.zul");
+	}
 }

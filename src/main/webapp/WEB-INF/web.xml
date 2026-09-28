@@ -50,7 +50,7 @@
         <welcome-file>index.zul</welcome-file>
     </welcome-file-list>
     <session-config>
-    <session-timeout>15</session-timeout> <!-- minutes -->
+    <session-timeout>30</session-timeout> <!-- minutes -->
     </session-config>
 
 </web-app>

@@ -5,7 +5,7 @@
 <borderlayout apply="com.iispl.cts.controller.admin.RoleFormController" hflex="1" vflex="1">
 
     <!-- Shared Left Sidebar Navigation -->
-    <west width="240px" border="none" collapsible="false">
+    <west width="220px" border="none" collapsible="false">
         <include src="/components/sidebar.zul" role="ADMIN" activeTab="role-management" />
     </west>
 

@@ -14,107 +14,97 @@ import com.iispl.cts.entity.Notification;
 
 public class NotificationDAOImpl implements NotificationDAO {
 
-    private static NotificationDAOImpl instance;
+	private static NotificationDAOImpl instance;
 
-    public static synchronized NotificationDAOImpl getInstance() {
-        if (instance == null) {
-            instance = new NotificationDAOImpl();
-        }
-        return instance;
-    }
+	// Singleton instance access
+	public static synchronized NotificationDAOImpl getInstance() {
+		if (instance == null) {
+			instance = new NotificationDAOImpl();
+		}
+		return instance;
+	}
 
-    @Override
-    public List<Notification> getUnreadByRoleOrUser(String role, String userId) {
-        List<Notification> list = new ArrayList<>();
-        String sql = "SELECT notification_id, recipient_role, recipient_user_id, message, is_read, created_at "
-                   + "FROM notifications "
-                   + "WHERE is_read = FALSE "
-                   + "AND (LOWER(recipient_role) = LOWER(?) OR recipient_user_id = ?) "
-                   + "ORDER BY created_at DESC LIMIT 15";
+	@Override
+	public List<Notification> getUnreadByRoleOrUser(String role, String userId) {
+		List<Notification> list = new ArrayList<>();
+		String sql = "SELECT notification_id, recipient_role, recipient_user_id, message, is_read, created_at "
+				+ "FROM notifications " + "WHERE is_read = FALSE "
+				+ "AND (LOWER(recipient_role) = LOWER(?) OR recipient_user_id = ?) "
+				+ "ORDER BY created_at DESC LIMIT 15";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, role != null ? role.trim() : "");
-            ps.setString(2, userId != null ? userId.trim() : "");
+			ps.setString(1, role != null ? role.trim() : "");
+			ps.setString(2, userId != null ? userId.trim() : "");
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new Notification(
-                        rs.getLong("notification_id"),
-                        rs.getString("recipient_role"),
-                        rs.getString("recipient_user_id"),
-                        rs.getString("message"),
-                        rs.getBoolean("is_read"),
-                        rs.getTimestamp("created_at")
-                    ));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					list.add(new Notification(rs.getLong("notification_id"), rs.getString("recipient_role"),
+							rs.getString("recipient_user_id"), rs.getString("message"), rs.getBoolean("is_read"),
+							rs.getTimestamp("created_at")));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 
-    @Override
-    public int getUnreadCount(String role, String userId) {
-        String sql = "SELECT COUNT(*) FROM notifications "
-                   + "WHERE is_read = FALSE "
-                   + "AND (LOWER(recipient_role) = LOWER(?) OR recipient_user_id = ?)";
+	@Override
+	public int getUnreadCount(String role, String userId) {
+		String sql = "SELECT COUNT(*) FROM notifications " + "WHERE is_read = FALSE "
+				+ "AND (LOWER(recipient_role) = LOWER(?) OR recipient_user_id = ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, role != null ? role.trim() : "");
-            ps.setString(2, userId != null ? userId.trim() : "");
+			ps.setString(1, role != null ? role.trim() : "");
+			ps.setString(2, userId != null ? userId.trim() : "");
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
-    @Override
-    public boolean markAllAsRead(String role, String userId) {
-        String sql = "UPDATE notifications SET is_read = TRUE "
-                   + "WHERE is_read = FALSE "
-                   + "AND (LOWER(recipient_role) = LOWER(?) OR recipient_user_id = ?)";
+	@Override
+	public boolean markAllAsRead(String role, String userId) {
+		String sql = "UPDATE notifications SET is_read = TRUE " + "WHERE is_read = FALSE "
+				+ "AND (LOWER(recipient_role) = LOWER(?) OR recipient_user_id = ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, role != null ? role.trim() : "");
-            ps.setString(2, userId != null ? userId.trim() : "");
+			ps.setString(1, role != null ? role.trim() : "");
+			ps.setString(2, userId != null ? userId.trim() : "");
 
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			return ps.executeUpdate() > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
-    @Override
-    public boolean createNotification(String targetRole, String targetUserId, String message) {
-        String sql = "INSERT INTO notifications (recipient_role, recipient_user_id, message, is_read, created_at) "
-                   + "VALUES (?, ?, ?, FALSE, ?)";
+	@Override
+	public boolean createNotification(String targetRole, String targetUserId, String message) {
+		String sql = "INSERT INTO notifications (recipient_role, recipient_user_id, message, is_read, created_at) "
+				+ "VALUES (?, ?, ?, FALSE, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, targetRole != null ? targetRole.trim() : "");
-            ps.setString(2, targetUserId != null ? targetUserId.trim() : null);
-            ps.setString(3, message);
-            ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+			// Bind target recipient metadata and generate submission timestamp
+			ps.setString(1, targetRole != null ? targetRole.trim() : "");
+			ps.setString(2, targetUserId != null ? targetUserId.trim() : null);
+			ps.setString(3, message);
+			ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
 
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			return ps.executeUpdate() > 0;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

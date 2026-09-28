@@ -20,25 +20,25 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	private Component sidebarComponent;
 
-	// Header & Category Labels
+	// Header and category labels
 	private Label lblPortalTitle;
 	private Label lblNavCategory;
 
-	// Role Section Containers
+	// Menu containers by role
 	private Div divAdminMenu;
 	private Div divMakerMenu;
 	private Div divCheckerMenu;
 	private Div divInwardMakerMenu;
 	private Div divInwardCheckerMenu;
 	
-	// Inward Maker Nav Links (wired automatically by ID from sidebar.zul)
+	// Inward maker nav links
 	private A navInwardDashboard;
 	private A navBatchIntake;
 	private A navInwardMicr;
 	private A navInwardDataEntry;
 	private A navInwardUnprocessed;
 	
-	// Inward Checker Nav Links
+	// Inward checker nav links
 	private A navInwardCheckerDash;
 	private A navVerification;
 	private A navInwardCheckerReports;
@@ -51,7 +51,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	private void applyRoleVisibility() {
-		// Priority 1: Check argument passed via <include role="ADMIN" .../>
+		// Check include parameter first, then session attribute
 		String role = null;
 		Map<?, ?> argMap = Executions.getCurrent().getArg();
 		if (argMap != null && argMap.containsKey("role")) {
@@ -60,17 +60,14 @@ public class SidebarController extends GenericForwardComposer<Component> {
 				role = r.toString();
 		}
 
-		// Priority 2: Fallback to HTTP Session
 		if (role == null || role.trim().isEmpty()) {
 			role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
 		}
 
-		// Default to ADMIN if nothing is specified
 		if (role == null || role.trim().isEmpty()) {
 			role = "ADMIN";
 		}
 
-		// Hide all containers first
 		if (divAdminMenu != null)
 			divAdminMenu.setVisible(false);
 		if (divMakerMenu != null)
@@ -82,7 +79,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		if (divInwardCheckerMenu != null)
 			divInwardCheckerMenu.setVisible(false);
 
-		// Switch headers and show active role container
 		switch (role.toUpperCase()) {
 		case "ADMIN":
 			if (lblPortalTitle != null)
@@ -110,7 +106,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 			if (divInwardMakerMenu != null)
 				divInwardMakerMenu.setVisible(true);
 
-			// Automatically highlight active tab based on page parameter
+			// Highlight active inward tab based on URL param
 			String pageParam = Executions.getCurrent().getParameter("page");
 			if ("data-entry".equals(pageParam) || "data-entry-queue".equals(pageParam)) {
 				clearInwardActiveTabs();
@@ -148,7 +144,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// Admin Navigation Actions
+	// Admin actions
 	public void navToAdminDashboard() {
 		Executions.sendRedirect("/admin/dashboard/admin-dashboard.zul");
 	}
@@ -169,10 +165,9 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		Executions.sendRedirect("/admin/reports/admin_reports.zul");
 	}
 
-	// Outward Maker Navigation Actions
+	// Outward maker actions
 	public void navToMakerDashboard() {
 		Component root = sidebarComponent.getPage().getFirstRoot();
-
 		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
 		if (mainContentArea instanceof Include) {
@@ -183,49 +178,36 @@ public class SidebarController extends GenericForwardComposer<Component> {
 
 	public void navToUploadBatch() {
 		Component root = sidebarComponent.getPage().getFirstRoot();
-
 		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
 		if (mainContentArea instanceof Include) {
-
 			Include include = (Include) mainContentArea;
-
 			include.setSrc("/outward/maker/batch/batch-upload.zul");
 		}
-
 	}
 
 	public void navToOutwardMicrRepair() {
 		Component root = sidebarComponent.getPage().getFirstRoot();
-
 		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
 		if (mainContentArea instanceof Include) {
-
 			Include include = (Include) mainContentArea;
-
 			include.setSrc("/outward/maker/micr-repair/micr-repair-view.zul");
 		}
-
 	}
 
 	public void navToQueue() {
 		Component root = sidebarComponent.getPage().getFirstRoot();
-
 		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
 		if (mainContentArea instanceof Include) {
-
 			Include include = (Include) mainContentArea;
-
 			include.setSrc("/outward/maker/unprocessed-cheques.zul");
 		}
-
 	}
 
 	public void navToOutwardDataEntry() {
 		Component root = sidebarComponent.getPage().getFirstRoot();
-
 		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
 		if (mainContentArea instanceof Include) {
@@ -235,21 +217,16 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	}
 
 	public void navToOutwardMakerReports() {
-	    Component root = sidebarComponent.getPage().getFirstRoot();
+		Component root = sidebarComponent.getPage().getFirstRoot();
+		Component mainContentArea = root.getFellowIfAny("mainContentArea", true);
 
-	    Component mainContentArea =
-	            root.getFellowIfAny("mainContentArea", true);
-
-	    if (mainContentArea instanceof Include) {
-	        Include include = (Include) mainContentArea;
-
-	        include.setSrc(
-	            "/outward/maker/reports/maker-reports.zul"
-	        );
-	    }
+		if (mainContentArea instanceof Include) {
+			Include include = (Include) mainContentArea;
+			include.setSrc("/outward/maker/reports/maker-reports.zul");
+		}
 	}
 
-	// Outward Checker Navigation Actions
+	// Outward checker actions
 	public void navToCheckerDashboard() {
 		Executions.sendRedirect("/outward/checker/dashboard.zul");
 	}
@@ -274,13 +251,13 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		Executions.sendRedirect("/outward/checker/checker-unprocessed-cheques.zul");
 	}
 
-	// Inward Maker Navigation Actions
+	// Inward maker actions
 	public void navToInwardDashboard() {
 		navigateTo("/inward/maker/dashboard.zul", "Maker Dashboard", navInwardDashboard);
 	}
 
 	public void navToBatchIntake() {
-	    navigateTo("/inward/maker/batch/batch-list.zul", "Batch Intake", navBatchIntake);
+		navigateTo("/inward/maker/batch/batch-list.zul", "Batch Intake", navBatchIntake);
 	}
 
 	public void navToInwardMicrRepair() {
@@ -294,41 +271,33 @@ public class SidebarController extends GenericForwardComposer<Component> {
 	public void navToInwardUnprocessedQueue() {
 		navigateTo("/inward-maker/unprocessed.zul", "Unprocessed Cheques", navInwardUnprocessed);
 	}
-		
-	// Inward Checker Navigation Actions
 
-	// Inward Checker Navigation Actions
-
+	// Inward checker actions
 	public void navToInwardCheckerDashboard() {
-	    Executions.sendRedirect("/inward/checker/dashboard.zul");
+		Executions.sendRedirect("/inward/checker/dashboard.zul");
 	}
 
 	public void navToVerification() {
-	    Executions.sendRedirect("/inward/checker/verification.zul");
+		Executions.sendRedirect("/inward/checker/verification.zul");
 	}
 
 	public void navToInwardCheckerReports() {
-	    Executions.sendRedirect("/inward/checker/reports.zul");
+		Executions.sendRedirect("/inward/checker/reports.zul");
 	}
 	
-	// Global Logout
 	public void onClickLogout() {
 		AuditServiceImpl.getInstance().log("AUTH", "LOGOUT", "User logged out of the system", "SUCCESS");
 
-		// Clear and invalidate current HTTP session
 		if (Sessions.getCurrent() != null) {
 			String userId = (String) Sessions.getCurrent().getAttribute("USER_ID");
 			if (userId == null) {
 				userId = (String) Sessions.getCurrent().getAttribute("CTS_USER_ID");
 			}
 
-			// Deregister user from real-time tracker
 			ActiveUserManager.userLoggedOut(userId);
-
 			Sessions.getCurrent().invalidate();
 		}
 
-		// Redirect back to login page	
 		Executions.sendRedirect("/common/login.zul");
 	}
 	
@@ -336,7 +305,7 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		Component root = sidebarComponent.getPage().getFirstRoot();
 		if (root == null) return;
 
-		// 1. Swap the SPA content area
+		// Swap view inside main include
 		Component mainContent = root.getFellowIfAny("mainContentArea", true);
 		if (mainContent instanceof Include) {
 			Include include = (Include) mainContent;
@@ -344,26 +313,22 @@ public class SidebarController extends GenericForwardComposer<Component> {
 			include.setSrc(zulPath);
 		}
 
-		// 2. Find and update Header Subtitle (checks ID spaces across desktop pages)
 		Label lblSubtitle = findSubtitleLabel(root);
 		if (lblSubtitle != null) {
 			lblSubtitle.setValue(pageSubtitle);
 		}
 
-		// 3. Update sidebar active tab highlight
 		clearInwardActiveTabs();
 		if (activeNavLink != null) {
 			activeNavLink.setSclass("nav-item active");
 		}
 	}
 
-	// Helper to reliably locate lblPageSubtitle across nested includes/pages
 	private Label findSubtitleLabel(Component root) {
-		// Attempt 1: Direct fellow lookup
 		Component comp = root.getFellowIfAny("lblPageSubtitle", true);
 		if (comp instanceof Label) return (Label) comp;
 
-		// Attempt 2: Search across all desktop pages (handles isolated include spaces)
+		// Search across desktop pages for nested include scopes
 		if (sidebarComponent.getDesktop() != null) {
 			for (org.zkoss.zk.ui.Page page : sidebarComponent.getDesktop().getPages()) {
 				comp = page.getFellowIfAny("lblPageSubtitle", true);
@@ -371,7 +336,6 @@ public class SidebarController extends GenericForwardComposer<Component> {
 			}
 		}
 
-		// Attempt 3: Recursive depth search down the component tree
 		return findLabelRecursively(root, "lblPageSubtitle");
 	}
 
@@ -393,5 +357,4 @@ public class SidebarController extends GenericForwardComposer<Component> {
 		if (navInwardDataEntry != null) navInwardDataEntry.setSclass("nav-item");
 		if (navInwardUnprocessed != null) navInwardUnprocessed.setSclass("nav-item");
 	}
-	
 }

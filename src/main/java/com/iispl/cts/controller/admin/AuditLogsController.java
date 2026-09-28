@@ -32,7 +32,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // Filter controls
+    // Filters and search controls
     private Datebox dtFrom;
     private Datebox dtTo;
     private Textbox txtSearchAudit;
@@ -41,7 +41,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     private Label lblAuditCount;
     private Rows rowsAudit;
 
-    // Custom Pagination Toolbar Controls
+    // Pagination controls
     private Button btnFirstPage;
     private Button btnPrevPage;
     private Intbox ibCurrentPage;
@@ -49,7 +49,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
     private Button btnNextPage;
     private Button btnLastPage;
 
-    // Pagination State
+    // Page state
     private static final int PAGE_SIZE = 10;
     private int activePageIndex = 0;
     private int totalPages = 1;
@@ -81,38 +81,33 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         }
     }
 
-    /**
-     * Executes the record retrieval and the count calculation in parallel
-     */
     private void loadAuditPage(int pageIndex) {
         Date from = dtFrom != null ? dtFrom.getValue() : null;
         Date to = dtTo != null ? dtTo.getValue() : null;
         String q = (txtSearchAudit != null && txtSearchAudit.getValue() != null) 
                    ? txtSearchAudit.getValue().trim() : "";
 
-        // Safe index boundary check
         int targetIndex = Math.max(0, pageIndex);
         int offset = targetIndex * PAGE_SIZE;
 
-        // 1. Single non-blocking call: dispatches both count & search SQL queries simultaneously
+        // Dispatches search and count query simultaneously
         AuditSearchResult result = auditService.searchAuditLogsConcurrently(
                 from, to, null, null, q, offset, PAGE_SIZE
         );
 
-        // 2. Extract results
         this.totalRecords = result.getTotalCount();
         this.totalPages = (int) Math.ceil((double) this.totalRecords / PAGE_SIZE);
         if (this.totalPages < 1) {
             this.totalPages = 1;
         }
 
-        // Adjust index if out of bounds (e.g., after applying a stricter filter while on a later page)
+        // Adjust if current page exceeds boundary after applying new filter
         if (targetIndex >= this.totalPages) {
             targetIndex = this.totalPages - 1;
         }
         this.activePageIndex = targetIndex;
 
-        // 3. Update pagination toolbar display
+        // Update toolbar
         if (lblAuditCount != null) {
             lblAuditCount.setValue(this.totalRecords + " records found");
         }
@@ -131,7 +126,6 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         if (btnNextPage != null) btnNextPage.setDisabled(isLast);
         if (btnLastPage != null) btnLastPage.setDisabled(isLast);
 
-        // 4. Render the returned rows
         renderAuditRows(result.getLogs());
     }
 
@@ -171,7 +165,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             Row row = new Row();
             row.setStyle("border-bottom: 1px solid #f1f5f9; min-height: 48px;");
 
-            // 1. DATE AND TIME
+            // Timestamp column
             String displayTime;
             if (log.getTimestamp() != null) {
                 LocalTime logTime = log.getTimestamp().toInstant()
@@ -185,7 +179,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             lblTime.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblTime);
 
-            // 2. USER
+            // User column
             String cleanUser = log.getUsername() != null && !log.getUsername().trim().isEmpty() 
                              ? log.getUsername().trim() 
                              : (log.getUserId() != null ? log.getUserId().trim() : "-");
@@ -194,21 +188,21 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block; text-align: center;");
             row.appendChild(lblUser);
 
-            // 3. ACTION
+            // Action column
             Label lblAction = new Label(log.getAction() != null ? log.getAction() : "-");
             lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155; display: block; text-align: center;");
             row.appendChild(lblAction);
 
-            // 4. DETAILS
+            // Details column
             Component detailsCell = createFormattedDetailsCell(log.getDetails());
             row.appendChild(detailsCell);
 
-            // 5. IP ADDRESS
+            // IP column
             Label lblIp = new Label(log.getIpAddress() != null ? log.getIpAddress() : "-");
             lblIp.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblIp);
 
-            // 6. STATUS BADGE
+            // Status badge column
             Label lblStatus = new Label(log.getStatus() != null ? log.getStatus() : "SUCCESS");
             String baseBadgeStyle = "display: table; margin: 0 auto; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
 
@@ -234,6 +228,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             return container;
         }
 
+        // Parse key-value tokens separated by pipe
         if (rawDetails.contains("|")) {
             String[] parts = rawDetails.split("\\|");
             for (int i = 0; i < parts.length; i++) {
@@ -259,7 +254,7 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         return container;
     }
 
-    // Filter Actions
+    // Filter event listeners
     public void onClick$btnSearch(Event event) { 
         loadAuditPage(0); 
     }
@@ -268,12 +263,12 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
         loadAuditPage(0); 
     }
 
-    public void onClick$btnReset(Event event) {
+    public void onClick$btnReset(Event event) { 
         resetFiltersToToday();
-        loadAuditPage(0);
+        loadAuditPage(0); 
     }
 
-    // Pagination Toolbar Actions
+    // Pagination event listeners
     public void onClick$btnFirstPage(Event event) {
         if (activePageIndex > 0) {
             loadAuditPage(0);

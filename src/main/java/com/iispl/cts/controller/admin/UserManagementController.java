@@ -42,13 +42,13 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
 	private static final long serialVersionUID = 1L;
 
-	// View Containers & Shared Header
+	// View containers and shared header
 	private Vlayout viewUserList;
 	private Vlayout viewAddUser;
 	private Vlayout viewModifyUser;
 	private Include incHeader;
 
-	// View 1 (List) Controls
+	// List view controls
 	private Textbox txtSearchQuery;
 	private Combobox cmbRoleFilter;
 	private Combobox cmbStatusFilter;
@@ -58,7 +58,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	private Button btnClearFilter;
 	private Button btnAddUser;
 
-	// Custom Pagination Toolbar Controls («, ‹, [ 1 ] / N, ›, »)
+	// Pagination controls
 	private Button btnFirstPage;
 	private Button btnPrevPage;
 	private Intbox ibCurrentPage;
@@ -66,13 +66,13 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	private Button btnNextPage;
 	private Button btnLastPage;
 
-	// Pagination State
+	// Pagination state
 	private static final int PAGE_SIZE = 10;
 	private int activePageIndex = 0;
 	private int totalPages = 1;
 	private List<User> currentFilteredUsers = new ArrayList<>();
 
-	// View 2 (Add) Controls
+	// Add view controls
 	private Textbox txtAddEmployeeId;
 	private Textbox txtAddUsername;
 	private Textbox txtAddEmail;
@@ -85,7 +85,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	private Button btnCancelAdd;
 	private boolean isPasswordVisible = false;
 
-	// View 3 (Modify) Controls
+	// Modify view controls
 	private Textbox txtModEmployeeId;
 	private Textbox txtModUsername;
 	private Textbox txtModEmail;
@@ -100,47 +100,43 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 	private String selectedModifyAction = "CHANGE_ROLE";
 	private User currentModUser;
 	private Div dotUserStatus;
-	
 
 	private Label lblModStatusText;
 	private Div badgeUserStatus;
 	private Button btnToggleUserStatus;
 	private Checkbox chkChangeRole;
-	
-    
- // Modal Components - Auto-wired automatically
- 	private Div modalConfirmUser;
- 	private Label lblModalHeaderTitle;
- 	private Label lblModalHeaderSubtitle;
- 	private Label lblModalNoticeTop;
- 	private Label lblModalEmpId;
- 	private Label lblModalUsername;
- 	private Hlayout rowModalEmail;
- 	private Label lblModalEmail;
- 	private Label lblModalRole;
- 	private Label lblModalStatus;
- 	private Label lblModalNoticeBottom;
- 	private Button btnConfirmUserModal;
- 	private Button btnCancelUserModal;
 
- 	// Staged values
- 	private String modalActionType = "";
- 	private User stagedNewUser;
- 	private String stagedNewPassword;
- 	private String stagedModStatus;
- 	private String stagedModRoleId;
- 	private String stagedModRoleName;
- 	private boolean stagedModRoleChanged;
- 	private boolean stagedModStatusChanged;
+	// Confirmation modal components
+	private Div modalConfirmUser;
+	private Label lblModalHeaderTitle;
+	private Label lblModalHeaderSubtitle;
+	private Label lblModalNoticeTop;
+	private Label lblModalEmpId;
+	private Label lblModalUsername;
+	private Hlayout rowModalEmail;
+	private Label lblModalEmail;
+	private Label lblModalRole;
+	private Label lblModalStatus;
+	private Label lblModalNoticeBottom;
+	private Button btnConfirmUserModal;
+	private Button btnCancelUserModal;
 
+	// Staged values for confirmation
+	private String modalActionType = "";
+	private User stagedNewUser;
+	private String stagedNewPassword;
+	private String stagedModStatus;
+	private String stagedModRoleId;
+	private String stagedModRoleName;
+	private boolean stagedModRoleChanged;
+	private boolean stagedModStatusChanged;
 
-	// Tracks current in-memory status changes before hitting DB
 	private boolean modUserActiveState;
-	
+
 	private final UserService userService = UserServiceImpl.getInstance();
 	private final RoleService roleService = RoleServiceImpl.getInstance();
 
-	// Cache of roleId -> roleName dynamically loaded from PostgreSQL
+	// Cache roleId to roleName mapping
 	private final Map<String, String> roleMap = new LinkedHashMap<>();
 
 	@Override
@@ -219,8 +215,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		return roleMap.getOrDefault(roleId, roleId);
 	}
 
-	// --- SCREEN 1: LIST VIEW & PAGINATION LOGIC ---
-
 	private void loadUserData() {
 		String query = txtSearchQuery != null ? txtSearchQuery.getValue() : "";
 		String roleId = (cmbRoleFilter != null && cmbRoleFilter.getSelectedItem() != null)
@@ -273,7 +267,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		int to = Math.min(from + PAGE_SIZE, totalRecords);
 		List<User> pageSlice = (totalRecords > 0 && from < totalRecords) 
 				? this.currentFilteredUsers.subList(from, to) 
-						: Collections.emptyList();
+				: Collections.emptyList();
 
 		renderUserRows(pageSlice);
 	}
@@ -308,7 +302,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
 			boolean isActive = "ACTIVE".equalsIgnoreCase(user.getStatus());
 
-			// Centering wrapper container
 			Div statusContainer = new Div();
 			statusContainer.setStyle("display: flex; justify-content: center; align-items: center; width: 100%; text-align: center;");
 
@@ -334,8 +327,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		}
 	}
 
-	// --- SEARCH & FILTER ACTIONS ---
-
 	public void onClick$btnSearch(Event event) { 
 		loadUserData(); 
 	}
@@ -350,8 +341,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		if (cmbStatusFilter != null) cmbStatusFilter.setSelectedIndex(0);
 		loadUserData();
 	}
-
-	// --- PAGINATION TOOLBAR ACTIONS ---
 
 	public void onClick$btnFirstPage(Event event) {
 		if (activePageIndex > 0) {
@@ -391,15 +380,13 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		onChange$ibCurrentPage(event);
 	}
 
-	// --- SCREEN 2: ADD USER VIEW ---
-
+	// Validation patterns
 	private static final java.util.regex.Pattern NAME_PATTERN = 
 			java.util.regex.Pattern.compile("^[a-zA-Z][a-zA-Z._]{2,49}$");
 	private static final java.util.regex.Pattern EMAIL_PATTERN = 
 			java.util.regex.Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
 	private static final java.util.regex.Pattern PHONE_PATTERN = 
-			java.util.regex.Pattern.compile("^(\\+91[\\-\\s]?|0)?[6-9]\\d{9}$"); // Standard 10-digit mobile starting 6-9
-	// Password must contain at least: 8 chars, 1 uppercase, 1 lowercase, 1 number, and 1 special character
+			java.util.regex.Pattern.compile("^(\\+91[\\-\\s]?|0)?[6-9]\\d{9}$");
 	private static final java.util.regex.Pattern STRONG_PASSWORD_PATTERN = 
 			java.util.regex.Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#^()_+\\-=])[A-Za-z\\d@$!%*?&#^()_+\\-=]{8,}$");
 
@@ -416,7 +403,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		refreshRoleCache();
 		populateAddRoleDropdown();
 
-		// Fix initial glitch: clear selection, reset text, and close popup
 		cmbAddRole.setSelectedIndex(-1);
 		cmbAddRole.setValue("");
 		cmbAddRole.close();
@@ -429,6 +415,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		txtAddPassword.setType(isPasswordVisible ? "text" : "password");
 		updatePasswordToggleIcon(isPasswordVisible);
 	}
+
 	private void updatePasswordToggleIcon(boolean isVisible) {
 		if (btnTogglePassword != null) {
 			btnTogglePassword.getChildren().clear();
@@ -446,14 +433,14 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		String password = txtAddPassword.getValue() != null ? txtAddPassword.getValue().trim() : "";
 		Comboitem selectedRole = cmbAddRole.getSelectedItem();
 
-		// 1. Validations
+		// Field validation checks
 		if (username.isEmpty()) {
 			Clients.showNotification("User Name is required.", "error", txtAddUsername, "top_center", 2500);
 			txtAddUsername.focus();
 			return;
 		}
-		if(username.matches(".*\\d")) {
-			Clients.showNotification("Username should not contain numbers.","error",txtAddUsername,"top_center", 3000);
+		if (username.matches(".*\\d")) {
+			Clients.showNotification("Username should not contain numbers.", "error", txtAddUsername, "top_center", 3000);
 			txtAddUsername.focus();
 			return;
 		}
@@ -491,7 +478,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		String assignedRoleId = (String) selectedRole.getValue();
 		String roleDisplayName = getRoleDisplayName(assignedRoleId);
 
-		// 2. Stage new user object
+		// Prepare user entity
 		stagedNewUser = new User();
 		stagedNewUser.setUserId(userService.generateNextUserId());
 		stagedNewUser.setRoleId(assignedRoleId);
@@ -506,7 +493,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
 		modalActionType = "ADD";
 
-		// 3. Populate modal directly (no getFellow needed)
+		// Populate add confirmation modal
 		lblModalHeaderTitle.setValue("Confirm New User");
 		lblModalHeaderSubtitle.setValue("User account creation");
 		lblModalNoticeTop.setValue("You are about to create a new system user for:");
@@ -521,9 +508,9 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		lblModalNoticeBottom.setValue("Once confirmed, the user will be provisioned with active system credentials.");
 		btnConfirmUserModal.setLabel("Create User");
 
-		// 4. Open modal
 		modalConfirmUser.setVisible(true);
 	}
+
 	public void onClick$btnClearAddForm(Event event) {
 		txtAddUsername.setValue("");
 		txtAddEmail.setValue("");
@@ -536,8 +523,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		switchView("LIST");
 	}
 
-	// --- SCREEN 3: MODIFY USER VIEW ---
-
 	private void openModifyView(User user) {
 		this.currentModUser = user;
 		txtModEmployeeId.setValue(user.getEmployeeId());
@@ -545,12 +530,11 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 		txtModEmail.setValue(user.getEmail());
 		txtModCurrentRole.setValue(getRoleDisplayName(user.getRoleId()));
 
-		// 1. Determine active status from DB record
 		String status = user.getStatus();
 		this.modUserActiveState = "ACTIVE".equalsIgnoreCase(status);
 		syncStatusUI();
 
-		// 2. Populate available roles excluding current role
+		// Populate available roles excluding current assignment
 		refreshRoleCache();
 		cmbNewRole.getChildren().clear();
 		for (Map.Entry<String, String> entry : roleMap.entrySet()) {
@@ -561,7 +545,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 			}
 		}
 
-		// 3. Reset Role picker: hidden and unselected by default
 		chkChangeRole.setChecked(false);
 		divNewRoleContainer.setVisible(false);
 		cmbNewRole.setSelectedIndex(-1);
@@ -578,7 +561,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 			if (dotUserStatus != null) {
 				dotUserStatus.setSclass("cts-status-dot-active");
 			}
-			btnToggleUserStatus.setLabel("DEACTIVATE USER"); // or "DISABLE USER"
+			btnToggleUserStatus.setLabel("DEACTIVATE USER");
 			btnToggleUserStatus.setSclass("cts-btn-status-toggle cts-btn-status-disable");
 		} else {
 			lblModStatusText.setValue("INACTIVE");
@@ -586,7 +569,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 			if (dotUserStatus != null) {
 				dotUserStatus.setSclass("cts-status-dot-inactive");
 			}
-			btnToggleUserStatus.setLabel("ACTIVATE USER"); // or "ENABLE USER"
+			btnToggleUserStatus.setLabel("ACTIVATE USER");
 			btnToggleUserStatus.setSclass("cts-btn-status-toggle cts-btn-status-enable");
 		}
 	}
@@ -635,7 +618,7 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
 		modalActionType = "MODIFY";
 
-		// Direct element population (no getFellow needed)
+		// Populate modify confirmation modal
 		lblModalHeaderTitle.setValue("Confirm User Modifications");
 		lblModalHeaderSubtitle.setValue("Security & role parameter changes");
 		lblModalNoticeTop.setValue("You are about to update account details for:");
@@ -664,14 +647,13 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 
 		modalConfirmUser.setVisible(true);
 	}
-	// -------------------------------------------------------------
-    // MODAL BUTTON ACTIONS
-    // -------------------------------------------------------------
+
 	public void onClick$btnCancelUserModal(Event event) {
 		if (modalConfirmUser != null) {
 			modalConfirmUser.setVisible(false);
 		}
 	}
+
 	public void onClick$btnConfirmUserModal(Event event) {
 		if (modalConfirmUser != null) {
 			modalConfirmUser.setVisible(false);
@@ -713,7 +695,6 @@ public class UserManagementController extends GenericForwardComposer<Component> 
 			}
 		}
 	}
-
 
 	public void onClick$btnCancelModifications(Event event) {
 		switchView("LIST");
