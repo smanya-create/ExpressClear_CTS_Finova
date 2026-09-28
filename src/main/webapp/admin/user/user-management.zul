@@ -28,9 +28,9 @@
 					<vlayout sclass="cts-content-wrapper" vflex="1"
 						hflex="1" spacing="0">
 
-						<!-- ============================================== -->
-						<!-- VIEW 1: USER LIST                              -->
-						<!-- ============================================== -->
+						
+						<!-- VIEW 1: USER LIST-->
+						
 						<vlayout id="viewUserList" visible="true"
 							vflex="1" hflex="1" spacing="12px"
 							style="padding: 16px 28px 10px 28px; box-sizing: border-box; overflow: hidden;">
@@ -180,9 +180,9 @@
 							</panel>
 						</vlayout>
 
-						<!-- ============================================== -->
-						<!-- VIEW 2: ADD USER                               -->
-						<!-- ============================================== -->
+						
+						<!-- VIEW 2: ADD USER-->
+						
 						<vlayout id="viewAddUser" visible="false"
 							vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;"
 							spacing="18px">
@@ -331,9 +331,9 @@
 							</panel>
 						</vlayout>
 
-						<!-- ============================================== -->
-						<!-- VIEW 3: MODIFY USER                            -->
-						<!-- ============================================== -->
+						
+						<!-- VIEW 3: MODIFY USER-->
+						
 						<vlayout id="viewModifyUser" visible="false"
 							vflex="1" hflex="1" style="overflow-y: auto; padding: 24px 32px;"
 							spacing="18px">
@@ -479,15 +479,7 @@
 							</panel>
 						</vlayout>
 
-						<!-- Footer -->
-						<hlayout sclass="cts-portal-footer" hflex="1"
-							style="padding: 6px 28px 10px 28px; box-sizing: border-box;">
-							<label value="Express Clear CTS · Admin "
-								sclass="cts-footer-left" />
-							<label value="User Management"
-								sclass="cts-footer-right" />
-						</hlayout>
-
+						
 						<!-- Centered confirmation modal -->
 						<div id="modalConfirmUser" visible="false"
 							style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 999999;">
