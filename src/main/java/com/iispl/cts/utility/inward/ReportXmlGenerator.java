@@ -169,7 +169,6 @@ public class ReportXmlGenerator {
         writeElement(writer, "DraweeBank", cheque.getDraweeBank(), 12);
         writeElement(writer, "PayeeName", cheque.getPayeeName(), 12);
         writeElement(writer, "PayeeAccountNumber", cheque.getPayeeAccountNumber(), 12);
-        writeElement(writer, "PresentingBank", cheque.getPresentingBank(), 12);
         writeElement(writer, "ChequeAmount", formatAmount(cheque.getChequeAmount()), 12);
         writeElement(writer, "ChequeDate", formatDate(cheque.getChequeDate()), 12);
         writeElement(writer, "Status", cheque.getChequeStatus(), 12);
