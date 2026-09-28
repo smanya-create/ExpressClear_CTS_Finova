@@ -55,8 +55,6 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
 	private static final long serialVersionUID = 1L;
 	private static final String SESSION_CURRENT_BATCH_ID = "OUTWARD_MAKER_CURRENT_BATCH_ID";
-	private static final String SESSION_CURRENT_BATCH_OBJ = "OUTWARD_MAKER_CURRENT_BATCH_OBJ";
-	private static final String SESSION_CURRENT_CHEQUE_LIST = "OUTWARD_MAKER_CURRENT_CHEQUE_LIST";
 
 	private static final String STATUS_PENDING_DATA_ENTRY = "PENDING_DATA_ENTRY";
 	private static final String MODE_DATA_ENTRY = "DATA_ENTRY";
@@ -212,7 +210,6 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	private void loadCurrentSessionBatch() {
 		Session session = Sessions.getCurrent();
 		if (session == null) return;
@@ -225,19 +222,11 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
 		batchId = currentSessionBatchId;
 
-		ScanBatch cachedBatch = (ScanBatch) session.getAttribute(SESSION_CURRENT_BATCH_OBJ);
-		List<ScanCheque> cachedCheques = (List<ScanCheque>) session.getAttribute(SESSION_CURRENT_CHEQUE_LIST);
-
-		if (cachedBatch != null && cachedCheques != null && !cachedCheques.isEmpty()) {
-			currentChequeList = new ArrayList<ScanCheque>(cachedCheques);
-			displayBatchInformation(cachedBatch, currentChequeList);
-			displayChequeList(currentChequeList);
-			return;
-		}
-
-		ScanBatch makerBatch = outwardMakerService.getMakerBatch(currentSessionBatchId);
+		// Fetch directly from DB services
+		ScanBatch makerBatch = outwardMakerService.getMakerBatch(batchId);
 		if (makerBatch == null) {
 			batchId = null;
+			session.removeAttribute(SESSION_CURRENT_BATCH_ID);
 			vltBatchResult.setVisible(false);
 			lstCheques.getItems().clear();
 			currentChequeList.clear();
@@ -250,9 +239,6 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 		if (batchCheques == null) {
 			batchCheques = new ArrayList<ScanCheque>();
 		}
-
-		session.setAttribute(SESSION_CURRENT_BATCH_OBJ, makerBatch);
-		session.setAttribute(SESSION_CURRENT_CHEQUE_LIST, batchCheques);
 
 		currentChequeList = new ArrayList<ScanCheque>(batchCheques);
 		displayBatchInformation(makerBatch, batchCheques);
@@ -325,8 +311,7 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
 		try {
 			BatchXmlParser parser = new BatchXmlParser();
-			BatchXmlParser.ParsedBatchData parsedData = parser.parse(
-					uploadedZipFile.getAbsolutePath());
+			BatchXmlParser.ParsedBatchData parsedData = parser.parse(uploadedZipFile.getAbsolutePath());
 
 			ScanBatch scanBatch = parsedData.getScanBatch();
 			if (scanBatch == null) {
@@ -366,21 +351,28 @@ public class OutwardMakerBatchUploadController implements Composer<Component> {
 
 			batchId = savedBatchId.trim();
 
+			// Store ONLY the batch ID in the session
 			Session session = Sessions.getCurrent();
 			if (session != null) {
 				session.setAttribute(SESSION_CURRENT_BATCH_ID, batchId);
-				session.setAttribute(SESSION_CURRENT_BATCH_OBJ, scanBatch);
-				session.setAttribute(SESSION_CURRENT_CHEQUE_LIST, micrChequeList);
 			}
 
+			// Clean up UI inputs
 			txtExpectedTotalCheques.setValue(null);
 			txtExpectedTotalChequeAmount.setValue(BigDecimal.ZERO);
 			txtChequeFolder.setValue("");
 			uploadedZipFile = null;
 			btnValidateBatch.setDisabled(true);
 
-			currentChequeList = new ArrayList<ScanCheque>(micrChequeList);
-			displayBatchInformation(scanBatch, currentChequeList);
+			// Fetch persisted data back from DB to ensure state consistency
+			ScanBatch persistedBatch = outwardMakerService.getMakerBatch(batchId);
+			List<ScanCheque> persistedCheques = outwardMakerService.getMakerBatchCheques(batchId);
+			if (persistedCheques == null) {
+				persistedCheques = new ArrayList<ScanCheque>();
+			}
+
+			currentChequeList = new ArrayList<ScanCheque>(persistedCheques);
+			displayBatchInformation(persistedBatch != null ? persistedBatch : scanBatch, currentChequeList);
 			displayChequeList(currentChequeList);
 
 		} catch (Exception e) {
