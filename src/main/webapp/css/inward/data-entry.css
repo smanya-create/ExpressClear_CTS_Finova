@@ -1,6 +1,4 @@
-/* =========================================================
-   INWARD CHEQUE DATA ENTRY - UNIFIED CTS PORTAL STYLING
-   ========================================================= */
+/* INWARD CHEQUE DATA ENTRY - UNIFIED CTS PORTAL STYLING  */
 
 /* Root Page Container - Soft Blue-Grey Portal Background */
 .cts-data-entry-wrapper {
@@ -66,9 +64,7 @@
     box-shadow: none !important;
 }
 
-/* =========================================================
-   METADATA CARD & TOP CONTROLS (Aligned with MICR Repair)
-   ========================================================= */
+/*  METADATA CARD & TOP CONTROLS (Aligned with MICR Repair) */
 .cts-metadata-card {
     background: #ffffff !important;
     border: 1px solid #dfe5ed !important;
@@ -183,9 +179,7 @@
     justify-content: center !important;
 }
 
-/* =========================================================
-   WORKSPACE GRID (2-Column Strict Enforcement)
-   ========================================================= */
+/*   WORKSPACE GRID (2-Column Strict Enforcement) */
 .cts-data-entry-grid {
     display: grid !important;
     grid-template-columns: 1.05fr 1fr !important;
@@ -221,9 +215,7 @@
     display: block !important;
 }
 
-/* =========================================================
-   PEACH / CORAL STATUS PILL (Matching 2nd Image Exactly)
-   ========================================================= */
+/*PEACH / CORAL STATUS PILL (Matching 2nd Image Exactly) */
 #lblDataStatus,
 .cts-status-pill-peach {
     display: inline-flex !important;
@@ -247,9 +239,7 @@
     white-space: nowrap !important;
 }
 
-/* =========================================================
-   CHEQUE IMAGE CONTAINER (Zooming & Native Scroll)
-   ========================================================= */
+/*  CHEQUE IMAGE CONTAINER (Zooming & Native Scroll)*/
 .cts-cheque-image-wrapper {
     width: 100% !important;
     height: 310px !important;
@@ -310,9 +300,7 @@
     border-color: #94a3b8 !important;
 }
 
-/* =========================================================
-   FORM INPUTS
-   ========================================================= */
+/*  FORM INPUTS */
 .cts-form-row {
     display: flex !important;
     gap: 12px !important;
@@ -358,9 +346,7 @@
     border-color: #e2e8f0 !important;
 }
 
-/* =========================================================
-   ACTION BUTTONS (Consistent Palette)
-   ========================================================= */
+/* ACTION BUTTONS (Consistent Palette) */
 .cts-form-action-area {
     display: flex !important;
     flex-direction: column !important;
@@ -451,9 +437,6 @@
     box-shadow: none !important;
 }
 
-/* =========================================================
-   MODAL WINDOW & BACKDROP (Fixes Screen Dimming Bug)
-   ========================================================= */
 .cts-modal-backdrop { 
     position: fixed !important; 
     top: 0 !important; 
@@ -516,9 +499,6 @@
 }
 
 
-/* ==========================================================================
-   READ-ONLY TEXTBOX STYLING (Crisp, High-Contrast & Clearly Locked)
-   ========================================================================== */
 .z-textbox[readonly],
 .z-textbox-readonly {
     background-color: #f1f5f9 !important; /* Soft grey-blue background */
@@ -536,9 +516,6 @@
     box-shadow: none !important;
 }
 
-/* ==========================================================================
-   DISABLED ACTION BUTTONS (Clean Muted Look, Text Stays Clear)
-   ========================================================================== */
 .cts-btn-solid-primary[disabled],
 .cts-btn-outline-danger[disabled],
 .cts-btn-secondary[disabled] {

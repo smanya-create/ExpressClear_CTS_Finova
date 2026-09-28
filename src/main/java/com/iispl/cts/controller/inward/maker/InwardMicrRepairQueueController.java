@@ -1,11 +1,14 @@
 package com.iispl.cts.controller.inward.maker;
 
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.Path;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
@@ -274,7 +277,7 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 		} catch (Exception ignored) {}
 
 		if (mainInclude == null && self != null && self.getDesktop() != null) {
-			for (org.zkoss.zk.ui.Page page : self.getDesktop().getPages()) {
+			for (Page page : self.getDesktop().getPages()) {
 				Component component = page.getFellowIfAny("mainContentArea", true);
 				if (component instanceof Include) {
 					mainInclude = (Include) component;
@@ -294,8 +297,8 @@ public class InwardMicrRepairQueueController extends GenericForwardComposer<Comp
 	private String formatDate(Object date) {
 		if (date == null) return "-";
 		try {
-			if (date instanceof java.util.Date) {
-				return new SimpleDateFormat("dd-MM-yyyy").format((java.util.Date) date);
+			if (date instanceof Date) {
+				return new SimpleDateFormat("dd-MM-yyyy").format((Date) date);
 			}
 			return date.toString().trim();
 		} catch (Exception e) {
