@@ -5,40 +5,30 @@
 <zk xmlns:h="xhtml">
 
     <style src="/css/outward/checker-xmlGeneration.css" />
-
     <borderlayout
         hflex="1"
         vflex="1">
-
         <west
             width="265px"
             splittable="false"
             collapsible="false">
-
             <include
                 src="/components/sidebar.zul"
                 role="OUTWARD_CHECKER"
                 activeTab="xml-gen" />
-
         </west>
-
          <center>
-
             <borderlayout
                 hflex="1"
                 vflex="1">
-
                 <north
                     height="75px"
                     splittable="false"
                     collapsible="false">
-
                     <include
                         src="/components/header.zul"
                         pageTitle="Outward Processing" />
-
                 </north>
-
                 <center
                     sclass="outward-checker-xml-center">
 
@@ -47,11 +37,7 @@
                         src="/outward/checker/xml-generation-content.zul" />
 
                 </center>
-
             </borderlayout>
-
         </center>
-
     </borderlayout>
-
 </zk>

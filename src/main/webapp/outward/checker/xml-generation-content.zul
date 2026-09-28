@@ -1,99 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?page title="ExpressClear CTS-XML Generation" contentType="text/html;charset=UTF-8"?>
-
 <zk>
-
     <style src="/css/outward/checker-xmlGeneration.css"/>
-
-    <vlayout
-        sclass="xml-generation-content"
+    <vlayout sclass="xml-generation-content"
         hflex="1"
         vflex="1"
         spacing="12px"
         apply="com.iispl.cts.controller.outward.checker.OutwardCheckerXmlGenerationController">
-
-        <vlayout
-            sclass="outward-maker-welcome-section"
+        <vlayout sclass="outward-maker-welcome-section"
             spacing="4px">
-
-            <label
-                value="Verified Batches"
+            <label value="Verified Batches"
                 sclass="outward-maker-welcome-title"/>
-
-            <label
-                value="All cheques verified by Checker  are available for XML generation."
+            <label value="All cheques verified by Checker  are available for XML generation."
                 sclass="outward-maker-welcome-subtitle"/>
-
         </vlayout>
-
-        <hlayout
-            sclass="summary-card"
+        <hlayout sclass="summary-card"
             hflex="1"
             spacing="0">
-
-            <vlayout
-                sclass="summary-item"
+            <vlayout sclass="summary-item"
                 spacing="5px">
-
-                <label
-                    value="VERIFIED BATCHES"
+                <label value="VERIFIED BATCHES"
                     sclass="summary-label"/>
-
-                <label
-                    id="lblVerifiedBatches"
+                <label id="lblVerifiedBatches"
                     value="2"
                     sclass="summary-value"/>
-
             </vlayout>
-
-            <vlayout
-                sclass="summary-item"
+            <vlayout sclass="summary-item"
                 spacing="5px">
-
-                <label
-                    value="NEXT STEP"
+                <label value="NEXT STEP"
                     sclass="summary-label"/>
-
-                <label
-                    value="Generate XML → Send to NPCI"
+                <label value="Generate XML → Send to NPCI"
                     sclass="summary-value"/>
-
             </vlayout>
-
         </hlayout>
-
-        <listbox
-            id="lstVerifiedBatches"
+        <listbox id="lstVerifiedBatches"
             sclass="xml-batch-table"
             hflex="1">
-
             <listhead>
-
-                <listheader
-                    label="BATCH"
+                <listheader label="BATCH"
                     width="18%"/>
-
-                <listheader
-                    label="NO. OF CHEQUES"
+                <listheader label="NO. OF CHEQUES"
                     width="18%"/>
-
-                <listheader
-                    label="TOTAL AMOUNT"
+                <listheader label="TOTAL AMOUNT"
                     width="22%"/>
-
-                <listheader
-                    label="STATUS"
+                <listheader label="STATUS"
                     width="18%"/>
-
-                <listheader
-                    label="ACTION"
+                <listheader label="ACTION"
                     width="24%"/>
-
             </listhead>
-
         </listbox>
-
     </vlayout>
-
 </zk>

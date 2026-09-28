@@ -1,228 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?page title="ExpressClear CTS - Checker Dashboard" contentType="text/html;charset=UTF-8"?>
-
 <zk title="CTS - Checker Dashboard">
-
     <style src="/css/outward/checker-dashboard.css" />
-
-    <borderlayout
-        hflex="1"
-        vflex="1"
+    <borderlayout hflex="1" vflex="1"
         apply="com.iispl.cts.controller.outward.checker.OutwardCheckerDashboardController">
-
-        <west
-            width="265px"
-            splittable="false"
-            collapsible="false">
-
-            <include
-                src="/components/sidebar.zul"
+        <west width="265px" splittable="false" collapsible="false">
+            <include src="/components/sidebar.zul"
                 role="OUTWARD_CHECKER"
                 activeTab="checker-dashboard" />
-
         </west>
-
-        <center
-            sclass="outward-checker-center">
-
-            <borderlayout
-                hflex="1"
-                vflex="1"
+        <center sclass="outward-checker-center">
+            <borderlayout hflex="1" vflex="1"
                 sclass="outward-checker-main-layout">
-
-                <north
-                    height="75px"
-                    splittable="false"
+                <north height="75px" splittable="false"
                     collapsible="false"
                     sclass="outward-checker-header-layout">
-
-                    <include
-                        src="/components/header.zul"
+                    <include src="/components/header.zul"
                         pageTitle="Outward Processing" />
-
                 </north>
-
-                <center
-                    sclass="outward-checker-content-center">
-
-                    <div
-                        sclass="outward-checker-content-wrapper"
-                        hflex="1"
-                        vflex="1">
-
-                        <div
-                            sclass="outward-checker-dashboard"
-                            hflex="1"
-                            vflex="1">
-
-                            <vlayout
-                                sclass="outward-checker-dashboard-scroll"
-                                hflex="1"
-                                vflex="1">
-
-                                <div
-                                    sclass="outward-checker-welcome-section">
-
-                                    <label
-                                        value="Dashboard"
+                <center sclass="outward-checker-content-center">
+                    <div sclass="outward-checker-content-wrapper"
+                        hflex="1" vflex="1">
+                        <div sclass="outward-checker-dashboard"
+                            hflex="1" vflex="1">
+                            <vlayout sclass="outward-checker-dashboard-scroll"
+                                hflex="1" vflex="1">
+                                <div sclass="outward-checker-welcome-section">
+                                    <label value="Dashboard"
                                         sclass="outward-checker-welcome-title" />
-
                                 </div>
-
-                                <div
-    sclass="outward-checker-search-section">
-
-    <label
-        value="Search"
-        sclass="outward-checker-search-title" />
-
-    <hlayout
-        sclass="outward-checker-search-row"
-        spacing="8px">
-
-        <textbox
-            id="txtBatchId"
-            hflex="1"
-            placeholder="Search by Batch ID..."
-            sclass="outward-checker-search-input" />
-
-        <combobox
-            id="cmbStatus"
-            readonly="true"
-            width="160px"
-            sclass="outward-checker-status-filter">
-
-            <comboitem
-                label="All Status"
-                value="ALL" />
-
-            <comboitem
-                label="Pending"
-                value="PENDING_CHECKER_PROCESS" />
-
-            <comboitem
-                label="On Hold"
-                value="ON_HOLD" />
-
-        </combobox>
-
-        <button
-            id="btnSearch"
-            label="SEARCH"
-            iconSclass="z-icon-search"
-            sclass="outward-checker-search-button" />
-
-        <button
-            id="btnClear"
-            label="CLEAR"
-            sclass="outward-checker-clear-button" />
-
-    </hlayout>
-
-</div>
-                                <div
-                                    sclass="outward-checker-section-header">
-
-                                    <label
-                                        value="Batches Received from Maker"
+                                <div sclass="outward-checker-search-section">
+                                    <label value="Search"
+                                        sclass="outward-checker-search-title" />
+                                    <hlayout sclass="outward-checker-search-row"
+                                        spacing="8px">
+                                        <textbox id="txtBatchId"
+                                            hflex="1"
+                                            placeholder="Search by Batch ID..."
+                                            sclass="outward-checker-search-input" />
+                                        <combobox id="cmbStatus"
+                                            readonly="true"
+                                            width="160px"
+                                            sclass="outward-checker-status-filter">
+                                            <comboitem label="All Status"
+                                                value="ALL" />
+                                            <comboitem label="Pending"
+                                                value="PENDING_CHECKER_PROCESS" />
+                                            <comboitem label="On Hold"
+                                                value="ON_HOLD" />
+                                        </combobox>
+                                        <button id="btnSearch"
+                                            label="SEARCH"
+                                            iconSclass="z-icon-search"
+                                            sclass="outward-checker-search-button" />
+                                        <button id="btnClear"
+                                            label="CLEAR"
+                                            sclass="outward-checker-clear-button" />
+                                    </hlayout>
+                                </div>
+                                <div sclass="outward-checker-section-header">
+                                    <label value="Batches Received from Maker"
                                         sclass="outward-checker-section-title" />
-
-           
-
                                 </div>
-
-                                <div
-                                    sclass="outward-checker-table-card">
-
-                                    <listbox
-                                        id="lstBatches"
+                                <div sclass="outward-checker-table-card">
+                                    <listbox id="lstBatches"
                                         sclass="outward-checker-batch-table"
                                         hflex="1">
-
                                         <listhead>
-
-                                            <listheader
-                                                label="BATCH ID"
+                                            <listheader label="BATCH ID"
                                                 width="12%" />
-
-                                            <listheader
-                                                label="TOTAL CHEQUES"
+                                            <listheader label="TOTAL CHEQUES"
                                                 width="14%" />
-
-                                            <listheader
-                                                label="NORMAL CHEQUES"
+                                            <listheader label="NORMAL CHEQUES"
                                                 width="17%" />
-
-                                            <listheader
-                                                label="MAKER RETURNED"
+                                            <listheader label="MAKER RETURNED"
                                                 width="14%" />
-
-                                            <listheader
-                                                label="REJECTION REQUESTS"
+                                            <listheader label="REJECTION REQUESTS"
                                                 width="17%" />
-
-                                            <listheader
-                                                label="BATCH STATUS"
+                                            <listheader label="BATCH STATUS"
                                                 width="16%" />
-
-                                            <listheader
-                                                label="ACTION"
+                                            <listheader label="ACTION"
                                                 width="100px"
                                                 align="center" />
-
                                         </listhead>
-
                                     </listbox>
-
                                 </div>
-
-                                <div
-                                    sclass="outward-checker-pagination">
-
-                                    <button
-                                        id="btnFirst"
+                                <div sclass="outward-checker-pagination">
+                                    <button id="btnFirst"
                                         label="«"
                                         disabled="true"
                                         sclass="outward-checker-pagination-button" />
-
-                                    <button
-                                        id="btnPrevious"
+                                    <button id="btnPrevious"
                                         label="‹"
                                         disabled="true"
                                         sclass="outward-checker-pagination-button" />
-
-                                    <label
-                                        id="lblPage"
+                                    <label id="lblPage"
                                         value="1/1"
                                         sclass="outward-checker-pagination-label" />
-
-                                    <button
-                                        id="btnNext"
+                                    <button id="btnNext"
                                         label="›"
                                         disabled="true"
                                         sclass="outward-checker-pagination-button" />
-
-                                    <button
-                                        id="btnLast"
+                                    <button id="btnLast"
                                         label="»"
                                         disabled="true"
                                         sclass="outward-checker-pagination-button" />
-
                                 </div>
-
                             </vlayout>
-
                         </div>
-
                     </div>
-
                 </center>
-
             </borderlayout>
-
         </center>
-
     </borderlayout>
-
 </zk>
