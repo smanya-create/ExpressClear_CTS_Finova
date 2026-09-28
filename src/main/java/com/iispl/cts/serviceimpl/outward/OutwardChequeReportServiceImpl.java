@@ -8,14 +8,14 @@ import com.iispl.cts.service.outward.OutwardChequeReportService;
 
 public class OutwardChequeReportServiceImpl implements OutwardChequeReportService {
 
-    private final OutwardChequeReportDAO reportDAO;
+	private final OutwardChequeReportDAO reportDAO;
 
-    public OutwardChequeReportServiceImpl() {
-        this.reportDAO = new OutwardChequeReportDAOImpl();
-    }
+	public OutwardChequeReportServiceImpl() {
+		this.reportDAO = new OutwardChequeReportDAOImpl();
+	}
 
-    @Override
-    public byte[] generateReport(Date fromDate, Date toDate, String reportType) throws Exception {
-        return reportDAO.generateReport(fromDate, toDate, reportType);
-    }
+	@Override
+	public byte[] generateReport(Date fromDate, Date toDate, String reportType) throws Exception {
+		return reportDAO.generateReport(fromDate, toDate, reportType);
+	}
 }

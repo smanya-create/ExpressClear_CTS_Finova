@@ -12,68 +12,42 @@ import com.iispl.cts.entity.outward.SendBackReason;
 
 public interface OutwardCheckerQueueService {
 
-	// ============================================================
 	// CHEQUES
-	// ============================================================
 
 	List<OutwardCheque> getChequesByBatchId(String batchId) throws SQLException;
 
-	// ============================================================
 	// BATCH STATUS
-	// ============================================================
 
 	String getBatchStatus(String batchId) throws SQLException;
 
-	// ============================================================
 	// IMAGES
-	// ============================================================
 
 	List<OutwardChequeImage> getImagesByChequeId(String outwardChequeId) throws Exception;
 
-	// ============================================================
 	// CHEQUE ACTIONS
-	// ============================================================
 
 	void verifyCheque(String chequeNo) throws SQLException;
 
-	void returnChequeToMaker(
-	        String chequeNo,
-	        String reasonId,
-	        String remarks) throws SQLException;
-	
-	void rejectCheque(
-	        String chequeNo,
-	        String username,
-	        String reasonId,
-	        String remarks)
-	        throws SQLException;
-	// ============================================================
+	void returnChequeToMaker(String chequeNo, String reasonId, String remarks) throws SQLException;
+
+	void rejectCheque(String chequeNo, String username, String reasonId, String remarks) throws SQLException;
 	// SEND BACK REASONS
-	// ============================================================
 
 	List<SendBackReason> getSendBackReasons() throws SQLException;
 
-	// ============================================================
 	// ACCOUNT VALIDATION
-	// ============================================================
 
 	boolean isPayeeAccountExists(String accountNumber) throws SQLException;
 
-	// ============================================================
 	// UPDATE BATCH STATUS
-	// ============================================================
 
 	void updateBatchStatus(String batchId, String status) throws SQLException;
-	
-	void updateChequeStatus(String chequeNo, String status) throws SQLException;
-	
-	List<RejectedReason> getRejectedReasons()
-	        throws SQLException;
 
-	void saveRejectedCheque(
-	        OutwardRejectedCheques rejectedCheque)
-	        throws SQLException;
-	
-	   RejectRequestDTO getRejectRequestByChequeId(
-	            String chequeId) throws SQLException;
+	void updateChequeStatus(String chequeNo, String status) throws SQLException;
+
+	List<RejectedReason> getRejectedReasons() throws SQLException;
+
+	void saveRejectedCheque(OutwardRejectedCheques rejectedCheque) throws SQLException;
+
+	RejectRequestDTO getRejectRequestByChequeId(String chequeId) throws SQLException;
 }

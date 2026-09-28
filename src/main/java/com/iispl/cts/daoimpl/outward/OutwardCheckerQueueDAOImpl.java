@@ -38,10 +38,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 			ps.setString(1, batchId);
 
-			System.out.println("=================================");
-			System.out.println("GET CHEQUES BY BATCH");
-			System.out.println("Batch ID = [" + batchId + "]");
-
 			try (ResultSet rs = ps.executeQuery()) {
 
 				while (rs.next()) {
@@ -85,10 +81,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 			}
 		}
 
-		System.out.println("Cheque Count for selected batch = " + cheques.size());
-
-		System.out.println("=================================");
-
 		return cheques;
 	}
 
@@ -109,22 +101,10 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 					String status = rs.getString("batch_status");
 
-					System.out.println("=================================");
-
-					System.out.println("BATCH STATUS");
-
-					System.out.println("Batch ID = " + batchId);
-
-					System.out.println("Batch Status = [" + status + "]");
-
-					System.out.println("=================================");
-
 					return status;
 				}
 			}
 		}
-
-		System.out.println("No batch found for Batch ID = " + batchId);
 
 		return null;
 	}
@@ -144,17 +124,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 			int rowsUpdated = ps.executeUpdate();
 
-			System.out.println("=================================");
-
-			System.out.println("CHEQUE STATUS UPDATE");
-
-			System.out.println("Cheque No = " + chequeNo);
-
-			System.out.println("New Status = " + status);
-
-			System.out.println("Rows Updated = " + rowsUpdated);
-
-			System.out.println("=================================");
 		}
 	}
 
@@ -172,14 +141,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 			}
 
 			con.setAutoCommit(false);
-
-			System.out.println("=================================");
-			System.out.println("REJECT CHEQUE");
-			System.out.println("Cheque Number = " + chequeNo);
-			System.out.println("Username      = " + username);
-			System.out.println("Reason ID     = " + reasonId);
-			System.out.println("Remarks       = " + remarks);
-			System.out.println("=================================");
 
 			String userSql = "SELECT user_id " + "FROM users " + "WHERE username = ? " + "AND status = 'ACTIVE'";
 
@@ -202,8 +163,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 				throw new SQLException("Active user not found for username: " + username);
 			}
-
-			System.out.println("Rejected By User ID = " + userId);
 
 			String chequeSql = "SELECT outward_cheque_id, " + "       outward_batch_id, " + "       cheque_amount "
 					+ "FROM outward_cheque " + "WHERE cheque_number = ?";
@@ -265,10 +224,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				throw new SQLException("Rejection reason name not found for code: " + reasonId);
 			}
 
-			System.out.println("Reason Code = " + rejectedReasonCode);
-
-			System.out.println("Reason Name = " + rejectedReasonName);
-
 			String insertSql = "INSERT INTO public.outward_rejected_cheques " + "(outward_cheque_id, "
 					+ " rejected_by, " + " remarks, " + " outward_batch_id, " + " cheque_amount, " + " reason_id, "
 					+ " reason) " + "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -298,28 +253,9 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 					throw new SQLException("Failed to insert rejected cheque: " + chequeNo);
 				}
 
-				System.out.println("=================================");
-
-				System.out.println("REJECTED CHEQUE INSERTED");
-
-				System.out.println("Cheque ID = " + outwardChequeId);
-
-				System.out.println("User ID = " + userId);
-
-				System.out.println("Reason ID = " + rejectedReasonCode);
-
-				System.out.println("Reason = " + rejectedReasonName);
-
-				System.out.println("Remarks = " + remarks);
-
-				System.out.println("Rows Inserted = " + rowsInserted);
-
-				System.out.println("=================================");
 			}
 
-			// ====================================================
-			// 6. UPDATE OUTWARD CHEQUE STATUS
-			// ====================================================
+			// UPDATE OUTWARD CHEQUE STATUS
 
 			String updateSql = "UPDATE outward_cheque " + "SET cheque_status = 'REJECTED' " + "WHERE cheque_number = ?";
 
@@ -334,38 +270,9 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 					throw new SQLException("Unable to update cheque status " + "for cheque: " + chequeNo);
 				}
 
-				System.out.println("=================================");
-
-				System.out.println("CHEQUE STATUS CHANGED");
-
-				System.out.println("Cheque Number = " + chequeNo);
-
-				System.out.println("Status = REJECTED");
-
-				System.out.println("Rows Updated = " + rowsUpdated);
-
-				System.out.println("=================================");
 			}
 
 			con.commit();
-
-			System.out.println("=================================");
-
-			System.out.println("REJECT TRANSACTION SUCCESS");
-
-			System.out.println("Cheque = " + chequeNo);
-
-			System.out.println("User = " + username);
-
-			System.out.println("User ID = " + userId);
-
-			System.out.println("Reason ID = " + rejectedReasonCode);
-
-			System.out.println("Reason = " + rejectedReasonName);
-
-			System.out.println("Status = REJECTED");
-
-			System.out.println("=================================");
 
 		} catch (SQLException e) {
 
@@ -374,8 +281,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				try {
 
 					con.rollback();
-
-					System.out.println("Reject transaction rolled back.");
 
 				} catch (SQLException rollbackException) {
 
@@ -437,22 +342,10 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 			}
 		}
 
-		System.out.println("=================================");
-
-		System.out.println("DATABASE IMAGE DATA");
-
-		System.out.println("Cheque ID = " + outwardChequeId);
-
-		System.out.println("Image Count = " + images.size());
-
-		System.out.println("=================================");
-
 		return images;
 	}
 
-	// ============================================================
 	// GET SEND BACK REASONS
-	// ============================================================
 
 	@Override
 	public List<SendBackReason> getSendBackReasons() throws SQLException {
@@ -482,8 +375,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 			}
 		}
 
-		System.out.println("Send Back Reasons Loaded = " + reasons.size());
-
 		return reasons;
 	}
 
@@ -498,13 +389,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 			// Start transaction
 			con.setAutoCommit(false);
-
-			System.out.println("=================================");
-			System.out.println("RETURN CHEQUE TO MAKER");
-			System.out.println("Cheque Number = " + chequeNo);
-			System.out.println("Reason ID = " + reasonId);
-			System.out.println("Remarks = " + remarks);
-			System.out.println("=================================");
 
 			String chequeSql = "SELECT outward_cheque_id, " + "       outward_batch_id " + "FROM outward_cheque "
 					+ "WHERE cheque_number = ?";
@@ -537,10 +421,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				throw new SQLException("Batch ID not found for cheque: " + chequeNo);
 			}
 
-			System.out.println("Outward Cheque ID = " + outwardChequeId);
-
-			System.out.println("Outward Batch ID = " + outwardBatchId);
-
 			String reasonSql = "SELECT reason_name " + "FROM send_back_reason " + "WHERE reason_id = ?";
 
 			String reasonName = null;
@@ -563,8 +443,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				throw new SQLException("Send back reason not found for reason ID: " + reasonId);
 			}
 
-			System.out.println("Reason Name = " + reasonName);
-
 			String insertSql = "INSERT INTO outward_cheque_request " + "(cheque_id, " + " batch_id, " + " remarks, "
 					+ " reason_id, " + " reason) " + "VALUES (?, ?, ?, ?, ?)";
 
@@ -583,23 +461,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 					throw new SQLException("Failed to insert outward cheque request " + "for cheque: " + chequeNo);
 				}
 
-				System.out.println("=================================");
-
-				System.out.println("OUTWARD CHEQUE REQUEST INSERTED");
-
-				System.out.println("Cheque ID = " + outwardChequeId);
-
-				System.out.println("Batch ID = " + outwardBatchId);
-
-				System.out.println("Reason ID = " + reasonId);
-
-				System.out.println("Reason = " + reasonName);
-
-				System.out.println("Remarks = " + remarks);
-
-				System.out.println("Rows Inserted = " + rowsInserted);
-
-				System.out.println("=================================");
 			}
 
 			String chequeStatus;
@@ -610,9 +471,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				chequeStatus = "PENDING_DATA_ENTRY";
 			}
 
-			System.out.println("Cheque Status = " + chequeStatus);
-			System.out.println("Updating using Outward Cheque ID = " + outwardChequeId);
-
 			String updateSql = "UPDATE outward_cheque " + "SET cheque_status = ? " + "WHERE outward_cheque_id = ?";
 
 			try (PreparedStatement ps = con.prepareStatement(updateSql)) {
@@ -622,39 +480,14 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 				int rowsUpdated = ps.executeUpdate();
 
-				System.out.println("Rows Updated = " + rowsUpdated);
-
 				if (rowsUpdated != 1) {
 					throw new SQLException("Failed to update cheque status " + "for cheque: " + chequeNo
 							+ ". Outward cheque ID: " + outwardChequeId);
 				}
 
-				System.out.println("=================================");
-
-				System.out.println("CHEQUE STATUS UPDATED");
-
-				System.out.println("Cheque Number = " + chequeNo);
-
-				System.out.println("Outward Cheque ID = " + outwardChequeId);
-
-				System.out.println("New Status = " + chequeStatus);
-
-				System.out.println("Rows Updated = " + rowsUpdated);
-
-				System.out.println("=================================");
 			}
 
 			con.commit();
-
-			System.out.println("=================================");
-
-			System.out.println("RETURN TO MAKER SUCCESS");
-
-			System.out.println("Cheque = " + chequeNo);
-
-			System.out.println("Status = RETURN_TO_MAKER");
-
-			System.out.println("=================================");
 
 		} catch (SQLException e) {
 
@@ -663,8 +496,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				try {
 
 					con.rollback();
-
-					System.out.println("Return-to-maker transaction rolled back.");
 
 				} catch (SQLException rollbackException) {
 
@@ -720,17 +551,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 			int rowsUpdated = ps.executeUpdate();
 
-			System.out.println("=================================");
-
-			System.out.println("BATCH STATUS UPDATE");
-
-			System.out.println("Batch ID = " + batchId);
-
-			System.out.println("New Status = " + status);
-
-			System.out.println("Rows Updated = " + rowsUpdated);
-
-			System.out.println("=================================");
 		}
 	}
 
@@ -761,8 +581,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 				reasons.add(reason);
 			}
 		}
-
-		System.out.println("Rejected Reasons Loaded = " + reasons.size());
 
 		return reasons;
 	}
@@ -799,12 +617,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 			ps.executeUpdate();
 
-			System.out.println("Rejected cheque saved successfully.");
-
-			System.out.println("Reason ID   : " + rejectedCheque.getRejectedReasonId());
-
-			System.out.println("Reason Name : " + rejectedCheque.getRejectedReasonName());
-
 		} finally {
 
 			if (ps != null) {
@@ -829,11 +641,6 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 			ps.setString(1, chequeId);
 
-			System.out.println("=================================");
-			System.out.println("GET REJECT REQUEST");
-			System.out.println("Cheque ID = " + chequeId);
-			System.out.println("=================================");
-
 			try (ResultSet rs = ps.executeQuery()) {
 
 				if (rs.next()) {
@@ -852,28 +659,10 @@ public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 					dto.setRemarks(rs.getString("remarks"));
 
-					System.out.println("Reject Request Found");
-
-					System.out.println("Request ID = " + dto.getRequestId());
-
-					System.out.println("Cheque ID = " + dto.getChequeId());
-
-					System.out.println("Batch ID = " + dto.getBatchId());
-
-					System.out.println("Reason ID = " + dto.getRejectedReasonId());
-
-					System.out.println("Reason = " + dto.getRejectedReasonName());
-
-					System.out.println("Remarks = " + dto.getRemarks());
-
-					System.out.println("=================================");
-
 					return dto;
 				}
 			}
 		}
-
-		System.out.println("No reject request found for Cheque ID = " + chequeId);
 
 		return null;
 	}
