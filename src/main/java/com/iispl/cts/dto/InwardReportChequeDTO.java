@@ -16,9 +16,6 @@ public class InwardReportChequeDTO {
     private BigDecimal chequeAmount;
     private LocalDateTime chequeDate;
     private String chequeStatus;
-    private String presentingBankCode;
-    private String presentingBank;
-    private String draweeBankCode;
     private String draweeBank;
     private String rejectionId;
     private String rejectedReasonId;
@@ -115,30 +112,6 @@ public class InwardReportChequeDTO {
 
     public void setChequeStatus(String chequeStatus) {
         this.chequeStatus = chequeStatus;
-    }
-
-    public String getPresentingBankCode() {
-        return presentingBankCode;
-    }
-
-    public void setPresentingBankCode(String presentingBankCode) {
-        this.presentingBankCode = presentingBankCode;
-    }
-
-    public String getPresentingBank() {
-        return presentingBank;
-    }
-
-    public void setPresentingBank(String presentingBank) {
-        this.presentingBank = presentingBank;
-    }
-
-    public String getDraweeBankCode() {
-        return draweeBankCode;
-    }
-
-    public void setDraweeBankCode(String draweeBankCode) {
-        this.draweeBankCode = draweeBankCode;
     }
 
     public String getDraweeBank() {
