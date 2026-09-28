@@ -739,9 +739,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 			ps.setString(4, rejectedBy);
 
 			int rowsInserted = ps.executeUpdate();
-
-			System.out.println("Rejection record inserted. Rows: " + rowsInserted);
-
 			return rowsInserted > 0;
 
 		} catch (SQLException e) {
@@ -782,13 +779,9 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 			int rowsInserted = ps.executeUpdate();
 
-			System.out.println("Rejection request inserted. Rows: " + rowsInserted);
-
 			return rowsInserted > 0;
 
 		} catch (SQLException e) {
-
-			System.err.println("Failed to save rejection request for cheque: " + request.getInwardChequeId());
 
 			e.printStackTrace();
 
@@ -808,14 +801,9 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 			int rowsUpdated = ps.executeUpdate();
 
-			System.out.println("Cheque status updated. Cheque: " + inwardChequeId + ", Status: " + chequeStatus
-					+ ", Rows: " + rowsUpdated);
-
 			return rowsUpdated > 0;
 
 		} catch (SQLException e) {
-
-			System.err.println("Failed to update cheque status for: " + inwardChequeId);
 
 			e.printStackTrace();
 
@@ -915,17 +903,12 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 			try (ResultSet rs = ps.executeQuery()) {
 
 				if (!rs.next()) {
-
-					System.out.println("CBS Validation Failed: Account not found - " + cheque.getDraweeAccountNumber());
-
 					return new CbsValidationResult(false, "Account not found: " + cheque.getDraweeAccountNumber());
 				}
 
 				String accountStatus = rs.getString("account_status");
 
 				if (!"Active".equalsIgnoreCase(accountStatus)) {
-
-					System.out.println("CBS Validation Failed: Account is " + accountStatus);
 
 					return new CbsValidationResult(false, "Account is " + accountStatus + ".");
 				}
@@ -935,17 +918,12 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				if (cheque.getDraweeName() == null || accountHolderName == null
 						|| !cheque.getDraweeName().trim().equalsIgnoreCase(accountHolderName.trim())) {
 
-					System.out.println("CBS Validation Failed: " + "Account holder name mismatch.");
-
 					return new CbsValidationResult(false, "Account holder name mismatch.");
 				}
 
 				String masterChequeNumber = rs.getString("master_cheque_number");
 
 				if (masterChequeNumber == null) {
-
-					System.out.println("CBS Validation Failed: Cheque number " + cheque.getChequeNumber()
-							+ " does not exist for account " + cheque.getDraweeAccountNumber());
 
 					return new CbsValidationResult(false,
 							"Cheque number " + cheque.getChequeNumber() + " does not exist for this account.");
@@ -956,8 +934,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				if (masterBankCode == null || cheque.getBankCode() == null
 						|| !cheque.getBankCode().trim().equalsIgnoreCase(masterBankCode.trim())) {
 
-					System.out.println("CBS Validation Failed: Bank code mismatch.");
-
 					return new CbsValidationResult(false,
 							"Bank code mismatch. " + "Cheque: " + cheque.getBankCode() + ", Master: " + masterBankCode);
 				}
@@ -967,8 +943,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				if (masterMicrCode == null || cheque.getMicrCode() == null
 						|| !cheque.getMicrCode().trim().equalsIgnoreCase(masterMicrCode.trim())) {
 
-					System.out.println("CBS Validation Failed: MICR code mismatch.");
-
 					return new CbsValidationResult(false,
 							"MICR code mismatch. " + "Cheque: " + cheque.getMicrCode() + ", Master: " + masterMicrCode);
 				}
@@ -977,9 +951,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 				if (cheque.getBranchCode() == null
 						|| !cheque.getBranchCode().trim().equalsIgnoreCase(masterBranchComponent)) {
-
-					System.out.println("CBS Validation Failed: Branch code mismatch.");
-
 					return new CbsValidationResult(false, "Branch code mismatch. " + "Cheque: " + cheque.getBranchCode()
 							+ ", Master MICR Branch: " + masterBranchComponent);
 				}
@@ -988,30 +959,22 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 				if (!"Active".equalsIgnoreCase(branchStatus)) {
 
-					System.out.println("CBS Validation Failed: Branch is " + branchStatus);
-
 					return new CbsValidationResult(false, "Branch is " + branchStatus + ".");
 				}
 
 				String bankStatus = rs.getString("bank_status");
 
 				if (!"Active".equalsIgnoreCase(bankStatus)) {
-
-					System.out.println("CBS Validation Failed: Bank is " + bankStatus);
-
+					
 					return new CbsValidationResult(false, "Bank is " + bankStatus + ".");
 				}
 
 				if (cheque.getTransactionCode() == null || cheque.getTransactionCode().trim().isEmpty()) {
 
-					System.out.println("CBS Validation Failed: " + "Transaction code is missing.");
-
 					return new CbsValidationResult(false, "Transaction code is missing.");
 				}
 
 				if (cheque.getChequeDate() == null) {
-
-					System.out.println("CBS Validation Failed: " + "Cheque date is missing.");
 
 					return new CbsValidationResult(false, "Cheque date is missing.");
 				}
@@ -1019,9 +982,6 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
 
 				if (cheque.getChequeDate().after(today)) {
-
-					System.out.println("CBS Validation Failed: " + "Cheque is postdated.");
-
 					return new CbsValidationResult(false,
 							"Cheque is postdated. " + "Cheque date: " + cheque.getChequeDate());
 				}
@@ -1031,21 +991,14 @@ public class InwardChequeDAOImpl implements InwardChequeDAO {
 				if (accountBalance == null || cheque.getChequeAmount() == null
 						|| accountBalance.compareTo(cheque.getChequeAmount()) < 0) {
 
-					System.out.println("CBS Validation Failed: " + "Insufficient balance.");
-
 					return new CbsValidationResult(false, "Insufficient balance. " + "Available: ₹" + accountBalance
 							+ ", Cheque amount: ₹" + cheque.getChequeAmount());
 				}
-
-				System.out.println("CBS Validation Passed for cheque: " + cheque.getChequeNumber());
-
 				return new CbsValidationResult(true, "CBS validation passed.");
 
 			}
 
 		} catch (SQLException e) {
-
-			System.err.println("CBS Validation Error for cheque: " + cheque.getChequeNumber());
 
 			e.printStackTrace();
 
