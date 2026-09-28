@@ -73,15 +73,15 @@
 					</hlayout>
 				</vlayout>
 
-				<!-- Notification trigger icon with unread badge counter -->
 				<div id="divNotificationBell"
-					style="position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:#f1f5f9;"
-					onClick='popupNotifications.open(self, "after_end")'>
-					<label value="🔔" style="font-size:15px;" />
-					<label id="lblUnreadBadge" value="0" visible="false"
-						style="position:absolute; top:-2px; right:-2px; background:#ef4444; color:white; border-radius:50%; font-size:9px; font-weight:bold; width:16px; height:16px; text-align:center; line-height:16px;" />
-				</div>
+					style="position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:#f1f5f9; overflow:visible;">
 
+					<label value="🔔" style="font-size:15px;" />
+
+					<label id="lblUnreadBadge" value="0" visible="false"
+						style="position:absolute; top:0px; right:-6px; background:#ef4444; color:white; border-radius:50%; font-size:9px; font-weight:bold; width:18px; height:18px; text-align:center; line-height:18px; z-index:9999; box-sizing:border-box;" />
+
+				</div>
 				<!-- Authenticated operator profile badge -->
 				<hlayout valign="middle" spacing="10px">
 					<div

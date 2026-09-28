@@ -102,8 +102,6 @@
     <!-- =========================================================================
          4. MAIN QUERY (OUTWARD SCAN BATCHES)
          ========================================================================= -->
-    <!-- Primary query iterating outward batch records during detail band evaluation -->
-    <!-- 4. MAIN QUERY (OUTWARD SCAN BATCHES) -->
     <queryString language="SQL">
         <![CDATA[
             SELECT 
@@ -128,7 +126,6 @@
     <field name="uploaded_at" class="java.sql.Timestamp"/>
     <field name="cheque_count" class="java.lang.Integer"/>
     <field name="total_amount" class="java.math.BigDecimal"/>
-    <field name="uploaded_by" class="java.lang.String"/>
     <field name="batch_status" class="java.lang.String"/>
 
     <!-- =========================================================================
@@ -239,8 +236,7 @@
     <!-- =========================================================================
          7. BATCH OPERATIONS HEADER
          ========================================================================= -->
-    <!-- Column headers for the outward batches list (Active only for SESSION_LIFECYCLE) -->
-<columnHeader>
+    <columnHeader>
         <band height="44">
             <printWhenExpression><![CDATA["SESSION_LIFECYCLE".equals($P{REPORT_TYPE})]]></printWhenExpression>
             <staticText>
@@ -264,7 +260,6 @@
     <!-- =========================================================================
          8. BATCH DETAIL ROWS
          ========================================================================= -->
-    <!-- Detail band repeating for each row returned from scan_batch -->
     <detail>
         <band height="18">
             <printWhenExpression><![CDATA["SESSION_LIFECYCLE".equals($P{REPORT_TYPE})]]></printWhenExpression>
@@ -288,9 +283,7 @@
          ========================================================================= -->
     <pageFooter>
         <band height="20">
-            <!-- Running page index -->
             <textField><reportElement x="680" y="2" width="80" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea043"/><textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER} + " of "]]></textFieldExpression></textField>
-            <!-- Total page count resolution -->
             <textField evaluationTime="Report"><reportElement x="762" y="2" width="35" height="15" forecolor="#64748B" uuid="885bb1cb-e7bc-493e-af4c-2234057ea044"/><textElement verticalAlignment="Middle"><font size="8"/></textElement><textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression></textField>
         </band>
     </pageFooter>
@@ -300,7 +293,6 @@
          ========================================================================= -->
     <summary>
         <band height="100">
-            <!-- Render this entire summary section only when extracting user audits -->
             <printWhenExpression><![CDATA["USER_AUDIT".equals($P{REPORT_TYPE})]]></printWhenExpression>
             
             <staticText>
@@ -309,7 +301,6 @@
                 <text><![CDATA[SYSTEM AUDIT & USER ACCESS LOGS]]></text>
             </staticText>
 
-            <!-- Audit table headers -->
             <rectangle>
                 <reportElement x="0" y="30" width="802" height="24" backcolor="#F1F5F9" uuid="2a0bb5f9-5f21-4f9e-a89e-2dc307eb8e42"/>
                 <graphicElement><pen lineWidth="0.5" lineColor="#CBD5E1"/></graphicElement>
@@ -323,7 +314,6 @@
             <staticText><reportElement x="654" y="34" width="86" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486b"/><textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[IP ADDRESS]]></text></staticText>
             <staticText><reportElement x="744" y="34" width="52" height="16" uuid="c6fbfe55-1f9e-436f-b27b-fb8653ee486c"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement><text><![CDATA[STATUS]]></text></staticText>
 
-            <!-- List component iterating over AuditDataset -->
             <componentElement>
                 <reportElement x="0" y="54" width="802" height="18" uuid="70a8d672-8356-4c4f-a720-7f28876c342b"/>
                 <jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">

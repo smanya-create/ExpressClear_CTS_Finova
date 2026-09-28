@@ -58,8 +58,8 @@
 										<vlayout spacing="6px" hflex="1">
 											<label value="REPORT TYPE" sclass="field-label" style="font-size: 11px; font-weight: 700; color: #64748b;" />
 											<combobox id="cmbReportType" readonly="true" height="38px" hflex="1" style="font-size: 13px;">
-												<comboitem label="Outward Clearing &amp; Batch Settlement Report (Pending, Verified, NPCI)" value="OUTWARD_CLEARING_SETTLEMENT" />
-												<comboitem label="Outward Cheque Rejection Audit Report (Rejections Only)" value="OUTWARD_REJECTIONS_AUDIT" />
+												<comboitem label="Outward Clearing &amp; Batch Settlement Report " value="OUTWARD_CLEARING_SETTLEMENT" />
+												<comboitem label="Outward Cheque Rejection Audit Report" value="OUTWARD_REJECTIONS_AUDIT" />
 											</combobox>
 										</vlayout>
 
