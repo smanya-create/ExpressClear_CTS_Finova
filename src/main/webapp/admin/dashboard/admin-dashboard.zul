@@ -89,7 +89,7 @@
 								<label value="Session Action"
 									sclass="cts-card-title" />
 								<label
-									value="Choose the session operation you want to perform."
+									value="Choose the session operation."
 									sclass="cts-card-subtitle" />
 							</vlayout>
 
