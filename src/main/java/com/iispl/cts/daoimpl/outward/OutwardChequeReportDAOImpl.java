@@ -17,6 +17,7 @@ import net.sf.jasperreports.engine.JasperReport;
 
 public class OutwardChequeReportDAOImpl implements OutwardChequeReportDAO {
 
+    // Report template paths
     private static final String SETTLEMENT_REPORT_PATH = "/reports/cts_checker_settlement_report.jrxml";
     private static final String REJECTIONS_REPORT_PATH = "/reports/cts_checker_rejections_report.jrxml";
     private static final String LEGACY_FALLBACK_PATH   = "/reports/outward/outward_cheque_report.jrxml";
@@ -24,14 +25,17 @@ public class OutwardChequeReportDAOImpl implements OutwardChequeReportDAO {
     @Override
     public byte[] generateReport(Date fromDate, Date toDate, String reportType) throws Exception {
 
+        // Validate date parameters
         if (fromDate == null) throw new IllegalArgumentException("From date is required.");
         if (toDate == null) throw new IllegalArgumentException("To date is required.");
         if (fromDate.after(toDate)) throw new IllegalArgumentException("From date cannot be later than To date.");
 
+        // Resolve template path by report type
         String targetPath = "OUTWARD_REJECTIONS_AUDIT".equals(reportType) 
                 ? REJECTIONS_REPORT_PATH 
                 : SETTLEMENT_REPORT_PATH;
 
+        // Load primary template with fallback
         InputStream reportStream = getClass().getResourceAsStream(targetPath);
         if (reportStream == null) {
             reportStream = getClass().getResourceAsStream(LEGACY_FALLBACK_PATH);
@@ -40,17 +44,20 @@ public class OutwardChequeReportDAOImpl implements OutwardChequeReportDAO {
             throw new IllegalStateException("Jasper report template not found at: " + targetPath + " or fallback: " + LEGACY_FALLBACK_PATH);
         }
 
+        // Compile jrxml template
         JasperReport jasperReport;
         try (InputStream stream = reportStream) {
             jasperReport = JasperCompileManager.compileReport(stream);
         }
 
+        // Populate report parameters
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("FROM_DATE", fromDate);
         parameters.put("TO_DATE", toDate);
         parameters.put("GENERATED_BY", "CHECKER");
         parameters.put("GENERATION_DATE", new java.util.Date());
 
+        // Fill report via JDBC connection and export to PDF byte array
         try (Connection connection = DBConnection.getConnection()) {
             if (connection == null) {
                 throw new IllegalStateException("Database connection is null.");

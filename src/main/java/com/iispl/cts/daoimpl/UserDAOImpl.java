@@ -12,6 +12,7 @@ public class UserDAOImpl implements UserDAO {
 
 	private static UserDAOImpl instance;
 
+	// Singleton instance access
 	public static synchronized UserDAOImpl getInstance() {
 		if (instance == null)
 			instance = new UserDAOImpl();
@@ -59,6 +60,7 @@ public class UserDAOImpl implements UserDAO {
 		StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1 ");
 		List<Object> params = new ArrayList<>();
 
+		// Search across multiple user fields
 		if (query != null && !query.trim().isEmpty()) {
 			sql.append(
 					"AND (LOWER(employee_id) LIKE ? OR LOWER(username) LIKE ? OR LOWER(full_name) LIKE ? OR LOWER(email) LIKE ?) ");
@@ -69,11 +71,13 @@ public class UserDAOImpl implements UserDAO {
 			params.add(q);
 		}
 
+		// Filter by assigned role
 		if (roleId != null && !"ALL".equalsIgnoreCase(roleId)) {
 			sql.append("AND role_id = ? ");
 			params.add(roleId);
 		}
 
+		// Filter by account active status
 		if (status != null && !"ALL".equalsIgnoreCase(status)) {
 			sql.append("AND LOWER(status) = ? ");
 			params.add(status.toLowerCase());
@@ -114,6 +118,7 @@ public class UserDAOImpl implements UserDAO {
 				}
 			}
 
+			// Update existing record or insert new user
 			if (exists) {
 				try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
 					ps.setString(1, user.getRoleId());
@@ -149,6 +154,7 @@ public class UserDAOImpl implements UserDAO {
 
 	@Override
 	public String generateNextUserId() {
+		// Extract maximum numeric index after USR prefix
 		String sql = "SELECT MAX(CAST(SUBSTRING(user_id, 4) AS INTEGER)) FROM users WHERE user_id LIKE 'USR%'";
 		int max = 1000;
 		try (Connection conn = DBConnection.getConnection();
@@ -165,6 +171,7 @@ public class UserDAOImpl implements UserDAO {
 
 	@Override
 	public String generateNextEmployeeId() {
+		// Extract maximum numeric index after EMP prefix
 		String sql = "SELECT MAX(CAST(SUBSTRING(employee_id, 4) AS INTEGER)) FROM users WHERE employee_id LIKE 'EMP%'";
 		int max = 1000;
 		try (Connection conn = DBConnection.getConnection();
@@ -265,7 +272,7 @@ public class UserDAOImpl implements UserDAO {
 		}
 
 		String clean = identifier.trim();
-		// Uses one query to check both username and email with LIMIT 1
+		// Matches login input against username or email
 		String sql = "SELECT * FROM users " + "WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?) "
 				+ "LIMIT 1";
 

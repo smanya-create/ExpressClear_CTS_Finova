@@ -6,44 +6,43 @@
 		apply="com.iispl.cts.controller.admin.RoleManagementController"
 		hflex="1" vflex="1">
 
-		<!-- 1. Match Shared Left Sidebar Navigation (240px) -->
+		<!-- Sidebar navigation -->
 		<west width="220px" border="none" collapsible="false">
 			<include src="/components/sidebar.zul" role="ADMIN"
 				activeTab="role-management" />
 		</west>
 
-		<!-- Main Workspace -->
+		<!-- Main workspace -->
 		<center border="none">
 			<borderlayout hflex="1" vflex="1">
 
-				<!-- Fixed Header -->
+				<!-- Pinned top header -->
 				<north size="auto" border="none">
 					<include id="incHeader" src="/components/header.zul"
 						pageTitle="Admin Dashboard" pageSubtitle="Role Management"
 						showNotifications="false" />
 				</north>
 
-				<!-- 2. Match Exact Content Workspace Padding & Background -->
+				<!-- Non-scrollable content area -->
 				<center border="none" autoscroll="false"
 					style="background-color: #f8fafc; overflow: hidden;">
 					<vlayout sclass="role-content" spacing="14px"
 						vflex="1" hflex="1"
 						style="padding: 20px 24px 16px 24px; box-sizing: border-box; overflow: hidden;">
 
-						<!-- Fixed Page Title Header -->
+						<!-- Page heading -->
 						<vlayout spacing="2px"
 							style="flex: 0 0 auto;">
 							<label value="Role Management"
 								sclass="page-title" />
-
 						</vlayout>
 
-						<!-- 3. Roles Table Card (Locked to ~420px to match Audit Trail card height) -->
+						<!-- System roles grid container -->
 						<vlayout sclass="card-panel" spacing="12px"
 							hflex="1" vflex="1"
 							style="padding: 16px 22px; box-sizing: border-box; overflow: hidden;">
 
-							<!-- Top Bar: Counter & Add Button -->
+							<!-- Toolbar with item count and add action -->
 							<hlayout valign="middle" hflex="1"
 								style="justify-content: space-between; flex: 0 0 auto;">
 								<hlayout valign="middle"
@@ -56,10 +55,12 @@
 								</hlayout>
 								<space hflex="1" />
 
+								<!-- Trigger add role dialog -->
 								<button id="btnAddRole"
 									label="+ Add Role" sclass="btn-primary" height="34px" />
 							</hlayout>
 
+							<!-- Roles list grid -->
 							<grid id="gridRoles" sclass="role-grid"
 								span="true" vflex="1" hflex="1"
 								emptyMessage="No roles found.">

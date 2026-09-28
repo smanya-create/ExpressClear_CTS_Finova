@@ -2,15 +2,16 @@
 <?link rel="stylesheet" type="text/css" href="/css/common/sidebar.css"?>
 <zk xmlns:w="client">
 	<style src="/css/common/sidebar.css" />
+	<!-- Collapsible left sidebar navigation panel -->
 	<vlayout sclass="sidebar" width="220px" vflex="1"
 		apply="com.iispl.cts.controller.common.SidebarController" spacing="0"
 		style="background-color: #0b1d3a; overflow: hidden;">
 
-		<!-- Top Scrollable Navigation Area -->
+		<!-- Scrollable navigation container -->
 		<vlayout vflex="1" hflex="1" spacing="0"
 			style="overflow-y: auto;">
 
-			<!-- Brand Title Header -->
+			<!-- Brand logo and portal identification header -->
 			<vlayout spacing="2px"
 				style="padding: 24px 20px 18px 20px;">
 				<label value="CTS"
@@ -24,12 +25,12 @@
 			<separator height="1px"
 				style="background: rgba(255, 255, 255, 0.08); margin: 0 0 12px 0;" />
 
-			<!-- Dynamic Role-Based Navigation Menu -->
+			<!-- Dynamic navigation links switched by assigned operator role -->
 			<vlayout hflex="1" spacing="0" style="padding: 0 10px;">
 				<label id="lblNavCategory" value="ADMINISTRATION"
 					style="font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 1px; padding: 6px 12px; display: block; text-transform: uppercase;" />
 
-				<!-- ADMIN MODULES -->
+				<!-- Administrator navigation links -->
 				<div id="divAdminMenu" visible="true">
 					<vlayout spacing="2px">
 						<a id="navAdminDashboard" label=" Dashboard"
@@ -50,7 +51,7 @@
 					</vlayout>
 				</div>
 
-				<!-- OUTWARD MAKER MODULES -->
+				<!-- Outward Maker navigation links -->
 				<div id="divMakerMenu" visible="false">
 					<vlayout spacing="2px">
 
@@ -74,6 +75,7 @@
 							onClick="$composer.navToOutwardDataEntry()"
 							w:onClick="jq('.nav-item').removeClass('active'); jq(this).addClass('active');" />
 
+						<!-- Hidden queue tab -->
 						<a id="navQueue" label="Unprocessed Cheques"
 							visible="false"
 							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
@@ -88,7 +90,7 @@
 					</vlayout>
 				</div>
 
-				<!-- OUTWARD CHECKER MODULES -->
+				<!-- Outward Checker navigation links -->
 				<div id="divCheckerMenu" visible="false">
 					<vlayout spacing="2px">
 						<a id="navToCheckerDashboard" label="Dashboard"
@@ -104,6 +106,7 @@
 							label="Outward Rejected Cheques"
 							sclass="${arg.activeTab eq 'outward-rejected-cheques' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToOutwardRejectedCheques()" />
+						<!-- Hidden unprocessed queue tab -->
 						<a id="navToOutwardCheckerUnprocessedQueue"
 							label="Unprocessed Cheques" visible="false"
 							sclass="${arg.activeTab eq 'unprocessed' ? 'nav-item active' : 'nav-item'}"
@@ -115,7 +118,7 @@
 					</vlayout>
 				</div>
 
-				<!-- INWARD MAKER MODULES -->
+				<!-- Inward Maker navigation links -->
 				<div id="divInwardMakerMenu" visible="false">
 					<vlayout spacing="2px">
 						<a id="navInwardDashboard" label="Dashboard"
@@ -131,17 +134,11 @@
 							sclass="${arg.activeTab eq 'inward-data-entry' ? 'nav-item active' : 'nav-item'}"
 							onClick="$composer.navToInwardDataEntry()" />
 
-						<!-- Temporarily disabled Unprocessed Cheques navigation -->
-						<!-- <a id="navInwardUnprocessed"
-							label="Unprocessed Cheques"
-							visible="false"
-							sclass="${arg.activeTab eq 'inward-unprocessed' ? 'nav-item active' : 'nav-item'}"
-							onClick="$composer.navToInwardUnprocessedQueue()" />  -->
-
+						<!-- Inward unprocessed queue temporarily disabled -->
 					</vlayout>
 				</div>
 
-				<!-- INWARD CHECKER MODULES -->
+				<!-- Inward Checker navigation links -->
 				<div id="divInwardCheckerMenu" visible="false">
 
 					<vlayout spacing="2px">
@@ -164,7 +161,7 @@
 			</vlayout>
 		</vlayout>
 
-		<!-- Pinned Bottom Logout Action -->
+		<!-- Bottom logout action -->
 		<vlayout spacing="0" hflex="1"
 			style="padding: 18px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
 			<a label="●  Log Out" sclass="nav-item-logout"
