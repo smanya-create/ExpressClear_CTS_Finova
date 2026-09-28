@@ -374,7 +374,7 @@
 
             <button
                 id="btnRejectCancel"
-                label="CANCEL"
+                label="Cancel"
                 style="
                     width:85px !important;
                     min-width:85px !important;
@@ -409,7 +409,7 @@
 
             <button
                 id="btnRejectConfirm"
-                label="REJECT CHEQUE"
+                label="Reject Cheque"
                 style="
                     width:125px !important;
                     min-width:125px !important;
