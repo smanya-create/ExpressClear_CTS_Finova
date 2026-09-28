@@ -173,10 +173,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		outwardCheckerQueueService = new OutwardCheckerQueueServiceImpl();
 
-		System.out.println("==========================================");
-		System.out.println("OUTWARD CHECKER QUEUE");
-		System.out.println("==========================================");
-
 		if (btnXmlGeneration != null) {
 
 			btnXmlGeneration.setVisible(true);
@@ -200,8 +196,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		}
 
 		if (batchId == null || batchId.trim().isEmpty()) {
-
-			System.out.println("No batch selected.");
 
 			if (noBatchMessage != null) {
 				noBatchMessage.setVisible(true);
@@ -303,12 +297,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 		}
 
 		status = status.trim();
-
-		System.out.println("==========================================");
-		System.out.println("CHECKER MESSAGE STATUS");
-		System.out.println("Cheque No : " + cheque.getChequeNumber());
-		System.out.println("Status    : " + status);
-		System.out.println("==========================================");
 
 		if ("PENDING_VERIFICATION".equalsIgnoreCase(status)) {
 
@@ -446,9 +434,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				lblMakerRejectionRemarks.setValue("");
 			}
 
-			System.out.println(
-					"Cheque " + cheque.getChequeNumber() + " is MAKER_RETURNED" + " -> showing MAKER RETURNED");
-
 			return;
 		}
 
@@ -490,9 +475,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				lblMakerRejectionRemarks.setValue("");
 			}
 
-			System.out.println("Cheque " + cheque.getChequeNumber() + " is VERIFIED_BY_CHECKER"
-					+ " -> showing APPROVED BY CHECKER");
-
 			return;
 		}
 
@@ -502,11 +484,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	}
 
 	private void updatePaginationProgress() {
-
-		/*
-		 * ========================================================= NO CHEQUES
-		 * =========================================================
-		 */
 
 		if (cheques == null || cheques.isEmpty()) {
 
@@ -578,12 +555,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			}
 		}
 
-		/*
-		 * ========================================================= CALCULATE
-		 * VERIFICATION PROGRESS
-		 * =========================================================
-		 */
-
 		int percentage = 0;
 
 		if (total > 0) {
@@ -601,39 +572,15 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			lblProgress.setValue(verifiedCount + "/" + total + " (" + percentage + "%)");
 		}
 
-		/*
-		 * ========================================================= CURRENT CHEQUE
-		 * NAVIGATION
-		 *
-		 * This still changes when Next / Previous is clicked.
-		 *
-		 * Example:
-		 *
-		 * 1 of 5 2 of 5 3 of 5
-		 *
-		 * This is navigation position, NOT verification progress.
-		 * =========================================================
-		 */
-
 		if (lblCurrentChequeNavigation != null) {
 
 			lblCurrentChequeNavigation.setValue(current + " of " + total);
 		}
 
-		/*
-		 * ========================================================= CURRENT CHEQUE
-		 * NUMBER / POSITION =========================================================
-		 */
-
 		if (lblCurrentCheque != null) {
 
 			lblCurrentCheque.setValue(String.valueOf(current));
 		}
-
-		/*
-		 * ========================================================= REMAINING CHEQUES
-		 * =========================================================
-		 */
 
 		if (lblRemaining != null) {
 
@@ -659,10 +606,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	private void refreshQueueAfterAction() {
 
 		try {
-
-			System.out.println("====================================");
-			System.out.println("REFRESHING CHECKER QUEUE");
-			System.out.println("====================================");
 
 			String currentChequeNumber = null;
 
@@ -712,8 +655,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				updateXmlGenerationButton();
 
-				System.out.println("No cheques remaining in checker queue.");
-
 				return;
 			}
 
@@ -737,9 +678,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				}
 			}
 
-			/*
-			 * Current cheque still exists.
-			 */
+			// Current cheque still exists.
+
 			if (newIndex >= 0) {
 
 				currentIndex = newIndex;
@@ -761,12 +701,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			updatePaginationProgress();
 
 			updateXmlGenerationButton();
-
-			System.out.println("Checker queue refreshed successfully.");
-
-			System.out.println("Total cheques = " + cheques.size());
-
-			System.out.println("Current index = " + currentIndex);
 
 		} catch (Exception e) {
 
@@ -795,8 +729,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				cmbRejectReason.appendChild(item);
 			}
-
-			System.out.println("Rejected reasons loaded = " + reasons.size());
 
 		} catch (Exception e) {
 
@@ -859,12 +791,9 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				btnReturnCancel.addEventListener("onClick", event -> closeReturnMakerWindow());
 			}
 
-			/*
-			 * Initially hidden.
-			 */
-			returnMakerWindow.setVisible(false);
+			// Initially hidden.
 
-			System.out.println("Return to Maker window created and attached.");
+			returnMakerWindow.setVisible(false);
 
 		} catch (Exception e) {
 
@@ -904,8 +833,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		try {
 
-			System.out.println("Loading cheques for batch = " + batchId);
-
 			cheques = outwardCheckerQueueService.getChequesByBatchId(batchId);
 
 			if (cheques == null) {
@@ -927,8 +854,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 					accountValidationResults.put(loadedChequeId, "VALID");
 
-					System.out.println(
-							"Cheque " + loadedCheque.getChequeNumber() + " is already VERIFIED_BY_CHECKER -> VALID");
 				}
 			}
 
@@ -951,10 +876,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			currentIndex = 0;
 
-			/*
-			 * 
-			 * displayCheque() does NOT validate account number.
-			 */
 			displayCheque();
 
 			updateXmlGenerationButton();
@@ -1056,8 +977,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				displayCheque();
 
-				System.out.println("Selected cheque = " + cheque.getChequeNumber());
-
 				return;
 			}
 		}
@@ -1079,8 +998,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				return;
 			}
-
-			System.out.println("Displaying cheque = " + cheque.getChequeNumber());
 
 			if (lblChequeNo != null) {
 
@@ -1147,8 +1064,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				setAccountValidationLabel("VALID");
 
-				System.out.println(
-						"Cheque " + cheque.getChequeNumber() + " status = VERIFIED_BY_CHECKER" + " -> Account = VALID");
 			}
 
 			else if ("VALID".equalsIgnoreCase(validationResult)) {
@@ -1262,8 +1177,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			if ("VERIFIED_BY_CHECKER".equalsIgnoreCase(nullSafe(cheque.getChequeStatus()))) {
 
-				System.out.println("Cheque " + cheque.getChequeNumber() + " is already validated.");
-
 				// Keep validation status as VALID
 				accountValidationPassed = true;
 
@@ -1298,14 +1211,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				return;
 			}
-
-			System.out.println("==========================================");
-
-			System.out.println("ACCOUNT VALIDATION");
-
-			System.out.println("Cheque Number = " + cheque.getChequeNumber());
-
-			System.out.println("Account Number = " + payeeAccountNumber);
 
 			boolean accountExists = outwardCheckerQueueService.isPayeeAccountExists(payeeAccountNumber);
 
@@ -1362,8 +1267,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		setAccountValidationLabel(result);
 
-		System.out.println("Cheque " + cheque.getChequeNumber() + " = " + result);
-
 		updateXmlGenerationButton();
 	}
 
@@ -1390,10 +1293,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			return;
 		}
 
-		System.out.println("==========================================");
-		System.out.println("CHECKING ALL CHEQUES");
-		System.out.println("==========================================");
-
 		boolean allValid = true;
 
 		for (OutwardCheque cheque : cheques) {
@@ -1409,20 +1308,10 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			String result = accountValidationResults.get(chequeId);
 
-			/*
-			 * Already verified by Checker.
-			 */
 			if ("VERIFIED_BY_CHECKER".equalsIgnoreCase(status)) {
-
-				System.out.println("Cheque " + cheque.getChequeNumber() + " = VALID (VERIFIED_BY_CHECKER)");
 
 				continue;
 			}
-
-			/*
-			 * Normal validation result.
-			 */
-			System.out.println("Cheque " + cheque.getChequeNumber() + " = " + result);
 
 			if (!"VALID".equalsIgnoreCase(nullSafe(result))) {
 
@@ -1433,17 +1322,12 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		if (!allValid) {
 
-			System.out.println("Not all cheques are VALID yet.");
-
 			updateXmlGenerationButton();
 			return;
 		}
 
-		System.out.println("ALL CHEQUES ARE VALID.");
-
 		updateXmlGenerationButton();
 
-		System.out.println("APPROVE BATCH button is now ENABLED.");
 	}
 
 	private void updateBatchStatusToVerified() {
@@ -1473,8 +1357,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				lblQueueStatus.setValue("VERIFIED");
 			}
 
-			System.out.println("Batch " + batchId + " status updated to VERIFIED.");
-
 			loadChequeStatus();
 
 			Executions.sendRedirect("/outward/checker/xml-generation.zul?batchId=" + batchId);
@@ -1497,8 +1379,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		if ("ON_HOLD".equalsIgnoreCase(nullSafe(batchStatus))) {
 
-			System.out.println("Batch " + batchId + " is ON_HOLD." + " Approval is blocked.");
-
 			return false;
 		}
 
@@ -1516,20 +1396,14 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			if ("VERIFIED_BY_CHECKER".equalsIgnoreCase(status)) {
 
-				System.out.println("Cheque " + cheque.getChequeNumber() + " = VERIFIED_BY_CHECKER");
-
 				continue;
 			}
 
 			if (!"VALID".equalsIgnoreCase(nullSafe(result))) {
 
-				System.out.println("Cheque " + cheque.getChequeNumber() + " is NOT VALID.");
-
 				return false;
 			}
 		}
-
-		System.out.println("ALL CHEQUES ARE VALID " + "AND BATCH IS NOT ON_HOLD.");
 
 		return true;
 	}
@@ -1550,8 +1424,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			btnXmlGeneration.setSclass("xml-generation-button");
 
-			System.out.println("Batch is ON_HOLD." + " APPROVE BATCH button DISABLED.");
-
 			return;
 		}
 
@@ -1563,15 +1435,12 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			btnXmlGeneration.setSclass("xml-generation-button-enabled");
 
-			System.out.println("All cheque accounts are VALID." + " APPROVE BATCH button ENABLED.");
-
 		} else {
 
 			btnXmlGeneration.setDisabled(true);
 
 			btnXmlGeneration.setSclass("xml-generation-button");
 
-			System.out.println("Not all cheque accounts are VALID." + " APPROVE BATCH button DISABLED.");
 		}
 	}
 
@@ -1658,8 +1527,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			batchStatus = outwardCheckerQueueService.getBatchStatus(batchId);
 
-			System.out.println("Loaded batch status: " + batchStatus);
-
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -1678,9 +1545,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			if (!showingBackImage) {
 
-				/*
-				 * FRONT -> BACK
-				 */
+				// FRONT -> BACK
+
 				if (backImagePath == null || backImagePath.isEmpty()) {
 
 					Messagebox.show("Back side image is not available.", "Cheque Image", Messagebox.OK,
@@ -1700,9 +1566,8 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			} else {
 
-				/*
-				 * BACK -> FRONT
-				 */
+				// BACK -> FRONT
+
 				if (frontImagePath == null || frontImagePath.isEmpty()) {
 
 					Messagebox.show("Front side image is not available.", "Cheque Image", Messagebox.OK,
@@ -1738,22 +1603,17 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 		path = path.trim();
 
-		// Convert Windows path separators to URL path separators.
 		path = path.replace("\\", "/");
 
-		// Keep external image URLs unchanged.
 		if (path.startsWith("http://") || path.startsWith("https://")) {
 
 			return path;
 		}
 
-		// ZK image src should start from the web application root.
 		if (!path.startsWith("/")) {
 
 			path = "/" + path;
 		}
-
-		System.out.println("Converted cheque image path = " + path);
 
 		return path;
 	}
@@ -1764,13 +1624,10 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			return;
 		}
 
-		// Total number of cheques in the batch
 		int total = cheques.size();
 
-		// Current cheque position
 		int current = currentIndex + 1;
 
-		// Remaining cheques
 		int remaining = total - current;
 
 		if (lblChequeCount != null) {
@@ -1826,7 +1683,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			displayCheque();
 
-			// Update pagination and progress bar
 			updatePaginationProgress();
 		}
 	}
@@ -1843,7 +1699,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			displayCheque();
 
-			// Update pagination and progress bar
 			updatePaginationProgress();
 		}
 	}
@@ -1864,12 +1719,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			}
 
 			String chequeStatus = nullSafe(cheque.getChequeStatus()).trim();
-
-			System.out.println("====================================");
-			System.out.println("RETURN TO MAKER");
-			System.out.println("Cheque No : " + cheque.getChequeNumber());
-			System.out.println("Status    : " + chequeStatus);
-			System.out.println("====================================");
 
 			if ("PENDING_MICR_REPAIR".equalsIgnoreCase(chequeStatus)
 					|| "PENDING_DATA_ENTRY".equalsIgnoreCase(chequeStatus)) {
@@ -1981,7 +1830,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			String reasonId = selectedReason.getValue().toString().trim();
 
-			// Reason name is stored as Comboitem label
 			String reasonName = selectedReason.getLabel();
 
 			String remarks = "";
@@ -2034,7 +1882,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 								outwardCheckerQueueService.updateBatchStatus(batchId, "ON_HOLD");
 
-								// Send notification to Maker
 								sendReturnToMakerNotificationAsync(cheque, reasonId);
 
 								cheque.setChequeStatus(chequeStatus);
@@ -2051,20 +1898,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 								}
 
 								updateXmlGenerationButton();
-
-								System.out.println("Cheque returned to Maker");
-
-								System.out.println("Cheque Number = " + cheque.getChequeNumber());
-
-								System.out.println("Reason ID = " + reasonId);
-
-								System.out.println("Reason Name = " + reasonName);
-
-								System.out.println("Remarks = " + finalRemarks);
-
-								System.out.println("Cheque Status = " + chequeStatus);
-
-								System.out.println("Batch Status = ON_HOLD");
 
 								if (returnMakerWindow != null) {
 
@@ -2147,10 +1980,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 	public void onClick$btnReject(Event event) {
 
-		System.out.println("====================================");
-		System.out.println("REJECT BUTTON CLICKED");
-		System.out.println("====================================");
-
 		try {
 
 			// CHECK CHEQUE LIST
@@ -2182,15 +2011,9 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				return;
 			}
 
-			System.out.println("Selected Cheque = " + cheque.getChequeNumber());
-
-			System.out.println("Batch ID = " + batchId);
-
 			// CREATE POPUP IF REQUIRED
 
 			if (rejectWindow == null || rejectWindow.getPage() == null) {
-
-				System.out.println("Reject window does not exist. Creating...");
 
 				createRejectWindow();
 			}
@@ -2199,8 +2022,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			if (rejectWindow == null) {
 
-				System.out.println("ERROR: rejectWindow is NULL.");
-
 				showError("Unable to open Reject Cheque popup.",
 						new IllegalStateException("Reject window was not created."));
 
@@ -2208,8 +2029,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			}
 
 			if (rejectWindow.getPage() == null) {
-
-				System.out.println("ERROR: rejectWindow has no Page.");
 
 				showError("Unable to open Reject Cheque popup.",
 						new IllegalStateException("Reject window is not attached to the current Page."));
@@ -2232,8 +2051,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			rejectWindow.doModal();
 
-			System.out.println("Reject Cheque window opened successfully.");
-
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -2243,10 +2060,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 	}
 
 	private void createRejectWindow() {
-
-		System.out.println("====================================");
-		System.out.println("CREATE REJECT CHEQUE WINDOW");
-		System.out.println("====================================");
 
 		try {
 
@@ -2258,11 +2071,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 				throw new IllegalStateException("Checker Queue root component is not attached to a Page.");
 			}
 
-			System.out.println("Current Page found successfully.");
-
 			if (rejectWindow != null) {
-
-				System.out.println("Existing rejectWindow found. Page = " + rejectWindow.getPage());
 
 				if (rejectWindow.getPage() == null) {
 
@@ -2274,9 +2083,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			}
 
 			Component component = Executions.createComponents("/outward/checker/reject-cheque.zul", null, null);
-
-			System.out.println(
-					"Created component type = " + (component == null ? "NULL" : component.getClass().getName()));
 
 			if (component == null) {
 
@@ -2293,13 +2099,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			rejectWindow = (Window) component;
 
-			System.out.println("Reject Window object created successfully.");
-
 			rejectWindow.setPage(self.getPage());
-
-			System.out.println("Reject Window attached to current Page.");
-
-			System.out.println("Reject Window Page = " + rejectWindow.getPage());
 
 			lblRejectBatch = (Label) rejectWindow.getFellowIfAny("lblRejectBatch");
 
@@ -2314,20 +2114,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			btnRejectCancel = (Button) rejectWindow.getFellowIfAny("btnRejectCancel");
 
 			Button btnRejectClose = (Button) rejectWindow.getFellowIfAny("btnRejectClose");
-
-			System.out.println("lblRejectBatch    = " + (lblRejectBatch != null));
-
-			System.out.println("lblRejectCheque   = " + (lblRejectCheque != null));
-
-			System.out.println("cmbRejectReason   = " + (cmbRejectReason != null));
-
-			System.out.println("txtRejectRemarks  = " + (txtRejectRemarks != null));
-
-			System.out.println("btnRejectConfirm  = " + (btnRejectConfirm != null));
-
-			System.out.println("btnRejectCancel   = " + (btnRejectCancel != null));
-
-			System.out.println("btnRejectClose    = " + (btnRejectClose != null));
 
 			if (lblRejectBatch == null) {
 				throw new IllegalStateException("lblRejectBatch not found in reject-cheque.zul.");
@@ -2367,11 +2153,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				loadRejectedReasons();
 
-				System.out.println("Rejected reasons loaded successfully.");
-
 			} catch (Exception reasonException) {
-
-				System.out.println("WARNING: Could not load rejected reasons.");
 
 				reasonException.printStackTrace();
 
@@ -2379,11 +2161,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 			rejectWindow.setVisible(false);
 
-			System.out.println("Reject window created successfully.");
-
 		} catch (Exception e) {
-
-			System.out.println("ERROR WHILE CREATING REJECT WINDOW");
 
 			e.printStackTrace();
 
@@ -2412,7 +2190,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 			btnRejectConfirm = null;
 			btnRejectCancel = null;
 
-			System.out.println("Reject window creation FAILED.");
 		}
 	}
 
@@ -2498,9 +2275,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 							String userId = loggedInUser.getUserId().trim();
 
-							System.out.println("Logged-in Username = " + loggedInUser.getUsername());
-							System.out.println("Logged-in User ID = " + userId);
-
 							rejectedCheque.setRejectedBy(userId);
 
 							rejectedCheque.setRejectedDate(new Timestamp(System.currentTimeMillis()));
@@ -2519,26 +2293,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 							// Checker remarks only
 							rejectedCheque.setRemarks(finalRemarks);
 
-							System.out.println("=================================");
-
-							System.out.println("REJECT CHEQUE");
-
-							System.out.println("Cheque ID = " + rejectedCheque.getOutwardChequeId());
-
-							System.out.println("Cheque Number = " + cheque.getChequeNumber());
-
-							System.out.println("Username = " + rejectedCheque.getRejectedBy());
-
-							System.out.println("Batch ID = " + rejectedCheque.getOutwardBatchId());
-
-							System.out.println("Amount = " + rejectedCheque.getChequeAmount());
-
-							System.out.println("Reason ID   = " + reasonId);
-							System.out.println("Reason Name = " + reasonName);
-							System.out.println("Remarks     = " + finalRemarks);
-
-							System.out.println("=================================");
-
 							outwardCheckerQueueService.saveRejectedCheque(rejectedCheque);
 
 							outwardCheckerQueueService.updateChequeStatus(cheque.getChequeNumber(), "REJECTED");
@@ -2549,14 +2303,6 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 							closeRejectWindow();
 
-							/*
-							 * --------------------------------------------------------- REFRESH QUEUE AFTER
-							 * REJECTION ---------------------------------------------------------
-							 *
-							 * Do NOT manually remove the cheque here.
-							 *
-							 * The refresh method reloads the latest queue from DB.
-							 */
 							refreshQueueAfterAction();
 
 							Messagebox.show(
