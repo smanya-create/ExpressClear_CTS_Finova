@@ -38,6 +38,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
+    // Component bindings from admin-reports.zul
     private Combobox cmbReportType;
     private Datebox dtFromDate;
     private Datebox dtToDate;
@@ -46,22 +47,25 @@ public class AdminReportController extends GenericForwardComposer<Component> {
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
+        // Enforce session check before loading screen components
         if (!SecurityUtil.checkAccess(null)) {
             return;
         }
         super.doAfterCompose(comp);
 
+        // Default combo selection to first option (USER_AUDIT)
         if (cmbReportType != null && cmbReportType.getItemCount() > 0) {
             cmbReportType.setSelectedIndex(0);
         }
 
-        // Initialize default dates matching the clearing date
+        // Default the date pickers to match the current CTS clearing business day
         LocalDate clearingDate = getClearingDate();
         Date defaultDate = Date.from(clearingDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         if (dtFromDate != null) dtFromDate.setValue(defaultDate);
         if (dtToDate != null) dtToDate.setValue(defaultDate);
     }
 
+    // Resolves the active clearing date from session; falls back to machine date if unassigned.
     private LocalDate getClearingDate() {
         Object sessionDateObj = Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
         if (sessionDateObj instanceof LocalDate) {
@@ -72,28 +76,27 @@ public class AdminReportController extends GenericForwardComposer<Component> {
         return LocalDate.now();
     }
 
- // =========================================================================
+    
     // UNIFIED REPORT GENERATION DISPATCHER
-    // =========================================================================
     public void onClick$btnGenerateReport(Event event) {
         Date fromDate = dtFromDate.getValue();
         Date toDate = dtToDate.getValue();
 
-        // 1. Strict parameter and date validations
+        // 1. Parameter and boundary validation
         if (!validateDates(fromDate, toDate)) {
             return;
         }
 
         String reportType = getSelectedReportType();
 
-        // 2. Zero-data pre-check guard
+        // 2. Pre-check database records to avoid generating empty files
         if (!hasReportData(reportType, fromDate, toDate)) {
             Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
                     "warning", null, "top_center", 3500);
             return;
         }
 
-        // 3. Evaluate selected format from the RadioGroup
+        // 3. Resolve user-selected format (PDF vs CSV)
         String selectedFormat = (rgExportFormat != null && rgExportFormat.getSelectedItem() != null)
                               ? rgExportFormat.getSelectedItem().getValue() : "PDF";
 
@@ -104,7 +107,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 exportUserAuditCsv(fromDate, toDate);
             }
         } else {
-            // PDF Export via JasperReports
+            // PDF output routed through Jasper engine
             if ("SESSION_LIFECYCLE".equals(reportType)) {
                 exportReportPdf("/reports/cts_consolidated_report.jrxml", fromDate, toDate, "CTS_Batch_Lifecycle", reportType);
             } else {
@@ -112,18 +115,17 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             }
         }
     }
-    // =========================================================================
+
     // PRE-CHECK DATA AVAILABILITY (ZERO-DATA GUARD)
-    // =========================================================================
     private boolean hasReportData(String reportType, Date fromDate, Date toDate) {
         if ("SESSION_LIFECYCLE".equals(reportType)) {
-        	String checkSessionSql = "SELECT COUNT(*) FROM clearing_session WHERE clearing_date >= ? AND clearing_date <= ?";
+            // Verify if there are clearing sessions or batches present within the period
+            String checkSessionSql = "SELECT COUNT(*) FROM clearing_session WHERE clearing_date >= ? AND clearing_date <= ?";
             String checkBatchSql = "SELECT COUNT(DISTINCT sb.scanned_batch_id) FROM scan_batch sb "
                                  + "LEFT JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id "
                                  + "WHERE CAST(GREATEST(sb.uploaded_at, COALESCE(sc.created_at, sb.uploaded_at)) AS DATE) BETWEEN ? AND ?";
 
             try (Connection conn = DBConnection.getConnection()) {
-                // Check if either sessions or batches exist
                 try (PreparedStatement ps = conn.prepareStatement(checkSessionSql)) {
                     ps.setDate(1, new java.sql.Date(fromDate.getTime()));
                     ps.setDate(2, new java.sql.Date(toDate.getTime()));
@@ -143,7 +145,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             }
             return false;
         } else {
-            // USER_AUDIT
+            // Verify row counts in audit trail for the range
             String checkAuditSql = "SELECT COUNT(*) FROM audit_logs WHERE \"timestamp\"::date >= ? AND \"timestamp\"::date <= ?";
             try (Connection conn = DBConnection.getConnection();
                  PreparedStatement ps = conn.prepareStatement(checkAuditSql)) {
@@ -160,10 +162,10 @@ public class AdminReportController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================================
+   
     // REPORT 1: USER ACTIVITY & SECURITY AUDIT CSV
-    // =========================================================================
     private void exportUserAuditCsv(Date fromDate, Date toDate) {
+        // Prepend UTF-8 BOM so spreadsheet viewers render special characters properly
         StringBuilder sb = new StringBuilder("\uFEFF");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -193,6 +195,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String ts = rs.getTimestamp("timestamp") != null ? sdf.format(rs.getTimestamp("timestamp")) : "-";
+                    // Wrap timestamp in formula syntax to preserve exact date-time format in Excel
                     String formattedTs = ts.equals("-") ? "-" : "=\"" + ts + "\"";
 
                     sb.append(String.format("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
@@ -208,6 +211,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 }
             }
 
+            // Trigger browser download via ZK utility
             SimpleDateFormat fSdf = new SimpleDateFormat("yyyyMMdd");
             String fileName = "CTS_User_Audit_Report_" + fSdf.format(fromDate) + "_to_" + fSdf.format(toDate) + ".csv";
             Filedownload.save(sb.toString().getBytes(StandardCharsets.UTF_8), "text/csv", fileName);
@@ -218,12 +222,8 @@ public class AdminReportController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================================
+   
     // REPORT 2: BOD / EOD CLEARING SESSION LIFECYCLE & BATCH RECONCILIATION
-    // =========================================================================
- // =========================================================================
-    // REPORT 2: BOD / EOD CLEARING SESSION LIFECYCLE & BATCH RECONCILIATION
-    // =========================================================================
     private void exportSessionLifecycleCsv(Date fromDate, Date toDate) {
         StringBuilder sb = new StringBuilder("\uFEFF");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -233,7 +233,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
         sb.append("        EXPRESS CLEAR CTS - BOD / EOD CLEARING SESSION LIFECYCLE & RECONCILIATION        \n");
         sb.append("========================================================================================\n");
 
-        // Section 1: Clearing Sessions
+        // Section 1: Clearing Session Records
         sb.append("Session ID,Clearing Date,Session Status,BOD Opened By,BOD Opened At,EOD Closed By,EOD Closed At,Remarks\n");
 
         String sessionSql = "SELECT cs.session_id, cs.clearing_date, cs.session_status, "
@@ -264,7 +264,7 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                         String formattedOpenedAt = openedAt.equals("-") ? "\"-\"" : "=\"" + openedAt + "\"";
                         String formattedClosedAt = closedAt.equals("-") ? "\"-\"" : "=\"" + closedAt + "\"";
                         
-                        // Safe null check for remarks
+                        // Handle potential quotes inside remarks
                         String rawRemarks = rs.getString("remarks");
                         String remarksEscaped = (rawRemarks != null) ? rawRemarks.replace("\"", "\"\"") : "-";
 
@@ -281,12 +281,13 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                 }
             }
 
-            // Section 2: Outward Clearing Batches Processed
+         // Section 2: Outward Batches Ingested During The Same Window
             sb.append("\n\n");
             sb.append("========================================================================================\n");
             sb.append("                     OUTWARD CLEARING BATCHES PROCESSED IN PERIOD                       \n");
             sb.append("========================================================================================\n");
-            sb.append("Batch ID,Reference ID,Uploaded At,Cheque Count,Total Amount (INR),Uploaded By,Status\n");
+            // "Uploaded By" removed from the CSV header row
+            sb.append("Batch ID,Reference ID,Uploaded At,Cheque Count,Total Amount (INR),Status\n");
 
             String batchSql = "SELECT " +
                               "    sb.scanned_batch_id AS outward_batch_id, " +
@@ -294,14 +295,12 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                               "    sb.uploaded_at, " +
                               "    COALESCE(sb.actual_cheque_count, 0) AS cheque_count, " +
                               "    COALESCE(sb.actual_total_amount, 0.00) AS total_amount, " +
-                              "    COALESCE(u.username, sb.uploaded_by) AS uploaded_by, " +
                               "    COALESCE(sb.batch_status, 'PENDING_CHECKER_PROCESS') AS batch_status " +
                               "FROM scan_batch sb " +
-                              "LEFT JOIN users u ON sb.uploaded_by = u.user_id " +
                               "LEFT JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id " +
                               "WHERE CAST(GREATEST(sb.uploaded_at, COALESCE(sc.created_at, sb.uploaded_at)) AS DATE) BETWEEN ? AND ? " +
                               "GROUP BY sb.scanned_batch_id, sb.batch_reference_id, sb.uploaded_at, sb.actual_cheque_count, " +
-                              "         sb.actual_total_amount, u.username, sb.uploaded_by, sb.batch_status " +
+                              "         sb.actual_total_amount, sb.batch_status " +
                               "ORDER BY sb.uploaded_at DESC";
 
             try (PreparedStatement psBatch = conn.prepareStatement(batchSql)) {
@@ -316,22 +315,22 @@ public class AdminReportController extends GenericForwardComposer<Component> {
                                           ? sdf.format(rsBatch.getTimestamp("uploaded_at")) : "-";
                         String formattedTime = uploadTime.equals("-") ? "\"-\"" : "=\"" + uploadTime + "\"";
 
-                        sb.append(String.format("\"%s\",\"%s\",%s,\"%d\",\"%s\",\"%s\",\"%s\"\n",
+                        // "uploaded_by" string parameter removed from formatting
+                        sb.append(String.format("\"%s\",\"%s\",%s,\"%d\",\"%s\",\"%s\"\n",
                                 rsBatch.getString("outward_batch_id") != null ? rsBatch.getString("outward_batch_id") : "-",
                                 rsBatch.getString("batch_reference_id") != null ? rsBatch.getString("batch_reference_id") : "-",
                                 formattedTime,
                                 rsBatch.getInt("cheque_count"),
                                 df.format(rsBatch.getDouble("total_amount")),
-                                rsBatch.getString("uploaded_by") != null ? rsBatch.getString("uploaded_by") : "-",
                                 rsBatch.getString("batch_status") != null ? rsBatch.getString("batch_status") : "-"));
                     }
                     if (!hasBatches) {
-                        sb.append("\"No outward batches processed for this period.\",,,,,,\n");
+                        sb.append("\"No outward batches processed for this period.\",,,,,\n");
                     }
                 }
             }
 
-            // TRIGGER THE DOWNLOAD
+            // Stream CSV binary to browser
             SimpleDateFormat fSdf = new SimpleDateFormat("yyyyMMdd");
             String fileName = "CTS_Session_Lifecycle_Report_" + fSdf.format(fromDate) + "_to_" + fSdf.format(toDate) + ".csv";
             Filedownload.save(sb.toString().getBytes(StandardCharsets.UTF_8), "text/csv", fileName);
@@ -341,29 +340,31 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             Clients.showNotification("Failed to export Clearing Lifecycle CSV: " + e.getMessage(), "error", null, "top_center", 3500);
         }
     }
-    // =========================================================================
+
+    
     // REUSABLE PDF EXPORTER (JASPERREPORTS)
-    // =========================================================================
- // =========================================================================
-    // REUSABLE PDF EXPORTER (JASPERREPORTS)
-    // =========================================================================
     private void exportReportPdf(String jrxmlRelativePath, Date fromDate, Date toDate, String filePrefix, String reportType) {
         try (Connection conn = DBConnection.getConnection()) {
+            // Locate template in webapp directory structure
             String reportPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath(jrxmlRelativePath);
             File jrxmlFile = new File(reportPath);
 
+            // Fallback check in case relative path wasn't resolved directly
             if (!jrxmlFile.exists()) {
                 reportPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath("/reports/cts_consolidated_report.jrxml");
             }
 
+            // Compile template file on demand
             JasperReport jasperReport = JasperCompileManager.compileReport(reportPath);
 
+            // Populate parameters expected by the JRXML template
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("FROM_DATE", new java.sql.Date(fromDate.getTime()));
             parameters.put("TO_DATE", new java.sql.Date(toDate.getTime()));
             parameters.put("GENERATED_BY", "ADMIN");
-            parameters.put("REPORT_TYPE", reportType); // Passed to Jasper
+            parameters.put("REPORT_TYPE", reportType);
 
+            // Fill and export PDF
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
             byte[] pdfBytes = JasperExportManager.exportReportToPdf(jasperPrint);
 
@@ -377,9 +378,9 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             Clients.showNotification("PDF export failed: " + e.getMessage(), "error", null, "top_center", 3500);
         }
     }
-    // =========================================================================
+
+    
     // DATE & INPUT VALIDATIONS
-    // =========================================================================
     private boolean validateDates(Date fromDate, Date toDate) {
         if (cmbReportType.getSelectedItem() == null) {
             Clients.showNotification("Please select a report type.", "error", cmbReportType, "top_center", 2500);
@@ -401,24 +402,6 @@ public class AdminReportController extends GenericForwardComposer<Component> {
             dtFromDate.focus();
             return false;
         }
-
-//        // Future date check against system clearing date
-//        LocalDate clearingDate = getClearingDate();
-//        LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-//        LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-//
-//        if (fromLocal.isAfter(clearingDate)) {
-//            Clients.showNotification("From Date cannot be in the future beyond current clearing date (" + clearingDate + ").", 
-//                    "error", dtFromDate, "top_center", 3000);
-//            dtFromDate.focus();
-//            return false;
-//        }
-//        if (toLocal.isAfter(clearingDate)) {
-//            Clients.showNotification("To Date cannot be in the future beyond current clearing date (" + clearingDate + ").", 
-//                    "error", dtToDate, "top_center", 3000);
-//            dtToDate.focus();
-//            return false;
-//        }
 
         return true;
     }
