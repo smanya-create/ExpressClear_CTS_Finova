@@ -36,9 +36,7 @@ public class ReportXmlGenerator {
             writer.writeStartElement("RRFReport");
     
             writer.writeCharacters("\n    ");
-            
 
-            writer.writeCharacters("\n    ");
 
             int totalRejectedCheques = rejectedCheques == null ? 0 : rejectedCheques.size();
             BigDecimal totalRejectedAmount = BigDecimal.ZERO;
