@@ -14,9 +14,7 @@ import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 
 public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDAO {
 
-	// =========================================================
 	// GET PAGINATED REJECTED CHEQUES
-	// =========================================================
 
 	@Override
 	public List<OutwardRejectedCheques> getRejectedCheques(int limit, int offset) throws Exception {
@@ -49,9 +47,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		return rejectedCheques;
 	}
 
-	// =========================================================
 	// SEARCH + PAGINATION
-	// =========================================================
 
 	@Override
 	public List<OutwardRejectedCheques> searchRejectedCheques(String searchValue, Date rejectedDate, int limit,
@@ -69,9 +65,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 		List<Object> parameters = new ArrayList<>();
 
-		// -----------------------------------------------------
 		// SEARCH TEXT
-		// -----------------------------------------------------
 
 		if (searchValue != null && !searchValue.trim().isEmpty()) {
 
@@ -93,9 +87,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 			parameters.add(searchPattern); // remarks
 		}
 
-		// -----------------------------------------------------
 		// SEARCH DATE
-		// -----------------------------------------------------
 
 		if (rejectedDate != null) {
 
@@ -104,9 +96,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 			parameters.add(rejectedDate);
 		}
 
-		// -----------------------------------------------------
 		// ORDER + PAGINATION
-		// -----------------------------------------------------
 
 		sql.append("ORDER BY rejected_date DESC " + "LIMIT ? OFFSET ?");
 
@@ -135,9 +125,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		return rejectedCheques;
 	}
 
-	// =========================================================
 	// TOTAL ALL RECORDS
-	// =========================================================
 
 	@Override
 	public int getTotalRejectedCheques() throws Exception {
@@ -156,9 +144,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		return 0;
 	}
 
-	// =========================================================
 	// TOTAL SEARCH RESULTS
-	// =========================================================
 
 	@Override
 	public int getTotalRejectedCheques(String searchValue, Date rejectedDate) throws Exception {
@@ -169,9 +155,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 
 		List<Object> parameters = new ArrayList<>();
 
-		// -----------------------------------------------------
 		// SEARCH TEXT
-		// -----------------------------------------------------
 
 		if (searchValue != null && !searchValue.trim().isEmpty()) {
 
@@ -190,9 +174,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 			parameters.add(searchPattern);
 		}
 
-		// -----------------------------------------------------
 		// SEARCH DATE
-		// -----------------------------------------------------
 
 		if (rejectedDate != null) {
 
@@ -220,23 +202,10 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		return 0;
 	}
 
-	// =========================================================
 	// SAVE REJECTED CHEQUE
-	// =========================================================
 
 	@Override
 	public boolean saveRejectedCheque(OutwardRejectedCheques rejectedCheque) throws Exception {
-
-		/*
-		 * outward_rejected_cheque_id is NOT included here.
-		 *
-		 * PostgreSQL will automatically generate it using:
-		 *
-		 * 'RCH' || nextval('outward_rejected_cheque_id_seq')
-		 *
-		 * rejected_date is also not included because the database has DEFAULT
-		 * CURRENT_TIMESTAMP.
-		 */
 
 		String sql = "INSERT INTO public.outward_rejected_cheques " + "(" + "outward_cheque_id, " + "rejected_by, "
 				+ "remarks, " + "outward_batch_id, " + "cheque_amount, " + "reason_id, " + "reason" + ") "
@@ -269,9 +238,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		}
 	}
 
-	// =========================================================
 	// COMMON MAPPING METHOD
-	// =========================================================
 
 	private OutwardRejectedCheques mapRejectedCheque(ResultSet rs) throws Exception {
 
@@ -280,7 +247,7 @@ public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDA
 		rejectedCheque.setOutwardRejectedChequeId(rs.getString("outward_rejected_cheque_id"));
 
 		rejectedCheque.setOutwardChequeId(rs.getString("outward_cheque_id"));
-		
+
 		rejectedCheque.setChequeNumber(rs.getString("cheque_number"));
 
 		rejectedCheque.setRejectedBy(rs.getString("rejected_by"));

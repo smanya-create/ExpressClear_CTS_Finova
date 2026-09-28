@@ -8,64 +8,42 @@ import com.iispl.cts.daoimpl.outward.OutwardCheckerRejectionDAOImpl;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.service.outward.OutwardCheckerRejectionService;
 
-public class OutwardCheckerRejectionServiceImpl
-        implements OutwardCheckerRejectionService {
+public class OutwardCheckerRejectionServiceImpl implements OutwardCheckerRejectionService {
 
-    private final OutwardCheckerRejectionDAO rejectionDAO;
+	private final OutwardCheckerRejectionDAO rejectionDAO;
 
-    public OutwardCheckerRejectionServiceImpl() {
-        this.rejectionDAO =
-                new OutwardCheckerRejectionDAOImpl();
-    }
+	public OutwardCheckerRejectionServiceImpl() {
+		this.rejectionDAO = new OutwardCheckerRejectionDAOImpl();
+	}
 
-    @Override
-    public List<OutwardRejectedCheques> getRejectedCheques(
-            int limit,
-            int offset) throws Exception {
+	@Override
+	public List<OutwardRejectedCheques> getRejectedCheques(int limit, int offset) throws Exception {
 
-        return rejectionDAO.getRejectedCheques(
-                limit,
-                offset);
-    }
+		return rejectionDAO.getRejectedCheques(limit, offset);
+	}
 
-    @Override
-    public List<OutwardRejectedCheques> searchRejectedCheques(
-            String searchValue,
-            Date rejectedDate,
-            int limit,
-            int offset) throws Exception {
+	@Override
+	public List<OutwardRejectedCheques> searchRejectedCheques(String searchValue, Date rejectedDate, int limit,
+			int offset) throws Exception {
 
-        return rejectionDAO.searchRejectedCheques(
-                searchValue,
-                rejectedDate,
-                limit,
-                offset);
-    }
+		return rejectionDAO.searchRejectedCheques(searchValue, rejectedDate, limit, offset);
+	}
 
-    @Override
-    public int getTotalRejectedCheques()
-            throws Exception {
+	@Override
+	public int getTotalRejectedCheques() throws Exception {
 
-        return rejectionDAO.getTotalRejectedCheques();
-    }
+		return rejectionDAO.getTotalRejectedCheques();
+	}
 
-    @Override
-    public int getTotalRejectedCheques(
-            String searchValue,
-            Date rejectedDate)
-            throws Exception {
+	@Override
+	public int getTotalRejectedCheques(String searchValue, Date rejectedDate) throws Exception {
 
-        return rejectionDAO.getTotalRejectedCheques(
-                searchValue,
-                rejectedDate);
-    }
+		return rejectionDAO.getTotalRejectedCheques(searchValue, rejectedDate);
+	}
 
-    @Override
-    public boolean saveRejectedCheque(
-            OutwardRejectedCheques rejectedCheque)
-            throws Exception {
+	@Override
+	public boolean saveRejectedCheque(OutwardRejectedCheques rejectedCheque) throws Exception {
 
-        return rejectionDAO.saveRejectedCheque(
-                rejectedCheque);
-    }
+		return rejectionDAO.saveRejectedCheque(rejectedCheque);
+	}
 }
