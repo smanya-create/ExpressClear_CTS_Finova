@@ -368,7 +368,7 @@
 
             <button
                 id="btnReturnCancel"
-                label="CANCEL"
+                label="Cancel"
                 style="
                     width:85px;
                     height:34px;
@@ -387,7 +387,7 @@
 
             <button
                 id="btnReturnConfirm"
-                label="RETURN"
+                label="Return"
                 style="
                     width:85px;
                     height:34px;

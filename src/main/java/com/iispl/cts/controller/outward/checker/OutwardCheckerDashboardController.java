@@ -67,12 +67,10 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		super.doAfterCompose(comp);
 		cmbStatus.setSelectedIndex(0);
 		setupPagination();
-		setupSearch();
-		setupClear();
-
+		onClickSearch();
+		onClickClear();
 		loadDashboard();
 	}
-
 	// handling pagenation
 	private void setupPagination() {
 		btnPrevious.addEventListener(Events.ON_CLICK, event -> {
@@ -107,14 +105,14 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		});
 	}
 
-	private void setupSearch() {
+	private void onClickSearch() {
 		btnSearch.addEventListener(Events.ON_CLICK, event -> {
 			pageNumber = 1;
 			loadDashboard();
 		});
 	}
 
-	private void setupClear() {
+	private void onClickClear() {
 		btnClear.addEventListener(Events.ON_CLICK, event -> {
 			txtBatchId.setValue("");
 			cmbStatus.setSelectedIndex(0);
@@ -126,11 +124,8 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 	// checking search is in active or not
 	private boolean isSearchActive() {
 		String batchId = txtBatchId.getValue();
-
 		boolean batchIdEntered = batchId != null && !batchId.trim().isEmpty();
-
 		boolean statusSelected = !"ALL".equalsIgnoreCase(getSelectedStatus());
-
 		return batchIdEntered || statusSelected;
 	}
 
@@ -139,24 +134,19 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		if (isSearchActive()) {
 			return outwardBatchDashboardDAO.getSearchPendingBatchCount(txtBatchId.getValue(), getSelectedStatus());
 		}
-
 		return outwardBatchService.getPendingBatchCount();
 	}
 
 	private String getSelectedStatus() {
 		Comboitem selectedItem = cmbStatus.getSelectedItem();
-
 		if (selectedItem == null) {
 			return "ALL";
 		}
-
 		String status = selectedItem.getValue();
-
 		return status == null ? "ALL" : status;
 	}
 
 	private int calculateTotalPages(int totalBatches) {
-
 		return (int) Math.ceil((double) totalBatches / pageSize);
 	}
 
@@ -174,45 +164,33 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 				String status = getSelectedStatus();
 
 				pendingBatches = outwardBatchDashboardDAO.searchPendingBatches(pageNumber, pageSize, batchId, status);
-
 				totalBatches = outwardBatchDashboardDAO.getSearchPendingBatchCount(batchId, status);
 
 				if (totalBatches == 0) {
-					Messagebox.show("No batches found for the given search criteria.", "No Results", Messagebox.OK,
-							Messagebox.INFORMATION);
-
+					Messagebox.show("No batches found for the given search criteria.", "No Results", Messagebox.OK,Messagebox.INFORMATION);
 					if (batchId != null && !batchId.trim().isEmpty()) {
 						txtBatchId.focus();
 					}
 				}
 
 			} else {
-
 				pendingBatches = outwardBatchService.getPendingBatches(pageNumber, pageSize);
-
 				totalBatches = outwardBatchService.getPendingBatchCount();
 			}
 
 			// Calculating total pages based on total batch count
 			int totalPages = calculateTotalPages(totalBatches);
-
 			updatePagination(totalPages);
-
 			setBatchList(pendingBatches);
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
-			Messagebox.show("Unable to load Checker Dashboard.\n\n" + e.getMessage(), "Dashboard Error", Messagebox.OK,
-					Messagebox.ERROR);
+			Messagebox.show("Unable to load Checker Dashboard.\n\n" + e.getMessage(), "Dashboard Error", Messagebox.OK,Messagebox.ERROR);
 		}
 	}
 
 	private void updatePagination(int totalPages) {
-
 		if (totalPages == 0) {
-
 			pageNumber = 0;
 
 			lblPage.setValue("0/0");
@@ -221,7 +199,6 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 			btnPrevious.setDisabled(true);
 			btnNext.setDisabled(true);
 			btnLast.setDisabled(true);
-
 			return;
 		}
 		if (pageNumber < 1) {
@@ -234,11 +211,8 @@ public class OutwardCheckerDashboardController extends GenericForwardComposer<Co
 		lblPage.setValue(pageNumber + "/" + totalPages);
 
 		btnFirst.setDisabled(pageNumber == 1);
-
 		btnPrevious.setDisabled(pageNumber == 1);
-
 		btnNext.setDisabled(pageNumber == totalPages);
-
 		btnLast.setDisabled(pageNumber == totalPages);
 	}
 

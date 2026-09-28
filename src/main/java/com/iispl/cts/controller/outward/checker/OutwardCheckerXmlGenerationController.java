@@ -20,8 +20,10 @@ import org.zkoss.zul.Messagebox;
 import com.iispl.cts.entity.outward.OutwardBatch;
 import com.iispl.cts.entity.outward.OutwardCheque;
 import com.iispl.cts.enums.OutwardBatchStatus;
+import com.iispl.cts.service.NotificationService;
 import com.iispl.cts.service.outward.OutwardBatchService;
 import com.iispl.cts.service.outward.OutwardChequeService;
+import com.iispl.cts.serviceimpl.NotificationServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.outward.OutwardChequeServiceImpl;
 
@@ -32,6 +34,7 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 
 	private OutwardBatchService outwardBatchService = new OutwardBatchServiceImpl();
 	private OutwardChequeService outwardChequeService = new OutwardChequeServiceImpl();
+	private final NotificationService notificationService = NotificationServiceImpl.getInstance();
 
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
@@ -93,6 +96,10 @@ public class OutwardCheckerXmlGenerationController extends GenericForwardCompose
 				return;
 			}
 			outwardBatchService.updateBatchStatus(batchId, OutwardBatchStatus.COMPLETED.toString());
+			notificationService.sendNotification(
+			        "INWARD_MAKER",
+			        null,
+			        "Batch " + batchId + " has been received from NPCI and is ready for inward processing.");
 			loadVerifiedBatches();
 			Filedownload.save(xmlFile.toFile(), "application/xml");
 		} catch (Exception e) {
