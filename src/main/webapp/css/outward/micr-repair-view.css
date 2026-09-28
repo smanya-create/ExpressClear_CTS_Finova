@@ -490,7 +490,7 @@
     border-radius: 4px !important;
     font-size: 10px !important;
     font-weight: 700 !important;
-    text-transform: uppercase !important;
+    text-transform: none;
     text-align: center !important;
     white-space: nowrap !important;
 }
@@ -512,7 +512,7 @@
     border-radius: 4px !important;
     font-size: 10px !important;
     font-weight: 700 !important;
-    text-transform: uppercase !important;
+    text-transform: none;
     text-align: center !important;
     white-space: nowrap !important;
 }
