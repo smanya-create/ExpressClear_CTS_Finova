@@ -1,1127 +1,642 @@
 .cts-data-entry-wrapper {
-
     padding: 10px 16px 20px 16px !important;
-
     background: #f1f5f9 !important;
-
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
-
     color: #172033 !important;
-
     display: flex !important;
-
     flex-direction: column !important;
-
     gap: 10px !important;
-
     box-sizing: border-box !important;
-
     width: 100% !important;
-
 }
 
 .cts-title-group {
-
     display: flex !important;
-
     justify-content: space-between !important;
-
     align-items: center !important;
-
     width: 100% !important;
-
     padding: 2px 0 4px 0 !important;
-
 }
 
 /* Top Back Button (Solid Deep Navy #18275c) */
-
 .cts-btn-top-back.z-button {
-
     background-image: none !important;
-
     background: #18275c !important;
     background-color: #18275c !important;
-
     border: 1px solid #18275c !important;
-
     color: #ffffff !important;
-
     font-size: 12px !important;
-
     font-weight: 700 !important;
-
     height: 34px !important;
-
     padding: 0 18px !important;
-
     border-radius: 5px !important;
-
     cursor: pointer !important;
-
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08) !important;
-
 }
 
 .cts-btn-top-back.z-button:hover {
-
     background: #101c46 !important;
     background-color: #101c46 !important;
-
     border-color: #101c46 !important;
-
 }
 
 .cts-btn-top-back.z-button:focus,
-
 .cts-btn-top-back.z-button:active {
-
     background: #0c1535 !important;
     background-color: #0c1535 !important;
-
     border-color: #0c1535 !important;
-
     color: #ffffff !important;
-
     outline: none !important;
-
     box-shadow: none !important;
-
 }
 
 .cts-main-title {
-
     font-size: 17px !important;
-
     font-weight: 700 !important;
-
     color: #0f172a !important;
-
     display: block !important;
-
     line-height: 1.2 !important;
-
 }
 
 .cts-main-subtitle {
-
     font-size: 11px !important;
-
     color: #64748b !important;
-
     display: block !important;
-
     margin-top: 4px !important;
-
     margin-left: 8px !important;
-
 }
 
 /* Kept for compatibility with the existing ZUL/controller. */
-
 .micr-nav-pill-box {
-
     background: transparent !important;
-
     border: none !important;
-
     padding: 0 !important;
-
     box-shadow: none !important;
-
 }
 
 .cts-metadata-card {
-
     background: #ffffff !important;
-
     border: 1px solid #dfe5ed !important;
-
     border-radius: 7px !important;
-
     padding: 12px 18px !important;
-
     display: grid !important;
-
     grid-template-columns: 1fr 1fr 2fr auto !important;
-
     gap: 20px !important;
-
     align-items: center !important;
-
     box-shadow: 0 1px 3px rgba(15, 23, 42, .04) !important;
-
     box-sizing: border-box !important;
-
     width: 100% !important;
-
     min-height: 70px !important;
-
     margin-bottom: 2px !important;
-
 }
 
 .cts-meta-col {
-
     display: flex !important;
-
     flex-direction: column !important;
-
     justify-content: center !important;
-
     min-width: 0 !important;
-
 }
 
 .cts-meta-header {
-
     font-size: 10px !important;
-
     font-weight: 600 !important;
-
     color: #64748b !important;
-
     letter-spacing: .6px !important;
-
     display: block !important;
-
     margin-bottom: 3px !important;
-
 }
 
 .cts-meta-val {
-
     font-size: 12px !important;
-
     font-weight: 700 !important;
-
     color: #0f172a !important;
-
     white-space: nowrap !important;
-
     overflow: hidden !important;
-
     text-overflow: ellipsis !important;
-
 }
 
 .cts-progress-meta-col {
-
     min-width: 230px !important;
-
 }
 
 .cts-navigation-meta-col {
-
     align-items: flex-end !important;
-
 }
 
 .cts-compact-progress {
-
     width: 225px !important;
-
     height: 7px !important;
-
     border-radius: 5px !important;
-
     background: #e2e8f0 !important;
-
     overflow: hidden !important;
-
 }
 
 .cts-compact-progress .z-progressmeter-image {
-
     background: #1b3d68 !important;
     background-color: #1b3d68 !important;
-
     background-image: none !important;
-
     transition: width .25s ease-in-out !important;
-
 }
 
 .micr-progress-text {
-
     font-size: 11px !important;
-
     font-weight: 700 !important;
-
     color: #334155 !important;
-
     white-space: nowrap !important;
-
 }
 
 .micr-divider {
-
     height: 16px !important;
-
 }
 
 .micr-nav-counter {
-
     font-size: 11px !important;
-
     font-weight: 700 !important;
-
     color: #1e293b !important;
-
     min-width: 48px !important;
-
     text-align: center !important;
-
     white-space: nowrap !important;
-
 }
 
 .micr-btn-compact-nav {
-
     height: 34px !important;
-
     padding: 0 11px !important;
-
     font-size: 11px !important;
-
     border-radius: 5px !important;
-
 }
 
 .cts-badge-micr,
-
 .cts-badge-micr-completed {
-
     display: inline-block !important;
-
     padding: 1px 8px !important;
-
     border-radius: 10px !important;
-
     font-size: 10px !important;
-
     font-weight: 700 !important;
-
     width: fit-content !important;
-
-}
-
-#lblHeaderItemStatus,
-.cts-status-pill-peach,
-#lblHeaderItemStatus.z-label {
-
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    min-width: 150px !important;
-    height: 24px !important;
-    padding: 0 14px !important;
-    line-height: normal !important;
-    box-sizing: border-box !important;
-
-    background: #ffedd5 !important;
-    background-color: #ffedd5 !important;
-    background-image: none !important;
-
-    color: #c2410c !important;
-
-    border: 1px solid #fed7aa !important;
-    border-radius: 9999px !important;
-
-    font-size: 10px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.3px !important;
-    text-align: center !important;
-    box-shadow: none !important;
-    white-space: nowrap !important;
-
-    opacity: 1 !important;
-    visibility: visible !important;
 }
 
 .cts-badge-micr-completed {
-
     background: #dcfce7 !important;
     background-color: #dcfce7 !important;
     background-image: none !important;
-
     color: #16a34a !important;
-
     border: 1px solid #86efac !important;
-
 }
 
 .cts-data-entry-grid {
-
     display: grid !important;
-
     grid-template-columns: 1.18fr 1fr !important;
-
     gap: 14px !important;
-
     width: 100% !important;
-
     align-items: stretch !important;
-
 }
 
 .cts-work-card {
-
     background: #ffffff !important;
-
     border: 1px solid #dfe5ed !important;
-
     border-radius: 7px !important;
-
     padding: 14px 16px !important;
-
     box-shadow: 0 1px 3px rgba(15, 23, 42, .04) !important;
-
     display: flex !important;
-
     flex-direction: column !important;
-
     box-sizing: border-box !important;
-
     position: relative !important;
-
     min-width: 0 !important;
-
 }
 
 .micr-card-header-row {
-
     display: flex !important;
-
     justify-content: space-between !important;
-
     align-items: flex-start !important;
-
     margin-bottom: 8px !important;
-
 }
 
 .cts-card-title {
-
     font-size: 13px !important;
-
     font-weight: 700 !important;
-
     color: #111827 !important;
-
     display: block !important;
-
     line-height: 1.2 !important;
-
 }
 
 .cts-card-tagline {
-
     font-size: 10px !important;
-
     color: #64748b !important;
-
     display: block !important;
-
     margin-top: 3px !important;
-
     margin-left: 0 !important;
-
 }
 
 .micr-btn-tab {
-
     height: 34px !important;
-
     min-width: 54px !important;
-
     padding: 0 10px !important;
-
     font-size: 11px !important;
-
     border-radius: 5px !important;
-
 }
 
 .cts-cheque-box-placeholder {
-
     background: #f4f7fa !important;
-
     border: 1px solid #d7dee7 !important;
-
     border-radius: 5px !important;
-
     height: 340px !important;
-
     display: flex !important;
-
     align-items: center !important;
-
     justify-content: center !important;
-
     margin-bottom: 9px !important;
-
     overflow: hidden !important;
-
     position: relative !important;
-
     box-sizing: border-box !important;
-
     flex: 1 1 auto !important;
-
 }
 
 .micr-cheque-image {
-
     max-height: 100% !important;
-
     max-width: 100% !important;
-
     object-fit: contain !important;
-
     transition: transform .2s ease, width .2s ease !important;
-
 }
 
 .micr-empty-box {
-
     background: transparent !important;
-
     border: none !important;
-
     text-align: center !important;
-
 }
 
 .micr-empty-title {
-
     color: #475569 !important;
-
     font-weight: 700 !important;
-
     font-size: 12px !important;
-
 }
 
 .micr-empty-sub {
-
     color: #94a3b8 !important;
-
     font-size: 10px !important;
-
 }
 
 .micr-done-overlay {
-
     position: absolute !important;
-
     top: 0 !important;
-
     left: 0 !important;
-
     right: 0 !important;
-
     bottom: 0 !important;
-
     background: #ffffff !important;
-
     z-index: 10 !important;
-
     text-align: center !important;
-
     padding: 24px !important;
-
 }
 
 .micr-done-inner {
-
     align-items: center !important;
-
     justify-content: center !important;
-
     height: 100% !important;
-
 }
 
 .micr-done-icon {
-
     font-size: 36px !important;
-
     color: #16a34a !important;
-
     font-weight: 800 !important;
-
 }
 
 .micr-done-title {
-
     font-size: 16px !important;
-
     font-weight: 800 !important;
-
     color: #0f172a !important;
-
 }
 
 .micr-done-batch {
-
     font-size: 12px !important;
-
     color: #64748b !important;
-
 }
 
 .micr-done-desc {
-
     font-size: 11px !important;
-
     color: #475569 !important;
-
 }
 
 .cts-btn-secondary {
-
     background-image: none !important;
-
     background: #ffffff !important;
     background-color: #ffffff !important;
-    background-image: none !important;
-
     border: 1px solid #cbd5e1 !important;
-
     color: #24334d !important;
-
     font-size: 11px !important;
-
     font-weight: 600 !important;
-
     border-radius: 5px !important;
-
     cursor: pointer !important;
-
 }
 
 .cts-btn-secondary:hover {
-
     background: #f8fafc !important;
     background-color: #f8fafc !important;
     background-image: none !important;
-
     border-color: #94a3b8 !important;
-
 }
 
 .cts-btn-icon-sq {
-
     width: 38px !important;
-
     height: 34px !important;
-
     padding: 0 !important;
-
 }
 
 .micr-btn-tool {
-
     height: 34px !important;
-
     padding: 0 12px !important;
-
     font-size: 11px !important;
-
 }
 
 .cts-form-row {
-
     display: flex !important;
-
     gap: 10px !important;
-
     margin-bottom: 7px !important;
-
     width: 100% !important;
-
 }
 
 .cts-form-field {
-
     flex: 1 !important;
-
     display: flex !important;
-
     flex-direction: column !important;
-
     min-width: 0 !important;
-
 }
 
 .micr-form-group {
-
     display: flex !important;
-
     flex-direction: column !important;
-
     margin-bottom: 7px !important;
-
     width: 100% !important;
-
 }
 
 .micr-remarks-wrap {
-
     margin-bottom: 8px !important;
-
 }
 
 .cts-field-lbl,
-
 .cts-field-lbl-bold {
-
     font-size: 11px !important;
-
     font-weight: 600 !important;
-
     color: #1f2937 !important;
-
     margin-bottom: 3px !important;
-
     display: block !important;
-
 }
 
 .cts-field-lbl-bold {
-
     font-weight: 700 !important;
-
 }
 
 .cts-input-text {
-
     width: 100% !important;
-
     height: 34px !important;
-
     border: 1px solid #cbd5e1 !important;
-
     border-radius: 4px !important;
-
     padding: 4px 9px !important;
-
     font-size: 12px !important;
-
     box-sizing: border-box !important;
-
 }
 
 .cts-textarea {
-
     width: 100% !important;
-
     border: 1px solid #cbd5e1 !important;
-
     border-radius: 4px !important;
-
     padding: 5px 9px !important;
-
     font-size: 12px !important;
-
     color: #1e293b !important;
-
     resize: vertical !important;
-
     box-sizing: border-box !important;
-
 }
 
 .micr-code-field {
-
     font-weight: 700 !important;
-
     letter-spacing: 1px !important;
-
 }
 
 .readonly-field {
-
     background: #f1f5f9 !important;
-
     border: 1px solid #d5dde8 !important;
-
     color: #64748b !important;
-
 }
 
 .ocr-field {
-
     background: #eff6ff !important;
-
     border: 1px solid #93c5fd !important;
-
     color: #475569 !important;
-
 }
 
 .error-field {
-
     background: #fff7ed !important;
-
     border: 1px solid #fb923c !important;
-
     color: #64748b !important;
-
 }
 
 .repair-editable-field {
-
     background: #fee2e2 !important;
-
     border: 2px solid #ef4444 !important;
-
     color: #b91c1c !important;
-
     font-weight: 700 !important;
-
 }
 
 .repair-editable-field:focus {
-
     background: #fee2e2 !important;
-
     border: 2px solid #dc2626 !important;
-
     color: #991b1b !important;
-
     outline: none !important;
-
     box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important;
-
 }
 
 .correction-field {
-
     background: #ffffff !important;
     background-color: #ffffff !important;
     background-image: none !important;
-
     border: 1px solid #cbd5e1 !important;
-
     color: #0f172a !important;
-
 }
 
 .correction-field:focus {
-
     border-color: #1677e8 !important;
-
     box-shadow: 0 0 0 2px rgba(22,119,232,.12) !important;
-
     outline: none !important;
-
 }
 
 .micr-action-footer {
-
     width: 100% !important;
-
     border-top: 1px solid #e2e8f0 !important;
-
     padding: 10px 8px 0 8px !important;
-
     margin-top: auto !important;
-
     box-sizing: border-box !important;
-
 }
 
 .micr-action-footer .micr-action-btn {
-
     height: 42px !important;
-
     min-width: 0 !important;
-
     box-sizing: border-box !important;
-
 }
 
 .cts-btn-outline-danger,
-
 .cts-btn-solid-primary,
-
 .cts-btn-submit-data-entry {
-
     height: 34px !important;
-
     font-size: 11px !important;
-
     font-weight: 700 !important;
-
     border-radius: 5px !important;
-
     cursor: pointer !important;
-
     box-sizing: border-box !important;
-
 }
 
 .cts-btn-outline-danger,
 #btnRejectRequest.z-button {
-
     background-image: none !important;
-
     background: #ffffff !important;
     background-color: #ffffff !important;
-
     border: 1px solid #ef4444 !important;
-
     color: #dc2626 !important;
-
     padding: 0 13px !important;
-
 }
 
 .cts-btn-outline-danger:hover,
 #btnRejectRequest.z-button:hover {
-
     background: #fef2f2 !important;
     background-color: #fef2f2 !important;
     background-image: none !important;
-
 }
 
 .cts-btn-solid-primary,
 #btnSaveAndNext.z-button {
-
     background-image: none !important;
-
     background: #1b3d68 !important;
     background-color: #1b3d68 !important;
-
     border: 1px solid #1b3d68 !important;
-
     color: #ffffff !important;
-
     padding: 0 14px !important;
-
 }
 
 .cts-btn-solid-primary:hover,
 #btnSaveAndNext.z-button:hover {
-
     background: #142f50 !important;
     background-color: #142f50 !important;
     background-image: none !important;
-
 }
 
 .cts-btn-submit-data-entry.z-button {
-
     background-image: none !important;
-
     background: #059669 !important;
     background-color: #059669 !important;
-
     border: 1px solid #059669 !important;
-
     color: #ffffff !important;
-
     font-weight: 700 !important;
-
     font-size: 12px !important;
-
     height: 34px !important;
-
     border-radius: 5px !important;
-
     cursor: pointer !important;
-
     box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2) !important;
-
     transition: all 0.2s ease !important;
-
 }
 
 .cts-btn-submit-data-entry.z-button:hover {
-
     background: #047857 !important;
     background-color: #047857 !important;
-
     border-color: #047857 !important;
-
 }
 
 .cts-btn-submit-data-entry.z-button[disabled],
-
 .cts-btn-submit-data-entry.z-button-disabled {
-
     background: #e2e8f0 !important;
     background-color: #e2e8f0 !important;
     background-image: none !important;
-
     border-color: #cbd5e1 !important;
-
     color: #94a3b8 !important;
-
     cursor: not-allowed !important;
-
     box-shadow: none !important;
-
 }
 
 .cts-modal-window {
-
     background: transparent !important;
-
     border: none !important;
-
     box-shadow: none !important;
-
 }
 
 .cts-modal-window .z-window-content {
-
     background: transparent !important;
-
     padding: 0 !important;
-
     border: none !important;
-
 }
 
 .cts-modal-box {
-
     background: #ffffff !important;
-
     width: 460px !important;
-
     border-radius: 8px !important;
-
     padding: 18px !important;
-
     box-shadow: 0 20px 25px -5px rgba(0,0,0,.3) !important;
-
     box-sizing: border-box !important;
-
 }
 
 .cts-modal-title-bar {
-
     display: flex !important;
-
     justify-content: space-between !important;
-
     align-items: center !important;
-
     border-bottom: 1px solid #e2e8f0 !important;
-
     padding-bottom: 8px !important;
-
 }
 
 .cts-modal-heading {
-
     font-size: 15px !important;
-
     font-weight: 700 !important;
-
     color: #0f172a !important;
-
 }
 
 .cts-modal-desc {
-
     font-size: 12px !important;
-
     color: #475569 !important;
-
 }
 
 .cts-modal-footer-bar {
-
     border-top: 1px solid #e2e8f0 !important;
-
     padding-top: 10px !important;
-
     display: flex !important;
-
     justify-content: flex-end !important;
-
     gap: 8px !important;
-
 }
 
 .cts-btn-modal-cancel {
-
     height: 30px !important;
-
     font-size: 12px !important;
-
     padding: 0 14px !important;
-
 }
 
 .cts-btn-modal-confirm {
-
     background-image: none !important;
-
     background: #dc2626 !important;
-
     border: 1px solid #dc2626 !important;
-
     color: #ffffff !important;
-
     height: 30px !important;
-
     font-size: 12px !important;
-
     padding: 0 14px !important;
-
     font-weight: 600 !important;
-
     border-radius: 6px !important;
-
     cursor: pointer !important;
-
 }
 
 .cts-btn-modal-confirm:hover {
-
     background: #b91c1c !important;
-
     border-color: #b91c1c !important;
-
 }
 
 @media (max-width: 1050px) {
-
     .cts-metadata-card {
-
         grid-template-columns: 1fr 1fr !important;
-
     }
 
     .cts-progress-meta-col,
-
     .cts-navigation-meta-col {
-
         min-width: 0 !important;
-
         align-items: flex-start !important;
-
     }
 
     .cts-data-entry-grid {
-
         grid-template-columns: 1fr !important;
-
     }
-
 }
 
 /* ============================================================
-   FINAL ZK BUTTON / STATUS OVERRIDES
-   These rules intentionally come last so the ZK theme cannot
-   replace the colors defined for this screen.
+   FINAL ZK BUTTON OVERRIDES
    ============================================================ */
 
 .cts-btn-top-back.z-button,
@@ -1223,6 +738,11 @@
     color: #94a3b8 !important;
 }
 
+/* ============================================================
+   STATUS PILL: GEOMETRY & COLOR MODES
+   ============================================================ */
+
+/* Base pill shape and dimensions */
 #lblHeaderItemStatus,
 #lblHeaderItemStatus.z-label,
 .cts-status-pill-peach {
@@ -1234,11 +754,6 @@
     padding: 0 14px !important;
     line-height: normal !important;
     box-sizing: border-box !important;
-    background: #ffedd5 !important;
-    background-color: #ffedd5 !important;
-    background-image: none !important;
-    color: #c2410c !important;
-    border: 1px solid #fed7aa !important;
     border-radius: 9999px !important;
     font-size: 10px !important;
     font-weight: 800 !important;
@@ -1248,4 +763,31 @@
     white-space: nowrap !important;
     opacity: 1 !important;
     visibility: visible !important;
+
+    /* Base colors (Peach/Amber fallback) without !important so subclasses override cleanly */
+    background: #ffedd5;
+    background-color: #ffedd5;
+    background-image: none;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+/* GREEN STRICTLY FOR MICR REPAIRED */
+#lblHeaderItemStatus.status-micr-repaired,
+.cts-status-pill-peach.status-micr-repaired {
+    background: #dcfce7 !important;
+    background-color: #dcfce7 !important;
+    background-image: none !important;
+    color: #15803d !important;
+    border: 1px solid #86efac !important;
+}
+
+/* RED FOR REJECTIONS */
+#lblHeaderItemStatus.status-micr-rejected,
+.cts-status-pill-peach.status-micr-rejected {
+    background: #fee2e2 !important;
+    background-color: #fee2e2 !important;
+    background-image: none !important;
+    color: #b91c1c !important;
+    border: 1px solid #fca5a5 !important;
 }

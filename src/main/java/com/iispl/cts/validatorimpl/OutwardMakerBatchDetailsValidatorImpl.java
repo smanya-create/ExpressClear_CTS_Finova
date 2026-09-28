@@ -41,7 +41,7 @@ public class OutwardMakerBatchDetailsValidatorImpl implements OutwardMakerBatchD
 		}
 		String normalized = chequeStatus.trim().toUpperCase(Locale.ENGLISH).replace('-', '_').replace(' ', '_');
 		if (STATUS_PENDING_MICR_REPAIR.equals(normalized)) {
-			return "/outward/maker/micr-repair/micr-repair-view.zul";
+			return "/outward/maker/micr-repair/micr-repair.zul";
 		}
 		return "/outward/maker/cheque-data-entry.zul";
 	}

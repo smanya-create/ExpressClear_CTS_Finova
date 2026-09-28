@@ -490,7 +490,17 @@ public class OutwardMakerBatchDetailsController extends GenericForwardComposer<C
 			return;
 
 		mainContentArea.clearDynamicProperties();
-		mainContentArea.setDynamicProperty("batchId", batchId);
+		
+		mainContentArea.setDynamicProperty("MICR_REPAIR_SOURCE", "SCAN");
+        mainContentArea.setDynamicProperty("MICR_REPAIR_BATCH_ID", batchId);
+        mainContentArea.setDynamicProperty("MICR_REPAIR_CHEQUE_ID", chequeId);
+        mainContentArea.setDynamicProperty("source", "OUTWARD");
+
+        mainContentArea.setAttribute("MICR_REPAIR_SOURCE", "SCAN");
+        mainContentArea.setAttribute("MICR_REPAIR_BATCH_ID", batchId);
+        mainContentArea.setAttribute("MICR_REPAIR_CHEQUE_ID", chequeId);
+        mainContentArea.setAttribute("source", "OUTWARD");
+  		mainContentArea.setDynamicProperty("batchId", batchId);
 		mainContentArea.setDynamicProperty("chequeId", chequeId);
 		mainContentArea.setDynamicProperty("outwardChequeId", chequeId);
 		mainContentArea.setDynamicProperty("mode", MODE_DATA_ENTRY);
