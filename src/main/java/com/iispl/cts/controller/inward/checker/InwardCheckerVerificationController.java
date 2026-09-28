@@ -915,41 +915,68 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	}
 
 	private void updateChequePosition() {
+	    if (lblChequePosition == null || currentBatchCheques == null) {
+	        return;
+	    }
+	    int total = currentBatchCheques.size();
+	    if (total == 0) {
+	        lblChequePosition.setValue("0/0");
 
-		if (lblChequePosition == null) {
-			return;
-		}
-
-		int total = currentBatchCheques.size();
-
-		if (total == 0) {
-
-			lblChequePosition.setValue("0/0");
-
-			if (btnPrevious != null) {
-				btnPrevious.setDisabled(true);
-			}
-
-			if (btnNext != null) {
-				btnNext.setDisabled(true);
-			}
-
-			return;
-		}
-
-		lblChequePosition.setValue((currentChequeIndex + 1) + "/" + total);
-
-		if (btnPrevious != null) {
-
-			btnPrevious.setDisabled(currentChequeIndex <= 0);
-		}
-
-		if (btnNext != null) {
-
-			btnNext.setDisabled(currentChequeIndex >= total - 1);
-		}
+	        if (btnPrevious != null) {
+	            btnPrevious.setDisabled(true);
+	            btnPrevious.setStyle(
+	                    "background:#0B2344;color:white;border:0;"
+	                    + "border-radius:4px;font-size:12px;opacity:0.5;"
+	                    + "cursor:not-allowed;"
+	            );
+	        }
+	        if (btnNext != null) {
+	            btnNext.setDisabled(true);
+	            btnNext.setStyle(
+	                    "background:#0B2344;color:white;border:0;"
+	                    + "border-radius:4px;font-size:12px;opacity:0.5;"
+	                    + "cursor:not-allowed;"
+	            );
+	        }
+	        return;
+	    }
+	    lblChequePosition.setValue(
+	            (currentChequeIndex + 1) + "/" + total
+	    );
+	    if (btnPrevious != null) {
+	        boolean previousDisabled = currentChequeIndex == 0;
+	        btnPrevious.setDisabled(previousDisabled);
+	        if (previousDisabled) {
+	            btnPrevious.setStyle(
+	                    "background:#0B2344;color:white;border:0;"
+	                    + "border-radius:4px;font-size:12px;opacity:0.5;"
+	                    + "cursor:not-allowed;"
+	            );
+	        } else {
+	            btnPrevious.setStyle(
+	                    "background:#0B2344;color:white;border:0;"
+	                    + "border-radius:4px;font-size:12px;"
+	            );
+	        }
+	    }
+	    if (btnNext != null) {
+	        boolean nextDisabled = currentChequeIndex == total - 1;
+	        btnNext.setDisabled(nextDisabled);
+	        if (nextDisabled) {
+	            btnNext.setStyle(
+	                    "background:#0B2344;color:white;border:0;"
+	                    + "border-radius:4px;font-size:12px;opacity:0.5;"
+	                    + "cursor:not-allowed;"
+	            );
+	        } else {
+	            btnNext.setStyle(
+	                    "background:#0B2344;color:white;border:0;"
+	                    + "border-radius:4px;font-size:12px;"
+	            );
+	        }
+	    }
 	}
-
+	
 	private String safeValue(String value) {
 
 		return value != null ? value : "";
@@ -960,7 +987,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		if (lblVerification == null || currentBatchId == null) {
 			return;
 		}
-
 		try {
 
 			List<InwardCheque> batchCheques = inwardChequeService.getChequesByBatchAndStatus(currentBatchId, null);
