@@ -583,7 +583,7 @@ public class OutwardMakerDAOImpl implements OutwardMakerDAO {
               + "WHERE outward_cheque_id = ?";
 
         String updateBatchSql =
-                "UPDATE outward_batch SET batch_status = 'PENDING_MAKER_PROCESS' "
+                "UPDATE outward_batch SET batch_status = 'ON_HOLD' "
               + "WHERE outward_batch_id = ?";
 
         try (Connection connection = DBConnection.getConnection()) {
