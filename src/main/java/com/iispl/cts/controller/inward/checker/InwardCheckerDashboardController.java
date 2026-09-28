@@ -35,13 +35,9 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
     @Override
     public void doAfterCompose(Component comp) throws Exception {
     	
-    	
-    	
         super.doAfterCompose(comp);
-
        
         loadSubmittedBatches();
-
        
         if (btnSearch != null) {
             btnSearch.addEventListener(Events.ON_CLICK, e -> performSearch());
@@ -161,10 +157,8 @@ public class InwardCheckerDashboardController extends GenericForwardComposer<Com
             return;
         }
 
-        // Instantiate button without label first
         Button btnVerify = new Button();
 
-        // Set icon before setting label and styles
         btnVerify.setIconSclass(actionIcon);
         btnVerify.setLabel(actionLabel);
         btnVerify.setStyle(buttonStyle);

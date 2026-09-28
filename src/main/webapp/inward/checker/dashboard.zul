@@ -36,8 +36,6 @@
 
                         <vlayout spacing="0px">
 
-                           
-
                             <label value="Monitor batches submitted by maker"
                                    style="font-size:12px;color:#807977"/>
 

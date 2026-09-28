@@ -174,11 +174,9 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
         boolean hasRejected = summary != null && summary.getRejectedCheques() != 0;
 
         if (hasRejected) {
-        	exportRrfButton.setStyle(
-                "background-color: #8F5C29; color: white; border-radius: 4px; cursor: pointer;");
+        	exportRrfButton.setStyle( "background-color: #8F5C29; color: white; border-radius: 4px; cursor: pointer;");
         } else {
-        	exportRrfButton.setStyle(
-                "background-color: #ABA2A1; color: white; cursor: not-allowed;");
+        	exportRrfButton.setStyle( "background-color: #ABA2A1; color: white; cursor: not-allowed;");
         }
 
         String rrfBatchId = (summary != null && summary.getBatchId() != null) ? summary.getBatchId() : "";
@@ -236,22 +234,17 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
         List<InwardReportChequeDTO> rejectedCheques = getRejectedCheques(batchId);
 
         if (rejectedCheques.isEmpty()) {
-            Messagebox.show(
-                    "No rejected cheques found for batch " + batchId,
+            Messagebox.show("No rejected cheques found for batch " + batchId,
                     "Information",
                     Messagebox.OK,
                     Messagebox.INFORMATION);
             return;
         }
 
-    
 
-        String xml = ReportXmlGenerator.generateRrfXml(
-                batchId,
-                rejectedCheques);
+        String xml = ReportXmlGenerator.generateRrfXml( batchId, rejectedCheques);
 
-        Filedownload.save(
-                xml.getBytes(StandardCharsets.UTF_8),
+        Filedownload.save( xml.getBytes(StandardCharsets.UTF_8),
                 "application/xml",
                 "RRF_" + batchId + ".xml");
     }
@@ -263,23 +256,18 @@ public class InwardCheckerReportsController extends GenericForwardComposer<Compo
                 .collect(Collectors.toList());
 
         if (batchCheques.isEmpty()) {
-            Messagebox.show(
-                    "No cheque data available for batch " + batchId,
+            Messagebox.show( "No cheque data available for batch " + batchId,
                     "Information",
                     Messagebox.OK,
                     Messagebox.INFORMATION);
             return;
         }
 
-        String generatedBy = String.valueOf(
-                Sessions.getCurrent().getAttribute("LOGGED_USER"));
+        String generatedBy = String.valueOf(Sessions.getCurrent().getAttribute("LOGGED_USER"));
 
-        String xml = ReportXmlGenerator.generateConfirmationFileXml(
-                batchId,
-                batchCheques);
+        String xml = ReportXmlGenerator.generateConfirmationFileXml( batchId, batchCheques);
 
-        Filedownload.save(
-                xml.getBytes(StandardCharsets.UTF_8),
+        Filedownload.save( xml.getBytes(StandardCharsets.UTF_8),
                 "application/xml",
                 "ConfirmationFile_" + batchId + ".xml");
     }
