@@ -43,6 +43,7 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 	private static final String REJECTIONS_REPORT_PATH = "/reports/cts_checker_rejections_report.jrxml";
 	private static final String LEGACY_FALLBACK_PATH = "/reports/outward/outward_cheque_report.jrxml";
 
+	// UI filters and triggers
 	private Combobox cmbReportType;
 	private Datebox dateFrom;
 	private Datebox dateTo;
@@ -81,26 +82,21 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		return "OUTWARD_CLEARING_SETTLEMENT";
 	}
 
-	// =========================================================================
-	// UNIFIED REPORT GENERATION DISPATCHER
-	// =========================================================================
 	public void onClick$btnGenerateReport(Event event) {
 		java.util.Date fromDate = dateFrom.getValue();
 		java.util.Date toDate = dateTo.getValue();
 
-		// 1. Strict parameter & date validations
 		if (!validateDates(fromDate, toDate)) return;
 
 		String reportType = getSelectedReportType();
 
-		// 2. Zero-data pre-check guard (Prevents downloading blank reports)
+		// Prevent generating empty reports
 		if (!hasCheckerReportData(reportType, fromDate, toDate)) {
 			Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
 					"warning", null, "top_center", 3500);
 			return;
 		}
 
-		// 3. Resolve selected format from RadioGroup
 		String selectedFormat = (rgExportFormat != null && rgExportFormat.getSelectedItem() != null)
 				? rgExportFormat.getSelectedItem().getValue() : "PDF";
 
@@ -115,9 +111,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		}
 	}
 
-	// =========================================================================
-	// PRE-CHECK DATA AVAILABILITY (ZERO-DATA GUARD)
-	// =========================================================================
 	private boolean hasCheckerReportData(String reportType, java.util.Date fromDate, java.util.Date toDate) {
 		LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -161,9 +154,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		return false;
 	}
 
-	// =========================================================================
-	// CSV 1: OUTWARD CLEARING & BATCH SETTLEMENT
-	// =========================================================================
 	private void exportClearingSettlementCsv(java.util.Date fromDate, java.util.Date toDate) {
 		StringBuilder sb = new StringBuilder("\uFEFF");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -258,9 +248,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		}
 	}
 
-	// =========================================================================
-	// CSV 2: REJECTED CHEQUES AUDIT
-	// =========================================================================
 	private void exportRejectionAuditCsv(java.util.Date fromDate, java.util.Date toDate) {
 		StringBuilder sb = new StringBuilder("\uFEFF");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -328,9 +315,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		}
 	}
 
-	// =========================================================================
-	// PDF EXPORT (DIRECT JASPER EXECUTION)
-	// =========================================================================
 	private void exportReportPdf(java.util.Date fromDate, java.util.Date toDate, String reportType) {
 		String targetPath = "OUTWARD_REJECTIONS_AUDIT".equals(reportType) 
 				? REJECTIONS_REPORT_PATH 
@@ -373,7 +357,7 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 
 			if (pdfBytes == null || pdfBytes.length == 0) {
 				Clients.showNotification("No records found for the selected date range. Report cannot be generated.", 
-						"warning", null, "top_center", 3500);
+							"warning", null, "top_center", 3500);
 				return;
 			}
 
@@ -390,6 +374,7 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 	}
 
 	private InputStream locateReportStream(String path) {
+		// Look up template in web app context first, fallback to classloader
 		try {
 			if (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null
 					&& Executions.getCurrent().getDesktop().getWebApp() != null) {
@@ -413,9 +398,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 		return null;
 	}
 
-	// =========================================================================
-	// STRICT BANKING DATE VALIDATION
-	// =========================================================================
 	private boolean validateDates(java.util.Date fromDate, java.util.Date toDate) {
 		if (cmbReportType.getSelectedItem() == null) {
 			Clients.showNotification("Please select a report type.", "error", cmbReportType, "top_center", 2500);
@@ -438,7 +420,6 @@ public class OutwardChequeReportController extends GenericForwardComposer<Compon
 			return false;
 		}
 
-		// Future date restriction relative to active clearing session
 		LocalDate clearingDate = getClearingDate();
 		LocalDate fromLocal = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		LocalDate toLocal = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

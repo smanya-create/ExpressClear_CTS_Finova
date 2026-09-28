@@ -21,6 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
 		this.notificationDAO = NotificationDAOImpl.getInstance();
 	}
 
+	// Singleton instance access
 	public static synchronized NotificationServiceImpl getInstance() {
 		if (instance == null) {
 			instance = new NotificationServiceImpl();
@@ -28,9 +29,9 @@ public class NotificationServiceImpl implements NotificationService {
 		return instance;
 	}
 
+	// Retrieves unread notifications matching either user role or specific user ID
 	@Override
 	public List<Notification> getUnreadNotifications(String role, String userId) {
-		// TODO Auto-generated method stub
 		if ((role == null || role.trim().isEmpty()) && (userId == null || userId.trim().isEmpty())) {
 			return Collections.emptyList();
 		}
@@ -42,9 +43,9 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	// Gets count of unread notifications for bell badge indicators
 	@Override
 	public int getUnreadNotificationCount(String role, String userId) {
-		// TODO Auto-generated method stub
 		if ((role == null || role.trim().isEmpty()) && (userId == null || userId.trim().isEmpty())) {
 			return 0;
 		}
@@ -56,9 +57,9 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	// Marks all pending unread notifications as read for target scope
 	@Override
 	public boolean markAllNotificationsAsRead(String role, String userId) {
-		// TODO Auto-generated method stub
 		if ((role == null || role.trim().isEmpty()) && (userId == null || userId.trim().isEmpty())) {
 			return false;
 		}
@@ -70,9 +71,9 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	// Validates content and dispatches a new notification to role or specific user
 	@Override
 	public boolean sendNotification(String targetRole, String targetUserId, String message) {
-		// TODO Auto-generated method stub
 		if (message == null || message.trim().isEmpty()) {
 			logger.warn("Attempted to send an empty notification message.");
 			return false;

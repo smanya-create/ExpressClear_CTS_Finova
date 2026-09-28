@@ -10,278 +10,285 @@ import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
 
-    private static UserDAOImpl instance;
+	private static UserDAOImpl instance;
 
-    public static synchronized UserDAOImpl getInstance() {
-        if (instance == null) instance = new UserDAOImpl();
-        return instance;
-    }
+	// Singleton instance access
+	public static synchronized UserDAOImpl getInstance() {
+		if (instance == null)
+			instance = new UserDAOImpl();
+		return instance;
+	}
 
-    @Override
-    public User findByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE LOWER(username) = LOWER(?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, username);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapResultSetToUser(rs);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	@Override
+	public User findByUsername(String username) {
+		String sql = "SELECT * FROM users WHERE LOWER(username) = LOWER(?)";
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, username);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return mapResultSetToUser(rs);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    @Override
-    public User findByEmployeeId(String employeeId) {
-        String sql = "SELECT * FROM users WHERE employee_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, employeeId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapResultSetToUser(rs);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	@Override
+	public User findByEmployeeId(String employeeId) {
+		String sql = "SELECT * FROM users WHERE employee_id = ?";
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, employeeId);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next())
+					return mapResultSetToUser(rs);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    @Override
-    public List<User> getAllUsers() {
-        return searchUsers(null, "ALL", "ALL");
-    }
+	@Override
+	public List<User> getAllUsers() {
+		return searchUsers(null, "ALL", "ALL");
+	}
 
-    @Override
-    public List<User> searchUsers(String query, String roleId, String status) {
-        List<User> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1 ");
-        List<Object> params = new ArrayList<>();
+	@Override
+	public List<User> searchUsers(String query, String roleId, String status) {
+		List<User> list = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1 ");
+		List<Object> params = new ArrayList<>();
 
-        if (query != null && !query.trim().isEmpty()) {
-            sql.append("AND (LOWER(employee_id) LIKE ? OR LOWER(username) LIKE ? OR LOWER(full_name) LIKE ? OR LOWER(email) LIKE ?) ");
-            String q = "%" + query.trim().toLowerCase() + "%";
-            params.add(q);
-            params.add(q);
-            params.add(q);
-            params.add(q);
-        }
+		// Search across multiple user fields
+		if (query != null && !query.trim().isEmpty()) {
+			sql.append(
+					"AND (LOWER(employee_id) LIKE ? OR LOWER(username) LIKE ? OR LOWER(full_name) LIKE ? OR LOWER(email) LIKE ?) ");
+			String q = "%" + query.trim().toLowerCase() + "%";
+			params.add(q);
+			params.add(q);
+			params.add(q);
+			params.add(q);
+		}
 
-        if (roleId != null && !"ALL".equalsIgnoreCase(roleId)) {
-            sql.append("AND role_id = ? ");
-            params.add(roleId);
-        }
+		// Filter by assigned role
+		if (roleId != null && !"ALL".equalsIgnoreCase(roleId)) {
+			sql.append("AND role_id = ? ");
+			params.add(roleId);
+		}
 
-        if (status != null && !"ALL".equalsIgnoreCase(status)) {
-            sql.append("AND LOWER(status) = ? ");
-            params.add(status.toLowerCase());
-        }
+		// Filter by account active status
+		if (status != null && !"ALL".equalsIgnoreCase(status)) {
+			sql.append("AND LOWER(status) = ? ");
+			params.add(status.toLowerCase());
+		}
 
-        sql.append("ORDER BY employee_id ASC");
+		sql.append("ORDER BY employee_id ASC");
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
+			for (int i = 0; i < params.size(); i++) {
+				ps.setObject(i + 1, params.get(i));
+			}
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapResultSetToUser(rs));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					list.add(mapResultSetToUser(rs));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 
-    @Override
-    public boolean saveUser(User user) {
-        String checkSql = "SELECT user_id FROM users WHERE user_id = ?";
-        String insertSql = "INSERT INTO users (user_id, role_id, employee_id, username, password, full_name, email, mobile_number, status, user_created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String updateSql = "UPDATE users SET role_id = ?, status = ?, full_name = ?, email = ?, mobile_number = ?, password = ? WHERE user_id = ?";
+	@Override
+	public boolean saveUser(User user) {
+		String checkSql = "SELECT user_id FROM users WHERE user_id = ?";
+		String insertSql = "INSERT INTO users (user_id, role_id, employee_id, username, password, full_name, email, mobile_number, status, user_created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String updateSql = "UPDATE users SET role_id = ?, status = ?, full_name = ?, email = ?, mobile_number = ?, password = ? WHERE user_id = ?";
 
-        try (Connection conn = DBConnection.getConnection()) {
-            boolean exists = false;
-            try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
-                checkPs.setString(1, user.getUserId());
-                try (ResultSet rs = checkPs.executeQuery()) {
-                    exists = rs.next();
-                }
-            }
+		try (Connection conn = DBConnection.getConnection()) {
+			boolean exists = false;
+			try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+				checkPs.setString(1, user.getUserId());
+				try (ResultSet rs = checkPs.executeQuery()) {
+					exists = rs.next();
+				}
+			}
 
-            if (exists) {
-                try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
-                    ps.setString(1, user.getRoleId());
-                    ps.setString(2, user.getStatus());
-                    ps.setString(3, user.getFullName());
-                    ps.setString(4, user.getEmail());
-                    ps.setString(5, user.getMobileNumber());
-                    ps.setString(6, user.getPassword());
-                    ps.setString(7, user.getUserId());
-                    return ps.executeUpdate() > 0;
-                }
-            } else {
-                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
-                    ps.setString(1, user.getUserId());
-                    ps.setString(2, user.getRoleId());
-                    ps.setString(3, user.getEmployeeId());
-                    ps.setString(4, user.getUsername());
-                    ps.setString(5, user.getPassword());
-                    ps.setString(6, user.getFullName());
-                    ps.setString(7, user.getEmail());
-                    ps.setString(8, user.getMobileNumber());
-                    ps.setString(9, user.getStatus());
-                    ps.setTimestamp(10, user.getUserCreatedAt() != null ? user.getUserCreatedAt() : new Timestamp(System.currentTimeMillis()));
-                    return ps.executeUpdate() > 0;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+			// Update existing record or insert new user
+			if (exists) {
+				try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+					ps.setString(1, user.getRoleId());
+					ps.setString(2, user.getStatus());
+					ps.setString(3, user.getFullName());
+					ps.setString(4, user.getEmail());
+					ps.setString(5, user.getMobileNumber());
+					ps.setString(6, user.getPassword());
+					ps.setString(7, user.getUserId());
+					return ps.executeUpdate() > 0;
+				}
+			} else {
+				try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+					ps.setString(1, user.getUserId());
+					ps.setString(2, user.getRoleId());
+					ps.setString(3, user.getEmployeeId());
+					ps.setString(4, user.getUsername());
+					ps.setString(5, user.getPassword());
+					ps.setString(6, user.getFullName());
+					ps.setString(7, user.getEmail());
+					ps.setString(8, user.getMobileNumber());
+					ps.setString(9, user.getStatus());
+					ps.setTimestamp(10, user.getUserCreatedAt() != null ? user.getUserCreatedAt()
+							: new Timestamp(System.currentTimeMillis()));
+					return ps.executeUpdate() > 0;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
-    @Override
-    public String generateNextUserId() {
-        String sql = "SELECT MAX(CAST(SUBSTRING(user_id, 4) AS INTEGER)) FROM users WHERE user_id LIKE 'USR%'";
-        int max = 1000;
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next() && rs.getObject(1) != null) {
-                max = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "USR" + (max + 1);
-    }
+	@Override
+	public String generateNextUserId() {
+		// Extract maximum numeric index after USR prefix
+		String sql = "SELECT MAX(CAST(SUBSTRING(user_id, 4) AS INTEGER)) FROM users WHERE user_id LIKE 'USR%'";
+		int max = 1000;
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
+			if (rs.next() && rs.getObject(1) != null) {
+				max = rs.getInt(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "USR" + (max + 1);
+	}
 
-    @Override
-    public String generateNextEmployeeId() {
-        String sql = "SELECT MAX(CAST(SUBSTRING(employee_id, 4) AS INTEGER)) FROM users WHERE employee_id LIKE 'EMP%'";
-        int max = 1000;
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next() && rs.getObject(1) != null) {
-                max = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "EMP" + (max + 1);
-    }
+	@Override
+	public String generateNextEmployeeId() {
+		// Extract maximum numeric index after EMP prefix
+		String sql = "SELECT MAX(CAST(SUBSTRING(employee_id, 4) AS INTEGER)) FROM users WHERE employee_id LIKE 'EMP%'";
+		int max = 1000;
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
+			if (rs.next() && rs.getObject(1) != null) {
+				max = rs.getInt(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "EMP" + (max + 1);
+	}
 
-    private User mapResultSetToUser(ResultSet rs) throws SQLException {
-        User u = new User();
-        u.setUserId(rs.getString("user_id"));
-        u.setRoleId(rs.getString("role_id"));
-        u.setEmployeeId(rs.getString("employee_id"));
-        u.setUsername(rs.getString("username"));
-        u.setPassword(rs.getString("password"));
-        u.setFullName(rs.getString("full_name"));
-        u.setEmail(rs.getString("email"));
-        u.setMobileNumber(rs.getString("mobile_number"));
-        u.setStatus(rs.getString("status"));
-        u.setUserCreatedAt(rs.getTimestamp("user_created_at"));
-        return u;
-    }
+	private User mapResultSetToUser(ResultSet rs) throws SQLException {
+		User u = new User();
+		u.setUserId(rs.getString("user_id"));
+		u.setRoleId(rs.getString("role_id"));
+		u.setEmployeeId(rs.getString("employee_id"));
+		u.setUsername(rs.getString("username"));
+		u.setPassword(rs.getString("password"));
+		u.setFullName(rs.getString("full_name"));
+		u.setEmail(rs.getString("email"));
+		u.setMobileNumber(rs.getString("mobile_number"));
+		u.setStatus(rs.getString("status"));
+		u.setUserCreatedAt(rs.getTimestamp("user_created_at"));
+		return u;
+	}
 
-    @Override
-    public List<User> findUsersByRoleId(String roleId) {
-        List<User> userList = new ArrayList<>();
-        String sql = "SELECT user_id, role_id, employee_id, username, full_name, email, mobile_number, status, user_created_at " +
-                     "FROM \"users\" WHERE role_id = ? ORDER BY full_name ASC";
+	@Override
+	public List<User> findUsersByRoleId(String roleId) {
+		List<User> userList = new ArrayList<>();
+		String sql = "SELECT user_id, role_id, employee_id, username, full_name, email, mobile_number, status, user_created_at "
+				+ "FROM \"users\" WHERE role_id = ? ORDER BY full_name ASC";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, roleId);
+			ps.setString(1, roleId);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    User user = new User();
-                    user.setUserId(rs.getString("user_id"));
-                    user.setRoleId(rs.getString("role_id"));
-                    user.setEmployeeId(rs.getString("employee_id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setMobileNumber(rs.getString("mobile_number"));
-                    user.setStatus(rs.getString("status"));
-                    user.setUserCreatedAt(rs.getTimestamp("user_created_at"));
-                    userList.add(user);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return userList;
-    }
-    @Override
-    public User findByEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return null;
-        }
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					User user = new User();
+					user.setUserId(rs.getString("user_id"));
+					user.setRoleId(rs.getString("role_id"));
+					user.setEmployeeId(rs.getString("employee_id"));
+					user.setUsername(rs.getString("username"));
+					user.setFullName(rs.getString("full_name"));
+					user.setEmail(rs.getString("email"));
+					user.setMobileNumber(rs.getString("mobile_number"));
+					user.setStatus(rs.getString("status"));
+					user.setUserCreatedAt(rs.getTimestamp("user_created_at"));
+					userList.add(user);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return userList;
+	}
 
-        String sql = "SELECT user_id, username, password, full_name, email, role_id, status, employee_id " +
-                     "FROM users " +
-                     "WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) LIMIT 1";
+	@Override
+	public User findByEmail(String email) {
+		if (email == null || email.trim().isEmpty()) {
+			return null;
+		}
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+		String sql = "SELECT user_id, username, password, full_name, email, role_id, status, employee_id "
+				+ "FROM users " + "WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) LIMIT 1";
 
-            ps.setString(1, email.trim());
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    User user = new User();
-                    user.setUserId(rs.getString("user_id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPassword(rs.getString("password"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setRoleId(rs.getString("role_id"));
-                    user.setStatus(rs.getString("status"));
-                    user.setEmployeeId(rs.getString("employee_id"));
-                    return user;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    @Override
-    public User findByIdentifier(String identifier) {
-        if (identifier == null || identifier.trim().isEmpty()) {
-            return null;
-        }
+			ps.setString(1, email.trim());
 
-        String clean = identifier.trim();
-        // Uses one query to check both username and email with LIMIT 1
-        String sql = "SELECT * FROM users " +
-                     "WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?) " +
-                     "LIMIT 1";
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					User user = new User();
+					user.setUserId(rs.getString("user_id"));
+					user.setUsername(rs.getString("username"));
+					user.setPassword(rs.getString("password"));
+					user.setFullName(rs.getString("full_name"));
+					user.setEmail(rs.getString("email"));
+					user.setRoleId(rs.getString("role_id"));
+					user.setStatus(rs.getString("status"));
+					user.setEmployeeId(rs.getString("employee_id"));
+					return user;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+	@Override
+	public User findByIdentifier(String identifier) {
+		if (identifier == null || identifier.trim().isEmpty()) {
+			return null;
+		}
 
-            ps.setString(1, clean);
-            ps.setString(2, clean);
+		String clean = identifier.trim();
+		// Matches login input against username or email
+		String sql = "SELECT * FROM users " + "WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?) "
+				+ "LIMIT 1";
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToUser(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+		try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, clean);
+			ps.setString(2, clean);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return mapResultSetToUser(rs);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }

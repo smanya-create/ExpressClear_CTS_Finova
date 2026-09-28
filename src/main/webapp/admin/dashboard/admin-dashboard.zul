@@ -5,6 +5,7 @@
 	<borderlayout sclass="main-layout" vflex="1" hflex="1"
 		apply="com.iispl.cts.controller.admin.AdminDashboardController">
 
+		<!-- Sidebar navigation -->
 		<west width="220px" border="none" collapsible="false">
 			<include src="/components/sidebar.zul" role="ADMIN"
 				activeTab="admin-dashboard" />
@@ -12,10 +13,11 @@
 
 		<center border="none">
 			<borderlayout vflex="1" hflex="1">
-			
+
+				<!-- Top navigation bar and active user polling timer -->
 				<north size="auto" border="none">
 					<div>
-						<!-- Active user counter timer: triggers every 3s -->
+						<!-- Poll active user count every second -->
 						<timer id="timerActiveUsers" delay="1000"
 							repeats="true" onTimer="$composer.refreshActiveUsers()" />
 						<include src="/components/header.zul"
@@ -24,14 +26,13 @@
 					</div>
 				</north>
 
-				<!-- Main Content Area -->
+				<!-- Main dashboard content -->
 				<center border="none" autoscroll="false"
 					style="background: #eef3f8; overflow: hidden;">
 					<vlayout sclass="cts-content-wrapper" spacing="12px"
 						hflex="1" vflex="1"
 						style="overflow: hidden; padding: 14px 20px;">
 
-						<!-- Top Heading -->
 						<vlayout sclass="cts-section-header"
 							spacing="2px">
 							<label value="Session Management"
@@ -41,11 +42,11 @@
 								sclass="cts-main-subtitle" />
 						</vlayout>
 
-						<!-- 3-Column Stat KPI Ribbon -->
+						<!-- KPI status cards -->
 						<hlayout sclass="cts-stats-card" hflex="1"
 							spacing="0">
 
-							<!-- Col 1: CURRENT CLEARING DATE -->
+							<!-- Current clearing date -->
 							<vlayout sclass="cts-stat-col" hflex="1"
 								spacing="4px" style="padding: 10px 16px;">
 								<label value="CURRENT CLEARING DATE"
@@ -54,7 +55,7 @@
 									sclass="cts-stat-num" />
 							</vlayout>
 
-							<!-- Col 2: SESSION STATUS -->
+							<!-- Active session state -->
 							<vlayout sclass="cts-stat-col" hflex="1"
 								spacing="4px"
 								style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
@@ -69,7 +70,7 @@
 								</hlayout>
 							</vlayout>
 
-							<!-- Col 3: LOGGED-IN USERS -->
+							<!-- Real-time logged-in user count -->
 							<vlayout
 								sclass="cts-stat-col cts-stat-col-last" hflex="1" spacing="4px"
 								style="border-left: 1px solid #e2e8f0; padding: 10px 16px 10px 24px;">
@@ -78,12 +79,10 @@
 								<label id="lblLoggedInUsers" value="0"
 									sclass="cts-stat-num" />
 							</vlayout>
-							
-							
 
 						</hlayout>
 
-						<!-- Session Action Selection Card -->
+						<!-- Session controls card -->
 						<vlayout sclass="cts-action-card"
 							spacing="14px">
 							<vlayout spacing="2px">
@@ -94,10 +93,10 @@
 									sclass="cts-card-subtitle" />
 							</vlayout>
 
-							<!-- EOD and BOD Option Cards -->
+							<!-- Operation selector options -->
 							<hlayout sclass="cts-options-grid"
 								spacing="16px" hflex="1">
-								<!-- End of Day (EOD) Card -->
+								<!-- End of Day action -->
 								<div id="cardEOD"
 									sclass="cts-choice-box cts-choice-box-active" hflex="1">
 									<hlayout sclass="cts-choice-inner"
@@ -111,7 +110,7 @@
 									</hlayout>
 								</div>
 
-								<!-- Begin of Day (BOD) Card -->
+								<!-- Begin of Day action -->
 								<div id="cardBOD"
 									sclass="cts-choice-box" hflex="1">
 									<hlayout sclass="cts-choice-inner"
@@ -126,12 +125,10 @@
 								</div>
 							</hlayout>
 
-							<!-- Dynamic Action Button (CLOSE SESSION / START SESSION) -->
+							<!-- Trigger session lifecycle action -->
 							<button id="btnStartSession"
-								label="START SESSION" sclass="cts-btn-primary" />
+								label="Start Session" sclass="cts-btn-primary" />
 						</vlayout>
-
-
 
 					</vlayout>
 				</center>

@@ -24,7 +24,7 @@ public class AuditServiceImpl implements AuditService {
     private static AuditServiceImpl instance;
     private final AuditLogDAO auditDAO;
 
-    // Dedicated thread pool for async logging and parallel query execution
+    // Worker pool for background audit logging and parallel search queries
     private final ExecutorService auditExecutor = new ThreadPoolExecutor(
             4, 8, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1000),
@@ -44,6 +44,7 @@ public class AuditServiceImpl implements AuditService {
         this.auditDAO = AuditLogDAOImpl.getInstance();
     }
 
+    // Singleton instance access
     public static synchronized AuditServiceImpl getInstance() {
         if (instance == null) {
             instance = new AuditServiceImpl();
@@ -51,6 +52,7 @@ public class AuditServiceImpl implements AuditService {
         return instance;
     }
 
+    // Async log submission pulling missing user attributes from active session
     @Override
     public void log(String username, String module, String action, String details, String status) {
         String userId = "SYSTEM";
@@ -95,8 +97,7 @@ public class AuditServiceImpl implements AuditService {
         CompletableFuture.runAsync(() -> auditDAO.insertAuditLog(entry), auditExecutor);
     }
 
-    // Keep the existing 4-parameter overload for regular in-app actions
-   
+    // Primary log method writing to file and queuing asynchronous database insertion
     @Override
     public void log(String userId, String username, String roleName, String module, String action, String details, String status) {
         String ipAddress = "127.0.0.1";
@@ -132,11 +133,10 @@ public class AuditServiceImpl implements AuditService {
                 fStatus
         );
 
-        // Asynchronous database write on internal executor pool
         CompletableFuture.runAsync(() -> auditDAO.insertAuditLog(entry), auditExecutor);
     }
 
-    // Keep the 4-arg convenience method for controllers where the session is already active
+    // Convenience overload extracting user credentials from current session
     @Override
     public void log(String module, String action, String details, String status) {
         String userId = "SYSTEM";
@@ -157,20 +157,22 @@ public class AuditServiceImpl implements AuditService {
 
         log(userId, username, roleName, module, action, details, status);
     }
+
+    // Executes count and search queries concurrently on the executor pool
     @Override
     public AuditSearchResult searchAuditLogsConcurrently(Date fromDate, Date toDate, String module,
                                                          String action, String query, int offset, int limit) {
-    	CompletableFuture<List<AuditLog>> logsFuture = CompletableFuture.supplyAsync(() -> {
-    	    System.out.println("[THREAD DEBUG - FETCH] Running on: " + Thread.currentThread().getName());
-    	    return auditDAO.searchAuditLogs(fromDate, toDate, module, action, query, offset, limit);
-    	}, auditExecutor);
+        CompletableFuture<List<AuditLog>> logsFuture = CompletableFuture.supplyAsync(() -> {
+            System.out.println("[THREAD DEBUG - FETCH] Running on: " + Thread.currentThread().getName());
+            return auditDAO.searchAuditLogs(fromDate, toDate, module, action, query, offset, limit);
+        }, auditExecutor);
 
-    	CompletableFuture<Integer> countFuture = CompletableFuture.supplyAsync(() -> {
-    	    System.out.println("[THREAD DEBUG - COUNT] Running on: " + Thread.currentThread().getName());
-    	    return auditDAO.countAuditLogs(fromDate, toDate, module, action, query);
-    	}, auditExecutor);
+        CompletableFuture<Integer> countFuture = CompletableFuture.supplyAsync(() -> {
+            System.out.println("[THREAD DEBUG - COUNT] Running on: " + Thread.currentThread().getName());
+            return auditDAO.countAuditLogs(fromDate, toDate, module, action, query);
+        }, auditExecutor);
 
-        // Wait for both worker threads to complete
+        // Await both tasks before constructing combined result
         CompletableFuture.allOf(logsFuture, countFuture).join();
 
         try {
@@ -181,11 +183,13 @@ public class AuditServiceImpl implements AuditService {
         }
     }
 
+    // Direct synchronous search query delegation
     @Override
     public List<AuditLog> searchAuditLogs(Date fromDate, Date toDate, String module, String action, String query, int offset, int limit) {
         return auditDAO.searchAuditLogs(fromDate, toDate, module, action, query, offset, limit);
     }
 
+    // Direct synchronous count query delegation
     @Override
     public int countAuditLogs(Date fromDate, Date toDate, String module, String action, String query) {
         return auditDAO.countAuditLogs(fromDate, toDate, module, action, query);

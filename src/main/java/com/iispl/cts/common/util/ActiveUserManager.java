@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveUserManager {
 
-    // Maps userId -> Set of active desktop/tab IDs
     private static final ConcurrentHashMap<String, Set<String>> userDesktopMap = new ConcurrentHashMap<>();
 
     public static void registerDesktop(String userId, String desktopId) {
@@ -25,7 +24,6 @@ public class ActiveUserManager {
             Set<String> desktops = userDesktopMap.get(cleanUserId);
             if (desktops != null) {
                 desktops.remove(desktopId);
-                // If user has no more open tabs/windows, remove them completely
                 if (desktops.isEmpty()) {
                     userDesktopMap.remove(cleanUserId);
                     System.out.println(">>> [ActiveUserManager] User Closed Browser: " + cleanUserId 
@@ -35,7 +33,6 @@ public class ActiveUserManager {
         }
     }
 
-    // Called on explicit button Logout
     public static void userLoggedOut(String userId) {
         if (userId != null) {
             userDesktopMap.remove(userId.trim());
@@ -48,7 +45,6 @@ public class ActiveUserManager {
         return userDesktopMap.size();
     }
     
-    //Returns active user count excluding admin. 
     public static int getActiveUserCount(String excludeUserId) {
         if (excludeUserId == null || excludeUserId.trim().isEmpty()) {
             return userDesktopMap.size();

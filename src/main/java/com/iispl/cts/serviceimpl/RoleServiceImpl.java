@@ -14,35 +14,39 @@ public class RoleServiceImpl implements RoleService {
     private static RoleServiceImpl instance;
     private final RoleDAO roleDAO = RoleDAOImpl.getInstance();
 
-    // In-memory cache for fast lookup during user login and session initialization
+    // Cache role entities in memory by id and name
     private static final Map<String, Role> ROLE_ID_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, Role> ROLE_NAME_CACHE = new ConcurrentHashMap<>();
 
+    // Singleton instance access
     public static synchronized RoleServiceImpl getInstance() {
         if (instance == null) instance = new RoleServiceImpl();
         return instance;
     }
 
+    // Fetches all roles without applying filters
     @Override
     public List<Role> getAllRoles() {
         return roleDAO.searchRoles(null, null);
     }
 
+    // Searches roles by keyword and status filter
     @Override
     public List<Role> searchRoles(String query, String status) {
         return roleDAO.searchRoles(query, status);
     }
 
+    // Gets role by ID with cache-aside lookup
     @Override
     public Role getRoleById(String roleId) {
         if (roleId == null || roleId.trim().isEmpty()) {
             return null;
         }
         String cleanId = roleId.trim();
-        // Return from cache or fetch from DB and store
         return ROLE_ID_CACHE.computeIfAbsent(cleanId, id -> roleDAO.findById(id));
     }
 
+    // Gets role by name with cache-aside lookup
     @Override
     public Role getRoleByName(String roleName) {
         if (roleName == null || roleName.trim().isEmpty()) {
@@ -52,6 +56,7 @@ public class RoleServiceImpl implements RoleService {
         return ROLE_NAME_CACHE.computeIfAbsent(cleanName, name -> roleDAO.findByName(name));
     }
 
+    // Persists new role and flushes cache
     @Override
     public boolean saveRole(Role role) {
         boolean success = roleDAO.saveRole(role);
@@ -61,6 +66,7 @@ public class RoleServiceImpl implements RoleService {
         return success;
     }
 
+    // Updates role details and flushes cache
     @Override
     public boolean updateRole(Role role) {
         boolean success = roleDAO.updateRole(role);
@@ -70,22 +76,25 @@ public class RoleServiceImpl implements RoleService {
         return success;
     }
 
+    // Generates the next sequential role identifier
     @Override
     public String generateNextRoleId() {
         return roleDAO.generateNextRoleId();
     }
 
+    // Validates if role name already exists
     @Override
     public boolean isRoleNameExists(String roleName) {
         return roleDAO.isRoleNameExists(roleName);
     }
 
+    // Validates if role name already exists excluding current role ID
     @Override
     public boolean isRoleNameExists(String roleName, String excludeRoleId) {
         return roleDAO.isRoleNameExists(roleName, excludeRoleId);
     }
 
-    // Clear cache when roles are modified
+    // Invalidates all cached roles on mutation
     public static void clearCache() {
         ROLE_ID_CACHE.clear();
         ROLE_NAME_CACHE.clear();

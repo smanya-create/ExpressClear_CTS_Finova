@@ -1,5 +1,7 @@
 package com.iispl.cts.common.util;
 
+import java.time.format.DateTimeFormatter;
+
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
@@ -10,111 +12,136 @@ import org.zkoss.zul.impl.InputElement;
 
 public class SecurityUtil {
 
-    public static boolean hasPermission(String screenKey) {
-        Session session = Sessions.getCurrent();
-        if (session == null) return false;
+	private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("hh:mm a");
 
-        String role = (String) session.getAttribute("USER_ROLE");
-        if (role != null && role.toUpperCase().contains("ADMIN")) {
-            return true;
-        }
+	public static boolean hasPermission(String screenKey) {
+		Session session = Sessions.getCurrent();
+		if (session == null)
+			return false;
 
-        Object permsObj = session.getAttribute("USER_PERMISSIONS");
-        if (permsObj == null || permsObj.toString().trim().isEmpty()) {
-            return false;
-        }
+		// Admin role retains full access across all application screens
+		String role = (String) session.getAttribute("USER_ROLE");
+		if (role != null && role.toUpperCase().contains("ADMIN")) {
+			return true;
+		}
 
-        String[] permissions = permsObj.toString().split(",");
-        String targetKey = screenKey.trim().toUpperCase();
+		Object permsObj = session.getAttribute("USER_PERMISSIONS");
+		if (permsObj == null || permsObj.toString().trim().isEmpty()) {
+			return false;
+		}
 
-        for (String perm : permissions) {
-            String p = perm.trim().toUpperCase();
-            if (p.equals(targetKey) || p.equals("ALL") || p.equals("*")) {
-                return true;
-            }
-        }
-        return false;
-    }
+		String[] permissions = permsObj.toString().split(",");
+		String targetKey = screenKey.trim().toUpperCase();
 
-    public static boolean checkAccess(String screenKey) {
-        Session session = Sessions.getCurrent();
-        if (session == null) {
-            Executions.sendRedirect("/common/login.zul");
-            return false;
-        }
+		for (String perm : permissions) {
+			String p = perm.trim().toUpperCase();
+			if (p.equals(targetKey) || p.equals("ALL") || p.equals("*")) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        Object user = session.getAttribute("LOGGED_USER");
-        if (user == null) user = session.getAttribute("CTS_USER_ID");
-        if (user == null) user = session.getAttribute("USER_ID");
+	// Entry-point screen guard validating session existence and
+	// authorization.Redirects unauthenticated or unauthorized requests to
+	// respective error views.
 
-        if (user == null) {
-            Executions.sendRedirect("/common/login.zul");
-            return false;
-        }
+	public static boolean checkAccess(String screenKey) {
+		Session session = Sessions.getCurrent();
+		if (session == null) {
+			Executions.sendRedirect("/common/login.zul");
+			return false;
+		}
 
-        if (!hasPermission(screenKey)) {
-            Executions.sendRedirect("/common/access-denied.zul");
-            return false;
-        }
+		// Verify active user identifier across potential session attribute keys
+		Object user = session.getAttribute("LOGGED_USER");
+		if (user == null)
+			user = session.getAttribute("CTS_USER_ID");
+		if (user == null)
+			user = session.getAttribute("USER_ID");
 
-        return true;
-    }
+		if (user == null) {
+			Executions.sendRedirect("/common/login.zul");
+			return false;
+		}
 
-    public static void applySessionLockdown(Page page) {
-        Session session = Sessions.getCurrent();
-        if (session == null || page == null) return;
+		if (!hasPermission(screenKey)) {
+			Executions.sendRedirect("/common/access-denied.zul");
+			return false;
+		}
 
-        // 1. Admin users bypass lockdown
-        String role = (String) session.getAttribute("USER_ROLE");
-        if (role == null) role = (String) session.getAttribute("CTS_USER_ROLE");
-        if (role != null && role.toUpperCase().contains("ADMIN")) {
-            return;
-        }
+		return true;
+	}
 
-        Boolean isOpen = (Boolean) session.getAttribute("CTS_SESSION_OPEN");
-        String path = (page.getRequestPath() != null) ? page.getRequestPath().toLowerCase() : "";
+	// Recursively traverses the view tree to disable mutation controls (buttons,
+	// inputs)when the clearing session is closed or outside scheduled presentation
+	// windows.
 
-        // Condition A: If DB session is CLOSED, lock everything
-        boolean lockAll = !Boolean.TRUE.equals(isOpen);
+	public static void applySessionLockdown(Page page) {
+		Session session = Sessions.getCurrent();
+		if (session == null || page == null)
+			return;
 
-        // Condition B: If Outward screen and not morning window, lock
-        boolean lockOutward = path.contains("/outward/") && !ClearingTimeMock.isOutwardWindow();
+		// 1. Admin users bypass window and session lockdowns
+		String role = (String) session.getAttribute("USER_ROLE");
+		if (role == null)
+			role = (String) session.getAttribute("CTS_USER_ROLE");
+		if (role != null && role.toUpperCase().contains("ADMIN")) {
+			return;
+		}
 
-        // Condition C: If Inward screen and not afternoon window, lock
-        boolean lockInward = path.contains("/inward/") && !ClearingTimeMock.isInwardWindow();
+		Boolean isOpen = (Boolean) session.getAttribute("CTS_SESSION_OPEN");
+		String path = (page.getRequestPath() != null) ? page.getRequestPath().toLowerCase() : "";
 
-        if (lockAll || lockOutward || lockInward) {
-            String reason = lockAll ? "Session is CLOSED by Admin." :
-                           (lockOutward ? "Outward Cutoff reached (02:00 PM). Presentation window closed." :
-                                          "Inward opens after Outward cutoff at 02:00 PM.");
+		// Condition A: If DB session is CLOSED, lock everything
+		boolean lockAll = !Boolean.TRUE.equals(isOpen);
 
-            for (Component root : page.getRoots()) {
-                disableActionControls(root, reason);
-            }
-        }
-    }
+		// Condition B: If Outward screen and not morning window, lock
+		boolean lockOutward = path.contains("/outward/") && !ClearingTimeMock.isOutwardWindow();
 
-    private static void disableActionControls(Component comp, String tooltip) {
-        if (comp instanceof Button) {
-            Button btn = (Button) comp;
-            String id = (btn.getId() != null) ? btn.getId().toLowerCase() : "";
-            String label = (btn.getLabel() != null) ? btn.getLabel().trim().toLowerCase() : "";
+		// Condition C: If Inward screen and not afternoon window, lock
+		boolean lockInward = path.contains("/inward/") && !ClearingTimeMock.isInwardWindow();
 
-            boolean isSystemControl = id.contains("logout") || id.contains("search") 
-                    || id.contains("view") || id.contains("refresh") || id.contains("page")
-                    || label.equals("«") || label.equals("‹") || label.equals("›") || label.equals("»");
+		if (lockAll || lockOutward || lockInward) {
+			// Dynamically resolve cutoff time string to keep warnings and tooltips in sync
+			String cutoffStr = ClearingTimeMock.CUTOFF_TIME.format(TIME_FMT);
 
-            if (!isSystemControl) {
-                btn.setDisabled(true);
-                btn.setTooltiptext(tooltip);
-                btn.setSclass("btn-grid-action btn-grid-action-disabled");
-            }
-        } else if (comp instanceof InputElement) {
-            ((InputElement) comp).setReadonly(true);
-        }
+			String reason = lockAll ? "Session is CLOSED by Admin."
+					: (lockOutward ? "Outward Cutoff reached (" + cutoffStr + "). Presentation window closed."
+							: "Inward opens after Outward cutoff at " + cutoffStr + ".");
 
-        for (Component child : comp.getChildren()) {
-            disableActionControls(child, tooltip);
-        }
-    }
+			for (Component root : page.getRoots()) {
+				disableActionControls(root, reason);
+			}
+		}
+	}
+
+	// Helper to disable mutable action buttons and set inputs to readonly,while
+	// preserving core navigation, view, and search controls.
+
+	private static void disableActionControls(Component comp, String tooltip) {
+		if (comp instanceof Button) {
+			Button btn = (Button) comp;
+			String id = (btn.getId() != null) ? btn.getId().toLowerCase() : "";
+			String label = (btn.getLabel() != null) ? btn.getLabel().trim().toLowerCase() : "";
+
+			// System navigation controls are kept active
+			boolean isSystemControl = id.contains("logout") || id.contains("search") || id.contains("view")
+					|| id.contains("refresh") || id.contains("page") || label.equals("«") || label.equals("‹")
+					|| label.equals("›") || label.equals("»");
+
+			if (!isSystemControl) {
+				btn.setDisabled(true);
+				btn.setTooltiptext(tooltip);
+				btn.setSclass("btn-grid-action btn-grid-action-disabled");
+			}
+		} else if (comp instanceof InputElement) {
+			((InputElement) comp).setReadonly(true);
+		}
+
+		// Traverse nested children components
+		for (Component child : comp.getChildren()) {
+			disableActionControls(child, tooltip);
+		}
+	}
 }

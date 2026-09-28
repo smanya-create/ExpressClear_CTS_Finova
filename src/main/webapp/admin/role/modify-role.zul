@@ -6,25 +6,23 @@
 		apply="com.iispl.cts.controller.admin.RoleFormController" hflex="1"
 		vflex="1">
 
-		<!-- Shared Left Sidebar Navigation -->
+		<!-- Sidebar navigation -->
 		<west width="220px" border="none" collapsible="false">
 			<include src="/components/sidebar.zul" role="ADMIN"
 				activeTab="role-management" />
 		</west>
 
-		<!-- Main Workspace -->
 		<center border="none">
-			<!-- Nested Borderlayout to pin header and scroll only the form -->
 			<borderlayout hflex="1" vflex="1">
 
-				<!-- Fixed Header (Does NOT scroll) -->
+				<!-- Pinned top header -->
 				<north size="auto" border="none">
 					<include id="incHeader" src="/components/header.zul"
 						pageTitle="Admin Dashboard"
 						pageSubtitle="Role Management / Modify Role" />
 				</north>
 
-				<!-- Scrollable Form Container -->
+				<!-- Scrollable edit form workspace -->
 				<center border="none" autoscroll="true"
 					style="background-color: #f1f5f9;">
 					<div>
@@ -38,7 +36,7 @@
 									sclass="page-subtitle" />
 							</vlayout>
 
-							<!-- Card Panel -->
+							<!-- Form card panel -->
 							<vlayout sclass="card-panel" spacing="20px"
 								style="padding: 24px 28px;" hflex="1">
 								<vlayout spacing="2px">
@@ -50,6 +48,7 @@
 								</vlayout>
 
 								<hlayout spacing="20px" hflex="1">
+									<!-- Role ID (read-only) -->
 									<vlayout spacing="6px" hflex="1">
 										<hlayout height="18px"
 											valign="middle">
@@ -60,6 +59,7 @@
 											readonly="true" hflex="1" height="38px"
 											sclass="input-box input-box-readonly" />
 									</vlayout>
+									<!-- Role Name -->
 									<vlayout spacing="6px" hflex="1">
 										<hlayout spacing="4px"
 											height="18px" valign="middle">
@@ -74,6 +74,7 @@
 									</vlayout>
 								</hlayout>
 
+								<!-- Description -->
 								<vlayout spacing="6px" hflex="1">
 									<hlayout spacing="4px"
 										valign="middle">
@@ -87,12 +88,13 @@
 										sclass="input-box" />
 								</vlayout>
 
+								<!-- Role status and toggle trigger -->
 								<vlayout spacing="8px">
 									<label value="ROLE STATUS"
 										sclass="field-label" />
 									<hlayout spacing="12px"
 										valign="middle">
-										<!-- Status Pill Badge -->
+										<!-- Status badge pill -->
 										<hlayout id="boxStatusBadge"
 											spacing="6px" valign="middle"
 											style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 9999px; padding: 6px 14px;">
@@ -103,13 +105,14 @@
 												style="color: #065f46; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; line-height: 1;" />
 										</hlayout>
 
-										<!-- Toggle Status Button -->
+										<!-- Activate/deactivate toggle -->
 										<button id="btnToggleStatus"
 											label="DEACTIVATE ROLE"
 											style="background: #ffffff; border: 1px solid #fca5a5; color: #dc2626; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 6px; cursor: pointer; height: 32px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);" />
 									</hlayout>
 								</vlayout>
-								<!-- Assigned Operators Section -->
+
+								<!-- Assigned operators grid -->
 								<vlayout spacing="14px" hflex="1"
 									style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 4px;">
 									<vlayout spacing="3px">
@@ -140,7 +143,7 @@
 									</listbox>
 								</vlayout>
 
-								<!-- Actions -->
+								<!-- Action buttons -->
 								<hlayout hflex="1" spacing="10px"
 									style="margin-top: 18px;">
 									<button id="btnSave"
@@ -151,14 +154,14 @@
 							</vlayout>
 						</vlayout>
 
-						<!-- Confirmation Modal -->
+						<!-- Confirmation modal dialog -->
 						<window id="winConfirmModal" title=""
 							border="none" width="460px" visible="false"
 							style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25); background: #ffffff;">
 
 							<vlayout spacing="18px"
 								style="padding: 24px 28px;">
-								<!-- Header with Warning Icon -->
+								<!-- Modal header -->
 								<hlayout spacing="14px"
 									valign="middle">
 									<div
@@ -176,7 +179,7 @@
 									</vlayout>
 								</hlayout>
 
-								<!-- Summary Details Box -->
+								<!-- Update summary table -->
 								<vlayout spacing="12px"
 									style="background-color: #f8fafc; border-radius: 8px; padding: 16px; border: 1px solid #e2e8f0;">
 									<label
@@ -232,7 +235,7 @@
 										style="font-size: 11px; color: #94a3b8; margin-top: 4px;" />
 								</vlayout>
 
-								<!-- Action Buttons -->
+								<!-- Modal triggers -->
 								<hlayout spacing="10px"
 									style="justify-content: flex-end; margin-top: 6px;">
 									<button id="btnCancelModal"
