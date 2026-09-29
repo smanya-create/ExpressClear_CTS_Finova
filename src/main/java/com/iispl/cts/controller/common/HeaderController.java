@@ -92,6 +92,14 @@ public class HeaderController extends GenericForwardComposer<Component> {
 
 		syncSessionBadge();
 		updateClockAndPoll();
+		
+	}
+	public void onClickNotificationBell() {
+	    loadDatabaseNotifications();
+
+	    if (popupNotifications != null && divNotificationBell != null) {
+	        popupNotifications.open(divNotificationBell, "after_end");
+	    }
 	}
 
 	private void syncSessionBadge() {
@@ -411,6 +419,7 @@ public class HeaderController extends GenericForwardComposer<Component> {
 			containerNotificationList.appendChild(notifRow);
 		}
 	}
+	
 
 	public void onClickMarkAllRead() {
 		String role = (lblHeaderRole != null) ? lblHeaderRole.getValue() : "ADMIN";

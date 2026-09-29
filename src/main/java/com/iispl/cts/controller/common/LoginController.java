@@ -84,16 +84,6 @@ public class LoginController extends GenericForwardComposer<Component> {
         }
     }
 
-    public void onOK$txtIdentifier(Event event) {
-        if (txtPassword != null) {
-            txtPassword.setFocus(true);
-        }
-    }
-
-    public void onOK$txtPassword(Event event) {
-        processLogin();
-    }
-
     public void onChanging$txtIdentifier(Event event) {
         clearErrorMessage();
     }
@@ -135,7 +125,6 @@ public class LoginController extends GenericForwardComposer<Component> {
             final String password = (txtPassword != null && txtPassword.getValue() != null) ? txtPassword.getValue().trim() : "";
 
             if (identifier.isEmpty() || password.isEmpty()) {
-                showErrorMessage("Please enter your username or email and password.");
                 resetLoginButton();
                 return;
             }
@@ -212,8 +201,8 @@ public class LoginController extends GenericForwardComposer<Component> {
 
         } catch (Exception e) {
             resetLoginButton();
-            showErrorMessage("An unexpected error occurred during login. Please try again.");
             e.printStackTrace();
+            showErrorMessage("Login failed. Please try again.");
         }
     }
 
