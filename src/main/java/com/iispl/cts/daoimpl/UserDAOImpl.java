@@ -185,7 +185,7 @@ public class UserDAOImpl implements UserDAO {
 		}
 		return "EMP" + (max + 1);
 	}
-
+    //converts database data into your Java entity
 	private User mapResultSetToUser(ResultSet rs) throws SQLException {
 		User u = new User();
 		u.setUserId(rs.getString("user_id"));

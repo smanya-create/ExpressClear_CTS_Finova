@@ -31,7 +31,7 @@
             FROM scan_batch sb
             JOIN scan_cheque sc ON sb.scanned_batch_id = sc.scanned_batch_id
             WHERE (UPPER(sc.cheque_status) LIKE '%MICR%' 
-                OR UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'MICR_REPAIRED', 'MICR_REJECTION_PENDING', 'DATA_ENTRY', 'PENDING_DATA_ENTRY', 'REJECTED_MICR'))
+                OR UPPER(sc.cheque_status) IN ('PENDING_MICR_REPAIR', 'MICR_REPAIRED', 'MICR_REJECTION_PENDING','REJECTED_MICR'))
               AND CAST(GREATEST(sb.uploaded_at, sc.created_at) AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
             ORDER BY sb.scanned_batch_id ASC, sc.created_at DESC
             ]]>
@@ -68,7 +68,7 @@
             FROM scan_cheque sc
             JOIN scan_batch sb ON sc.scanned_batch_id = sb.scanned_batch_id
             WHERE (UPPER(sc.cheque_status) LIKE '%DATA_ENTRY%'
-                OR UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY', 'PENDING_MICR_REPAIR'))
+                OR UPPER(sc.cheque_status) IN ('DATA_ENTRY', 'PENDING_DATA_ENTRY'))
               AND CAST(GREATEST(sc.created_at, sb.uploaded_at) AS DATE) BETWEEN $P{DS_FROM_DATE} AND $P{DS_TO_DATE}
             ORDER BY sc.created_at DESC
             ]]>
