@@ -9,6 +9,11 @@ import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
 
+
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardBatchService {
 
 	List<InwardBatch> getAllBatches();

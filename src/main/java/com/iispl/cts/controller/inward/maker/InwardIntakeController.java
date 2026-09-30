@@ -17,6 +17,10 @@ import org.zkoss.zul.Window;
 
 import com.iispl.cts.common.util.SecurityUtil;
 
+
+/**
+ * @author Gummireddy Sai Chandana
+ */
 public class InwardIntakeController extends GenericComposer {
 
 	private Window validationFailedWindow;

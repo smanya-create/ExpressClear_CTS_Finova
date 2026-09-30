@@ -55,6 +55,10 @@ import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 import com.iispl.cts.validator.MICRValidator;
 import com.iispl.cts.validatorimpl.MICRValidatorImpl;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public class InwardMicrRepairControllerr extends GenericForwardComposer<Component> {
 
 	

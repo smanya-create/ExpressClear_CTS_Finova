@@ -4,6 +4,9 @@ import java.util.List;
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardDashboardKpiDTO;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardDashboardDAO {
     InwardDashboardKpiDTO getKpiMetrics();
     List<InwardDashboardBatchDTO> getRecentBatches();

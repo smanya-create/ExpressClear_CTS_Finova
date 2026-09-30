@@ -3,6 +3,10 @@ package com.iispl.cts.entity.inward;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public class InwardChequeRejection implements Serializable {
 
    

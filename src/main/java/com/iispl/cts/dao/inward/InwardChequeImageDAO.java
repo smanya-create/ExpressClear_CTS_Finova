@@ -4,6 +4,10 @@ import java.util.List;
 
 import com.iispl.cts.entity.inward.InwardChequeImage;
 
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardChequeImageDAO {
 
     List<InwardChequeImage> getAllImages();

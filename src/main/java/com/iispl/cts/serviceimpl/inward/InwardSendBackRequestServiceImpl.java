@@ -8,6 +8,10 @@ import com.iispl.cts.daoimpl.inward.InwardSendBackRequestDAOImpl;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 import com.iispl.cts.service.inward.InwardSendBackRequestService;
 
+
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardSendBackRequestServiceImpl implements InwardSendBackRequestService {
 
     private final InwardSendBackRequestDAO sendBackRequestDao;

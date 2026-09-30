@@ -36,6 +36,10 @@ import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardDashboardServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
+
+/**
+ * @author  Sudhansu Sekhar Panda
+ */
 public class InwardMakerDashboardController extends GenericForwardComposer<Component> {
 
 	private static final int PAGE_SIZE = 5;

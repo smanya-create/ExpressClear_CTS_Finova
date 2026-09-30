@@ -9,6 +9,11 @@ import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
+
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardChequeService {
 
 	List<InwardCheque> getMicrRepairRequiredCheques();

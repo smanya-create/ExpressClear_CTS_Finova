@@ -2,6 +2,9 @@ package com.iispl.cts.dto;
 
 import java.io.Serializable;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardDashboardKpiDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 

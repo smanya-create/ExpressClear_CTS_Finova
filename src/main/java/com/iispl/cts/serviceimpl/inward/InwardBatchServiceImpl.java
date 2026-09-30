@@ -19,6 +19,11 @@ import com.iispl.cts.parser.InwardBatchXmlParser;
 import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
 import com.iispl.cts.service.inward.InwardBatchService;
 
+
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardBatchServiceImpl implements InwardBatchService {
 
 	private final InwardBatchDAO inwardBatchDAO;

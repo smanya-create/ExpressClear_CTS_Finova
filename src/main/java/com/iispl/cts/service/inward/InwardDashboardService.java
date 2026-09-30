@@ -4,6 +4,10 @@ import java.util.List;
 import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardDashboardKpiDTO;
 
+
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardDashboardService {
     InwardDashboardKpiDTO getDashboardSummary();
     List<InwardDashboardBatchDTO> getRecentBatches(String filterBatchId);

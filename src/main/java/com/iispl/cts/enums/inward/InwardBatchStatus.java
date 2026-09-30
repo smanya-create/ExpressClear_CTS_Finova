@@ -1,5 +1,9 @@
 package com.iispl.cts.enums.inward;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public enum InwardBatchStatus {
 	
 	    RECEIVED,

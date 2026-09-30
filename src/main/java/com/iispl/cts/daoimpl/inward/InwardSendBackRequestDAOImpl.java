@@ -10,6 +10,9 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.inward.InwardSendBackRequestDAO;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardSendBackRequestDAOImpl implements InwardSendBackRequestDAO {
 
     @Override

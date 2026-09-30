@@ -3,6 +3,9 @@ package com.iispl.cts.dao.inward;
 import java.util.Map;
 import com.iispl.cts.dto.InwardSendBackRequestDTO;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardSendBackRequestDAO {
     Map<String, InwardSendBackRequestDTO> getPendingRequestsByBatchId(String batchId);
     InwardSendBackRequestDTO getLatestPendingByChequeId(String inwardChequeId);
