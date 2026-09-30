@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
@@ -23,6 +24,7 @@ import org.zkoss.zul.Timer;
 import org.zkoss.zul.Vlayout;
 
 import com.iispl.cts.common.config.DBConnection;
+import com.iispl.cts.common.util.ActiveUserManager;
 import com.iispl.cts.common.util.ClearingTimeMock;
 import com.iispl.cts.entity.Notification;
 import com.iispl.cts.service.NotificationService;
@@ -46,6 +48,12 @@ public class HeaderController extends GenericForwardComposer<Component> {
 	private Popup popupNotifications;
 	private Vlayout containerNotificationList;
 	private Label lblOperatorCycleBadge;
+	
+	// Component wires for the popup card
+	
+	private Label lblPopupAvatarInitial;
+	private Label lblPopupFullName;
+	private Label lblPopupEmail;
 
 	private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 	private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
@@ -242,33 +250,76 @@ public class HeaderController extends GenericForwardComposer<Component> {
 	}
 
 	private void initUserProfile() {
-		String username = (String) Sessions.getCurrent().getAttribute("CTS_USERNAME");
-		if (username == null)
-			username = (String) Sessions.getCurrent().getAttribute("USERNAME");
-		if (username == null || username.trim().isEmpty())
-			username = "User";
+	    Session session = Sessions.getCurrent();
+	    if (session == null) return;
 
-		String role = (String) Sessions.getCurrent().getAttribute("CTS_USER_ROLE");
-		if (role == null)
-			role = (String) Sessions.getCurrent().getAttribute("ROLE_NAME");
-		if (role == null || role.trim().isEmpty())
-			role = "ADMIN";
+	    // 1. Resolve username
+	    String username = (String) session.getAttribute("CTS_USERNAME");
+	    if (username == null)
+	        username = (String) session.getAttribute("USERNAME");
+	    if (username == null || username.trim().isEmpty())
+	        username = "User";
 
-		if (lblHeaderUsername != null)
-			lblHeaderUsername.setValue(username);
-		if (lblHeaderRole != null)
-			lblHeaderRole.setValue(role);
-		if (lblUserInitial != null && !username.isEmpty()) {
-			lblUserInitial.setValue(username.substring(0, 1).toUpperCase());
-		}
+	    // 2. Resolve full name
+	    String fullName = (String) session.getAttribute("USER_FULL_NAME");
+	    if (fullName == null || fullName.trim().isEmpty())
+	        fullName = (String) session.getAttribute("LOGGED_USER");
+	    if (fullName == null || fullName.trim().isEmpty())
+	        fullName = username;
 
-		boolean isOperationalRole = "OUTWARD_MAKER".equalsIgnoreCase(role) || "OUTWARD_CHECKER".equalsIgnoreCase(role)
-				|| "INWARD_MAKER".equalsIgnoreCase(role) || "INWARD_CHECKER".equalsIgnoreCase(role)
-				|| "ADMIN".equalsIgnoreCase(role);
+	    // 3. Resolve database email
+	    String email = (String) session.getAttribute("USER_EMAIL");
+	    if (email == null || email.trim().isEmpty()) {
+	        // Fallback check from serialized User entity if direct attribute was missed
+	        Object userObj = session.getAttribute("USER_OBJ");
+	        if (userObj instanceof com.iispl.cts.entity.User) {
+	            email = ((com.iispl.cts.entity.User) userObj).getEmail();
+	        }
+	    }
+	    if (email == null || email.trim().isEmpty()) {
+	        email = username.toLowerCase() + "@imageinfosystems.com";
+	    }
 
-		if (divNotificationBell != null) {
-			divNotificationBell.setVisible(isOperationalRole);
-		}
+	    // 4. Resolve role display
+	    String role = (String) session.getAttribute("CTS_USER_ROLE");
+	    if (role == null)
+	        role = (String) session.getAttribute("ROLE_NAME");
+	    if (role == null || role.trim().isEmpty())
+	        role = "ADMIN";
+
+	    // 5. Compute avatar initial letter
+	    String initial = "U";
+	    if (fullName != null && !fullName.trim().isEmpty()) {
+	        initial = fullName.trim().substring(0, 1).toUpperCase();
+	    } else if (!username.isEmpty()) {
+	        initial = username.trim().substring(0, 1).toUpperCase();
+	    }
+
+	    // 6. Update Header controls
+	    if (lblHeaderUsername != null)
+	        lblHeaderUsername.setValue(username);
+	    if (lblHeaderRole != null)
+	        lblHeaderRole.setValue(role);
+	    if (lblUserInitial != null) {
+	        lblUserInitial.setValue(initial);
+	    }
+
+	    // 7. Update Popup Card controls
+	    if (lblPopupAvatarInitial != null)
+	        lblPopupAvatarInitial.setValue(initial);
+	    if (lblPopupFullName != null)
+	        lblPopupFullName.setValue(fullName);
+	    if (lblPopupEmail != null)
+	        lblPopupEmail.setValue(email);
+
+	    // 8. Notification bell visibility check
+	    boolean isOperationalRole = "OUTWARD_MAKER".equalsIgnoreCase(role) || "OUTWARD_CHECKER".equalsIgnoreCase(role)
+	            || "INWARD_MAKER".equalsIgnoreCase(role) || "INWARD_CHECKER".equalsIgnoreCase(role)
+	            || "ADMIN".equalsIgnoreCase(role);
+
+	    if (divNotificationBell != null) {
+	        divNotificationBell.setVisible(isOperationalRole);
+	    }
 	}
 
 	private void loadSessionState() {
@@ -442,6 +493,28 @@ public class HeaderController extends GenericForwardComposer<Component> {
 			this.message = message;
 			this.timeAgo = timeAgo;
 		}
+	}
+	public void onHeaderLogout() {
+	    Session session = Sessions.getCurrent();
+	    if (session != null) {
+	        String userId = (String) session.getAttribute("USER_ID");
+	        if (userId == null) userId = (String) session.getAttribute("CTS_USER_ID");
+
+	        // 1. Immediately remove from active operator registry
+	        if (userId != null) {
+	            ActiveUserManager.userLoggedOut(userId);
+	        }
+
+	        // 2. Invalidate HTTP session
+	        session.removeAttribute("LOGGED_USER");
+	        session.removeAttribute("CTS_USER_ID");
+	        session.removeAttribute("USER_ID");
+	        session.removeAttribute("USER_ROLE");
+	        session.invalidate();
+	    }
+
+	    // 3. Redirect back to standard login screen
+	    Executions.sendRedirect("/common/login.zul");
 	}
 
 }

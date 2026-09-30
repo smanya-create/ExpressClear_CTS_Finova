@@ -26,8 +26,7 @@
 			</hlayout>
 
 			<!-- Status indicators, clock, notification, and profile controls -->
-			<hlayout valign="middle" spacing="18px"
-				style="margin-left:auto;">
+			<hlayout valign="middle" spacing="18px" style="margin-left:auto;">
 
 				<!-- Clearing cycle selection and status badge -->
 				<hlayout valign="middle" spacing="6px">
@@ -38,12 +37,9 @@
 					<combobox id="cmbSimulateCycle" width="220px"
 						readonly="true" visible="false" sclass="cts-header-cycle-select"
 						onSelect="$composer.onSelectSimulationCycle()">
-						<comboitem label="⚡ Live Clock (All Active)"
-							value="LIVE" />
-						<comboitem label="☀ Morning (Outward 09:30)"
-							value="MORNING" />
-						<comboitem label="🌙 Afternoon (Inward 02:30)"
-							value="AFTERNOON" />
+						<comboitem label="⚡ Live Clock (All Active)" value="LIVE" />
+						<comboitem label="☀ Morning (Outward 09:30)" value="MORNING" />
+						<comboitem label="🌙 Afternoon (Inward 02:30)" value="AFTERNOON" />
 					</combobox>
 
 					<!-- Read-only operator cycle indicator -->
@@ -61,8 +57,7 @@
 				</hlayout>
 
 				<!-- Active clearing date and dynamic real-time clock -->
-				<vlayout spacing="2px"
-					style="align-items:flex-end; text-align:right;">
+				<vlayout spacing="2px" style="align-items:flex-end; text-align:right;">
 					<label value="Session Date &amp; Time"
 						style="font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:0.5px;" />
 					<hlayout valign="middle" spacing="6px">
@@ -73,31 +68,86 @@
 					</hlayout>
 				</vlayout>
 
+				<!-- Notification Bell Trigger -->
 				<div id="divNotificationBell"
 					style="position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:#f1f5f9; overflow:visible;"
 					onClick="$composer.onClickNotificationBell()">
 					<label value="🔔" style="font-size:15px;" />
-
 					<label id="lblUnreadBadge" value="0" visible="false"
 						style="position:absolute; top:0px; right:-6px; background:#ef4444; color:white; border-radius:50%; font-size:9px; font-weight:bold; width:18px; height:18px; text-align:center; line-height:18px; z-index:9999; box-sizing:border-box;" />
 				</div>
-				<!-- Authenticated operator profile badge -->
-				<hlayout valign="middle" spacing="10px">
+
+				<!-- Authenticated operator header button (triggers card popup) -->
+				<hlayout id="userProfileTrigger" valign="middle" spacing="8px"
+					style="cursor:pointer; padding:3px 6px; border-radius:24px; transition:all 0.2s;"
+					popup="popupAccountCard, position=after_end">
+					
+					<!-- Header Circle Avatar -->
 					<div
-						style="width:36px; height:36px; border-radius:50%; background-color:#e0f2fe; border:1.5px solid #bae6fd; display:flex; align-items:center; justify-content:center;">
+						style="width:34px; height:34px; border-radius:50%; background-color:#0284c7; display:flex; align-items:center; justify-content:center;">
 						<label id="lblUserInitial" value="A"
-							style="font-size:14px; font-weight:800; color:#0284c7;" />
+							style="font-size:14px; font-weight:700; color:#ffffff;" />
 					</div>
-					<vlayout spacing="1px">
+					
+					<vlayout spacing="0px">
 						<label id="lblHeaderUsername" value="Admin"
-							style="font-size:13px; font-weight:700; color:#1e293b;" />
+							style="font-size:12.5px; font-weight:700; color:#1e293b;" />
 						<label id="lblHeaderRole" value="ADMIN"
-							style="font-size:11px; font-weight:600; color:#64748b;" />
+							style="font-size:10.5px; font-weight:600; color:#64748b;" />
 					</vlayout>
 				</hlayout>
 
 			</hlayout>
 		</hlayout>
+
+		<!-- ============================================================ -->
+		<!-- Google-Style Account Details Popup Card                      -->
+		<!-- ============================================================ -->
+		<popup id="popupAccountCard" width="360px"
+			style="padding:0; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.18); border:none; background:#f0f4f9; overflow:hidden;">
+			
+			<vlayout spacing="10px" style="padding:16px 14px 18px 14px;">
+				
+				<!-- Top Header: Managed domain & Close Button -->
+				<hlayout valign="middle" hflex="1" style="justify-content:space-between; padding:0 4px;">
+					<label value="Managed by ExpressClear-CTS" 
+						style="font-size:11.5px; font-weight:500; color:#475569;" />
+				</hlayout>
+
+				<!-- Main Identity Card (Clean, no pencil icon) -->
+				<div style="background:#ffffff; border-radius:16px; padding:16px 14px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+					<hlayout valign="middle" spacing="14px">
+						
+						<!-- Large Circular Avatar without edit/modify pencil button -->
+						<div style="width:58px; height:58px; border-radius:50%; background-color:#0284c7; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+							<label id="lblPopupAvatarInitial" value="A"
+								style="font-size:24px; font-weight:700; color:#ffffff;" />
+						</div>
+
+						<!-- Name & Email Display -->
+						<vlayout spacing="3px" hflex="1">
+							<label id="lblPopupFullName" value="Admin User"
+								style="font-size:15px; font-weight:700; color:#0f172a; line-height:1.2;" />
+							<label id="lblPopupEmail" value="admin@imageinfosystems.com"
+								style="font-size:12px; color:#64748b; word-break:break-all;" />
+						</vlayout>
+					</hlayout>
+				</div>
+
+				<!-- Card Option 1: Log Out Row -->
+				<div id="rowLogoutAction"
+					style="background:#ffffff; border-radius:14px; padding:12px 16px; cursor:pointer; display:flex; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.06); transition:background 0.2s;"
+					onClick="$composer.onHeaderLogout()">
+					<hlayout valign="middle" spacing="12px">
+						<!-- Standard Sign-Out/Logout Icon -->
+						<span class="z-icon-sign-out" style="font-size:17px; color:#334155;" />
+						<label value="Log Out" 
+							style="font-size:13.5px; font-weight:600; color:#1e293b; cursor:pointer;" />
+					</hlayout>
+				</div>
+
+			</vlayout>
+		</popup>
 
 		<!-- Notification dropdown list popup -->
 		<popup id="popupNotifications" width="320px"

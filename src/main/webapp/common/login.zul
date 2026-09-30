@@ -31,7 +31,7 @@
 				<vlayout spacing="6px"
 					style="text-align: center; margin-bottom: 30px;">
 
-					<label value="Welcome back"
+					<label value="Welcome"
 						style="font-size: 26px; font-weight: bold; color: #1a202c; display: block;" />
 
 					<label value="Sign in to access Express Clear CTS."

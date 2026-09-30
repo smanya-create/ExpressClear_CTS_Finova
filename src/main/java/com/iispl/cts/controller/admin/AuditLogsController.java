@@ -148,38 +148,27 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        Object sessionDateObj = Sessions.getCurrent().getAttribute("CTS_CLEARING_DATE");
-        LocalDate clearingDate;
-        if (sessionDateObj instanceof LocalDate) {
-            clearingDate = (LocalDate) sessionDateObj;
-        } else if (sessionDateObj instanceof java.sql.Date) {
-            clearingDate = ((java.sql.Date) sessionDateObj).toLocalDate();
-        } else {
-            clearingDate = LocalDate.now();
-        }
-
-        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter fullDateTimeFmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
         for (AuditLog log : logs) {
             Row row = new Row();
             row.setStyle("border-bottom: 1px solid #f1f5f9; min-height: 48px;");
 
-            // Timestamp column
+            // 1. Timestamp column: Formats the actual date and time stored on the log record
             String displayTime;
             if (log.getTimestamp() != null) {
-                LocalTime logTime = log.getTimestamp().toInstant()
-                        .atZone(ZoneId.systemDefault()).toLocalTime();
-                displayTime = clearingDate.format(dateFmt) + " " + logTime.format(timeFmt);
+                displayTime = log.getTimestamp().toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .format(fullDateTimeFmt);
             } else {
-                displayTime = clearingDate.format(dateFmt) + " " + ClearingTimeMock.getCurrentTime().format(timeFmt);
+                displayTime = "-";
             }
 
             Label lblTime = new Label(displayTime);
             lblTime.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblTime);
 
-            // User column
+            // 2. User column
             String cleanUser = log.getUsername() != null && !log.getUsername().trim().isEmpty() 
                              ? log.getUsername().trim() 
                              : (log.getUserId() != null ? log.getUserId().trim() : "-");
@@ -188,21 +177,21 @@ public class AuditLogsController extends GenericForwardComposer<Component> {
             lblUser.setStyle("font-size: 13px; font-weight: 600; color: #1e293b; display: block; text-align: center;");
             row.appendChild(lblUser);
 
-            // Action column
+            // 3. Action column
             Label lblAction = new Label(log.getAction() != null ? log.getAction() : "-");
             lblAction.setStyle("font-size: 12px; font-weight: 600; color: #334155; display: block; text-align: center;");
             row.appendChild(lblAction);
 
-            // Details column
+            // 4. Details column
             Component detailsCell = createFormattedDetailsCell(log.getDetails());
             row.appendChild(detailsCell);
 
-            // IP column
+            // 5. IP column
             Label lblIp = new Label(log.getIpAddress() != null ? log.getIpAddress() : "-");
             lblIp.setStyle("font-size: 12px; color: #64748b; display: block; text-align: center;");
             row.appendChild(lblIp);
 
-            // Status badge column
+            // 6. Status badge column
             Label lblStatus = new Label(log.getStatus() != null ? log.getStatus() : "SUCCESS");
             String baseBadgeStyle = "display: table; margin: 0 auto; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.2; text-align: center;";
 

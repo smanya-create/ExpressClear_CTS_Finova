@@ -174,6 +174,8 @@ public class LoginController extends GenericForwardComposer<Component> {
                 session.setAttribute("LOGGED_USER", authenticatedUser.getFullName());
                 session.setAttribute("USER_ID", authenticatedUser.getUserId());
                 session.setAttribute("USERNAME", authenticatedUser.getUsername());
+                session.setAttribute("USER_FULL_NAME", authenticatedUser.getFullName()); // <--- ADD THIS
+                session.setAttribute("USER_EMAIL", authenticatedUser.getEmail());
                 session.setAttribute("CTS_USERNAME", authenticatedUser.getUsername());
                 session.setAttribute("USER_ROLE", normalizedRole);
                 session.setAttribute("CTS_USER_ROLE", normalizedRole);
