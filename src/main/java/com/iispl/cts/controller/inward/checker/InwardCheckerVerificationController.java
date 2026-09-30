@@ -79,7 +79,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 	private Label lblAmount;
 	private Label lblDraweeName;
 	private Label lblDraweeAccountNumber;
-	private Label lblAccountBalance;
 	
 	private Button btnPrevious;
 	private Button btnNext;
@@ -342,14 +341,6 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			}
 			if (lblDraweeAccountNumber != null) {
 				lblDraweeAccountNumber.setValue(safeValue(cheque.getDraweeAccountNumber()));
-			}
-			if (lblAccountBalance != null) {
-				BigDecimal accountBalance = inwardChequeService.getAccountBalance(cheque.getDraweeAccountNumber());
-				if (accountBalance != null) {
-					lblAccountBalance.setValue("₹" + accountBalance.toString());
-				} else {
-					lblAccountBalance.setValue("₹0.00");
-				}
 			}
 			if (lblVerificationStatus != null) {
 				String status = cheque.getChequeStatus();
@@ -758,9 +749,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			highlightCbsField(lblVerificationChequeNumber);
 		} else if (r.contains("cheque date") || r.contains("postdated")) {
 			highlightCbsField(lblChequeDate);
-		} else if (r.contains("balance") || r.contains("insufficient")) {
-			highlightCbsField(lblAccountBalance);
-		}
+		} 
 	}
 	private void clearCbsFieldHighlights() {
 		if (lblMicrCode != null) {
@@ -790,9 +779,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 		if (lblDraweeAccountNumber != null) {
 			lblDraweeAccountNumber.setStyle("");
 		}
-		if (lblAccountBalance != null) {
-			lblAccountBalance.setStyle("");
-		}
+		
 	}
 	public void onClick$btnReturn() {
 		try {

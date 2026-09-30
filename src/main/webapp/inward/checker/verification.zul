@@ -464,18 +464,6 @@
 
 											</hlayout>
 
-
-
-											<hlayout width="100%">
-
-												<label
-													value="Available Balance" sclass="verification-field-label"
-													hflex="1" />
-												<label value=""
-													id="lblAccountBalance" sclass="verification-field-value" />
-
-											</hlayout>
-
 										</vlayout>
 
 
