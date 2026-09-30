@@ -342,6 +342,7 @@ public class InwardCheckerVerificationController extends GenericForwardComposer<
 			if (lblDraweeAccountNumber != null) {
 				lblDraweeAccountNumber.setValue(safeValue(cheque.getDraweeAccountNumber()));
 			}
+			
 			if (lblVerificationStatus != null) {
 				String status = cheque.getChequeStatus();
 				if ("ACCEPTED".equalsIgnoreCase(status) || "REJECTED".equalsIgnoreCase(status)) {
