@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public class InwardCheque implements Serializable {
 
     

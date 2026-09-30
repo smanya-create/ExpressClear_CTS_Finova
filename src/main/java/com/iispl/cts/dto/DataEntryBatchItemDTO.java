@@ -3,6 +3,10 @@ package com.iispl.cts.dto;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class DataEntryBatchItemDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;

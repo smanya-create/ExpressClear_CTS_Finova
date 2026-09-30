@@ -10,7 +10,10 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.inward.InwardChequeImageDAO;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 
-
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
 	private static InwardChequeImageDAOImpl instance;

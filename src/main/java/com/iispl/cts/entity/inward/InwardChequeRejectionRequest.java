@@ -2,6 +2,10 @@ package com.iispl.cts.entity.inward;
 
 import java.util.Date;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public class InwardChequeRejectionRequest {
 
 	private Long requestId;

@@ -11,6 +11,11 @@ import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.entity.inward.InwardChequeImage;
 import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
+
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardChequeServiceImpl implements InwardChequeService {
 
 	private final InwardChequeDAO inwardChequeDAO;

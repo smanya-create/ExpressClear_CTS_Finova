@@ -13,6 +13,9 @@ import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardDashboardKpiDTO;
 import com.iispl.cts.enums.inward.InwardChequeStatus;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardDashboardDAOImpl implements InwardDashboardDAO {
 
     @Override

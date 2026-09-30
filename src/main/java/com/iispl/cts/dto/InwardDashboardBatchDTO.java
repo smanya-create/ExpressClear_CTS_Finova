@@ -2,6 +2,9 @@ package com.iispl.cts.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardDashboardBatchDTO {
 
     private String batchId;

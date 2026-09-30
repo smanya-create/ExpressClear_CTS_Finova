@@ -28,6 +28,10 @@ import com.iispl.cts.service.inward.InwardChequeService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
+
+/**
+ * @author  Sudhansu Sekhar Panda
+ */
 public class InwardMakerBatchDetailsController extends GenericForwardComposer<Component> {
 
 	

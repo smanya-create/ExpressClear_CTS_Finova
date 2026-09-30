@@ -32,6 +32,10 @@ import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public class InwardMicrRepairQueueController extends GenericForwardComposer<Component> {
 
 	

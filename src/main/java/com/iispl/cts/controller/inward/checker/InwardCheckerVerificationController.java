@@ -55,6 +55,10 @@ import com.iispl.cts.serviceimpl.SendBackReasonServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 
+
+/**
+ * @author Abhijith V
+ */
 public class InwardCheckerVerificationController extends GenericForwardComposer<Component> {
 
 	private Label lblBatchId;

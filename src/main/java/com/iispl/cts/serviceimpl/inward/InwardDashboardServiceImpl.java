@@ -9,6 +9,10 @@ import com.iispl.cts.dto.InwardDashboardBatchDTO;
 import com.iispl.cts.dto.InwardDashboardKpiDTO;
 import com.iispl.cts.service.inward.InwardDashboardService;
 
+
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardDashboardServiceImpl implements InwardDashboardService {
 
     private final InwardDashboardDAO dashboardDAO;

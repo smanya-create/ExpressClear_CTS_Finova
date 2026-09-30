@@ -49,6 +49,10 @@ import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardChequeServiceImpl;
 import com.iispl.cts.serviceimpl.inward.InwardSendBackRequestServiceImpl;
 
+
+/**
+ * @author  Sudhansu Sekhar Panda
+ */
 public class InwardDataEntryController extends GenericForwardComposer<Component> {
 
 	private final InwardBatchService batchService = new InwardBatchServiceImpl();

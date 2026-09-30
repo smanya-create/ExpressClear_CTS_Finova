@@ -8,6 +8,10 @@ import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.entity.inward.InwardBatch;
 import com.iispl.cts.enums.inward.InwardBatchStatus;
 
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardBatchDAO {
 
     List<InwardBatch> getAllBatches();

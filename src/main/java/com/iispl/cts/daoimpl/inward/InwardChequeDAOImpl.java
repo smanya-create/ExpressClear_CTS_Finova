@@ -14,6 +14,10 @@ import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
 import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardChequeDAOImpl implements InwardChequeDAO {
 
 	private static InwardChequeDAOImpl instance;

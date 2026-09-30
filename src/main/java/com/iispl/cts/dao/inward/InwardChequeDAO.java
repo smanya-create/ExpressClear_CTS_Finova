@@ -9,6 +9,10 @@ import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 import com.iispl.cts.entity.inward.CbsValidationResult;
 import com.iispl.cts.entity.inward.InwardCheque;
 
+/**
+ * @author Shair Yaar Khan
+ * @author Sudhansu Sekhar Panda
+ */
 public interface InwardChequeDAO {
 
 	List<InwardCheque> getMicrRepairRequiredCheques();

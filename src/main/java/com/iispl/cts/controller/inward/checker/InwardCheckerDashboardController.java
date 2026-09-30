@@ -21,6 +21,10 @@ import com.iispl.cts.enums.inward.InwardBatchStatus;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
+
+/**
+ * @author Sanath Punnam
+ */
 public class InwardCheckerDashboardController extends GenericForwardComposer<Component> {
 
     

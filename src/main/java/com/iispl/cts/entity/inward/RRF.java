@@ -4,6 +4,10 @@ package com.iispl.cts.entity.inward;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+
+/**
+ * @author Shair Yaar Khan
+ */
 public class RRF implements Serializable {
 
     private static final long serialVersionUID = 1L;

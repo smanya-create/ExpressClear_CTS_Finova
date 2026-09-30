@@ -37,6 +37,10 @@ import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
+
+/**
+ * @author Gummireddy Sai Chandana
+ */
 public class InwardBatchController extends SelectorComposer<Window> {
 	
 	private static final String PARSED_BATCH_SESSION_PREFIX = "CTS_PARSED_BATCH_";

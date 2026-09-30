@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+/**
+ * @author Shair Yaar Khan
+ */
 public class InwardBatch implements Serializable {
 
 	

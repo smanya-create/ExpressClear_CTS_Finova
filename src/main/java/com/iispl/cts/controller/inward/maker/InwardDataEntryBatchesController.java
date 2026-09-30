@@ -24,6 +24,10 @@ import com.iispl.cts.dto.DataEntryBatchItemDTO;
 import com.iispl.cts.service.inward.InwardBatchService;
 import com.iispl.cts.serviceimpl.inward.InwardBatchServiceImpl;
 
+
+/**
+ * @author  Sudhansu Sekhar Panda
+ */
 public class InwardDataEntryBatchesController extends GenericForwardComposer<Component> {
 
 	

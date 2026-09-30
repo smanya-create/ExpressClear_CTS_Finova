@@ -3,6 +3,9 @@ package com.iispl.cts.dto;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+/**
+ * @author Sudhansu Sekhar Panda
+ */
 public class InwardSendBackRequestDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
