@@ -1,6 +1,7 @@
 package com.iispl.cts.parser;
 
 import java.io.File;
+
 import java.net.URL;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -21,9 +22,11 @@ import com.ximpleware.AutoPilot;
 import com.ximpleware.VTDGen;
 import com.ximpleware.VTDNav;
 
+/**
+ * @author Gummireddy Sai Chandana
+ */
+
 public class InwardBatchXmlParser {
-	
-	
 	
 
 	public ParsedBatchData parse(String npciXmlPath, String ocrXmlPath) throws Exception {

@@ -17,6 +17,7 @@ import com.iispl.cts.entity.inward.InwardChequeRejectionRequest;
 /**
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
+ * @author Gummireddy Sai Chandana
  */
 public class InwardChequeDAOImpl implements InwardChequeDAO {
 
