@@ -765,6 +765,8 @@ public class InwardBatchController extends SelectorComposer<Window> {
 	private String valueOrEmpty(String value) {
 		return value == null ? "" : value;
 	}
+	
+	//Nested helper class used to encapsulates  the result of  batch parsing for the controller.
 	private static class ParseResult {
 		private final String batchId;
 		private final ParsedBatchData parsedBatchData;

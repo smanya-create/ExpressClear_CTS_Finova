@@ -12,6 +12,7 @@ import com.iispl.cts.entity.inward.InwardCheque;
 /**
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
+ * @author Gummireddy Sai Chandana
  */
 public interface InwardChequeDAO {
 

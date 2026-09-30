@@ -23,6 +23,7 @@ import com.iispl.cts.service.inward.InwardBatchService;
 /**
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
+ * @author Gummireddy Sai chandana 
  */
 public class InwardBatchServiceImpl implements InwardBatchService {
 

@@ -24,6 +24,7 @@ import com.iispl.cts.enums.inward.InwardChequeStatus;
 /**
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
+ * @author Gummireddy Sai Chandana
  */
 public class InwardBatchDAOImpl implements InwardBatchDAO {
 

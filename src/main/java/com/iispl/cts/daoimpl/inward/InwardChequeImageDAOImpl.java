@@ -13,6 +13,7 @@ import com.iispl.cts.entity.inward.InwardChequeImage;
 /**
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
+ * @author Gummireddy Sai Chandana
  */
 public class InwardChequeImageDAOImpl implements InwardChequeImageDAO {
 
