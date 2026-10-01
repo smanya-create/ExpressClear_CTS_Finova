@@ -12,6 +12,10 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.outward.OutwardCheckerRejectionDAO;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public class OutwardCheckerRejectionDAOImpl implements OutwardCheckerRejectionDAO {
 
 	// GET PAGINATED REJECTED CHEQUES

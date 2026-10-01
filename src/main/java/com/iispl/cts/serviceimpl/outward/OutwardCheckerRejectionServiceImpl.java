@@ -8,6 +8,10 @@ import com.iispl.cts.daoimpl.outward.OutwardCheckerRejectionDAOImpl;
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.service.outward.OutwardCheckerRejectionService;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public class OutwardCheckerRejectionServiceImpl implements OutwardCheckerRejectionService {
 
 	private final OutwardCheckerRejectionDAO rejectionDAO;

@@ -13,6 +13,10 @@ import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public class OutwardCheckerQueueServiceImpl implements OutwardCheckerQueueService {
 
 	private OutwardCheckerQueueDAO outwardCheckerQueueDAO;

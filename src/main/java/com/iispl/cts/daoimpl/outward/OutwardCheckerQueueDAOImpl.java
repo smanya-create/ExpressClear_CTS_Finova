@@ -16,6 +16,10 @@ import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public class OutwardCheckerQueueDAOImpl implements OutwardCheckerQueueDAO {
 
 	// GET CHEQUES BY SELECTED BATCH
