@@ -7,6 +7,10 @@ import com.iispl.cts.daoimpl.RejectedReasonDaoImpl;
 import com.iispl.cts.entity.RejectedReason;
 import com.iispl.cts.service.RejectedReasonService;
 
+/**
+ * @author Abhijith V
+ */
+
 public class RejectedReasonServiceImpl implements RejectedReasonService {
 
 	  private static RejectedReasonServiceImpl instance;

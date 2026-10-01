@@ -12,6 +12,8 @@ import com.iispl.cts.enums.inward.InwardBatchStatus;
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
  * @author Gummireddy Sai Chandana
+ * @author Abhijith V
+ * @author Sanath Punnam
  */
 public interface InwardBatchDAO {
 

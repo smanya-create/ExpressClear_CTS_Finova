@@ -11,6 +11,10 @@ import com.iispl.cts.common.config.DBConnection;
 import com.iispl.cts.dao.RejectedReasonDao;
 import com.iispl.cts.entity.RejectedReason;
 
+/**
+ * @author Abhijith V
+ */
+
 public class RejectedReasonDaoImpl implements RejectedReasonDao {
 
 	private static RejectedReasonDaoImpl instance;
@@ -27,7 +31,7 @@ public class RejectedReasonDaoImpl implements RejectedReasonDao {
 		return instance;
 	}
 
-	// Fetch all rejection reasons.
+	
 	@Override
 	public List<RejectedReason> getAllRejectedReasons() {
 
@@ -55,7 +59,7 @@ public class RejectedReasonDaoImpl implements RejectedReasonDao {
 		return list;
 	}
 
-	// Fetch one rejection reason by ID.
+	
 	@Override
 	public RejectedReason findById(String rejectedReasonId) {
 
@@ -88,7 +92,7 @@ public class RejectedReasonDaoImpl implements RejectedReasonDao {
 		return null;
 	}
 
-	// Map database row to entity.
+	
 	private RejectedReason mapResultSet(ResultSet rs) throws SQLException {
 
 		RejectedReason reason = new RejectedReason();

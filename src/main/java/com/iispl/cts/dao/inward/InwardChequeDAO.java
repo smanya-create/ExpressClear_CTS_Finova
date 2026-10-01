@@ -13,7 +13,9 @@ import com.iispl.cts.entity.inward.InwardCheque;
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
  * @author Gummireddy Sai Chandana
+ * @author Abhijith V
  */
+
 public interface InwardChequeDAO {
 
 	List<InwardCheque> getMicrRepairRequiredCheques();
