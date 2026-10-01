@@ -39,6 +39,11 @@ import com.iispl.cts.entity.outward.SendBackReason;
 import com.iispl.cts.service.outward.OutwardCheckerQueueService;
 import com.iispl.cts.serviceimpl.outward.OutwardCheckerQueueServiceImpl;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
+
 public class OutwardCheckerQueueController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
@@ -542,7 +547,7 @@ public class OutwardCheckerQueueController extends GenericForwardComposer<Compon
 
 				if (cheque == null) {
 					continue;
-				}
+				}	
 
 				String chequeId = nullSafe(cheque.getOutwardChequeId());
 

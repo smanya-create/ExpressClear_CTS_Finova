@@ -10,6 +10,10 @@ import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.entity.outward.RejectedReason;
 import com.iispl.cts.entity.outward.SendBackReason;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public interface OutwardCheckerQueueDAO {
 
 	// GET CHEQUES BY SELECTED BATCH

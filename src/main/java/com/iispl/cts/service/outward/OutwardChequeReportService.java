@@ -2,6 +2,10 @@ package com.iispl.cts.service.outward;
 
 import java.sql.Date;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public interface OutwardChequeReportService {
 	byte[] generateReport(Date fromDate, Date toDate, String reportType) throws Exception;
 }

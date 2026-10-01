@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public interface OutwardCheckerRejectionDAO {
 
 	List<OutwardRejectedCheques> getRejectedCheques(int limit, int offset) throws Exception;

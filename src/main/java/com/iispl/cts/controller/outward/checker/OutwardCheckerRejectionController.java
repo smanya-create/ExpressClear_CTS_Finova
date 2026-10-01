@@ -29,6 +29,10 @@ import com.iispl.cts.entity.outward.OutwardRejectedCheques;
 import com.iispl.cts.service.outward.OutwardCheckerRejectionService;
 import com.iispl.cts.serviceimpl.outward.OutwardCheckerRejectionServiceImpl;
 
+/*
+ * @author Anandhu Jayakumar
+ */
+
 public class OutwardCheckerRejectionController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
