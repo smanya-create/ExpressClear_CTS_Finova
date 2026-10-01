@@ -3,6 +3,10 @@ package com.iispl.cts.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+
+/**
+ * @author Sanath Punnam
+ */
 public class InwardReportChequeDTO {
 
     private String inwardChequeId;

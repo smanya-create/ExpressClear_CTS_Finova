@@ -15,6 +15,10 @@ import javax.xml.stream.XMLStreamWriter;
 import com.iispl.cts.dto.InwardReportChequeDTO;
 import com.iispl.cts.enums.inward.InwardChequeStatus;
 
+
+/**
+ * @author Sanath Punnam
+ */
 public class ReportXmlGenerator {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");

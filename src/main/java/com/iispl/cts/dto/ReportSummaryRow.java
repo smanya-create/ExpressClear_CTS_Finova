@@ -1,5 +1,9 @@
 package com.iispl.cts.dto;
 
+
+/**
+ * @author Sanath Punnam
+ */
 public class ReportSummaryRow {
 	
 	 private String batchId;

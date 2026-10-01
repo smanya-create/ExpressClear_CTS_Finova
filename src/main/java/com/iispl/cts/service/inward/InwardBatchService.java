@@ -14,6 +14,7 @@ import com.iispl.cts.parser.InwardBatchXmlParser.ParsedBatchData;
  * @author Shair Yaar Khan
  * @author Sudhansu Sekhar Panda
  * @author Gummireddy Sai chandana 
+ * @author Abhijith V
  */
 public interface InwardBatchService {
 
